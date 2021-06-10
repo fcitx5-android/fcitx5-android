@@ -1,0 +1,5 @@
+[Addon]
+Name=Android Frontend
+Type=SharedLibrary
+Library=androidfrontend
+Category=Frontend
