@@ -54,7 +54,7 @@ std::unique_ptr<fcitx::AddonInstance> p_addon;
 fcitx::ICUUID p_uuid;
 
 void scheduleEvent(fcitx::EventDispatcher *dispatcher, fcitx::Instance *instance) {
-    dispatcher->schedule([dispatcher, instance]() {
+    dispatcher->schedule([instance]() {
         auto *unicode = instance->addonManager().addon("unicode", true);
         FCITX_ASSERT(unicode);
         auto *punctuation = instance->addonManager().addon("punctuation", true);
@@ -72,23 +72,6 @@ void scheduleEvent(fcitx::EventDispatcher *dispatcher, fcitx::Instance *instance
         auto uuid = androidfrontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
         p_addon.reset(androidfrontend);
         p_uuid = (uuid);
-    });
-
-    dispatcher->schedule([dispatcher, instance]() {
-        auto *androidfrontend = instance->addonManager().addon("androidfrontend");
-        auto uuid = androidfrontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
-
-        androidfrontend->call<fcitx::IAndroidFrontend::keyEvent>(uuid, fcitx::Key("n"), false);
-        androidfrontend->call<fcitx::IAndroidFrontend::keyEvent>(uuid, fcitx::Key("i"), false);
-        androidfrontend->call<fcitx::IAndroidFrontend::keyEvent>(uuid, fcitx::Key("h"), false);
-        androidfrontend->call<fcitx::IAndroidFrontend::keyEvent>(uuid, fcitx::Key("a"), false);
-        androidfrontend->call<fcitx::IAndroidFrontend::keyEvent>(uuid, fcitx::Key("o"), false);
-        androidfrontend->call<fcitx::IAndroidFrontend::keyEvent>(uuid, fcitx::Key("1"), false);
-
-        dispatcher->schedule([dispatcher, instance]() {
-            dispatcher->detach();
-            instance->exit();
-        });
     });
 }
 
@@ -135,9 +118,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_MainActivity_sendKeyToFcitx(JNIEnv *env, jobject /* this */, jstring key) {
     auto *androidfrontend = p_instance->addonManager().addon("androidfrontend");
-    auto uuid = p_uuid;
     const char* k = env->GetStringUTFChars(key, nullptr);
-    p_dispatcher->schedule([&](){
-        androidfrontend->call<fcitx::IAndroidFrontend::keyEvent>(uuid, fcitx::Key(k), false);
-    });
+    androidfrontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, fcitx::Key(k), false);
+    env->ReleaseStringUTFChars(key, k);
 }

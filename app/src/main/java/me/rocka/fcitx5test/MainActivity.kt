@@ -48,12 +48,19 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         copyFileOrDir("fcitx5")
-        startupFcitx(
-            applicationInfo.dataDir,
-            applicationInfo.nativeLibraryDir,
-            getExternalFilesDir(null)!!.absolutePath + "/config",
-            "${applicationInfo.dataDir}/fcitx5/libime"
-        )
+        Thread {
+            startupFcitx(
+                applicationInfo.dataDir,
+                applicationInfo.nativeLibraryDir,
+                getExternalFilesDir(null)!!.absolutePath + "/config",
+                "${applicationInfo.dataDir}/fcitx5/libime"
+            )
+        }.start()
+        Thread.sleep(1000)
+        listOf("n", "i", "h", "a", "o", "1").forEach {
+            sendKeyToFcitx(it)
+            Thread.sleep(50)
+        }
     }
 
     private external fun startupFcitx(
