@@ -42,7 +42,8 @@ add_subdirectory(fcitx5)
 add_subdirectory(androidfrontend)
 
 option(BOOST_DISABLE_TESTS "" ON)
-set(FETCHCONTENT_SOURCE_DIR_BOOST ${CMAKE_CURRENT_SOURCE_DIR}/boost_1_71_0)
+# you may put boost source here (./boost_1_71_0) to avoid download it every time
+#set(FETCHCONTENT_SOURCE_DIR_BOOST ${CMAKE_CURRENT_SOURCE_DIR}/boost_1_71_0)
 add_subdirectory(boost-cmake)
 
 option(ENABLE_TEST "" OFF)

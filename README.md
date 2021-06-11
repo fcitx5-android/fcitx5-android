@@ -11,12 +11,12 @@ It can build, run, and print to stdout.
 ### Dependencies
 
 - Android SDK Platform & Build-Tools 30
-- Android NDK (Side by side) 23 & cmake 3.18.1
+- Android NDK (Side by side) 23 & cmake 3.18.1 . Note: you may need to install Android Studio Beta for Android NDK 23. NDK 21 & 22 are comfirmed not working with this project.
 - [KDE/extra-cmake-modules](https://github.com/KDE/extra-cmake-modules)
 
 ### Patch CMakeLists.txt
 
-If cmake complaint about "cannot find ...", just comment out those lines. Believe me, it will build.
+If cmake complaint about "cannot find ...", just comment out those lines. Believe me, it will build. See my patchs here: https://gist.github.com/rocka/f25d29bc6ceb31033543fd95eba09bf9
 
 ### `libime` data
 
