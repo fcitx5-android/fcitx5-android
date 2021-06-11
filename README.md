@@ -20,7 +20,7 @@ If cmake complaint about "cannot find ...", just comment out those lines. Believ
 
 ### `libime` data
 
-I don't know why cmake won't download and generate those data. Just install [libime](https://archlinux.org/packages/community/x86_64/libime/), and copy `/usr/{lib,share}/libime/*` to `app/src/main/assets/libime/`.
+I don't know why cmake won't download and generate those data. Just install [libime](https://archlinux.org/packages/community/x86_64/libime/), and copy `/usr/{lib,share}/libime/*` to `app/src/main/assets/fcitx5/libime/`.
 
 ### `fcitx5-chinese-addons` dict
 
