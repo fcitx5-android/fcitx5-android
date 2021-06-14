@@ -47,57 +47,78 @@ index 2f98f7f..1cceb7e 100644
 <summary>Logcat</summary>
 
 ```
+D/fcitx5: I2021-06-15 00:32:44.666513 instance.cpp:1371] Override Enabled Addons: {}
+    I2021-06-15 00:32:44.666658 instance.cpp:1372] Overr
+D/fcitx5: ide Disabled Addons: {}
 D/fcitx5: I
-D/fcitx5: 2021-06-10 21:14:01.301125 instance.cpp
-D/fcitx5: :
-D/fcitx5: 1371]
-D/fcitx5: Override Enabled Addons: {
-D/fcitx5: unicode,
-D/fcitx5: punctuation,
-D/fcitx5: androidfrontend, pinyin
-D/fcitx5: }
-D/fcitx5: I
-D/fcitx5: 2021-06-10 21:14:01.301305 instance.cpp:
-D/fcitx5: 1372]
-D/fcitx5: Override Disabled Addons: {all
-D/fcitx5: }
-D/fcitx5: I
-D/fcitx5: 2021-06-10 21:14:01.339251
+D/fcitx5: 2021-06-15 00:32:44.674399
 D/fcitx5: addonmanager.cpp:
 D/fcitx5: 189]
 D/fcitx5: Loaded addon unicode
 D/fcitx5: I
-D/fcitx5: 2021-06-10 21:14:01.339849 addonmanager.cpp
-D/fcitx5: :189]
-D/fcitx5: Loaded addon androidfrontend
+D/fcitx5: 2021-06-15 00:32:44.675208
+D/fcitx5:
+D/fcitx5: addonmanager.cpp
+D/fcitx5: :
+D/fcitx5: 189
+D/fcitx5: ]
+D/fcitx5: Loaded addon
+D/fcitx5: androidfrontend
 D/fcitx5: I
-D/fcitx5: 2021-06-10 21:14:01.342312 inputmethodmanager.cpp
-D/fcitx5: :117
-D/fcitx5: ] No valid input method group in configuration.
+D/fcitx5: 2021-06-15 00:32:44.676556
+D/fcitx5:
+D/fcitx5: inputmethodmanager.cpp
+D/fcitx5: :
+D/fcitx5: 117
+D/fcitx5: ]
+D/fcitx5: No valid input method group in configuration.
 D/fcitx5: Building a default one
 D/fcitx5: I
-D/fcitx5: 2021-06-10 21:14:01.343421
-D/fcitx5:  instance.cpp
+D/fcitx5: 2021-06-15 00:32:44.677021
+D/fcitx5:
+D/fcitx5: instance.cpp
 D/fcitx5: :
-D/fcitx5: 730]
-D/fcitx5: Items in Default
-D/fcitx5: : [
+D/fcitx5: 730
+D/fcitx5: ]
+D/fcitx5: Items in
+D/fcitx5: Default
+D/fcitx5: :
+D/fcitx5: [
 D/fcitx5: InputMethodGroupItem(
-D/fcitx5: keyboard-us,layout=
-D/fcitx5: )]
+D/fcitx5: keyboard-us
+D/fcitx5: ,layout=
+D/fcitx5: )
+D/fcitx5: ]
 D/fcitx5: I
-D/fcitx5: 2021-06-10 21:14:01.343485 instance.cpp
-D/fcitx5: :735]
-D/fcitx5: Generated groups: [
-D/fcitx5: Default]
+D/fcitx5: 2021-06-15 00:32:44.677383
+D/fcitx5:
+D/fcitx5: instance.cpp
+D/fcitx5: :
+D/fcitx5: 735
+D/fcitx5: ]
+D/fcitx5: Generated groups:
+D/fcitx5: [
+D/fcitx5: Default
+D/fcitx5: ]
 D/fcitx5: E
-D/fcitx5: 2021-06-10 21:14:01.343650 instance.cpp
-D/fcitx5: :1381]
+D/fcitx5: 2021-06-15 00:32:44.678391
+D/fcitx5:
+D/fcitx5: instance.cpp
+D/fcitx5: :
+D/fcitx5: 1381
+D/fcitx5: ]
 D/fcitx5: Couldn't find keyboard-us
 D/fcitx5: I
-D/fcitx5: 2021-06-10 21:14:01.346341 addonmanager.cpp:189] Loaded addon punctuation
+D/fcitx5: 2021-06-15 00:32:44.682066
+D/fcitx5:
+D/fcitx5: addonmanager.cpp
+D/fcitx5: :
+D/fcitx5: 189
+D/fcitx5: ]
+D/fcitx5: Loaded addon
+D/fcitx5: punctuation
 D/fcitx5: E
-D/fcitx5: 2021-06-10 21:14:01.636885
+D/fcitx5: 2021-06-15 00:32:45.040030
 D/fcitx5:
 D/fcitx5: pinyin.cpp
 D/fcitx5: :
@@ -106,7 +127,7 @@ D/fcitx5: ]
 D/fcitx5: Failed to load pinyin history:
 D/fcitx5: io fail: unspecified iostream_category error
 D/fcitx5: I
-D/fcitx5: 2021-06-10 21:14:01.706428
+D/fcitx5: 2021-06-15 00:32:45.070853
 D/fcitx5:
 D/fcitx5: addonmanager.cpp
 D/fcitx5: :
@@ -114,27 +135,15 @@ D/fcitx5: 189
 D/fcitx5: ]
 D/fcitx5: Loaded addon
 D/fcitx5: pinyin
-W/ocka.fcitx5test: type=1400 audit(0.0:26994): avc: denied { read } for name="uuid" dev="proc" ino=15533979 scontext=u:r:untrusted_app:s0:c512,c768 tcontext=u:object_r:proc:s0 tclass=file permissive=0
-W/ocka.fcitx5test: type=1400 audit(0.0:26995): avc: denied { read } for name="uuid" dev="proc" ino=15533979 scontext=u:r:untrusted_app:s0:c512,c768 tcontext=u:object_r:proc:s0 tclass=file permissive=0
+W/Thread-2: type=1400 audit(0.0:192): avc: denied { read } for name="uuid" dev="proc" ino=40929 scontext=u:r:untrusted_app:s0:c512,c768 tcontext=u:object_r:proc:s0 tclass=file permissive=0
 D/fcitx5: I
-D/fcitx5: 2021-06-10 21:14:01.735381
+D/fcitx5: 2021-06-15 00:32:45.711658 androidfrontend.cpp:70] KeyEvent key: n isRelease: 0 accepted: 1
+D/fcitx5: I
+D/fcitx5: 2021-06-15 00:32:45.775222
 D/fcitx5:
 D/fcitx5: androidfrontend.cpp
 D/fcitx5: :
-D/fcitx5: 71
-D/fcitx5: ]
-D/fcitx5: KeyEvent key:
-D/fcitx5: n
-D/fcitx5:  isRelease:
-D/fcitx5: 0
-D/fcitx5:  accepted:
-D/fcitx5: 1
-D/fcitx5: I
-D/fcitx5: 2021-06-10 21:14:01.742409
-D/fcitx5:
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 71
+D/fcitx5: 70
 D/fcitx5: ]
 D/fcitx5: KeyEvent key:
 D/fcitx5: i
@@ -143,24 +152,15 @@ D/fcitx5: 0
 D/fcitx5:  accepted:
 D/fcitx5: 1
 D/fcitx5: I
-D/fcitx5: 2021-06-10 21:14:01.771056
-D/fcitx5:
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 71
-D/fcitx5: ]
-D/fcitx5: KeyEvent key:
-D/fcitx5: h
-D/fcitx5:  isRelease:
-D/fcitx5: 0
-D/fcitx5:  accepted:
-D/fcitx5: 1
+D/fcitx5: 2021-06-15 00:32:45.923111 androidfrontend.cpp
+D/fcitx5: :70] KeyEvent key:
+D/fcitx5: h isRelease: 0 accepted: 1
 D/fcitx5: I
-D/fcitx5: 2021-06-10 21:14:01.776967
+D/fcitx5: 2021-06-15 00:32:45.991609
 D/fcitx5:
 D/fcitx5: androidfrontend.cpp
 D/fcitx5: :
-D/fcitx5: 71
+D/fcitx5: 70
 D/fcitx5: ]
 D/fcitx5: KeyEvent key:
 D/fcitx5: a
@@ -169,11 +169,11 @@ D/fcitx5: 0
 D/fcitx5:  accepted:
 D/fcitx5: 1
 D/fcitx5: I
-D/fcitx5: 2021-06-10 21:14:01.790069
+D/fcitx5: 2021-06-15 00:32:46.105018
 D/fcitx5:
 D/fcitx5: androidfrontend.cpp
 D/fcitx5: :
-D/fcitx5: 71
+D/fcitx5: 70
 D/fcitx5: ]
 D/fcitx5: KeyEvent key:
 D/fcitx5: o
@@ -181,27 +181,12 @@ D/fcitx5:  isRelease:
 D/fcitx5: 0
 D/fcitx5:  accepted:
 D/fcitx5: 1
-D/fcitx5: I
-D/fcitx5: 2021-06-10 21:14:01.790626
-D/fcitx5:
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 29
-D/fcitx5: ]
-D/fcitx5: Commit:
-D/fcitx5: 你好
-D/fcitx5: I
-D/fcitx5: 2021-06-10 21:14:01.791372
-D/fcitx5:
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 71
-D/fcitx5: ]
-D/fcitx5: KeyEvent key:
-D/fcitx5: 1
-D/fcitx5:  isRelease:
-D/fcitx5: 0
-D/fcitx5:  accepted:
-D/fcitx5: 1
+D/fcitx5: 5 Candidates:
+D/fcitx5: 0: 你好
+D/fcitx5: 1: 你
+D/fcitx5: 2: 尼
+D/fcitx5: 3: 泥
+D/fcitx5: 4: 妮
+D/Candidate: 你好,你,尼,泥,妮
 ```
 </details>
