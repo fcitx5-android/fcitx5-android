@@ -21,9 +21,9 @@ public:
         : InputContext(inputContextManager, program), frontend_(frontend) {
         created();
     }
-    ~AndroidInputContext() { destroy(); }
+    ~AndroidInputContext() override { destroy(); }
 
-    const char *frontend() const override { return "androidfrontend"; }
+    [[nodiscard]] const char *frontend() const override { return "androidfrontend"; }
 
     void commitStringImpl(const std::string &text) override {
         FCITX_INFO() << "Commit: " << text;
@@ -47,8 +47,7 @@ private:
 
 AndroidFrontend::AndroidFrontend(Instance *instance) : instance_(instance) {}
 
-AndroidFrontend::~AndroidFrontend() {
-}
+AndroidFrontend::~AndroidFrontend() = default;
 
 ICUUID
 AndroidFrontend::createInputContext(const std::string &program) {
@@ -75,6 +74,12 @@ void AndroidFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
 
 void AndroidFrontend::commitString(const std::string &expect) {
     //
+}
+
+std::shared_ptr<CandidateList>
+AndroidFrontend::candidateList(ICUUID uuid) {
+    auto *ic = instance_->inputContextManager().findByUUID(uuid);
+    return ic->inputPanel().candidateList();
 }
 
 class AndroidFrontendFactory : public AddonFactory {

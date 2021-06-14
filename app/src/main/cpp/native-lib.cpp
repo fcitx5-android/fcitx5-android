@@ -21,12 +21,11 @@ static int pfd[2];
 static pthread_t thr;
 static const char *tag = "fcitx5";
 
-static void* logger_thread(void*)
-{
+static void *logger_thread(void *) {
     ssize_t read_size;
     char buf[128];
-    while((read_size = read(pfd[0], buf, sizeof buf - 1)) > 0) {
-        if(buf[read_size - 1] == '\n') --read_size;
+    while ((read_size = read(pfd[0], buf, sizeof buf - 1)) > 0) {
+        if (buf[read_size - 1] == '\n') --read_size;
         /* add null-terminator */
         buf[read_size] = '\0';
         __android_log_write(ANDROID_LOG_DEBUG, tag, buf);
@@ -34,8 +33,7 @@ static void* logger_thread(void*)
     return nullptr;
 }
 
-void start_logger()
-{
+void start_logger() {
     /* make stdout line-buffered and stderr unbuffered */
     setvbuf(stdout, nullptr, _IOLBF, 0);
     setvbuf(stderr, nullptr, _IONBF, 0);
@@ -50,7 +48,7 @@ void start_logger()
 
 std::unique_ptr<fcitx::Instance> p_instance;
 std::unique_ptr<fcitx::EventDispatcher> p_dispatcher;
-std::unique_ptr<fcitx::AddonInstance> p_addon;
+std::unique_ptr<fcitx::AddonInstance> p_frontend;
 fcitx::ICUUID p_uuid;
 
 void scheduleEvent(fcitx::EventDispatcher *dispatcher, fcitx::Instance *instance) {
@@ -64,13 +62,13 @@ void scheduleEvent(fcitx::EventDispatcher *dispatcher, fcitx::Instance *instance
 
         auto defaultGroup = instance->inputMethodManager().currentGroup();
         defaultGroup.inputMethodList().clear();
-        defaultGroup.inputMethodList().push_back(fcitx::InputMethodGroupItem("pinyin"));
+        defaultGroup.inputMethodList().emplace_back("pinyin");
         defaultGroup.setDefaultInputMethod("");
         instance->inputMethodManager().setGroup(defaultGroup);
 
         auto *androidfrontend = instance->addonManager().addon("androidfrontend");
         auto uuid = androidfrontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
-        p_addon.reset(androidfrontend);
+        p_frontend.reset(androidfrontend);
         p_uuid = (uuid);
     });
 }
@@ -102,9 +100,7 @@ Java_me_rocka_fcitx5test_MainActivity_startupFcitx(JNIEnv *env, jobject /* this 
     env->ReleaseStringUTFChars(appDataLibime, app_data_libime);
 
     char arg0[] = "";
-    char arg1[] = "--disable=all";
-    char arg2[] = "--enable=unicode,punctuation,pinyin,androidfrontend";
-    char *argv[] = { arg0, arg1, arg2 };
+    char *argv[] = { arg0 };
     p_instance = std::make_unique<fcitx::Instance>(FCITX_ARRAY_SIZE(argv), argv);
     p_instance->addonManager().registerDefaultLoader(nullptr);
     p_dispatcher = std::make_unique<fcitx::EventDispatcher>();
@@ -117,8 +113,27 @@ Java_me_rocka_fcitx5test_MainActivity_startupFcitx(JNIEnv *env, jobject /* this 
 extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_MainActivity_sendKeyToFcitx(JNIEnv *env, jobject /* this */, jstring key) {
-    auto *androidfrontend = p_instance->addonManager().addon("androidfrontend");
     const char* k = env->GetStringUTFChars(key, nullptr);
-    androidfrontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, fcitx::Key(k), false);
+    p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, fcitx::Key(k), false);
     env->ReleaseStringUTFChars(key, k);
+}
+
+extern "C"
+JNIEXPORT jobjectArray JNICALL
+Java_me_rocka_fcitx5test_MainActivity_getCandidates(JNIEnv *env, jobject /* this */) {
+    auto candidateList = p_frontend->call<fcitx::IAndroidFrontend::candidateList>(p_uuid);
+    int size = candidateList->size();
+    jobjectArray array = env->NewObjectArray(size, env->FindClass("java/lang/String"), nullptr);
+    std::cout << size << " Candidates: " << std::endl;
+    for (int i = 0; i < size; i++) {
+        auto &candidate = candidateList->candidate(i);
+        if (candidate.isPlaceHolder()) {
+            continue;
+        }
+        // TODO: apply `p_instance->outputFilter(ic, candidate.text())` ?
+        auto text = candidate.text().toString();
+        std::cout << i << ": " << text << std::endl;
+        env->SetObjectArrayElement(array, i, env->NewStringUTF(text.c_str()));
+    }
+    return array;
 }

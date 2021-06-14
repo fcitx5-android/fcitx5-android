@@ -3,6 +3,8 @@ package me.rocka.fcitx5test
 import android.app.Activity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
+import androidx.annotation.UiThread
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -56,11 +58,14 @@ class MainActivity : Activity() {
                 "${applicationInfo.dataDir}/fcitx5/libime"
             )
         }.start()
-        Thread.sleep(1000)
-        listOf("n", "i", "h", "a", "o", "1").forEach {
-            sendKeyToFcitx(it)
-            Thread.sleep(50)
-        }
+        Thread {
+            Thread.sleep(1000)
+            listOf("n", "i", "h", "a", "o").forEach {
+                sendKeyToFcitx(it)
+                Thread.sleep(50)
+            }
+            Log.d("Candidate", getCandidates().joinToString(","))
+        }.start()
     }
 
     private external fun startupFcitx(
@@ -71,6 +76,8 @@ class MainActivity : Activity() {
     )
 
     private external fun sendKeyToFcitx(key: String)
+
+    private external fun getCandidates(): Array<String>
 
     companion object {
         init {
