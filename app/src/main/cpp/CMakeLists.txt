@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.18)
 
 project(fcitx-lib)
 
-set(ECM_DIR /usr/share/ECM/cmake)
 
 add_subdirectory(fmt)
 
