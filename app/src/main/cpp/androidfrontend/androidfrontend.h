@@ -29,7 +29,7 @@ namespace fcitx {
         ICUUID createInputContext(const std::string &program);
         void destroyInputContext(ICUUID uuid);
         void keyEvent(ICUUID uuid, const Key &key, bool isRelease);
-        std::shared_ptr<CandidateList> candidateList(ICUUID uuid);
+        std::shared_ptr<BulkCandidateList> candidateList(ICUUID uuid);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, createInputContext);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, destroyInputContext);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, keyEvent);

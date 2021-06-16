@@ -76,10 +76,10 @@ void AndroidFrontend::commitString(const std::string &expect) {
     //
 }
 
-std::shared_ptr<CandidateList>
+std::shared_ptr<BulkCandidateList>
 AndroidFrontend::candidateList(ICUUID uuid) {
     auto *ic = instance_->inputContextManager().findByUUID(uuid);
-    return ic->inputPanel().candidateList();
+    return std::shared_ptr<BulkCandidateList>(ic->inputPanel().candidateList()->toBulk());
 }
 
 class AndroidFrontendFactory : public AddonFactory {

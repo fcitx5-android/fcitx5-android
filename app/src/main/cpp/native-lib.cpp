@@ -46,6 +46,10 @@ void start_logger() {
     pthread_detach(thr);
 }
 
+static void frontendLog(const std::string& s) {
+    __android_log_write(ANDROID_LOG_DEBUG, "androidfrontend", s.c_str());
+}
+
 std::unique_ptr<fcitx::Instance> p_instance;
 std::unique_ptr<fcitx::EventDispatcher> p_dispatcher;
 std::unique_ptr<fcitx::AddonInstance> p_frontend;
@@ -122,17 +126,16 @@ extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_me_rocka_fcitx5test_MainActivity_getCandidates(JNIEnv *env, jobject /* this */) {
     auto candidateList = p_frontend->call<fcitx::IAndroidFrontend::candidateList>(p_uuid);
-    int size = candidateList->size();
+    int size = candidateList->totalSize();
     jobjectArray array = env->NewObjectArray(size, env->FindClass("java/lang/String"), nullptr);
-    std::cout << size << " Candidates: " << std::endl;
+    frontendLog(std::to_string(size) + " candidates");
     for (int i = 0; i < size; i++) {
-        auto &candidate = candidateList->candidate(i);
+        auto &candidate = candidateList->candidateFromAll(i);
         if (candidate.isPlaceHolder()) {
             continue;
         }
         // TODO: apply `p_instance->outputFilter(ic, candidate.text())` ?
         auto text = candidate.text().toString();
-        std::cout << i << ": " << text << std::endl;
         env->SetObjectArrayElement(array, i, env->NewStringUTF(text.c_str()));
     }
     return array;
