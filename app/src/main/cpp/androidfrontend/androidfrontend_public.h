@@ -26,4 +26,7 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, candidateList,
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, selectCandidate,
                              void(ICUUID, int idx));
 
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setCommitStringCallback,
+                             void(const std::function<void(std::string)>&));
+
 #endif // _FCITX_FRONTEND_ANDROIDFRONTEND_ANDROIDFRONTEND_PUBLIC_H_

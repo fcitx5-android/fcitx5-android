@@ -89,6 +89,10 @@ class MainActivity : Activity() {
 
     private external fun selectCandidate(idx: Int)
 
+    private fun commitString(str: String) {
+        Log.d("Commit", "commitString: $str")
+    }
+
     companion object {
         init {
             System.loadLibrary("native-lib")

@@ -51,7 +51,7 @@ fcitx::ICUUID p_uuid;
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_me_rocka_fcitx5test_MainActivity_startupFcitx(JNIEnv *env, jobject /* this */, jstring appData, jstring appLib, jstring extData, jstring appDataLibime) {
+Java_me_rocka_fcitx5test_MainActivity_startupFcitx(JNIEnv *env, jobject obj, jstring appData, jstring appLib, jstring extData, jstring appDataLibime) {
     // debug log
     start_logger();
 
@@ -75,6 +75,13 @@ Java_me_rocka_fcitx5test_MainActivity_startupFcitx(JNIEnv *env, jobject /* this 
     env->ReleaseStringUTFChars(extData, ext_data);
     env->ReleaseStringUTFChars(appDataLibime, app_data_libime);
 
+    jclass cls = env->GetObjectClass(obj);
+    jmethodID javaCommitStringImpl = env->GetMethodID(cls, "commitString", "(Ljava/lang/String;)V");
+    auto commitStringCallback = [&](const std::string& str){
+        jstring string = env->NewStringUTF(str.c_str());
+        env->CallVoidMethod(obj, javaCommitStringImpl, string);
+    };
+
     char arg0[] = "";
     char *argv[] = { arg0 };
     p_instance = std::make_unique<fcitx::Instance>(FCITX_ARRAY_SIZE(argv), argv);
@@ -82,7 +89,7 @@ Java_me_rocka_fcitx5test_MainActivity_startupFcitx(JNIEnv *env, jobject /* this 
     p_dispatcher = std::make_unique<fcitx::EventDispatcher>();
     p_dispatcher->attach(&p_instance->eventLoop());
 
-    p_dispatcher->schedule([](){
+    p_dispatcher->schedule([&](){
         auto defaultGroup = p_instance->inputMethodManager().currentGroup();
         defaultGroup.inputMethodList().clear();
         defaultGroup.inputMethodList().emplace_back("pinyin");
@@ -90,6 +97,7 @@ Java_me_rocka_fcitx5test_MainActivity_startupFcitx(JNIEnv *env, jobject /* this 
         p_instance->inputMethodManager().setGroup(defaultGroup);
 
         auto *androidfrontend = p_instance->addonManager().addon("androidfrontend");
+        androidfrontend->call<fcitx::IAndroidFrontend::setCommitStringCallback>(commitStringCallback);
         auto uuid = androidfrontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
         p_frontend.reset(androidfrontend);
         p_uuid = (uuid);

@@ -29,9 +29,11 @@ public:
         FCITX_INFO() << "Commit: " << text;
         frontend_->commitString(text);
     }
+
     void forwardKeyImpl(const ForwardKeyEvent &key) override {
         FCITX_INFO() << "ForwardKey: " << key.key();
     }
+
     void deleteSurroundingTextImpl(int offset, unsigned int size) override {
         FCITX_INFO() << "DeleteSurrounding: " << offset << " " << size;
     }
@@ -52,13 +54,15 @@ private:
 AndroidFrontend::AndroidFrontend(Instance *instance)
     : instance_(instance),
       cachedCandidateList(std::shared_ptr<CandidateList>(nullptr)),
-      cachedBulkCandidateList(std::shared_ptr<BulkCandidateList>(nullptr)) {}
+      cachedBulkCandidateList(std::shared_ptr<BulkCandidateList>(nullptr)),
+      commitStringCallback({}) {}
 
 AndroidFrontend::~AndroidFrontend() = default;
 
 ICUUID
 AndroidFrontend::createInputContext(const std::string &program) {
     auto *ic = new AndroidInputContext(this, instance_->inputContextManager(), program);
+    ic->setCapabilityFlags(CapabilityFlag::Preedit);
     ic->setCapabilityFlags(CapabilityFlag::ClientSideInputPanel);
     return ic->uuid();
 }
@@ -67,6 +71,7 @@ void AndroidFrontend::destroyInputContext(ICUUID uuid) {
     auto *ic = instance_->inputContextManager().findByUUID(uuid);
     delete ic;
 }
+
 void AndroidFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
     auto *ic = instance_->inputContextManager().findByUUID(uuid);
     if (!ic) {
@@ -79,8 +84,10 @@ void AndroidFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
                  + " accepted: " + std::to_string(keyEvent.accepted());
 }
 
-void AndroidFrontend::commitString(const std::string &expect) {
-    //
+void AndroidFrontend::commitString(const std::string &str) {
+    if (commitStringCallback) {
+        commitStringCallback(str);
+    }
 }
 
 void AndroidFrontend::updateCandidateList(const std::shared_ptr<CandidateList>& candidateList) {
@@ -103,6 +110,10 @@ void AndroidFrontend::selectCandidate(ICUUID uuid, int idx) {
     if (cachedBulkCandidateList) {
         cachedBulkCandidateList->candidateFromAll(idx).select(ic);
     }
+}
+
+void AndroidFrontend::setCommitStringCallback(const std::function<void(std::string)>& callback) {
+    commitStringCallback = callback;
 }
 
 class AndroidFrontendFactory : public AddonFactory {
