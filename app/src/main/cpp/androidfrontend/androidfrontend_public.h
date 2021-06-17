@@ -23,4 +23,7 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, keyEvent,
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, candidateList,
                              std::shared_ptr<BulkCandidateList>(ICUUID));
 
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, selectCandidate,
+                             void(ICUUID, int idx));
+
 #endif // _FCITX_FRONTEND_ANDROIDFRONTEND_ANDROIDFRONTEND_PUBLIC_H_

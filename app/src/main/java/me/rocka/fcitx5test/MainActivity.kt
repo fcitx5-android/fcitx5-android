@@ -3,8 +3,6 @@ package me.rocka.fcitx5test
 import android.app.Activity
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
-import androidx.annotation.UiThread
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -62,9 +60,19 @@ class MainActivity : Activity() {
             Thread.sleep(1000)
             listOf("n", "i", "h", "a", "o").forEach {
                 sendKeyToFcitx(it)
-                Thread.sleep(50)
+                Thread.sleep(200)
             }
-            Log.d("Candidate", getCandidates().joinToString(","))
+            val formatCandidates = { getCandidates().run { "($size)" + joinToString(",") } }
+            Thread.sleep(2000)
+            Log.d("Candidate", formatCandidates())
+            Thread.sleep(200)
+            selectCandidate(42)
+            Thread.sleep(200)
+            Log.d("Candidate", formatCandidates())
+            Thread.sleep(200)
+            selectCandidate(42)
+            Thread.sleep(200)
+            Log.d("Candidate", formatCandidates())
         }.start()
     }
 
@@ -78,6 +86,8 @@ class MainActivity : Activity() {
     private external fun sendKeyToFcitx(key: String)
 
     private external fun getCandidates(): Array<String>
+
+    private external fun selectCandidate(idx: Int)
 
     companion object {
         init {

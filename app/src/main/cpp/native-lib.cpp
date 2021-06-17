@@ -118,14 +118,20 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_MainActivity_sendKeyToFcitx(JNIEnv *env, jobject /* this */, jstring key) {
     const char* k = env->GetStringUTFChars(key, nullptr);
-    p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, fcitx::Key(k), false);
-    env->ReleaseStringUTFChars(key, k);
+    p_dispatcher->schedule([=]() {
+        p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, fcitx::Key(k), false);
+    });
+    // FIXME: `const char* k` should be released after keyEvent
+//    env->ReleaseStringUTFChars(key, k);
 }
 
 extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_me_rocka_fcitx5test_MainActivity_getCandidates(JNIEnv *env, jobject /* this */) {
     auto candidateList = p_frontend->call<fcitx::IAndroidFrontend::candidateList>(p_uuid);
+    if (!candidateList) {
+        return env->NewObjectArray(0, env->FindClass("java/lang/String"), nullptr);
+    }
     int size = candidateList->totalSize();
     jobjectArray array = env->NewObjectArray(size, env->FindClass("java/lang/String"), nullptr);
     frontendLog(std::to_string(size) + " candidates");
@@ -139,4 +145,13 @@ Java_me_rocka_fcitx5test_MainActivity_getCandidates(JNIEnv *env, jobject /* this
         env->SetObjectArrayElement(array, i, env->NewStringUTF(text.c_str()));
     }
     return array;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_MainActivity_selectCandidate(JNIEnv *env, jobject /* this */, jint idx) {
+    frontendLog("select candidate #" + std::to_string(idx));
+    p_dispatcher->schedule([idx]() {
+        p_frontend->call<fcitx::IAndroidFrontend::selectCandidate>(p_uuid, idx);
+    });
 }

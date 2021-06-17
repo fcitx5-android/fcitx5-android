@@ -41,18 +41,25 @@ public:
                      << inputPanel().clientPreedit().toString();
     }
 
+    void updateClientSideUIImpl() override {
+        frontend_->updateCandidateList(inputPanel().candidateList());
+    }
+
 private:
     AndroidFrontend *frontend_;
 };
 
-AndroidFrontend::AndroidFrontend(Instance *instance) : instance_(instance) {}
+AndroidFrontend::AndroidFrontend(Instance *instance)
+    : instance_(instance),
+      cachedCandidateList(std::shared_ptr<CandidateList>(nullptr)),
+      cachedBulkCandidateList(std::shared_ptr<BulkCandidateList>(nullptr)) {}
 
 AndroidFrontend::~AndroidFrontend() = default;
 
 ICUUID
 AndroidFrontend::createInputContext(const std::string &program) {
-    auto *ic =
-        new AndroidInputContext(this, instance_->inputContextManager(), program);
+    auto *ic = new AndroidInputContext(this, instance_->inputContextManager(), program);
+    ic->setCapabilityFlags(CapabilityFlag::ClientSideInputPanel);
     return ic->uuid();
 }
 
@@ -67,19 +74,35 @@ void AndroidFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
     }
     KeyEvent keyEvent(ic, key, isRelease);
     ic->keyEvent(keyEvent);
-    FCITX_INFO() << "KeyEvent key: " << key.toString()
-                 << " isRelease: " << isRelease
-                 << " accepted: " << keyEvent.accepted();
+    FCITX_INFO() << "KeyEvent key: " + key.toString()
+                 + " isRelease: " + std::to_string(isRelease)
+                 + " accepted: " + std::to_string(keyEvent.accepted());
 }
 
 void AndroidFrontend::commitString(const std::string &expect) {
     //
 }
 
+void AndroidFrontend::updateCandidateList(const std::shared_ptr<CandidateList>& candidateList) {
+    if (candidateList) {
+        cachedCandidateList = candidateList;
+        cachedBulkCandidateList.reset(candidateList->toBulk());
+    } else {
+        cachedCandidateList = nullptr;
+        cachedBulkCandidateList = nullptr;
+    }
+}
+
 std::shared_ptr<BulkCandidateList>
 AndroidFrontend::candidateList(ICUUID uuid) {
+    return std::shared_ptr<BulkCandidateList>(cachedBulkCandidateList);
+}
+
+void AndroidFrontend::selectCandidate(ICUUID uuid, int idx) {
     auto *ic = instance_->inputContextManager().findByUUID(uuid);
-    return std::shared_ptr<BulkCandidateList>(ic->inputPanel().candidateList()->toBulk());
+    if (cachedBulkCandidateList) {
+        cachedBulkCandidateList->candidateFromAll(idx).select(ic);
+    }
 }
 
 class AndroidFrontendFactory : public AddonFactory {
