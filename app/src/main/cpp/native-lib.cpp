@@ -118,11 +118,11 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_MainActivity_sendKeyToFcitx(JNIEnv *env, jobject /* this */, jstring key) {
     const char* k = env->GetStringUTFChars(key, nullptr);
+    fcitx::Key parsedKey(k);
+    env->ReleaseStringUTFChars(key, k);
     p_dispatcher->schedule([=]() {
-        p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, fcitx::Key(k), false);
+        p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, parsedKey, false);
     });
-    // FIXME: `const char* k` should be released after keyEvent
-//    env->ReleaseStringUTFChars(key, k);
 }
 
 extern "C"
