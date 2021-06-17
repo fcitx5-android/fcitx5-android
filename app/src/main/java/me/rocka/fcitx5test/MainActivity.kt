@@ -81,7 +81,7 @@ class MainActivity : Activity() {
         appLib: String,
         extData: String,
         appDataLibime: String
-    )
+    ): Int
 
     private external fun sendKeyToFcitx(key: String)
 

@@ -1,19 +1,13 @@
 #include <jni.h>
 #include <memory>
-#include <string>
-#include <cstdlib>
 #include <unistd.h>
 #include <android/log.h>
-#include <thread>
 
-#include <fcitx-utils/eventdispatcher.h>
-#include <fcitx-utils/testing.h>
-#include <fcitx-utils/stringutils.h>
-#include <fcitx-utils/standardpath.h>
-#include <fcitx-utils/testing.h>
+#include <fcitx/instance.h>
 #include <fcitx/addonmanager.h>
 #include <fcitx/inputmethodmanager.h>
-#include <fcitx/instance.h>
+#include <fcitx-utils/eventdispatcher.h>
+
 #include "androidfrontend/androidfrontend_public.h"
 
 // https://codelab.wordpress.com/2014/11/03/how-to-use-standard-output-streams-for-logging-in-android-apps/
@@ -55,30 +49,8 @@ std::unique_ptr<fcitx::EventDispatcher> p_dispatcher;
 std::unique_ptr<fcitx::AddonInstance> p_frontend;
 fcitx::ICUUID p_uuid;
 
-void scheduleEvent(fcitx::EventDispatcher *dispatcher, fcitx::Instance *instance) {
-    dispatcher->schedule([instance]() {
-        auto *unicode = instance->addonManager().addon("unicode", true);
-        FCITX_ASSERT(unicode);
-        auto *punctuation = instance->addonManager().addon("punctuation", true);
-        FCITX_ASSERT(punctuation);
-        auto *pinyin = instance->addonManager().addon("pinyin", true);
-        FCITX_ASSERT(pinyin);
-
-        auto defaultGroup = instance->inputMethodManager().currentGroup();
-        defaultGroup.inputMethodList().clear();
-        defaultGroup.inputMethodList().emplace_back("pinyin");
-        defaultGroup.setDefaultInputMethod("");
-        instance->inputMethodManager().setGroup(defaultGroup);
-
-        auto *androidfrontend = instance->addonManager().addon("androidfrontend");
-        auto uuid = androidfrontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
-        p_frontend.reset(androidfrontend);
-        p_uuid = (uuid);
-    });
-}
-
 extern "C"
-JNIEXPORT void JNICALL
+JNIEXPORT jint JNICALL
 Java_me_rocka_fcitx5test_MainActivity_startupFcitx(JNIEnv *env, jobject /* this */, jstring appData, jstring appLib, jstring extData, jstring appDataLibime) {
     // debug log
     start_logger();
@@ -109,9 +81,29 @@ Java_me_rocka_fcitx5test_MainActivity_startupFcitx(JNIEnv *env, jobject /* this 
     p_instance->addonManager().registerDefaultLoader(nullptr);
     p_dispatcher = std::make_unique<fcitx::EventDispatcher>();
     p_dispatcher->attach(&p_instance->eventLoop());
-    std::thread thread(scheduleEvent, p_dispatcher.get(), p_instance.get());
-    p_instance->exec();
-    thread.join();
+
+    p_dispatcher->schedule([](){
+        auto defaultGroup = p_instance->inputMethodManager().currentGroup();
+        defaultGroup.inputMethodList().clear();
+        defaultGroup.inputMethodList().emplace_back("pinyin");
+        defaultGroup.setDefaultInputMethod("");
+        p_instance->inputMethodManager().setGroup(defaultGroup);
+
+        auto *androidfrontend = p_instance->addonManager().addon("androidfrontend");
+        auto uuid = androidfrontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
+        p_frontend.reset(androidfrontend);
+        p_uuid = (uuid);
+    });
+
+    try {
+        return p_instance->exec();
+    } catch (const fcitx::InstanceQuietQuit &) {
+    } catch (const std::exception &e) {
+        __android_log_write(ANDROID_LOG_ERROR, "fcitx5", "Received exception:");
+        __android_log_write(ANDROID_LOG_ERROR, "fcitx5", e.what());
+        return 1;
+    }
+    return 0;
 }
 
 extern "C"
