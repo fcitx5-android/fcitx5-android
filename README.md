@@ -4,7 +4,7 @@ An attempt to run fcitx5 on Android.
 
 ## Project status
 
-It can build, run, and print to stdout.
+It can build, run, and print to logcat.
 
 ## Build
 
@@ -47,42 +47,65 @@ index 2f98f7f..1cceb7e 100644
 <summary>Logcat</summary>
 
 ```
-D/fcitx5: I2021-06-15 00:32:44.666513 instance.cpp:1371] Override Enabled Addons: {}
-    I2021-06-15 00:32:44.666658 instance.cpp:1372] Overr
+D/fcitx5: I2021-06-17 23:33:22.644784 instance.cpp:1371] Override Enabled Addons: {}
+    I2021-06-17 23:33:22.645000 instance.cpp:1372] Overr
 D/fcitx5: ide Disabled Addons: {}
+D/fcitx5: I2021-06-17 23:33:22.660692 addonmanager.cpp:189] Loaded addon unicode
 D/fcitx5: I
-D/fcitx5: 2021-06-15 00:32:44.674399
-D/fcitx5: addonmanager.cpp:
-D/fcitx5: 189]
-D/fcitx5: Loaded addon unicode
-D/fcitx5: I
-D/fcitx5: 2021-06-15 00:32:44.675208
-D/fcitx5:
+D/fcitx5: 2021-06-17 23:33:22.697848
+D/fcitx5:  
 D/fcitx5: addonmanager.cpp
 D/fcitx5: :
 D/fcitx5: 189
-D/fcitx5: ]
-D/fcitx5: Loaded addon
+D/fcitx5: ] 
+D/fcitx5: Loaded addon 
+D/fcitx5: quickphrase
+D/fcitx5: I
+D/fcitx5: 2021-06-17 23:33:22.699319
+D/fcitx5:  
+D/fcitx5: addonmanager.cpp
+D/fcitx5: :
+D/fcitx5: 189
+D/fcitx5: ] 
+D/fcitx5: Loaded addon 
+D/fcitx5: imselector
+D/fcitx5: I
+D/fcitx5: 2021-06-17 23:33:22.700319
+D/fcitx5:  
+D/fcitx5: addonmanager.cpp
+D/fcitx5: :
+D/fcitx5: 189
+D/fcitx5: ] 
+D/fcitx5: Loaded addon 
 D/fcitx5: androidfrontend
 D/fcitx5: I
-D/fcitx5: 2021-06-15 00:32:44.676556
-D/fcitx5:
+D/fcitx5: 2021-06-17 23:33:22.706749
+D/fcitx5:  
+D/fcitx5: addonmanager.cpp
+D/fcitx5: :
+D/fcitx5: 189
+D/fcitx5: ] 
+D/fcitx5: Loaded addon 
+D/fcitx5: pinyinhelper
+D/fcitx5: I
+D/fcitx5: 2021-06-17 23:33:22.710749
+D/fcitx5:  
 D/fcitx5: inputmethodmanager.cpp
 D/fcitx5: :
 D/fcitx5: 117
-D/fcitx5: ]
-D/fcitx5: No valid input method group in configuration.
+D/fcitx5: ] 
+D/fcitx5: No valid input method group in configuration. 
 D/fcitx5: Building a default one
 D/fcitx5: I
-D/fcitx5: 2021-06-15 00:32:44.677021
-D/fcitx5:
+D/fcitx5: 2021-06-17 23:33:22.711921
+D/fcitx5:  
 D/fcitx5: instance.cpp
 D/fcitx5: :
 D/fcitx5: 730
-D/fcitx5: ]
-D/fcitx5: Items in
+D/fcitx5: ] 
+D/fcitx5: Items in 
 D/fcitx5: Default
-D/fcitx5: :
+D/fcitx5: : 
 D/fcitx5: [
 D/fcitx5: InputMethodGroupItem(
 D/fcitx5: keyboard-us
@@ -90,103 +113,124 @@ D/fcitx5: ,layout=
 D/fcitx5: )
 D/fcitx5: ]
 D/fcitx5: I
-D/fcitx5: 2021-06-15 00:32:44.677383
-D/fcitx5:
+D/fcitx5: 2021-06-17 23:33:22.712206
+D/fcitx5:  
 D/fcitx5: instance.cpp
 D/fcitx5: :
 D/fcitx5: 735
-D/fcitx5: ]
-D/fcitx5: Generated groups:
+D/fcitx5: ] 
+D/fcitx5: Generated groups: 
 D/fcitx5: [
 D/fcitx5: Default
 D/fcitx5: ]
 D/fcitx5: E
-D/fcitx5: 2021-06-15 00:32:44.678391
-D/fcitx5:
+D/fcitx5: 2021-06-17 23:33:22.712594
+D/fcitx5:  
 D/fcitx5: instance.cpp
 D/fcitx5: :
 D/fcitx5: 1381
-D/fcitx5: ]
+D/fcitx5: ] 
 D/fcitx5: Couldn't find keyboard-us
+W/Thread-2: type=1400 audit(0.0:6986): avc: denied { read } for name="uuid" dev="proc" ino=3145872 scontext=u:r:untrusted_app:s0:c512,c768 tcontext=u:object_r:proc:s0 tclass=file permissive=0
 D/fcitx5: I
-D/fcitx5: 2021-06-15 00:32:44.682066
-D/fcitx5:
+D/fcitx5: 2021-06-17 23:33:22.722067
+D/fcitx5:  
 D/fcitx5: addonmanager.cpp
 D/fcitx5: :
 D/fcitx5: 189
-D/fcitx5: ]
-D/fcitx5: Loaded addon
+D/fcitx5: ] 
+D/fcitx5: Loaded addon 
 D/fcitx5: punctuation
 D/fcitx5: E
-D/fcitx5: 2021-06-15 00:32:45.040030
-D/fcitx5:
+D/fcitx5: 2021-06-17 23:33:22.993406
+D/fcitx5:  
 D/fcitx5: pinyin.cpp
 D/fcitx5: :
 D/fcitx5: 647
-D/fcitx5: ]
-D/fcitx5: Failed to load pinyin history:
+D/fcitx5: ] 
+D/fcitx5: Failed to load pinyin history: 
 D/fcitx5: io fail: unspecified iostream_category error
 D/fcitx5: I
-D/fcitx5: 2021-06-15 00:32:45.070853
-D/fcitx5:
+D/fcitx5: 2021-06-17 23:33:23.063986
+D/fcitx5:  
 D/fcitx5: addonmanager.cpp
 D/fcitx5: :
 D/fcitx5: 189
-D/fcitx5: ]
-D/fcitx5: Loaded addon
+D/fcitx5: ] 
+D/fcitx5: Loaded addon 
 D/fcitx5: pinyin
-W/Thread-2: type=1400 audit(0.0:192): avc: denied { read } for name="uuid" dev="proc" ino=40929 scontext=u:r:untrusted_app:s0:c512,c768 tcontext=u:object_r:proc:s0 tclass=file permissive=0
 D/fcitx5: I
-D/fcitx5: 2021-06-15 00:32:45.711658 androidfrontend.cpp:70] KeyEvent key: n isRelease: 0 accepted: 1
+D/fcitx5: 2021-06-17 23:33:23.069996
+D/fcitx5:  
+D/fcitx5: addonmanager.cpp
+D/fcitx5: :
+D/fcitx5: 189
+D/fcitx5: ] 
+D/fcitx5: Loaded addon 
+D/fcitx5: cloudpinyin
 D/fcitx5: I
-D/fcitx5: 2021-06-15 00:32:45.775222
-D/fcitx5:
+D/fcitx5: 2021-06-17 23:33:23.703631
+D/fcitx5:  
+D/fcitx5: addonmanager.cpp
+D/fcitx5: :
+D/fcitx5: 189
+D/fcitx5: ] 
+D/fcitx5: Loaded addon 
+D/fcitx5: spell
+D/fcitx5: I
+D/fcitx5: 2021-06-17 23:33:25.783885
+D/fcitx5:  
 D/fcitx5: androidfrontend.cpp
 D/fcitx5: :
-D/fcitx5: 70
-D/fcitx5: ]
-D/fcitx5: KeyEvent key:
-D/fcitx5: i
-D/fcitx5:  isRelease:
-D/fcitx5: 0
-D/fcitx5:  accepted:
-D/fcitx5: 1
+D/fcitx5: 77
+D/fcitx5: ] 
+D/fcitx5: KeyEvent key: n isRelease: 0 accepted: 1
 D/fcitx5: I
-D/fcitx5: 2021-06-15 00:32:45.923111 androidfrontend.cpp
-D/fcitx5: :70] KeyEvent key:
-D/fcitx5: h isRelease: 0 accepted: 1
-D/fcitx5: I
-D/fcitx5: 2021-06-15 00:32:45.991609
-D/fcitx5:
+D/fcitx5: 2021-06-17 23:33:25.810964
+D/fcitx5:  
 D/fcitx5: androidfrontend.cpp
 D/fcitx5: :
-D/fcitx5: 70
-D/fcitx5: ]
-D/fcitx5: KeyEvent key:
-D/fcitx5: a
-D/fcitx5:  isRelease:
-D/fcitx5: 0
-D/fcitx5:  accepted:
-D/fcitx5: 1
+D/fcitx5: 77
+D/fcitx5: ] 
+D/fcitx5: KeyEvent key: i isRelease: 0 accepted: 1
 D/fcitx5: I
-D/fcitx5: 2021-06-15 00:32:46.105018
-D/fcitx5:
+D/fcitx5: 2021-06-17 23:33:25.859533
+D/fcitx5:  
 D/fcitx5: androidfrontend.cpp
 D/fcitx5: :
-D/fcitx5: 70
-D/fcitx5: ]
-D/fcitx5: KeyEvent key:
-D/fcitx5: o
-D/fcitx5:  isRelease:
-D/fcitx5: 0
-D/fcitx5:  accepted:
-D/fcitx5: 1
-D/fcitx5: 5 Candidates:
-D/fcitx5: 0: 你好
-D/fcitx5: 1: 你
-D/fcitx5: 2: 尼
-D/fcitx5: 3: 泥
-D/fcitx5: 4: 妮
-D/Candidate: 你好,你,尼,泥,妮
+D/fcitx5: 77
+D/fcitx5: ] 
+D/fcitx5: KeyEvent key: h isRelease: 0 accepted: 1
+D/fcitx5: I
+D/fcitx5: 2021-06-17 23:33:25.883510
+D/fcitx5:  
+D/fcitx5: androidfrontend.cpp
+D/fcitx5: :
+D/fcitx5: 77
+D/fcitx5: ] 
+D/fcitx5: KeyEvent key: a isRelease: 0 accepted: 1
+D/fcitx5: I
+D/fcitx5: 2021-06-17 23:33:25.897653
+D/fcitx5:  
+D/fcitx5: androidfrontend.cpp
+D/fcitx5: :
+D/fcitx5: 77
+D/fcitx5: ] 
+D/fcitx5: KeyEvent key: o isRelease: 0 accepted: 1
+D/androidfrontend: 108 candidates
+D/Candidate: (108)你好,你,尼,泥,妮,逆,腻,拟,呢,倪,妳,溺,👋,祢,匿,霓,昵,睨,怩,猊,擬,膩,鲵,旎,坭,伲,铌,輗,袮,貎,儗,麑,抳,柅,暱,埿,禰,惄,薿,孨,聻,蜺,苨,迡,檷,嫟,眤,籾,秜,縌,腝,馜,鯢,氼,狔,孴,婗,痆,懝,胒,隬,棿,齯,晲,淣,㘈,掜,抐,愵,屰,屔,嬺,堄,儞,聣,伱,䵒,䵑,䦵,䝚,臡,䛏,䘽,蚭,蛪,䘦,䘌,觬,誽,譺,䕥,跜,䁥,㹸,㵫,郳,鈮,鑈,㲻,㮏,㪒,㩘,鯓,㦐,㥾,㠜,㞾,𣲷
+D/androidfrontend: select candidate #42
+D/androidfrontend: 90 candidates
+D/Candidate: (90)好,号,浩,豪,耗,毫,郝,昊,嚎,皓,號,蒿,灏,蚝,壕,镐,濠,嗥,哈,薅,貉,颢,晧,皞,暠,蠔,灝,滈,淏,呺,恏,鎬,鄗,皜,顥,澔,秏,嚆,譹,暤,諕,竓,哠,籇,藃,茠,傐,儫,椃,䪽,䧫,㘪,嘷,噑,䧚,虠,㙱,薧,峼,䝥,悎,薃,昦,㚪,聕,䝞,暭,曍,鰝,毜,㝀,㞻,䚽,䒵,㬶,㠙,皥,㬔,獆,獋,獔,皡,㩝,䯫,蛤,虾,铪,奤,鉿,丷
+D/androidfrontend: select candidate #42
+D/fcitx5: I
+D/fcitx5: 2021-06-17 23:33:27.324554
+D/fcitx5:  
+D/fcitx5: androidfrontend.cpp
+D/fcitx5: :
+D/fcitx5: 29
+D/fcitx5: ] 
+D/fcitx5: Commit: 苨哠
+D/Candidate: (0)
 ```
 </details>
