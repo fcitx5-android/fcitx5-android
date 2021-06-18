@@ -75,11 +75,35 @@ Java_me_rocka_fcitx5test_MainActivity_startupFcitx(JNIEnv *env, jobject obj, jst
     env->ReleaseStringUTFChars(extData, ext_data);
     env->ReleaseStringUTFChars(appDataLibime, app_data_libime);
 
-    jclass cls = env->GetObjectClass(obj);
-    jmethodID javaCommitStringImpl = env->GetMethodID(cls, "commitString", "(Ljava/lang/String;)V");
+    jclass hostClass = env->GetObjectClass(obj);
+    jclass stringClass = env->FindClass("java/lang/String");
+    jmethodID handleFcitxEvent = env->GetMethodID(hostClass, "handleFcitxEvent", "(I[Ljava/lang/Object;)V");
+    auto candidateListCallback = [&](const std::shared_ptr<fcitx::BulkCandidateList>& candidateList){
+        frontendLog("candidateListCallback");
+        if (!candidateList) {
+            jobjectArray vararg = env->NewObjectArray(0, stringClass, nullptr);
+            env->CallVoidMethod(obj, handleFcitxEvent, 0, vararg);
+            return;
+        }
+        int size = candidateList->totalSize();
+        jobjectArray vararg = env->NewObjectArray(size, stringClass, nullptr);
+        frontendLog(std::to_string(size) + " candidates");
+        for (int i = 0; i < size; i++) {
+            auto &candidate = candidateList->candidateFromAll(i);
+            if (candidate.isPlaceHolder()) {
+                continue;
+            }
+            // TODO: apply `p_instance->outputFilter(ic, candidate.text())` ?
+            auto text = candidate.text().toString();
+            env->SetObjectArrayElement(vararg, i, env->NewStringUTF(text.c_str()));
+        }
+        env->CallVoidMethod(obj, handleFcitxEvent, 0, vararg);
+    };
     auto commitStringCallback = [&](const std::string& str){
-        jstring string = env->NewStringUTF(str.c_str());
-        env->CallVoidMethod(obj, javaCommitStringImpl, string);
+        frontendLog("commitStringCallback");
+        jobjectArray vararg = env->NewObjectArray(1, stringClass, nullptr);
+        env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(str.c_str()));
+        env->CallVoidMethod(obj, handleFcitxEvent, 1, vararg);
     };
 
     char arg0[] = "";
@@ -97,6 +121,7 @@ Java_me_rocka_fcitx5test_MainActivity_startupFcitx(JNIEnv *env, jobject obj, jst
         p_instance->inputMethodManager().setGroup(defaultGroup);
 
         auto *androidfrontend = p_instance->addonManager().addon("androidfrontend");
+        androidfrontend->call<fcitx::IAndroidFrontend::setCandidateListCallback>(candidateListCallback);
         androidfrontend->call<fcitx::IAndroidFrontend::setCommitStringCallback>(commitStringCallback);
         auto uuid = androidfrontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
         p_frontend.reset(androidfrontend);
@@ -120,31 +145,9 @@ Java_me_rocka_fcitx5test_MainActivity_sendKeyToFcitx(JNIEnv *env, jobject /* thi
     const char* k = env->GetStringUTFChars(key, nullptr);
     fcitx::Key parsedKey(k);
     env->ReleaseStringUTFChars(key, k);
-    p_dispatcher->schedule([=]() {
+    p_dispatcher->schedule([parsedKey]() {
         p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, parsedKey, false);
     });
-}
-
-extern "C"
-JNIEXPORT jobjectArray JNICALL
-Java_me_rocka_fcitx5test_MainActivity_getCandidates(JNIEnv *env, jobject /* this */) {
-    auto candidateList = p_frontend->call<fcitx::IAndroidFrontend::candidateList>(p_uuid);
-    if (!candidateList) {
-        return env->NewObjectArray(0, env->FindClass("java/lang/String"), nullptr);
-    }
-    int size = candidateList->totalSize();
-    jobjectArray array = env->NewObjectArray(size, env->FindClass("java/lang/String"), nullptr);
-    frontendLog(std::to_string(size) + " candidates");
-    for (int i = 0; i < size; i++) {
-        auto &candidate = candidateList->candidateFromAll(i);
-        if (candidate.isPlaceHolder()) {
-            continue;
-        }
-        // TODO: apply `p_instance->outputFilter(ic, candidate.text())` ?
-        auto text = candidate.text().toString();
-        env->SetObjectArrayElement(array, i, env->NewStringUTF(text.c_str()));
-    }
-    return array;
 }
 
 extern "C"

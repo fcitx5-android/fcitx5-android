@@ -10,8 +10,9 @@
 
 #include <list>
 #include <string>
-#include "fcitx/addoninstance.h"
-#include "fcitx/instance.h"
+#include <fcitx/instance.h>
+#include <fcitx/addoninstance.h>
+
 #include "androidfrontend_public.h"
 
 namespace fcitx {
@@ -29,18 +30,21 @@ namespace fcitx {
     private:
         std::shared_ptr<CandidateList> cachedCandidateList;
         std::shared_ptr<BulkCandidateList> cachedBulkCandidateList;
-        std::function<void(std::string)> commitStringCallback;
+        CandidateListCallback candidateListCallback;
+        CommitStringCallback commitStringCallback;
         ICUUID createInputContext(const std::string &program);
         void destroyInputContext(ICUUID uuid);
         void keyEvent(ICUUID uuid, const Key &key, bool isRelease);
         std::shared_ptr<BulkCandidateList> candidateList(ICUUID uuid);
         void selectCandidate(ICUUID uuid, int idx);
+        void setCandidateListCallback(const std::function<void(const std::shared_ptr<BulkCandidateList>&)>& callback);
         void setCommitStringCallback(const std::function<void(std::string)>& callback);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, createInputContext);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, destroyInputContext);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, keyEvent);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, candidateList);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, selectCandidate);
+        FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCandidateListCallback);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCommitStringCallback);
 
         Instance *instance_;

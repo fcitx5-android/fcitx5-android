@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later
  *
  */
+
 #ifndef _FCITX_FRONTEND_ANDROIDFRONTEND_ANDROIDFRONTEND_PUBLIC_H_
 #define _FCITX_FRONTEND_ANDROIDFRONTEND_ANDROIDFRONTEND_PUBLIC_H_
 
@@ -11,6 +12,9 @@
 #include <fcitx/candidatelist.h>
 #include <fcitx/addoninstance.h>
 #include <fcitx/inputcontext.h>
+
+typedef std::function<void(const std::shared_ptr<fcitx::BulkCandidateList>&)> CandidateListCallback;
+typedef std::function<void(std::string)> CommitStringCallback;
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, createInputContext,
                              ICUUID(const std::string &));
@@ -26,7 +30,10 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, candidateList,
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, selectCandidate,
                              void(ICUUID, int idx));
 
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setCandidateListCallback,
+                             void(const CandidateListCallback &));
+
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setCommitStringCallback,
-                             void(const std::function<void(std::string)>&));
+                             void(const CommitStringCallback &));
 
 #endif // _FCITX_FRONTEND_ANDROIDFRONTEND_ANDROIDFRONTEND_PUBLIC_H_

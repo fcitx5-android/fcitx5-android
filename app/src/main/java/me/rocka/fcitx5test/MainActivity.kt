@@ -22,7 +22,7 @@ class MainActivity : Activity() {
                 }
             }
         } catch (ex: IOException) {
-            Log.e("CopyFile", "I/O Exception", ex)
+            Log.e("copyFileOrDir", "I/O Exception", ex)
         }
     }
 
@@ -40,7 +40,7 @@ class MainActivity : Activity() {
             target.flush()
             target.close()
         } catch (e: Exception) {
-            Log.e("CopyFile", e.message ?: "Unknown error")
+            Log.e("copyFile", e.message ?: "Unknown error")
         }
     }
 
@@ -62,35 +62,26 @@ class MainActivity : Activity() {
                 sendKeyToFcitx(it)
                 Thread.sleep(200)
             }
-            val formatCandidates = { getCandidates().run { "($size)" + joinToString(",") } }
             Thread.sleep(2000)
-            Log.d("Candidate", formatCandidates())
-            Thread.sleep(200)
             selectCandidate(42)
             Thread.sleep(200)
-            Log.d("Candidate", formatCandidates())
-            Thread.sleep(200)
             selectCandidate(42)
-            Thread.sleep(200)
-            Log.d("Candidate", formatCandidates())
         }.start()
     }
 
-    private external fun startupFcitx(
-        appData: String,
-        appLib: String,
-        extData: String,
-        appDataLibime: String
-    ): Int
+    private external fun startupFcitx(appData: String, appLib: String, extData: String, appDataLibime: String): Int
 
     private external fun sendKeyToFcitx(key: String)
 
-    private external fun getCandidates(): Array<String>
-
     private external fun selectCandidate(idx: Int)
 
-    private fun commitString(str: String) {
-        Log.d("Commit", "commitString: $str")
+    private fun handleFcitxEvent(type: Int, vararg params: Any) {
+        val msg: String = when (type) {
+            0 -> "CandidateList, ${params.run { "[$size]" + joinToString(",") }}"
+            1 -> "CommitString, ${params[0]}"
+            else -> "UnknownEvent, ${params.run { "[$size]" + joinToString(",") }}"
+        }
+        Log.d("FcitxEvent", msg)
     }
 
     companion object {

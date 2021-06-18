@@ -5,11 +5,12 @@
  *
  */
 
-#include "androidfrontend.h"
 #include <fcitx/addonfactory.h>
 #include <fcitx/addonmanager.h>
 #include <fcitx/inputcontextmanager.h>
 #include <fcitx/inputpanel.h>
+
+#include "androidfrontend.h"
 
 namespace fcitx {
 
@@ -55,7 +56,8 @@ AndroidFrontend::AndroidFrontend(Instance *instance)
     : instance_(instance),
       cachedCandidateList(std::shared_ptr<CandidateList>(nullptr)),
       cachedBulkCandidateList(std::shared_ptr<BulkCandidateList>(nullptr)),
-      commitStringCallback({}) {}
+      commitStringCallback({}),
+      candidateListCallback({}) {}
 
 AndroidFrontend::~AndroidFrontend() = default;
 
@@ -98,6 +100,9 @@ void AndroidFrontend::updateCandidateList(const std::shared_ptr<CandidateList>& 
         cachedCandidateList = nullptr;
         cachedBulkCandidateList = nullptr;
     }
+    if (candidateListCallback) {
+        candidateListCallback(cachedBulkCandidateList);
+    }
 }
 
 std::shared_ptr<BulkCandidateList>
@@ -112,7 +117,11 @@ void AndroidFrontend::selectCandidate(ICUUID uuid, int idx) {
     }
 }
 
-void AndroidFrontend::setCommitStringCallback(const std::function<void(std::string)>& callback) {
+void AndroidFrontend::setCandidateListCallback(const CandidateListCallback& callback) {
+    candidateListCallback = callback;
+}
+
+void AndroidFrontend::setCommitStringCallback(const CommitStringCallback & callback) {
     commitStringCallback = callback;
 }
 
