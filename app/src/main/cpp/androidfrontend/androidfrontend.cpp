@@ -1,10 +1,3 @@
-/*
- * SPDX-FileCopyrightText: 2021-2021 Rocket Aaron <i@rocka.me>
- *
- * SPDX-License-Identifier: LGPL-2.1-or-later
- *
- */
-
 #include <fcitx/addonfactory.h>
 #include <fcitx/addonmanager.h>
 #include <fcitx/inputcontextmanager.h>

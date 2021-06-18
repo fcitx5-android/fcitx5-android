@@ -1,10 +1,3 @@
-/*
- * SPDX-FileCopyrightText: 2020-2020 CSSlayer <wengxt@gmail.com>
- *
- * SPDX-License-Identifier: LGPL-2.1-or-later
- *
- */
-
 #ifndef _FCITX_FRONTEND_ANDROIDFRONTEND_ANDROIDFRONTEND_PUBLIC_H_
 #define _FCITX_FRONTEND_ANDROIDFRONTEND_ANDROIDFRONTEND_PUBLIC_H_
 

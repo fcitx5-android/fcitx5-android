@@ -1,10 +1,3 @@
-/*
- * SPDX-FileCopyrightText: 2021-2021 Rocket Aaron <i@rocka.me>
- *
- * SPDX-License-Identifier: LGPL-2.1-or-later
- *
- */
-
 #ifndef _FCITX_FRONTEND_ANDROIDFRONTEND_ANDROIDFRONTEND_H_
 #define _FCITX_FRONTEND_ANDROIDFRONTEND_ANDROIDFRONTEND_H_
 
