@@ -30,8 +30,8 @@ namespace fcitx {
         void keyEvent(ICUUID uuid, const Key &key, bool isRelease);
         std::shared_ptr<BulkCandidateList> candidateList(ICUUID uuid);
         void selectCandidate(ICUUID uuid, int idx);
-        void setCandidateListCallback(const std::function<void(const std::shared_ptr<BulkCandidateList>&)>& callback);
-        void setCommitStringCallback(const std::function<void(std::string)>& callback);
+        void setCandidateListCallback(const CandidateListCallback& callback);
+        void setCommitStringCallback(const CommitStringCallback& callback);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, createInputContext);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, destroyInputContext);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, keyEvent);
