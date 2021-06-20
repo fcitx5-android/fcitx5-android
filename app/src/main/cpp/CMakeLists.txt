@@ -2,13 +2,13 @@ cmake_minimum_required(VERSION 3.18)
 
 project(fcitx-lib)
 
+# prebuilt fmt
+set(fmt_DIR "${CMAKE_SOURCE_DIR}/prebuilt/fmt/${ANDROID_ABI}/lib/cmake/fmt")
 
-add_subdirectory(fmt)
-
-add_subdirectory(libintl-lite)
+# prebuilt libintl-lite
+set(LibIntl_DIR "${CMAKE_SOURCE_DIR}/prebuilt/libintl-lite/${ANDROID_ABI}/lib/cmake")
+find_package(LibIntl)
 add_library(LibIntl::LibIntl ALIAS intl)
-target_include_directories(intl PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/libintl-lite>)
 
 cmake_policy(SET CMP0077 NEW)
 option(EVENT__DISABLE_DEBUG_MODE "" ON)
@@ -40,28 +40,26 @@ add_subdirectory(fcitx5)
 
 add_subdirectory(androidfrontend)
 
-option(BOOST_DISABLE_TESTS "" ON)
-# you may put boost source here (./boost_1_71_0) to avoid download it every time
-#set(FETCHCONTENT_SOURCE_DIR_BOOST ${CMAKE_CURRENT_SOURCE_DIR}/boost_1_71_0)
-add_subdirectory(boost-cmake)
+# prebuilt boost
+set(BOOST_VERSION "1.74.0")
+set(BOOST_MODULES filesystem iostreams regex)
+set(BOOST_ROOT "${CMAKE_SOURCE_DIR}/prebuilt/boost/${ANDROID_ABI}")
+
+set(Boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}/")
+
+set(boost_headers_DIR "${BOOST_ROOT}/lib/cmake/boost_headers-${BOOST_VERSION}/")
+include_directories("${BOOST_ROOT}/include")
+add_library(Boost::boost INTERFACE IMPORTED)
+
+foreach(mod IN LISTS BOOST_MODULES)
+    set("boost_${mod}_DIR" "${BOOST_ROOT}/lib/cmake/boost_${mod}-${BOOST_VERSION}/")
+    add_library("Boost::${mod}" STATIC IMPORTED)
+    set_target_properties("Boost::${mod}" PROPERTIES IMPORTED_LOCATION "${BOOST_ROOT}/lib/libboost_${mod}.a")
+endforeach()
 
 option(ENABLE_TEST "" OFF)
 set(_Fcitx5Macro_SELF_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fcitx5/src/lib/fcitx-utils)
 add_subdirectory(libime)
-
-option(BUILD_CURL_EXE "" OFF)
-option(BUILD_TESTING "" OFF)
-set(CURL_DISABLE_TESTS ON)
-set(HTTP_ONLY ON)
-option(CMAKE_USE_LIBSSH2 "" OFF)
-option(CURL_DISABLE_COOKIES "" ON)
-option(CURL_DISABLE_CRYPTO_AUTH "" ON)
-option(CMAKE_USE_OPENSSL "" OFF)
-option(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG "" ON)
-option(ENABLE_UNIX_SOCKETS "" OFF)
-add_subdirectory(curl)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/curl/include)
-add_library(PkgConfig::Curl ALIAS libcurl)
 
 option(ENABLE_TEST "" OFF)
 option(ENABLE_OPENCC "" OFF)

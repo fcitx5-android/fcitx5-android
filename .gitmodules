@@ -1,12 +1,6 @@
 [submodule "app/src/main/cpp/fcitx5"]
 	path = app/src/main/cpp/fcitx5
 	url = git@github.com:fcitx/fcitx5.git
-[submodule "app/src/main/cpp/fmt"]
-	path = app/src/main/cpp/fmt
-	url = git@github.com:fmtlib/fmt.git
-[submodule "app/src/main/cpp/libintl-lite"]
-	path = app/src/main/cpp/libintl-lite
-	url = git@github.com:j-jorge/libintl-lite.git
 [submodule "app/src/main/cpp/libevent"]
 	path = app/src/main/cpp/libevent
 	url = git@github.com:libevent/libevent.git
@@ -16,9 +10,6 @@
 [submodule "app/src/main/cpp/libime"]
 	path = app/src/main/cpp/libime
 	url = git@github.com:fcitx/libime.git
-[submodule "app/src/main/cpp/boost-cmake"]
-	path = app/src/main/cpp/boost-cmake
-	url = git@github.com:Orphis/boost-cmake.git
-[submodule "app/src/main/cpp/curl"]
-	path = app/src/main/cpp/curl
-	url = git@github.com:curl/curl.git
+[submodule "app/src/main/cpp/prebuilt"]
+	path = app/src/main/cpp/prebuilt
+	url = git@github.com:rocka/fcitx5-android-prebuilt-libs

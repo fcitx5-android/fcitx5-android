@@ -1,6 +1,3 @@
-# boost-cmake source
-app/src/main/cpp/boost_1_*
-
 # libime data
 app/src/main/assets/fcitx5/libime/
 
