@@ -106,6 +106,9 @@ AndroidFrontend::candidateList(ICUUID uuid) {
 void AndroidFrontend::selectCandidate(ICUUID uuid, int idx) {
     auto *ic = instance_->inputContextManager().findByUUID(uuid);
     if (cachedBulkCandidateList) {
+        if (idx >= cachedBulkCandidateList->totalSize()) {
+            return;
+        }
         cachedBulkCandidateList->candidateFromAll(idx).select(ic);
     }
 }
