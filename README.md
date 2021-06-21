@@ -14,10 +14,6 @@ It can build, run, and print to logcat.
 - Android NDK (Side by side) 23 & cmake 3.18.1, they can be installed using SDK Manager in Android Studio or `sdkmanager` command line. **Note:** you may need to install Android Studio Beta for Android NDK 23, or use `sdkmanager` from Android SDK Command-line Tools. NDK 21 & 22 are confirmed not working with this project.
 - [KDE/extra-cmake-modules](https://github.com/KDE/extra-cmake-modules)
 
-### Patch CMakeLists.txt
-
-If cmake complaint about "cannot find ...", just comment out those lines. Believe me, it will build. See my patches here: https://gist.github.com/rocka/f25d29bc6ceb31033543fd95eba09bf9
-
 ### `libime` data
 
 I don't know why cmake won't download and generate those data. Just install [libime](https://archlinux.org/packages/community/x86_64/libime/), and copy `/usr/{lib,share}/libime/*` to `app/src/main/assets/fcitx5/libime/`.
@@ -39,6 +35,37 @@ index 2f98f7f..1cceb7e 100644
 +                       stringutils::joinPath(getenv("LIBIME_INSTALL_PKGDATADIR"), "sc.dict").c_str(),
                         libime::PinyinDictFormat::Binary);
      prediction_.setUserLanguageModel(ime_->model());
+```
+
+In order to make "table" input methods work, patch below should be applied:
+
+```diff
+diff --git a/im/table/engine.cpp b/im/table/engine.cpp
+index 89fce9c..1dec491 100644
+--- a/im/table/engine.cpp
++++ b/im/table/engine.cpp
+@@ -144,7 +144,7 @@ const libime::PinyinDictionary &TableEngine::pinyinDict() {
+     if (!pinyinLoaded_) {
+         try {
+             pinyinDict_.load(libime::PinyinDictionary::SystemDict,
+-                             LIBIME_INSTALL_PKGDATADIR "/sc.dict",
++                             stringutils::joinPath(getenv("LIBIME_INSTALL_PKGDATADIR"), "sc.dict").c_str(),
+                              libime::PinyinDictFormat::Binary);
+         } catch (const std::exception &) {
+         }
+diff --git a/im/table/ime.cpp b/im/table/ime.cpp
+index 0f4668e..4379f0f 100644
+--- a/im/table/ime.cpp
++++ b/im/table/ime.cpp
+@@ -111,7 +111,7 @@ TableIME::requestDict(const std::string &name) {
+         try {
+             auto dict = std::make_unique<libime::TableBasedDictionary>();
+             auto dictFile = StandardPath::global().open(
+-                StandardPath::Type::PkgData, *root.config->file, O_RDONLY);
++                StandardPath::Type::PkgData, stringutils::joinPath(getenv("LIBIME_INSTALL_PKGDATADIR"), *root.config->file), O_RDONLY);
+             TABLE_DEBUG() << "Load table at: " << *root.config->file;
+             if (dictFile.fd() < 0) {
+                 throw std::runtime_error("Couldn't open file");
 ```
 
 ## PoC

@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.18)
 
 project(fcitx-lib)
 
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+
 # prebuilt fmt
 set(fmt_DIR "${CMAKE_SOURCE_DIR}/prebuilt/fmt/${ANDROID_ABI}/lib/cmake/fmt")
 
