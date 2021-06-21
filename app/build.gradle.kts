@@ -20,7 +20,10 @@ android {
             cmake {
                 cppFlags("-std=c++17")
                 val ecm = System.getenv("ECM_DIR") ?: "/usr/share/ECM/cmake"
-                arguments("-DECM_DIR=${ecm}")
+                arguments(
+                    "-DANDROID_STL=c++_shared",
+                    "-DECM_DIR=${ecm}"
+                )
             }
         }
         ndk {
