@@ -51,7 +51,7 @@ fcitx::ICUUID p_uuid;
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_me_rocka_fcitx5test_MainActivity_startupFcitx(JNIEnv *env, jobject obj, jstring appData, jstring appLib, jstring extData, jstring appDataLibime) {
+Java_me_rocka_fcitx5test_native_JNI_startupFcitx(JNIEnv *env, jobject obj, jstring appData, jstring appLib, jstring extData, jstring appDataLibime) {
     // debug log
     start_logger();
 
@@ -141,7 +141,7 @@ Java_me_rocka_fcitx5test_MainActivity_startupFcitx(JNIEnv *env, jobject obj, jst
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_MainActivity_sendKeyToFcitx__Ljava_lang_String_2(JNIEnv *env, jobject /* this */, jstring key) {
+Java_me_rocka_fcitx5test_native_JNI_sendKeyToFcitx__Ljava_lang_String_2(JNIEnv *env, jobject /* this */, jstring key) {
     const char* k = env->GetStringUTFChars(key, nullptr);
     fcitx::Key parsedKey(k);
     env->ReleaseStringUTFChars(key, k);
@@ -152,7 +152,7 @@ Java_me_rocka_fcitx5test_MainActivity_sendKeyToFcitx__Ljava_lang_String_2(JNIEnv
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_MainActivity_sendKeyToFcitx__C(JNIEnv *env, jobject /* this */, jchar c) {
+Java_me_rocka_fcitx5test_native_JNI_sendKeyToFcitx__C(JNIEnv *env, jobject /* this */, jchar c) {
     fcitx::Key parsedKey((const char*) &c);
     p_dispatcher->schedule([parsedKey]() {
         p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, parsedKey, false);
@@ -161,7 +161,7 @@ Java_me_rocka_fcitx5test_MainActivity_sendKeyToFcitx__C(JNIEnv *env, jobject /* 
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_MainActivity_selectCandidate(JNIEnv *env, jobject /* this */, jint idx) {
+Java_me_rocka_fcitx5test_native_JNI_selectCandidate(JNIEnv *env, jobject /* this */, jint idx) {
     frontendLog("select candidate #" + std::to_string(idx));
     p_dispatcher->schedule([idx]() {
         p_frontend->call<fcitx::IAndroidFrontend::selectCandidate>(p_uuid, idx);
