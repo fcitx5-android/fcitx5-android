@@ -1,9 +1,6 @@
 [submodule "app/src/main/cpp/fcitx5"]
 	path = app/src/main/cpp/fcitx5
 	url = git@github.com:fcitx/fcitx5.git
-[submodule "app/src/main/cpp/libevent"]
-	path = app/src/main/cpp/libevent
-	url = git@github.com:libevent/libevent.git
 [submodule "app/src/main/cpp/fcitx5-chinese-addons"]
 	path = app/src/main/cpp/fcitx5-chinese-addons
 	url = git@github.com:fcitx/fcitx5-chinese-addons.git

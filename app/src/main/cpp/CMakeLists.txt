@@ -10,18 +10,10 @@ set(LibIntl_DIR "${CMAKE_SOURCE_DIR}/prebuilt/libintl-lite/${ANDROID_ABI}/lib/cm
 find_package(LibIntl)
 add_library(LibIntl::LibIntl ALIAS intl)
 
-cmake_policy(SET CMP0077 NEW)
-option(EVENT__DISABLE_DEBUG_MODE "" ON)
-option(EVENT__ENABLE_VERBOSE_DEBUG "" OFF)
-option(EVENT__DISABLE_THREAD_SUPPORT "" ON)
-option(EVENT__DISABLE_OPENSSL "" ON)
-option(EVENT__DISABLE_MBEDTLS "" ON)
-option(EVENT__DISABLE_BENCHMARK "" ON)
-option(EVENT__DISABLE_TESTS "" ON)
-option(EVENT__DISABLE_REGRESS "" ON)
-option(EVENT__DISABLE_SAMPLES "" ON)
-add_subdirectory(libevent)
-add_library(libevent::core ALIAS event_core)
+# prebuilt libevent
+set(Libevent_DIR "${CMAKE_SOURCE_DIR}/prebuilt/libevent/${ANDROID_ABI}/lib/cmake/libevent")
+set(LIBEVENT_STATIC_LINK ON)
+find_package(Libevent)
 
 option(ENABLE_TEST "" OFF)
 option(ENABLE_COVERAGE "" OFF)
