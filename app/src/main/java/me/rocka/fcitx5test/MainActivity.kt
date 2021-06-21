@@ -58,7 +58,7 @@ class MainActivity : Activity() {
         }.start()
         Thread {
             Thread.sleep(1000)
-            listOf("n", "i", "h", "a", "o").forEach {
+            "nihao".forEach {
                 sendKeyToFcitx(it)
                 Thread.sleep(200)
             }
@@ -72,6 +72,8 @@ class MainActivity : Activity() {
     private external fun startupFcitx(appData: String, appLib: String, extData: String, appDataLibime: String): Int
 
     private external fun sendKeyToFcitx(key: String)
+
+    private external fun sendKeyToFcitx(c: Char)
 
     private external fun selectCandidate(idx: Int)
 

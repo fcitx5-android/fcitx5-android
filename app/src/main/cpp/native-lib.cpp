@@ -141,10 +141,19 @@ Java_me_rocka_fcitx5test_MainActivity_startupFcitx(JNIEnv *env, jobject obj, jst
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_MainActivity_sendKeyToFcitx(JNIEnv *env, jobject /* this */, jstring key) {
+Java_me_rocka_fcitx5test_MainActivity_sendKeyToFcitx__Ljava_lang_String_2(JNIEnv *env, jobject /* this */, jstring key) {
     const char* k = env->GetStringUTFChars(key, nullptr);
     fcitx::Key parsedKey(k);
     env->ReleaseStringUTFChars(key, k);
+    p_dispatcher->schedule([parsedKey]() {
+        p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, parsedKey, false);
+    });
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_MainActivity_sendKeyToFcitx__C(JNIEnv *env, jobject /* this */, jchar c) {
+    fcitx::Key parsedKey((const char*) &c);
     p_dispatcher->schedule([parsedKey]() {
         p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, parsedKey, false);
     });
