@@ -20,8 +20,8 @@ public:
     [[nodiscard]] const char *frontend() const override { return "androidfrontend"; }
 
     void commitStringImpl(const std::string &text) override {
-        FCITX_INFO() << "Commit: " << text;
         frontend_->commitString(text);
+        FCITX_INFO() << "Commit: " + text;
     }
 
     void forwardKeyImpl(const ForwardKeyEvent &key) override {
@@ -33,8 +33,10 @@ public:
     }
 
     void updatePreeditImpl() override {
-        FCITX_INFO() << "Update preedit: "
-                     << inputPanel().clientPreedit().toString();
+        auto preedit = inputPanel().preedit().toString();
+        auto clientPreedit = inputPanel().clientPreedit().toString();
+        frontend_->updatePreedit(preedit, clientPreedit);
+        FCITX_INFO() << "preedit: \"" + preedit + "\"; clientPreedit: " + clientPreedit;
     }
 
     BulkCandidateList* bulkCandidateList() {
@@ -85,15 +87,18 @@ private:
 AndroidFrontend::AndroidFrontend(Instance *instance)
     : instance_(instance),
       commitStringCallback({}),
-      candidateListCallback({}) {}
+      candidateListCallback({}),
+      preeditCallback({}) {}
 
 AndroidFrontend::~AndroidFrontend() = default;
 
 ICUUID
 AndroidFrontend::createInputContext(const std::string &program) {
     auto *ic = new AndroidInputContext(this, instance_->inputContextManager(), program);
-    ic->setCapabilityFlags(CapabilityFlag::Preedit);
-    ic->setCapabilityFlags(CapabilityFlag::ClientSideInputPanel);
+    CapabilityFlags flags;
+    flags |= CapabilityFlag::Preedit;
+    flags |= CapabilityFlag::ClientSideInputPanel;
+    ic->setCapabilityFlags(flags);
     return ic->uuid();
 }
 
@@ -126,6 +131,12 @@ void AndroidFrontend::updateCandidateList(const std::vector<std::string> &candid
     }
 }
 
+void AndroidFrontend::updatePreedit(const std::string &preedit, const std::string &clientPreedit) {
+    if (preeditCallback) {
+        preeditCallback(preedit, clientPreedit);
+    }
+}
+
 void AndroidFrontend::selectCandidate(ICUUID uuid, int idx) {
     auto *ic = dynamic_cast<AndroidInputContext*>(instance_->inputContextManager().findByUUID(uuid));
     ic->selectCandidate(idx);
@@ -139,7 +150,11 @@ void AndroidFrontend::setCommitStringCallback(const CommitStringCallback & callb
     commitStringCallback = callback;
 }
 
-class AndroidFrontendFactory : public AddonFactory {
+void AndroidFrontend::setPreeditCallback(const PreeditCallback &callback) {
+    preeditCallback = callback;
+}
+
+    class AndroidFrontendFactory : public AddonFactory {
 public:
     AddonInstance *create(AddonManager *manager) override {
         return new AndroidFrontend(manager->instance());

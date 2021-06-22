@@ -49,9 +49,6 @@ class MainActivity : Activity() {
             Thread.sleep(1000)
             "nihaoshijie".forEach {
                 JNI.sendKeyToFcitx(it)
-                runOnUiThread {
-                    binding.input.text = binding.input.text.toString() + it.toString()
-                }
                 Thread.sleep(200)
             }
             Thread.sleep(500)
@@ -60,9 +57,6 @@ class MainActivity : Activity() {
             Thread.sleep(2000)
             "shijienihao".forEach {
                 JNI.sendKeyToFcitx(it)
-                runOnUiThread {
-                    binding.input.text = binding.input.text.toString() + it.toString()
-                }
                 Thread.sleep(200)
             }
             Thread.sleep(500)
@@ -78,8 +72,12 @@ class MainActivity : Activity() {
                 binding.candidate.text = event.data.joinToString(separator = " | ")
             }
             is FcitxEvent.CommitStringEvent -> {
-                Log.i(javaClass.name, "commmit update: ${event.data}")
+                Log.i(javaClass.name, "commit update: ${event.data}")
                 binding.commit.text = event.data
+            }
+            is FcitxEvent.PreeditEvent -> {
+                Log.i(javaClass.name, "preedit update: ${event.data}")
+                binding.input.text = event.data.preedit
             }
             is FcitxEvent.UnknownEvent -> {
                 Log.i(javaClass.name, "unknown event: ${event.data}")
