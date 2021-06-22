@@ -9,12 +9,7 @@ object JNI {
         System.loadLibrary("native-lib")
     }
 
-    external fun startupFcitx(
-        appData: String,
-        appLib: String,
-        extData: String,
-        appDataLibime: String
-    ): Int
+    external fun startupFcitx(appData: String, appLib: String, extData: String): Int
 
     external fun sendKeyToFcitx(key: String)
 

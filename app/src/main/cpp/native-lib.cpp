@@ -44,14 +44,19 @@ static void frontendLog(const std::string& s) {
     __android_log_write(ANDROID_LOG_DEBUG, "androidfrontend", s.c_str());
 }
 
-std::unique_ptr<fcitx::Instance> p_instance;
-std::unique_ptr<fcitx::EventDispatcher> p_dispatcher;
-std::unique_ptr<fcitx::AddonInstance> p_frontend;
+std::unique_ptr<fcitx::Instance> p_instance(nullptr);
+std::unique_ptr<fcitx::EventDispatcher> p_dispatcher(nullptr);
+std::unique_ptr<fcitx::AddonInstance> p_frontend(nullptr);
 fcitx::ICUUID p_uuid;
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_me_rocka_fcitx5test_native_JNI_startupFcitx(JNIEnv *env, jobject obj, jstring appData, jstring appLib, jstring extData, jstring appDataLibime) {
+Java_me_rocka_fcitx5test_native_JNI_startupFcitx(JNIEnv *env, jobject obj, jstring appData, jstring appLib, jstring extData) {
+    if (p_instance != nullptr) {
+        frontendLog("fcitx already running ...");
+        return 2;
+    }
+    frontendLog("startupFcitx ...");
     // debug log
     start_logger();
 
@@ -60,7 +65,8 @@ Java_me_rocka_fcitx5test_native_JNI_startupFcitx(JNIEnv *env, jobject obj, jstri
     const char* app_data = env->GetStringUTFChars(appData, nullptr);
     const char* app_lib = env->GetStringUTFChars(appLib, nullptr);
     const char* ext_data = env->GetStringUTFChars(extData, nullptr);
-    const char* app_data_libime = env->GetStringUTFChars(appDataLibime, nullptr);
+    std::string libime_data = std::string(app_data) + "/fcitx5/libime";
+    const char* app_data_libime = libime_data.c_str();
 
     setenv("HOME", ext_data, 1);
     setenv("XDG_DATA_DIRS", app_data, 1);
@@ -73,7 +79,6 @@ Java_me_rocka_fcitx5test_native_JNI_startupFcitx(JNIEnv *env, jobject obj, jstri
     env->ReleaseStringUTFChars(appData, app_data);
     env->ReleaseStringUTFChars(appLib, app_lib);
     env->ReleaseStringUTFChars(extData, ext_data);
-    env->ReleaseStringUTFChars(appDataLibime, app_data_libime);
 
     jclass hostClass = env->GetObjectClass(obj);
     jclass stringClass = env->FindClass("java/lang/String");

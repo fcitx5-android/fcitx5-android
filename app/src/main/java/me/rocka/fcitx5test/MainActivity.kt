@@ -31,8 +31,7 @@ class MainActivity : Activity() {
             JNI.startupFcitx(
                 applicationInfo.dataDir,
                 applicationInfo.nativeLibraryDir,
-                getExternalFilesDir(null)!!.absolutePath + "/config",
-                "${applicationInfo.dataDir}/fcitx5/libime"
+                getExternalFilesDir(null)!!.absolutePath
             )
         }
     }
