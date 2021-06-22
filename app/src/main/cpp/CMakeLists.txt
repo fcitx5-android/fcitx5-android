@@ -47,8 +47,6 @@ add_library(Boost::boost INTERFACE IMPORTED)
 
 foreach(mod IN LISTS BOOST_MODULES)
     set("boost_${mod}_DIR" "${BOOST_ROOT}/lib/cmake/boost_${mod}-${BOOST_VERSION}/")
-    add_library("Boost::${mod}" STATIC IMPORTED)
-    set_target_properties("Boost::${mod}" PROPERTIES IMPORTED_LOCATION "${BOOST_ROOT}/lib/libboost_${mod}.a")
 endforeach()
 
 option(ENABLE_TEST "" OFF)
