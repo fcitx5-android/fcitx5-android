@@ -6,8 +6,8 @@
 #include <fcitx/addoninstance.h>
 #include <fcitx/inputcontext.h>
 
-typedef std::function<void(const std::shared_ptr<fcitx::BulkCandidateList>&)> CandidateListCallback;
-typedef std::function<void(std::string)> CommitStringCallback;
+typedef std::function<void(const std::vector<std::string> &)> CandidateListCallback;
+typedef std::function<void(const std::string &)> CommitStringCallback;
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, createInputContext,
                              ICUUID(const std::string &));
@@ -16,9 +16,6 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, destroyInputContext, void(ICUUID))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, keyEvent,
                              void(ICUUID, const Key &, bool isRelease));
-
-FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, candidateList,
-                             std::shared_ptr<BulkCandidateList>(ICUUID));
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, selectCandidate,
                              void(ICUUID, int idx));

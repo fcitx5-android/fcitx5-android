@@ -37,8 +37,45 @@ public:
                      << inputPanel().clientPreedit().toString();
     }
 
+    BulkCandidateList* bulkCandidateList() {
+        auto candidateList = inputPanel().candidateList();
+        if (!candidateList || candidateList->empty()) {
+            FCITX_INFO() << "bulkCandidateList: no or empty candidateList";
+            return nullptr;
+        }
+        return candidateList->toBulk();
+    }
+
     void updateClientSideUIImpl() override {
-        frontend_->updateCandidateList(inputPanel().candidateList());
+        std::vector<std::string> candidates;
+        auto list = bulkCandidateList();
+        if (list == nullptr) {
+            frontend_->updateCandidateList(candidates);
+            return;
+        }
+        int size = list->totalSize();
+        FCITX_INFO() << "updateClientSideUIImpl: " + std::to_string(size) + " candidates";
+        for (int i = 0; i < size; i++) {
+            auto &candidate = list->candidateFromAll(i);
+            if (candidate.isPlaceHolder()) {
+                continue;
+            }
+            candidates.push_back(candidate.text().toString());
+        }
+        frontend_->updateCandidateList(candidates);
+    }
+
+    bool selectCandidate(int idx) {
+        auto list = bulkCandidateList();
+        if (list == nullptr) {
+            return false;
+        }
+        int size = list->totalSize();
+        if (idx >= size) {
+            return false;
+        }
+        list->candidateFromAll(idx).select(this);
+        return true;
     }
 
 private:
@@ -47,8 +84,6 @@ private:
 
 AndroidFrontend::AndroidFrontend(Instance *instance)
     : instance_(instance),
-      cachedCandidateList(std::shared_ptr<CandidateList>(nullptr)),
-      cachedBulkCandidateList(std::shared_ptr<BulkCandidateList>(nullptr)),
       commitStringCallback({}),
       candidateListCallback({}) {}
 
@@ -85,32 +120,15 @@ void AndroidFrontend::commitString(const std::string &str) {
     }
 }
 
-void AndroidFrontend::updateCandidateList(const std::shared_ptr<CandidateList>& candidateList) {
-    if (candidateList) {
-        cachedCandidateList = candidateList;
-        cachedBulkCandidateList.reset(candidateList->toBulk());
-    } else {
-        cachedCandidateList = nullptr;
-        cachedBulkCandidateList = nullptr;
-    }
+void AndroidFrontend::updateCandidateList(const std::vector<std::string> &candidates) {
     if (candidateListCallback) {
-        candidateListCallback(cachedBulkCandidateList);
+        candidateListCallback(candidates);
     }
-}
-
-std::shared_ptr<BulkCandidateList>
-AndroidFrontend::candidateList(ICUUID uuid) {
-    return std::shared_ptr<BulkCandidateList>(cachedBulkCandidateList);
 }
 
 void AndroidFrontend::selectCandidate(ICUUID uuid, int idx) {
-    auto *ic = instance_->inputContextManager().findByUUID(uuid);
-    if (cachedBulkCandidateList) {
-        if (idx >= cachedBulkCandidateList->totalSize()) {
-            return;
-        }
-        cachedBulkCandidateList->candidateFromAll(idx).select(ic);
-    }
+    auto *ic = dynamic_cast<AndroidInputContext*>(instance_->inputContextManager().findByUUID(uuid));
+    ic->selectCandidate(idx);
 }
 
 void AndroidFrontend::setCandidateListCallback(const CandidateListCallback& callback) {

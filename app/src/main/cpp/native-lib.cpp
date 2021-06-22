@@ -78,24 +78,14 @@ Java_me_rocka_fcitx5test_native_JNI_startupFcitx(JNIEnv *env, jobject obj, jstri
     jclass hostClass = env->GetObjectClass(obj);
     jclass stringClass = env->FindClass("java/lang/String");
     jmethodID handleFcitxEvent = env->GetMethodID(hostClass, "handleFcitxEvent", "(I[Ljava/lang/Object;)V");
-    auto candidateListCallback = [&](const std::shared_ptr<fcitx::BulkCandidateList>& candidateList){
+    auto candidateListCallback = [&](const std::vector<std::string> & candidateList){
         frontendLog("candidateListCallback");
-        if (!candidateList) {
-            jobjectArray vararg = env->NewObjectArray(0, stringClass, nullptr);
-            env->CallVoidMethod(obj, handleFcitxEvent, 0, vararg);
-            return;
-        }
-        int size = candidateList->totalSize();
+        int size = candidateList.size();
         jobjectArray vararg = env->NewObjectArray(size, stringClass, nullptr);
         frontendLog(std::to_string(size) + " candidates");
-        for (int i = 0; i < size; i++) {
-            auto &candidate = candidateList->candidateFromAll(i);
-            if (candidate.isPlaceHolder()) {
-                continue;
-            }
-            // TODO: apply `p_instance->outputFilter(ic, candidate.text())` ?
-            auto text = candidate.text().toString();
-            env->SetObjectArrayElement(vararg, i, env->NewStringUTF(text.c_str()));
+        size_t i = 0;
+        for(const auto& s : candidateList) {
+            env->SetObjectArrayElement(vararg, i++, env->NewStringUTF(s.c_str()));
         }
         env->CallVoidMethod(obj, handleFcitxEvent, 0, vararg);
     };

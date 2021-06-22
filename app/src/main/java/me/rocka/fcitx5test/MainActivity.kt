@@ -47,17 +47,26 @@ class MainActivity : Activity() {
 
         thread {
             Thread.sleep(1000)
-            "nihao".forEach {
+            "nihaoshijie".forEach {
                 JNI.sendKeyToFcitx(it)
                 runOnUiThread {
                     binding.input.text = binding.input.text.toString() + it.toString()
                 }
-                Thread.sleep(800)
+                Thread.sleep(200)
             }
+            Thread.sleep(500)
+            JNI.selectCandidate(0)
+
             Thread.sleep(2000)
-            JNI.selectCandidate(42)
-            Thread.sleep(200)
-            JNI.selectCandidate(42)
+            "shijienihao".forEach {
+                JNI.sendKeyToFcitx(it)
+                runOnUiThread {
+                    binding.input.text = binding.input.text.toString() + it.toString()
+                }
+                Thread.sleep(200)
+            }
+            Thread.sleep(500)
+            JNI.selectCandidate(0)
         }
     }
 
