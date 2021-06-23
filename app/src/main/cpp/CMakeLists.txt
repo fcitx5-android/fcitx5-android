@@ -58,6 +58,7 @@ option(ENABLE_OPENCC "" OFF)
 option(ENABLE_GUI "" OFF)
 option(ENABLE_BROWSER "" OFF)
 option(USE_WEBKIT "" OFF)
+option(ENABLE_CLOUDPINYIN "" OFF)
 add_subdirectory(fcitx5-chinese-addons)
 
 add_library(native-lib SHARED native-lib.cpp)
