@@ -21,7 +21,6 @@ public:
 
     void commitStringImpl(const std::string &text) override {
         frontend_->commitString(text);
-        FCITX_INFO() << "Commit: " + text;
     }
 
     void forwardKeyImpl(const ForwardKeyEvent &key) override {
@@ -36,7 +35,6 @@ public:
         auto preedit = inputPanel().preedit().toString();
         auto clientPreedit = inputPanel().clientPreedit().toString();
         frontend_->updatePreedit(preedit, clientPreedit);
-        FCITX_INFO() << "preedit: \"" + preedit + "\"; clientPreedit: " + clientPreedit;
     }
 
     BulkCandidateList* bulkCandidateList() {
@@ -56,7 +54,6 @@ public:
             return;
         }
         int size = list->totalSize();
-        FCITX_INFO() << "updateClientSideUIImpl: " + std::to_string(size) + " candidates";
         for (int i = 0; i < size; i++) {
             auto &candidate = list->candidateFromAll(i);
             if (candidate.isPlaceHolder()) {
@@ -114,9 +111,9 @@ void AndroidFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
     }
     KeyEvent keyEvent(ic, key, isRelease);
     ic->keyEvent(keyEvent);
-    FCITX_INFO() << "KeyEvent key: " + key.toString()
-                 + " isRelease: " + std::to_string(isRelease)
-                 + " accepted: " + std::to_string(keyEvent.accepted());
+    FCITX_INFO() << "KeyEvent(key=" << key
+                 << ", isRelease=" << isRelease
+                 << ", accepted=" << keyEvent.accepted() << ")";
 }
 
 void AndroidFrontend::commitString(const std::string &str) {

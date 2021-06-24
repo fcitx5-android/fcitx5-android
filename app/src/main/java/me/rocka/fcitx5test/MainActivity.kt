@@ -45,21 +45,15 @@ class MainActivity : Activity() {
         super.onResume()
 
         thread {
-            Thread.sleep(1000)
-            "nihaoshijie".forEach {
-                JNI.sendKeyToFcitx(it)
-                Thread.sleep(200)
+            listOf("nihaoshijie", "shijienihao").forEach { str ->
+                Thread.sleep(2000)
+                str.forEach { c ->
+                    JNI.sendKeyToFcitx(c)
+                    Thread.sleep(200)
+                }
+                Thread.sleep(500)
+                JNI.selectCandidate(0)
             }
-            Thread.sleep(500)
-            JNI.selectCandidate(0)
-
-            Thread.sleep(2000)
-            "shijienihao".forEach {
-                JNI.sendKeyToFcitx(it)
-                Thread.sleep(200)
-            }
-            Thread.sleep(500)
-            JNI.selectCandidate(0)
         }
     }
 
@@ -67,16 +61,13 @@ class MainActivity : Activity() {
     fun onFcitxEvent(event: FcitxEvent<*>) {
         when (event) {
             is FcitxEvent.CandidateListEvent -> {
-                Log.i(javaClass.name, "candidate update: ${event.data}")
                 binding.candidate.text = event.data.joinToString(separator = " | ")
             }
             is FcitxEvent.CommitStringEvent -> {
-                Log.i(javaClass.name, "commit update: ${event.data}")
                 binding.commit.text = event.data
             }
             is FcitxEvent.PreeditEvent -> {
-                Log.i(javaClass.name, "preedit update: ${event.data}")
-                binding.input.text = event.data.preedit
+                binding.input.text = "${event.data.clientPreedit}\n${event.data.preedit}"
             }
             is FcitxEvent.UnknownEvent -> {
                 Log.i(javaClass.name, "unknown event: ${event.data}")

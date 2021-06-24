@@ -25,7 +25,7 @@ object JNI {
     @Suppress("unused")
     private fun handleFcitxEvent(type: Int, vararg params: Any) {
         EventBus.getDefault().post(FcitxEvent.create(type, params.asList()))
-        Log.d("FcitxEvent", "type: ${type}, args: ${params.run { "[$size]" + joinToString(",") }}")
+        Log.d("FcitxEvent", "type=${type}, params=${params.run { "[$size]" + joinToString(",") }}")
     }
 
 }
