@@ -4,16 +4,18 @@ project(fcitx-lib)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
+set(PREBUILT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/prebuilt/")
+
 # prebuilt fmt
-set(fmt_DIR "${CMAKE_SOURCE_DIR}/prebuilt/fmt/${ANDROID_ABI}/lib/cmake/fmt")
+set(fmt_DIR "${PREBUILT_DIR}/fmt/${ANDROID_ABI}/lib/cmake/fmt")
 
 # prebuilt libintl-lite
-set(LibIntl_DIR "${CMAKE_SOURCE_DIR}/prebuilt/libintl-lite/${ANDROID_ABI}/lib/cmake")
+set(LibIntl_DIR "${PREBUILT_DIR}/libintl-lite/${ANDROID_ABI}/lib/cmake")
 find_package(LibIntl)
 add_library(LibIntl::LibIntl ALIAS intl)
 
 # prebuilt libevent
-set(Libevent_DIR "${CMAKE_SOURCE_DIR}/prebuilt/libevent/${ANDROID_ABI}/lib/cmake/libevent")
+set(Libevent_DIR "${PREBUILT_DIR}/libevent/${ANDROID_ABI}/lib/cmake/libevent")
 set(LIBEVENT_STATIC_LINK ON)
 find_package(Libevent)
 
@@ -35,16 +37,11 @@ add_subdirectory(fcitx5)
 add_subdirectory(androidfrontend)
 
 # prebuilt boost
-set(BOOST_VERSION "1.74.0")
+set(BOOST_VERSION "1.76.0")
 set(BOOST_MODULES filesystem iostreams regex)
-set(BOOST_ROOT "${CMAKE_SOURCE_DIR}/prebuilt/boost/${ANDROID_ABI}")
-
+set(BOOST_ROOT "${PREBUILT_DIR}/boost/${ANDROID_ABI}")
 set(Boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}/")
-
 set(boost_headers_DIR "${BOOST_ROOT}/lib/cmake/boost_headers-${BOOST_VERSION}/")
-include_directories("${BOOST_ROOT}/include")
-add_library(Boost::boost INTERFACE IMPORTED)
-
 foreach(mod IN LISTS BOOST_MODULES)
     set("boost_${mod}_DIR" "${BOOST_ROOT}/lib/cmake/boost_${mod}-${BOOST_VERSION}/")
 endforeach()
