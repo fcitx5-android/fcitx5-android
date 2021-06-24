@@ -11,6 +11,8 @@ object JNI {
 
     external fun startupFcitx(appData: String, appLib: String, extData: String): Int
 
+    external fun exitFcitx()
+
     external fun sendKeyToFcitx(key: String)
 
     external fun sendKeyToFcitx(c: Char)

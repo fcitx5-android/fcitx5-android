@@ -40,8 +40,8 @@ void start_logger() {
     pthread_detach(thr);
 }
 
-static void frontendLog(const std::string& s) {
-    __android_log_write(ANDROID_LOG_DEBUG, "androidfrontend", s.c_str());
+static void jniLog(const std::string& s) {
+    __android_log_write(ANDROID_LOG_DEBUG, "JNI", s.c_str());
 }
 
 std::unique_ptr<fcitx::Instance> p_instance(nullptr);
@@ -49,13 +49,20 @@ std::unique_ptr<fcitx::EventDispatcher> p_dispatcher(nullptr);
 std::unique_ptr<fcitx::AddonInstance> p_frontend(nullptr);
 fcitx::ICUUID p_uuid;
 
+void resetGlobalPointers() {
+    p_instance = nullptr;
+    p_dispatcher = nullptr;
+    p_frontend = nullptr;
+}
+
 extern "C"
 JNIEXPORT jint JNICALL
 Java_me_rocka_fcitx5test_native_JNI_startupFcitx(JNIEnv *env, jobject obj, jstring appData, jstring appLib, jstring extData) {
     if (p_instance != nullptr) {
-        frontendLog("fcitx already running ...");
+        jniLog("fcitx already running ...");
         return 2;
     }
+    jniLog("startupFcitx ...");
     frontendLog("startupFcitx ...");
     // debug log
     start_logger();
@@ -84,10 +91,10 @@ Java_me_rocka_fcitx5test_native_JNI_startupFcitx(JNIEnv *env, jobject obj, jstri
     jclass stringClass = env->FindClass("java/lang/String");
     jmethodID handleFcitxEvent = env->GetMethodID(hostClass, "handleFcitxEvent", "(I[Ljava/lang/Object;)V");
     auto candidateListCallback = [&](const std::vector<std::string> & candidateList){
-        frontendLog("candidateListCallback");
+        jniLog("candidateListCallback");
         int size = candidateList.size();
         jobjectArray vararg = env->NewObjectArray(size, stringClass, nullptr);
-        frontendLog(std::to_string(size) + " candidates");
+        jniLog(std::to_string(size) + " candidates");
         size_t i = 0;
         for(const auto& s : candidateList) {
             env->SetObjectArrayElement(vararg, i++, env->NewStringUTF(s.c_str()));
@@ -95,13 +102,13 @@ Java_me_rocka_fcitx5test_native_JNI_startupFcitx(JNIEnv *env, jobject obj, jstri
         env->CallVoidMethod(obj, handleFcitxEvent, 0, vararg);
     };
     auto commitStringCallback = [&](const std::string& str){
-        frontendLog("commitStringCallback");
+        jniLog("commitStringCallback");
         jobjectArray vararg = env->NewObjectArray(1, stringClass, nullptr);
         env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(str.c_str()));
         env->CallVoidMethod(obj, handleFcitxEvent, 1, vararg);
     };
     auto preeditCallback = [&](const std::string& preedit, const std::string& clientPreedit){
-        frontendLog("preeditCallback");
+        jniLog("preeditCallback");
         jobjectArray  vararg = env->NewObjectArray(2, stringClass, nullptr);
         env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(preedit.c_str()));
         env->SetObjectArrayElement(vararg, 1, env->NewStringUTF(clientPreedit.c_str()));
@@ -132,19 +139,41 @@ Java_me_rocka_fcitx5test_native_JNI_startupFcitx(JNIEnv *env, jobject obj, jstri
     });
 
     try {
-        return p_instance->exec();
+        int code = p_instance->exec();
+        resetGlobalPointers();
+        return code;
     } catch (const fcitx::InstanceQuietQuit &) {
     } catch (const std::exception &e) {
-        __android_log_write(ANDROID_LOG_ERROR, "fcitx5", "Received exception:");
-        __android_log_write(ANDROID_LOG_ERROR, "fcitx5", e.what());
+        jniLog("fcitx exited with exception:");
+        jniLog(e.what());
+        resetGlobalPointers();
         return 1;
     }
+    resetGlobalPointers();
     return 0;
+}
+
+#define RETURN_IF_NOT_RUNNING \
+    if (p_instance == nullptr || p_dispatcher == nullptr || p_frontend == nullptr) { \
+        jniLog("fcitx is not running!"); \
+        return; \
+    }
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_native_JNI_exitFcitx(JNIEnv *env, jobject /* this */) {
+    RETURN_IF_NOT_RUNNING
+    jniLog("shutting down fcitx ...");
+    p_dispatcher->schedule([](){
+        p_dispatcher->detach();
+        p_instance->exit();
+    });
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_JNI_sendKeyToFcitx__Ljava_lang_String_2(JNIEnv *env, jobject /* this */, jstring key) {
+    RETURN_IF_NOT_RUNNING
     const char* k = env->GetStringUTFChars(key, nullptr);
     fcitx::Key parsedKey(k);
     env->ReleaseStringUTFChars(key, k);
@@ -156,6 +185,7 @@ Java_me_rocka_fcitx5test_native_JNI_sendKeyToFcitx__Ljava_lang_String_2(JNIEnv *
 extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_JNI_sendKeyToFcitx__C(JNIEnv *env, jobject /* this */, jchar c) {
+    RETURN_IF_NOT_RUNNING
     fcitx::Key parsedKey((const char*) &c);
     p_dispatcher->schedule([parsedKey]() {
         p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, parsedKey, false);
@@ -165,7 +195,8 @@ Java_me_rocka_fcitx5test_native_JNI_sendKeyToFcitx__C(JNIEnv *env, jobject /* th
 extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_JNI_selectCandidate(JNIEnv *env, jobject /* this */, jint idx) {
-    frontendLog("select candidate #" + std::to_string(idx));
+    RETURN_IF_NOT_RUNNING
+    jniLog("select candidate #" + std::to_string(idx));
     p_dispatcher->schedule([idx]() {
         p_frontend->call<fcitx::IAndroidFrontend::selectCandidate>(p_uuid, idx);
     });

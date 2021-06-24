@@ -87,6 +87,7 @@ class MainActivity : Activity() {
     override fun onStop() {
         super.onStop()
         EventBus.getDefault().unregister(this)
+        JNI.exitFcitx()
     }
 
 }
