@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/activity_main_reset"
+        android:icon="@drawable/ic_baseline_settings_backup_restore_24"
+        android:title="fcitx.reset()"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/activity_main_empty"
+        android:icon="@drawable/ic_baseline_device_unknown_24"
+        android:title="fcitx.empty()"
+        app:showAsAction="ifRoom" />
+
+</menu>

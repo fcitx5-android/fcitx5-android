@@ -2,6 +2,9 @@ package me.rocka.fcitx5test
 
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.coroutineScope
 import kotlinx.coroutines.delay
@@ -58,6 +61,24 @@ class MainActivity : AppCompatActivity() {
                 fcitx.select(0)
             }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        super.onCreateOptionsMenu(menu)
+        menuInflater.inflate(R.menu.activity_main_actionbar, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
+        R.id.activity_main_reset -> {
+            fcitx.reset()
+            true
+        }
+        R.id.activity_main_empty -> {
+            Toast.makeText(this, "${fcitx.empty()}", Toast.LENGTH_SHORT).show()
+            true
+        }
+        else -> super.onOptionsItemSelected(item)
     }
 
 }
