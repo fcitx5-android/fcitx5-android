@@ -96,6 +96,8 @@ AndroidFrontend::createInputContext(const std::string &program) {
     flags |= CapabilityFlag::Preedit;
     flags |= CapabilityFlag::ClientSideInputPanel;
     ic->setCapabilityFlags(flags);
+    // focus needed for `InputContext::reset` to work
+    ic->focusIn();
     return ic->uuid();
 }
 
@@ -137,6 +139,18 @@ void AndroidFrontend::updatePreedit(const std::string &preedit, const std::strin
 void AndroidFrontend::selectCandidate(ICUUID uuid, int idx) {
     auto *ic = dynamic_cast<AndroidInputContext*>(instance_->inputContextManager().findByUUID(uuid));
     ic->selectCandidate(idx);
+}
+
+bool AndroidFrontend::isInputPanelEmpty(ICUUID uuid) {
+    auto *ic = instance_->inputContextManager().findByUUID(uuid);
+    return ic->inputPanel().empty();
+}
+
+void AndroidFrontend::resetInputPanel(ICUUID uuid) {
+    auto *ic = instance_->inputContextManager().findByUUID(uuid);
+    // `InputPanel::reset()` seems to have no effect
+    // ic->inputPanel().reset();
+    ic->reset(ResetReason::LostFocus);
 }
 
 void AndroidFrontend::setCandidateListCallback(const CandidateListCallback& callback) {

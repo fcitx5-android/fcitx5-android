@@ -21,6 +21,12 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, keyEvent,
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, selectCandidate,
                              void(ICUUID, int idx));
 
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, isInputPanelEmpty,
+                             bool(ICUUID));
+
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, resetInputPanel,
+                             void(ICUUID));
+
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setCandidateListCallback,
                              void(const CandidateListCallback &));
 

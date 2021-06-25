@@ -29,6 +29,8 @@ namespace fcitx {
         void destroyInputContext(ICUUID uuid);
         void keyEvent(ICUUID uuid, const Key &key, bool isRelease);
         void selectCandidate(ICUUID uuid, int idx);
+        bool isInputPanelEmpty(ICUUID uuid);
+        void resetInputPanel(ICUUID uuid);
         void setCandidateListCallback(const CandidateListCallback& callback);
         void setCommitStringCallback(const CommitStringCallback& callback);
         void setPreeditCallback(const PreeditCallback & callback);
@@ -36,6 +38,8 @@ namespace fcitx {
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, destroyInputContext);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, keyEvent);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, selectCandidate);
+        FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, isInputPanelEmpty);
+        FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, resetInputPanel);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCandidateListCallback);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCommitStringCallback);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setPreeditCallback);

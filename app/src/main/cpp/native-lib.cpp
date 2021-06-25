@@ -156,11 +156,13 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
     return 0;
 }
 
-#define RETURN_IF_NOT_RUNNING \
+#define DO_IF_NOT_RUNNING(expr) \
     if (p_instance == nullptr || p_dispatcher == nullptr || p_frontend == nullptr) { \
         jniLog("fcitx is not running!"); \
-        return; \
+        expr; \
     }
+#define RETURN_IF_NOT_RUNNING DO_IF_NOT_RUNNING(return)
+#define RETURN_VALUE_IF_NOT_RUNNING(v) DO_IF_NOT_RUNNING(return v)
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -202,5 +204,21 @@ Java_me_rocka_fcitx5test_native_Fcitx_selectCandidate(JNIEnv *env, jclass clazz,
     jniLog("select candidate #" + std::to_string(idx));
     p_dispatcher->schedule([idx]() {
         p_frontend->call<fcitx::IAndroidFrontend::selectCandidate>(p_uuid, idx);
+    });
+}
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_isInputPanelEmpty(JNIEnv *env, jclass clazz) {
+    RETURN_VALUE_IF_NOT_RUNNING(true)
+    return p_frontend->call<fcitx::IAndroidFrontend::isInputPanelEmpty>(p_uuid);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_resetInputPanel(JNIEnv *env, jclass clazz) {
+    RETURN_IF_NOT_RUNNING
+    p_dispatcher->schedule([](){
+        p_frontend->call<fcitx::IAndroidFrontend::resetInputPanel>(p_uuid);
     });
 }

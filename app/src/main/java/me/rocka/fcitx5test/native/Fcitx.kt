@@ -23,6 +23,8 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
     fun sendKey(key: String) = sendKeyToFcitx(key)
     fun sendKey(c: Char) = sendKeyToFcitx(c)
     fun select(idx: Int) = selectCandidate(idx)
+    fun empty() = isInputPanelEmpty()
+    fun reset() = resetInputPanel()
 
     init {
         if (isRunning.get())
@@ -59,6 +61,12 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
 
         @JvmStatic
         external fun selectCandidate(idx: Int)
+
+        @JvmStatic
+        external fun isInputPanelEmpty(): Boolean
+
+        @JvmStatic
+        external fun resetInputPanel()
 
         /**
          * Called from native-lib
