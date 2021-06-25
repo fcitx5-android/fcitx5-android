@@ -67,7 +67,7 @@ JNI_OnLoad(JavaVM* /* jvm */, void* /* reserved */) {
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_me_rocka_fcitx5test_native_JNI_startupFcitx(JNIEnv *env, jobject obj, jstring appData, jstring appLib, jstring extData) {
+Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, jstring appData, jstring appLib, jstring extData) {
     if (p_instance != nullptr) {
         jniLog("fcitx already running");
         return 2;
@@ -94,9 +94,9 @@ Java_me_rocka_fcitx5test_native_JNI_startupFcitx(JNIEnv *env, jobject obj, jstri
     env->ReleaseStringUTFChars(appLib, app_lib);
     env->ReleaseStringUTFChars(extData, ext_data);
 
-    jclass hostClass = env->GetObjectClass(obj);
+    jclass hostClass = clazz;
     jclass stringClass = env->FindClass("java/lang/String");
-    jmethodID handleFcitxEvent = env->GetMethodID(hostClass, "handleFcitxEvent", "(I[Ljava/lang/Object;)V");
+    jmethodID handleFcitxEvent = env->GetStaticMethodID(hostClass, "handleFcitxEvent", "(I[Ljava/lang/Object;)V");
     auto candidateListCallback = [&](const std::vector<std::string> & candidateList){
         int size = candidateList.size();
         jobjectArray vararg = env->NewObjectArray(size, stringClass, nullptr);
@@ -104,18 +104,18 @@ Java_me_rocka_fcitx5test_native_JNI_startupFcitx(JNIEnv *env, jobject obj, jstri
         for(const auto& s : candidateList) {
             env->SetObjectArrayElement(vararg, i++, env->NewStringUTF(s.c_str()));
         }
-        env->CallVoidMethod(obj, handleFcitxEvent, 0, vararg);
+        env->CallStaticVoidMethod(clazz, handleFcitxEvent, 0, vararg);
     };
     auto commitStringCallback = [&](const std::string& str){
         jobjectArray vararg = env->NewObjectArray(1, stringClass, nullptr);
         env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(str.c_str()));
-        env->CallVoidMethod(obj, handleFcitxEvent, 1, vararg);
+        env->CallStaticVoidMethod(clazz, handleFcitxEvent, 1, vararg);
     };
     auto preeditCallback = [&](const std::string& preedit, const std::string& clientPreedit){
         jobjectArray  vararg = env->NewObjectArray(2, stringClass, nullptr);
         env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(preedit.c_str()));
         env->SetObjectArrayElement(vararg, 1, env->NewStringUTF(clientPreedit.c_str()));
-        env->CallVoidMethod(obj, handleFcitxEvent, 2, vararg);
+        env->CallStaticVoidMethod(clazz, handleFcitxEvent, 2, vararg);
     };
 
     char arg0[] = "";
@@ -164,7 +164,7 @@ Java_me_rocka_fcitx5test_native_JNI_startupFcitx(JNIEnv *env, jobject obj, jstri
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_JNI_exitFcitx(JNIEnv *env, jobject /* this */) {
+Java_me_rocka_fcitx5test_native_Fcitx_exitFcitx(JNIEnv *env, jclass clazz) {
     RETURN_IF_NOT_RUNNING
     jniLog("shutting down fcitx");
     p_dispatcher->schedule([](){
@@ -175,7 +175,7 @@ Java_me_rocka_fcitx5test_native_JNI_exitFcitx(JNIEnv *env, jobject /* this */) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_JNI_sendKeyToFcitx__Ljava_lang_String_2(JNIEnv *env, jobject /* this */, jstring key) {
+Java_me_rocka_fcitx5test_native_Fcitx_sendKeyToFcitxString(JNIEnv *env, jclass clazz, jstring key) {
     RETURN_IF_NOT_RUNNING
     const char* k = env->GetStringUTFChars(key, nullptr);
     fcitx::Key parsedKey(k);
@@ -187,7 +187,7 @@ Java_me_rocka_fcitx5test_native_JNI_sendKeyToFcitx__Ljava_lang_String_2(JNIEnv *
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_JNI_sendKeyToFcitx__C(JNIEnv *env, jobject /* this */, jchar c) {
+Java_me_rocka_fcitx5test_native_Fcitx_sendKeyToFcitxChar(JNIEnv *env, jclass clazz, jchar c) {
     RETURN_IF_NOT_RUNNING
     fcitx::Key parsedKey((const char*) &c);
     p_dispatcher->schedule([parsedKey]() {
@@ -197,7 +197,7 @@ Java_me_rocka_fcitx5test_native_JNI_sendKeyToFcitx__C(JNIEnv *env, jobject /* th
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_JNI_selectCandidate(JNIEnv *env, jobject /* this */, jint idx) {
+Java_me_rocka_fcitx5test_native_Fcitx_selectCandidate(JNIEnv *env, jclass clazz, jint idx) {
     RETURN_IF_NOT_RUNNING
     jniLog("select candidate #" + std::to_string(idx));
     p_dispatcher->schedule([idx]() {

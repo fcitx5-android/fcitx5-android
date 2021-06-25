@@ -1,84 +1,63 @@
 package me.rocka.fcitx5test
 
-import android.app.Activity
 import android.os.Bundle
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.databinding.ActivityMainBinding
+import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxEvent
-import me.rocka.fcitx5test.native.JNI
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
-import java.io.File
-import kotlin.concurrent.thread
 
-class MainActivity : Activity() {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var fcitx: Fcitx
+    private val uiScope
+        get() = lifecycle.coroutineScope
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         val rootView = binding.root
         setContentView(rootView)
-        copyFileOrDir("fcitx5")
-        Log.i(
-            javaClass.name,
-            File("${applicationInfo.dataDir}/fcitx5")
-                .listFiles()?.joinToString()
-                ?: "No data found"
-        )
-        thread {
-            JNI.startupFcitx(
-                applicationInfo.dataDir,
-                applicationInfo.nativeLibraryDir,
-                getExternalFilesDir(null)!!.absolutePath
-            )
-        }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        EventBus.getDefault().register(this)
+        fcitx = Fcitx(this)
+        lifecycle.addObserver(fcitx)
+        fcitx.eventFlow.onEach {
+            when (it) {
+                is FcitxEvent.CandidateListEvent -> {
+                    binding.candidate.text = it.data.joinToString(separator = " | ")
+                }
+                is FcitxEvent.CommitStringEvent -> {
+                    binding.commit.text = it.data
+                }
+                is FcitxEvent.PreeditEvent -> {
+                    binding.input.text = "${it.data.clientPreedit}\n${it.data.preedit}"
+                }
+                is FcitxEvent.UnknownEvent -> {
+                    Log.i(javaClass.name, "unknown event: ${it.data}")
+                }
+            }
+        }.launchIn(uiScope)
     }
 
     override fun onResume() {
         super.onResume()
-
-        thread {
+        fcitx.sendKey("Escape")
+        uiScope.launch {
             listOf("nihaoshijie", "shijienihao").forEach { str ->
-                Thread.sleep(2000)
+                delay(2000)
                 str.forEach { c ->
-                    JNI.sendKeyToFcitx(c)
-                    Thread.sleep(200)
+                    fcitx.sendKey(c)
+                    delay(200)
                 }
-                Thread.sleep(500)
-                JNI.selectCandidate(0)
+                delay(500)
+                fcitx.select(0)
             }
         }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onFcitxEvent(event: FcitxEvent<*>) {
-        when (event) {
-            is FcitxEvent.CandidateListEvent -> {
-                binding.candidate.text = event.data.joinToString(separator = " | ")
-            }
-            is FcitxEvent.CommitStringEvent -> {
-                binding.commit.text = event.data
-            }
-            is FcitxEvent.PreeditEvent -> {
-                binding.input.text = "${event.data.clientPreedit}\n${event.data.preedit}"
-            }
-            is FcitxEvent.UnknownEvent -> {
-                Log.i(javaClass.name, "unknown event: ${event.data}")
-            }
-        }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        EventBus.getDefault().unregister(this)
-        JNI.exitFcitx()
     }
 
 }

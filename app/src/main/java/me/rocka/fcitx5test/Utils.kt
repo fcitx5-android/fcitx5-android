@@ -5,7 +5,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
-fun Context.copyFileOrDir(path: String): Unit =
+fun Context.copyFileOrDir(path: String): Unit = runCatching {
     with(assets) {
         val list = list(path) ?: throw IOException("No asset $path")
         if (list.isEmpty()) {
@@ -17,11 +17,16 @@ fun Context.copyFileOrDir(path: String): Unit =
                 copyFileOrDir("${path}/$it")
             }
         }
-    }
 
-private fun Context.copyFile(filename: String) =
+    }
+}.getOrThrow()
+
+
+private fun Context.copyFile(filename: String) = runCatching {
     with(assets) {
         open(filename).copyTo(
             FileOutputStream("${applicationInfo.dataDir}/${filename}")
         )
     }
+    Unit
+}.getOrThrow()
