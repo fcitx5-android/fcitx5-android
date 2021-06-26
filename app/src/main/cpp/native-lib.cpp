@@ -117,6 +117,12 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
         env->SetObjectArrayElement(vararg, 1, env->NewStringUTF(clientPreedit.c_str()));
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 2, vararg);
     };
+    auto inputPanelAuxCallback = [&](const std::string& auxUp, const std::string& auxDown) {
+        jobjectArray vararg = env->NewObjectArray(2, stringClass, nullptr);
+        env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(auxUp.c_str()));
+        env->SetObjectArrayElement(vararg, 1, env->NewStringUTF(auxDown.c_str()));
+        env->CallStaticVoidMethod(clazz, handleFcitxEvent, 3, vararg);
+    };
 
     char arg0[] = "";
     char *argv[] = { arg0 };
@@ -136,6 +142,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
         androidfrontend->call<fcitx::IAndroidFrontend::setCandidateListCallback>(candidateListCallback);
         androidfrontend->call<fcitx::IAndroidFrontend::setCommitStringCallback>(commitStringCallback);
         androidfrontend->call<fcitx::IAndroidFrontend::setPreeditCallback>(preeditCallback);
+        androidfrontend->call<fcitx::IAndroidFrontend::setInputPanelAuxCallback>(inputPanelAuxCallback);
         auto uuid = androidfrontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
         p_frontend.reset(androidfrontend);
         p_uuid = uuid;

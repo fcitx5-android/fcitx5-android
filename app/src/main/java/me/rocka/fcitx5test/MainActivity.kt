@@ -40,6 +40,9 @@ class MainActivity : AppCompatActivity() {
                 is FcitxEvent.PreeditEvent -> {
                     binding.input.text = "${it.data.clientPreedit}\n${it.data.preedit}"
                 }
+                is FcitxEvent.InputPanelAuxEvent -> {
+                    Toast.makeText(this, "${it.data.auxUp}\n${it.data.auxDown}", Toast.LENGTH_SHORT).show()
+                }
                 is FcitxEvent.UnknownEvent -> {
                     Log.i(javaClass.name, "unknown event: ${it.data}")
                 }

@@ -17,6 +17,9 @@ public:
     }
     ~AndroidInputContext() override { destroy(); }
 
+    std::string auxUpCached;
+    std::string auxDownCached;
+
     [[nodiscard]] const char *frontend() const override { return "androidfrontend"; }
 
     void commitStringImpl(const std::string &text) override {
@@ -32,30 +35,35 @@ public:
     }
 
     void updatePreeditImpl() override {
-        auto preedit = inputPanel().preedit().toString();
-        auto clientPreedit = inputPanel().clientPreedit().toString();
+        InputPanel& ip = inputPanel();
+        auto preedit = ip.preedit().toString();
+        auto clientPreedit = ip.clientPreedit().toString();
         frontend_->updatePreedit(preedit, clientPreedit);
     }
 
-    BulkCandidateList* bulkCandidateList() {
-        auto candidateList = inputPanel().candidateList();
-        if (!candidateList || candidateList->empty()) {
-            FCITX_INFO() << "bulkCandidateList: no or empty candidateList";
-            return nullptr;
-        }
-        return candidateList->toBulk();
-    }
-
     void updateClientSideUIImpl() override {
+        InputPanel& ip = inputPanel();
+        auto auxUp = ip.auxUp().toString();
+        auto auxDown = ip.auxDown().toString();
+        if (auxUp != auxUpCached || auxDown != auxDownCached) {
+            auxUpCached = auxUp;
+            auxDownCached = auxDown;
+            frontend_->updateInputPanelAux(auxUpCached, auxDownCached);
+        }
         std::vector<std::string> candidates;
-        auto list = bulkCandidateList();
-        if (list == nullptr) {
+        auto list = ip.candidateList();
+        if (!list || list->empty()) {
             frontend_->updateCandidateList(candidates);
             return;
         }
-        int size = list->totalSize();
+        auto bulkList = list->toBulk();
+        if (!bulkList) {
+            frontend_->updateCandidateList(candidates);
+            return;
+        }
+        int size = bulkList->totalSize();
         for (int i = 0; i < size; i++) {
-            auto &candidate = list->candidateFromAll(i);
+            auto &candidate = bulkList->candidateFromAll(i);
             if (candidate.isPlaceHolder()) {
                 continue;
             }
@@ -136,6 +144,12 @@ void AndroidFrontend::updatePreedit(const std::string &preedit, const std::strin
     }
 }
 
+void AndroidFrontend::updateInputPanelAux(const std::string &auxUp, const std::string &auxDown) {
+    if (inputPanelAuxCallback) {
+        inputPanelAuxCallback(auxUp, auxDown);
+    }
+}
+
 void AndroidFrontend::selectCandidate(ICUUID uuid, int idx) {
     auto *ic = dynamic_cast<AndroidInputContext*>(instance_->inputContextManager().findByUUID(uuid));
     ic->selectCandidate(idx);
@@ -163,6 +177,10 @@ void AndroidFrontend::setCommitStringCallback(const CommitStringCallback & callb
 
 void AndroidFrontend::setPreeditCallback(const PreeditCallback &callback) {
     preeditCallback = callback;
+}
+
+void AndroidFrontend::setInputPanelAuxCallback(const InputPanelAuxCallback &callback) {
+    inputPanelAuxCallback = callback;
 }
 
     class AndroidFrontendFactory : public AddonFactory {
