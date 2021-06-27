@@ -17,9 +17,6 @@ public:
     }
     ~AndroidInputContext() override { destroy(); }
 
-    std::string auxUpCached;
-    std::string auxDownCached;
-
     [[nodiscard]] const char *frontend() const override { return "androidfrontend"; }
 
     void commitStringImpl(const std::string &text) override {
@@ -46,8 +43,8 @@ public:
         auto auxUp = ip.auxUp().toString();
         auto auxDown = ip.auxDown().toString();
         if (auxUp != auxUpCached || auxDown != auxDownCached) {
-            auxUpCached = auxUp;
-            auxDownCached = auxDown;
+            auxUpCached = std::move(auxUp);
+            auxDownCached = std::move(auxDown);
             frontend_->updateInputPanelAux(auxUpCached, auxDownCached);
         }
         std::vector<std::string> candidates;
@@ -59,10 +56,9 @@ public:
         int size = list->totalSize();
         for (int i = 0; i < size; i++) {
             auto &candidate = list->candidateFromAll(i);
-            if (candidate.isPlaceHolder()) {
-                continue;
-            }
-            candidates.push_back(candidate.text().toString());
+            // maybe unnecessary; I don't see anywhere using `CandidateWord::setPlaceHolder`
+            // if (candidate.isPlaceHolder()) continue;
+            candidates.push_back(std::move(candidate.text().toString()));
         }
         frontend_->updateCandidateList(candidates);
     }
@@ -82,6 +78,8 @@ public:
 
 private:
     AndroidFrontend *frontend_;
+    std::string auxUpCached;
+    std::string auxDownCached;
 
     BulkCandidateList* bulkCandidateList() {
         auto candidateList = inputPanel().candidateList();
