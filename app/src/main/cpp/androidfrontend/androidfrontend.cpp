@@ -51,19 +51,14 @@ public:
             frontend_->updateInputPanelAux(auxUpCached, auxDownCached);
         }
         std::vector<std::string> candidates;
-        auto list = ip.candidateList();
-        if (!list || list->empty()) {
+        auto list = bulkCandidateList();
+        if (!list) {
             frontend_->updateCandidateList(candidates);
             return;
         }
-        auto bulkList = list->toBulk();
-        if (!bulkList) {
-            frontend_->updateCandidateList(candidates);
-            return;
-        }
-        int size = bulkList->totalSize();
+        int size = list->totalSize();
         for (int i = 0; i < size; i++) {
-            auto &candidate = bulkList->candidateFromAll(i);
+            auto &candidate = list->candidateFromAll(i);
             if (candidate.isPlaceHolder()) {
                 continue;
             }
@@ -74,7 +69,7 @@ public:
 
     bool selectCandidate(int idx) {
         auto list = bulkCandidateList();
-        if (list == nullptr) {
+        if (!list) {
             return false;
         }
         int size = list->totalSize();
@@ -87,6 +82,15 @@ public:
 
 private:
     AndroidFrontend *frontend_;
+
+    BulkCandidateList* bulkCandidateList() {
+        auto candidateList = inputPanel().candidateList();
+        if (!candidateList || candidateList->empty()) {
+            FCITX_INFO() << "bulkCandidateList: no or empty candidateList";
+            return nullptr;
+        }
+        return candidateList->toBulk();
+    }
 };
 
 AndroidFrontend::AndroidFrontend(Instance *instance)
