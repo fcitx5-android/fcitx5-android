@@ -20,4 +20,8 @@ jobs:
       - run: sdkmanager --install "ndk;23.0.7421159" --channel=1
       - run: sdkmanager --install "cmake;3.18.1"
       - run: sudo apt install -y extra-cmake-modules gettext
-      - run: ./gradlew --no-daemon build
+      - uses: burrunan/gradle-cache-action@v1
+        name: Build
+        with:
+          arguments: assembleDebug
+          gradle-version: wrapper
