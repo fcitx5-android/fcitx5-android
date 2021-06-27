@@ -32,14 +32,14 @@ public:
     }
 
     void updatePreeditImpl() override {
-        InputPanel& ip = inputPanel();
+        InputPanel &ip = inputPanel();
         auto preedit = ip.preedit().toString();
         auto clientPreedit = ip.clientPreedit().toString();
         frontend_->updatePreedit(preedit, clientPreedit);
     }
 
     void updateClientSideUIImpl() override {
-        InputPanel& ip = inputPanel();
+        InputPanel &ip = inputPanel();
         auto auxUp = ip.auxUp().toString();
         auto auxDown = ip.auxDown().toString();
         if (auxUp != auxUpCached || auxDown != auxDownCached) {
@@ -99,13 +99,12 @@ AndroidFrontend::AndroidFrontend(Instance *instance)
 
 AndroidFrontend::~AndroidFrontend() = default;
 
-ICUUID
-AndroidFrontend::createInputContext(const std::string &program) {
+ICUUID AndroidFrontend::createInputContext(const std::string &program) {
     auto *ic = new AndroidInputContext(this, instance_->inputContextManager(), program);
-    CapabilityFlags flags;
-    flags |= CapabilityFlag::Preedit;
-    flags |= CapabilityFlag::ClientSideInputPanel;
-    ic->setCapabilityFlags(flags);
+    ic->setCapabilityFlags(CapabilityFlags {
+        CapabilityFlag::Preedit,
+        CapabilityFlag::ClientSideInputPanel
+    });
     // focus needed for `InputContext::reset` to work
     ic->focusIn();
     return ic->uuid();
@@ -169,11 +168,11 @@ void AndroidFrontend::resetInputPanel(ICUUID uuid) {
     ic->reset(ResetReason::LostFocus);
 }
 
-void AndroidFrontend::setCandidateListCallback(const CandidateListCallback& callback) {
+void AndroidFrontend::setCandidateListCallback(const CandidateListCallback &callback) {
     candidateListCallback = callback;
 }
 
-void AndroidFrontend::setCommitStringCallback(const CommitStringCallback & callback) {
+void AndroidFrontend::setCommitStringCallback(const CommitStringCallback &callback) {
     commitStringCallback = callback;
 }
 
@@ -185,7 +184,7 @@ void AndroidFrontend::setInputPanelAuxCallback(const InputPanelAuxCallback &call
     inputPanelAuxCallback = callback;
 }
 
-    class AndroidFrontendFactory : public AddonFactory {
+class AndroidFrontendFactory : public AddonFactory {
 public:
     AddonInstance *create(AddonManager *manager) override {
         return new AndroidFrontend(manager->instance());

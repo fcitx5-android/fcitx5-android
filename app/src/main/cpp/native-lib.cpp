@@ -39,7 +39,7 @@ void start_logger() {
     pthread_detach(thr);
 }
 
-static void jniLog(const std::string& s) {
+static void jniLog(const std::string &s) {
     __android_log_write(ANDROID_LOG_DEBUG, "JNI", s.c_str());
 }
 
@@ -56,7 +56,7 @@ void resetGlobalPointers() {
 }
 
 JNIEXPORT jint JNICALL
-JNI_OnLoad(JavaVM* /* jvm */, void* /* reserved */) {
+JNI_OnLoad(JavaVM * /* jvm */, void * /* reserved */) {
     // tell fcitx log to stdout
     fcitx::Log::setLogStream(std::cout);
     // redirect stdout and stderr to logcat
@@ -76,11 +76,11 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
 
     setenv("SKIP_FCITX_PATH", "true", 1);
 
-    const char* app_data = env->GetStringUTFChars(appData, nullptr);
-    const char* app_lib = env->GetStringUTFChars(appLib, nullptr);
-    const char* ext_data = env->GetStringUTFChars(extData, nullptr);
+    const char *app_data = env->GetStringUTFChars(appData, nullptr);
+    const char *app_lib = env->GetStringUTFChars(appLib, nullptr);
+    const char *ext_data = env->GetStringUTFChars(extData, nullptr);
     std::string libime_data = std::string(app_data) + "/fcitx5/libime";
-    const char* app_data_libime = libime_data.c_str();
+    const char *app_data_libime = libime_data.c_str();
 
     setenv("HOME", ext_data, 1);
     setenv("XDG_DATA_DIRS", app_data, 1);
@@ -97,8 +97,8 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
     jclass hostClass = clazz;
     jclass stringClass = env->FindClass("java/lang/String");
     jmethodID handleFcitxEvent = env->GetStaticMethodID(hostClass, "handleFcitxEvent", "(I[Ljava/lang/Object;)V");
-    auto candidateListCallback = [&](const std::vector<std::string> & candidateList){
-        int size = candidateList.size();
+    auto candidateListCallback = [&](const std::vector<std::string> &candidateList) {
+        size_t size = candidateList.size();
         jobjectArray vararg = env->NewObjectArray(size, stringClass, nullptr);
         size_t i = 0;
         for(const auto& s : candidateList) {
@@ -106,18 +106,18 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
         }
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 0, vararg);
     };
-    auto commitStringCallback = [&](const std::string& str){
+    auto commitStringCallback = [&](const std::string &str) {
         jobjectArray vararg = env->NewObjectArray(1, stringClass, nullptr);
         env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(str.c_str()));
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 1, vararg);
     };
-    auto preeditCallback = [&](const std::string& preedit, const std::string& clientPreedit){
-        jobjectArray  vararg = env->NewObjectArray(2, stringClass, nullptr);
+    auto preeditCallback = [&](const std::string &preedit, const std::string &clientPreedit) {
+        jobjectArray vararg = env->NewObjectArray(2, stringClass, nullptr);
         env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(preedit.c_str()));
         env->SetObjectArrayElement(vararg, 1, env->NewStringUTF(clientPreedit.c_str()));
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 2, vararg);
     };
-    auto inputPanelAuxCallback = [&](const std::string& auxUp, const std::string& auxDown) {
+    auto inputPanelAuxCallback = [&](const std::string &auxUp, const std::string &auxDown) {
         jobjectArray vararg = env->NewObjectArray(2, stringClass, nullptr);
         env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(auxUp.c_str()));
         env->SetObjectArrayElement(vararg, 1, env->NewStringUTF(auxDown.c_str()));
@@ -131,7 +131,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
     p_dispatcher = std::make_unique<fcitx::EventDispatcher>();
     p_dispatcher->attach(&p_instance->eventLoop());
 
-    p_dispatcher->schedule([&](){
+    p_dispatcher->schedule([&]() {
         auto defaultGroup = p_instance->inputMethodManager().currentGroup();
         defaultGroup.inputMethodList().clear();
         defaultGroup.inputMethodList().emplace_back("pinyin");
@@ -176,7 +176,7 @@ JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_exitFcitx(JNIEnv *env, jclass clazz) {
     RETURN_IF_NOT_RUNNING
     jniLog("shutting down fcitx");
-    p_dispatcher->schedule([](){
+    p_dispatcher->schedule([]() {
         p_dispatcher->detach();
         p_instance->exit();
     });
@@ -186,7 +186,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_sendKeyToFcitxString(JNIEnv *env, jclass clazz, jstring key) {
     RETURN_IF_NOT_RUNNING
-    const char* k = env->GetStringUTFChars(key, nullptr);
+    const char *k = env->GetStringUTFChars(key, nullptr);
     fcitx::Key parsedKey(k);
     env->ReleaseStringUTFChars(key, k);
     p_dispatcher->schedule([parsedKey]() {
@@ -198,7 +198,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_sendKeyToFcitxChar(JNIEnv *env, jclass clazz, jchar c) {
     RETURN_IF_NOT_RUNNING
-    fcitx::Key parsedKey((const char*) &c);
+    fcitx::Key parsedKey((const char *) &c);
     p_dispatcher->schedule([parsedKey]() {
         p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, parsedKey, false);
     });
@@ -225,7 +225,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_resetInputPanel(JNIEnv *env, jclass clazz) {
     RETURN_IF_NOT_RUNNING
-    p_dispatcher->schedule([](){
+    p_dispatcher->schedule([]() {
         p_frontend->call<fcitx::IAndroidFrontend::resetInputPanel>(p_uuid);
     });
 }
