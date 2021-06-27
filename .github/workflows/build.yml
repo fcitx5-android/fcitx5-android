@@ -1,0 +1,23 @@
+name: Build
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '8'
+      - uses: android-actions/setup-android@v2
+      - run: sdkmanager --install "ndk;23.0.7421159" --channel=1
+      - run: sdkmanager --install "cmake;3.18.1"
+      - run: sudo apt install -y extra-cmake-modules
+      - run: ./gradlew --no-daemon build
