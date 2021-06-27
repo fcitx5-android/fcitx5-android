@@ -31,6 +31,7 @@ private:
 AndroidStreamBuf::AndroidStreamBuf(size_t buf_size) : buf_size_(buf_size) {
     assert(buf_size_ > 0);
     pbuf_ = new char[buf_size_];
+    memset(pbuf_, 0, buf_size_);
 
     setp(pbuf_, pbuf_ + buf_size_);
 }
