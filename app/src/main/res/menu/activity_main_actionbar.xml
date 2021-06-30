@@ -14,4 +14,10 @@
         android:title="fcitx.empty()"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/activity_main_save_config"
+        android:icon="@drawable/ic_baseline_save_24"
+        android:title="fcitx.saveConfig()"
+        app:showAsAction="ifRoom" />
+
 </menu>

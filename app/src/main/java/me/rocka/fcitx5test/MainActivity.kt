@@ -52,7 +52,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        fcitx.sendKey("Escape")
         uiScope.launch {
             listOf("nihaoshijie", "shijienihao").forEach { str ->
                 delay(2000)
@@ -62,6 +61,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 delay(500)
                 fcitx.select(0)
+                fcitx.reset()
             }
         }
     }
@@ -79,6 +79,10 @@ class MainActivity : AppCompatActivity() {
         }
         R.id.activity_main_empty -> {
             Toast.makeText(this, "${fcitx.empty()}", Toast.LENGTH_SHORT).show()
+            true
+        }
+        R.id.activity_main_save_config -> {
+            fcitx.saveConfig()
             true
         }
         else -> super.onOptionsItemSelected(item)
