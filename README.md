@@ -39,382 +39,113 @@ There are no additional patches needed for now, because we switched to a forked 
 <summary>Logcat</summary>
 
 ```
-I/me.rocka.fcitx5test.MainActivity: /data/user/0/me.rocka.fcitx5test/fcitx5/addon, /data/user/0/me.rocka.fcitx5test/fcitx5/inputmethod, /data/user/0/me.rocka.fcitx5test/fcitx5/libime
-D/androidfrontend: startupFcitx ...
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:32.484533 instance.cpp:1371] Override Enabled Addons: {}
-    I2021-06-23 23:29:32.484649 instance.cpp:1372] Overri
-D/fcitx5: de Disabled Addons: {}
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:32.500251
-D/fcitx5:  
-D/fcitx5: addonmanager.cpp
-D/fcitx5: :
-D/fcitx5: 189
-D/fcitx5: ] 
-D/fcitx5: Loaded addon 
-D/fcitx5: unicode
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:32.502117
-D/fcitx5:  
-D/fcitx5: addonmanager.cpp
-D/fcitx5: :
-D/fcitx5: 189
-D/fcitx5: ] 
-D/fcitx5: Loaded addon 
-D/fcitx5: androidfrontend
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:32.509935
-D/fcitx5:  
-D/fcitx5: inputmethodmanager.cpp:
-D/fcitx5: 117
-D/fcitx5: ] No valid input method group in configuration. 
-D/fcitx5: Building a default one
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:32.511463 
-D/fcitx5: instance.cpp:
-D/fcitx5: 730] 
-D/fcitx5: Items in 
-D/fcitx5: Default
-D/fcitx5: : 
-D/fcitx5: [
-D/fcitx5: InputMethodGroupItem(
-D/fcitx5: keyboard-us
-D/fcitx5: ,layout=
-D/fcitx5: )]
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:32.511638 
-D/fcitx5: instance.cpp:
-D/fcitx5: 735
-D/fcitx5: ] 
-D/fcitx5: Generated groups: [
-D/fcitx5: Default
-D/fcitx5: ]
-D/fcitx5: E
-D/fcitx5: 2021-06-23 23:29:32.512076 
-D/fcitx5: instance.cpp:
-D/fcitx5: 1381] 
-D/fcitx5: Couldn't find keyboard-us
-W/Thread-2: type=1400 audit(0.0:10130): avc: denied { read } for name="uuid" dev="proc" ino=4490765 scontext=u:r:untrusted_app:s0:c512,c768 tcontext=u:object_r:proc:s0 tclass=file permissive=0
-D/fcitx5: I2021-06-23 23:29:32.517618 addonmanager.cpp:189] Loaded addon punctuation
-D/fcitx5: E
-D/fcitx5: 2021-06-23 23:29:32.797390
-D/fcitx5:  
-D/fcitx5: pinyin.cpp
-D/fcitx5: :
-D/fcitx5: 659
-D/fcitx5: ] 
-D/fcitx5: Failed to load pinyin history: 
-D/fcitx5: io fail: unspecified iostream_category error
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:32.818567
-D/fcitx5:  
-D/fcitx5: addonmanager.cpp
-D/fcitx5: :
-D/fcitx5: 189
-D/fcitx5: ] 
-D/fcitx5: Loaded addon 
-D/fcitx5: pinyin
-D/androidfrontend: preeditCallback
-I/me.rocka.fcitx5test.MainActivity: preedit update: PreeditEventData(preedit=n, clientPreedit=你)
-D/FcitxEvent: type: 2, args: [2]n,你
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:33.556001
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 39
-D/fcitx5: ] 
-D/fcitx5: preedit: "n"; clientPreedit: 你
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:33.556418
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 117
-D/fcitx5: ] 
-D/fcitx5: KeyEvent key: n isRelease: 0 accepted: 1
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:33.556674
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 59
-D/fcitx5: ] 
-D/fcitx5: updateClientSideUIImpl: 721 candidates
-D/androidfrontend: candidateListCallback
-D/androidfrontend: 721 candidates
-D/FcitxEvent: type: 0, args: [721]你,年,那,呢,能,内,您,...
-I/me.rocka.fcitx5test.MainActivity: candidate update: [你, 年, 那, 呢, 能, 内...
-D/androidfrontend: preeditCallback
-D/FcitxEvent: type: 2, args: [2]ni,你
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:33.695244
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 39
-D/fcitx5: ] 
-D/fcitx5: preedit: "ni"; clientPreedit: 你
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:33.697131
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 117
-D/fcitx5: ] 
-D/fcitx5: KeyEvent key: i isRelease: 0 accepted: 1
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:33.697409
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 59
-D/fcitx5: ] 
-D/fcitx5: updateClientSideUIImpl: 106 candidates
-D/androidfrontend: candidateListCallback
-D/androidfrontend: 106 candidates
-D/FcitxEvent: type: 0, args: [106]你,尼,泥,妮,逆,腻,拟,呢...
-I/me.rocka.fcitx5test.MainActivity: preedit update: PreeditEventData(preedit=ni, clientPreedit=你)
-I/me.rocka.fcitx5test.MainActivity: candidate update: [你, 尼, 泥, 妮, 逆, 腻...
-D/androidfrontend: preeditCallback
-D/FcitxEvent: type: 2, args: [2]ni h,你好
-I/me.rocka.fcitx5test.MainActivity: preedit update: PreeditEventData(preedit=ni h, clientPreedit=你好)
-D/androidfrontend: candidateListCallback
-D/androidfrontend: 113 candidates
-D/fcitx5: I2021-06-23 23:29:33.955087 androidfrontend.cpp:39] preedit: "ni h"; clientPreedit: 你好
-    I2021-06-23 23:29:33.955502 androidf
-D/fcitx5: rontend.cpp:117] KeyEvent key: h isRelease: 0 accepted: 1
-    I2021-06-23 23:29:33.955602 androidfrontend.cpp:59] updateClientSideU
-D/fcitx5: IImpl: 113 candidates
-D/FcitxEvent: type: 0, args: [113]你好,你会,你还,你,你和,你很,霓虹,尼,泥,拟合...
-I/me.rocka.fcitx5test.MainActivity: candidate update: [你好, 你会, 你还, 你...
-D/androidfrontend: preeditCallback
-D/FcitxEvent: type: 2, args: [2]ni ha,你哈
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:34.121912 androidfrontend.cpp:
-D/fcitx5: 39] 
-I/me.rocka.fcitx5test.MainActivity: preedit update: PreeditEventData(preedit=ni ha, clientPreedit=你哈)
-D/fcitx5: preedit: "ni ha"; clientPreedit: 你哈
-D/androidfrontend: candidateListCallback
-D/androidfrontend: 107 candidates
-D/fcitx5: I2021-06-23 23:29:34.122393 androidfrontend.cpp:117] KeyEvent key: a isRelease: 0 accepted: 1
-    I2021-06-23 23:29:34.122484 andro
-D/fcitx5: idfrontend.cpp:59] updateClientSideUIImpl: 107 candidates
-D/FcitxEvent: type: 0, args: [107]你哈,你,尼,泥,妮,逆,腻,拟,呢...
-I/me.rocka.fcitx5test.MainActivity: candidate update: [你哈, 你, 尼, 泥, 妮...
-D/androidfrontend: preeditCallback
-D/FcitxEvent: type: 2, args: [2]ni hao,你好
-D/fcitx5: I
-I/me.rocka.fcitx5test.MainActivity: preedit update: PreeditEventData(preedit=ni hao, clientPreedit=你好)
-D/fcitx5: 2021-06-23 23:29:34.342379
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :39] 
-D/fcitx5: preedit: "ni hao"; clientPreedit: 你好
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:34.343558
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 117
-D/fcitx5: ] 
-D/fcitx5: KeyEvent key: o isRelease: 0 accepted: 1
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:34.344142
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 59
-D/fcitx5: ] 
-D/fcitx5: updateClientSideUIImpl: 107 candidates
-D/androidfrontend: candidateListCallback
-D/androidfrontend: 107 candidates
-D/FcitxEvent: type: 0, args: [107]你好,你,尼,泥,妮,逆,腻,拟,呢...
-I/me.rocka.fcitx5test.MainActivity: candidate update: [你好, 你, 尼, 泥, 妮, 逆...
-D/androidfrontend: preeditCallback
-I/me.rocka.fcitx5test.MainActivity: preedit update: PreeditEventData(preedit=ni hao s, clientPreedit=你好事)
-D/FcitxEvent: type: 2, args: [2]ni hao s,你好事
-D/fcitx5: I2021-06-23 23:29:34.577992 androidfrontend.cpp:39] preedit: "ni hao s"; clientPreedit: 你好事
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:34.578674
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp:
-D/fcitx5: 117] 
-D/fcitx5: KeyEvent key: s isRelease: 0 accepted: 1
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:34.579132
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :59] 
-D/fcitx5: updateClientSideUIImpl: 109 candidates
-D/androidfrontend: candidateListCallback
-D/androidfrontend: 109 candidates
-D/FcitxEvent: type: 0, args: [109]你好事,你好受,你好,你,尼,泥,妮,逆,腻,拟,呢...
-I/me.rocka.fcitx5test.MainActivity: candidate update: [你好事, 你好受, 你好, 你...
-D/androidfrontend: preeditCallback
-I/me.rocka.fcitx5test.MainActivity: preedit update: PreeditEventData(preedit=ni hao sh, clientPreedit=你好事)
-D/FcitxEvent: type: 2, args: [2]ni hao sh,你好事
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:34.778517
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 39
-D/fcitx5: ] 
-D/fcitx5: preedit: "ni hao sh"; clientPreedit: 你好事
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:34.779629
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 117
-D/fcitx5: ] 
-D/fcitx5: KeyEvent key: h isRelease: 0 accepted: 1
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:34.780201
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 59
-D/fcitx5: ] 
-D/fcitx5: updateClientSideUIImpl: 109 candidates
-D/androidfrontend: candidateListCallback
-D/androidfrontend: 109 candidates
-D/FcitxEvent: type: 0, args: [109]你好事,你好受,你好,你,尼,泥,妮,逆,腻,拟,呢...
-I/me.rocka.fcitx5test.MainActivity: candidate update: [你好事, 你好受, 你好, 你...
-D/androidfrontend: preeditCallback
-D/FcitxEvent: type: 2, args: [2]ni hao shi,你好事
-D/fcitx5: I2021-06-23 23:29:34.952250 androidfrontend.cpp:39] preedit: "ni hao shi"; clientPreedit: 你好事
-I/me.rocka.fcitx5test.MainActivity: preedit update: PreeditEventData(preedit=ni hao shi, clientPreedit=你好事)
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:34.953220 androidfrontend.cpp:
-D/fcitx5: 117] 
-D/fcitx5: KeyEvent key: i isRelease: 0 accepted: 1
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:34.953472 androidfrontend.cpp:59] 
-D/fcitx5: updateClientSideUIImpl: 109 candidates
-D/androidfrontend: candidateListCallback
-D/androidfrontend: 109 candidates
-D/FcitxEvent: type: 0, args: [109]你好事,你好是,你好,你,尼,泥,妮,逆,腻,拟,呢...
-I/me.rocka.fcitx5test.MainActivity: candidate update: [你好事, 你好是, 你好, 你...
-D/androidfrontend: preeditCallback
-I/me.rocka.fcitx5test.MainActivity: preedit update: PreeditEventData(preedit=ni hao shi j, clientPreedit=你好时间)
-D/FcitxEvent: type: 2, args: [2]ni hao shi j,你好时间
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:35.155800
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 39
-D/fcitx5: ] 
-D/fcitx5: preedit: "ni hao shi j"; clientPreedit: 你好时间
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:35.156419
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 117
-D/fcitx5: ] 
-D/fcitx5: KeyEvent key: j isRelease: 0 accepted: 1
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:35.156687
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 59
-D/fcitx5: ] 
-D/fcitx5: updateClientSideUIImpl: 109 candidates
-D/androidfrontend: candidateListCallback
-D/androidfrontend: 109 candidates
-D/FcitxEvent: type: 0, args: [109]你好时间,你好世界,你好,你,尼,泥,妮,逆,腻,拟,呢...
-I/me.rocka.fcitx5test.MainActivity: candidate update: [你好时间, 你好世界, 你好...
-D/androidfrontend: preeditCallback
-I/me.rocka.fcitx5test.MainActivity: preedit update: PreeditEventData(preedit=ni hao shi ji, clientPreedit=你好世纪)
-D/FcitxEvent: type: 2, args: [2]ni hao shi ji,你好世纪
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:35.365671 
-D/fcitx5: androidfrontend.cpp:
-D/fcitx5: 39] 
-D/fcitx5: preedit: "ni hao shi ji"; clientPreedit: 你好世纪
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:35.366147 androidfrontend.cpp
-D/fcitx5: :117] 
-D/fcitx5: KeyEvent key: i isRelease: 0 accepted: 1
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:35.366265 androidfrontend.cpp
-D/fcitx5: :59
-D/fcitx5: ] updateClientSideUIImpl: 109 candidates
-D/androidfrontend: candidateListCallback
-D/androidfrontend: 109 candidates
-D/FcitxEvent: type: 0, args: [109]你好世纪,你好实际,你好,你,尼,泥,妮,逆,腻,拟,呢...
-I/me.rocka.fcitx5test.MainActivity: candidate update: [你好世纪, 你好实际, 你好...
-D/androidfrontend: preeditCallback
-D/FcitxEvent: type: 2, args: [2]ni hao shi jie,你好世界
-D/fcitx5: I
-I/me.rocka.fcitx5test.MainActivity: preedit update: PreeditEventData(preedit=ni hao shi jie, clientPreedit=你好世界)
-D/fcitx5: 2021-06-23 23:29:35.584027
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 39
-D/fcitx5: ] 
-D/fcitx5: preedit: "ni hao shi jie"; clientPreedit: 你好世界
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:35.584601
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 117
-D/fcitx5: ] 
-D/fcitx5: KeyEvent key: e isRelease: 0 accepted: 1
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:35.584851
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 59
-D/fcitx5: ] 
-D/fcitx5: updateClientSideUIImpl: 109 candidates
-D/androidfrontend: candidateListCallback
-D/androidfrontend: 109 candidates
-D/FcitxEvent: type: 0, args: [109]你好世界,你好时节,你好,你,尼,泥,妮,逆,腻,拟,呢...
-I/me.rocka.fcitx5test.MainActivity: candidate update: [你好世界, 你好时节, 你好...
-D/androidfrontend: select candidate #0
-D/androidfrontend: commitStringCallback
-I/me.rocka.fcitx5test.MainActivity: commit update: 你好世界
-D/FcitxEvent: type: 1, args: [1]你好世界
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:36.209345
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 24
-D/fcitx5: ] 
-D/fcitx5: Commit: 你好世界
-D/androidfrontend: preeditCallback
-D/FcitxEvent: type: 2, args: [2],
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:36.211133
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 39
-D/fcitx5: ] 
-D/fcitx5: preedit: ""; clientPreedit: 
-D/fcitx5: I
-D/fcitx5: 2021-06-23 23:29:36.215067
-D/fcitx5:  
-D/fcitx5: androidfrontend.cpp
-D/fcitx5: :
-D/fcitx5: 45
-D/fcitx5: ] 
-D/fcitx5: bulkCandidateList: no or empty candidateList
-D/androidfrontend: candidateListCallback
-D/androidfrontend: 0 candidates
-D/FcitxEvent: type: 0, args: [0]
-I/me.rocka.fcitx5test.MainActivity: preedit update: PreeditEventData(preedit=, clientPreedit=)
-I/me.rocka.fcitx5test.MainActivity: candidate update: []
+D/JNI: startupFcitx
+D/fcitx5: I2021-06-30 23:30:42.037640 instance.cpp:1371] Override Enabled Addons: {}
+D/fcitx5: I2021-06-30 23:30:42.037898 instance.cpp:1372] Override Disabled Addons: {}
+D/fcitx5: I2021-06-30 23:30:42.045989 addonmanager.cpp:189] Loaded addon unicode
+D/fcitx5: I2021-06-30 23:30:42.047548 addonmanager.cpp:189] Loaded addon quickphrase
+D/fcitx5: I2021-06-30 23:30:42.049194 addonmanager.cpp:189] Loaded addon pinyinhelper
+D/fcitx5: I2021-06-30 23:30:42.050042 addonmanager.cpp:189] Loaded addon androidfrontend
+D/fcitx5: E2021-06-30 23:30:42.057642 instance.cpp:1381] Couldn't find keyboard-us
+D/fcitx5: I2021-06-30 23:30:42.060428 addonmanager.cpp:189] Loaded addon punctuation
+D/fcitx5: E2021-06-30 23:30:42.392059 pinyin.cpp:659] Failed to load pinyin history: io fail: unspecified iostream_category error
+D/fcitx5: I2021-06-30 23:30:42.413191 addonmanager.cpp:189] Loaded addon pinyin
+D/fcitx5: I2021-06-30 23:30:42.414280 addonmanager.cpp:189] Loaded addon fullwidth
+D/fcitx5: I2021-06-30 23:30:42.415101 addonmanager.cpp:189] Loaded addon chttrans
+D/FcitxEvent: type=3, params=[2]拼,
+D/fcitx5: I2021-06-30 23:30:42.416938 androidfrontend.cpp:87] bulkCandidateList: no or empty candidateList
+D/FcitxEvent: type=0, params=[0]
+D/fcitx5: I2021-06-30 23:30:43.501732 addonmanager.cpp:189] Loaded addon spell
+D/FcitxEvent: type=2, params=[2]n,你
+D/fcitx5: I2021-06-30 23:30:43.516066 androidfrontend.cpp:125] KeyEvent(key=Key(n states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=3, params=[2],
+D/FcitxEvent: type=0, params=[1250]你,年,那,呢,能,内,您,女,男,拿,难,牛,南...
+I/zygote64: Do partial code cache collection, code=30KB, data=28KB
+I/zygote64: After code cache collection, code=30KB, data=28KB
+I/zygote64: Increasing code cache capacity to 128KB
+D/FcitxEvent: type=2, params=[2]ni,你
+D/fcitx5: I2021-06-30 23:30:43.672417 androidfrontend.cpp:125] KeyEvent(key=Key(i states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[183]你,尼,泥,妮,逆,腻,拟,呢,倪,妳,溺,祢,匿...
+D/FcitxEvent: type=2, params=[2]ni h,你好
+D/fcitx5: I2021-06-30 23:30:43.965315 androidfrontend.cpp:125] KeyEvent(key=Key(h states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[190]你好,你会,你还,你,你和,你很,霓虹,尼,泥...
+D/FcitxEvent: type=2, params=[2]ni ha,你哈
+D/fcitx5: I2021-06-30 23:30:44.107517 androidfrontend.cpp:125] KeyEvent(key=Key(a states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[184]你哈,你,尼,泥,妮,逆,腻,拟,呢,倪,妳,溺...
+I/zygote64: Do partial code cache collection, code=61KB, data=47KB
+I/zygote64: After code cache collection, code=54KB, data=44KB
+I/zygote64: Increasing code cache capacity to 256KB
+D/FcitxEvent: type=2, params=[2]ni hao,你好
+D/fcitx5: I2021-06-30 23:30:44.328185 androidfrontend.cpp:125] KeyEvent(key=Key(o states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[184]你好,你,尼,泥,妮,逆,腻,拟,呢,倪,妳,溺...
+D/FcitxEvent: type=2, params=[2]ni hao s,你好事
+D/fcitx5: I2021-06-30 23:30:44.599255 androidfrontend.cpp:125] KeyEvent(key=Key(s states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[186]你好事,你好受,你好,你,尼,泥,妮,逆,腻...
+D/FcitxEvent: type=2, params=[2]ni hao sh,你好事
+D/fcitx5: I2021-06-30 23:30:44.762583 androidfrontend.cpp:125] KeyEvent(key=Key(h states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[186]你好事,你好受,你好,你,尼,泥,妮,逆,腻...
+D/FcitxEvent: type=2, params=[2]ni hao shi,你好事
+D/fcitx5: I2021-06-30 23:30:44.963864 androidfrontend.cpp:125] KeyEvent(key=Key(i states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[186]你好事,你好是,你好,你,尼,泥,妮,逆,腻...
+D/FcitxEvent: type=2, params=[2]ni hao shi j,你好时间
+D/fcitx5: I2021-06-30 23:30:45.189018 androidfrontend.cpp:125] KeyEvent(key=Key(j states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[186]你好时间,你好世界,你好,你,尼,泥,妮...
+D/FcitxEvent: type=2, params=[2]ni hao shi ji,你好世纪
+D/fcitx5: I2021-06-30 23:30:45.353536 androidfrontend.cpp:125] KeyEvent(key=Key(i states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[186]你好世纪,你好实际,你好,你,尼,泥,妮...
+D/FcitxEvent: type=2, params=[2]ni hao shi jie,你好世界
+D/fcitx5: I2021-06-30 23:30:45.621923 androidfrontend.cpp:125] KeyEvent(key=Key(e states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[186]你好世界,你好时节,你好,你,尼,泥,妮...
+D/JNI: select candidate #0
+D/FcitxEvent: type=1, params=[1]你好世界
+D/FcitxEvent: type=2, params=[2],
+D/FcitxEvent: type=2, params=[2],
+D/fcitx5: I2021-06-30 23:30:46.240326 androidfrontend.cpp:87] bulkCandidateList: no or empty candidateList
+D/FcitxEvent: type=0, params=[0]
+I/zygote64: Do full code cache collection, code=118KB, data=99KB
+I/zygote64: After code cache collection, code=104KB, data=60KB
+D/FcitxEvent: type=2, params=[2]s,是
+D/fcitx5: I2021-06-30 23:30:48.395683 androidfrontend.cpp:125] KeyEvent(key=Key(s states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[3117]是,说,上,时,三,水,生,所,山,事,少...
+D/FcitxEvent: type=2, params=[2]sh,是
+D/fcitx5: I2021-06-30 23:30:48.498730 androidfrontend.cpp:125] KeyEvent(key=Key(h states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[1883]是,说,上,时,水,生,山,事,少,书,神...
+D/FcitxEvent: type=2, params=[2]shi,是
+D/fcitx5: I2021-06-30 23:30:48.635653 androidfrontend.cpp:125] KeyEvent(key=Key(i states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[406]是,时,事,使,石,师,诗,十,市,式,世...
+D/FcitxEvent: type=2, params=[2]shi j,时间
+D/fcitx5: I2021-06-30 23:30:48.894473 androidfrontend.cpp:125] KeyEvent(key=Key(j states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[452]时间,世界,事件,实际,世纪,实践,是...
+D/FcitxEvent: type=2, params=[2]shi ji,世纪
+D/fcitx5: I2021-06-30 23:30:49.103983 androidfrontend.cpp:125] KeyEvent(key=Key(i states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[417]世纪,实际,十几,是,时机,事迹,史记...
+D/FcitxEvent: type=2, params=[2]shi jie,世界
+D/fcitx5: I2021-06-30 23:30:49.326505 androidfrontend.cpp:125] KeyEvent(key=Key(e states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[425]世界,是,时节,师姐,时,视界,石阶...
+D/FcitxEvent: type=2, params=[2]shi ji en,实际恩
+D/fcitx5: I2021-06-30 23:30:49.477205 androidfrontend.cpp:125] KeyEvent(key=Key(n states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[419]实际恩,实际嗯,实际,世纪,十几,是...
+D/FcitxEvent: type=2, params=[2]shi jie ni,世界你
+D/fcitx5: I2021-06-30 23:30:49.736813 androidfrontend.cpp:125] KeyEvent(key=Key(i states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[426]世界你,世界,是,时节,师姐,时,视界...
+D/FcitxEvent: type=2, params=[2]shi jie ni h,世界你好
+D/fcitx5: I2021-06-30 23:30:49.931826 androidfrontend.cpp:125] KeyEvent(key=Key(h states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[426]世界你好,世界,是,时节,师姐,时,视界...
+I/zygote64: Do partial code cache collection, code=124KB, data=98KB
+I/zygote64: After code cache collection, code=124KB, data=98KB
+I/zygote64: Increasing code cache capacity to 512KB
+D/FcitxEvent: type=2, params=[2]shi jie ni ha,世界你哈
+D/fcitx5: I2021-06-30 23:30:50.095093 androidfrontend.cpp:125] KeyEvent(key=Key(a states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[426]世界你哈,世界,是,时节,师姐,时,视界...
+D/FcitxEvent: type=2, params=[2]shi jie ni hao,世界你好
+D/fcitx5: I2021-06-30 23:30:50.309284 androidfrontend.cpp:125] KeyEvent(key=Key(o states=0), isRelease=0, accepted=1)
+D/FcitxEvent: type=0, params=[426]世界你好,世界,是,时节,师姐,时,视界...
+D/JNI: select candidate #0
+D/FcitxEvent: type=1, params=[1]世界你好
+D/FcitxEvent: type=2, params=[2],
+D/FcitxEvent: type=2, params=[2],
+D/fcitx5: I2021-06-30 23:30:50.985314 androidfrontend.cpp:87] bulkCandidateList: no or empty candidateList
+D/FcitxEvent: type=0, params=[0]
 ```
 
 </details>
