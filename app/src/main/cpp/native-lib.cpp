@@ -94,6 +94,8 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
     const char *app_data = env->GetStringUTFChars(appData, nullptr);
     const char *app_lib = env->GetStringUTFChars(appLib, nullptr);
     const char *ext_data = env->GetStringUTFChars(extData, nullptr);
+    std::string config_home = std::string(ext_data) + "/config";
+    std::string data_home = std::string(ext_data) + "/data";
     std::string libime_data = std::string(app_data) + "/fcitx5/libime";
     const char *app_data_libime = libime_data.c_str();
 
@@ -101,6 +103,8 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
     setenv("XDG_DATA_DIRS", app_data, 1);
     setenv("XDG_CONFIG_HOME", ext_data, 1);
     setenv("XDG_DATA_HOME", ext_data, 1);
+    setenv("FCITX_CONFIG_HOME", config_home.c_str(), 1);
+    setenv("XDG_DATA_HOME", data_home.c_str(), 1);
     setenv("FCITX_ADDON_DIRS", app_lib, 1);
     setenv("LIBIME_MODEL_DIRS", app_data_libime, 1);
     setenv("LIBIME_INSTALL_PKGDATADIR", app_data_libime, 1);
@@ -147,11 +151,12 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
     p_dispatcher->attach(&p_instance->eventLoop());
 
     p_dispatcher->schedule([&]() {
-        auto defaultGroup = p_instance->inputMethodManager().currentGroup();
-        defaultGroup.inputMethodList().clear();
-        defaultGroup.inputMethodList().emplace_back("pinyin");
-        defaultGroup.setDefaultInputMethod("");
-        p_instance->inputMethodManager().setGroup(defaultGroup);
+        auto group = p_instance->inputMethodManager().currentGroup();
+        if (group.inputMethodList().empty()) {
+            group.inputMethodList().clear();
+            group.inputMethodList().emplace_back("pinyin");
+            p_instance->inputMethodManager().setGroup(group);
+        }
 
         auto *androidfrontend = p_instance->addonManager().addon("androidfrontend");
         androidfrontend->call<fcitx::IAndroidFrontend::setCandidateListCallback>(candidateListCallback);
@@ -194,6 +199,16 @@ Java_me_rocka_fcitx5test_native_Fcitx_exitFcitx(JNIEnv *env, jclass clazz) {
     p_dispatcher->schedule([]() {
         p_dispatcher->detach();
         p_instance->exit();
+    });
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_saveFcitxConfig(JNIEnv *env, jclass clazz) {
+    RETURN_IF_NOT_RUNNING
+    p_dispatcher->schedule([]() {
+        p_instance->inputMethodManager().save();
+        p_instance->globalConfig().safeSave();
     });
 }
 
