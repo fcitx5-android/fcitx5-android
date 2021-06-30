@@ -1,6 +1,5 @@
 #include <jni.h>
 #include <memory>
-#include <unistd.h>
 #include <android/log.h>
 
 #include <fcitx/instance.h>
@@ -16,7 +15,7 @@ static const size_t androidBufSize = 512;
 
 class AndroidStreamBuf : public std::streambuf {
 public:
-    AndroidStreamBuf(size_t buf_size) : buf_size_(buf_size) {
+    explicit AndroidStreamBuf(size_t buf_size) : buf_size_(buf_size) {
         assert(buf_size_ > 0);
         pbuf_ = new char[buf_size_];
         memset(pbuf_, 0, buf_size_);
@@ -24,9 +23,9 @@ public:
         setp(pbuf_, pbuf_ + buf_size_);
     }
 
-    ~AndroidStreamBuf() { delete pbuf_; }
+    ~AndroidStreamBuf() override { delete pbuf_; }
 
-    int overflow(int c) {
+    int overflow(int c) override {
         if (-1 == sync()) {
             return traits_type::eof();
         } else {
@@ -39,7 +38,7 @@ public:
         }
     }
 
-    int sync() {
+    int sync() override {
         auto str_buf = fcitx::stringutils::trim(std::string(pbuf_));
         auto trim_pbuf = str_buf.c_str();
 
@@ -73,10 +72,9 @@ void resetGlobalPointers() {
     p_frontend = nullptr;
 }
 
-static auto stream = std::ostream(new AndroidStreamBuf(androidBufSize));
-
 JNIEXPORT jint JNICALL
 JNI_OnLoad(JavaVM * /* jvm */, void * /* reserved */) {
+    static std::ostream stream(new AndroidStreamBuf(androidBufSize));
     fcitx::Log::setLogStream(stream);
     // return supported JNI version; or it will crash
     return JNI_VERSION_1_6;
