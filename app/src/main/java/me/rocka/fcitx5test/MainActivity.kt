@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.coroutineScope
 import kotlinx.coroutines.delay
@@ -79,6 +80,21 @@ class MainActivity : AppCompatActivity() {
         }
         R.id.activity_main_empty -> {
             Toast.makeText(this, "${fcitx.empty()}", Toast.LENGTH_SHORT).show()
+            true
+        }
+        R.id.activity_main_list -> {
+            val list = fcitx.listIme()
+            val status = fcitx.imeStatus()
+            val current = list.indexOfFirst { status.startsWith(it) }
+            AlertDialog.Builder(this)
+                .setTitle("Change IME")
+                .setSingleChoiceItems(list, current) { dialog, choice ->
+                    val ime = list[choice]
+                    fcitx.setIme(ime.split(":")[0])
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Cancel") { _, _ -> Unit }
+                .show()
             true
         }
         R.id.activity_main_save_config -> {
