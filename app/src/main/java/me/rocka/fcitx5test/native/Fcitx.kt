@@ -26,6 +26,9 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
     fun select(idx: Int) = selectCandidate(idx)
     fun empty() = isInputPanelEmpty()
     fun reset() = resetInputPanel()
+    fun listIme() = listInputMethods()
+    fun imeStatus() = inputMethodStatus()
+    fun setIme(ime: String) = setInputMethod(ime)
 
     init {
         if (isRunning.get())
@@ -71,6 +74,15 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
 
         @JvmStatic
         external fun resetInputPanel()
+
+        @JvmStatic
+        external fun listInputMethods(): Array<String>
+
+        @JvmStatic
+        external fun inputMethodStatus(): String
+
+        @JvmStatic
+        external fun setInputMethod(ime: String)
 
         /**
          * Called from native-lib

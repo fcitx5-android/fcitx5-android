@@ -4,6 +4,8 @@
 
 #include <fcitx/instance.h>
 #include <fcitx/addonmanager.h>
+#include <fcitx/inputmethodentry.h>
+#include <fcitx/inputmethodengine.h>
 #include <fcitx/inputmethodmanager.h>
 #include <fcitx-utils/eventdispatcher.h>
 #include <fcitx-utils/stringutils.h>
@@ -153,7 +155,6 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
     p_dispatcher->schedule([&]() {
         auto group = p_instance->inputMethodManager().currentGroup();
         if (group.inputMethodList().empty()) {
-            group.inputMethodList().clear();
             group.inputMethodList().emplace_back("pinyin");
             p_instance->inputMethodManager().setGroup(group);
         }
@@ -207,8 +208,9 @@ JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_saveFcitxConfig(JNIEnv *env, jclass clazz) {
     RETURN_IF_NOT_RUNNING
     p_dispatcher->schedule([]() {
-        p_instance->inputMethodManager().save();
         p_instance->globalConfig().safeSave();
+        p_instance->inputMethodManager().save();
+        p_instance->addonManager().saveAll();
     });
 }
 
@@ -257,5 +259,61 @@ Java_me_rocka_fcitx5test_native_Fcitx_resetInputPanel(JNIEnv *env, jclass clazz)
     RETURN_IF_NOT_RUNNING
     p_dispatcher->schedule([]() {
         p_frontend->call<fcitx::IAndroidFrontend::resetInputPanel>(p_uuid);
+    });
+}
+
+extern "C"
+JNIEXPORT jobjectArray JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_listInputMethods(JNIEnv *env, jclass clazz) {
+    auto &imMgr = p_instance->inputMethodManager();
+    auto group = p_instance->inputMethodManager().currentGroup();
+    size_t size = group.inputMethodList().size();
+    jobjectArray array = env->NewObjectArray(size, env->FindClass("java/lang/String"), nullptr);
+    size_t i = 0;
+    for (const auto &ime : group.inputMethodList()) {
+        const auto *entry = imMgr.entry(ime.name());
+        std::string str = entry->uniqueName() + ":"  + entry->name() + ":" + entry->icon();
+        env->SetObjectArrayElement(array, i++, env->NewStringUTF(str.c_str()));
+    }
+    return array;
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_inputMethodStatus(JNIEnv *env, jclass clazz) {
+    auto &imMgr = p_instance->inputMethodManager();
+    std::string uniqueName;
+    std::string name = "Not available";
+    std::string icon = "input-keyboard";
+    std::string altDescription;
+    std::string label;
+    auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
+    if (ic) {
+        icon = p_instance->inputMethodIcon(ic);
+        if (auto entry = p_instance->inputMethodEntry(ic)) {
+            uniqueName = entry->uniqueName();
+            name = entry->name();
+            label = entry->label();
+            if (auto engine = p_instance->inputMethodEngine(ic)) {
+                auto subModeLabel = engine->subModeLabel(*entry, *ic);
+                if (!subModeLabel.empty()) {
+                    label = subModeLabel;
+                }
+                altDescription = engine->subMode(*entry, *ic);
+            }
+        }
+    }
+    std::string result = uniqueName + ":" + name + ":" + icon + ":" + altDescription + ":" + label;
+    return env->NewStringUTF(result.c_str());
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_setInputMethod(JNIEnv *env, jclass clazz, jstring ime) {
+    const char *chars = env->GetStringUTFChars(ime, nullptr);
+    std::string string(chars);
+    env->ReleaseStringUTFChars(ime, chars);
+    p_dispatcher->schedule([string]() {
+        p_instance->setCurrentInputMethod(string);
     });
 }
