@@ -42,7 +42,8 @@ class MainActivity : AppCompatActivity() {
                     binding.input.text = "${it.data.clientPreedit}\n${it.data.preedit}"
                 }
                 is FcitxEvent.InputPanelAuxEvent -> {
-                    Toast.makeText(this, "${it.data.auxUp}\n${it.data.auxDown}", Toast.LENGTH_SHORT).show()
+                    val text = "${it.data.auxUp}\n${it.data.auxDown}"
+                    if (text.length > 1) Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
                 }
                 is FcitxEvent.UnknownEvent -> {
                     Log.i(javaClass.name, "unknown event: ${it.data}")
@@ -54,8 +55,16 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         uiScope.launch {
-            listOf("nihaoshijie", "shijienihao").forEach { str ->
-                delay(2000)
+            delay(2000)
+            val keySeq = with(fcitx.imeStatus()) {
+                when {
+                    startsWith("pinyin") -> listOf("nihaoshijie", "shijienihao")
+                    startsWith("shuangpin") -> listOf("nihkuijx", "uijxnihk")
+                    startsWith("wb") -> listOf("wqvbanlw", "anlwwqvb")
+                    else -> listOf("")
+                }
+            }
+            keySeq.forEach { str ->
                 str.forEach { c ->
                     fcitx.sendKey(c)
                     delay(200)
