@@ -29,6 +29,7 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
     fun listIme() = listInputMethods()
     fun imeStatus() = inputMethodStatus()
     fun setIme(ime: String) = setInputMethod(ime)
+    fun availableIme() = availableInputMethods()
 
     init {
         if (isRunning.get())
@@ -83,6 +84,9 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
 
         @JvmStatic
         external fun setInputMethod(ime: String)
+
+        @JvmStatic
+        external fun availableInputMethods(): Array<String>
 
         /**
          * Called from native-lib

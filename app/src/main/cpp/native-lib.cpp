@@ -318,3 +318,27 @@ Java_me_rocka_fcitx5test_native_Fcitx_setInputMethod(JNIEnv *env, jclass clazz, 
         p_instance->setCurrentInputMethod(ime);
     });
 }
+
+extern "C"
+JNIEXPORT jobjectArray JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_availableInputMethods(JNIEnv *env, jclass clazz) {
+    std::vector<std::string> entries;
+    p_instance->inputMethodManager().foreachEntries([&](const auto & entry) {
+        entries.emplace_back(fcitx::stringutils::join({
+             entry.uniqueName(),
+             entry.name(),
+             entry.icon(),
+             entry.nativeName(),
+             entry.label(),
+             entry.languageCode(),
+             std::to_string(entry.isConfigurable())
+            }, ":"));
+        return true;
+    });
+    jobjectArray array = env->NewObjectArray(entries.size(), env->FindClass("java/lang/String"), nullptr);
+    size_t i = 0;
+    for (const auto & entry : entries) {
+        env->SetObjectArrayElement(array, i++, env->NewStringUTF(entry.c_str()));
+    }
+    return array;
+}
