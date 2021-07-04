@@ -23,6 +23,10 @@ class MainActivity : AppCompatActivity() {
     private val uiScope
         get() = lifecycle.coroutineScope
 
+    private fun toast(msg: String, duration: Int = Toast.LENGTH_SHORT) {
+        Toast.makeText(this, msg, duration).show()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -43,7 +47,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 is FcitxEvent.InputPanelAuxEvent -> {
                     val text = "${it.data.auxUp}\n${it.data.auxDown}"
-                    if (text.length > 1) Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
+                    if (text.length > 1) toast(text)
                 }
                 is FcitxEvent.UnknownEvent -> {
                     Log.i(javaClass.name, "unknown event: ${it.data}")
@@ -88,7 +92,7 @@ class MainActivity : AppCompatActivity() {
             true
         }
         R.id.activity_main_empty -> {
-            Toast.makeText(this, "${fcitx.empty()}", Toast.LENGTH_SHORT).show()
+            toast("${fcitx.empty()}")
             true
         }
         R.id.activity_main_list -> {
@@ -103,6 +107,9 @@ class MainActivity : AppCompatActivity() {
                     dialog.dismiss()
                 }
                 .setNegativeButton("Cancel") { _, _ -> Unit }
+                .setNeutralButton("All") { _, _ ->
+                    toast(fcitx.availableIme().joinToString("\n"))
+                }
                 .show()
             true
         }
