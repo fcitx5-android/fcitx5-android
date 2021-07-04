@@ -106,7 +106,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
     setenv("XDG_CONFIG_HOME", ext_data, 1);
     setenv("XDG_DATA_HOME", ext_data, 1);
     setenv("FCITX_CONFIG_HOME", config_home.c_str(), 1);
-    setenv("XDG_DATA_HOME", data_home.c_str(), 1);
+    setenv("FCITX_DATA_HOME", data_home.c_str(), 1);
     setenv("FCITX_ADDON_DIRS", app_lib, 1);
     setenv("LIBIME_MODEL_DIRS", app_data_libime, 1);
     setenv("LIBIME_INSTALL_PKGDATADIR", app_data_libime, 1);
@@ -153,10 +153,11 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
     p_dispatcher->attach(&p_instance->eventLoop());
 
     p_dispatcher->schedule([&]() {
-        auto group = p_instance->inputMethodManager().currentGroup();
+        auto &imMgr = p_instance->inputMethodManager();
+        auto group = imMgr.currentGroup();
         if (group.inputMethodList().empty()) {
             group.inputMethodList().emplace_back("pinyin");
-            p_instance->inputMethodManager().setGroup(group);
+            imMgr.setGroup(group);
         }
 
         auto *androidfrontend = p_instance->addonManager().addon("androidfrontend");
@@ -266,11 +267,11 @@ extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_listInputMethods(JNIEnv *env, jclass clazz) {
     auto &imMgr = p_instance->inputMethodManager();
-    auto group = p_instance->inputMethodManager().currentGroup();
-    size_t size = group.inputMethodList().size();
-    jobjectArray array = env->NewObjectArray(size, env->FindClass("java/lang/String"), nullptr);
+    auto &group = imMgr.currentGroup();
+    auto &list = group.inputMethodList();
+    jobjectArray array = env->NewObjectArray(list.size(), env->FindClass("java/lang/String"), nullptr);
     size_t i = 0;
-    for (const auto &ime : group.inputMethodList()) {
+    for (const auto &ime : list) {
         const auto *entry = imMgr.entry(ime.name());
         std::string str = entry->uniqueName() + ":"  + entry->name() + ":" + entry->icon();
         env->SetObjectArrayElement(array, i++, env->NewStringUTF(str.c_str()));
@@ -313,7 +314,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_setInputMethod(JNIEnv *env, jclass clazz, 
     const char *chars = env->GetStringUTFChars(ime, nullptr);
     std::string string(chars);
     env->ReleaseStringUTFChars(ime, chars);
-    p_dispatcher->schedule([string]() {
-        p_instance->setCurrentInputMethod(string);
+    p_dispatcher->schedule([ime = std::move(string)]() {
+        p_instance->setCurrentInputMethod(ime);
     });
 }
