@@ -322,23 +322,28 @@ Java_me_rocka_fcitx5test_native_Fcitx_setInputMethod(JNIEnv *env, jclass clazz, 
 extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_availableInputMethods(JNIEnv *env, jclass clazz) {
-    std::vector<std::string> entries;
-    p_instance->inputMethodManager().foreachEntries([&](const auto & entry) {
-        entries.emplace_back(fcitx::stringutils::join({
-             entry.uniqueName(),
-             entry.name(),
-             entry.icon(),
-             entry.nativeName(),
-             entry.label(),
-             entry.languageCode(),
-             std::to_string(entry.isConfigurable())
-            }, ":"));
+    jclass imEntryClass = env->FindClass("me/rocka/fcitx5test/native/InputMethodEntry");
+    jmethodID entryConstructor = env->GetMethodID(imEntryClass, "<init>",
+                                                  "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
+    std::vector<const fcitx::InputMethodEntry *> entries;
+    p_instance->inputMethodManager().foreachEntries([&](const auto &entry) {
+        const fcitx::InputMethodEntry *ptr = &entry;
+        entries.emplace_back(ptr);
         return true;
     });
-    jobjectArray array = env->NewObjectArray(entries.size(), env->FindClass("java/lang/String"), nullptr);
+    jobjectArray array = env->NewObjectArray(entries.size(), imEntryClass, nullptr);
     size_t i = 0;
-    for (const auto & entry : entries) {
-        env->SetObjectArrayElement(array, i++, env->NewStringUTF(entry.c_str()));
+    for (const auto &entry : entries) {
+        jobject obj = env->NewObject(imEntryClass, entryConstructor,
+                                     env->NewStringUTF(entry->uniqueName().c_str()),
+                                     env->NewStringUTF(entry->name().c_str()),
+                                     env->NewStringUTF(entry->icon().c_str()),
+                                     env->NewStringUTF(entry->nativeName().c_str()),
+                                     env->NewStringUTF(entry->label().c_str()),
+                                     env->NewStringUTF(entry->languageCode().c_str()),
+                                     entry->isConfigurable() ? JNI_TRUE : JNI_FALSE
+        );
+        env->SetObjectArrayElement(array, i++, obj);
     }
     return array;
 }

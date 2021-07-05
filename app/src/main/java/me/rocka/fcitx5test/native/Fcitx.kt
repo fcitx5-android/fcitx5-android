@@ -86,7 +86,7 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
         external fun setInputMethod(ime: String)
 
         @JvmStatic
-        external fun availableInputMethods(): Array<String>
+        external fun availableInputMethods(): Array<InputMethodEntry>
 
         /**
          * Called from native-lib
