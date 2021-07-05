@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity() {
             toast("${fcitx.empty()}")
             true
         }
-        R.id.activity_main_list -> {
+        R.id.activity_main_get_available -> {
             val list = fcitx.listIme()
             val status = fcitx.imeStatus()
             val current = list.indexOfFirst { status.startsWith(it) }
@@ -106,9 +106,28 @@ class MainActivity : AppCompatActivity() {
                     fcitx.setIme(ime.split(":")[0])
                     dialog.dismiss()
                 }
-                .setNegativeButton("Cancel") { _, _ -> Unit }
+                .setNegativeButton("Cancel") { _, _ ->  }
                 .setNeutralButton("All") { _, _ ->
                     toast(fcitx.availableIme().joinToString("\n"))
+                }
+                .show()
+            true
+        }
+        R.id.activity_main_set_enabled -> {
+            val enabled = fcitx.listIme()
+            val available = fcitx.availableIme()
+            val strAvail = available.map { "${it.uniqueName}:${it.name}" } .toTypedArray()
+            val boolAvail = available.map { avail ->
+                enabled.indexOfFirst { it.startsWith(avail.uniqueName) } >= 0
+            } .toBooleanArray()
+            AlertDialog.Builder(this)
+                .setTitle("Enabled IME")
+                .setMultiChoiceItems(strAvail, boolAvail) { _, which, checked ->
+                    boolAvail[which] = checked;
+                }
+                .setNegativeButton("Cancel") { _, _ ->  }
+                .setPositiveButton("OK") { _, _ ->
+                    fcitx.setEnabledIme(strAvail.filterIndexed { i, _ -> boolAvail[i] } .toTypedArray());
                 }
                 .show()
             true

@@ -15,9 +15,15 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/activity_main_list"
+        android:id="@+id/activity_main_get_available"
         android:icon="@drawable/ic_baseline_format_list_bulleted_24"
         android:title="fcitx.listIme()"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/activity_main_set_enabled"
+        android:icon="@drawable/ic_baseline_list_alt_24"
+        android:title="fcitx.setEnabledIme()"
         app:showAsAction="never" />
 
     <item
