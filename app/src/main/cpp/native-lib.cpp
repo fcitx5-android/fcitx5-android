@@ -363,9 +363,10 @@ Java_me_rocka_fcitx5test_native_Fcitx_setEnabledInputMethods(JNIEnv *env, jclass
     p_dispatcher->schedule([entries = std::move(entries)]() {
         auto &imMgr = p_instance->inputMethodManager();
         fcitx::InputMethodGroup newGroup(imMgr.currentGroup().name());
-        auto list = newGroup.inputMethodList();
+        newGroup.setDefaultLayout("us");
+        auto &list = newGroup.inputMethodList();
         for (const auto &e : entries) {
-            newGroup.inputMethodList().emplace_back(e);
+            list.emplace_back(e);
         }
         imMgr.setGroup(std::move(newGroup));
         imMgr.save();

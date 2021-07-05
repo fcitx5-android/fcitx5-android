@@ -106,7 +106,7 @@ class MainActivity : AppCompatActivity() {
                     fcitx.setIme(ime.split(":")[0])
                     dialog.dismiss()
                 }
-                .setNegativeButton("Cancel") { _, _ ->  }
+                .setNegativeButton("Cancel") { _, _ -> }
                 .setNeutralButton("All") { _, _ ->
                     toast(fcitx.availableIme().joinToString("\n"))
                 }
@@ -125,9 +125,9 @@ class MainActivity : AppCompatActivity() {
                 .setMultiChoiceItems(strAvail, boolAvail) { _, which, checked ->
                     boolAvail[which] = checked;
                 }
-                .setNegativeButton("Cancel") { _, _ ->  }
+                .setNegativeButton("Cancel") { _, _ -> }
                 .setPositiveButton("OK") { _, _ ->
-                    fcitx.setEnabledIme(strAvail.filterIndexed { i, _ -> boolAvail[i] } .toTypedArray());
+                    fcitx.setEnabledIme(available.filterIndexed { i, _ -> boolAvail[i] } .map { it.uniqueName } .toTypedArray());
                 }
                 .show()
             true
