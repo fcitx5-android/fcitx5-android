@@ -347,3 +347,27 @@ Java_me_rocka_fcitx5test_native_Fcitx_availableInputMethods(JNIEnv *env, jclass 
     }
     return array;
 }
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_setEnabledInputMethods(JNIEnv *env, jclass clazz, jobjectArray array) {
+    size_t size = env->GetArrayLength(array);
+    std::vector<std::string> entries;
+    for (size_t i = 0; i < size; i++) {
+        auto string = (jstring) env->GetObjectArrayElement(array, i);
+        const char *chars = env->GetStringUTFChars(string, nullptr);
+        entries.emplace_back(chars);
+        env->ReleaseStringUTFChars(string, chars);
+        env->DeleteLocalRef(string);
+    }
+    p_dispatcher->schedule([entries = std::move(entries)]() {
+        auto &imMgr = p_instance->inputMethodManager();
+        fcitx::InputMethodGroup newGroup(imMgr.currentGroup().name());
+        auto list = newGroup.inputMethodList();
+        for (const auto &e : entries) {
+            newGroup.inputMethodList().emplace_back(e);
+        }
+        imMgr.setGroup(std::move(newGroup));
+        imMgr.save();
+    });
+}
