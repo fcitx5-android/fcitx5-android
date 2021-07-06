@@ -14,10 +14,6 @@ It can build, run, print to logcat, and dispatch event to JVM side.
 - Android NDK (Side by side) 23 & cmake 3.18.1, they can be installed using SDK Manager in Android Studio or `sdkmanager` command line. **Note:** you may need to install Android Studio Beta for Android NDK 23, or use `sdkmanager` from Android SDK Command-line Tools. NDK 21 & 22 are confirmed not working with this project.
 - [KDE/extra-cmake-modules](https://github.com/KDE/extra-cmake-modules)
 
-### `libime` data
-
-I don't know why cmake won't download and generate those data. Just install [libime](https://archlinux.org/packages/community/x86_64/libime/), and copy `/usr/{lib,share}/libime/*` to `app/src/main/assets/fcitx5/libime/`.
-
 ### Additional patches
 
 There are no additional patches needed for now, because we switched to a forked version of [fcitx5-chinese-addons](https://github.com/rocka/fcitx5-chinese-addons/tree/android), and we hope to find some way to upstream those changes.
