@@ -31,6 +31,9 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
     fun setIme(ime: String) = setInputMethod(ime)
     fun availableIme() = availableInputMethods()
     fun setEnabledIme(array: Array<String>) = setEnabledInputMethods(array)
+    fun globalConfig() = getGlobalConfig()
+    fun addonConfig(addon: String) = getAddonConfig(addon)
+    fun imConfig(im: String) = getInputMethodConfig(im)
 
     init {
         if (isRunning.get())
@@ -91,6 +94,15 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
 
         @JvmStatic
         external fun setEnabledInputMethods(array: Array<String>)
+
+        @JvmStatic
+        external fun getGlobalConfig(): RawConfig
+
+        @JvmStatic
+        external fun getAddonConfig(addon: String): RawConfig
+
+        @JvmStatic
+        external fun getInputMethodConfig(im: String): RawConfig
 
         /**
          * Called from native-lib

@@ -372,3 +372,86 @@ Java_me_rocka_fcitx5test_native_Fcitx_setEnabledInputMethods(JNIEnv *env, jclass
         imMgr.save();
     });
 }
+
+jobject fcitxRawConfigToJObject(JNIEnv *env, jclass cls, jmethodID init, jmethodID setSubItems, const fcitx::RawConfig& cfg) {
+    jobject obj = env->NewObject(cls, init,
+                                 env->NewStringUTF(cfg.name().c_str()),
+                                 env->NewStringUTF(cfg.comment().c_str()),
+                                 env->NewStringUTF(cfg.value().c_str()),
+                                 nullptr);
+    if (!cfg.hasSubItems()) {
+        return obj;
+    }
+    std::vector<const fcitx::RawConfig *> subItems;
+    for (const auto& option : cfg.subItems()) {
+        const auto& subCfg = cfg.get(option);
+        subItems.emplace_back(subCfg.get());
+    }
+    jobjectArray array = env->NewObjectArray(subItems.size(), cls, nullptr);
+    size_t i = 0;
+    for (const auto item : subItems) {
+        env->SetObjectArrayElement(array, i++, fcitxRawConfigToJObject(env, cls, init, setSubItems, *item));
+    }
+    env->CallVoidMethod(obj, setSubItems, array);
+    env->DeleteLocalRef(array);
+    return obj;
+}
+
+jobject fcitxRawConfigToJObject(JNIEnv *env, const fcitx::RawConfig& cfg) {
+    jclass cls = env->FindClass("me/rocka/fcitx5test/native/RawConfig");
+    jmethodID init = env->GetMethodID(cls, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lme/rocka/fcitx5test/native/RawConfig;)V");
+    jmethodID setSubItems = env->GetMethodID(cls, "setSubItems", "([Lme/rocka/fcitx5test/native/RawConfig;)V");
+    return fcitxRawConfigToJObject(env, cls, init, setSubItems, cfg);
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_getGlobalConfig(JNIEnv *env, jclass clazz) {
+    fcitx::RawConfig cfg;
+    p_instance->globalConfig().save(cfg);
+    return fcitxRawConfigToJObject(env, cfg);
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_getAddonConfig(JNIEnv *env, jclass clazz, jstring addon) {
+    const char *addonName = env->GetStringUTFChars(addon, nullptr);
+    const auto *addonInfo = p_instance->addonManager().addonInfo(addonName);
+    env->ReleaseStringUTFChars(addon, addonName);
+    if (!addonInfo || !addonInfo->isConfigurable()) {
+        return nullptr;
+    }
+    const auto *addonInstance = p_instance->addonManager().addon(addonName, true);
+    if (!addonInstance) {
+        return nullptr;
+    }
+    const auto configuration = addonInstance->getConfig();
+    if (!configuration) {
+        return nullptr;
+    }
+    fcitx::RawConfig cfg;
+    configuration->save(cfg);
+    return fcitxRawConfigToJObject(env, cfg);
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_getInputMethodConfig(JNIEnv *env, jclass clazz, jstring im) {
+    const char *imName = env->GetStringUTFChars(im, nullptr);
+    const auto *entry = p_instance->inputMethodManager().entry(imName);
+    env->ReleaseStringUTFChars(im, imName);
+    if (!entry || !entry->isConfigurable()) {
+        return nullptr;
+    }
+    const auto *engine = p_instance->inputMethodEngine(imName);
+    if (!engine) {
+        return nullptr;
+    }
+    const auto configuration = engine->getConfigForInputMethod(*entry);
+    if (!configuration) {
+        return nullptr;
+    }
+    fcitx::RawConfig cfg;
+    configuration->save(cfg);
+    return fcitxRawConfigToJObject(env, cfg);
+}
