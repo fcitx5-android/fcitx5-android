@@ -327,8 +327,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_availableInputMethods(JNIEnv *env, jclass 
                                                   "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
     std::vector<const fcitx::InputMethodEntry *> entries;
     p_instance->inputMethodManager().foreachEntries([&](const auto &entry) {
-        const fcitx::InputMethodEntry *ptr = &entry;
-        entries.emplace_back(ptr);
+        entries.emplace_back(&entry);
         return true;
     });
     jobjectArray array = env->NewObjectArray(entries.size(), imEntryClass, nullptr);
@@ -344,6 +343,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_availableInputMethods(JNIEnv *env, jclass 
                                      entry->isConfigurable() ? JNI_TRUE : JNI_FALSE
         );
         env->SetObjectArrayElement(array, i++, obj);
+        env->DeleteLocalRef(obj);
     }
     return array;
 }

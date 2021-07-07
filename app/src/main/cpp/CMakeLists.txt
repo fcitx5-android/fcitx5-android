@@ -38,10 +38,9 @@ add_subdirectory(androidfrontend)
 
 # prebuilt boost
 set(BOOST_VERSION "1.76.0")
-set(BOOST_MODULES filesystem iostreams regex)
+set(BOOST_MODULES headers filesystem iostreams regex)
 set(BOOST_ROOT "${PREBUILT_DIR}/boost/${ANDROID_ABI}")
 set(Boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}/")
-set(boost_headers_DIR "${BOOST_ROOT}/lib/cmake/boost_headers-${BOOST_VERSION}/")
 foreach(mod IN LISTS BOOST_MODULES)
     set("boost_${mod}_DIR" "${BOOST_ROOT}/lib/cmake/boost_${mod}-${BOOST_VERSION}/")
 endforeach()

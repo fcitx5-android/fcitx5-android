@@ -21,8 +21,8 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
     val eventFlow = eventFlow_.asSharedFlow()
 
     fun saveConfig() = saveFcitxConfig()
-    fun sendKey(key: String) = sendKeyToFcitx(key)
-    fun sendKey(c: Char) = sendKeyToFcitx(c)
+    fun sendKey(key: String) = sendKeyToFcitxString(key)
+    fun sendKey(c: Char) = sendKeyToFcitxChar(c)
     fun select(idx: Int) = selectCandidate(idx)
     fun empty() = isInputPanelEmpty()
     fun reset() = resetInputPanel()
@@ -64,12 +64,10 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
         external fun saveFcitxConfig()
 
         @JvmStatic
-        @JvmName("sendKeyToFcitxString")
-        external fun sendKeyToFcitx(key: String)
+        external fun sendKeyToFcitxString(key: String)
 
         @JvmStatic
-        @JvmName("sendKeyToFcitxChar")
-        external fun sendKeyToFcitx(c: Char)
+        external fun sendKeyToFcitxChar(c: Char)
 
         @JvmStatic
         external fun selectCandidate(idx: Int)
