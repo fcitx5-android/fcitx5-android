@@ -543,3 +543,38 @@ Java_me_rocka_fcitx5test_native_Fcitx_getInputMethodConfig(JNIEnv *env, jclass c
     else
         return nullptr;
 }
+
+void jobjectFillRawConfig(JNIEnv *env, jclass cls, jfieldID fName, jfieldID fValue, jfieldID fSubItems, jobject jConfig, fcitx::RawConfig &config) {
+    auto subItems = (jobjectArray) env->GetObjectField(jConfig, fSubItems);
+    if (subItems == nullptr) {
+        auto jValue = (jstring) env->GetObjectField(jConfig, fValue);
+        const char *cValue = env->GetStringUTFChars(jValue, nullptr);
+        config = cValue;
+        env->ReleaseStringUTFChars(jValue, cValue);
+        env->DeleteLocalRef(jValue);
+        return;
+    } else {
+        size_t size = env->GetArrayLength(subItems);
+        for (size_t i = 0; i < size; i++) {
+            jobject item = env->GetObjectArrayElement(subItems, i);
+            auto jName = (jstring) env->GetObjectField(item, fName);
+            const char *cName = env->GetStringUTFChars(jName, nullptr);
+            auto subConfig = config.get(cName, true);
+            env->ReleaseStringUTFChars(jName, cName);
+            jobjectFillRawConfig(env, cls, fName, fValue, fSubItems, item, *subConfig);
+            env->DeleteLocalRef(jName);
+            env->DeleteLocalRef(item);
+        }
+    }
+    env->DeleteLocalRef(subItems);
+}
+
+fcitx::RawConfig jobjectToRawConfig(JNIEnv *env, jobject jConfig) {
+    fcitx::RawConfig config;
+    jclass cls = env->FindClass("me/rocka/fcitx5test/native/RawConfig");
+    jfieldID fName = env->GetFieldID(cls, "name", "Ljava/lang/String;");
+    jfieldID fValue = env->GetFieldID(cls, "value", "Ljava/lang/String;");
+    jfieldID fSubItems = env->GetFieldID(cls, "subItems", "[Lme/rocka/fcitx5test/native/RawConfig;");
+    jobjectFillRawConfig(env, cls, fName, fValue, fSubItems, jConfig, config);
+    return config;
+}
