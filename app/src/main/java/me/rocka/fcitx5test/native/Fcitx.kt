@@ -13,6 +13,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class Fcitx(private val context: Context) : DefaultLifecycleObserver {
 
+    interface RawConfigMap {
+        operator fun get(key: String): RawConfig?
+        operator fun set(key: String, value: RawConfig)
+    }
+
     private var fcitxJob: Job? = null
 
     /**
@@ -31,9 +36,17 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
     fun setIme(ime: String) = setInputMethod(ime)
     fun availableIme() = availableInputMethods()
     fun setEnabledIme(array: Array<String>) = setEnabledInputMethods(array)
-    fun globalConfig() = getGlobalConfig()
-    fun addonConfig(addon: String) = getAddonConfig(addon)
-    fun imConfig(im: String) = getInputMethodConfig(im)
+    var globalConfig: RawConfig
+        get() = getFcitxGlobalConfig()
+        set(value) = setFcitxGlobalConfig(value)
+    var addonConfig = object : RawConfigMap {
+        override operator fun get(key: String) = getFcitxAddonConfig(key)
+        override operator fun set(key: String, value: RawConfig) = setFcitxAddonConfig(key, value)
+    }
+    var imConfig = object : RawConfigMap {
+        override operator fun get(key: String) = getFcitxInputMethodConfig(key)
+        override operator fun set(key: String, value: RawConfig) = setFcitxInputMethodConfig(key, value)
+    }
 
     init {
         if (isRunning.get())
@@ -94,13 +107,22 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
         external fun setEnabledInputMethods(array: Array<String>)
 
         @JvmStatic
-        external fun getGlobalConfig(): RawConfig
+        external fun getFcitxGlobalConfig(): RawConfig
 
         @JvmStatic
-        external fun getAddonConfig(addon: String): RawConfig
+        external fun getFcitxAddonConfig(addon: String): RawConfig?
 
         @JvmStatic
-        external fun getInputMethodConfig(im: String): RawConfig
+        external fun getFcitxInputMethodConfig(im: String): RawConfig?
+
+        @JvmStatic
+        external fun setFcitxGlobalConfig(config: RawConfig)
+
+        @JvmStatic
+        external fun setFcitxAddonConfig(addon: String, config: RawConfig)
+
+        @JvmStatic
+        external fun setFcitxInputMethodConfig(im: String, config: RawConfig)
 
         /**
          * Called from native-lib

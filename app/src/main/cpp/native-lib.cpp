@@ -306,14 +306,25 @@ public:
         return cfg;
     }
 
-    std::optional<fcitx::RawConfig> getAddonConfig(JNIEnv *env, jstring addon){
-        const char *addonName = env->GetStringUTFChars(addon, nullptr);
-        const auto *addonInfo = p_instance->addonManager().addonInfo(addonName);
-        env->ReleaseStringUTFChars(addon, addonName);
-        if (!addonInfo || !addonInfo->isConfigurable()) {
-            return std::nullopt;
+    void setGlobalConfig(const fcitx::RawConfig &config) {
+        p_instance->globalConfig().load(config, true);
+        if (p_instance->globalConfig().safeSave()) {
+            p_instance->reloadConfig();
         }
-        const auto *addonInstance = p_instance->addonManager().addon(addonName, true);
+    }
+
+    fcitx::AddonInstance *getAddonInstance(const std::string &addon) {
+        const auto *addonInfo = p_instance->addonManager().addonInfo(addon);
+        if (!addonInfo || !addonInfo->isConfigurable()) {
+            return nullptr;
+        }
+        return p_instance->addonManager().addon(addon, true);
+    }
+
+    std::optional<fcitx::RawConfig> getAddonConfig(JNIEnv *env, jstring addon) {
+        const char *addonName = env->GetStringUTFChars(addon, nullptr);
+        const auto addonInstance = getAddonInstance(addonName);
+        env->ReleaseStringUTFChars(addon, addonName);
         if (!addonInstance) {
             return std::nullopt;
         }
@@ -326,7 +337,17 @@ public:
         return std::make_optional(cfg);
     }
 
-    std::optional<fcitx::RawConfig> getInputMethodConfig(JNIEnv *env, jstring im){
+    void setAddonConfig(JNIEnv *env, jstring addon, const fcitx::RawConfig &config) {
+        const char *addonName = env->GetStringUTFChars(addon, nullptr);
+        auto addonInstance = getAddonInstance(addonName);
+        env->ReleaseStringUTFChars(addon, addonName);
+        if (!addonInstance) {
+            return;
+        }
+        addonInstance->setConfig(config);
+    }
+
+    std::optional<fcitx::RawConfig> getInputMethodConfig(JNIEnv *env, jstring im) {
         const char *imName = env->GetStringUTFChars(im, nullptr);
         const auto *entry = p_instance->inputMethodManager().entry(imName);
         env->ReleaseStringUTFChars(im, imName);
@@ -344,6 +365,20 @@ public:
         fcitx::RawConfig cfg;
         configuration->save(cfg);
         return std::make_optional(cfg);
+    }
+
+    void setInputMethodConfig(JNIEnv *env, jstring im, const fcitx::RawConfig &config) {
+        const char *imName = env->GetStringUTFChars(im, nullptr);
+        const auto *entry = p_instance->inputMethodManager().entry(imName);
+        env->ReleaseStringUTFChars(im, imName);
+        if (!entry || !entry->isConfigurable()) {
+            return;
+        }
+        auto *engine = p_instance->inputMethodEngine(imName);
+        if (!engine) {
+            return;
+        }
+        engine->setConfigForInputMethod(*entry, config);
     }
 
     void saveConfig(){
@@ -519,16 +554,16 @@ jobject fcitxRawConfigToJObject(JNIEnv *env, const fcitx::RawConfig& cfg) {
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_getGlobalConfig(JNIEnv *env, jclass clazz) {
+Java_me_rocka_fcitx5test_native_Fcitx_getFcitxGlobalConfig(JNIEnv *env, jclass clazz) {
     auto cfg = JNIFcitx::getInstance().getGlobalConfig();
     return fcitxRawConfigToJObject(env, cfg);
 }
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_getAddonConfig(JNIEnv *env, jclass clazz, jstring addon) {
+Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddonConfig(JNIEnv *env, jclass clazz, jstring addon) {
     auto result = JNIFcitx::getInstance().getAddonConfig(env, addon);
-    if(result)
+    if (result)
         return fcitxRawConfigToJObject(env, result.value());
     else
         return nullptr;
@@ -536,9 +571,9 @@ Java_me_rocka_fcitx5test_native_Fcitx_getAddonConfig(JNIEnv *env, jclass clazz, 
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_getInputMethodConfig(JNIEnv *env, jclass clazz, jstring im) {
+Java_me_rocka_fcitx5test_native_Fcitx_getFcitxInputMethodConfig(JNIEnv *env, jclass clazz, jstring im) {
     auto result = JNIFcitx::getInstance().getInputMethodConfig(env, im);
-    if(result)
+    if (result)
         return fcitxRawConfigToJObject(env, result.value());
     else
         return nullptr;
@@ -577,4 +612,25 @@ fcitx::RawConfig jobjectToRawConfig(JNIEnv *env, jobject jConfig) {
     jfieldID fSubItems = env->GetFieldID(cls, "subItems", "[Lme/rocka/fcitx5test/native/RawConfig;");
     jobjectFillRawConfig(env, cls, fName, fValue, fSubItems, jConfig, config);
     return config;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_setFcitxGlobalConfig(JNIEnv *env, jclass clazz, jobject config) {
+    auto rawConfig = jobjectToRawConfig(env, config);
+    JNIFcitx::getInstance().setGlobalConfig(rawConfig);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_setFcitxAddonConfig(JNIEnv *env, jclass clazz, jstring addon, jobject config) {
+    auto rawConfig = jobjectToRawConfig(env, config);
+    JNIFcitx::getInstance().setAddonConfig(env, addon, rawConfig);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_setFcitxInputMethodConfig(JNIEnv *env, jclass clazz, jstring im, jobject config) {
+    auto rawConfig = jobjectToRawConfig(env, config);
+    JNIFcitx::getInstance().setInputMethodConfig(env, im, rawConfig);
 }
