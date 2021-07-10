@@ -27,6 +27,12 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/activity_main_addons"
+        android:icon="@drawable/ic_baseline_extension_24"
+        android:title="fcitx.addons()"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/activity_main_save_config"
         android:icon="@drawable/ic_baseline_save_24"
         android:title="fcitx.saveConfig()"

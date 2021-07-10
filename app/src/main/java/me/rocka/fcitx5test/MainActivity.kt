@@ -107,9 +107,6 @@ class MainActivity : AppCompatActivity() {
                     dialog.dismiss()
                 }
                 .setNegativeButton("Cancel") { _, _ -> }
-                .setNeutralButton("All") { _, _ ->
-                    toast(fcitx.availableIme().joinToString("\n"))
-                }
                 .show()
             true
         }
@@ -128,6 +125,22 @@ class MainActivity : AppCompatActivity() {
                 .setNegativeButton("Cancel") { _, _ -> }
                 .setPositiveButton("OK") { _, _ ->
                     fcitx.setEnabledIme(available.filterIndexed { i, _ -> boolAvail[i] } .map { it.uniqueName } .toTypedArray());
+                }
+                .show()
+            true
+        }
+        R.id.activity_main_addons -> {
+            val addons = fcitx.addons()
+            val nameArray = addons.map { "${it.uniqueName}:${it.name}" } .toTypedArray()
+            val stateArray = addons.map { it.enabled } .toBooleanArray()
+            AlertDialog.Builder(this)
+                .setTitle("Enabled Addons")
+                .setMultiChoiceItems(nameArray, stateArray) { _, which, checked ->
+                    stateArray[which] = checked
+                }
+                .setNegativeButton("Cancel") { _, _ -> }
+                .setPositiveButton("OK") { _, _ ->
+                    fcitx.setAddonState(nameArray, stateArray)
                 }
                 .show()
             true
