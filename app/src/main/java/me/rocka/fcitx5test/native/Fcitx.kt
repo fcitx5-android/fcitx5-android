@@ -47,6 +47,8 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
         override operator fun get(key: String) = getFcitxInputMethodConfig(key)
         override operator fun set(key: String, value: RawConfig) = setFcitxInputMethodConfig(key, value)
     }
+    fun addons() = getFcitxAddons()
+    fun setAddonState(name: Array<String>, state: BooleanArray) = setFcitxAddonState(name, state)
 
     init {
         if (isRunning.get())
@@ -123,6 +125,12 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
 
         @JvmStatic
         external fun setFcitxInputMethodConfig(im: String, config: RawConfig)
+
+        @JvmStatic
+        external fun getFcitxAddons(): Array<AddonInfo>
+
+        @JvmStatic
+        external fun setFcitxAddonState(name: Array<String>, state: BooleanArray)
 
         /**
          * Called from native-lib

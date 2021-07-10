@@ -381,6 +381,71 @@ public:
         engine->setConfigForInputMethod(*entry, config);
     }
 
+    std::map<const fcitx::AddonInfo *, bool> getAddons() {
+        auto &globalConfig = p_instance->globalConfig();
+        auto &addonManager = p_instance->addonManager();
+        const auto &enabledAddons = globalConfig.enabledAddons();
+        std::unordered_set<std::string> enabledSet(enabledAddons.begin(), enabledAddons.end());
+        const auto &disabledAddons = globalConfig.disabledAddons();
+        std::unordered_set<std::string> disabledSet(disabledAddons.begin(), disabledAddons.end());
+        std::map<const fcitx::AddonInfo *, bool> addons;
+        for (const auto category : {fcitx::AddonCategory::InputMethod,
+                                    fcitx::AddonCategory::Frontend,
+                                    fcitx::AddonCategory::Loader,
+                                    fcitx::AddonCategory::Module,
+                                    fcitx::AddonCategory::UI}) {
+            const auto names = addonManager.addonNames(category);
+            for (const auto &name : names) {
+                const auto *info = addonManager.addonInfo(name);
+                if (!info) {
+                    continue;
+                }
+                bool enabled = info->isDefaultEnabled();
+                if (disabledSet.count(info->uniqueName())) {
+                    enabled = false;
+                } else if (enabledSet.count(info->uniqueName())) {
+                    enabled = true;
+                }
+                addons.insert({info, enabled});
+            }
+        }
+        return addons;
+    }
+
+    void setAddonState(const std::map<std::string, bool> &state) {
+        auto &globalConfig = p_instance->globalConfig();
+        auto &addonManager = p_instance->addonManager();
+        const auto &enabledAddons = globalConfig.enabledAddons();
+        std::set<std::string> enabledSet(enabledAddons.begin(), enabledAddons.end());
+        const auto &disabledAddons = globalConfig.disabledAddons();
+        std::set<std::string> disabledSet(disabledAddons.begin(), disabledAddons.end());
+        for (const auto &item : state) {
+            const auto *info = addonManager.addonInfo(item.first);
+            if (!info) {
+                continue;
+            }
+            const bool enabled = item.second;
+            const auto &uniqueName = info->uniqueName();
+            if (enabled == info->isDefaultEnabled()) {
+                enabledSet.erase(uniqueName);
+                disabledSet.erase(uniqueName);
+            } else if (enabled) {
+                enabledSet.insert(uniqueName);
+                disabledSet.erase(uniqueName);
+            } else {
+                enabledSet.erase(uniqueName);
+                disabledSet.insert(uniqueName);
+            }
+        }
+        p_dispatcher->schedule([this, e = std::move(enabledSet), d = std::move(disabledSet)] {
+            auto &globalConfig = p_instance->globalConfig();
+            globalConfig.setEnabledAddons({e.begin(), e.end()});
+            globalConfig.setDisabledAddons({d.begin(), d.end()});
+            globalConfig.safeSave();
+            p_instance->reloadConfig();
+        });
+    }
+
     void saveConfig(){
         p_dispatcher->schedule([this]() {
             p_instance->globalConfig().safeSave();
@@ -633,4 +698,53 @@ JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_setFcitxInputMethodConfig(JNIEnv *env, jclass clazz, jstring im, jobject config) {
     auto rawConfig = jobjectToRawConfig(env, config);
     JNIFcitx::getInstance().setInputMethodConfig(env, im, rawConfig);
+}
+
+extern "C"
+JNIEXPORT jobjectArray JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddons(JNIEnv *env, jclass clazz) {
+    jclass cls = env->FindClass("me/rocka/fcitx5test/native/AddonInfo");
+    RETURN_VALUE_IF_NOT_RUNNING(env->NewObjectArray(0, cls, nullptr))
+    const auto &addons = JNIFcitx::getInstance().getAddons();
+    jmethodID init = env->GetMethodID(cls, "<init>" ,"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZZZ)V");
+    jobjectArray array = env->NewObjectArray(addons.size(), cls, nullptr);
+    size_t i = 0;
+    for (const auto addon : addons) {
+        const auto *info = addon.first;
+        jobject obj = env->NewObject(cls, init,
+                                     env->NewStringUTF(info->uniqueName().c_str()),
+                                     env->NewStringUTF(info->name().match().c_str()),
+                                     env->NewStringUTF(info->comment().match().c_str()),
+                                     static_cast<int32_t>(info->category()),
+                                     info->isConfigurable(),
+                                     addon.second,
+                                     info->onDemand()
+        );
+        env->SetObjectArrayElement(array, i++, obj);
+        env->DeleteLocalRef(obj);
+    }
+    return array;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_setFcitxAddonState(JNIEnv *env, jclass clazz, jobjectArray name, jbooleanArray state) {
+    RETURN_IF_NOT_RUNNING
+    size_t nameLength = env->GetArrayLength(name);
+    size_t stateLength = env->GetArrayLength(state);
+    if (nameLength != stateLength) {
+        jniLog("setFcitxAddonState: name and state length mismatch");
+        return;
+    }
+    std::map<std::string, bool> map;
+    const auto enabled = env->GetBooleanArrayElements(state, nullptr);
+    for (size_t i = 0; i < nameLength; i++) {
+        auto jName = reinterpret_cast<jstring>(env->GetObjectArrayElement(name, i));
+        auto cName = env->GetStringUTFChars(jName, nullptr);
+        map.insert({cName, enabled[i]});
+        env->ReleaseStringUTFChars(jName, cName);
+        env->DeleteLocalRef(jName);
+    }
+    env->ReleaseBooleanArrayElements(state, enabled, 0);
+    JNIFcitx::getInstance().setAddonState(map);
 }
