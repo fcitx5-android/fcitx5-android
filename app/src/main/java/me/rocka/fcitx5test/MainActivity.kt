@@ -131,7 +131,7 @@ class MainActivity : AppCompatActivity() {
         }
         R.id.activity_main_addons -> {
             val addons = fcitx.addons()
-            val nameArray = addons.map { "${it.uniqueName}:${it.name}" } .toTypedArray()
+            val nameArray = addons.map { it.uniqueName } .toTypedArray()
             val stateArray = addons.map { it.enabled } .toBooleanArray()
             AlertDialog.Builder(this)
                 .setTitle("Enabled Addons")
