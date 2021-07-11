@@ -1,11 +1,6 @@
 #ifndef _FCITX_FRONTEND_ANDROIDFRONTEND_ANDROIDFRONTEND_H_
 #define _FCITX_FRONTEND_ANDROIDFRONTEND_ANDROIDFRONTEND_H_
 
-#include <list>
-#include <string>
-#include <fcitx/instance.h>
-#include <fcitx/addoninstance.h>
-
 #include "androidfrontend_public.h"
 
 namespace fcitx {
@@ -19,8 +14,8 @@ namespace fcitx {
 
         void updateCandidateList(const std::vector<std::string> &candidates);
         void commitString(const std::string &str);
-        void updatePreedit(const std::string& preedit, const std::string& clientPreedit);
-        void updateInputPanelAux(const std::string& auxUp, const std::string& auxDown);
+        void updatePreedit(const std::string &preedit, const std::string &clientPreedit);
+        void updateInputPanelAux(const std::string &auxUp, const std::string &auxDown);
 
     private:
         CandidateListCallback candidateListCallback;
@@ -33,10 +28,10 @@ namespace fcitx {
         void selectCandidate(ICUUID uuid, int idx);
         bool isInputPanelEmpty(ICUUID uuid);
         void resetInputPanel(ICUUID uuid);
-        void setCandidateListCallback(const CandidateListCallback& callback);
-        void setCommitStringCallback(const CommitStringCallback& callback);
-        void setPreeditCallback(const PreeditCallback & callback);
-        void setInputPanelAuxCallback(const InputPanelAuxCallback & callback);
+        void setCandidateListCallback(const CandidateListCallback &callback);
+        void setCommitStringCallback(const CommitStringCallback &callback);
+        void setPreeditCallback(const PreeditCallback &callback);
+        void setInputPanelAuxCallback(const InputPanelAuxCallback &callback);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, createInputContext);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, destroyInputContext);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, keyEvent);

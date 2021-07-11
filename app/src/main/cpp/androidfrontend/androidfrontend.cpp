@@ -2,6 +2,7 @@
 #include <fcitx/addonmanager.h>
 #include <fcitx/inputcontextmanager.h>
 #include <fcitx/inputpanel.h>
+#include <fcitx/instance.h>
 
 #include "androidfrontend.h"
 
@@ -12,9 +13,10 @@ public:
     AndroidInputContext(AndroidFrontend *frontend,
                         InputContextManager &inputContextManager,
                         const std::string &program)
-        : InputContext(inputContextManager, program), frontend_(frontend) {
+            : InputContext(inputContextManager, program), frontend_(frontend) {
         created();
     }
+
     ~AndroidInputContext() override { destroy(); }
 
     [[nodiscard]] const char *frontend() const override { return "androidfrontend"; }
@@ -81,7 +83,7 @@ private:
     std::string auxUpCached;
     std::string auxDownCached;
 
-    BulkCandidateList* bulkCandidateList() {
+    BulkCandidateList *bulkCandidateList() {
         auto candidateList = inputPanel().candidateList();
         if (!candidateList || candidateList->empty()) {
             FCITX_INFO() << "bulkCandidateList: no or empty candidateList";
@@ -92,18 +94,18 @@ private:
 };
 
 AndroidFrontend::AndroidFrontend(Instance *instance)
-    : instance_(instance),
-      commitStringCallback({}),
-      candidateListCallback({}),
-      preeditCallback({}) {}
+        : instance_(instance),
+          commitStringCallback({}),
+          candidateListCallback({}),
+          preeditCallback({}) {}
 
 AndroidFrontend::~AndroidFrontend() = default;
 
 ICUUID AndroidFrontend::createInputContext(const std::string &program) {
     auto *ic = new AndroidInputContext(this, instance_->inputContextManager(), program);
-    ic->setCapabilityFlags(CapabilityFlags {
-        CapabilityFlag::Preedit,
-        CapabilityFlag::ClientSideInputPanel
+    ic->setCapabilityFlags(CapabilityFlags{
+            CapabilityFlag::Preedit,
+            CapabilityFlag::ClientSideInputPanel
     });
     // focus needed for `InputContext::reset` to work
     ic->focusIn();
@@ -152,7 +154,7 @@ void AndroidFrontend::updateInputPanelAux(const std::string &auxUp, const std::s
 }
 
 void AndroidFrontend::selectCandidate(ICUUID uuid, int idx) {
-    auto *ic = dynamic_cast<AndroidInputContext*>(instance_->inputContextManager().findByUUID(uuid));
+    auto *ic = dynamic_cast<AndroidInputContext *>(instance_->inputContextManager().findByUUID(uuid));
     ic->selectCandidate(idx);
 }
 

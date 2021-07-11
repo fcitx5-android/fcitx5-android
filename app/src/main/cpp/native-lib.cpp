@@ -84,11 +84,11 @@ public:
         return instance;
     }
 
-    bool isRunning (){
-        return !(p_instance == nullptr || p_dispatcher == nullptr || p_frontend == nullptr);
+    bool isRunning() {
+        return p_instance != nullptr && p_dispatcher != nullptr && p_frontend != nullptr;
     }
 
-    jint startup(JNIEnv *env, jclass clazz, jstring appData, jstring appLib, jstring extData){
+    jint startup(JNIEnv *env, jclass clazz, jstring appData, jstring appLib, jstring extData) {
         if (p_instance != nullptr) {
             jniLog("fcitx already running");
             return 2;
@@ -126,7 +126,7 @@ public:
             size_t size = candidateList.size();
             jobjectArray vararg = env->NewObjectArray(size, stringClass, nullptr);
             size_t i = 0;
-            for(const auto& s : candidateList) {
+            for (const auto &s : candidateList) {
                 env->SetObjectArrayElement(vararg, i++, env->NewStringUTF(s.c_str()));
             }
             env->CallStaticVoidMethod(clazz, handleFcitxEvent, 0, vararg);
@@ -150,7 +150,7 @@ public:
         };
 
         char arg0[] = "";
-        char *argv[] = { arg0 };
+        char *argv[] = {arg0};
         p_instance = std::make_unique<fcitx::Instance>(FCITX_ARRAY_SIZE(argv), argv);
         p_instance->addonManager().registerDefaultLoader(nullptr);
         p_dispatcher = std::make_unique<fcitx::EventDispatcher>();
@@ -189,30 +189,30 @@ public:
         return 0;
     }
 
-    void sendKey(fcitx::Key key){
+    void sendKey(fcitx::Key key) {
         p_dispatcher->schedule([this, key]() {
             p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, key, false);
         });
     }
 
-    void select(jint idx){
+    void select(jint idx) {
         jniLog("select candidate #" + std::to_string(idx));
         p_dispatcher->schedule([this, idx]() {
             p_frontend->call<fcitx::IAndroidFrontend::selectCandidate>(p_uuid, idx);
         });
     }
 
-    bool isInputPanelEmpty(){
+    bool isInputPanelEmpty() {
         return p_frontend->call<fcitx::IAndroidFrontend::isInputPanelEmpty>(p_uuid);
     }
 
-    void resetInputPanel(){
+    void resetInputPanel() {
         p_dispatcher->schedule([this]() {
             p_frontend->call<fcitx::IAndroidFrontend::resetInputPanel>(p_uuid);
         });
     }
 
-    jobjectArray listInputMethods(JNIEnv *env){
+    jobjectArray listInputMethods(JNIEnv *env) {
         auto &imMgr = p_instance->inputMethodManager();
         auto &group = imMgr.currentGroup();
         auto &list = group.inputMethodList();
@@ -220,7 +220,7 @@ public:
         size_t i = 0;
         for (const auto &ime : list) {
             const auto *entry = imMgr.entry(ime.name());
-            std::string str = entry->uniqueName() + ":"  + entry->name() + ":" + entry->icon();
+            std::string str = entry->uniqueName() + ":" + entry->name() + ":" + entry->icon();
             env->SetObjectArrayElement(array, i++, env->NewStringUTF(str.c_str()));
         }
         return array;
@@ -231,7 +231,7 @@ public:
         std::string uniqueName;
         std::string name = "Not available";
         std::string icon = "input-keyboard";
-        std::string altDescription;
+        std::string subMode;
         std::string label;
         auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
         if (ic) {
@@ -245,21 +245,21 @@ public:
                     if (!subModeLabel.empty()) {
                         label = subModeLabel;
                     }
-                    altDescription = engine->subMode(*entry, *ic);
+                    subMode = engine->subMode(*entry, *ic);
                 }
             }
         }
-        std::string result = uniqueName + ":" + name + ":" + icon + ":" + altDescription + ":" + label;
+        std::string result = uniqueName + ":" + name + ":" + icon + ":" + subMode + ":" + label;
         return env->NewStringUTF(result.c_str());
     }
 
-    void setInputMethod(std::string string){
+    void setInputMethod(std::string string) {
         p_dispatcher->schedule([this, ime = std::move(string)]() {
             p_instance->setCurrentInputMethod(ime);
         });
     }
 
-    jobjectArray availableInputMethods(JNIEnv* env){
+    jobjectArray availableInputMethods(JNIEnv *env) {
         jclass imEntryClass = env->FindClass("me/rocka/fcitx5test/native/InputMethodEntry");
         jmethodID entryConstructor = env->GetMethodID(imEntryClass, "<init>",
                                                       "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
@@ -286,7 +286,7 @@ public:
         return array;
     }
 
-    void setEnabledInputMethods(std::vector<std::string> & entries){
+    void setEnabledInputMethods(std::vector<std::string> &entries) {
         p_dispatcher->schedule([this, entries]() {
             auto &imMgr = p_instance->inputMethodManager();
             fcitx::InputMethodGroup newGroup(imMgr.currentGroup().name());
@@ -300,7 +300,7 @@ public:
         });
     }
 
-    fcitx::RawConfig getGlobalConfig(){
+    fcitx::RawConfig getGlobalConfig() {
         fcitx::RawConfig cfg;
         p_instance->globalConfig().save(cfg);
         return cfg;
@@ -446,7 +446,7 @@ public:
         });
     }
 
-    void saveConfig(){
+    void saveConfig() {
         p_dispatcher->schedule([this]() {
             p_instance->globalConfig().safeSave();
             p_instance->inputMethodManager().save();
@@ -454,7 +454,7 @@ public:
         });
     }
 
-    void exit(){
+    void exit() {
         jniLog("shutting down fcitx");
         p_dispatcher->schedule([this]() {
             p_dispatcher->detach();
@@ -488,7 +488,7 @@ JNI_OnLoad(JavaVM * /* jvm */, void * /* reserved */) {
 extern "C"
 JNIEXPORT jint JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, jstring appData, jstring appLib, jstring extData) {
-   return JNIFcitx::getInstance().startup(env,clazz,appData,appLib,extData);
+    return JNIFcitx::getInstance().startup(env, clazz, appData, appLib, extData);
 }
 
 extern "C"
@@ -568,7 +568,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_setInputMethod(JNIEnv *env, jclass clazz, 
 extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_availableInputMethods(JNIEnv *env, jclass clazz) {
-   return JNIFcitx::getInstance().availableInputMethods(env);
+    return JNIFcitx::getInstance().availableInputMethods(env);
 }
 
 extern "C"
@@ -586,7 +586,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_setEnabledInputMethods(JNIEnv *env, jclass
     JNIFcitx::getInstance().setEnabledInputMethods(entries);
 }
 
-jobject fcitxRawConfigToJObject(JNIEnv *env, jclass cls, jmethodID init, jmethodID setSubItems, const fcitx::RawConfig& cfg) {
+jobject fcitxRawConfigToJObject(JNIEnv *env, jclass cls, jmethodID init, jmethodID setSubItems, const fcitx::RawConfig &cfg) {
     jobject obj = env->NewObject(cls, init,
                                  env->NewStringUTF(cfg.name().c_str()),
                                  env->NewStringUTF(cfg.comment().c_str()),
@@ -596,8 +596,8 @@ jobject fcitxRawConfigToJObject(JNIEnv *env, jclass cls, jmethodID init, jmethod
         return obj;
     }
     std::vector<const fcitx::RawConfig *> subItems;
-    for (const auto& option : cfg.subItems()) {
-        const auto& subCfg = cfg.get(option);
+    for (const auto &option : cfg.subItems()) {
+        const auto &subCfg = cfg.get(option);
         subItems.emplace_back(subCfg.get());
     }
     jobjectArray array = env->NewObjectArray(subItems.size(), cls, nullptr);
@@ -610,7 +610,7 @@ jobject fcitxRawConfigToJObject(JNIEnv *env, jclass cls, jmethodID init, jmethod
     return obj;
 }
 
-jobject fcitxRawConfigToJObject(JNIEnv *env, const fcitx::RawConfig& cfg) {
+jobject fcitxRawConfigToJObject(JNIEnv *env, const fcitx::RawConfig &cfg) {
     jclass cls = env->FindClass("me/rocka/fcitx5test/native/RawConfig");
     jmethodID init = env->GetMethodID(cls, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lme/rocka/fcitx5test/native/RawConfig;)V");
     jmethodID setSubItems = env->GetMethodID(cls, "setSubItems", "([Lme/rocka/fcitx5test/native/RawConfig;)V");
@@ -706,7 +706,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddons(JNIEnv *env, jclass clazz) 
     jclass cls = env->FindClass("me/rocka/fcitx5test/native/AddonInfo");
     RETURN_VALUE_IF_NOT_RUNNING(env->NewObjectArray(0, cls, nullptr))
     const auto &addons = JNIFcitx::getInstance().getAddons();
-    jmethodID init = env->GetMethodID(cls, "<init>" ,"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZZZ)V");
+    jmethodID init = env->GetMethodID(cls, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZZZ)V");
     jobjectArray array = env->NewObjectArray(addons.size(), cls, nullptr);
     size_t i = 0;
     for (const auto addon : addons) {
