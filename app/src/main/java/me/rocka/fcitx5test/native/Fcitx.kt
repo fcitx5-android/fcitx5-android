@@ -94,10 +94,10 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
         external fun resetInputPanel()
 
         @JvmStatic
-        external fun listInputMethods(): Array<String>
+        external fun listInputMethods(): Array<InputMethodEntry>
 
         @JvmStatic
-        external fun inputMethodStatus(): String
+        external fun inputMethodStatus(): InputMethodEntry
 
         @JvmStatic
         external fun setInputMethod(ime: String)

@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         uiScope.launch {
             delay(2000)
-            val keySeq = with(fcitx.imeStatus()) {
+            val keySeq = with(fcitx.imeStatus().uniqueName) {
                 when {
                     startsWith("pinyin") -> listOf("nihaoshijie", "shijienihao")
                     startsWith("shuangpin") -> listOf("nihkuijx", "uijxnihk")
@@ -98,12 +98,12 @@ class MainActivity : AppCompatActivity() {
         R.id.activity_main_get_available -> {
             val list = fcitx.listIme()
             val status = fcitx.imeStatus()
-            val current = list.indexOfFirst { status.startsWith(it) }
+            val current = list.indexOfFirst { status.uniqueName == it.uniqueName }
             AlertDialog.Builder(this)
                 .setTitle("Change IME")
-                .setSingleChoiceItems(list, current) { dialog, choice ->
+                .setSingleChoiceItems(list.map { it.uniqueName } .toTypedArray(), current) { dialog, choice ->
                     val ime = list[choice]
-                    fcitx.setIme(ime.split(":")[0])
+                    fcitx.setIme(ime.uniqueName)
                     dialog.dismiss()
                 }
                 .setNegativeButton("Cancel") { _, _ -> }
@@ -113,18 +113,18 @@ class MainActivity : AppCompatActivity() {
         R.id.activity_main_set_enabled -> {
             val enabled = fcitx.listIme()
             val available = fcitx.availableIme()
-            val strAvail = available.map { "${it.uniqueName}:${it.name}" } .toTypedArray()
-            val boolAvail = available.map { avail ->
-                enabled.indexOfFirst { it.startsWith(avail.uniqueName) } >= 0
+            val nameArray = available.map { it.uniqueName } .toTypedArray()
+            val stateArray = available.map { avail ->
+                enabled.indexOfFirst { it.uniqueName == avail.uniqueName } >= 0
             } .toBooleanArray()
             AlertDialog.Builder(this)
                 .setTitle("Enabled IME")
-                .setMultiChoiceItems(strAvail, boolAvail) { _, which, checked ->
-                    boolAvail[which] = checked;
+                .setMultiChoiceItems(nameArray, stateArray) { _, which, checked ->
+                    stateArray[which] = checked;
                 }
                 .setNegativeButton("Cancel") { _, _ -> }
                 .setPositiveButton("OK") { _, _ ->
-                    fcitx.setEnabledIme(available.filterIndexed { i, _ -> boolAvail[i] } .map { it.uniqueName } .toTypedArray());
+                    fcitx.setEnabledIme(nameArray.filterIndexed { i, _ -> stateArray[i] } .toTypedArray());
                 }
                 .show()
             true
