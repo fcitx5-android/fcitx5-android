@@ -58,29 +58,14 @@ private:
 };
 
 
-static void jniLog(const std::string &s) {
-    __android_log_write(ANDROID_LOG_DEBUG, "JNI", s.c_str());
-}
-
-
-#define DO_IF_NOT_RUNNING(expr) \
-    if (!JNIFcitx::getInstance().isRunning()) { \
-        jniLog("fcitx is not running!"); \
-        expr; \
-    }
-#define RETURN_IF_NOT_RUNNING DO_IF_NOT_RUNNING(return)
-#define RETURN_VALUE_IF_NOT_RUNNING(v) DO_IF_NOT_RUNNING(return v)
-
-
-// TODO(berberman) move out JNIEnv
-class JNIFcitx {
+class Fcitx {
 public:
-    JNIFcitx() = default;
-    JNIFcitx(JNIFcitx const &) = delete;
-    void operator=(JNIFcitx const &) = delete;
+    Fcitx() = default;
+    Fcitx(Fcitx const &) = delete;
+    void operator=(Fcitx const &) = delete;
 
-    static JNIFcitx &getInstance() {
-        static JNIFcitx instance;
+    static Fcitx &Instance() {
+        static Fcitx instance;
         return instance;
     }
 
@@ -88,67 +73,7 @@ public:
         return p_instance != nullptr && p_dispatcher != nullptr && p_frontend != nullptr;
     }
 
-    jint startup(JNIEnv *env, jclass clazz, jstring appData, jstring appLib, jstring extData) {
-        if (p_instance != nullptr) {
-            jniLog("fcitx already running");
-            return 2;
-        }
-        jniLog("startupFcitx");
-
-        setenv("SKIP_FCITX_PATH", "true", 1);
-
-        const char *app_data = env->GetStringUTFChars(appData, nullptr);
-        const char *app_lib = env->GetStringUTFChars(appLib, nullptr);
-        const char *ext_data = env->GetStringUTFChars(extData, nullptr);
-        std::string config_home = std::string(ext_data) + "/config";
-        std::string data_home = std::string(ext_data) + "/data";
-        std::string libime_data = std::string(app_data) + "/fcitx5/libime";
-        const char *app_data_libime = libime_data.c_str();
-
-        setenv("HOME", ext_data, 1);
-        setenv("XDG_DATA_DIRS", app_data, 1);
-        setenv("XDG_CONFIG_HOME", ext_data, 1);
-        setenv("XDG_DATA_HOME", ext_data, 1);
-        setenv("FCITX_CONFIG_HOME", config_home.c_str(), 1);
-        setenv("FCITX_DATA_HOME", data_home.c_str(), 1);
-        setenv("FCITX_ADDON_DIRS", app_lib, 1);
-        setenv("LIBIME_MODEL_DIRS", app_data_libime, 1);
-        setenv("LIBIME_INSTALL_PKGDATADIR", app_data_libime, 1);
-
-        env->ReleaseStringUTFChars(appData, app_data);
-        env->ReleaseStringUTFChars(appLib, app_lib);
-        env->ReleaseStringUTFChars(extData, ext_data);
-
-        jclass hostClass = clazz;
-        jclass stringClass = env->FindClass("java/lang/String");
-        jmethodID handleFcitxEvent = env->GetStaticMethodID(hostClass, "handleFcitxEvent", "(I[Ljava/lang/Object;)V");
-        auto candidateListCallback = [&](const std::vector<std::string> &candidateList) {
-            size_t size = candidateList.size();
-            jobjectArray vararg = env->NewObjectArray(size, stringClass, nullptr);
-            size_t i = 0;
-            for (const auto &s : candidateList) {
-                env->SetObjectArrayElement(vararg, i++, env->NewStringUTF(s.c_str()));
-            }
-            env->CallStaticVoidMethod(clazz, handleFcitxEvent, 0, vararg);
-        };
-        auto commitStringCallback = [&](const std::string &str) {
-            jobjectArray vararg = env->NewObjectArray(1, stringClass, nullptr);
-            env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(str.c_str()));
-            env->CallStaticVoidMethod(clazz, handleFcitxEvent, 1, vararg);
-        };
-        auto preeditCallback = [&](const std::string &preedit, const std::string &clientPreedit) {
-            jobjectArray vararg = env->NewObjectArray(2, stringClass, nullptr);
-            env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(preedit.c_str()));
-            env->SetObjectArrayElement(vararg, 1, env->NewStringUTF(clientPreedit.c_str()));
-            env->CallStaticVoidMethod(clazz, handleFcitxEvent, 2, vararg);
-        };
-        auto inputPanelAuxCallback = [&](const std::string &auxUp, const std::string &auxDown) {
-            jobjectArray vararg = env->NewObjectArray(2, stringClass, nullptr);
-            env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(auxUp.c_str()));
-            env->SetObjectArrayElement(vararg, 1, env->NewStringUTF(auxDown.c_str()));
-            env->CallStaticVoidMethod(clazz, handleFcitxEvent, 3, vararg);
-        };
-
+    int startup(std::function<void(fcitx::AddonInstance *)> setupCallback) {
         char arg0[] = "";
         char *argv[] = {arg0};
         p_instance = std::make_unique<fcitx::Instance>(FCITX_ARRAY_SIZE(argv), argv);
@@ -156,7 +81,7 @@ public:
         p_dispatcher = std::make_unique<fcitx::EventDispatcher>();
         p_dispatcher->attach(&p_instance->eventLoop());
 
-        p_dispatcher->schedule([&]() {
+        p_dispatcher->schedule([&, this]() {
             auto &imMgr = p_instance->inputMethodManager();
             auto group = imMgr.currentGroup();
             if (group.inputMethodList().empty()) {
@@ -165,10 +90,7 @@ public:
             }
 
             auto *androidfrontend = p_instance->addonManager().addon("androidfrontend");
-            androidfrontend->call<fcitx::IAndroidFrontend::setCandidateListCallback>(candidateListCallback);
-            androidfrontend->call<fcitx::IAndroidFrontend::setCommitStringCallback>(commitStringCallback);
-            androidfrontend->call<fcitx::IAndroidFrontend::setPreeditCallback>(preeditCallback);
-            androidfrontend->call<fcitx::IAndroidFrontend::setInputPanelAuxCallback>(inputPanelAuxCallback);
+            setupCallback(androidfrontend);
             auto uuid = androidfrontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
             p_frontend.reset(androidfrontend);
             p_uuid = uuid;
@@ -180,8 +102,7 @@ public:
             return code;
         } catch (const fcitx::InstanceQuietQuit &) {
         } catch (const std::exception &e) {
-            jniLog("fcitx exited with exception:");
-            jniLog(e.what());
+            FCITX_ERROR() << "fcitx exited with exception: " << e.what();
             resetGlobalPointers();
             return 1;
         }
@@ -195,8 +116,7 @@ public:
         });
     }
 
-    void select(jint idx) {
-        jniLog("select candidate #" + std::to_string(idx));
+    void select(int idx) {
         p_dispatcher->schedule([this, idx]() {
             p_frontend->call<fcitx::IAndroidFrontend::selectCandidate>(p_uuid, idx);
         });
@@ -212,45 +132,25 @@ public:
         });
     }
 
-    jobjectArray listInputMethods(JNIEnv *env) {
-        auto &imMgr = p_instance->inputMethodManager();
-        auto &group = imMgr.currentGroup();
-        auto &list = group.inputMethodList();
-        jobjectArray array = env->NewObjectArray(list.size(), env->FindClass("java/lang/String"), nullptr);
-        size_t i = 0;
+    std::vector<const fcitx::InputMethodEntry *> listInputMethods() {
+        const auto &imMgr = p_instance->inputMethodManager();
+        const auto &list = imMgr.currentGroup().inputMethodList();
+        std::vector<const fcitx::InputMethodEntry *> entries;
         for (const auto &ime : list) {
             const auto *entry = imMgr.entry(ime.name());
-            std::string str = entry->uniqueName() + ":" + entry->name() + ":" + entry->icon();
-            env->SetObjectArrayElement(array, i++, env->NewStringUTF(str.c_str()));
+            entries.emplace_back(entry);
         }
-        return array;
+        return std::move(entries);
     }
 
-    jstring inputMethodStatus(JNIEnv *env) {
+    const fcitx::InputMethodEntry *inputMethodStatus() {
+        // TODO(rocka): report `subMode` and `subModeLabel`
         auto &imMgr = p_instance->inputMethodManager();
-        std::string uniqueName;
-        std::string name = "Not available";
-        std::string icon = "input-keyboard";
-        std::string subMode;
-        std::string label;
         auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
         if (ic) {
-            icon = p_instance->inputMethodIcon(ic);
-            if (auto entry = p_instance->inputMethodEntry(ic)) {
-                uniqueName = entry->uniqueName();
-                name = entry->name();
-                label = entry->label();
-                if (auto engine = p_instance->inputMethodEngine(ic)) {
-                    auto subModeLabel = engine->subModeLabel(*entry, *ic);
-                    if (!subModeLabel.empty()) {
-                        label = subModeLabel;
-                    }
-                    subMode = engine->subMode(*entry, *ic);
-                }
-            }
+            return p_instance->inputMethodEntry(ic);
         }
-        std::string result = uniqueName + ":" + name + ":" + icon + ":" + subMode + ":" + label;
-        return env->NewStringUTF(result.c_str());
+        return nullptr;
     }
 
     void setInputMethod(std::string string) {
@@ -259,31 +159,13 @@ public:
         });
     }
 
-    jobjectArray availableInputMethods(JNIEnv *env) {
-        jclass imEntryClass = env->FindClass("me/rocka/fcitx5test/native/InputMethodEntry");
-        jmethodID entryConstructor = env->GetMethodID(imEntryClass, "<init>",
-                                                      "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
+    std::vector<const fcitx::InputMethodEntry *> availableInputMethods() {
         std::vector<const fcitx::InputMethodEntry *> entries;
         p_instance->inputMethodManager().foreachEntries([&](const auto &entry) {
             entries.emplace_back(&entry);
             return true;
         });
-        jobjectArray array = env->NewObjectArray(entries.size(), imEntryClass, nullptr);
-        size_t i = 0;
-        for (const auto &entry : entries) {
-            jobject obj = env->NewObject(imEntryClass, entryConstructor,
-                                         env->NewStringUTF(entry->uniqueName().c_str()),
-                                         env->NewStringUTF(entry->name().c_str()),
-                                         env->NewStringUTF(entry->icon().c_str()),
-                                         env->NewStringUTF(entry->nativeName().c_str()),
-                                         env->NewStringUTF(entry->label().c_str()),
-                                         env->NewStringUTF(entry->languageCode().c_str()),
-                                         entry->isConfigurable() ? JNI_TRUE : JNI_FALSE
-            );
-            env->SetObjectArrayElement(array, i++, obj);
-            env->DeleteLocalRef(obj);
-        }
-        return array;
+        return std::move(entries);
     }
 
     void setEnabledInputMethods(std::vector<std::string> &entries) {
@@ -321,10 +203,8 @@ public:
         return p_instance->addonManager().addon(addon, true);
     }
 
-    std::optional<fcitx::RawConfig> getAddonConfig(JNIEnv *env, jstring addon) {
-        const char *addonName = env->GetStringUTFChars(addon, nullptr);
+    std::optional<fcitx::RawConfig> getAddonConfig(const std::string &addonName) {
         const auto addonInstance = getAddonInstance(addonName);
-        env->ReleaseStringUTFChars(addon, addonName);
         if (!addonInstance) {
             return std::nullopt;
         }
@@ -337,20 +217,16 @@ public:
         return std::make_optional(cfg);
     }
 
-    void setAddonConfig(JNIEnv *env, jstring addon, const fcitx::RawConfig &config) {
-        const char *addonName = env->GetStringUTFChars(addon, nullptr);
+    void setAddonConfig(const std::string &addonName, const fcitx::RawConfig &config) {
         auto addonInstance = getAddonInstance(addonName);
-        env->ReleaseStringUTFChars(addon, addonName);
         if (!addonInstance) {
             return;
         }
         addonInstance->setConfig(config);
     }
 
-    std::optional<fcitx::RawConfig> getInputMethodConfig(JNIEnv *env, jstring im) {
-        const char *imName = env->GetStringUTFChars(im, nullptr);
+    std::optional<fcitx::RawConfig> getInputMethodConfig(const std::string &imName) {
         const auto *entry = p_instance->inputMethodManager().entry(imName);
-        env->ReleaseStringUTFChars(im, imName);
         if (!entry || !entry->isConfigurable()) {
             return std::nullopt;
         }
@@ -367,10 +243,8 @@ public:
         return std::make_optional(cfg);
     }
 
-    void setInputMethodConfig(JNIEnv *env, jstring im, const fcitx::RawConfig &config) {
-        const char *imName = env->GetStringUTFChars(im, nullptr);
+    void setInputMethodConfig(const std::string &imName, const fcitx::RawConfig &config) {
         const auto *entry = p_instance->inputMethodManager().entry(imName);
-        env->ReleaseStringUTFChars(im, imName);
         if (!entry || !entry->isConfigurable()) {
             return;
         }
@@ -455,7 +329,6 @@ public:
     }
 
     void exit() {
-        jniLog("shutting down fcitx");
         p_dispatcher->schedule([this]() {
             p_dispatcher->detach();
             p_instance->exit();
@@ -470,12 +343,30 @@ private:
     fcitx::ICUUID p_uuid{};
 
     void resetGlobalPointers() {
-        jniLog("resetGlobalPointers");
         p_instance = nullptr;
         p_dispatcher = nullptr;
         p_frontend = nullptr;
     }
 };
+
+static void jniLog(const std::string &s) {
+    __android_log_write(ANDROID_LOG_DEBUG, "JNI", s.c_str());
+}
+
+#define DO_IF_NOT_RUNNING(expr) \
+    if (!Fcitx::Instance().isRunning()) { \
+        jniLog("fcitx is not running!"); \
+        expr; \
+    }
+#define RETURN_IF_NOT_RUNNING DO_IF_NOT_RUNNING(return)
+#define RETURN_VALUE_IF_NOT_RUNNING(v) DO_IF_NOT_RUNNING(return v)
+
+std::string jstringToString(JNIEnv *env, jstring j) {
+    const char *c = env->GetStringUTFChars(j, nullptr);
+    std::string s(c);
+    env->ReleaseStringUTFChars(j, c);
+    return s;
+}
 
 JNIEXPORT jint JNICALL
 JNI_OnLoad(JavaVM * /* jvm */, void * /* reserved */) {
@@ -488,21 +379,87 @@ JNI_OnLoad(JavaVM * /* jvm */, void * /* reserved */) {
 extern "C"
 JNIEXPORT jint JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, jstring appData, jstring appLib, jstring extData) {
-    return JNIFcitx::getInstance().startup(env, clazz, appData, appLib, extData);
+    if (Fcitx::Instance().isRunning()) {
+        jniLog("startupFcitx: already running!");
+        return 2;
+    }
+    jniLog("startupFcitx: starting...");
+
+    setenv("SKIP_FCITX_PATH", "true", 1);
+
+    const char *app_data = env->GetStringUTFChars(appData, nullptr);
+    const char *app_lib = env->GetStringUTFChars(appLib, nullptr);
+    const char *ext_data = env->GetStringUTFChars(extData, nullptr);
+    std::string config_home = fcitx::stringutils::joinPath(ext_data, "config");
+    std::string data_home = fcitx::stringutils::joinPath(ext_data, "data");
+    std::string libime_data = fcitx::stringutils::joinPath(app_data, "fcitx5", "libime");
+    const char *app_data_libime = libime_data.c_str();
+
+    setenv("HOME", ext_data, 1);
+    setenv("XDG_DATA_DIRS", app_data, 1);
+    setenv("XDG_CONFIG_HOME", ext_data, 1);
+    setenv("XDG_DATA_HOME", ext_data, 1);
+    setenv("FCITX_CONFIG_HOME", config_home.c_str(), 1);
+    setenv("FCITX_DATA_HOME", data_home.c_str(), 1);
+    setenv("FCITX_ADDON_DIRS", app_lib, 1);
+    setenv("LIBIME_MODEL_DIRS", app_data_libime, 1);
+    setenv("LIBIME_INSTALL_PKGDATADIR", app_data_libime, 1);
+
+    env->ReleaseStringUTFChars(appData, app_data);
+    env->ReleaseStringUTFChars(appLib, app_lib);
+    env->ReleaseStringUTFChars(extData, ext_data);
+
+    jclass stringClass = env->FindClass("java/lang/String");
+    jmethodID handleFcitxEvent = env->GetStaticMethodID(clazz, "handleFcitxEvent", "(I[Ljava/lang/Object;)V");
+    auto candidateListCallback = [&](const std::vector<std::string> &candidateList) {
+        size_t size = candidateList.size();
+        jobjectArray vararg = env->NewObjectArray(size, stringClass, nullptr);
+        size_t i = 0;
+        for (const auto &s : candidateList) {
+            env->SetObjectArrayElement(vararg, i++, env->NewStringUTF(s.c_str()));
+        }
+        env->CallStaticVoidMethod(clazz, handleFcitxEvent, 0, vararg);
+    };
+    auto commitStringCallback = [&](const std::string &str) {
+        jobjectArray vararg = env->NewObjectArray(1, stringClass, nullptr);
+        env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(str.c_str()));
+        env->CallStaticVoidMethod(clazz, handleFcitxEvent, 1, vararg);
+    };
+    auto preeditCallback = [&](const std::string &preedit, const std::string &clientPreedit) {
+        jobjectArray vararg = env->NewObjectArray(2, stringClass, nullptr);
+        env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(preedit.c_str()));
+        env->SetObjectArrayElement(vararg, 1, env->NewStringUTF(clientPreedit.c_str()));
+        env->CallStaticVoidMethod(clazz, handleFcitxEvent, 2, vararg);
+    };
+    auto inputPanelAuxCallback = [&](const std::string &auxUp, const std::string &auxDown) {
+        jobjectArray vararg = env->NewObjectArray(2, stringClass, nullptr);
+        env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(auxUp.c_str()));
+        env->SetObjectArrayElement(vararg, 1, env->NewStringUTF(auxDown.c_str()));
+        env->CallStaticVoidMethod(clazz, handleFcitxEvent, 3, vararg);
+    };
+
+    return Fcitx::Instance().startup([&](auto *androidfrontend) {
+        jniLog("startupFcitx: setupCallback");
+        androidfrontend->template call<fcitx::IAndroidFrontend::setCandidateListCallback>(candidateListCallback);
+        androidfrontend->template call<fcitx::IAndroidFrontend::setCommitStringCallback>(commitStringCallback);
+        androidfrontend->template call<fcitx::IAndroidFrontend::setPreeditCallback>(preeditCallback);
+        androidfrontend->template call<fcitx::IAndroidFrontend::setInputPanelAuxCallback>(inputPanelAuxCallback);
+    });
+    jniLog("startupFcitx: returned");
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_exitFcitx(JNIEnv *env, jclass clazz) {
     RETURN_IF_NOT_RUNNING
-    JNIFcitx::getInstance().exit();
+    Fcitx::Instance().exit();
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_saveFcitxConfig(JNIEnv *env, jclass clazz) {
     RETURN_IF_NOT_RUNNING
-    JNIFcitx::getInstance().saveConfig();
+    Fcitx::Instance().saveConfig();
 }
 
 extern "C"
@@ -512,7 +469,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_sendKeyToFcitxString(JNIEnv *env, jclass c
     const char *k = env->GetStringUTFChars(key, nullptr);
     fcitx::Key parsedKey(k);
     env->ReleaseStringUTFChars(key, k);
-    JNIFcitx::getInstance().sendKey(parsedKey);
+    Fcitx::Instance().sendKey(parsedKey);
 }
 
 extern "C"
@@ -520,55 +477,89 @@ JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_sendKeyToFcitxChar(JNIEnv *env, jclass clazz, jchar c) {
     RETURN_IF_NOT_RUNNING
     fcitx::Key parsedKey((const char *) &c);
-    JNIFcitx::getInstance().sendKey(parsedKey);
+    Fcitx::Instance().sendKey(parsedKey);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_selectCandidate(JNIEnv *env, jclass clazz, jint idx) {
     RETURN_IF_NOT_RUNNING
-    JNIFcitx::getInstance().select(idx);
+    jniLog("selectCandidate: #" + std::to_string(idx));
+    Fcitx::Instance().select(idx);
 }
 
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_isInputPanelEmpty(JNIEnv *env, jclass clazz) {
     RETURN_VALUE_IF_NOT_RUNNING(true)
-    return JNIFcitx::getInstance().isInputPanelEmpty();
+    return Fcitx::Instance().isInputPanelEmpty();
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_resetInputPanel(JNIEnv *env, jclass clazz) {
     RETURN_IF_NOT_RUNNING
-    JNIFcitx::getInstance().resetInputPanel();
+    Fcitx::Instance().resetInputPanel();
+}
+
+// TODO: avoid unnecessary `FindClass` and `GetMethodID` when called in loop
+jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry) {
+    jclass imEntryClass = env->FindClass("me/rocka/fcitx5test/native/InputMethodEntry");
+    jmethodID entryConstructor = env->GetMethodID(imEntryClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
+    return env->NewObject(imEntryClass, entryConstructor,
+                          env->NewStringUTF(entry->uniqueName().c_str()),
+                          env->NewStringUTF(entry->name().c_str()),
+                          env->NewStringUTF(entry->icon().c_str()),
+                          env->NewStringUTF(entry->nativeName().c_str()),
+                          env->NewStringUTF(entry->label().c_str()),
+                          env->NewStringUTF(entry->languageCode().c_str()),
+                          entry->isConfigurable()
+    );
 }
 
 extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_listInputMethods(JNIEnv *env, jclass clazz) {
-    return JNIFcitx::getInstance().listInputMethods(env);
+    const auto entries = Fcitx::Instance().listInputMethods();
+    jclass imEntryClass = env->FindClass("me/rocka/fcitx5test/native/InputMethodEntry");
+    jobjectArray array = env->NewObjectArray(entries.size(), imEntryClass, nullptr);
+    size_t i = 0;
+    for (const auto &entry : entries) {
+        jobject obj = fcitxInputMethodEntryToJObject(env, entry);
+        env->SetObjectArrayElement(array, i++, obj);
+        env->DeleteLocalRef(obj);
+    }
+    return array;
 }
 
 extern "C"
-JNIEXPORT jstring JNICALL
+JNIEXPORT jobject JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_inputMethodStatus(JNIEnv *env, jclass clazz) {
-    return JNIFcitx::getInstance().inputMethodStatus(env);
+    const auto *entry = Fcitx::Instance().inputMethodStatus();
+    return fcitxInputMethodEntryToJObject(env, entry);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_setInputMethod(JNIEnv *env, jclass clazz, jstring ime) {
     const char *chars = env->GetStringUTFChars(ime, nullptr);
-    std::string string(chars);
+    Fcitx::Instance().setInputMethod(chars);
     env->ReleaseStringUTFChars(ime, chars);
-    JNIFcitx::getInstance().setInputMethod(string);
 }
 
 extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_availableInputMethods(JNIEnv *env, jclass clazz) {
-    return JNIFcitx::getInstance().availableInputMethods(env);
+    auto entries = Fcitx::Instance().availableInputMethods();
+    jclass imEntryClass = env->FindClass("me/rocka/fcitx5test/native/InputMethodEntry");
+    jobjectArray array = env->NewObjectArray(entries.size(), imEntryClass, nullptr);
+    size_t i = 0;
+    for (const auto &entry : entries) {
+        jobject obj = fcitxInputMethodEntryToJObject(env, entry);
+        env->SetObjectArrayElement(array, i++, obj);
+        env->DeleteLocalRef(obj);
+    }
+    return array;
 }
 
 extern "C"
@@ -583,7 +574,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_setEnabledInputMethods(JNIEnv *env, jclass
         env->ReleaseStringUTFChars(string, chars);
         env->DeleteLocalRef(string);
     }
-    JNIFcitx::getInstance().setEnabledInputMethods(entries);
+    Fcitx::Instance().setEnabledInputMethods(entries);
 }
 
 jobject fcitxRawConfigToJObject(JNIEnv *env, jclass cls, jmethodID init, jmethodID setSubItems, const fcitx::RawConfig &cfg) {
@@ -620,14 +611,14 @@ jobject fcitxRawConfigToJObject(JNIEnv *env, const fcitx::RawConfig &cfg) {
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_getFcitxGlobalConfig(JNIEnv *env, jclass clazz) {
-    auto cfg = JNIFcitx::getInstance().getGlobalConfig();
+    auto cfg = Fcitx::Instance().getGlobalConfig();
     return fcitxRawConfigToJObject(env, cfg);
 }
 
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddonConfig(JNIEnv *env, jclass clazz, jstring addon) {
-    auto result = JNIFcitx::getInstance().getAddonConfig(env, addon);
+    auto result = Fcitx::Instance().getAddonConfig(jstringToString(env, addon));
     if (result)
         return fcitxRawConfigToJObject(env, result.value());
     else
@@ -637,7 +628,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddonConfig(JNIEnv *env, jclass cl
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_getFcitxInputMethodConfig(JNIEnv *env, jclass clazz, jstring im) {
-    auto result = JNIFcitx::getInstance().getInputMethodConfig(env, im);
+    auto result = Fcitx::Instance().getInputMethodConfig(jstringToString(env, im));
     if (result)
         return fcitxRawConfigToJObject(env, result.value());
     else
@@ -683,21 +674,21 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_setFcitxGlobalConfig(JNIEnv *env, jclass clazz, jobject config) {
     auto rawConfig = jobjectToRawConfig(env, config);
-    JNIFcitx::getInstance().setGlobalConfig(rawConfig);
+    Fcitx::Instance().setGlobalConfig(rawConfig);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_setFcitxAddonConfig(JNIEnv *env, jclass clazz, jstring addon, jobject config) {
     auto rawConfig = jobjectToRawConfig(env, config);
-    JNIFcitx::getInstance().setAddonConfig(env, addon, rawConfig);
+    Fcitx::Instance().setAddonConfig(jstringToString(env, addon), rawConfig);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_setFcitxInputMethodConfig(JNIEnv *env, jclass clazz, jstring im, jobject config) {
     auto rawConfig = jobjectToRawConfig(env, config);
-    JNIFcitx::getInstance().setInputMethodConfig(env, im, rawConfig);
+    Fcitx::Instance().setInputMethodConfig(jstringToString(env, im), rawConfig);
 }
 
 extern "C"
@@ -705,7 +696,7 @@ JNIEXPORT jobjectArray JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddons(JNIEnv *env, jclass clazz) {
     jclass cls = env->FindClass("me/rocka/fcitx5test/native/AddonInfo");
     RETURN_VALUE_IF_NOT_RUNNING(env->NewObjectArray(0, cls, nullptr))
-    const auto &addons = JNIFcitx::getInstance().getAddons();
+    const auto &addons = Fcitx::Instance().getAddons();
     jmethodID init = env->GetMethodID(cls, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZZZ)V");
     jobjectArray array = env->NewObjectArray(addons.size(), cls, nullptr);
     size_t i = 0;
@@ -746,5 +737,5 @@ Java_me_rocka_fcitx5test_native_Fcitx_setFcitxAddonState(JNIEnv *env, jclass cla
         env->DeleteLocalRef(jName);
     }
     env->ReleaseBooleanArrayElements(state, enabled, 0);
-    JNIFcitx::getInstance().setAddonState(map);
+    Fcitx::Instance().setAddonState(map);
 }
