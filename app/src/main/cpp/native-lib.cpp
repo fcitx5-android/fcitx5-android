@@ -438,7 +438,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 3, vararg);
     };
 
-    return Fcitx::Instance().startup([&](auto *androidfrontend) {
+    int code = Fcitx::Instance().startup([&](auto *androidfrontend) {
         jniLog("startupFcitx: setupCallback");
         androidfrontend->template call<fcitx::IAndroidFrontend::setCandidateListCallback>(candidateListCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setCommitStringCallback>(commitStringCallback);
@@ -446,6 +446,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
         androidfrontend->template call<fcitx::IAndroidFrontend::setInputPanelAuxCallback>(inputPanelAuxCallback);
     });
     jniLog("startupFcitx: returned");
+    return code;
 }
 
 extern "C"
