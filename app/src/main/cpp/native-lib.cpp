@@ -542,9 +542,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_inputMethodStatus(JNIEnv *env, jclass claz
 extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_setInputMethod(JNIEnv *env, jclass clazz, jstring ime) {
-    const char *chars = env->GetStringUTFChars(ime, nullptr);
-    Fcitx::Instance().setInputMethod(chars);
-    env->ReleaseStringUTFChars(ime, chars);
+    Fcitx::Instance().setInputMethod(jstringToString(env, ime));
 }
 
 extern "C"
@@ -568,10 +566,8 @@ Java_me_rocka_fcitx5test_native_Fcitx_setEnabledInputMethods(JNIEnv *env, jclass
     size_t size = env->GetArrayLength(array);
     std::vector<std::string> entries;
     for (size_t i = 0; i < size; i++) {
-        auto string = (jstring) env->GetObjectArrayElement(array, i);
-        const char *chars = env->GetStringUTFChars(string, nullptr);
-        entries.emplace_back(chars);
-        env->ReleaseStringUTFChars(string, chars);
+        auto string = reinterpret_cast<jstring>(env->GetObjectArrayElement(array, i));
+        entries.emplace_back(jstringToString(env, string));
         env->DeleteLocalRef(string);
     }
     Fcitx::Instance().setEnabledInputMethods(entries);
@@ -638,20 +634,17 @@ Java_me_rocka_fcitx5test_native_Fcitx_getFcitxInputMethodConfig(JNIEnv *env, jcl
 void jobjectFillRawConfig(JNIEnv *env, jclass cls, jfieldID fName, jfieldID fValue, jfieldID fSubItems, jobject jConfig, fcitx::RawConfig &config) {
     auto subItems = (jobjectArray) env->GetObjectField(jConfig, fSubItems);
     if (subItems == nullptr) {
-        auto jValue = (jstring) env->GetObjectField(jConfig, fValue);
-        const char *cValue = env->GetStringUTFChars(jValue, nullptr);
-        config = cValue;
-        env->ReleaseStringUTFChars(jValue, cValue);
+        auto jValue = reinterpret_cast<jstring>(env->GetObjectField(jConfig, fValue));
+        config = jstringToString(env, jValue);
         env->DeleteLocalRef(jValue);
         return;
     } else {
         size_t size = env->GetArrayLength(subItems);
         for (size_t i = 0; i < size; i++) {
             jobject item = env->GetObjectArrayElement(subItems, i);
-            auto jName = (jstring) env->GetObjectField(item, fName);
-            const char *cName = env->GetStringUTFChars(jName, nullptr);
-            auto subConfig = config.get(cName, true);
-            env->ReleaseStringUTFChars(jName, cName);
+            auto jName = reinterpret_cast<jstring>(env->GetObjectField(item, fName));
+            auto name = jstringToString(env, jName);
+            auto subConfig = config.get(name, true);
             jobjectFillRawConfig(env, cls, fName, fValue, fSubItems, item, *subConfig);
             env->DeleteLocalRef(jName);
             env->DeleteLocalRef(item);
@@ -731,9 +724,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_setFcitxAddonState(JNIEnv *env, jclass cla
     const auto enabled = env->GetBooleanArrayElements(state, nullptr);
     for (size_t i = 0; i < nameLength; i++) {
         auto jName = reinterpret_cast<jstring>(env->GetObjectArrayElement(name, i));
-        auto cName = env->GetStringUTFChars(jName, nullptr);
-        map.insert({cName, enabled[i]});
-        env->ReleaseStringUTFChars(jName, cName);
+        map.insert({jstringToString(env, jName), enabled[i]});
         env->DeleteLocalRef(jName);
     }
     env->ReleaseBooleanArrayElements(state, enabled, 0);
