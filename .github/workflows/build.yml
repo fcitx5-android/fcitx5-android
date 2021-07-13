@@ -25,3 +25,21 @@ jobs:
         with:
           arguments: assembleDebug
           gradle-version: wrapper
+      - name: Send success notification to telegram
+        if: ${{ success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          disable_web_page_preview: true
+          message: "Job [${{ github.workflow }} / ${{ github.job }} (${{ github.event_name }}) #${{ github.run_number }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) by [${{ github.actor }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) succeed ✔"
+      - name: Send failure notification to telegram
+        if: ${{ failure() && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          disable_web_page_preview: true
+          message: "Job [${{ github.workflow }} / ${{ github.job }} (${{ github.event_name }}) #${{ github.run_number }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) by [${{ github.actor }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) failed ✘"
