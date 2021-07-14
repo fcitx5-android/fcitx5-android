@@ -16,16 +16,6 @@ android {
         versionName("1.0")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        externalNativeBuild {
-            cmake {
-                cppFlags("-std=c++17")
-                val ecm = System.getenv("ECM_DIR") ?: "/usr/share/ECM/cmake"
-                arguments(
-                    "-DANDROID_STL=c++_shared",
-                    "-DECM_DIR=${ecm}"
-                )
-            }
-        }
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a")
         }

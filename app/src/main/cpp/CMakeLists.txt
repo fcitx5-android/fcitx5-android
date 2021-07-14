@@ -2,7 +2,18 @@ cmake_minimum_required(VERSION 3.18)
 
 project(fcitx-lib)
 
+set(ANDROID_STL c++_shared)
+
+set(CMAKE_CXX_STANDARD 17)
+
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+
+# extra-cmake-modules
+if(DEFINED ENV{ECM_DIR})
+    set(ECM_DIR $ENV{ECM_DIR})
+else()
+    set(ECM_DIR /usr/share/ECM/cmake)
+endif()
 
 set(PREBUILT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/prebuilt/")
 
