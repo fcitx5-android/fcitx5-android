@@ -90,10 +90,9 @@ public:
             }
 
             auto *androidfrontend = p_instance->addonManager().addon("androidfrontend");
-            setupCallback(androidfrontend);
-            auto uuid = androidfrontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
+            p_uuid = androidfrontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
             p_frontend.reset(androidfrontend);
-            p_uuid = uuid;
+            setupCallback(androidfrontend);
         });
 
         try {
@@ -419,27 +418,37 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
             env->SetObjectArrayElement(vararg, i++, env->NewStringUTF(s.c_str()));
         }
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 0, vararg);
+        env->DeleteLocalRef(vararg);
     };
     auto commitStringCallback = [&](const std::string &str) {
         jobjectArray vararg = env->NewObjectArray(1, stringClass, nullptr);
         env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(str.c_str()));
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 1, vararg);
+        env->DeleteLocalRef(vararg);
     };
     auto preeditCallback = [&](const std::string &preedit, const std::string &clientPreedit) {
         jobjectArray vararg = env->NewObjectArray(2, stringClass, nullptr);
         env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(preedit.c_str()));
         env->SetObjectArrayElement(vararg, 1, env->NewStringUTF(clientPreedit.c_str()));
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 2, vararg);
+        env->DeleteLocalRef(vararg);
     };
     auto inputPanelAuxCallback = [&](const std::string &auxUp, const std::string &auxDown) {
         jobjectArray vararg = env->NewObjectArray(2, stringClass, nullptr);
         env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(auxUp.c_str()));
         env->SetObjectArrayElement(vararg, 1, env->NewStringUTF(auxDown.c_str()));
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 3, vararg);
+        env->DeleteLocalRef(vararg);
+    };
+    auto readyCallback = [&]() {
+        jobjectArray vararg = env->NewObjectArray(0, stringClass, nullptr);
+        env->CallStaticVoidMethod(clazz, handleFcitxEvent, 4, vararg);
+        env->DeleteLocalRef(vararg);
     };
 
     int code = Fcitx::Instance().startup([&](auto *androidfrontend) {
         jniLog("startupFcitx: setupCallback");
+        readyCallback();
         androidfrontend->template call<fcitx::IAndroidFrontend::setCandidateListCallback>(candidateListCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setCommitStringCallback>(commitStringCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setPreeditCallback>(preeditCallback);
