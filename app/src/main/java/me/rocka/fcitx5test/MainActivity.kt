@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity() {
             true
         }
         R.id.activity_main_empty -> {
-            toast("${fcitx.empty()}")
+            toast("${fcitx.isEmpty()}")
             true
         }
         R.id.activity_main_get_available -> {
@@ -120,11 +120,11 @@ class MainActivity : AppCompatActivity() {
             AlertDialog.Builder(this)
                 .setTitle("Enabled IME")
                 .setMultiChoiceItems(nameArray, stateArray) { _, which, checked ->
-                    stateArray[which] = checked;
+                    stateArray[which] = checked
                 }
                 .setNegativeButton("Cancel") { _, _ -> }
                 .setPositiveButton("OK") { _, _ ->
-                    fcitx.setEnabledIme(nameArray.filterIndexed { i, _ -> stateArray[i] } .toTypedArray());
+                    fcitx.setEnabledIme(nameArray.filterIndexed { i, _ -> stateArray[i] } .toTypedArray())
                 }
                 .show()
             true

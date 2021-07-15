@@ -2,7 +2,8 @@ package me.rocka.fcitx5test.native
 
 import android.content.Context
 import android.util.Log
-import androidx.lifecycle.*
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -29,7 +30,7 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
     fun sendKey(key: String) = sendKeyToFcitxString(key)
     fun sendKey(c: Char) = sendKeyToFcitxChar(c)
     fun select(idx: Int) = selectCandidate(idx)
-    fun empty() = isInputPanelEmpty()
+    fun isEmpty() = isInputPanelEmpty()
     fun reset() = resetInputPanel()
     fun listIme() = listInputMethods()
     fun imeStatus() = inputMethodStatus()
@@ -45,8 +46,10 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
     }
     var imConfig = object : RawConfigMap {
         override operator fun get(key: String) = getFcitxInputMethodConfig(key)
-        override operator fun set(key: String, value: RawConfig) = setFcitxInputMethodConfig(key, value)
+        override operator fun set(key: String, value: RawConfig) =
+            setFcitxInputMethodConfig(key, value)
     }
+
     fun addons() = getFcitxAddons()
     fun setAddonState(name: Array<String>, state: BooleanArray) = setFcitxAddonState(name, state)
 
@@ -142,9 +145,7 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
                 "FcitxEvent",
                 "type=${type}, params=${params.run { "[$size]" + joinToString(",") }}"
             )
-            launch {
-                eventFlow_.emit(FcitxEvent.create(type, params.asList()))
-            }
+            eventFlow_.tryEmit(FcitxEvent.create(type, params.asList()))
         }
     }
 

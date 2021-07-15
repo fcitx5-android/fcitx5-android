@@ -62,6 +62,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-common-java8:2.3.1")
     implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-android", "1.4.2")
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+    androidTestImplementation ("androidx.test:runner:1.4.0")
+    androidTestImplementation ("androidx.test:rules:1.4.0")
+    androidTestImplementation("androidx.lifecycle:lifecycle-runtime-testing:2.3.1")
 }
