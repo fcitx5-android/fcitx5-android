@@ -3,6 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/activity_main_mock_input"
+        android:icon="@drawable/ic_baseline_input_24"
+        android:title="mockInput()"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/activity_main_reset"
         android:icon="@drawable/ic_baseline_settings_backup_restore_24"
         android:title="fcitx.reset()"

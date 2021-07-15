@@ -49,6 +49,9 @@ class MainActivity : AppCompatActivity() {
                     val text = "${it.data.auxUp}\n${it.data.auxDown}"
                     if (text.length > 1) toast(text)
                 }
+                is FcitxEvent.ReadyEvent -> {
+                    mockInput()
+                }
                 is FcitxEvent.UnknownEvent -> {
                     Log.i(javaClass.name, "unknown event: ${it.data}")
                 }
@@ -56,10 +59,8 @@ class MainActivity : AppCompatActivity() {
         }.launchIn(uiScope)
     }
 
-    override fun onResume() {
-        super.onResume()
+    private fun mockInput() {
         uiScope.launch {
-            delay(2000)
             val keySeq = with(fcitx.imeStatus().uniqueName) {
                 when {
                     startsWith("pinyin") -> listOf("nihaoshijie", "shijienihao")
@@ -87,6 +88,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
+        R.id.activity_main_mock_input -> {
+            mockInput()
+            true
+        }
         R.id.activity_main_reset -> {
             fcitx.reset()
             true
