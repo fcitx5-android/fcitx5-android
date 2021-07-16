@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxEvent
+import me.rocka.fcitx5test.native.RawConfig
 import org.junit.AfterClass
 import org.junit.Assert
 import org.junit.BeforeClass
@@ -41,7 +42,13 @@ class FcitxTest {
                 .launchIn(GlobalScope)
 
             // wait fcitx started
-            runBlocking { delay(2000) }
+            runBlocking { receiveFirst<FcitxEvent.ReadyEvent>() }
+            fcitx.setEnabledIme(arrayOf("pinyin"))
+            fcitx.globalConfig = RawConfig(arrayOf(
+                RawConfig("Behavior", arrayOf(
+                    RawConfig("ShowInputMethodInformation", false)
+                ))
+            ))
         }
 
         @AfterClass
