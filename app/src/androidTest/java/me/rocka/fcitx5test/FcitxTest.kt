@@ -12,10 +12,7 @@ import kotlinx.coroutines.runBlocking
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxEvent
 import me.rocka.fcitx5test.native.RawConfig
-import org.junit.AfterClass
-import org.junit.Assert
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.*
 
 class FcitxTest {
 
@@ -61,7 +58,7 @@ class FcitxTest {
         private suspend fun sendString(str: String) {
             str.forEach { c ->
                 fcitx.sendKey(c)
-                delay(200)
+                delay(50)
             }
         }
 
@@ -81,14 +78,35 @@ class FcitxTest {
 
     }
 
+    private var enabledIme: List<String> = listOf()
+
+    @Before
+    fun saveEnabledIME() {
+        enabledIme = fcitx.listIme().map { it.uniqueName }
+    }
+
+    @After
+    fun restoreEnabledIME() {
+        fcitx.setEnabledIme(enabledIme.toTypedArray())
+    }
+
+    @Test
+    fun testWbx(): Unit = runBlocking {
+        fcitx.setEnabledIme(arrayOf("wbx"))
+        sendString("wqvb")
+        val expected = "你好"
+        fcitx.select(0)
+        val commitString = receiveFirstCommitString()?.data
+        log("commitString is $commitString")
+        Assert.assertEquals(expected, commitString)
+        fcitx.reset()
+    }
 
     @Test
     fun testPinyin(): Unit = runBlocking {
+        fcitx.setEnabledIme(arrayOf("pinyin"))
         sendString("nihaoshijie")
         val expected = "你好世界"
-        val candidateList = receiveFirstCandidateList()?.data
-        log("candidateList is $candidateList")
-        Assert.assertEquals(expected, candidateList?.firstOrNull())
         fcitx.select(0)
         val commitString = receiveFirstCommitString()?.data
         log("commitString is $commitString")
@@ -102,11 +120,15 @@ class FcitxTest {
         log("after first reset: ${fcitx.isEmpty()}")
         Assert.assertEquals(true, fcitx.isEmpty())
         fcitx.sendKey('a')
-        receiveFirstCandidateList()
+        do {
+            val list = receiveFirstCandidateList()
+        } while (list!!.data.isEmpty())
         log("after sending 'a': ${fcitx.isEmpty()}")
         Assert.assertEquals(false, fcitx.isEmpty())
         fcitx.reset()
-        receiveFirstCandidateList()
+        do {
+            val list = receiveFirstCandidateList()
+        } while (list!!.data.isNotEmpty())
         log("after second reset: ${fcitx.isEmpty()}")
         Assert.assertEquals(true, fcitx.isEmpty())
     }
