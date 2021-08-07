@@ -1,0 +1,1 @@
+../../../cpp/fcitx5/src/modules/quickphrase/quickphrase.d
