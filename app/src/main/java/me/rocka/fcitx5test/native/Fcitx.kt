@@ -9,7 +9,6 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import me.rocka.fcitx5test.copyFileOrDir
-import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
 class Fcitx(private val context: Context) : DefaultLifecycleObserver {
@@ -154,8 +153,6 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
             fcitxJob = launch {
                 copyFileOrDir("fcitx5")
                 val externalFilesDir = getExternalFilesDir(null)!!
-                File(externalFilesDir.absolutePath, "data").mkdirs()
-                File(externalFilesDir.absolutePath, "config").mkdirs()
                 // TODO: should be set in a callback which indicates fcitx has started
                 isRunning.set(true)
                 startupFcitx(
