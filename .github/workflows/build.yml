@@ -17,7 +17,7 @@ jobs:
           distribution: 'adopt'
           java-version: '11'
       - uses: android-actions/setup-android@v2
-      - run: sdkmanager --install "ndk;23.0.7421159" --channel=1
+      - run: sdkmanager --install "ndk;23.0.7599858"
       - run: sdkmanager --install "cmake;3.18.1"
       - run: sudo apt install -y extra-cmake-modules
       - uses: burrunan/gradle-cache-action@v1

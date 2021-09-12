@@ -6,7 +6,7 @@ plugins {
 android {
     compileSdk = 30
     buildToolsVersion = "30.0.3"
-    ndkVersion = "23.0.7421159 rc5"
+    ndkVersion = "23.0.7599858"
 
     defaultConfig {
         applicationId = "me.rocka.fcitx5test"
