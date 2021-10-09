@@ -552,15 +552,10 @@ jobject fcitxRawConfigToJObject(JNIEnv *env, jclass cls, jmethodID init, jmethod
     if (!cfg.hasSubItems()) {
         return obj;
     }
-    std::vector<const fcitx::RawConfig *> subItems;
-    for (const auto &option : cfg.subItems()) {
-        const auto &subCfg = cfg.get(option);
-        subItems.emplace_back(subCfg.get());
-    }
-    jobjectArray array = env->NewObjectArray(subItems.size(), cls, nullptr);
+    jobjectArray array = env->NewObjectArray(cfg.subItemsSize(), cls, nullptr);
     size_t i = 0;
-    for (const auto item : subItems) {
-        env->SetObjectArrayElement(array, i++, fcitxRawConfigToJObject(env, cls, init, setSubItems, *item));
+    for (const auto &option : cfg.subItems()) {
+        env->SetObjectArrayElement(array, i++, fcitxRawConfigToJObject(env, cls, init, setSubItems, *cfg.get(option)));
     }
     env->CallVoidMethod(obj, setSubItems, array);
     env->DeleteLocalRef(array);
@@ -610,7 +605,6 @@ void jobjectFillRawConfig(JNIEnv *env, jclass cls, jfieldID fName, jfieldID fVal
         auto jValue = reinterpret_cast<jstring>(env->GetObjectField(jConfig, fValue));
         config = jstringToString(env, jValue);
         env->DeleteLocalRef(jValue);
-        return;
     } else {
         size_t size = env->GetArrayLength(subItems);
         for (size_t i = 0; i < size; i++) {
