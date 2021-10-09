@@ -15,7 +15,7 @@ else()
     set(ECM_DIR /usr/share/ECM/cmake)
 endif()
 
-set(PREBUILT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/prebuilt/")
+set(PREBUILT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/prebuilt")
 
 # prebuilt fmt
 set(fmt_DIR "${PREBUILT_DIR}/fmt/${ANDROID_ABI}/lib/cmake/fmt")
@@ -51,9 +51,9 @@ add_subdirectory(androidfrontend)
 set(BOOST_VERSION "1.76.0")
 set(BOOST_MODULES headers filesystem iostreams regex)
 set(BOOST_ROOT "${PREBUILT_DIR}/boost/${ANDROID_ABI}")
-set(Boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}/")
+set(Boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
 foreach(mod IN LISTS BOOST_MODULES)
-    set("boost_${mod}_DIR" "${BOOST_ROOT}/lib/cmake/boost_${mod}-${BOOST_VERSION}/")
+    set("boost_${mod}_DIR" "${BOOST_ROOT}/lib/cmake/boost_${mod}-${BOOST_VERSION}")
 endforeach()
 
 option(ENABLE_TEST "" OFF)
