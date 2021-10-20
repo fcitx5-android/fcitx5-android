@@ -37,31 +37,23 @@ public:
         p_dispatcher->attach(&p_instance->eventLoop());
 
         p_dispatcher->schedule([&, this]() {
-            auto &imMgr = p_instance->inputMethodManager();
-            auto group = imMgr.currentGroup();
-            if (group.inputMethodList().empty()) {
-                group.inputMethodList().emplace_back("pinyin");
-                imMgr.setGroup(group);
-            }
-
-            auto *androidfrontend = p_instance->addonManager().addon("androidfrontend");
-            p_uuid = androidfrontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
-            p_frontend.reset(androidfrontend);
-            setupCallback(androidfrontend);
+            p_frontend = p_instance->addonManager().addon("androidfrontend");
+            p_uuid = p_frontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
+            setupCallback(p_frontend);
         });
 
+        int code = -1;
         try {
-            int code = p_instance->exec();
-            resetGlobalPointers();
-            return code;
+            code = p_instance->exec();
         } catch (const fcitx::InstanceQuietQuit &) {
+            FCITX_INFO() << "fcitx exited quietly";
+            code = 0;
         } catch (const std::exception &e) {
             FCITX_ERROR() << "fcitx exited with exception: " << e.what();
-            resetGlobalPointers();
-            return 1;
+            code = 1;
         }
         resetGlobalPointers();
-        return 0;
+        return code;
     }
 
     void sendKey(fcitx::Key key) {
@@ -290,16 +282,16 @@ public:
     }
 
 private:
-
     std::unique_ptr<fcitx::Instance> p_instance{};
     std::unique_ptr<fcitx::EventDispatcher> p_dispatcher{};
-    std::unique_ptr<fcitx::AddonInstance> p_frontend{};
+    fcitx::AddonInstance *p_frontend = nullptr;
     fcitx::ICUUID p_uuid{};
 
     void resetGlobalPointers() {
-        p_instance = nullptr;
-        p_dispatcher = nullptr;
+        p_instance.reset();
+        p_dispatcher.reset();
         p_frontend = nullptr;
+        p_uuid = {};
     }
 };
 
@@ -409,7 +401,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
         androidfrontend->template call<fcitx::IAndroidFrontend::setPreeditCallback>(preeditCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setInputPanelAuxCallback>(inputPanelAuxCallback);
     });
-    jniLog("startupFcitx: returned");
+    jniLog("startupFcitx: returned with code " + std::to_string(code));
     return code;
 }
 
