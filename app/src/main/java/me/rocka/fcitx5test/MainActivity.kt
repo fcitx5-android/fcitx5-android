@@ -63,6 +63,7 @@ class MainActivity : AppCompatActivity() {
         uiScope.launch {
             val keySeq = with(fcitx.imeStatus().uniqueName) {
                 when {
+                    startsWith("keyboard") -> listOf("hello world")
                     startsWith("pinyin") -> listOf("nihaoshijie", "shijienihao")
                     startsWith("shuangpin") -> listOf("nihkuijx", "uijxnihk")
                     startsWith("wb") -> listOf("wqvbanlw", "anlwwqvb")
