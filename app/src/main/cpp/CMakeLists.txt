@@ -46,6 +46,7 @@ option(ENABLE_LIBUUID "" OFF)
 add_subdirectory(fcitx5)
 
 add_subdirectory(androidfrontend)
+add_subdirectory(androidkeyboard)
 
 # prebuilt boost
 set(BOOST_VERSION "1.76.0")
