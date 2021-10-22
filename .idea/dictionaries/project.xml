@@ -2,6 +2,7 @@
   <dictionary name="project">
     <words>
       <w>androidfrontend</w>
+      <w>androidkeyboard</w>
       <w>berberman</w>
       <w>constraintlayout</w>
       <w>cout</w>
@@ -9,6 +10,7 @@
       <w>fcitx</w>
       <w>fmtlib</w>
       <w>icuuid</w>
+      <w>iter</w>
       <w>jbytes</w>
       <w>jnicall</w>
       <w>jobject</w>
@@ -22,6 +24,7 @@
       <w>orphis</w>
       <w>pkgdatadir</w>
       <w>preedit</w>
+      <w>quickphrase</w>
       <w>sdkmanager</w>
       <w>setenv</w>
       <w>shijienihao</w>
