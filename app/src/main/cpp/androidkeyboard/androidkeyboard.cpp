@@ -1,8 +1,10 @@
 #include <fcitx-utils/utf8.h>
+#include <fcitx-utils/charutils.h>
 #include <fcitx/instance.h>
 #include <fcitx/candidatelist.h>
 #include <fcitx/inputpanel.h>
 
+#include "../fcitx5/src/modules/spell/spell_public.h"
 #include "../fcitx5/src/im/keyboard/chardata.h"
 
 #include "androidkeyboard.h"
@@ -12,6 +14,56 @@
 namespace fcitx {
 
 namespace {
+
+enum class SpellType {
+    AllLower, Mixed, FirstUpper, AllUpper
+};
+
+SpellType guessSpellType(const std::string &input) {
+    if (input.size() <= 1) {
+        if (charutils::isupper(input[0])) {
+            return SpellType::FirstUpper;
+        }
+        return SpellType::AllLower;
+    }
+
+    if (std::all_of(input.begin(), input.end(),
+                    [](char c) { return charutils::isupper(c); })) {
+        return SpellType::AllUpper;
+    }
+
+    if (std::all_of(input.begin() + 1, input.end(),
+                    [](char c) { return charutils::islower(c); })) {
+        if (charutils::isupper(input[0])) {
+            return SpellType::FirstUpper;
+        }
+        return SpellType::AllLower;
+    }
+
+    return SpellType::Mixed;
+}
+
+std::string formatWord(const std::string &input, SpellType type) {
+    if (type == SpellType::Mixed || type == SpellType::AllLower) {
+        return input;
+    }
+    if (guessSpellType(input) != SpellType::AllLower) {
+        return input;
+    }
+    std::string result;
+    if (type == SpellType::AllUpper) {
+        result.reserve(input.size());
+        std::transform(input.begin(), input.end(), std::back_inserter(result),
+                       charutils::toupper);
+    } else {
+        // FirstUpper
+        result = input;
+        if (!result.empty()) {
+            result[0] = charutils::toupper(result[0]);
+        }
+    }
+    return result;
+}
 
 class AndroidKeyboardCandidateWord : public CandidateWord {
 public:
@@ -33,16 +85,11 @@ private:
 
 } // namespace
 
-AndroidKeyboardEngine::AndroidKeyboardEngine(Instance *instance) : instance_(instance) {
+AndroidKeyboardEngine::AndroidKeyboardEngine(Instance *instance)
+        : instance_(instance), enableWordHint_(true) {
     instance_->inputContextManager().registerProperty("keyboardState", &factory_);
     reloadConfig();
-    deferEvent_ = instance_->eventLoop().addDeferEvent([this](EventSource *) {
-        deferEvent_.reset();
-        return true;
-    });
 }
-
-AndroidKeyboardEngine::~AndroidKeyboardEngine() {}
 
 static inline bool isValidSym(const Key &key) {
     if (key.states()) {
@@ -63,8 +110,6 @@ static inline bool isValidCharacter(const std::string &c) {
     return iter == c.end() && validChars.count(code);
 }
 
-static KeyList FCITX_HYPHEN_APOS = Key::keyListFromString("minus apostrophe");
-
 void AndroidKeyboardEngine::keyEvent(const InputMethodEntry &entry, KeyEvent &event) {
     FCITX_UNUSED(entry);
     auto *inputContext = event.inputContext();
@@ -75,10 +120,6 @@ void AndroidKeyboardEngine::keyEvent(const InputMethodEntry &entry, KeyEvent &ev
     }
 
     auto *state = inputContext->propertyFor(&factory_);
-    if (state->repeatStarted_ &&
-        !event.rawKey().states().test(KeyState::Repeat)) {
-        state->repeatStarted_ = false;
-    }
 
     // and by pass all modifier
     if (event.key().isModifier()) {
@@ -112,6 +153,7 @@ void AndroidKeyboardEngine::keyEvent(const InputMethodEntry &entry, KeyEvent &ev
     bool validCharacter = isValidCharacter(compose);
     bool validSym = isValidSym(event.key());
 
+    static KeyList FCITX_HYPHEN_APOS = {Key(FcitxKey_minus), Key(FcitxKey_apostrophe)};
     // check for valid character
     if (validCharacter || event.key().isSimple() || validSym) {
         if (validCharacter || event.key().isLAZ() || event.key().isUAZ() ||
@@ -146,22 +188,39 @@ std::vector<InputMethodEntry> AndroidKeyboardEngine::listInputMethods() {
     std::vector<InputMethodEntry> result;
     result.emplace_back(std::move(
             InputMethodEntry("keyboard-us", _("Keyboard"), "en", "androidkeyboard")
-            .setLabel("us")
-            .setIcon("input-keyboard")
-            .setConfigurable(true)));
+                    .setLabel("us")
+                    .setIcon("input-keyboard")
+                    .setConfigurable(true)));
     return result;
 }
 
 void AndroidKeyboardEngine::reloadConfig() {
-    // nothing to reload
-}
+    readAsIni(config_, ConfPath);
+    selectionKeys_.clear();
+    KeySym syms[] = {
+            FcitxKey_1, FcitxKey_2, FcitxKey_3, FcitxKey_4, FcitxKey_5,
+            FcitxKey_6, FcitxKey_7, FcitxKey_8, FcitxKey_9, FcitxKey_0,
+    };
 
-const Configuration *AndroidKeyboardEngine::getSubConfig(const std::string &path) const {
-    return nullptr;
-}
+    KeyStates states;
+    switch (config_.chooseModifier.value()) {
+        case ChooseModifier::Alt:
+            states = KeyState::Alt;
+            break;
+        case ChooseModifier::Control:
+            states = KeyState::Ctrl;
+            break;
+        case ChooseModifier::Super:
+            states = KeyState::Super;
+            break;
+        default:
+            break;
+    }
 
-void AndroidKeyboardEngine::setSubConfig(const std::string &, const RawConfig &) {
-    // nothing to set
+    for (auto sym : syms) {
+        selectionKeys_.emplace_back(sym, states);
+    }
+    enableWordHint_ = config_.enableWordHint.value();
 }
 
 void AndroidKeyboardEngine::reset(const InputMethodEntry &entry, InputContextEvent &event) {
@@ -185,13 +244,24 @@ void AndroidKeyboardEngine::resetState(InputContext *inputContext) {
 }
 
 void AndroidKeyboardEngine::updateCandidate(const InputMethodEntry &entry, InputContext *inputContext) {
-
     inputContext->inputPanel().reset();
     auto *state = inputContext->propertyFor(&factory_);
-    // handle spell and emoji
+    std::vector<std::string> results;
+    if (spell()) {
+        results = spell()->call<ISpell::hint>(entry.languageCode(),
+                                              state->buffer_.userInput(),
+                                              config_.pageSize.value());
+    }
     auto candidateList = std::make_unique<CommonCandidateList>();
+    auto spellType = guessSpellType(state->buffer_.userInput());
+    for (const auto &result : results) {
+        candidateList->append<AndroidKeyboardCandidateWord>(
+                this, Text(formatWord(result, spellType)));
+    }
     candidateList->setPageSize(*config_.pageSize);
+    candidateList->setSelectionKey(selectionKeys_);
     candidateList->setCursorIncludeUnselected(true);
+    state->mode_ = CandidateMode::Hint;
     inputContext->inputPanel().setCandidateList(std::move(candidateList));
 
     updateUI(inputContext);
@@ -217,9 +287,16 @@ bool AndroidKeyboardEngine::updateBuffer(InputContext *inputContext, const std::
     }
 
     auto *state = inputContext->propertyFor(&factory_);
-//    const CapabilityFlags noPredictFlag{CapabilityFlag::Password,
-//                                        CapabilityFlag::NoSpellCheck,
-//                                        CapabilityFlag::Sensitive};
+    const CapabilityFlags noPredictFlag{CapabilityFlag::Password,
+                                        CapabilityFlag::NoSpellCheck,
+                                        CapabilityFlag::Sensitive};
+    // no spell hint enabled or no supported dictionary
+    if (!enableWordHint_ ||
+        inputContext->capabilityFlags().testAny(noPredictFlag) ||
+        !supportHint(entry->languageCode())) {
+        return false;
+    }
+
     auto &buffer = state->buffer_;
     auto preedit = preeditString(inputContext);
     if (preedit != buffer.userInput()) {
@@ -248,6 +325,11 @@ void AndroidKeyboardEngine::commitBuffer(InputContext *inputContext) {
     inputContext->inputPanel().reset();
     inputContext->updatePreedit();
     inputContext->updateUserInterface(UserInterfaceComponent::InputPanel);
+}
+
+bool AndroidKeyboardEngine::supportHint(const std::string &language) {
+    const bool hasSpell = spell() && spell()->call<ISpell::checkDict>(language);
+    return hasSpell;
 }
 
 std::string AndroidKeyboardEngine::preeditString(InputContext *inputContext) {
