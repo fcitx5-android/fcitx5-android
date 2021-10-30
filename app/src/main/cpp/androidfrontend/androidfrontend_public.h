@@ -7,6 +7,7 @@ typedef std::function<void(const std::vector<std::string> &)> CandidateListCallb
 typedef std::function<void(const std::string &)> CommitStringCallback;
 typedef std::function<void(const std::string &, const std::string &)> PreeditCallback;
 typedef std::function<void(const std::string &, const std::string &)> InputPanelAuxCallback;
+typedef std::function<void(const int, const std::string &)> KeyEventCallback;
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, createInputContext,
                              ICUUID(const std::string &))
@@ -36,5 +37,8 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setPreeditCallback,
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setInputPanelAuxCallback,
                              void(const InputPanelAuxCallback &))
+
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setKeyEventCallback,
+                             void(const KeyEventCallback &))
 
 #endif // _FCITX_FRONTEND_ANDROIDFRONTEND_ANDROIDFRONTEND_PUBLIC_H_

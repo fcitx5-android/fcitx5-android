@@ -52,6 +52,9 @@ class MainActivity : AppCompatActivity() {
                 is FcitxEvent.ReadyEvent -> {
                     mockInput()
                 }
+                is FcitxEvent.KeyEvent -> {
+                    binding.commit.text = binding.commit.text.toString() + it.data.sym
+                }
                 is FcitxEvent.UnknownEvent -> {
                     Log.i(javaClass.name, "unknown event: ${it.data}")
                 }

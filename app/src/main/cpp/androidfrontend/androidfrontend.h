@@ -22,6 +22,7 @@ namespace fcitx {
         CommitStringCallback commitStringCallback;
         PreeditCallback preeditCallback;
         InputPanelAuxCallback inputPanelAuxCallback;
+        KeyEventCallback keyEventCallback;
         ICUUID createInputContext(const std::string &program);
         void destroyInputContext(ICUUID uuid);
         void keyEvent(ICUUID uuid, const Key &key, bool isRelease);
@@ -32,6 +33,7 @@ namespace fcitx {
         void setCommitStringCallback(const CommitStringCallback &callback);
         void setPreeditCallback(const PreeditCallback &callback);
         void setInputPanelAuxCallback(const InputPanelAuxCallback &callback);
+        void setKeyEventCallback(const KeyEventCallback &callback);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, createInputContext);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, destroyInputContext);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, keyEvent);
@@ -42,6 +44,7 @@ namespace fcitx {
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCommitStringCallback);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setPreeditCallback);
         FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setInputPanelAuxCallback);
+        FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setKeyEventCallback);
 
         Instance *instance_;
     };

@@ -355,11 +355,13 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
     env->ReleaseStringUTFChars(appLib, app_lib);
     env->ReleaseStringUTFChars(extData, ext_data);
 
-    jclass stringClass = env->FindClass("java/lang/String");
+    jclass ObjectClass = env->FindClass("java/lang/Object");
+    jclass IntegerClass = env->FindClass("java/lang/Integer");
+    jmethodID IntegerInit = env->GetMethodID(IntegerClass, "<init>", "(I)V");
     jmethodID handleFcitxEvent = env->GetStaticMethodID(clazz, "handleFcitxEvent", "(I[Ljava/lang/Object;)V");
     auto candidateListCallback = [&](const std::vector<std::string> &candidateList) {
         size_t size = candidateList.size();
-        jobjectArray vararg = env->NewObjectArray(size, stringClass, nullptr);
+        jobjectArray vararg = env->NewObjectArray(size, ObjectClass, nullptr);
         size_t i = 0;
         for (const auto &s : candidateList) {
             env->SetObjectArrayElement(vararg, i++, env->NewStringUTF(s.c_str()));
@@ -368,29 +370,38 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
         env->DeleteLocalRef(vararg);
     };
     auto commitStringCallback = [&](const std::string &str) {
-        jobjectArray vararg = env->NewObjectArray(1, stringClass, nullptr);
+        jobjectArray vararg = env->NewObjectArray(1, ObjectClass, nullptr);
         env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(str.c_str()));
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 1, vararg);
         env->DeleteLocalRef(vararg);
     };
     auto preeditCallback = [&](const std::string &preedit, const std::string &clientPreedit) {
-        jobjectArray vararg = env->NewObjectArray(2, stringClass, nullptr);
+        jobjectArray vararg = env->NewObjectArray(2, ObjectClass, nullptr);
         env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(preedit.c_str()));
         env->SetObjectArrayElement(vararg, 1, env->NewStringUTF(clientPreedit.c_str()));
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 2, vararg);
         env->DeleteLocalRef(vararg);
     };
     auto inputPanelAuxCallback = [&](const std::string &auxUp, const std::string &auxDown) {
-        jobjectArray vararg = env->NewObjectArray(2, stringClass, nullptr);
+        jobjectArray vararg = env->NewObjectArray(2, ObjectClass, nullptr);
         env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(auxUp.c_str()));
         env->SetObjectArrayElement(vararg, 1, env->NewStringUTF(auxDown.c_str()));
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 3, vararg);
         env->DeleteLocalRef(vararg);
     };
     auto readyCallback = [&]() {
-        jobjectArray vararg = env->NewObjectArray(0, stringClass, nullptr);
+        jobjectArray vararg = env->NewObjectArray(0, ObjectClass, nullptr);
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 4, vararg);
         env->DeleteLocalRef(vararg);
+    };
+    auto keyEventCallback = [&](const int code, const std::string &sym) {
+        jobjectArray vararg = env->NewObjectArray(2, ObjectClass, nullptr);
+        auto integer = env->NewObject(IntegerClass, IntegerInit, code);
+        env->SetObjectArrayElement(vararg, 0, integer);
+        env->SetObjectArrayElement(vararg, 1, env->NewStringUTF(sym.c_str()));
+        env->CallStaticVoidMethod(clazz, handleFcitxEvent, 5, vararg);
+        env->DeleteLocalRef(vararg);
+        env->DeleteLocalRef(integer);
     };
 
     int code = Fcitx::Instance().startup([&](auto *androidfrontend) {
@@ -400,6 +411,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
         androidfrontend->template call<fcitx::IAndroidFrontend::setCommitStringCallback>(commitStringCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setPreeditCallback>(preeditCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setInputPanelAuxCallback>(inputPanelAuxCallback);
+        androidfrontend->template call<fcitx::IAndroidFrontend::setKeyEventCallback>(keyEventCallback);
     });
     jniLog("startupFcitx: returned with code " + std::to_string(code));
     return code;

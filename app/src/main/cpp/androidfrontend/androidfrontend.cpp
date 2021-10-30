@@ -127,6 +127,9 @@ void AndroidFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
     FCITX_INFO() << "KeyEvent(key=" << key
                  << ", isRelease=" << isRelease
                  << ", accepted=" << keyEvent.accepted() << ")";
+    if (!keyEvent.accepted() && keyEventCallback) {
+        keyEventCallback(key.code(), fcitx::Key::keySymToUTF8(key.sym()));
+    }
 }
 
 void AndroidFrontend::commitString(const std::string &str) {
@@ -184,6 +187,10 @@ void AndroidFrontend::setPreeditCallback(const PreeditCallback &callback) {
 
 void AndroidFrontend::setInputPanelAuxCallback(const InputPanelAuxCallback &callback) {
     inputPanelAuxCallback = callback;
+}
+
+void AndroidFrontend::setKeyEventCallback(const KeyEventCallback &callback) {
+    keyEventCallback = callback;
 }
 
 class AndroidFrontendFactory : public AddonFactory {
