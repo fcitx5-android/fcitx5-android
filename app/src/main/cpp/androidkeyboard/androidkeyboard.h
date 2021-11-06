@@ -64,13 +64,11 @@ public:
 
     void reloadConfig() override;
 
+    void save() override;
+
     const Configuration *getConfig() const override { return &config_; }
 
-    void setConfig(const RawConfig &config) override {
-        config_.load(config, true);
-        safeSaveAsIni(config_, ConfPath);
-        reloadConfig();
-    }
+    void setConfig(const RawConfig &config) override;
 
     void reset(const InputMethodEntry &entry, InputContextEvent &event) override;
 

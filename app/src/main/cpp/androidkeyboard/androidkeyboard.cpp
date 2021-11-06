@@ -223,6 +223,16 @@ void AndroidKeyboardEngine::reloadConfig() {
     enableWordHint_ = config_.enableWordHint.value();
 }
 
+void AndroidKeyboardEngine::save() {
+    safeSaveAsIni(config_, ConfPath);
+}
+
+void AndroidKeyboardEngine::setConfig(const RawConfig &config) {
+    config_.load(config, true);
+    safeSaveAsIni(config_, ConfPath);
+    reloadConfig();
+}
+
 void AndroidKeyboardEngine::reset(const InputMethodEntry &entry, InputContextEvent &event) {
     auto *inputContext = event.inputContext();
     // The reason that we do not commit here is we want to force the behavior.
