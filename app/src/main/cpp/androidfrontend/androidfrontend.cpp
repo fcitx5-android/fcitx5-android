@@ -128,7 +128,8 @@ void AndroidFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
                  << ", isRelease=" << isRelease
                  << ", accepted=" << keyEvent.accepted() << ")";
     if (!keyEvent.accepted() && keyEventCallback) {
-        keyEventCallback(key.code(), fcitx::Key::keySymToUTF8(key.sym()));
+        auto sym = key.sym();
+        keyEventCallback(fcitx::Key::keySymToUnicode(sym), fcitx::Key::keySymToString(sym));
     }
 }
 

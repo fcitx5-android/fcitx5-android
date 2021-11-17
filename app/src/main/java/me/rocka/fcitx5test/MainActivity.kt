@@ -50,10 +50,10 @@ class MainActivity : AppCompatActivity() {
                     if (text.length > 1) toast(text)
                 }
                 is FcitxEvent.ReadyEvent -> {
-                    mockInput()
+//                    mockInput()
                 }
                 is FcitxEvent.KeyEvent -> {
-                    binding.commit.text = binding.commit.text.toString() + it.data.sym
+                    binding.commit.text = binding.commit.text.toString() + Char(it.data.code)
                 }
                 is FcitxEvent.UnknownEvent -> {
                     Log.i(javaClass.name, "unknown event: ${it.data}")
