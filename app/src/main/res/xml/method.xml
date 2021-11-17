@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<input-method xmlns:android="http://schemas.android.com/apk/res/android"
+    android:settingsActivity="me.rocka.fcitx5test.MainActivity"
+    android:supportsSwitchingToNextInputMethod="true">
+    <subtype android:icon="@drawable/ic_baseline_input_24"
+        android:imeSubtypeMode="keyboard"
+        android:isAsciiCapable="true" />
+</input-method>
