@@ -50,7 +50,7 @@ class FcitxService : InputMethodService(), LifecycleOwner {
                             else -> Log.d("KeyEvent", "sym: `${it.data.sym}`; code: `${it.data.code}`")
                         }
                     } else {
-                        currentInputConnection.commitText(it.data.sym, 1)
+                        sendKeyChar(Char(it.data.code))
                     }
                 }
                 is FcitxEvent.CandidateListEvent -> {
