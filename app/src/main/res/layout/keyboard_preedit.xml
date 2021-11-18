@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:alpha="0.8">
 
     <TextView
         android:id="@+id/keyboard_preedit_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
-        android:alpha="0.8"
         android:background="#ffffff"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
@@ -19,7 +19,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:alpha="0.8"
         android:background="#ffffff"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"

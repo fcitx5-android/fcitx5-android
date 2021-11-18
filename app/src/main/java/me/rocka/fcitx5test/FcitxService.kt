@@ -56,8 +56,8 @@ class FcitxService : InputMethodService(), LifecycleOwner {
         val hasStart = start.isNotEmpty()
         val hasEnd = end.isNotEmpty()
         setCandidatesViewShown(hasStart or hasEnd)
-        preeditStartView.visibility = if (hasStart) View.VISIBLE else View.GONE
-        preeditEndView.visibility = if (hasEnd) View.VISIBLE else View.GONE
+        preeditStartView.alpha = if (hasStart) 1f else 0f
+        preeditEndView.alpha = if (hasEnd) 1f else 0f
         preeditStartView.text = start
         preeditEndView.text = end
     }
