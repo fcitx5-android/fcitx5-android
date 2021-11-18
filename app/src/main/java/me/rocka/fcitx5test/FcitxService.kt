@@ -97,6 +97,9 @@ class FcitxService : InputMethodService(), LifecycleOwner {
                     preeditContent.preedit = it.data
                     currentInputConnection?.setComposingText(it.data.clientPreedit, 1)
                 }
+                is FcitxEvent.IMChangeEvent -> {
+                    langSwitchButton.text = it.data.status.label
+                }
                 else -> {
                 }
             }

@@ -94,10 +94,16 @@ private:
 };
 
 AndroidFrontend::AndroidFrontend(Instance *instance)
-        : instance_(instance),
-          commitStringCallback({}),
-          candidateListCallback({}),
-          preeditCallback({}) {}
+        : instance_(instance) {
+    eventHandlers_.emplace_back(instance_->watchEvent(
+            EventType::InputContextSwitchInputMethod,
+            EventWatcherPhase::Default,
+            [this](Event &event) {
+                if (imChangeCallback) {
+                    imChangeCallback();
+                }
+            }));
+}
 
 AndroidFrontend::~AndroidFrontend() = default;
 
@@ -192,6 +198,10 @@ void AndroidFrontend::setInputPanelAuxCallback(const InputPanelAuxCallback &call
 
 void AndroidFrontend::setKeyEventCallback(const KeyEventCallback &callback) {
     keyEventCallback = callback;
+}
+
+void AndroidFrontend::setInputMethodChangeCallback(const InputMethodChangeCallback &callback) {
+    imChangeCallback = callback;
 }
 
 class AndroidFrontendFactory : public AddonFactory {

@@ -322,6 +322,8 @@ JNI_OnLoad(JavaVM * /* jvm */, void * /* reserved */) {
     return JNI_VERSION_1_6;
 }
 
+jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry);
+
 extern "C"
 JNIEXPORT jint JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, jstring appData, jstring appLib, jstring extData) {
@@ -403,6 +405,15 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
         env->DeleteLocalRef(vararg);
         env->DeleteLocalRef(integer);
     };
+    auto imChangeCallback = [&]() {
+        jobjectArray vararg = env->NewObjectArray(1, ObjectClass, nullptr);
+        const auto *entry = Fcitx::Instance().inputMethodStatus();
+        auto obj = fcitxInputMethodEntryToJObject(env, entry);
+        env->SetObjectArrayElement(vararg, 0, obj);
+        env->CallStaticVoidMethod(clazz, handleFcitxEvent, 6, vararg);
+        env->DeleteLocalRef(vararg);
+        env->DeleteLocalRef(obj);
+    };
 
     int code = Fcitx::Instance().startup([&](auto *androidfrontend) {
         jniLog("startupFcitx: setupCallback");
@@ -412,6 +423,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
         androidfrontend->template call<fcitx::IAndroidFrontend::setPreeditCallback>(preeditCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setInputPanelAuxCallback>(inputPanelAuxCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setKeyEventCallback>(keyEventCallback);
+        androidfrontend->template call<fcitx::IAndroidFrontend::setInputMethodChangeCallback>(imChangeCallback);
     });
     jniLog("startupFcitx: returned with code " + std::to_string(code));
     return code;
