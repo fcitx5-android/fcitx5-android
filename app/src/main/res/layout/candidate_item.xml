@@ -3,6 +3,9 @@
     android:id="@+id/candidate_item_text"
     android:layout_width="wrap_content"
     android:layout_height="40dp"
-    android:background="@color/cardview_shadow_end_color"
     android:gravity="center"
-    android:padding="5dp" />
+    android:paddingStart="10dp"
+    android:paddingTop="0dp"
+    android:paddingEnd="10dp"
+    android:paddingBottom="0dp"
+    android:textSize="18sp" />
