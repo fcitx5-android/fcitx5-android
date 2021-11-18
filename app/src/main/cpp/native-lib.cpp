@@ -10,6 +10,8 @@
 #include <fcitx-utils/eventdispatcher.h>
 #include <fcitx-utils/stringutils.h>
 
+#include "fcitx5/src/modules/quickphrase/quickphrase_public.h"
+
 #include "androidfrontend/androidfrontend_public.h"
 #include "androidstreambuf.h"
 
@@ -37,7 +39,9 @@ public:
         p_dispatcher->attach(&p_instance->eventLoop());
 
         p_dispatcher->schedule([&, this]() {
-            p_frontend = p_instance->addonManager().addon("androidfrontend");
+            auto &addonMgr = p_instance->addonManager();
+            p_frontend = addonMgr.addon("androidfrontend");
+            p_quickphrase = addonMgr.addon("quickphrase");
             p_uuid = p_frontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
             setupCallback(p_frontend);
         });
@@ -91,7 +95,6 @@ public:
 
     const fcitx::InputMethodEntry *inputMethodStatus() {
         // TODO(rocka): report `subMode` and `subModeLabel`
-        auto &imMgr = p_instance->inputMethodManager();
         auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
         if (ic) {
             return p_instance->inputMethodEntry(ic);
@@ -266,6 +269,17 @@ public:
         });
     }
 
+    void triggerQuickPhrase() {
+        if (p_quickphrase) {
+            p_dispatcher->schedule([this]() {
+                auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
+                p_quickphrase->call<fcitx::IQuickPhrase::trigger>(
+                        ic, "", "", "", "", fcitx::Key{FcitxKey_None}
+                );
+            });
+        }
+    }
+
     void saveConfig() {
         p_dispatcher->schedule([this]() {
             p_instance->globalConfig().safeSave();
@@ -285,6 +299,7 @@ private:
     std::unique_ptr<fcitx::Instance> p_instance{};
     std::unique_ptr<fcitx::EventDispatcher> p_dispatcher{};
     fcitx::AddonInstance *p_frontend = nullptr;
+    fcitx::AddonInstance *p_quickphrase = nullptr;
     fcitx::ICUUID p_uuid{};
 
     void resetGlobalPointers() {
@@ -715,4 +730,10 @@ Java_me_rocka_fcitx5test_native_Fcitx_setFcitxAddonState(JNIEnv *env, jclass cla
     }
     env->ReleaseBooleanArrayElements(state, enabled, 0);
     Fcitx::Instance().setAddonState(map);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_triggerQuickPhraseInput(JNIEnv *env, jclass clazz) {
+    Fcitx::Instance().triggerQuickPhrase();
 }

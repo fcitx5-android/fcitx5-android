@@ -48,9 +48,9 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
         override operator fun set(key: String, value: RawConfig) =
             setFcitxInputMethodConfig(key, value)
     }
-
     fun addons() = getFcitxAddons()
     fun setAddonState(name: Array<String>, state: BooleanArray) = setFcitxAddonState(name, state)
+    fun triggerQuickPhrase() = triggerQuickPhraseInput()
 
     init {
         if (isRunning.get())
@@ -133,6 +133,9 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
 
         @JvmStatic
         external fun setFcitxAddonState(name: Array<String>, state: BooleanArray)
+
+        @JvmStatic
+        external fun triggerQuickPhraseInput()
 
         /**
          * Called from native-lib
