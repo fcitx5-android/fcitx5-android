@@ -14,6 +14,36 @@ It can build, run, print to logcat, and dispatch event to JVM side.
 - Android NDK (Side by side) 23 & cmake 3.18.1, they can be installed using SDK Manager in Android Studio or `sdkmanager` command line. **Note:** you may need to install Android Studio Beta for Android NDK 23, or use `sdkmanager` from Android SDK Command-line Tools. NDK 21 & 22 are confirmed not working with this project.
 - [KDE/extra-cmake-modules](https://github.com/KDE/extra-cmake-modules)
 
+### How to set up development environment
+
+First, clone this repository and fetch all submodules:
+
+```
+git clone git@github.com:rocka/fcitx5-android-poc.git
+git submodule update --init --recursive
+```
+
+Install extra-cmake-modules from your distribution software repository:
+
+```
+# For Arch
+sudo pacman -S extra-cmake-modules
+# For Debian/Ubuntu
+sudo apt install extra-cmake-modules
+```
+
+Install Android SDK Platform, Android SDK Build-Tools, Android NDK and cmake via SDK Manager in Android Studio:
+
+![open SDK Manager](https://user-images.githubusercontent.com/48406926/142432806-d3ee3c16-beee-409e-9f6b-60c352c3f230.png)
+
+![install SDK Platform](https://user-images.githubusercontent.com/48406926/142432902-d979ceda-1c12-4c9c-a59f-ffa201457861.png)
+
+![install SDK Build-Tools](https://user-images.githubusercontent.com/48406926/142432955-380ccd4a-df11-46ae-a520-3c13eac38960.png)
+
+![install NDK](https://user-images.githubusercontent.com/48406926/142433006-9dfbeb20-b3e3-4230-aa28-625efb58f936.png)
+
+![install CMake](https://user-images.githubusercontent.com/48406926/142433080-a4ad2446-889a-479c-837a-c2b5ad74b104.png)
+
 ### Additional patches
 
 There are no additional patches needed for now, because we switched to a forked version of [fcitx5-chinese-addons](https://github.com/rocka/fcitx5-chinese-addons/tree/android), and we hope to find some way to upstream those changes.
