@@ -10,8 +10,8 @@ It can build, run, print to logcat, and dispatch event to JVM side.
 
 ### Dependencies
 
-- Android SDK Platform & Build-Tools 30
-- Android NDK (Side by side) 23 & cmake 3.18.1, they can be installed using SDK Manager in Android Studio or `sdkmanager` command line. **Note:** you may need to install Android Studio Beta for Android NDK 23, or use `sdkmanager` from Android SDK Command-line Tools. NDK 21 & 22 are confirmed not working with this project.
+- Android SDK Platform & Build-Tools 30 or newer version
+- Android NDK (Side by side) 23 & cmake 3.18.1, they can be installed using SDK Manager in Android Studio or `sdkmanager` command line. **Note:** NDK 21 & 22 are confirmed not working with this project.
 - [KDE/extra-cmake-modules](https://github.com/KDE/extra-cmake-modules)
 
 ### How to set up development environment
