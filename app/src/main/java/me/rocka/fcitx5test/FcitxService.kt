@@ -22,6 +22,7 @@ import me.rocka.fcitx5test.native.FcitxEvent
 
 class FcitxService : InputMethodService(), LifecycleOwner {
     private lateinit var fcitx: Fcitx
+    private var fcitxReady = false
     private val dispatcher = ServiceLifecycleDispatcher(this)
     private val candidateLytMgr = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
     private val candidateViewAdp = CandidateViewAdapter()
@@ -37,10 +38,10 @@ class FcitxService : InputMethodService(), LifecycleOwner {
         fcitx.eventFlow.onEach {
             when (it) {
                 is FcitxEvent.ReadyEvent -> {
-                    Toast.makeText(this, "READY", Toast.LENGTH_SHORT).show()
+                    fcitxReady = true
                 }
                 is FcitxEvent.CommitStringEvent -> {
-                    currentInputConnection.commitText(it.data, 1)
+                    currentInputConnection?.commitText(it.data, 1)
                 }
                 is FcitxEvent.KeyEvent -> {
                     if (Character.isISOControl(it.data.code)) {
@@ -56,19 +57,16 @@ class FcitxService : InputMethodService(), LifecycleOwner {
                 is FcitxEvent.CandidateListEvent -> {
                     candidateViewAdp.candidates = it.data
                     candidateViewAdp.notifyDataSetChanged()
+                    candidateLytMgr.scrollToPosition(0)
                 }
                 is FcitxEvent.InputPanelAuxEvent -> {
                     val text = "${it.data.auxUp}\n${it.data.auxDown}"
                     if (text.length > 1) Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
                 }
                 is FcitxEvent.PreeditEvent -> {
-                    if (it.data.preedit.isEmpty()) {
-                        setCandidatesViewShown(false)
-                    } else {
-                        setCandidatesViewShown(true)
-                        setPreedit(it.data.preedit)
-                    }
-                    currentInputConnection.setComposingText(it.data.clientPreedit, 1)
+                    setCandidatesViewShown(it.data.preedit.isNotEmpty())
+                    setPreedit(it.data.preedit)
+                    currentInputConnection?.setComposingText(it.data.clientPreedit, 1)
                 }
                 else -> {
                 }
@@ -79,7 +77,7 @@ class FcitxService : InputMethodService(), LifecycleOwner {
     }
 
     fun onButtonPress(v: View) {
-        fcitx.sendKey((v as Button).text.last().lowercaseChar())
+        fcitx.sendKey((v as Button).text[0].lowercase())
     }
 
     fun onCapsPress(v: View) {
@@ -91,9 +89,10 @@ class FcitxService : InputMethodService(), LifecycleOwner {
     }
 
     fun onLangSwitchPress(v: View) {
+        if (!fcitxReady) return;
         val list = fcitx.listIme()
         val status = fcitx.imeStatus()
-        val index = list.indexOfFirst { it -> it.uniqueName == status.uniqueName }
+        val index = list.indexOfFirst { it.uniqueName == status.uniqueName }
         val next = (index + 1) % list.size
         fcitx.setIme(list[next].uniqueName)
     }
@@ -138,5 +137,10 @@ class FcitxService : InputMethodService(), LifecycleOwner {
 
     override fun onFinishInput() {
         fcitx.reset()
+    }
+
+    override fun onDestroy() {
+        dispatcher.onServicePreSuperOnDestroy()
+        super.onDestroy()
     }
 }

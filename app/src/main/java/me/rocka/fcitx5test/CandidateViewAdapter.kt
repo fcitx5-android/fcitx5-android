@@ -18,7 +18,7 @@ class CandidateViewAdapter : RecyclerView.Adapter<CandidateViewAdapter.Candidate
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CandidateItemHolder {
         val v = LayoutInflater.from(parent.context).inflate(R.layout.candidate_item, parent, false)
         val holder = CandidateItemHolder(v)
-        holder.textView.setOnClickListener { onSelectCallback(holder.idx) }
+        holder.itemView.setOnClickListener { onSelectCallback(holder.idx) }
         return holder
     }
 
