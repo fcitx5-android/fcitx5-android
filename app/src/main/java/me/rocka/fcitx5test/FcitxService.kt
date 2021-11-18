@@ -8,7 +8,6 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ServiceLifecycleDispatcher
@@ -26,10 +25,41 @@ class FcitxService : InputMethodService(), LifecycleOwner {
     private val dispatcher = ServiceLifecycleDispatcher(this)
     private val candidateLytMgr = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
     private val candidateViewAdp = CandidateViewAdapter()
-    private var setPreedit: (String) -> Unit = {}
+    private lateinit var preeditStartView: TextView
+    private lateinit var preeditEndView: TextView
+    private var preeditContent = object {
+        var preedit = FcitxEvent.PreeditEvent.Data("", "")
+            set(value) {
+                field = value
+                updatePreedit()
+            }
+        var aux = FcitxEvent.InputPanelAuxEvent.Data("", "")
+            set(value) {
+                field = value
+                updatePreedit()
+            }
+    }
+    private lateinit var capsButton: Button
+    private lateinit var langSwitchButton: Button
+
+    enum class CapsState { None, Once, Lock }
+
+    private var capsState = CapsState.None
 
     override fun getLifecycle(): Lifecycle {
         return dispatcher.lifecycle
+    }
+
+    fun updatePreedit() {
+        val start = preeditContent.aux.auxUp + preeditContent.preedit.preedit
+        val end = preeditContent.aux.auxDown
+        val hasStart = start.isNotEmpty()
+        val hasEnd = end.isNotEmpty()
+        setCandidatesViewShown(hasStart or hasEnd)
+        preeditStartView.visibility = if (hasStart) View.VISIBLE else View.GONE
+        preeditEndView.visibility = if (hasEnd) View.VISIBLE else View.GONE
+        preeditStartView.text = start
+        preeditEndView.text = end
     }
 
     override fun onCreate() {
@@ -39,6 +69,7 @@ class FcitxService : InputMethodService(), LifecycleOwner {
             when (it) {
                 is FcitxEvent.ReadyEvent -> {
                     fcitxReady = true
+                    langSwitchButton.text = fcitx.imeStatus().label
                 }
                 is FcitxEvent.CommitStringEvent -> {
                     currentInputConnection?.commitText(it.data, 1)
@@ -60,12 +91,10 @@ class FcitxService : InputMethodService(), LifecycleOwner {
                     candidateLytMgr.scrollToPosition(0)
                 }
                 is FcitxEvent.InputPanelAuxEvent -> {
-                    val text = "${it.data.auxUp}\n${it.data.auxDown}"
-                    if (text.length > 1) Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
+                    preeditContent.aux = it.data
                 }
                 is FcitxEvent.PreeditEvent -> {
-                    setCandidatesViewShown(it.data.preedit.isNotEmpty())
-                    setPreedit(it.data.preedit)
+                    preeditContent.preedit = it.data
                     currentInputConnection?.setComposingText(it.data.clientPreedit, 1)
                 }
                 else -> {
@@ -77,11 +106,28 @@ class FcitxService : InputMethodService(), LifecycleOwner {
     }
 
     fun onButtonPress(v: View) {
-        fcitx.sendKey((v as Button).text[0].lowercase())
+        var c = (v as Button).text[0];
+        when (capsState) {
+            CapsState.None -> {
+                c = c.lowercaseChar()
+            }
+            CapsState.Once -> {
+                c = c.uppercaseChar()
+                capsState = CapsState.None
+            }
+            CapsState.Lock -> {
+                c = c.uppercaseChar()
+            }
+        }
+        fcitx.sendKey(c)
     }
 
     fun onCapsPress(v: View) {
-        fcitx.sendKey("Caps_Lock")
+        capsState = when (capsState) {
+            CapsState.None -> CapsState.Once
+            CapsState.Once -> CapsState.Lock
+            CapsState.Lock -> CapsState.None
+        }
     }
 
     fun onBackspacePress(v: View) {
@@ -89,12 +135,12 @@ class FcitxService : InputMethodService(), LifecycleOwner {
     }
 
     fun onLangSwitchPress(v: View) {
-        if (!fcitxReady) return;
+        if (!fcitxReady) return
         val list = fcitx.listIme()
         val status = fcitx.imeStatus()
         val index = list.indexOfFirst { it.uniqueName == status.uniqueName }
-        val next = (index + 1) % list.size
-        fcitx.setIme(list[next].uniqueName)
+        val next = list[(index + 1) % list.size]
+        fcitx.setIme(next.uniqueName)
     }
 
     private fun onLangSwitchLongPress(): Boolean {
@@ -117,22 +163,26 @@ class FcitxService : InputMethodService(), LifecycleOwner {
             candidateViewAdp.onSelectCallback = { idx -> fcitx.select(idx) }
             it.adapter = candidateViewAdp
         }
+        view.findViewById<Button>(R.id.button_caps).also {
+            capsButton = it
+        }
         view.findViewById<Button>(R.id.button_lang).also {
+            langSwitchButton = it
             it.setOnLongClickListener { this.onLangSwitchLongPress() }
         }
         return view
     }
 
     override fun onCreateCandidatesView(): View {
-        val view = layoutInflater.inflate(R.layout.keyboard_preedit, null)
-        val text = view.findViewById<TextView>(R.id.keyboard_preedit_text)
-        setPreedit = { text.text = it }
-        return view
+        layoutInflater.inflate(R.layout.keyboard_preedit, null).also {
+            preeditStartView = it.findViewById(R.id.keyboard_preedit_text)
+            preeditEndView = it.findViewById(R.id.keyboard_preedit_after_text)
+            return it
+        }
     }
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
-        val msg = fcitx.imeStatus()?.label ?: "(Not Available)"
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+        val msg = fcitx.imeStatus()?.label ?: "×"
     }
 
     override fun onFinishInput() {
