@@ -137,6 +137,10 @@ class FcitxService : InputMethodService(), LifecycleOwner {
         fcitx.sendKey("BackSpace")
     }
 
+    fun onQuickPhrasePress(v: View) {
+        fcitx.triggerQuickPhrase()
+    }
+
     fun onLangSwitchPress(v: View) {
         if (!fcitxReady) return
         val list = fcitx.listIme()
@@ -185,7 +189,6 @@ class FcitxService : InputMethodService(), LifecycleOwner {
     }
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
-        val msg = fcitx.imeStatus()?.label ?: "×"
     }
 
     override fun onFinishInput() {

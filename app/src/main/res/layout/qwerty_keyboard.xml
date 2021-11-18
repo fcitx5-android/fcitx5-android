@@ -25,7 +25,6 @@
 
         <Button
             android:id="@+id/button_q"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -39,7 +38,6 @@
 
         <Button
             android:id="@+id/button_w"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -53,7 +51,6 @@
 
         <Button
             android:id="@+id/button_e"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -67,7 +64,6 @@
 
         <Button
             android:id="@+id/button_r"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -81,7 +77,6 @@
 
         <Button
             android:id="@+id/button_t"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -95,7 +90,6 @@
 
         <Button
             android:id="@+id/button_y"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -109,7 +103,6 @@
 
         <Button
             android:id="@+id/button_u"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -123,7 +116,6 @@
 
         <Button
             android:id="@+id/button_i"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -137,7 +129,6 @@
 
         <Button
             android:id="@+id/button_o"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -151,7 +142,6 @@
 
         <Button
             android:id="@+id/button_p"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -173,7 +163,6 @@
 
         <Button
             android:id="@+id/button_a"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -188,7 +177,6 @@
 
         <Button
             android:id="@+id/button_s"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -202,7 +190,6 @@
 
         <Button
             android:id="@+id/button_d"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -216,7 +203,6 @@
 
         <Button
             android:id="@+id/button_f"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -230,7 +216,6 @@
 
         <Button
             android:id="@+id/button_g"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -244,7 +229,6 @@
 
         <Button
             android:id="@+id/button_h"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -258,7 +242,6 @@
 
         <Button
             android:id="@+id/button_j"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -272,7 +255,6 @@
 
         <Button
             android:id="@+id/button_k"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -286,7 +268,6 @@
 
         <Button
             android:id="@+id/button_l"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -308,7 +289,6 @@
 
         <Button
             android:id="@+id/button_caps"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onCapsPress"
@@ -322,7 +302,6 @@
 
         <Button
             android:id="@+id/button_z"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -336,7 +315,6 @@
 
         <Button
             android:id="@+id/button_x"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -350,7 +328,6 @@
 
         <Button
             android:id="@+id/button_c"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -364,7 +341,6 @@
 
         <Button
             android:id="@+id/button_v"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -378,7 +354,6 @@
 
         <Button
             android:id="@+id/button_b"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -392,7 +367,6 @@
 
         <Button
             android:id="@+id/button_n"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -406,7 +380,6 @@
 
         <Button
             android:id="@+id/button_m"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onButtonPress"
@@ -420,11 +393,9 @@
 
         <Button
             android:id="@+id/button_backspace"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onBackspacePress"
-            android:padding="-5dp"
             android:text="⌫"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -442,8 +413,20 @@
         app:layout_constraintTop_toBottomOf="@+id/keyboard_row2">
 
         <Button
-            android:id="@+id/button_lang"
+            android:id="@+id/button_quickphrase"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:longClickable="true"
+            android:onClick="onQuickPhrasePress"
+            android:text="❝❞"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/button_lang"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.15" />
 
+        <Button
+            android:id="@+id/button_lang"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:longClickable="true"
@@ -451,13 +434,12 @@
             android:text="🜨"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/button_space"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/button_quickphrase"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_percent="0.15" />
 
         <Button
             android:id="@+id/button_space"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onSpacePress"
@@ -469,7 +451,6 @@
 
         <Button
             android:id="@+id/button_enter"
-
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:onClick="onEnterPress"
