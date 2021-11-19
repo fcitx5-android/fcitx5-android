@@ -6,28 +6,41 @@ on:
     branches: [master]
 
 jobs:
-  build:
+  Release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Fetch source code
+        uses: actions/checkout@v2
         with:
           submodules: recursive
-      - uses: actions/setup-java@v2
+
+      - name: Setup Java
+        uses: actions/setup-java@v2
         with:
-          distribution: 'adopt'
-          java-version: '11'
-      - uses: android-actions/setup-android@v2
-      - run: sdkmanager --install "ndk;23.0.7599858"
-      - run: sdkmanager --install "cmake;3.18.1"
-      - run: sudo apt update && sudo apt upgrade
-      - run: sudo apt install -y extra-cmake-modules
-      - uses: burrunan/gradle-cache-action@v1
-        name: Build
+          distribution: "adopt"
+          java-version: "11"
+
+      - name: Install extra-cmake-modules
+        run: |
+          sudo apt update
+          sudo apt install extra-cmake-modules
+
+      - name: Cache JNI build
+        uses: actions/cache@v2
+        with:
+          path: |
+            app/.cxx
+            app/build/intermediates
+          key: ${{ runner.os }}-jni-build
+
+      - name: Build Release APK
+        uses: burrunan/gradle-cache-action@v1
         with:
           arguments: assembleRelease
           gradle-version: wrapper
-      - uses: r0adkll/sign-android-release@v1
-        name: Sign APK
+
+      - name: Sign APK
+        uses: r0adkll/sign-android-release@v1
         # ID used to access action output
         id: sign_apk
         with:
@@ -36,26 +49,26 @@ jobs:
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           alias: ${{ secrets.KEY_ALIAS }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
-      - uses: actions/upload-artifact@v2
-        name: Upload APK
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v2
         with:
           name: Signed APK
           path: ${{steps.sign_apk.outputs.signedReleaseFile}}
-      - name: Send success notification to Telegram
-        if: ${{ success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          format: markdown
-          disable_web_page_preview: true
-          message: "Job [${{ github.workflow }} / ${{ github.job }} (${{ github.event_name }}) #${{ github.run_number }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) by [${{ github.actor }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) succeed ✔"
-      - name: Send failure notification to Telegram
-        if: ${{ failure() && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          format: markdown
-          disable_web_page_preview: true
-          message: "Job [${{ github.workflow }} / ${{ github.job }} (${{ github.event_name }}) #${{ github.run_number }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) by [${{ github.actor }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) failed ✘"
+
+      - name: Notify Telegram group
+        if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
+        run: |
+          curl -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
+            -H "content-type: application/json" \
+            -d @- << EOF
+          {
+          "chat_id": ${{ secrets.TELEGRAM_TO }},
+          "text": "Job [${{ github.workflow }} / ${{ github.job }} \\\(${{ github.event_name }}\\\) \\\#${{ github.run_number }}]\
+          (https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) \
+          by [${{ github.actor }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) \
+          ${{ job.status == 'success' && 'succeed ✔' || 'failed ✘' }}",
+          "parse_mode": "MarkdownV2",
+          "disable_web_page_preview": true
+          }
+          EOF
