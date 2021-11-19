@@ -7,13 +7,33 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/input"
+        android:id="@+id/open_ime_settings_guide"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@id/candidate"
+        android:text="@string/open_ime_settings_guide"
+        app:layout_constraintBottom_toTopOf="@id/commit"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/open_ime_settings"
+        android:text="@string/button_open_ime_settings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/input"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/open_ime_settings_guide" />
+
+    <TextView
+        android:id="@+id/input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/commit"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/open_ime_settings" />
 
     <TextView
         android:id="@+id/candidate"

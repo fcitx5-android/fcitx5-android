@@ -1,9 +1,11 @@
 package me.rocka.fcitx5test
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -32,6 +34,11 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         val rootView = binding.root
         setContentView(rootView)
+        val openImeSettingsButton = findViewById<Button>(R.id.open_ime_settings)
+        openImeSettingsButton.setOnClickListener{
+            val intent = Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS)
+            startActivity(intent)
+        }
         fcitx = Fcitx(this)
         lifecycle.addObserver(fcitx)
         fcitx.eventFlow.onEach {
