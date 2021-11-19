@@ -1,9 +1,13 @@
 package me.rocka.fcitx5test
 
 import android.content.Context
+import android.view.View
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import android.view.ViewGroup
+import androidx.core.view.children
+
 
 fun Context.copyFileOrDir(path: String): Unit = runCatching {
     with(assets) {
@@ -30,3 +34,11 @@ private fun Context.copyFile(filename: String) = runCatching {
     }
     Unit
 }.getOrThrow()
+
+fun View.allChildren(): List<View> {
+    if (this !is ViewGroup)
+        return listOf()
+    val result = mutableListOf<View>()
+    children.forEach { result.addAll(it.allChildren()) }
+    return result.toList()
+}
