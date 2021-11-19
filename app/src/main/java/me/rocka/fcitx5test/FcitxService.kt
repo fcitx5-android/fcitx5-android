@@ -79,7 +79,7 @@ class FcitxService : InputMethodService(), LifecycleOwner {
                         when (it.data.code) {
                             '\b'.code -> sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
                             '\r'.code -> sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
-                            else -> Log.d("KeyEvent", "sym: `${it.data.sym}`; code: `${it.data.code}`")
+                            else -> Log.d("KeyEvent", it.data.toString())
                         }
                     } else {
                         sendKeyChar(Char(it.data.code))
@@ -109,7 +109,7 @@ class FcitxService : InputMethodService(), LifecycleOwner {
     }
 
     fun onButtonPress(v: View) {
-        var c = (v as Button).text[0];
+        var c = (v as Button).text[0]
         when (capsState) {
             CapsState.None -> {
                 c = c.lowercaseChar()
@@ -150,11 +150,6 @@ class FcitxService : InputMethodService(), LifecycleOwner {
         fcitx.setIme(next.uniqueName)
     }
 
-    private fun onLangSwitchLongPress(): Boolean {
-        (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager).showInputMethodPicker()
-        return true
-    }
-
     fun onSpacePress(v: View) {
         fcitx.sendKey("space")
     }
@@ -175,7 +170,11 @@ class FcitxService : InputMethodService(), LifecycleOwner {
         }
         view.findViewById<Button>(R.id.button_lang).also {
             langSwitchButton = it
-            it.setOnLongClickListener { this.onLangSwitchLongPress() }
+            it.setOnLongClickListener {
+                (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager).showInputMethodPicker()
+                true
+            }
+        }
         }
         return view
     }

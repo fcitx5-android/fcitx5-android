@@ -36,9 +36,9 @@ sealed class FcitxEvent<T>(open val data: T) {
         private const val COMMIT_STRING_ID = 1
         private const val PREEDIT_ID = 2
         private const val INPUT_PANEL_AUX_ID = 3
-        private const val READY_ID = 4;
-        private const val KEY_EVENT_ID = 5;
-        private const val IM_CHANGE_ID = 6;
+        private const val READY_ID = 4
+        private const val KEY_EVENT_ID = 5
+        private const val IM_CHANGE_ID = 6
 
         @Suppress("UNCHECKED_CAST")
         fun create(type: Int, params: List<Any>) =

@@ -48,6 +48,7 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
         override operator fun set(key: String, value: RawConfig) =
             setFcitxInputMethodConfig(key, value)
     }
+
     fun addons() = getFcitxAddons()
     fun setAddonState(name: Array<String>, state: BooleanArray) = setFcitxAddonState(name, state)
     fun triggerQuickPhrase() = triggerQuickPhraseInput()
@@ -57,7 +58,8 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
             throw IllegalAccessException("Fcitx5 is already running!")
     }
 
-    private companion object JNI: CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.IO) {
+    private companion object JNI :
+        CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.IO) {
         private var isRunning = AtomicBoolean(false)
 
         private val eventFlow_ =
@@ -145,7 +147,7 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
         fun handleFcitxEvent(type: Int, vararg params: Any) {
             Log.d(
                 "FcitxEvent",
-                "type=${type}, params=${params.run { "[$size]" + joinToString(",") }}"
+                "type=${type}, params=[${params.size}]${params.take(10).joinToString()}"
             )
             eventFlow_.tryEmit(FcitxEvent.create(type, params.asList()))
         }
