@@ -24,9 +24,24 @@ jobs:
       - uses: burrunan/gradle-cache-action@v1
         name: Build
         with:
-          arguments: assembleDebug
+          arguments: assembleRelease
           gradle-version: wrapper
-      - name: Send success notification to telegram
+      - uses: r0adkll/sign-android-release@v1
+        name: Sign APK
+        # ID used to access action output
+        id: sign_apk
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+      - uses: actions/upload-artifact@v2
+        name: Upload APK
+        with:
+          name: Signed APK
+          path: ${{steps.sign_apk.outputs.signedReleaseFile}}
+      - name: Send success notification to Telegram
         if: ${{ success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
         uses: appleboy/telegram-action@master
         with:
@@ -35,7 +50,7 @@ jobs:
           format: markdown
           disable_web_page_preview: true
           message: "Job [${{ github.workflow }} / ${{ github.job }} (${{ github.event_name }}) #${{ github.run_number }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) by [${{ github.actor }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) succeed ✔"
-      - name: Send failure notification to telegram
+      - name: Send failure notification to Telegram
         if: ${{ failure() && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
         uses: appleboy/telegram-action@master
         with:
