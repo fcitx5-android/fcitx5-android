@@ -34,10 +34,10 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         val rootView = binding.root
         setContentView(rootView)
-        val openImeSettingsButton = findViewById<Button>(R.id.open_ime_settings)
-        openImeSettingsButton.setOnClickListener{
-            val intent = Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS)
-            startActivity(intent)
+        findViewById<Button>(R.id.open_ime_settings).also {
+            it.setOnClickListener {
+                startActivity(Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS))
+            }
         }
         fcitx = Fcitx(this)
         lifecycle.addObserver(fcitx)
