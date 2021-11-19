@@ -3,6 +3,7 @@ package me.rocka.fcitx5test
 import android.inputmethodservice.InputMethodService
 import android.util.Log
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -18,8 +19,12 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxEvent
+import java.util.*
+import kotlin.concurrent.timer
 
 class FcitxService : InputMethodService(), LifecycleOwner {
+    enum class CapsState { None, Once, Lock }
+
     private lateinit var fcitx: Fcitx
     private var fcitxReady = false
     private val dispatcher = ServiceLifecycleDispatcher(this)
@@ -40,11 +45,12 @@ class FcitxService : InputMethodService(), LifecycleOwner {
             }
     }
     private lateinit var capsButton: Button
-    private lateinit var langSwitchButton: Button
-
-    enum class CapsState { None, Once, Lock }
-
     private var capsState = CapsState.None
+    private lateinit var backspaceButton: Button
+    private var backspaceTimer: Timer? = null
+    private var backspaceAction: TimerTask.() -> Unit = { fcitx.sendKey("BackSpace") }
+    private lateinit var langSwitchButton: Button
+    private lateinit var punctuationButton: Button
 
     override fun getLifecycle(): Lifecycle {
         return dispatcher.lifecycle
@@ -138,6 +144,7 @@ class FcitxService : InputMethodService(), LifecycleOwner {
     }
 
     fun onQuickPhrasePress(v: View) {
+        fcitx.reset()
         fcitx.triggerQuickPhrase()
     }
 
@@ -154,6 +161,15 @@ class FcitxService : InputMethodService(), LifecycleOwner {
         fcitx.sendKey("space")
     }
 
+    fun onPunctuationPress(v: View) {
+        fcitx.reset()
+        fcitx.triggerQuickPhrase()
+        when (fcitx.imeStatus().label) {
+            "us" -> 'e'
+            else -> 'z'
+        }.also { fcitx.sendKey(it) }
+    }
+
     fun onEnterPress(v: View) {
         fcitx.sendKey("Return")
     }
@@ -168,6 +184,20 @@ class FcitxService : InputMethodService(), LifecycleOwner {
         view.findViewById<Button>(R.id.button_caps).also {
             capsButton = it
         }
+        view.findViewById<Button>(R.id.button_backspace).also {
+            backspaceButton = it
+            it.setOnTouchListener { v, e ->
+                when (e.action) {
+                    MotionEvent.ACTION_BUTTON_PRESS -> v.performClick()
+                    MotionEvent.ACTION_UP -> backspaceTimer?.run { cancel(); purge() }
+                }
+                false
+            }
+            it.setOnLongClickListener {
+                backspaceTimer = timer(period = 80L, action = backspaceAction)
+                true
+            }
+        }
         view.findViewById<Button>(R.id.button_lang).also {
             langSwitchButton = it
             it.setOnLongClickListener {
@@ -175,6 +205,8 @@ class FcitxService : InputMethodService(), LifecycleOwner {
                 true
             }
         }
+        view.findViewById<Button>(R.id.button_punctuation).also {
+            punctuationButton = it
         }
         return view
     }
@@ -188,6 +220,7 @@ class FcitxService : InputMethodService(), LifecycleOwner {
     }
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
+        fcitx.reset()
     }
 
     override fun onFinishInput() {

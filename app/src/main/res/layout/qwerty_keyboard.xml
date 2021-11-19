@@ -395,6 +395,7 @@
             android:id="@+id/button_backspace"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:longClickable="true"
             android:onClick="onBackspacePress"
             android:text="⌫"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -431,12 +432,13 @@
             android:layout_height="0dp"
             android:longClickable="true"
             android:onClick="onLangSwitchPress"
+            android:padding="-5dp"
             android:text="🜨"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/button_space"
             app:layout_constraintStart_toEndOf="@id/button_quickphrase"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_percent="0.15" />
+            app:layout_constraintWidth_percent="0.1" />
 
         <Button
             android:id="@+id/button_space"
@@ -445,9 +447,22 @@
             android:onClick="onSpacePress"
             android:text="␣"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/button_enter"
+            app:layout_constraintEnd_toStartOf="@+id/button_punctuation"
             app:layout_constraintStart_toEndOf="@+id/button_lang"
             app:layout_constraintTop_toTopOf="parent" />
+
+
+        <Button
+            android:id="@+id/button_punctuation"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:onClick="onPunctuationPress"
+            android:text="."
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/button_enter"
+            app:layout_constraintStart_toEndOf="@+id/button_space"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.1" />
 
         <Button
             android:id="@+id/button_enter"
@@ -457,7 +472,7 @@
             android:text="⏎"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/button_space"
+            app:layout_constraintStart_toEndOf="@+id/button_punctuation"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_percent="0.15" />
 
