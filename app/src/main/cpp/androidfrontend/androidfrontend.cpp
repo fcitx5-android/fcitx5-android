@@ -50,47 +50,53 @@ public:
             frontend_->updateInputPanelAux(auxUpCached, auxDownCached);
         }
         std::vector<std::string> candidates;
-        auto list = bulkCandidateList();
-        if (!list) {
-            frontend_->updateCandidateList(candidates);
-            return;
-        }
-        int size = list->totalSize();
-        for (int i = 0; i < size; i++) {
-            auto &candidate = list->candidateFromAll(i);
-            // maybe unnecessary; I don't see anywhere using `CandidateWord::setPlaceHolder`
-            // if (candidate.isPlaceHolder()) continue;
-            candidates.push_back(std::move(candidate.text().toString()));
+        const auto &list = ip.candidateList();
+        if (list) {
+            const auto &bulk = list->toBulk();
+            if (bulk) {
+                const int size = bulk->totalSize();
+                for (int i = 0; i < size; i++) {
+                    auto &candidate = bulk->candidateFromAll(i);
+                    // maybe unnecessary; I don't see anywhere using `CandidateWord::setPlaceHolder`
+                    // if (candidate.isPlaceHolder()) continue;
+                    candidates.emplace_back(std::move(candidate.text().toString()));
+                }
+            } else {
+                const int size = list->size();
+                for (int i = 0; i < size; i++) {
+                    candidates.emplace_back(std::move(list->candidate(i).text().toString()));
+                }
+            }
         }
         frontend_->updateCandidateList(candidates);
     }
 
-    bool selectCandidate(int idx) {
-        auto list = bulkCandidateList();
+    void selectCandidate(int idx) {
+        const auto &list = inputPanel().candidateList();
         if (!list) {
-            return false;
+            return;
         }
-        int size = list->totalSize();
-        if (idx >= size) {
-            return false;
+        const auto &bulk = list->toBulk();
+        if (bulk) {
+            try {
+                bulk->candidateFromAll(idx).select(this);
+            } catch (const std::invalid_argument &e) {
+                FCITX_WARN() << "BulkCandidateList index out of range";
+            }
+        } else {
+            const int size = list->size();
+            if (idx >= 0 && idx < size) {
+                list->candidate(idx).select(this);
+            } else {
+                FCITX_WARN() << "CandidateList index out of range";
+            }
         }
-        list->candidateFromAll(idx).select(this);
-        return true;
     }
 
 private:
     AndroidFrontend *frontend_;
     std::string auxUpCached;
     std::string auxDownCached;
-
-    BulkCandidateList *bulkCandidateList() {
-        auto candidateList = inputPanel().candidateList();
-        if (!candidateList || candidateList->empty()) {
-            FCITX_INFO() << "bulkCandidateList: no or empty candidateList";
-            return nullptr;
-        }
-        return candidateList->toBulk();
-    }
 };
 
 AndroidFrontend::AndroidFrontend(Instance *instance)
