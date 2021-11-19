@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Fcitx5Test</string>
+    <string name="button_open_ime_settings">Open IME Settings</string>
+    <string name="open_ime_settings_guide">Click the button and enable Fcitx5Test in the list.</string>
 </resources>
