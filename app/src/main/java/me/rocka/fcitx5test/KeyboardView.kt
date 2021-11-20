@@ -41,16 +41,20 @@ class KeyboardView(
                     }
                     false
                 }
+                it.setOnClickListener { presenter.backspace() }
                 it.setOnLongClickListener {
                     presenter.startDeleting()
                     true
                 }
             }
 
-            buttonLang.setOnLongClickListener {
-                (service.getSystemService(InputMethodService.INPUT_METHOD_SERVICE)
-                        as InputMethodManager).showInputMethodPicker()
-                true
+            buttonLang.let {
+                it.setOnClickListener { presenter.switchLang() }
+                it.setOnLongClickListener {
+                    (service.getSystemService(InputMethodService.INPUT_METHOD_SERVICE)
+                            as InputMethodManager).showInputMethodPicker()
+                    true
+                }
             }
 
             root.allChildren()

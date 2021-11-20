@@ -39,7 +39,10 @@ class KeyboardPresenter(
                 1
             )
             is FcitxEvent.IMChangeEvent -> view.updateLangSwitchButtonText(event.data.status.label)
-            is FcitxEvent.InputPanelAuxEvent -> cachedPreedit.aux = event.data
+            is FcitxEvent.InputPanelAuxEvent -> {
+                cachedPreedit.aux = event.data
+                view.updatePreedit(cachedPreedit)
+            }
             is FcitxEvent.KeyEvent -> {
                 if (Character.isISOControl(event.data.code)) {
                     when (event.data.code) {
@@ -53,6 +56,7 @@ class KeyboardPresenter(
             }
             is FcitxEvent.PreeditEvent -> {
                 cachedPreedit.preedit = event.data
+                view.updatePreedit(cachedPreedit)
                 service.currentInputConnection?.setComposingText(event.data.clientPreedit, 1)
             }
             is FcitxEvent.ReadyEvent -> {
@@ -102,12 +106,11 @@ class KeyboardPresenter(
     }
 
     override fun startDeleting() {
-        backspaceTimer = timer(period = 80L, action = { backspace() })
+        backspaceTimer = timer(period = 40L, action = { backspace() })
     }
 
     override fun stopDeleting() {
         backspaceTimer?.run { cancel(); purge() }
-
     }
 
     override fun space() {
