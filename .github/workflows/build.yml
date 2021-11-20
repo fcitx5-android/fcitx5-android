@@ -40,6 +40,7 @@ jobs:
           gradle-version: wrapper
 
       - name: Sign APK
+        if: ${{ github.event_name == 'push' }}
         uses: r0adkll/sign-android-release@v1
         # ID used to access action output
         id: sign_apk
@@ -53,11 +54,11 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v2
         with:
-          name: Signed APK
-          path: ${{steps.sign_apk.outputs.signedReleaseFile}}
+          name: Release APK
+          path: ${{ github.event_name == 'push' && steps.sign_apk.outputs.signedReleaseFile || 'app/build/outputs/apk/release/*.apk' }}
 
       - name: Notify Telegram group
-        if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
+        if: ${{ github.event_name == 'push' }}
         run: |
           curl -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
             -H "content-type: application/json" \
