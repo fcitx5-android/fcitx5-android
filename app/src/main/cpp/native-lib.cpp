@@ -131,10 +131,18 @@ public:
         });
     }
 
+    static fcitx::RawConfig mergeConfigDesc(const fcitx::Configuration *conf) {
+        fcitx::RawConfig topLevel;
+        auto cfg = topLevel.get("cfg", true);
+        conf->save(*cfg);
+        auto desc = topLevel.get("desc", true);
+        conf->dumpDescription(*desc);
+        return topLevel;
+    }
+
     fcitx::RawConfig getGlobalConfig() {
-        fcitx::RawConfig cfg;
-        p_instance->globalConfig().save(cfg);
-        return cfg;
+        const auto &configuration = p_instance->globalConfig().config();
+        return mergeConfigDesc(&configuration);
     }
 
     void setGlobalConfig(const fcitx::RawConfig &config) {
@@ -161,9 +169,7 @@ public:
         if (!configuration) {
             return std::nullopt;
         }
-        fcitx::RawConfig cfg;
-        configuration->save(cfg);
-        return std::make_optional(cfg);
+        return std::make_optional(mergeConfigDesc(configuration));
     }
 
     void setAddonConfig(const std::string &addonName, const fcitx::RawConfig &config) {
@@ -187,9 +193,7 @@ public:
         if (!configuration) {
             return std::nullopt;
         }
-        fcitx::RawConfig cfg;
-        configuration->save(cfg);
-        return std::make_optional(cfg);
+        return std::make_optional(mergeConfigDesc(configuration));
     }
 
     void setInputMethodConfig(const std::string &imName, const fcitx::RawConfig &config) {
