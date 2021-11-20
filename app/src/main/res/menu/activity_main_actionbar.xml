@@ -44,4 +44,9 @@
         android:title="fcitx.saveConfig()"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/activity_main_settings"
+        android:title="Settings"
+        app:showAsAction="never" />
+
 </menu>

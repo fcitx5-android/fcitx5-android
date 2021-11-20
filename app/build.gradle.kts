@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     kotlin("android")
+    id("kotlin-android")
 }
 
 android {
@@ -61,6 +62,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-service:2.4.0")
     implementation("androidx.lifecycle:lifecycle-common-java8:2.4.0")
     implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-android", "1.4.2")
+    implementation("androidx.preference:preference-ktx:1.1.1")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.4.0")
     androidTestImplementation("androidx.test:rules:1.4.0")

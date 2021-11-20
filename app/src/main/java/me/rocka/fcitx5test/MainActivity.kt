@@ -32,8 +32,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        val rootView = binding.root
-        setContentView(rootView)
+        setContentView(binding.root)
         findViewById<Button>(R.id.open_ime_settings).also {
             it.setOnClickListener {
                 startActivity(Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS))
@@ -163,6 +162,46 @@ class MainActivity : AppCompatActivity() {
         }
         R.id.activity_main_save_config -> {
             fcitx.saveConfig()
+            true
+        }
+        R.id.activity_main_settings -> {
+            val intent = Intent(this, SettingsActivity::class.java)
+            AlertDialog.Builder(this)
+                .setTitle("Settings")
+                .setItems(arrayOf("global", "addon", "inputmethod")) { _, type ->
+                    when (type) {
+                        0 -> intent.apply {
+                            putExtra("conf", fcitx.globalConfig)
+                            startActivity(this)
+                        }
+                        1 -> {
+                            val addons = fcitx.addons().filter { it.enabled }.map { it.uniqueName }.toTypedArray()
+                            AlertDialog.Builder(this)
+                                .setTitle("addon config")
+                                .setItems(addons) { _, addon ->
+                                    intent.apply {
+                                        putExtra("conf", fcitx.addonConfig[addons[addon]])
+                                        startActivity(this)
+                                    }
+                                }
+                                .show()
+                        }
+                        2 -> {
+                            val inputMethods = fcitx.listIme().map { it.uniqueName }.toTypedArray()
+                            AlertDialog.Builder(this)
+                                .setTitle("inputmethod config")
+                                .setItems(inputMethods) { _, im ->
+                                    intent.apply {
+                                        putExtra("conf", fcitx.imConfig[inputMethods[im]])
+                                        startActivity(this)
+                                    }
+                                }
+                                .show()
+                        }
+                    }
+                }
+                .setNegativeButton("Cancel") { _, _ -> }
+                .show()
             true
         }
         else -> super.onOptionsItemSelected(item)
