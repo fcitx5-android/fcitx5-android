@@ -1,28 +1,17 @@
 package me.rocka.fcitx5test
 
 import android.inputmethodservice.InputMethodService
-import android.util.Log
-import android.view.KeyEvent
-import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
-import android.widget.Button
-import android.widget.TextView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ServiceLifecycleDispatcher
 import androidx.lifecycle.coroutineScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
 import me.rocka.fcitx5test.databinding.QwertyKeyboardBinding
 import me.rocka.fcitx5test.native.Fcitx
-import me.rocka.fcitx5test.native.FcitxEvent
-import java.util.*
-import kotlin.concurrent.timer
 
 class FcitxService : InputMethodService(), LifecycleOwner {
 

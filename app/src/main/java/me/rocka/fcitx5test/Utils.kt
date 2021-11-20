@@ -37,7 +37,7 @@ private fun Context.copyFile(filename: String) = runCatching {
 
 fun View.allChildren(): List<View> {
     if (this !is ViewGroup)
-        return listOf()
+        return listOf(this)
     val result = mutableListOf<View>()
     children.forEach { result.addAll(it.allChildren()) }
     return result.toList()
