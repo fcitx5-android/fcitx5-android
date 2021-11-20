@@ -1,5 +1,6 @@
 package me.rocka.fcitx5test
 
+import android.annotation.SuppressLint
 import android.inputmethodservice.InputMethodService
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -15,6 +16,12 @@ import me.rocka.fcitx5test.native.Fcitx
 
 class FcitxService : InputMethodService(), LifecycleOwner {
 
+    companion object {
+        @SuppressLint("StaticFieldLeak")
+        private var instance: Fcitx? = null
+        fun getFcitx() = instance
+    }
+
     private lateinit var fcitx: Fcitx
     private val dispatcher = ServiceLifecycleDispatcher(this)
 
@@ -26,7 +33,10 @@ class FcitxService : InputMethodService(), LifecycleOwner {
     }
 
     override fun onCreate() {
-        fcitx = Fcitx(this)
+        if (instance == null) {
+            instance = Fcitx(this)
+        }
+        fcitx = instance!!
         lifecycle.addObserver(fcitx)
         dispatcher.onServicePreSuperOnCreate()
         super.onCreate()
