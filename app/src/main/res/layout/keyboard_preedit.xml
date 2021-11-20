@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:alpha="0.8"
-    android:theme="@style/Theme.AppCompat">
+    android:theme="@style/Theme.AppCompat.DayNight">
 
     <TextView
         android:id="@+id/keyboard_preedit_text"

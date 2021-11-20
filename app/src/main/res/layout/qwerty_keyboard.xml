@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?android:attr/colorBackground"
-    android:theme="@style/Theme.AppCompat">
+    android:theme="@style/Theme.AppCompat.DayNight">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/candidate_list"

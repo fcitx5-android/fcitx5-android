@@ -9,4 +9,4 @@
     android:paddingEnd="10dp"
     android:paddingBottom="0dp"
     android:textSize="18sp"
-    android:theme="@style/Theme.AppCompat" />
+    android:theme="@style/Theme.AppCompat.DayNight" />
