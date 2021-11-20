@@ -50,6 +50,7 @@ class FcitxService : InputMethodService(), LifecycleOwner {
         keyboardPresenter = KeyboardPresenter(this, keyboardView, fcitx)
         keyboardView.presenter = keyboardPresenter
 
+        fcitx.imeStatus()?.let { keyboardView.updateLangSwitchButtonText(it.label) }
         fcitx.eventFlow.onEach {
             keyboardPresenter.handleFcitxEvent(it)
         }.launchIn(lifecycle.coroutineScope)

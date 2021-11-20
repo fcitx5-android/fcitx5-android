@@ -17,15 +17,12 @@ class KeyboardPresenter(
 
     override var capsState: CapsState = CapsState.None
 
-    private var fcitxReady = false
-
     private var backspaceTimer: Timer? = null
 
     private var cachedPreedit = KeyboardContract.PreeditContent(
         FcitxEvent.PreeditEvent.Data("", ""),
         FcitxEvent.InputPanelAuxEvent.Data("", "")
     )
-
 
     override fun selectCandidate(idx: Int) {
         fcitx.select(idx)
@@ -60,7 +57,6 @@ class KeyboardPresenter(
                 service.currentInputConnection?.setComposingText(event.data.clientPreedit, 1)
             }
             is FcitxEvent.ReadyEvent -> {
-                fcitxReady = true
                 view.updateLangSwitchButtonText(fcitx.imeStatus().label)
             }
             is FcitxEvent.UnknownEvent -> {}
@@ -68,8 +64,8 @@ class KeyboardPresenter(
     }
 
     override fun switchLang() {
-        if (!fcitxReady) return
         val list = fcitx.listIme()
+        if (list.isEmpty()) return
         val status = fcitx.imeStatus()
         val index = list.indexOfFirst { it.uniqueName == status.uniqueName }
         val next = list[(index + 1) % list.size]
