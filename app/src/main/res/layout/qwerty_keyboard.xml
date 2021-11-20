@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground">
+    android:background="?android:attr/colorBackground"
+    android:theme="@style/Theme.AppCompat">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/candidate_list"

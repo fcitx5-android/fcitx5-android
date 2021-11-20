@@ -2,14 +2,15 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:alpha="0.8">
+    android:alpha="0.8"
+    android:theme="@style/Theme.AppCompat">
 
     <TextView
         android:id="@+id/keyboard_preedit_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
-        android:background="#ffffff"
+        android:background="?android:attr/colorBackground"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
         android:textSize="16sp" />
@@ -19,7 +20,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:background="#ffffff"
+        android:background="?android:attr/colorBackground"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
         android:textSize="16sp" />
