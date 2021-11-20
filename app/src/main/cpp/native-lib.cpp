@@ -502,11 +502,8 @@ Java_me_rocka_fcitx5test_native_Fcitx_resetInputPanel(JNIEnv *env, jclass clazz)
     Fcitx::Instance().resetInputPanel();
 }
 
-// TODO: avoid unnecessary `FindClass` and `GetMethodID` when called in loop
-jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry) {
-    jclass imEntryClass = env->FindClass("me/rocka/fcitx5test/native/InputMethodEntry");
-    jmethodID entryConstructor = env->GetMethodID(imEntryClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
-    return env->NewObject(imEntryClass, entryConstructor,
+jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry, jclass imEntryClass, jmethodID imEntryInit) {
+    return env->NewObject(imEntryClass, imEntryInit,
                           env->NewStringUTF(entry->uniqueName().c_str()),
                           env->NewStringUTF(entry->name().c_str()),
                           env->NewStringUTF(entry->icon().c_str()),
@@ -517,12 +514,15 @@ jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntr
     );
 }
 
-extern "C"
-JNIEXPORT jobjectArray JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_listInputMethods(JNIEnv *env, jclass clazz) {
+jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry) {
     jclass imEntryClass = env->FindClass("me/rocka/fcitx5test/native/InputMethodEntry");
-    RETURN_VALUE_IF_NOT_RUNNING(env->NewObjectArray(0, imEntryClass, nullptr))
-    const auto entries = Fcitx::Instance().listInputMethods();
+    jmethodID imEntryInit = env->GetMethodID(imEntryClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
+    return fcitxInputMethodEntryToJObject(env, entry, imEntryClass, imEntryInit);
+}
+
+jobjectArray fcitxInputMethodEntriesToJObjectArray(JNIEnv *env, const std::vector<const fcitx::InputMethodEntry *> &entries) {
+    jclass imEntryClass = env->FindClass("me/rocka/fcitx5test/native/InputMethodEntry");
+    jmethodID imEntryInit = env->GetMethodID(imEntryClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
     jobjectArray array = env->NewObjectArray(entries.size(), imEntryClass, nullptr);
     size_t i = 0;
     for (const auto &entry : entries) {
@@ -531,6 +531,14 @@ Java_me_rocka_fcitx5test_native_Fcitx_listInputMethods(JNIEnv *env, jclass clazz
         env->DeleteLocalRef(obj);
     }
     return array;
+}
+
+extern "C"
+JNIEXPORT jobjectArray JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_listInputMethods(JNIEnv *env, jclass clazz) {
+    RETURN_VALUE_IF_NOT_RUNNING(fcitxInputMethodEntriesToJObjectArray(env, {}))
+    const auto entries = Fcitx::Instance().listInputMethods();
+    return fcitxInputMethodEntriesToJObjectArray(env, entries);
 }
 
 extern "C"
@@ -551,17 +559,9 @@ Java_me_rocka_fcitx5test_native_Fcitx_setInputMethod(JNIEnv *env, jclass clazz, 
 extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_availableInputMethods(JNIEnv *env, jclass clazz) {
-    jclass imEntryClass = env->FindClass("me/rocka/fcitx5test/native/InputMethodEntry");
-    RETURN_VALUE_IF_NOT_RUNNING(env->NewObjectArray(0, imEntryClass, nullptr))
+    RETURN_VALUE_IF_NOT_RUNNING(fcitxInputMethodEntriesToJObjectArray(env, {}))
     auto entries = Fcitx::Instance().availableInputMethods();
-    jobjectArray array = env->NewObjectArray(entries.size(), imEntryClass, nullptr);
-    size_t i = 0;
-    for (const auto &entry : entries) {
-        jobject obj = fcitxInputMethodEntryToJObject(env, entry);
-        env->SetObjectArrayElement(array, i++, obj);
-        env->DeleteLocalRef(obj);
-    }
-    return array;
+    return fcitxInputMethodEntriesToJObjectArray(env, entries);
 }
 
 extern "C"
