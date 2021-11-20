@@ -12,46 +12,19 @@
         android:layout_height="wrap_content"
         android:text="@string/open_ime_settings_guide"
         app:layout_constraintBottom_toTopOf="@id/open_ime_settings"
-        app:layout_constraintVertical_chainStyle="packed"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <Button
         android:id="@+id/open_ime_settings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="@string/button_open_ime_settings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@id/input"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/open_ime_settings_guide" />
-
-    <TextView
-        android:id="@+id/input"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@id/candidate"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/open_ime_settings" />
-
-    <TextView
-        android:id="@+id/candidate"
-        android:layout_width="wrap_content"
-        android:layout_height="350dp"
-        app:layout_constraintBottom_toTopOf="@id/commit"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/input" />
-
-    <TextView
-        android:id="@+id/commit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/candidate" />
+        app:layout_constraintTop_toBottomOf="@id/open_ime_settings_guide" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

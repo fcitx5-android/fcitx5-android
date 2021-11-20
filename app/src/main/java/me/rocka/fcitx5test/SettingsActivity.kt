@@ -3,14 +3,18 @@ package me.rocka.fcitx5test
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.preference.*
+import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.RawConfig
 
 class SettingsActivity : AppCompatActivity() {
+    private lateinit var raw: RawConfig
+    private lateinit var fcitx: Fcitx
+
     class MySettingsFragment(val raw: RawConfig) : PreferenceFragmentCompat() {
         private val cfg = raw["cfg"]!!
         private val desc = raw["desc"]!!
 
-        private fun createSinglePreference(cfg: RawConfig, store: PreferenceDataStore) : Preference {
+        private fun createSinglePreference(cfg: RawConfig, store: PreferenceDataStore): Preference {
             val type = cfg["Type"]?.value!!
             val itemDesc = cfg["Description"]?.value ?: cfg.name
             val defValue = cfg["DefaultValue"]?.value ?: ""
@@ -33,6 +37,7 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 "String" -> EditTextPreference(context).apply {
                     summary = store.getString(cfg.name, defValue)
+                    dialogTitle = itemDesc
                     setOnPreferenceChangeListener { pref, v ->
                         pref.summary = (v as Int).toString()
                         true
@@ -80,13 +85,28 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        fcitx = FcitxService.getFcitx()!!
+        raw = when (intent.getStringExtra("type")) {
+            "global" -> fcitx.globalConfig
+            "addon" -> fcitx.addonConfig[intent.getStringExtra("addon")!!]!!
+            "im" -> fcitx.imConfig[intent.getStringExtra("im")!!]!!
+            else -> RawConfig(arrayOf())
+        }
         setContentView(R.layout.activity_settings)
         supportFragmentManager
             .beginTransaction()
-            .replace(
-                R.id.settings_container,
-                MySettingsFragment(intent.getSerializableExtra("conf") as RawConfig)
-            )
+            .replace(R.id.settings_container, MySettingsFragment(raw))
             .commit()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        val newValue = raw["cfg"]!!
+        when (intent.getStringExtra("type")) {
+            "global" -> fcitx.globalConfig = newValue
+            "addon" -> fcitx.addonConfig[intent.getStringExtra("addon")!!] = newValue
+            "im" -> fcitx.imConfig[intent.getStringExtra("im")!!] = newValue
+            else -> {}
+        }
     }
 }

@@ -3,24 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/activity_main_mock_input"
-        android:icon="@drawable/ic_baseline_input_24"
-        android:title="mockInput()"
-        app:showAsAction="ifRoom" />
-
-    <item
-        android:id="@+id/activity_main_reset"
-        android:icon="@drawable/ic_baseline_settings_backup_restore_24"
-        android:title="fcitx.reset()"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/activity_main_empty"
-        android:icon="@drawable/ic_baseline_indeterminate_check_box_24"
-        android:title="fcitx.empty()"
-        app:showAsAction="never" />
-
-    <item
         android:id="@+id/activity_main_get_available"
         android:icon="@drawable/ic_baseline_format_list_bulleted_24"
         android:title="fcitx.listIme()"
