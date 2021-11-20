@@ -12,7 +12,7 @@ class SettingsActivity : AppCompatActivity() {
 
         private fun createSinglePreference(cfg: RawConfig, store: PreferenceDataStore) : Preference {
             val type = cfg["Type"]?.value!!
-            val itemDesc = cfg["Description"]?.value
+            val itemDesc = cfg["Description"]?.value ?: cfg.name
             val defValue = cfg["DefaultValue"]?.value ?: ""
             return when (type) {
                 "Boolean" -> SwitchPreferenceCompat(context)
@@ -44,6 +44,8 @@ class SettingsActivity : AppCompatActivity() {
             }.apply {
                 key = cfg.name
                 title = itemDesc
+                isSingleLineTitle = false
+                isIconSpaceReserved = false
                 preferenceDataStore = store
             }
         }
@@ -59,7 +61,9 @@ class SettingsActivity : AppCompatActivity() {
                     val store = FcitxRawConfigStore(cfg[category.name]!!)
                     val catPref = PreferenceCategory(context).apply {
                         key = category.name
-                        title = category.name
+                        title = category["Description"]?.value ?: category.name
+                        isSingleLineTitle = false
+                        isIconSpaceReserved = false
                     }
                     screen.addPreference(catPref)
                     desc[type]!!.subItems!!.forEach { item ->
