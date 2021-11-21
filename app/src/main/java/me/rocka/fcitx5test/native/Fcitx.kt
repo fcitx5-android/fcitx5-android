@@ -2,21 +2,34 @@ package me.rocka.fcitx5test.native
 
 import android.content.Context
 import android.util.Log
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import me.rocka.fcitx5test.copyFileOrDir
-import java.util.concurrent.atomic.AtomicBoolean
+import me.rocka.fcitx5test.native.FcitxState.*
 
-class Fcitx(private val context: Context) : DefaultLifecycleObserver {
+class Fcitx(private val context: Context) : FcitxLifecycleOwner {
 
     interface RawConfigMap {
         operator fun get(key: String): RawConfig?
         operator fun set(key: String, value: RawConfig)
     }
+
+    override val currentState: FcitxState
+        get() = fcitxState_
+
+    @Volatile
+    override var observer: FcitxLifecycleObserver? = null
+        set(value) {
+            onStateChanged = {
+                when (it) {
+                    Starting to Ready -> value?.onReady()
+                    Stopping to Stopped -> value?.onStopped()
+                }
+            }
+            field = value
+        }
 
     private var fcitxJob: Job? = null
 
@@ -54,13 +67,21 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
     fun triggerQuickPhrase() = triggerQuickPhraseInput()
 
     init {
-        if (isRunning.get())
+        if (fcitxState_ != Stopped)
             throw IllegalAccessException("Fcitx5 is already running!")
     }
 
     private companion object JNI :
         CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.IO) {
-        private var isRunning = AtomicBoolean(false)
+
+        @Volatile
+        private var fcitxState_ = Stopped
+            set(value) {
+                onStateChanged(field to value)
+                field = value
+            }
+
+        private var onStateChanged: (Pair<FcitxState, FcitxState>) -> Unit = {}
 
         private val eventFlow_ =
             MutableSharedFlow<FcitxEvent<*>>(
@@ -149,33 +170,40 @@ class Fcitx(private val context: Context) : DefaultLifecycleObserver {
                 "FcitxEvent",
                 "type=${type}, params=[${params.size}]${params.take(10).joinToString()}"
             )
-            eventFlow_.tryEmit(FcitxEvent.create(type, params.asList()))
+            val event = FcitxEvent.create(type, params.asList())
+            if (event is FcitxEvent.ReadyEvent)
+                fcitxState_ = Ready
+            eventFlow_.tryEmit(event)
         }
     }
 
-    override fun onCreate(owner: LifecycleOwner) {
+    override fun start() {
+        if (fcitxState_ != Stopped)
+            return
+        fcitxState_ = Starting
         with(context) {
             fcitxJob = launch {
                 copyFileOrDir("fcitx5")
                 val externalFilesDir = getExternalFilesDir(null)!!
-                // TODO: should be set in a callback which indicates fcitx has started
-                isRunning.set(true)
                 startupFcitx(
                     applicationInfo.dataDir,
                     applicationInfo.nativeLibraryDir,
                     externalFilesDir.absolutePath
                 )
-                isRunning.set(false)
             }
         }
     }
 
-    override fun onDestroy(owner: LifecycleOwner) {
+    override fun stop() {
+        if (fcitxState_ != Ready)
+            return
+        fcitxState_ = Stopping
         exitFcitx()
         runBlocking {
             fcitxJob?.cancelAndJoin()
         }
         fcitxJob = null
+        fcitxState_ = Stopped
     }
 
 }

@@ -1,12 +1,16 @@
 package me.rocka.fcitx5test
 
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
+import android.os.IBinder
 import android.view.View
+import android.view.ViewGroup
+import androidx.core.view.children
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import android.view.ViewGroup
-import androidx.core.view.children
 
 
 fun Context.copyFileOrDir(path: String): Unit = runCatching {
@@ -41,4 +45,23 @@ fun View.allChildren(): List<View> {
     val result = mutableListOf<View>()
     children.forEach { result.addAll(it.allChildren()) }
     return result.toList()
+}
+
+fun Context.bindFcitxDaemon(
+    onDisconnected: () -> Unit = {},
+    onConnected: (FcitxDaemon.MyBinder) -> Unit
+): ServiceConnection = object : ServiceConnection {
+    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+        onConnected(service as FcitxDaemon.MyBinder)
+    }
+
+    override fun onServiceDisconnected(name: ComponentName?) {
+        onDisconnected()
+    }
+
+}.also {
+    bindService(
+        Intent(this, FcitxDaemon::class.java),
+        it, Context.BIND_AUTO_CREATE
+    )
 }
