@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity() {
                     .setNegativeButton(R.string.cancel) { _, _ -> }
                     .setItems(R.array.conf_types) { _, type ->
                         when (type) {
-                            0 -> intent.apply {
+                            0 -> intent.run {
                                 putExtra("type", "global")
                                 startActivity(this)
                             }
@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
                                     .setTitle(R.string.input_methods_conf)
                                     .setNegativeButton(R.string.cancel) { _, _ -> }
                                     .setItems(names) { _, idx ->
-                                        intent.apply {
+                                        intent.run {
                                             putExtra("type", "im")
                                             putExtra("im", ids[idx])
                                             startActivity(this)
@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity() {
                                     .setTitle(R.string.addons_conf)
                                     .setNegativeButton(R.string.cancel) { _, _ -> }
                                     .setItems(names) { _, idx ->
-                                        intent.apply {
+                                        intent.run {
                                             putExtra("type", "addon")
                                             putExtra("addon", ids[idx])
                                             startActivity(this)

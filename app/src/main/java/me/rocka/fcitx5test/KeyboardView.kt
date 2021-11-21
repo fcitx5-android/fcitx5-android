@@ -7,6 +7,7 @@ import android.widget.Button
 import androidx.recyclerview.widget.LinearLayoutManager
 import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
 import me.rocka.fcitx5test.databinding.QwertyKeyboardBinding
+import me.rocka.fcitx5test.native.InputMethodEntry
 
 
 class KeyboardView(
@@ -94,8 +95,8 @@ class KeyboardView(
         candidateLytMgr.scrollToPosition(0)
     }
 
-    override fun updateLangSwitchButtonText(langName: String) {
-        keyboardBinding.buttonSpace.text = langName
+    override fun updateSpaceButtonText(entry: InputMethodEntry) {
+        keyboardBinding.buttonSpace.text = entry.name
     }
 
 }

@@ -35,7 +35,7 @@ class KeyboardPresenter(
                 event.data,
                 1
             )
-            is FcitxEvent.IMChangeEvent -> view.updateLangSwitchButtonText(event.data.status.name)
+            is FcitxEvent.IMChangeEvent -> view.updateSpaceButtonText(event.data.status)
             is FcitxEvent.InputPanelAuxEvent -> {
                 cachedPreedit.aux = event.data
                 view.updatePreedit(cachedPreedit)
@@ -57,7 +57,7 @@ class KeyboardPresenter(
                 service.currentInputConnection?.setComposingText(event.data.clientPreedit, 1)
             }
             is FcitxEvent.ReadyEvent -> {
-                fcitx.ime().let { view.updateLangSwitchButtonText(it.name) }
+                fcitx.ime().let { view.updateSpaceButtonText(it) }
             }
             is FcitxEvent.UnknownEvent -> {}
         }
@@ -126,7 +126,7 @@ class KeyboardPresenter(
         fcitx.reset()
         fcitx.triggerQuickPhrase()
         when (fcitx.ime().label) {
-            "us" -> 'e'
+            "En" -> 'e'
             else -> 'z'
         }.also { fcitx.sendKey(it) }
     }

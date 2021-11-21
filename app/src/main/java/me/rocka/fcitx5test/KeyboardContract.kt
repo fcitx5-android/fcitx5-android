@@ -2,6 +2,7 @@ package me.rocka.fcitx5test
 
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxEvent
+import me.rocka.fcitx5test.native.InputMethodEntry
 
 interface KeyboardContract {
     data class PreeditContent(
@@ -17,7 +18,7 @@ interface KeyboardContract {
 
         fun updateCandidates(data: List<String>)
 
-        fun updateLangSwitchButtonText(langName: String)
+        fun updateSpaceButtonText(entry: InputMethodEntry)
 
     }
 

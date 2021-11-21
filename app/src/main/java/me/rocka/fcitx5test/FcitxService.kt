@@ -33,7 +33,7 @@ class FcitxService : InputMethodService() {
         keyboardPresenter = KeyboardPresenter(this, keyboardView, fcitx)
         keyboardView.presenter = keyboardPresenter
 
-        fcitx.ime().let { keyboardView.updateLangSwitchButtonText(it.name) }
+        fcitx.ime().let { keyboardView.updateSpaceButtonText(it) }
         return keyboardView.keyboardBinding.root
     }
 
@@ -41,6 +41,10 @@ class FcitxService : InputMethodService() {
     override fun onCreateCandidatesView(): View = keyboardView.preeditBinding.root
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
+        fcitx.reset()
+    }
+
+    override fun onFinishInputView(finishingInput: Boolean) {
         fcitx.reset()
     }
 
