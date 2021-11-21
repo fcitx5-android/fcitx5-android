@@ -3,32 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/activity_main_get_available"
-        android:icon="@drawable/ic_baseline_format_list_bulleted_24"
-        android:title="fcitx.listIme()"
-        app:showAsAction="never" />
-
-    <item
         android:id="@+id/activity_main_set_enabled"
         android:icon="@drawable/ic_baseline_list_alt_24"
-        android:title="fcitx.setEnabledIme()"
-        app:showAsAction="never" />
+        android:title="@string/input_methods"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/activity_main_addons"
         android:icon="@drawable/ic_baseline_extension_24"
-        android:title="fcitx.addons()"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/activity_main_save_config"
-        android:icon="@drawable/ic_baseline_save_24"
-        android:title="fcitx.saveConfig()"
-        app:showAsAction="never" />
+        android:title="@string/addons"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/activity_main_settings"
-        android:title="Settings"
-        app:showAsAction="never" />
+        android:icon="@drawable/ic_baseline_settings_24"
+        android:title="@string/conf"
+        app:showAsAction="ifRoom" />
 
 </menu>

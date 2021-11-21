@@ -2,4 +2,12 @@
     <string name="app_name">Fcitx5Test</string>
     <string name="button_open_ime_settings">Open IME Settings</string>
     <string name="open_ime_settings_guide">Click the button and enable Fcitx5Test in the list.</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="input_methods">Input Methods</string>
+    <string name="input_methods_conf">Configure Input Methods</string>
+    <string name="addons">Addons</string>
+    <string name="addons_conf">Configure Addons</string>
+    <string name="conf">Configuration</string>
+    <string name="global_options">Global Options</string>
 </resources>

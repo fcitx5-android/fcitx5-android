@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="conf_types">
+        <item>@string/global_options</item>
+        <item>@string/input_methods</item>
+        <item>@string/addons</item>
+    </array>
+</resources>

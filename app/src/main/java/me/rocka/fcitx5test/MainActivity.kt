@@ -26,7 +26,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         super.onCreateOptionsMenu(menu)
         menuInflater.inflate(R.menu.activity_main_actionbar, menu)
@@ -35,107 +34,75 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.activity_main_get_available -> {
-                val list = fcitx.listIme()
-                val status = fcitx.imeStatus()
-                val current = list.indexOfFirst { status.uniqueName == it.uniqueName }
-                AlertDialog.Builder(this)
-                    .setTitle("Change IME")
-                    .setSingleChoiceItems(
-                        list.map { it.uniqueName }.toTypedArray(),
-                        current
-                    ) { dialog, choice ->
-                        val ime = list[choice]
-                        fcitx.setIme(ime.uniqueName)
-                        dialog.dismiss()
-                    }
-                    .setNegativeButton("Cancel") { _, _ -> }
-                    .show()
-                true
-            }
             R.id.activity_main_set_enabled -> {
-                val enabled = fcitx.listIme()
+                val enabled = fcitx.enabledIme()
                 val available = fcitx.availableIme()
-                val nameArray = available.map { it.uniqueName }.toTypedArray()
-                val stateArray = available.map { avail ->
-                    enabled.indexOfFirst { it.uniqueName == avail.uniqueName } >= 0
-                }.toBooleanArray()
+                val ids = available.map { it.uniqueName }.toTypedArray()
+                val names = available.map { it.name }.toTypedArray()
+                val state = available.map { enabled.contains(it) }.toBooleanArray()
                 AlertDialog.Builder(this)
-                    .setTitle("Enabled IME")
-                    .setMultiChoiceItems(nameArray, stateArray) { _, which, checked ->
-                        stateArray[which] = checked
-                    }
-                    .setNegativeButton("Cancel") { _, _ -> }
-                    .setPositiveButton("OK") { _, _ ->
-                        fcitx.setEnabledIme(nameArray.filterIndexed { i, _ -> stateArray[i] }
-                            .toTypedArray())
-                    }
-                    .show()
+                    .setTitle(R.string.input_methods)
+                    .setMultiChoiceItems(names, state) { _, idx, checked -> state[idx] = checked }
+                    .setNegativeButton(R.string.cancel) { _, _ -> }
+                    .setPositiveButton(R.string.save) { _, _ ->
+                        fcitx.setEnabledIme(ids.filterIndexed { i, _ -> state[i] }.toTypedArray())
+                    }.show()
                 true
             }
-            R.id.activity_main_addons -> {
-                val addons = fcitx.addons()
-                val nameArray = addons.map { it.uniqueName }.toTypedArray()
-                val stateArray = addons.map { it.enabled }.toBooleanArray()
-                AlertDialog.Builder(this)
-                    .setTitle("Enabled Addons")
-                    .setMultiChoiceItems(nameArray, stateArray) { _, which, checked ->
-                        stateArray[which] = checked
-                    }
-                    .setNegativeButton("Cancel") { _, _ -> }
-                    .setPositiveButton("OK") { _, _ ->
-                        fcitx.setAddonState(nameArray, stateArray)
-                    }
+            R.id.activity_main_addons -> fcitx.addons().run {
+                val ids = map { it.uniqueName }.toTypedArray()
+                val names = map { it.name }.toTypedArray()
+                val state = map { it.enabled }.toBooleanArray()
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle(R.string.addons)
+                    .setMultiChoiceItems(names, state) { _, idx, checked -> state[idx] = checked }
+                    .setNegativeButton(R.string.cancel) { _, _ -> }
+                    .setPositiveButton(R.string.save) { _, _ -> fcitx.setAddonState(ids, state) }
                     .show()
-                true
-            }
-            R.id.activity_main_save_config -> {
-                fcitx.saveConfig()
                 true
             }
             R.id.activity_main_settings -> {
                 val intent = Intent(this, SettingsActivity::class.java)
                 AlertDialog.Builder(this)
-                    .setTitle("Settings")
-                    .setItems(arrayOf("global", "addon", "inputmethod")) { _, type ->
+                    .setTitle(R.string.conf)
+                    .setNegativeButton(R.string.cancel) { _, _ -> }
+                    .setItems(R.array.conf_types) { _, type ->
                         when (type) {
                             0 -> intent.apply {
                                 putExtra("type", "global")
                                 startActivity(this)
                             }
-                            1 -> {
-                                val addons =
-                                    fcitx.addons().filter { it.enabled and it.isConfigurable }
-                                        .map { it.uniqueName }.toTypedArray()
-                                AlertDialog.Builder(this)
-                                    .setTitle("addon config")
-                                    .setItems(addons) { _, addon ->
-                                        intent.apply {
-                                            putExtra("type", "addon")
-                                            putExtra("addon", addons[addon])
-                                            startActivity(this)
-                                        }
-                                    }
-                                    .show()
-                            }
-                            2 -> {
-                                val inputMethods =
-                                    fcitx.listIme().map { it.uniqueName }.toTypedArray()
-                                AlertDialog.Builder(this)
-                                    .setTitle("inputmethod config")
-                                    .setItems(inputMethods) { _, im ->
+                            1 -> fcitx.enabledIme().run {
+                                val ids = map { it.uniqueName }.toTypedArray()
+                                val names = map { it.name }.toTypedArray()
+                                AlertDialog.Builder(this@MainActivity)
+                                    .setTitle(R.string.input_methods_conf)
+                                    .setNegativeButton(R.string.cancel) { _, _ -> }
+                                    .setItems(names) { _, idx ->
                                         intent.apply {
                                             putExtra("type", "im")
-                                            putExtra("im", inputMethods[im])
+                                            putExtra("im", ids[idx])
                                             startActivity(this)
                                         }
-                                    }
-                                    .show()
+                                    }.show()
                             }
+                            2 -> fcitx.addons().filter { it.isConfigurable }.run {
+                                val ids = map { it.uniqueName }.toTypedArray()
+                                val names = map { it.name }.toTypedArray()
+                                AlertDialog.Builder(this@MainActivity)
+                                    .setTitle(R.string.addons_conf)
+                                    .setNegativeButton(R.string.cancel) { _, _ -> }
+                                    .setItems(names) { _, idx ->
+                                        intent.apply {
+                                            putExtra("type", "addon")
+                                            putExtra("addon", ids[idx])
+                                            startActivity(this)
+                                        }
+                                    }.show()
+                            }
+
                         }
-                    }
-                    .setNegativeButton("Cancel") { _, _ -> }
-                    .show()
+                    }.show()
                 true
             }
             else -> super.onOptionsItemSelected(item)
