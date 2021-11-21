@@ -187,8 +187,8 @@ void AndroidKeyboardEngine::keyEvent(const InputMethodEntry &entry, KeyEvent &ev
 std::vector<InputMethodEntry> AndroidKeyboardEngine::listInputMethods() {
     std::vector<InputMethodEntry> result;
     result.emplace_back(std::move(
-            InputMethodEntry("keyboard-us", _("Keyboard"), "en", "androidkeyboard")
-                    .setLabel("us")
+            InputMethodEntry("keyboard-us", _("English"), "en", "androidkeyboard")
+                    .setLabel("En")
                     .setIcon("input-keyboard")
                     .setConfigurable(true)));
     return result;
