@@ -1,11 +1,10 @@
 package me.rocka.fcitx5test
 
 import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Bundle
+import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Button
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import me.rocka.fcitx5test.databinding.ActivityMainBinding
@@ -14,20 +13,16 @@ import me.rocka.fcitx5test.native.Fcitx
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var fcitx: Fcitx
-    private var daemonConnection: ServiceConnection? = null
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        daemonConnection = bindFcitxDaemon {
+        bindFcitxDaemon {
             fcitx = it.getFcitxInstance()
         }
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        findViewById<Button>(R.id.open_ime_settings).also {
-            it.setOnClickListener {
-                startActivity(Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS))
-            }
+        binding.openImeSettings.setOnClickListener {
+            startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
         }
     }
 
@@ -145,10 +140,5 @@ class MainActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    override fun onDestroy() {
-        daemonConnection?.let { unbindService(it) }
-        super.onDestroy()
     }
 }
