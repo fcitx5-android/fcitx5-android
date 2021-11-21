@@ -57,19 +57,19 @@ class KeyboardPresenter(
                 service.currentInputConnection?.setComposingText(event.data.clientPreedit, 1)
             }
             is FcitxEvent.ReadyEvent -> {
-                fcitx.imeStatus()?.let { view.updateLangSwitchButtonText(it.label) }
+                fcitx.ime()?.let { view.updateLangSwitchButtonText(it.label) }
             }
             is FcitxEvent.UnknownEvent -> {}
         }
     }
 
     override fun switchLang() {
-        val list = fcitx.listIme()
+        val list = fcitx.enabledIme()
         if (list.isEmpty()) return
-        val status = fcitx.imeStatus()
+        val status = fcitx.ime()
         val index = list.indexOfFirst { it.uniqueName == status.uniqueName }
         val next = list[(index + 1) % list.size]
-        fcitx.setIme(next.uniqueName)
+        fcitx.activateIme(next.uniqueName)
     }
 
     override fun switchCapsState() {
@@ -125,7 +125,7 @@ class KeyboardPresenter(
     override fun punctuation() {
         fcitx.reset()
         fcitx.triggerQuickPhrase()
-        when (fcitx.imeStatus().label) {
+        when (fcitx.ime().label) {
             "us" -> 'e'
             else -> 'z'
         }.also { fcitx.sendKey(it) }

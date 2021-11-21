@@ -12,7 +12,7 @@ import me.rocka.fcitx5test.native.FcitxState.*
 class Fcitx(private val context: Context) : FcitxLifecycleOwner {
 
     interface RawConfigMap {
-        operator fun get(key: String): RawConfig?
+        operator fun get(key: String): RawConfig
         operator fun set(key: String, value: RawConfig)
     }
 
@@ -44,25 +44,29 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
     fun select(idx: Int) = selectCandidate(idx)
     fun isEmpty() = isInputPanelEmpty()
     fun reset() = resetInputPanel()
-    fun listIme() = listInputMethods()
-    fun imeStatus() = inputMethodStatus()
-    fun setIme(ime: String) = setInputMethod(ime)
-    fun availableIme() = availableInputMethods()
+    fun availableIme() = availableInputMethods() ?: arrayOf()
+    fun enabledIme() = listInputMethods() ?: arrayOf()
     fun setEnabledIme(array: Array<String>) = setEnabledInputMethods(array)
+    fun activateIme(ime: String) = setInputMethod(ime)
+    fun ime() =
+        inputMethodStatus() ?: InputMethodEntry("", "(Not Available)", "", "", "×", "", false)
+
     var globalConfig: RawConfig
-        get() = getFcitxGlobalConfig()
+        get() = getFcitxGlobalConfig() ?: RawConfig(arrayOf())
         set(value) = setFcitxGlobalConfig(value)
     var addonConfig = object : RawConfigMap {
-        override operator fun get(key: String) = getFcitxAddonConfig(key)
+        override operator fun get(key: String) = getFcitxAddonConfig(key) ?: RawConfig(arrayOf())
         override operator fun set(key: String, value: RawConfig) = setFcitxAddonConfig(key, value)
     }
     var imConfig = object : RawConfigMap {
-        override operator fun get(key: String) = getFcitxInputMethodConfig(key)
+        override operator fun get(key: String) =
+            getFcitxInputMethodConfig(key) ?: RawConfig(arrayOf())
+
         override operator fun set(key: String, value: RawConfig) =
             setFcitxInputMethodConfig(key, value)
     }
 
-    fun addons() = getFcitxAddons()
+    fun addons() = getFcitxAddons() ?: arrayOf()
     fun setAddonState(name: Array<String>, state: BooleanArray) = setFcitxAddonState(name, state)
     fun triggerQuickPhrase() = triggerQuickPhraseInput()
 
@@ -119,22 +123,22 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
         external fun resetInputPanel()
 
         @JvmStatic
-        external fun listInputMethods(): Array<InputMethodEntry>
+        external fun listInputMethods(): Array<InputMethodEntry>?
 
         @JvmStatic
-        external fun inputMethodStatus(): InputMethodEntry
+        external fun inputMethodStatus(): InputMethodEntry?
 
         @JvmStatic
         external fun setInputMethod(ime: String)
 
         @JvmStatic
-        external fun availableInputMethods(): Array<InputMethodEntry>
+        external fun availableInputMethods(): Array<InputMethodEntry>?
 
         @JvmStatic
         external fun setEnabledInputMethods(array: Array<String>)
 
         @JvmStatic
-        external fun getFcitxGlobalConfig(): RawConfig
+        external fun getFcitxGlobalConfig(): RawConfig?
 
         @JvmStatic
         external fun getFcitxAddonConfig(addon: String): RawConfig?
@@ -152,7 +156,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
         external fun setFcitxInputMethodConfig(im: String, config: RawConfig)
 
         @JvmStatic
-        external fun getFcitxAddons(): Array<AddonInfo>
+        external fun getFcitxAddons(): Array<AddonInfo>?
 
         @JvmStatic
         external fun setFcitxAddonState(name: Array<String>, state: BooleanArray)

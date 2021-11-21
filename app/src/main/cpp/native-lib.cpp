@@ -536,7 +536,7 @@ jobjectArray fcitxInputMethodEntriesToJObjectArray(JNIEnv *env, const std::vecto
 extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_listInputMethods(JNIEnv *env, jclass clazz) {
-    RETURN_VALUE_IF_NOT_RUNNING(fcitxInputMethodEntriesToJObjectArray(env, {}))
+    RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     const auto entries = Fcitx::Instance().listInputMethods();
     return fcitxInputMethodEntriesToJObjectArray(env, entries);
 }
@@ -559,7 +559,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_setInputMethod(JNIEnv *env, jclass clazz, 
 extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_availableInputMethods(JNIEnv *env, jclass clazz) {
-    RETURN_VALUE_IF_NOT_RUNNING(fcitxInputMethodEntriesToJObjectArray(env, {}))
+    RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     auto entries = Fcitx::Instance().availableInputMethods();
     return fcitxInputMethodEntriesToJObjectArray(env, entries);
 }
@@ -692,8 +692,8 @@ Java_me_rocka_fcitx5test_native_Fcitx_setFcitxInputMethodConfig(JNIEnv *env, jcl
 extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddons(JNIEnv *env, jclass clazz) {
+    RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     jclass cls = env->FindClass("me/rocka/fcitx5test/native/AddonInfo");
-    RETURN_VALUE_IF_NOT_RUNNING(env->NewObjectArray(0, cls, nullptr))
     const auto &addons = Fcitx::Instance().getAddons();
     jmethodID init = env->GetMethodID(cls, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZZZ)V");
     jobjectArray array = env->NewObjectArray(addons.size(), cls, nullptr);

@@ -89,8 +89,8 @@ class SettingsActivity : AppCompatActivity() {
             fcitx = it.getFcitxInstance()
             raw = when (intent.getStringExtra("type")) {
                 "global" -> fcitx.globalConfig
-                "addon" -> fcitx.addonConfig[intent.getStringExtra("addon")!!]!!
-                "im" -> fcitx.imConfig[intent.getStringExtra("im")!!]!!
+                "addon" -> fcitx.addonConfig[intent.getStringExtra("addon")!!]
+                "im" -> fcitx.imConfig[intent.getStringExtra("im")!!]
                 else -> RawConfig(arrayOf())
             }
             setContentView(R.layout.activity_settings)

@@ -33,7 +33,7 @@ class FcitxService : InputMethodService() {
         keyboardPresenter = KeyboardPresenter(this, keyboardView, fcitx)
         keyboardView.presenter = keyboardPresenter
 
-        fcitx.imeStatus()?.let { keyboardView.updateLangSwitchButtonText(it.label) }
+        fcitx.ime().let { keyboardView.updateLangSwitchButtonText(it.label) }
         return keyboardView.keyboardBinding.root
     }
 

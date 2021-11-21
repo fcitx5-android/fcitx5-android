@@ -82,7 +82,7 @@ class FcitxTest {
 
     @Before
     fun saveEnabledIME() {
-        enabledIme = fcitx.listIme().map { it.uniqueName }
+        enabledIme = fcitx.enabledIme().map { it.uniqueName }
     }
 
     @After
