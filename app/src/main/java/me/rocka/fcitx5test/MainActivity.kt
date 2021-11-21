@@ -1,12 +1,10 @@
 package me.rocka.fcitx5test
 
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.Menu
 import android.view.MenuItem
-import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -16,23 +14,14 @@ import me.rocka.fcitx5test.native.Fcitx
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var fcitx: Fcitx
+    private var daemonConnection: ServiceConnection? = null
 
-    private fun alertActivateInputMethod() {
-        AlertDialog.Builder(this)
-            .setTitle("!")
-            .setMessage("Can't find fcitx instance; have you selected 'Fcitx5Test' as default input method?")
-            .setNegativeButton("Don't event think about it!") { _, _ -> }
-            .setPositiveButton("Take me there!") { _, _ ->
-                Handler(Looper.getMainLooper()).postDelayed({
-                    (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager).showInputMethodPicker()
-                }, 200)
-            }
-            .show()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        FcitxService.getFcitx()?.let { fcitx = it }
+        daemonConnection = bindFcitxDaemon {
+            fcitx = it.getFcitxInstance()
+        }
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         findViewById<Button>(R.id.open_ime_settings).also {
@@ -42,12 +31,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (!this::fcitx.isInitialized) {
-            FcitxService.getFcitx()?.let { fcitx = it }
-        }
-    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         super.onCreateOptionsMenu(menu)
@@ -56,15 +39,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (!this::fcitx.isInitialized) {
-            val f = FcitxService.getFcitx()
-            if (f != null) {
-                fcitx = f
-            } else {
-                alertActivateInputMethod()
-                return super.onOptionsItemSelected(item)
-            }
-        }
         return when (item.itemId) {
             R.id.activity_main_get_available -> {
                 val list = fcitx.listIme()
@@ -173,4 +147,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onDestroy() {
+        daemonConnection?.let { unbindService(it) }
+        super.onDestroy()
+    }
 }

@@ -1,7 +1,7 @@
 package me.rocka.fcitx5test
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.*
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.RawConfig
@@ -85,18 +85,21 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        fcitx = FcitxService.getFcitx()!!
-        raw = when (intent.getStringExtra("type")) {
-            "global" -> fcitx.globalConfig
-            "addon" -> fcitx.addonConfig[intent.getStringExtra("addon")!!]!!
-            "im" -> fcitx.imConfig[intent.getStringExtra("im")!!]!!
-            else -> RawConfig(arrayOf())
+        bindFcitxDaemon {
+            fcitx = it.getFcitxInstance()
+            raw = when (intent.getStringExtra("type")) {
+                "global" -> fcitx.globalConfig
+                "addon" -> fcitx.addonConfig[intent.getStringExtra("addon")!!]!!
+                "im" -> fcitx.imConfig[intent.getStringExtra("im")!!]!!
+                else -> RawConfig(arrayOf())
+            }
+            setContentView(R.layout.activity_settings)
+            supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.settings_container, MySettingsFragment(raw))
+                .commit()
         }
-        setContentView(R.layout.activity_settings)
-        supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.settings_container, MySettingsFragment(raw))
-            .commit()
+
     }
 
     override fun onPause() {

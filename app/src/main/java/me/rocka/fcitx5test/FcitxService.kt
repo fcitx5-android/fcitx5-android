@@ -1,44 +1,24 @@
 package me.rocka.fcitx5test
 
-import android.annotation.SuppressLint
 import android.inputmethodservice.InputMethodService
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ServiceLifecycleDispatcher
-import androidx.lifecycle.coroutineScope
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
 import me.rocka.fcitx5test.databinding.QwertyKeyboardBinding
 import me.rocka.fcitx5test.native.Fcitx
 
-class FcitxService : InputMethodService(), LifecycleOwner {
-
-    companion object {
-        @SuppressLint("StaticFieldLeak")
-        private var instance: Fcitx? = null
-        fun getFcitx() = instance
-    }
-
-    private lateinit var fcitx: Fcitx
-    private val dispatcher = ServiceLifecycleDispatcher(this)
+class FcitxService : InputMethodService() {
 
     private lateinit var keyboardPresenter: KeyboardPresenter
     private lateinit var keyboardView: KeyboardView
-
-    override fun getLifecycle(): Lifecycle {
-        return dispatcher.lifecycle
-    }
-
+    private lateinit var fcitx: Fcitx
     override fun onCreate() {
-        if (instance == null) {
-            instance = Fcitx(this)
+        bindFcitxDaemon {
+            fcitx = it.getFcitxInstance()
         }
-        fcitx = instance!!
-        lifecycle.addObserver(fcitx)
-        dispatcher.onServicePreSuperOnCreate()
         super.onCreate()
     }
 
@@ -53,7 +33,7 @@ class FcitxService : InputMethodService(), LifecycleOwner {
         fcitx.imeStatus()?.let { keyboardView.updateLangSwitchButtonText(it.label) }
         fcitx.eventFlow.onEach {
             keyboardPresenter.handleFcitxEvent(it)
-        }.launchIn(lifecycle.coroutineScope)
+        }.launchIn(MainScope())
 
         return keyboardView.keyboardBinding.root
     }
@@ -67,10 +47,5 @@ class FcitxService : InputMethodService(), LifecycleOwner {
 
     override fun onFinishInput() {
         fcitx.reset()
-    }
-
-    override fun onDestroy() {
-        dispatcher.onServicePreSuperOnDestroy()
-        super.onDestroy()
     }
 }

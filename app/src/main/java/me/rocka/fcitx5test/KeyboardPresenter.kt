@@ -57,7 +57,7 @@ class KeyboardPresenter(
                 service.currentInputConnection?.setComposingText(event.data.clientPreedit, 1)
             }
             is FcitxEvent.ReadyEvent -> {
-                view.updateLangSwitchButtonText(fcitx.imeStatus().label)
+                fcitx.imeStatus()?.let { view.updateLangSwitchButtonText(it.label) }
             }
             is FcitxEvent.UnknownEvent -> {}
         }
