@@ -36,6 +36,8 @@ interface KeyboardContract {
 
         fun onKeyPress(key: Char)
 
+        fun onKeyLongPress(key: Char):Boolean
+
         fun backspace()
 
         fun startDeleting()

@@ -97,6 +97,14 @@ class KeyboardPresenter(
         fcitx.sendKey(c)
     }
 
+    override fun onKeyLongPress(key: Char):Boolean {
+        var c = key
+        if (!fcitx.isEmpty())
+            fcitx.sendKey("space")
+        fcitx.sendKey(c)
+        return true
+    }
+
     override fun backspace() {
         fcitx.sendKey("BackSpace")
     }

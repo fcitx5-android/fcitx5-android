@@ -61,7 +61,10 @@ class KeyboardView(
                 // unstable, assuming all letter keys names have the pattern: button_X
                 .filter { it.resources.getResourceName(it.id).takeLast(2).startsWith('_') }
                 .mapNotNull { it as? Button }
-                .forEach { it.setOnClickListener { _ -> presenter.onKeyPress(it.text[0]) } }
+                .forEach {
+                    it.setOnClickListener { _ -> presenter.onKeyPress(it.text[2]) }
+                    it.setOnLongClickListener { _ -> presenter.onKeyLongPress(it.text[0])}
+                }
 
             buttonQuickphrase.setOnClickListener { presenter.quickPhrase() }
 
