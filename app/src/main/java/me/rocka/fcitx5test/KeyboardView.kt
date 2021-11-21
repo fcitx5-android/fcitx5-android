@@ -95,7 +95,7 @@ class KeyboardView(
     }
 
     override fun updateLangSwitchButtonText(langName: String) {
-        keyboardBinding.buttonLang.text = langName
+        keyboardBinding.buttonSpace.text = langName
     }
 
 }
