@@ -16,8 +16,11 @@ class FcitxService : InputMethodService() {
     private lateinit var keyboardView: KeyboardView
     private lateinit var fcitx: Fcitx
     override fun onCreate() {
-        bindFcitxDaemon {
-            fcitx = it.getFcitxInstance()
+        bindFcitxDaemon { binder ->
+            fcitx = binder.getFcitxInstance()
+            fcitx.eventFlow.onEach {
+                keyboardPresenter.handleFcitxEvent(it)
+            }.launchIn(MainScope())
         }
         super.onCreate()
     }
@@ -31,10 +34,6 @@ class FcitxService : InputMethodService() {
         keyboardView.presenter = keyboardPresenter
 
         fcitx.imeStatus()?.let { keyboardView.updateLangSwitchButtonText(it.label) }
-        fcitx.eventFlow.onEach {
-            keyboardPresenter.handleFcitxEvent(it)
-        }.launchIn(MainScope())
-
         return keyboardView.keyboardBinding.root
     }
 
