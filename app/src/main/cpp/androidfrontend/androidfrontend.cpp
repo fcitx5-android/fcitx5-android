@@ -99,11 +99,8 @@ AndroidFrontend::AndroidFrontend(Instance *instance)
     eventHandlers_.emplace_back(instance_->watchEvent(
             EventType::InputContextSwitchInputMethod,
             EventWatcherPhase::Default,
-            [this](Event &event) {
-                if (imChangeCallback) {
-                    imChangeCallback();
-                }
-            }));
+            [this](Event &event) { imChangeCallback(); }
+    ));
 }
 
 AndroidFrontend::~AndroidFrontend() = default;
@@ -134,34 +131,26 @@ void AndroidFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
     FCITX_INFO() << "KeyEvent(key=" << key
                  << ", isRelease=" << isRelease
                  << ", accepted=" << keyEvent.accepted() << ")";
-    if (!keyEvent.accepted() && keyEventCallback) {
+    if (!keyEvent.accepted()) {
         auto sym = key.sym();
         keyEventCallback(fcitx::Key::keySymToUnicode(sym), fcitx::Key::keySymToString(sym));
     }
 }
 
 void AndroidFrontend::commitString(const std::string &str) {
-    if (commitStringCallback) {
-        commitStringCallback(str);
-    }
+    commitStringCallback(str);
 }
 
 void AndroidFrontend::updateCandidateList(const std::vector<std::string> &candidates) {
-    if (candidateListCallback) {
-        candidateListCallback(candidates);
-    }
+    candidateListCallback(candidates);
 }
 
 void AndroidFrontend::updatePreedit(const std::string &preedit, const std::string &clientPreedit) {
-    if (preeditCallback) {
-        preeditCallback(preedit, clientPreedit);
-    }
+    preeditCallback(preedit, clientPreedit);
 }
 
 void AndroidFrontend::updateInputPanelAux(const std::string &auxUp, const std::string &auxDown) {
-    if (inputPanelAuxCallback) {
-        inputPanelAuxCallback(auxUp, auxDown);
-    }
+    inputPanelAuxCallback(auxUp, auxDown);
 }
 
 void AndroidFrontend::selectCandidate(ICUUID uuid, int idx) {
