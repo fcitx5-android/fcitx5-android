@@ -10,7 +10,7 @@ import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
 import me.rocka.fcitx5test.databinding.QwertyKeyboardBinding
 import me.rocka.fcitx5test.native.Fcitx
 
-class FcitxService : InputMethodService() {
+class FcitxIMEService : InputMethodService() {
 
     private lateinit var keyboardPresenter: KeyboardPresenter
     private lateinit var keyboardView: KeyboardView

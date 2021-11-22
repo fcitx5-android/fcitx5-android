@@ -24,7 +24,9 @@ data class RawConfig(
     constructor(subItems: Array<RawConfig>) : this("", "", "", subItems)
     constructor(name: String, subItems: Array<RawConfig>) : this(name, "", "", subItems)
 
-    operator fun get(name: String): RawConfig? {
+    operator fun get(name: String) = findByName(name)!!
+
+    fun findByName(name: String): RawConfig? {
         return subItems?.find { it.name == name }
     }
 

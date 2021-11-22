@@ -11,7 +11,7 @@ import me.rocka.fcitx5test.native.InputMethodEntry
 
 
 class KeyboardView(
-    val service: FcitxService,
+    val service: FcitxIMEService,
     val keyboardBinding: QwertyKeyboardBinding,
     val preeditBinding: KeyboardPreeditBinding
 ) :

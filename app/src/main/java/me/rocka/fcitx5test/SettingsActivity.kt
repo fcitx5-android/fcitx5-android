@@ -10,23 +10,23 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var raw: RawConfig
     private lateinit var fcitx: Fcitx
 
-    class MySettingsFragment(val raw: RawConfig) : PreferenceFragmentCompat() {
-        private val cfg = raw["cfg"]!!
-        private val desc = raw["desc"]!!
+    class MySettingsFragment(raw: RawConfig) : PreferenceFragmentCompat() {
+        private val cfg = raw["cfg"]
+        private val desc = raw["desc"]
 
         private fun createSinglePreference(cfg: RawConfig, store: PreferenceDataStore): Preference {
-            val type = cfg["Type"]?.value!!
-            val itemDesc = cfg["Description"]?.value ?: cfg.name
-            val defValue = cfg["DefaultValue"]?.value ?: ""
+            val type = cfg["Type"].value
+            val itemDesc = cfg.findByName("Description")?.value ?: cfg.name
+            val defValue = cfg.findByName("DefaultValue")?.value ?: ""
             return when (type) {
                 "Boolean" -> SwitchPreferenceCompat(context)
                 "Integer" -> SeekBarPreference(context).apply {
                     showSeekBarValue = true
-                    min = cfg["IntMin"]!!.value.toInt()
-                    max = cfg["IntMax"]!!.value.toInt()
+                    min = cfg["IntMin"].value.toInt()
+                    max = cfg["IntMax"].value.toInt()
                 }
                 "Enum" -> DropDownPreference(context).apply {
-                    val enums = cfg["Enum"]!!.subItems!!.map { it.value }.toTypedArray()
+                    val enums = cfg["Enum"].subItems?.map { it.value }?.toTypedArray() ?: arrayOf()
                     entries = enums
                     entryValues = enums
                     summary = store.getString(cfg.name, defValue)
@@ -61,17 +61,17 @@ class SettingsActivity : AppCompatActivity() {
 
             val topStore = FcitxRawConfigStore(cfg)
             desc.subItems!![0].subItems!!.forEach { category ->
-                val type = category["Type"]?.value!!
+                val type = category["Type"].value
                 if (type.contains("$")) {
-                    val store = FcitxRawConfigStore(cfg[category.name]!!)
+                    val store = FcitxRawConfigStore(cfg[category.name])
                     val catPref = PreferenceCategory(context).apply {
                         key = category.name
-                        title = category["Description"]?.value ?: category.name
+                        title = category.findByName("Description")?.value ?: category.name
                         isSingleLineTitle = false
                         isIconSpaceReserved = false
                     }
                     screen.addPreference(catPref)
-                    desc[type]!!.subItems!!.forEach { item ->
+                    desc[type].subItems?.forEach { item ->
                         catPref.addPreference(createSinglePreference(item, store))
                     }
                 } else {
@@ -104,7 +104,7 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        val newValue = raw["cfg"]!!
+        val newValue = raw["cfg"]
         when (intent.getStringExtra("type")) {
             "global" -> fcitx.globalConfig = newValue
             "addon" -> fcitx.addonConfig[intent.getStringExtra("addon")!!] = newValue
