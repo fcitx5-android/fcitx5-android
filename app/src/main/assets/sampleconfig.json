@@ -1,0 +1,282 @@
+{
+  "imes": [
+    {
+      "name": "English",
+      "vKeyboard": "default"
+    }
+  ],
+  "vKeyboards": [
+    {
+      "des": "Default English keyboard",
+      "name": "default",
+      "layout": "l0",
+      "keys": [
+        {
+          "name": "l0r0k0",
+          "short": {
+            "text": "Q",
+            "type": "fcitx"
+          },
+          "display": "Q"
+        },
+        {
+          "name": "l0r0k1",
+          "short": {
+            "text": "W",
+            "type": "fcitx"
+          },
+          "display": "W"
+        },
+        {
+          "name": "l0r0k2",
+          "short": {
+            "text": "E",
+            "type": "fcitx"
+          },
+          "display": "E"
+        },
+        {
+          "name": "l0r0k3",
+          "short": {
+            "text": "R",
+            "type": "fcitx"
+          },
+          "display": "R"
+        },
+        {
+          "name": "l0r0k4",
+          "short": {
+            "text": "T",
+            "type": "fcitx"
+          },
+          "display": "T"
+        },
+        {
+          "name": "l0r0k5",
+          "short": {
+            "text": "Y",
+            "type": "fcitx"
+          },
+          "display": "Y"
+        },
+        {
+          "name": "l0r0k6",
+          "short": {
+            "text": "U",
+            "type": "fcitx"
+          },
+          "display": "U"
+        },
+        {
+          "name": "l0r0k7",
+          "short": {
+            "text": "I",
+            "type": "fcitx"
+          },
+          "display": "I"
+        },
+        {
+          "name": "l0r0k8",
+          "short": {
+            "text": "O",
+            "type": "fcitx"
+          },
+          "display": "O"
+        },
+        {
+          "name": "l0r0k9",
+          "short": {
+            "text": "P",
+            "type": "fcitx"
+          },
+          "display": "P"
+        },
+        {
+          "name": "l0r1k0",
+          "short": {
+            "text": "A",
+            "type": "fcitx"
+          },
+          "display": "A"
+        },
+        {
+          "name": "l0r1k1",
+          "short": {
+            "text": "S",
+            "type": "fcitx"
+          },
+          "display": "S"
+        },
+        {
+          "name": "l0r1k2",
+          "short": {
+            "text": "D",
+            "type": "fcitx"
+          },
+          "display": "D"
+        },
+        {
+          "name": "l0r1k3",
+          "short": {
+            "text": "F",
+            "type": "fcitx"
+          },
+          "display": "F"
+        },
+        {
+          "name": "l0r1k4",
+          "short": {
+            "text": "G",
+            "type": "fcitx"
+          },
+          "display": "G"
+        },
+        {
+          "name": "l0r1k5",
+          "short": {
+            "text": "H",
+            "type": "fcitx"
+          },
+          "display": "H"
+        },
+        {
+          "name": "l0r1k6",
+          "short": {
+            "text": "J",
+            "type": "fcitx"
+          },
+          "display": "J"
+        },
+        {
+          "name": "l0r1k7",
+          "short": {
+            "text": "K",
+            "type": "fcitx"
+          },
+          "display": "K"
+        },
+        {
+          "name": "l0r1k8",
+          "short": {
+            "text": "L",
+            "type": "fcitx"
+          },
+          "display": "L"
+        },
+        {
+          "name": "l0r2k0",
+          "short": {
+            "type": "caps"
+          }
+        },
+        {
+          "name": "l0r2k1",
+          "short": {
+            "text": "Z",
+            "type": "fcitx"
+          },
+          "display": "Z"
+        },
+        {
+          "name": "l0r2k2",
+          "short": {
+            "text": "X",
+            "type": "fcitx"
+          },
+          "display": "X"
+        },
+        {
+          "name": "l0r2k3",
+          "short": {
+            "text": "C",
+            "type": "fcitx"
+          },
+          "display": "C"
+        },
+        {
+          "name": "l0r2k4",
+          "short": {
+            "text": "V",
+            "type": "fcitx"
+          },
+          "display": "V"
+        },
+        {
+          "name": "l0r2k5",
+          "short": {
+            "text": "B",
+            "type": "fcitx"
+          },
+          "display": "B"
+        },
+        {
+          "name": "l0r2k6",
+          "short": {
+            "text": "N",
+            "type": "fcitx"
+          },
+          "display": "N"
+        },
+        {
+          "name": "l0r2k7",
+          "short": {
+            "text": "M",
+            "type": "fcitx"
+          },
+          "display": "M"
+        },
+        {
+          "name": "l0r2k8",
+          "short": {
+            "type": "backspace"
+          }
+        },
+        {
+          "name": "l0r3k0",
+          "short": {
+            "type": "quickphrase"
+          }
+        },
+        {
+          "name": "l0r3k1",
+          "short": {
+            "text": ",",
+            "type": "nofcitx"
+          },
+          "long": {
+            "text": "\\",
+            "type": "fcitx"
+          },
+          "display": "\\\n,"
+        },
+        {
+          "name": "l0r3k2",
+          "short": {
+            "type": "lang"
+          }
+        },
+        {
+          "name": "l0r3k3",
+          "short": {
+            "type": "space"
+          },
+          "display": "lang"
+        },
+        {
+          "name": "l0r3k4",
+          "short": {
+            "text": ".",
+            "type": "nofcitx"
+          },
+          "display": "."
+        },
+        {
+          "name": "l0r3k5",
+          "short": {
+            "type": "enter"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -35,7 +35,7 @@ class KeyboardPresenter(
                 event.data,
                 1
             )
-            is FcitxEvent.IMChangeEvent -> view.updateSpaceButtonText(event.data.status)
+            is FcitxEvent.IMChangeEvent -> view.updateVirtualKeyboard(event.data.status)
             is FcitxEvent.InputPanelAuxEvent -> {
                 cachedPreedit.aux = event.data
                 view.updatePreedit(cachedPreedit)
@@ -57,7 +57,7 @@ class KeyboardPresenter(
                 service.currentInputConnection?.setComposingText(event.data.clientPreedit, 1)
             }
             is FcitxEvent.ReadyEvent -> {
-                fcitx.ime().let { view.updateSpaceButtonText(it) }
+                fcitx.ime().let { view.updateVirtualKeyboard(it) }
             }
             is FcitxEvent.UnknownEvent -> {}
         }
@@ -95,6 +95,10 @@ class KeyboardPresenter(
             }
         }
         fcitx.sendKey(c)
+    }
+
+    override  fun onNoFcitxKeyPress(text: String){
+        service.currentInputConnection.commitText(text,1)
     }
 
     override fun backspace() {

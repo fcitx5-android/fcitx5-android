@@ -33,7 +33,7 @@ class FcitxService : InputMethodService() {
         keyboardPresenter = KeyboardPresenter(this, keyboardView, fcitx)
         keyboardView.presenter = keyboardPresenter
 
-        fcitx.ime().let { keyboardView.updateSpaceButtonText(it) }
+        fcitx.ime().let { keyboardView.updateVirtualKeyboard(it) }
         return keyboardView.keyboardBinding.root
     }
 

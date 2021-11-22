@@ -18,7 +18,7 @@ interface KeyboardContract {
 
         fun updateCandidates(data: List<String>)
 
-        fun updateSpaceButtonText(entry: InputMethodEntry)
+        fun updateVirtualKeyboard(entry: InputMethodEntry)
 
     }
 
@@ -36,6 +36,8 @@ interface KeyboardContract {
         fun switchCapsState()
 
         fun onKeyPress(key: Char)
+
+        fun onNoFcitxKeyPress(text: String)
 
         fun backspace()
 
