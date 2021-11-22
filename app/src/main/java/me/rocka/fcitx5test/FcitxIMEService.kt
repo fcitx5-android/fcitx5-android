@@ -3,6 +3,7 @@ package me.rocka.fcitx5test
 import android.inputmethodservice.InputMethodService
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -15,10 +16,12 @@ class FcitxIMEService : InputMethodService() {
     private lateinit var keyboardPresenter: KeyboardPresenter
     private lateinit var keyboardView: KeyboardView
     private lateinit var fcitx: Fcitx
+    private var eventHandlerJob: Job? = null
+
     override fun onCreate() {
         bindFcitxDaemon { binder ->
             fcitx = binder.getFcitxInstance()
-            fcitx.eventFlow.onEach {
+            eventHandlerJob = fcitx.eventFlow.onEach {
                 keyboardPresenter.handleFcitxEvent(it)
             }.launchIn(MainScope())
         }
@@ -50,5 +53,10 @@ class FcitxIMEService : InputMethodService() {
 
     override fun onFinishInput() {
         fcitx.reset()
+    }
+
+    override fun onDestroy() {
+        eventHandlerJob?.cancel()
+        super.onDestroy()
     }
 }
