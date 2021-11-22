@@ -34,21 +34,18 @@ public:
     }
 
     void updatePreeditImpl() override {
-        InputPanel &ip = inputPanel();
-        auto preedit = ip.preedit().toString();
-        auto clientPreedit = ip.clientPreedit().toString();
-        frontend_->updatePreedit(preedit, clientPreedit);
+        // if PreeditInApplication is disabled, this function is not called
+        // moved to `updateClientSideUIImpl`
     }
 
     void updateClientSideUIImpl() override {
         InputPanel &ip = inputPanel();
+        auto preedit = ip.preedit().toString();
+        auto clientPreedit = ip.clientPreedit().toString();
+        frontend_->updatePreedit(preedit, clientPreedit);
         auto auxUp = ip.auxUp().toString();
         auto auxDown = ip.auxDown().toString();
-        if (auxUp != auxUpCached || auxDown != auxDownCached) {
-            auxUpCached = std::move(auxUp);
-            auxDownCached = std::move(auxDown);
-            frontend_->updateInputPanelAux(auxUpCached, auxDownCached);
-        }
+        frontend_->updateInputPanelAux(auxUp, auxDown);
         std::vector<std::string> candidates;
         const auto &list = ip.candidateList();
         if (list) {
@@ -95,8 +92,6 @@ public:
 
 private:
     AndroidFrontend *frontend_;
-    std::string auxUpCached;
-    std::string auxDownCached;
 };
 
 AndroidFrontend::AndroidFrontend(Instance *instance)
