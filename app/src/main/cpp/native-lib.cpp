@@ -11,6 +11,7 @@
 #include <fcitx-utils/stringutils.h>
 
 #include "fcitx5/src/modules/quickphrase/quickphrase_public.h"
+#include "fcitx5-chinese-addons/modules/punctuation/punctuation_public.h"
 
 #include "androidfrontend/androidfrontend_public.h"
 #include "androidstreambuf.h"
@@ -42,6 +43,7 @@ public:
             auto &addonMgr = p_instance->addonManager();
             p_frontend = addonMgr.addon("androidfrontend");
             p_quickphrase = addonMgr.addon("quickphrase");
+            p_punctuation = addonMgr.addon("punctuation", true);
             p_uuid = p_frontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
             setupCallback(p_frontend);
         });
@@ -274,14 +276,21 @@ public:
     }
 
     void triggerQuickPhrase() {
-        if (p_quickphrase) {
-            p_dispatcher->schedule([this]() {
-                auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
-                p_quickphrase->call<fcitx::IQuickPhrase::trigger>(
-                        ic, "", "", "", "", fcitx::Key{FcitxKey_None}
-                );
-            });
+        if (!p_quickphrase) return;
+        p_dispatcher->schedule([this]() {
+            auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
+            p_quickphrase->call<fcitx::IQuickPhrase::trigger>(
+                    ic, "", "", "", "", fcitx::Key{FcitxKey_None}
+            );
+        });
+    }
+
+    std::pair<std::string, std::string> queryPunctuation(uint32_t unicode, const std::string& language) {
+        if (!p_punctuation) {
+            std::string s(1, unicode);
+            return std::make_pair(s, s);
         }
+        return p_punctuation->call<fcitx::IPunctuation::getPunctuation>(language, unicode);
     }
 
     void saveConfig() {
@@ -304,12 +313,15 @@ private:
     std::unique_ptr<fcitx::EventDispatcher> p_dispatcher{};
     fcitx::AddonInstance *p_frontend = nullptr;
     fcitx::AddonInstance *p_quickphrase = nullptr;
+    fcitx::AddonInstance *p_punctuation = nullptr;
     fcitx::ICUUID p_uuid{};
 
     void resetGlobalPointers() {
         p_instance.reset();
         p_dispatcher.reset();
         p_frontend = nullptr;
+        p_quickphrase = nullptr;
+        p_punctuation = nullptr;
         p_uuid = {};
     }
 };
@@ -734,4 +746,17 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_triggerQuickPhraseInput(JNIEnv *env, jclass clazz) {
     Fcitx::Instance().triggerQuickPhrase();
+}
+
+extern "C"
+JNIEXPORT jobjectArray JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_queryPunctuation(JNIEnv *env, jclass clazz, jchar c, jstring language) {
+    RETURN_VALUE_IF_NOT_RUNNING(nullptr)
+    const auto pair = Fcitx::Instance().queryPunctuation(c, jstringToString(env, language));
+    jclass s = env->FindClass("java/lang/String");
+    jobjectArray array = env->NewObjectArray(2, s, nullptr);
+    env->SetObjectArrayElement(array, 0, env->NewStringUTF(pair.first.c_str()));
+    env->SetObjectArrayElement(array, 1, env->NewStringUTF(pair.second.c_str()));
+    env->DeleteLocalRef(s);
+    return array;
 }
