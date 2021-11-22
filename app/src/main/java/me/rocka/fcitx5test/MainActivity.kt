@@ -27,10 +27,8 @@ class MainActivity : AppCompatActivity() {
         binding.openImeSettings.setOnClickListener {
             startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
         }
-        val buildTime = SimpleDateFormat(
-            "yyyy-MM-dd'T'HH:mm:ss.SSS",
-            Locale.ROOT
-        ).format(Date(BuildConfig.BUILD_TIME))
+        val buildTime = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.ROOT)
+            .format(Date(BuildConfig.BUILD_TIME))
         binding.versionInfo.text =
             "Build Git Hash: ${BuildConfig.BUILD_GIT_HASH}\nBuild Date: $buildTime"
     }
