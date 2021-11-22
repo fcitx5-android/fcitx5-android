@@ -160,16 +160,16 @@ public:
         return p_instance->addonManager().addon(addon, true);
     }
 
-    std::optional<fcitx::RawConfig> getAddonConfig(const std::string &addonName) {
+    std::unique_ptr<fcitx::RawConfig> getAddonConfig(const std::string &addonName) {
         const auto addonInstance = getAddonInstance(addonName);
         if (!addonInstance) {
-            return std::nullopt;
+            return nullptr;
         }
         const auto configuration = addonInstance->getConfig();
         if (!configuration) {
-            return std::nullopt;
+            return nullptr;
         }
-        return std::make_optional(mergeConfigDesc(configuration));
+        return std::make_unique<fcitx::RawConfig>(mergeConfigDesc(configuration));
     }
 
     void setAddonConfig(const std::string &addonName, const fcitx::RawConfig &config) {
@@ -180,20 +180,20 @@ public:
         addonInstance->setConfig(config);
     }
 
-    std::optional<fcitx::RawConfig> getInputMethodConfig(const std::string &imName) {
+    std::unique_ptr<fcitx::RawConfig> getInputMethodConfig(const std::string &imName) {
         const auto *entry = p_instance->inputMethodManager().entry(imName);
         if (!entry || !entry->isConfigurable()) {
-            return std::nullopt;
+            return nullptr;
         }
         const auto *engine = p_instance->inputMethodEngine(imName);
         if (!engine) {
-            return std::nullopt;
+            return nullptr;
         }
         const auto configuration = engine->getConfigForInputMethod(*entry);
         if (!configuration) {
-            return std::nullopt;
+            return nullptr;
         }
-        return std::make_optional(mergeConfigDesc(configuration));
+        return std::make_unique<fcitx::RawConfig>(mergeConfigDesc(configuration));
     }
 
     void setInputMethodConfig(const std::string &imName, const fcitx::RawConfig &config) {
@@ -617,10 +617,7 @@ JNIEXPORT jobject JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddonConfig(JNIEnv *env, jclass clazz, jstring addon) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     auto result = Fcitx::Instance().getAddonConfig(jstringToString(env, addon));
-    if (result)
-        return fcitxRawConfigToJObject(env, result.value());
-    else
-        return nullptr;
+    return result ? fcitxRawConfigToJObject(env, *result) : nullptr;
 }
 
 extern "C"
@@ -628,10 +625,7 @@ JNIEXPORT jobject JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_getFcitxInputMethodConfig(JNIEnv *env, jclass clazz, jstring im) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     auto result = Fcitx::Instance().getInputMethodConfig(jstringToString(env, im));
-    if (result)
-        return fcitxRawConfigToJObject(env, result.value());
-    else
-        return nullptr;
+    return result ? fcitxRawConfigToJObject(env, *result) : nullptr;
 }
 
 void jobjectFillRawConfig(JNIEnv *env, jclass cls, jfieldID fName, jfieldID fValue, jfieldID fSubItems, jobject jConfig, fcitx::RawConfig &config) {
