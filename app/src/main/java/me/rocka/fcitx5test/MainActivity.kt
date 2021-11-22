@@ -1,6 +1,5 @@
 package me.rocka.fcitx5test
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
@@ -12,6 +11,7 @@ import me.rocka.fcitx5test.databinding.ActivityMainBinding
 import me.rocka.fcitx5test.native.Fcitx
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -27,11 +27,12 @@ class MainActivity : AppCompatActivity() {
         binding.openImeSettings.setOnClickListener {
             startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
         }
-        val gitHash = BuildConfig.BUILD_GIT_HASH
-        @SuppressLint("SimpleDateFormat")
-        val buildDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-            .format(Date(BuildConfig.BUILD_TIME))
-        binding.versionInfo.setText("Build Git Hash: $gitHash\nBuild Date: $buildDate")
+        val buildTime = SimpleDateFormat(
+            "yyyy-MM-dd'T'HH:mm:ss.SSS",
+            Locale.ROOT
+        ).format(Date(BuildConfig.BUILD_TIME))
+        binding.versionInfo.text =
+            "Build Git Hash: ${BuildConfig.BUILD_GIT_HASH}\nBuild Date: $buildTime"
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

@@ -1,3 +1,5 @@
+import java.io.ByteArrayOutputStream
+
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -55,13 +57,12 @@ android {
     }
 }
 
-fun gitHashShort(): String {
-    val os = org.apache.commons.io.output.ByteArrayOutputStream()
+fun gitHashShort(): String  = ByteArrayOutputStream().let {
     project.exec {
-        commandLine = "git describe --always --dirty".split(" ")
-        standardOutput = os
+        commandLine = "git describe --tags --always --dirty".split(" ")
+        standardOutput = it
     }
-    return String(os.toByteArray()).trim()
+    it.toString().trim()
 }
 
 dependencies {
