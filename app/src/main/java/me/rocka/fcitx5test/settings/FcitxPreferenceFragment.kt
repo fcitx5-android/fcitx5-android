@@ -22,12 +22,8 @@ abstract class FcitxPreferenceFragment : PreferenceFragmentCompat() {
     final override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         connection = requireActivity().bindFcitxDaemon {
             fcitx = it.getFcitxInstance()
-            preferenceScreen = PreferenceScreenFactory.create(
-                preferenceManager,
-                raw
-            )
+            preferenceScreen = PreferenceScreenFactory.create(preferenceManager, raw)
         }
-
     }
 
     override fun onPause() {

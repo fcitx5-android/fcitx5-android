@@ -14,7 +14,8 @@
         android:text=""
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintRight_toRightOf="parent"
+        tools:text="Build Git Hash: 000000\nBuild Date: 2021-11-23T00:12:34.567" />
 
     <TextView
         android:id="@+id/open_ime_settings_guide"

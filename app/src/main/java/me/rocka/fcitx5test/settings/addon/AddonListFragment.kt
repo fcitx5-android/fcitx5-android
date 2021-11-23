@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import me.rocka.fcitx5test.MyAddonRecyclerViewAdapter
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.bindFcitxDaemon
 import me.rocka.fcitx5test.native.Fcitx
@@ -36,7 +35,7 @@ class AddonListFragment : Fragment() {
         if (view is RecyclerView) {
             with(view) {
                 layoutManager = LinearLayoutManager(context)
-                adapter = MyAddonRecyclerViewAdapter(fcitx)
+                adapter = AddonListAdapter(fcitx)
             }
         }
         return view
