@@ -1,5 +1,6 @@
 package me.rocka.fcitx5test
 
+import android.content.ServiceConnection
 import android.inputmethodservice.InputMethodService
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -17,9 +18,10 @@ class FcitxIMEService : InputMethodService() {
     private lateinit var keyboardView: KeyboardView
     private lateinit var fcitx: Fcitx
     private var eventHandlerJob: Job? = null
+    private var connection: ServiceConnection? = null
 
     override fun onCreate() {
-        bindFcitxDaemon { binder ->
+        connection = bindFcitxDaemon { binder ->
             fcitx = binder.getFcitxInstance()
             eventHandlerJob = fcitx.eventFlow.onEach {
                 keyboardPresenter.handleFcitxEvent(it)
@@ -57,6 +59,7 @@ class FcitxIMEService : InputMethodService() {
 
     override fun onDestroy() {
         eventHandlerJob?.cancel()
+        connection?.let { unbindService(it) }
         super.onDestroy()
     }
 }
