@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.databinding.FragmentInputMethodEntryBinding
 import me.rocka.fcitx5test.native.Fcitx
-import me.rocka.fcitx5test.settings.addon.AddonConfigFragment
 
 class InputMethodListAdapter(private val fcitx: Fcitx) :
     RecyclerView.Adapter<InputMethodListAdapter.ViewHolder>() {
@@ -34,11 +33,11 @@ class InputMethodListAdapter(private val fcitx: Fcitx) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = entries[position]
         holder.run {
-            name.text = position.toString()
+            name.text = item.name
             holder.configureButton.setOnClickListener {
                 it.findNavController().navigate(
                     R.id.action_imListFragment_to_imConfigFragment,
-                    bundleOf(AddonConfigFragment.ARG_NAME to item.name)
+                    bundleOf(InputMethodConfigFragment.ARG_NAME to item.uniqueName)
                 )
             }
         }

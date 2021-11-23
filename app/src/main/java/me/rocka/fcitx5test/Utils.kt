@@ -49,10 +49,10 @@ fun View.allChildren(): List<View> {
 
 fun Context.bindFcitxDaemon(
     onDisconnected: () -> Unit = {},
-    onConnected: (FcitxDaemon.MyBinder) -> Unit
+    onConnected: (FcitxDaemon.FcitxBinder) -> Unit
 ): ServiceConnection = object : ServiceConnection {
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-        onConnected(service as FcitxDaemon.MyBinder)
+        onConnected(service as FcitxDaemon.FcitxBinder)
     }
 
     override fun onServiceDisconnected(name: ComponentName?) {

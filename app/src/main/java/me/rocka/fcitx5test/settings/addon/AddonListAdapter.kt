@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageButton
+import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
@@ -18,6 +19,7 @@ class AddonListAdapter(private val fcitx: Fcitx) :
     inner class ViewHolder(binding: FragmentAddonListEntryBinding) :
         RecyclerView.ViewHolder(binding.root) {
         val enabled: CheckBox = binding.addonEnable
+        val addonName: TextView = binding.addonName
         val settingsButton: ImageButton = binding.addonSettings
     }
 
@@ -42,15 +44,17 @@ class AddonListAdapter(private val fcitx: Fcitx) :
         val item = values[position]
         with(holder) {
             enabled.isChecked = item.enabled
+            addonName.text = item.name
             enabled.setOnCheckedChangeListener { _, isChecked ->
                 values[position] = item.copy(enabled = isChecked)
                 updateAddonState()
             }
-            settingsButton.visibility = if (item.enabled) View.VISIBLE else View.INVISIBLE
+            settingsButton.visibility =
+                if (item.isConfigurable and item.enabled) View.VISIBLE else View.INVISIBLE
             settingsButton.setOnClickListener {
                 it.findNavController().navigate(
                     R.id.action_addonListFragment_to_addonConfigFragment,
-                    bundleOf(AddonConfigFragment.ARG_NAME to item.name)
+                    bundleOf(AddonConfigFragment.ARG_NAME to item.uniqueName)
                 )
             }
         }

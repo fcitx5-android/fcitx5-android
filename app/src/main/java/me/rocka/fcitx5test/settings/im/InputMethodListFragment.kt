@@ -7,9 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.bindFcitxDaemon
+import me.rocka.fcitx5test.databinding.FragmentInputMethodListBinding
 import me.rocka.fcitx5test.native.Fcitx
 
 /**
@@ -22,23 +21,21 @@ class InputMethodListFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        connection = requireActivity().bindFcitxDaemon {
-            fcitx = it.getFcitxInstance()
-        }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_input_method_list, container, false)
-        if (view is RecyclerView) {
-            with(view) {
-                layoutManager = LinearLayoutManager(context)
+    ): View {
+        val binding = FragmentInputMethodListBinding.inflate(inflater)
+        binding.list.run {
+            layoutManager = LinearLayoutManager(context)
+            connection = requireActivity().bindFcitxDaemon {
+                fcitx = it.getFcitxInstance()
                 adapter = InputMethodListAdapter(fcitx)
             }
         }
-        return view
+        return binding.root
     }
 
     override fun onDestroy() {
