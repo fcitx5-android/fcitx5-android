@@ -9,7 +9,7 @@ import java.util.*
 import kotlin.concurrent.timer
 
 class KeyboardPresenter(
-    val service: FcitxService,
+    val service: FcitxIMEService,
     val view: KeyboardContract.View,
     override val fcitx: Fcitx,
 ) :

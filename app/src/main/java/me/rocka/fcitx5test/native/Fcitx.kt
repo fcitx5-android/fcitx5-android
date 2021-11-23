@@ -69,6 +69,8 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
     fun addons() = getFcitxAddons() ?: arrayOf()
     fun setAddonState(name: Array<String>, state: BooleanArray) = setFcitxAddonState(name, state)
     fun triggerQuickPhrase() = triggerQuickPhraseInput()
+    fun punctuation(c: Char, language: String = "zh_CN"): Pair<String, String> =
+        queryPunctuation(c, language)?.let { Pair(it[0], it[1]) } ?: "$c".let { Pair(it, it) }
 
     init {
         if (fcitxState_ != Stopped)
@@ -163,6 +165,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
 
         @JvmStatic
         external fun triggerQuickPhraseInput()
+
+        @JvmStatic
+        external fun queryPunctuation(c: Char, language: String): Array<String>?
 
         /**
          * Called from native-lib
