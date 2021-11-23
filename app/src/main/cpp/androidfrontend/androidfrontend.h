@@ -49,12 +49,12 @@ private:
     Instance *instance_;
     std::vector<std::unique_ptr<fcitx::HandlerTableEntry<fcitx::EventHandler>>> eventHandlers_;
 
-    CandidateListCallback candidateListCallback;
-    CommitStringCallback commitStringCallback;
-    PreeditCallback preeditCallback;
-    InputPanelAuxCallback inputPanelAuxCallback;
-    KeyEventCallback keyEventCallback;
-    InputMethodChangeCallback imChangeCallback;
+    CandidateListCallback candidateListCallback = [](const std::vector<std::string> &) {};
+    CommitStringCallback commitStringCallback = [](const std::string &) {};
+    PreeditCallback preeditCallback = [](const std::string &, const std::string &) {};
+    InputPanelAuxCallback inputPanelAuxCallback = [](const std::string &, const std::string &) {};
+    KeyEventCallback keyEventCallback = [](int, const std::string &) {};
+    InputMethodChangeCallback imChangeCallback = [] {};
 };
 } // namespace fcitx
 

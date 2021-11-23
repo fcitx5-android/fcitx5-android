@@ -18,7 +18,7 @@ import java.io.InputStreamReader
 
 
 class KeyboardView(
-    val service: FcitxService,
+    val service: FcitxIMEService,
     val keyboardBinding: QwertyKeyboardBinding,
     val preeditBinding: KeyboardPreeditBinding
 ) :

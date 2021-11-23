@@ -1,3 +1,5 @@
+import java.io.ByteArrayOutputStream
+
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -15,6 +17,8 @@ android {
         targetSdk = 30
         versionCode = 1
         versionName = "0.0.1"
+        buildConfigField("String", "BUILD_GIT_HASH", "\"${gitHashShort()}\"")
+        buildConfigField("long", "BUILD_TIME", System.currentTimeMillis().toString())
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
@@ -51,6 +55,14 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+}
+
+fun gitHashShort(): String  = ByteArrayOutputStream().let {
+    project.exec {
+        commandLine = "git describe --tags --always --dirty".split(" ")
+        standardOutput = it
+    }
+    it.toString().trim()
 }
 
 dependencies {
