@@ -1,5 +1,17 @@
 import java.io.ByteArrayOutputStream
 
+fun exec(cmd: String): String = ByteArrayOutputStream().let {
+    project.exec {
+        commandLine = cmd.split(" ")
+        standardOutput = it
+    }
+    it.toString().trim()
+}
+
+val gitRevCount = exec("git rev-list --count HEAD")
+val gitHashShort = exec("git describe --always --dirty")
+val gitVersionName = exec("git describe --tags --long --always --dirty")
+
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -17,7 +29,8 @@ android {
         targetSdk = 30
         versionCode = 1
         versionName = "0.0.1"
-        buildConfigField("String", "BUILD_GIT_HASH", "\"${gitHashShort()}\"")
+        setProperty("archivesBaseName", "$applicationId-v$versionName-$gitRevCount-g$gitHashShort")
+        buildConfigField("String", "BUILD_GIT_HASH", "\"$gitHashShort\"")
         buildConfigField("long", "BUILD_TIME", System.currentTimeMillis().toString())
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -57,18 +70,9 @@ android {
     }
 }
 
-fun gitHashShort(): String  = ByteArrayOutputStream().let {
-    project.exec {
-        commandLine = "git describe --tags --always --dirty".split(" ")
-        standardOutput = it
-    }
-    it.toString().trim()
-}
-
 dependencies {
     implementation("androidx.core:core-ktx:1.7.0")
-    implementation("androidx.appcompat:appcompat:1.3.1")
-    implementation("com.google.android.material:material:1.4.0")
+    implementation("androidx.appcompat:appcompat:1.4.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.2")
     implementation("androidx.lifecycle", "lifecycle-runtime-ktx", "2.3.1")
     implementation("androidx.lifecycle:lifecycle-service:2.4.0")
