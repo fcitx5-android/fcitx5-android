@@ -1,33 +1,33 @@
-package me.rocka.fcitx5test
+package me.rocka.fcitx5test.settings.addon
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.CheckBox
+import android.widget.ImageButton
 import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.databinding.FragmentAddonListEntryBinding
 import me.rocka.fcitx5test.native.Fcitx
-import me.rocka.fcitx5test.settings.addon.AddonConfigFragment
 
-class MyAddonRecyclerViewAdapter(
-    private val fcitx: Fcitx
-) : RecyclerView.Adapter<MyAddonRecyclerViewAdapter.ViewHolder>() {
+class AddonListAdapter(private val fcitx: Fcitx) :
+    RecyclerView.Adapter<AddonListAdapter.ViewHolder>() {
+
+    inner class ViewHolder(binding: FragmentAddonListEntryBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        val enabled: CheckBox = binding.addonEnable
+        val settingsButton: ImageButton = binding.addonSettings
+    }
 
     private val values = fcitx.addons()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-
         return ViewHolder(
-            FragmentAddonListEntryBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            )
+            FragmentAddonListEntryBinding
+                .inflate(LayoutInflater.from(parent.context), parent, false)
         )
-
     }
 
     private fun updateAddonState() {
@@ -57,11 +57,5 @@ class MyAddonRecyclerViewAdapter(
     }
 
     override fun getItemCount(): Int = values.size
-
-    inner class ViewHolder(binding: FragmentAddonListEntryBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        val enabled: CheckBox = binding.addonEnable
-        val settingsButton: Button = binding.addonSettings
-    }
 
 }
