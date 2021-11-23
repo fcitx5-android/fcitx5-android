@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/settings_nav"
+    app:startDestination="@id/globalConfigFragment">
+
+    <fragment
+        android:id="@+id/globalConfigFragment"
+        android:name="me.rocka.fcitx5test.settings.global.GlobalConfigFragment"
+        android:label="GlobalConfigFragment" />
+    <fragment
+        android:id="@+id/addonListFragment"
+        android:name="me.rocka.fcitx5test.settings.addon.AddonListFragment"
+        android:label="fragment_addon_list_list"
+        tools:layout="@layout/fragment_addon_list_list">
+        <action
+            android:id="@+id/action_addonListFragment_to_addonConfigFragment"
+            app:destination="@id/addonConfigFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/addonConfigFragment"
+        android:name="me.rocka.fcitx5test.settings.addon.AddonConfigFragment"
+        android:label="AddonConfigFragment" />
+    <fragment
+        android:id="@+id/imListFragment"
+        android:name="me.rocka.fcitx5test.settings.im.InputMethodListFragment"
+        android:label="fragment_im_list_list"
+        tools:layout="@layout/fragment_input_method_list">
+        <action
+            android:id="@+id/action_imListFragment_to_imConfigFragment"
+            app:destination="@id/imConfigFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/imConfigFragment"
+        android:name="me.rocka.fcitx5test.settings.im.InputMethodListFragment"
+        android:label="InputMethodListFragment" />
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="me.rocka.fcitx5test.MainFragment"
+        android:label="fragment_main"
+        tools:layout="@layout/fragment_main" >
+    </fragment>
+
+</navigation>
