@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import me.rocka.fcitx5test.bindFcitxDaemon
 import me.rocka.fcitx5test.databinding.FragmentInputMethodListBinding
 import me.rocka.fcitx5test.native.Fcitx
+import me.rocka.fcitx5test.setToolbarTitle
 
 /**
  * A fragment representing a list of Items.
@@ -27,11 +28,12 @@ class InputMethodListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        setToolbarTitle("Input Methods")
         val binding = FragmentInputMethodListBinding.inflate(inflater)
         binding.list.run {
             layoutManager = LinearLayoutManager(context)
             connection = requireActivity().bindFcitxDaemon {
-                fcitx = it.getFcitxInstance()
+                fcitx = getFcitxInstance()
                 adapter = InputMethodListAdapter(fcitx)
             }
         }

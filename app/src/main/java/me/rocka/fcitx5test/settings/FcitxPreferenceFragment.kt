@@ -6,8 +6,10 @@ import androidx.preference.PreferenceFragmentCompat
 import me.rocka.fcitx5test.bindFcitxDaemon
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.RawConfig
+import me.rocka.fcitx5test.setToolbarTitle
 
 abstract class FcitxPreferenceFragment : PreferenceFragmentCompat() {
+    abstract fun getPageTitle(): String
     abstract fun obtainConfig(fcitx: Fcitx): RawConfig
     abstract fun saveConfig(fcitx: Fcitx, newConfig: RawConfig)
 
@@ -20,10 +22,14 @@ abstract class FcitxPreferenceFragment : PreferenceFragmentCompat() {
             ?: throw IllegalStateException("No $key found in bundle")
 
     final override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        setToolbarTitle(getPageTitle())
         connection = requireActivity().bindFcitxDaemon {
-            fcitx = it.getFcitxInstance()
-            raw = obtainConfig(fcitx)
-            preferenceScreen = PreferenceScreenFactory.create(preferenceManager, raw)
+            fcitx = getFcitxInstance()
+            // block UI until fcitx is ready
+            onReady {
+                raw = obtainConfig(fcitx)
+                preferenceScreen = PreferenceScreenFactory.create(preferenceManager, raw)
+            }
         }
     }
 

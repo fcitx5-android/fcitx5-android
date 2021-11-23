@@ -21,8 +21,8 @@ class FcitxIMEService : InputMethodService() {
     private var connection: ServiceConnection? = null
 
     override fun onCreate() {
-        connection = bindFcitxDaemon { binder ->
-            fcitx = binder.getFcitxInstance()
+        connection = bindFcitxDaemon {
+            fcitx = getFcitxInstance()
             eventHandlerJob = fcitx.eventFlow.onEach {
                 keyboardPresenter.handleFcitxEvent(it)
             }.launchIn(MainScope())

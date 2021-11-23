@@ -16,6 +16,7 @@ class MainFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        setToolbarTitle(requireContext().getString(R.string.app_name))
         val binding = FragmentMainBinding.inflate(inflater, container, false)
         binding.openImeSettings.setOnClickListener {
             startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))

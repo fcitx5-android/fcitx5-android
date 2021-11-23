@@ -10,27 +10,23 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import me.rocka.fcitx5test.bindFcitxDaemon
 import me.rocka.fcitx5test.databinding.FragmentAddonListBinding
 import me.rocka.fcitx5test.native.Fcitx
+import me.rocka.fcitx5test.setToolbarTitle
 
 class AddonListFragment : Fragment() {
     private lateinit var fcitx: Fcitx
     private var connection: ServiceConnection? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        connection = requireActivity().bindFcitxDaemon {
-            fcitx = it.getFcitxInstance()
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        setToolbarTitle("Addons")
         val binding = FragmentAddonListBinding.inflate(inflater)
         binding.list.apply {
             layoutManager = LinearLayoutManager(context)
             connection = requireActivity().bindFcitxDaemon {
-                fcitx = it.getFcitxInstance()
+                fcitx = getFcitxInstance()
                 adapter = AddonListAdapter(fcitx)
             }
         }
