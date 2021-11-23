@@ -54,7 +54,10 @@ class AddonListAdapter(private val fcitx: Fcitx) :
             settingsButton.setOnClickListener {
                 it.findNavController().navigate(
                     R.id.action_addonListFragment_to_addonConfigFragment,
-                    bundleOf(AddonConfigFragment.ARG_NAME to item.uniqueName)
+                    bundleOf(
+                        AddonConfigFragment.ARG_UNIQUE_NAME to item.uniqueName,
+                        AddonConfigFragment.ARG_NAME to item.name
+                    )
                 )
             }
         }

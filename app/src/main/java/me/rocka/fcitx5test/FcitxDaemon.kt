@@ -5,15 +5,24 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxLifecycleObserver
+import me.rocka.fcitx5test.native.FcitxState
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
 
-class FcitxDaemon : Service() {
+class FcitxDaemon : Service(), CoroutineScope by MainScope() {
     private val fcitx = Fcitx(this).apply {
         observer = object : FcitxLifecycleObserver {
             override fun onReady() {
                 Log.d(javaClass.name, "FcitxDaemon onReady")
+                launch {
+                    while (leftoverOnReadyListeners.isNotEmpty())
+                        leftoverOnReadyListeners.remove()()
+                }
             }
 
             override fun onStopped() {
@@ -24,6 +33,8 @@ class FcitxDaemon : Service() {
     }
     private val bindingCount = AtomicInteger(0)
 
+    private val leftoverOnReadyListeners = ConcurrentLinkedQueue<() -> Unit>()
+
     override fun onCreate() {
         Log.d(javaClass.name, "FcitxDaemon onCreate")
         super.onCreate()
@@ -31,6 +42,14 @@ class FcitxDaemon : Service() {
 
     inner class FcitxBinder : Binder() {
         fun getFcitxInstance() = fcitx
+
+        fun onReady(block: () -> Unit) {
+            // if fcitx is ready, call right now
+            if (fcitx.currentState == FcitxState.Ready)
+                launch { block() }
+            // otherwise save it
+            else leftoverOnReadyListeners.add(block)
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder {
@@ -50,5 +69,6 @@ class FcitxDaemon : Service() {
     override fun onDestroy() {
         Log.d(javaClass.name, "FcitxDaemon onDestroy")
         fcitx.stop()
+        leftoverOnReadyListeners.clear()
     }
 }

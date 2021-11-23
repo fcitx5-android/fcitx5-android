@@ -37,7 +37,10 @@ class InputMethodListAdapter(private val fcitx: Fcitx) :
             holder.configureButton.setOnClickListener {
                 it.findNavController().navigate(
                     R.id.action_imListFragment_to_imConfigFragment,
-                    bundleOf(InputMethodConfigFragment.ARG_NAME to item.uniqueName)
+                    bundleOf(
+                        InputMethodConfigFragment.ARG_UNIQUE_NAME to item.uniqueName,
+                        InputMethodConfigFragment.ARG_NAME to item.name
+                    )
                 )
             }
         }

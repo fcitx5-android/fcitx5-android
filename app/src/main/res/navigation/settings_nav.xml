@@ -8,7 +8,6 @@
     <fragment
         android:id="@+id/mainFragment"
         android:name="me.rocka.fcitx5test.MainFragment"
-        android:label="fragment_main"
         tools:layout="@layout/fragment_main">
         <action
             android:id="@+id/action_mainFragment_to_globalConfigFragment"
@@ -23,13 +22,11 @@
 
     <fragment
         android:id="@+id/globalConfigFragment"
-        android:name="me.rocka.fcitx5test.settings.global.GlobalConfigFragment"
-        android:label="GlobalConfigFragment" />
+        android:name="me.rocka.fcitx5test.settings.global.GlobalConfigFragment" />
 
     <fragment
         android:id="@+id/imListFragment"
         android:name="me.rocka.fcitx5test.settings.im.InputMethodListFragment"
-        android:label="fragment_im_list_list"
         tools:layout="@layout/fragment_input_method_list">
         <action
             android:id="@+id/action_imListFragment_to_imConfigFragment"
@@ -37,13 +34,11 @@
     </fragment>
     <fragment
         android:id="@+id/imConfigFragment"
-        android:name="me.rocka.fcitx5test.settings.im.InputMethodConfigFragment"
-        android:label="InputMethodListFragment" />
+        android:name="me.rocka.fcitx5test.settings.im.InputMethodConfigFragment" />
 
     <fragment
         android:id="@+id/addonListFragment"
         android:name="me.rocka.fcitx5test.settings.addon.AddonListFragment"
-        android:label="fragment_addon_list_list"
         tools:layout="@layout/fragment_addon_list">
         <action
             android:id="@+id/action_addonListFragment_to_addonConfigFragment"
@@ -51,7 +46,6 @@
     </fragment>
     <fragment
         android:id="@+id/addonConfigFragment"
-        android:name="me.rocka.fcitx5test.settings.addon.AddonConfigFragment"
-        android:label="AddonConfigFragment" />
+        android:name="me.rocka.fcitx5test.settings.addon.AddonConfigFragment" />
 
 </navigation>
