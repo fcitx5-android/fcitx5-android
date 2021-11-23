@@ -7,17 +7,6 @@
     tools:context=".MainFragment">
 
     <TextView
-        android:id="@+id/version_info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
-        android:text=""
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        tools:text="Build Git Hash: 000000\nBuild Date: 2021-11-23T00:12:34.567" />
-
-    <TextView
         android:id="@+id/open_ime_settings_guide"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -37,5 +26,43 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/open_ime_settings_guide" />
+
+    <Button
+        android:id="@+id/global_options"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Global Options"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/open_ime_settings" />
+
+    <Button
+        android:id="@+id/input_methods"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Input Methods"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/global_options" />
+
+    <Button
+        android:id="@+id/addons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Addons"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/input_methods" />
+
+    <TextView
+        android:id="@+id/version_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:text=""
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        tools:text="Build Git Hash: 000000\nBuild Date: 2021-11-23T00:12:34.567" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

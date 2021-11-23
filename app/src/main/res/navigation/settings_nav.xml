@@ -3,25 +3,29 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/settings_nav"
-    app:startDestination="@id/globalConfigFragment">
+    app:startDestination="@id/mainFragment">
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="me.rocka.fcitx5test.MainFragment"
+        android:label="fragment_main"
+        tools:layout="@layout/fragment_main">
+        <action
+            android:id="@+id/action_mainFragment_to_globalConfigFragment"
+            app:destination="@id/globalConfigFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_addonListFragment"
+            app:destination="@id/addonListFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_imListFragment"
+            app:destination="@id/imListFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/globalConfigFragment"
         android:name="me.rocka.fcitx5test.settings.global.GlobalConfigFragment"
         android:label="GlobalConfigFragment" />
-    <fragment
-        android:id="@+id/addonListFragment"
-        android:name="me.rocka.fcitx5test.settings.addon.AddonListFragment"
-        android:label="fragment_addon_list_list"
-        tools:layout="@layout/fragment_addon_list_list">
-        <action
-            android:id="@+id/action_addonListFragment_to_addonConfigFragment"
-            app:destination="@id/addonConfigFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/addonConfigFragment"
-        android:name="me.rocka.fcitx5test.settings.addon.AddonConfigFragment"
-        android:label="AddonConfigFragment" />
+
     <fragment
         android:id="@+id/imListFragment"
         android:name="me.rocka.fcitx5test.settings.im.InputMethodListFragment"
@@ -33,13 +37,21 @@
     </fragment>
     <fragment
         android:id="@+id/imConfigFragment"
-        android:name="me.rocka.fcitx5test.settings.im.InputMethodListFragment"
+        android:name="me.rocka.fcitx5test.settings.im.InputMethodConfigFragment"
         android:label="InputMethodListFragment" />
+
     <fragment
-        android:id="@+id/mainFragment"
-        android:name="me.rocka.fcitx5test.MainFragment"
-        android:label="fragment_main"
-        tools:layout="@layout/fragment_main" >
+        android:id="@+id/addonListFragment"
+        android:name="me.rocka.fcitx5test.settings.addon.AddonListFragment"
+        android:label="fragment_addon_list_list"
+        tools:layout="@layout/fragment_addon_list">
+        <action
+            android:id="@+id/action_addonListFragment_to_addonConfigFragment"
+            app:destination="@id/addonConfigFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/addonConfigFragment"
+        android:name="me.rocka.fcitx5test.settings.addon.AddonConfigFragment"
+        android:label="AddonConfigFragment" />
 
 </navigation>

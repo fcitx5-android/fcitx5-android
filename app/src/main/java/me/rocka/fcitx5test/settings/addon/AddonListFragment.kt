@@ -7,14 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.bindFcitxDaemon
+import me.rocka.fcitx5test.databinding.FragmentAddonListBinding
 import me.rocka.fcitx5test.native.Fcitx
 
 class AddonListFragment : Fragment() {
-
-
     private lateinit var fcitx: Fcitx
     private var connection: ServiceConnection? = null
 
@@ -29,16 +26,15 @@ class AddonListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
-        val view = inflater.inflate(R.layout.fragment_addon_list_list, container, false)
-
-        if (view is RecyclerView) {
-            with(view) {
-                layoutManager = LinearLayoutManager(context)
+        val binding = FragmentAddonListBinding.inflate(inflater)
+        binding.list.apply {
+            layoutManager = LinearLayoutManager(context)
+            connection = requireActivity().bindFcitxDaemon {
+                fcitx = it.getFcitxInstance()
                 adapter = AddonListAdapter(fcitx)
             }
         }
-        return view
+        return binding.root
     }
 
     override fun onDestroy() {

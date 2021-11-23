@@ -29,7 +29,7 @@ class FcitxDaemon : Service() {
         super.onCreate()
     }
 
-    inner class MyBinder : Binder() {
+    inner class FcitxBinder : Binder() {
         fun getFcitxInstance() = fcitx
     }
 
@@ -37,7 +37,7 @@ class FcitxDaemon : Service() {
         bindingCount.getAndIncrement()
         Log.d(javaClass.name, "FcitxDaemon onBind, count = ${bindingCount.get()}")
         fcitx.start()
-        return MyBinder()
+        return FcitxBinder()
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
