@@ -231,12 +231,28 @@ class KeyboardView(
                         when(key.long.type){
                             "fcitx" -> it.setOnLongClickListener{
                                 presenter.onKeyPress(key.long.text[0])
-                                true}
+                                true
+                            }
                             "nofcitx" -> it.setOnLongClickListener{
                                 presenter.onNoFcitxKeyPress(key.long.text)
-                                true}
-                            "quickphrase" -> it.setOnClickListener { presenter.quickPhrase() }
-
+                                true
+                            }
+                            "quickphrase" -> it.setOnLongClickListener {
+                                presenter.quickPhrase()
+                                true
+                            }
+                            "space" -> it.setOnLongClickListener {
+                                presenter.space()
+                                true
+                            }
+                            "enter" -> it.setOnLongClickListener {
+                                presenter.enter()
+                                true
+                            }
+                            "switch" -> it.setOnLongClickListener{
+                                changevKeyboard(key.long.text,lang_name)
+                            true
+                            }
                             else -> {}
                         }
                     }
