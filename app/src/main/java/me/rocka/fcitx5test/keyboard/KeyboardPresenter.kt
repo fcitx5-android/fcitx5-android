@@ -1,15 +1,15 @@
-package me.rocka.fcitx5test
+package me.rocka.fcitx5test.keyboard
 
 import android.util.Log
 import android.view.KeyEvent
-import me.rocka.fcitx5test.KeyboardContract.CapsState
+import me.rocka.fcitx5test.keyboard.KeyboardContract.CapsState
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxEvent
 import java.util.*
 import kotlin.concurrent.timer
 
 class KeyboardPresenter(
-    val service: FcitxIMEService,
+    val service: FcitxInputMethodService,
     val view: KeyboardContract.View,
     override val fcitx: Fcitx,
 ) :

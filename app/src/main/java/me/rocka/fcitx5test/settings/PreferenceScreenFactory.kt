@@ -3,7 +3,6 @@ package me.rocka.fcitx5test.settings
 import android.content.Context
 import android.util.Log
 import androidx.preference.*
-import me.rocka.fcitx5test.FcitxRawConfigStore
 import me.rocka.fcitx5test.native.RawConfig
 
 object PreferenceScreenFactory {

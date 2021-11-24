@@ -1,4 +1,4 @@
-package me.rocka.fcitx5test
+package me.rocka.fcitx5test.settings
 
 import androidx.preference.PreferenceDataStore
 import me.rocka.fcitx5test.native.RawConfig
