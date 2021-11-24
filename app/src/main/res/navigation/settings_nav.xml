@@ -11,13 +11,25 @@
         tools:layout="@layout/fragment_main">
         <action
             android:id="@+id/action_mainFragment_to_globalConfigFragment"
-            app:destination="@id/globalConfigFragment" />
+            app:destination="@id/globalConfigFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_mainFragment_to_addonListFragment"
-            app:destination="@id/addonListFragment" />
+            app:destination="@id/addonListFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_mainFragment_to_imListFragment"
-            app:destination="@id/imListFragment" />
+            app:destination="@id/imListFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
 
     <fragment
@@ -30,7 +42,11 @@
         tools:layout="@layout/fragment_input_method_list">
         <action
             android:id="@+id/action_imListFragment_to_imConfigFragment"
-            app:destination="@id/imConfigFragment" />
+            app:destination="@id/imConfigFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
     <fragment
         android:id="@+id/imConfigFragment"
@@ -42,7 +58,11 @@
         tools:layout="@layout/fragment_addon_list">
         <action
             android:id="@+id/action_addonListFragment_to_addonConfigFragment"
-            app:destination="@id/addonConfigFragment" />
+            app:destination="@id/addonConfigFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
     <fragment
         android:id="@+id/addonConfigFragment"

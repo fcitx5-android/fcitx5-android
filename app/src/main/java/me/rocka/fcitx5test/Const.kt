@@ -9,6 +9,6 @@ object Const {
     val versionInfo =
         """
         Build Git Hash: ${BuildConfig.BUILD_GIT_HASH}
-        Build Date: $buildTime"
+        Build Date: $buildTime
         """.trimIndent()
 }

@@ -7,7 +7,7 @@ import me.rocka.fcitx5test.settings.FcitxPreferenceFragment
 
 class GlobalConfigFragment : FcitxPreferenceFragment() {
     override fun getPageTitle(): String =
-        requireContext().resources.getString(R.string.global_options_conf)
+        requireContext().resources.getString(R.string.global_options)
 
     override fun obtainConfig(fcitx: Fcitx): RawConfig = fcitx.globalConfig
 

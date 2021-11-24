@@ -22,18 +22,23 @@ class MainFragment : Fragment() {
         viewModel.setToolbarTitle(requireContext().getString(R.string.app_name))
         viewModel.disableToolbarSaveButton()
         val binding = FragmentMainBinding.inflate(inflater, container, false)
-        binding.openImeSettings.setOnClickListener {
-            startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
+        binding.settingsList.apply {
+            adapter = SettingItemRecyclerViewAdapter(
+                context.getString(R.string.open_ime_settings) to {
+                    startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
+                },
+                context.getString(R.string.global_options) to {
+                    findNavController().navigate(R.id.action_mainFragment_to_globalConfigFragment)
+                },
+                context.getString(R.string.input_methods) to {
+                    findNavController().navigate(R.id.action_mainFragment_to_imListFragment)
+                },
+                context.getString(R.string.addons) to {
+                    findNavController().navigate(R.id.action_mainFragment_to_addonListFragment)
+                },
+            )
         }
-        binding.globalOptions.setOnClickListener {
-            findNavController().navigate(R.id.action_mainFragment_to_globalConfigFragment)
-        }
-        binding.inputMethods.setOnClickListener {
-            findNavController().navigate(R.id.action_mainFragment_to_imListFragment)
-        }
-        binding.addons.setOnClickListener {
-            findNavController().navigate(R.id.action_mainFragment_to_addonListFragment)
-        }
+
         binding.versionInfo.text = Const.versionInfo
         return binding.root
     }
