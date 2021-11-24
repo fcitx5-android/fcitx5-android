@@ -37,7 +37,15 @@ class InputMethodListAdapter(private val fcitx: Fcitx, val fab: FloatingActionBu
                         updateIMState()
                         notifyItemInserted(entries.size - 1)
                         updateFAB()
-                        Snackbar.make(fab, "${unEnabled[which].name} added", Snackbar.LENGTH_SHORT)
+                        Snackbar
+                            .make(fab, "${unEnabled[which].name} added", Snackbar.LENGTH_SHORT)
+                            .setAction("Undo") {
+                                entries.removeLast()
+                                updateIMState()
+                                // the index of element just added is current last element's index + 1
+                                notifyItemRemoved(entries.size)
+                                updateFAB()
+                            }
                             .show()
                     }
                     .show()
@@ -50,7 +58,13 @@ class InputMethodListAdapter(private val fcitx: Fcitx, val fab: FloatingActionBu
         updateIMState()
         notifyItemRemoved(item)
         updateFAB()
-        Snackbar.make(fab, "${removed.name} removed", Snackbar.LENGTH_SHORT)
+        Snackbar
+            .make(fab, "${removed.name} removed", Snackbar.LENGTH_SHORT)
+            .setAction("Undo") {
+                entries.add(item, removed)
+                notifyItemInserted(item)
+                updateFAB()
+            }
             .show()
     }
 
