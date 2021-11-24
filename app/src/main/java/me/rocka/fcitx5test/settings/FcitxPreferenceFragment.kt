@@ -2,11 +2,13 @@ package me.rocka.fcitx5test.settings
 
 import android.content.ServiceConnection
 import android.os.Bundle
+import android.widget.Toast
+import androidx.fragment.app.activityViewModels
 import androidx.preference.PreferenceFragmentCompat
+import me.rocka.fcitx5test.MainViewModel
 import me.rocka.fcitx5test.bindFcitxDaemon
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.RawConfig
-import me.rocka.fcitx5test.setToolbarTitle
 
 abstract class FcitxPreferenceFragment : PreferenceFragmentCompat() {
     abstract fun getPageTitle(): String
@@ -16,13 +18,18 @@ abstract class FcitxPreferenceFragment : PreferenceFragmentCompat() {
     private lateinit var fcitx: Fcitx
     private lateinit var raw: RawConfig
     private var connection: ServiceConnection? = null
+    private val viewModel: MainViewModel by activityViewModels()
 
     fun requireStringArg(key: String) =
         requireArguments().getString(key)
             ?: throw IllegalStateException("No $key found in bundle")
 
     final override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        setToolbarTitle(getPageTitle())
+        viewModel.setToolbarTitle(getPageTitle())
+        viewModel.enableToolbarSaveButton {
+            saveConfig(fcitx, raw["cfg"])
+            Toast.makeText(requireContext(), "Saved", Toast.LENGTH_SHORT).show()
+        }
         connection = requireActivity().bindFcitxDaemon {
             fcitx = getFcitxInstance()
             // block UI until fcitx is ready

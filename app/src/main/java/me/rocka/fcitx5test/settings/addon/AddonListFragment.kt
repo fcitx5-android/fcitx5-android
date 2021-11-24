@@ -6,22 +6,24 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import me.rocka.fcitx5test.MainViewModel
 import me.rocka.fcitx5test.bindFcitxDaemon
 import me.rocka.fcitx5test.databinding.FragmentAddonListBinding
 import me.rocka.fcitx5test.native.Fcitx
-import me.rocka.fcitx5test.setToolbarTitle
 
 class AddonListFragment : Fragment() {
     private lateinit var fcitx: Fcitx
     private var connection: ServiceConnection? = null
-
+    private val viewModel: MainViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        setToolbarTitle("Addons")
+        viewModel.setToolbarTitle("Addons")
+        viewModel.disableToolbarSaveButton()
         val binding = FragmentAddonListBinding.inflate(inflater)
         binding.list.apply {
             layoutManager = LinearLayoutManager(context)
