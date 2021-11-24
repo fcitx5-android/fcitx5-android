@@ -9,7 +9,7 @@ sealed class FcitxEvent<T>(open val data: T) {
 
     data class PreeditEvent(override val data: Data) :
         FcitxEvent<PreeditEvent.Data>(data) {
-        data class Data(val preedit: String, val clientPreedit: String)
+        data class Data(val preedit: String, val clientPreedit: String, val cursor: Int)
     }
 
     data class InputPanelAuxEvent(override val data: Data) :
@@ -45,8 +45,12 @@ sealed class FcitxEvent<T>(open val data: T) {
             when (type) {
                 CANDIDATE_LIST_ID -> CandidateListEvent(params as List<String>)
                 COMMIT_STRING_ID -> CommitStringEvent(params.first() as String)
-                PREEDIT_ID -> PreeditEvent(PreeditEvent.Data(params[0] as String, params[1] as String))
-                INPUT_PANEL_AUX_ID -> InputPanelAuxEvent(InputPanelAuxEvent.Data(params[0] as String, params[1] as String))
+                PREEDIT_ID -> PreeditEvent(
+                    PreeditEvent.Data(params[0] as String, params[1] as String, params[2] as Int)
+                )
+                INPUT_PANEL_AUX_ID -> InputPanelAuxEvent(
+                    InputPanelAuxEvent.Data(params[0] as String, params[1] as String)
+                )
                 READY_ID -> ReadyEvent()
                 KEY_EVENT_ID -> KeyEvent(KeyEvent.Data(params[0] as Int, params[1] as String))
                 IM_CHANGE_ID -> IMChangeEvent(IMChangeEvent.Data(params[0] as InputMethodEntry))
