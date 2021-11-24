@@ -1,11 +1,13 @@
 package me.rocka.fcitx5test.settings.global
 
+import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.RawConfig
 import me.rocka.fcitx5test.settings.FcitxPreferenceFragment
 
 class GlobalConfigFragment : FcitxPreferenceFragment() {
-    override fun getPageTitle(): String = "Global"
+    override fun getPageTitle(): String =
+        requireContext().resources.getString(R.string.global_options_conf)
 
     override fun obtainConfig(fcitx: Fcitx): RawConfig = fcitx.globalConfig
 

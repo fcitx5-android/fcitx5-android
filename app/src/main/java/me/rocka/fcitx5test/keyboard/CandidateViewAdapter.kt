@@ -1,10 +1,11 @@
-package me.rocka.fcitx5test
+package me.rocka.fcitx5test.keyboard
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import me.rocka.fcitx5test.R
 
 class CandidateViewAdapter : RecyclerView.Adapter<CandidateViewAdapter.CandidateItemHolder>() {
     class CandidateItemHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

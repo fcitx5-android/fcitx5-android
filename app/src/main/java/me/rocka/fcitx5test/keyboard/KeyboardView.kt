@@ -1,17 +1,18 @@
-package me.rocka.fcitx5test
+package me.rocka.fcitx5test.keyboard
 
 import android.inputmethodservice.InputMethodService
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import androidx.recyclerview.widget.LinearLayoutManager
+import me.rocka.fcitx5test.allChildren
 import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
 import me.rocka.fcitx5test.databinding.QwertyKeyboardBinding
 import me.rocka.fcitx5test.native.InputMethodEntry
 
 
 class KeyboardView(
-    val service: FcitxIMEService,
+    val service: FcitxInputMethodService,
     val keyboardBinding: QwertyKeyboardBinding,
     val preeditBinding: KeyboardPreeditBinding
 ) :

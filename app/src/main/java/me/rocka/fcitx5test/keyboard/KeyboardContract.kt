@@ -1,4 +1,4 @@
-package me.rocka.fcitx5test
+package me.rocka.fcitx5test.keyboard
 
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxEvent

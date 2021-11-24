@@ -1,11 +1,15 @@
 package me.rocka.fcitx5test.settings.im
 
+import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.RawConfig
 import me.rocka.fcitx5test.settings.FcitxPreferenceFragment
 
 class InputMethodConfigFragment : FcitxPreferenceFragment() {
-    override fun getPageTitle(): String = "Input Methods: ${requireStringArg(ARG_NAME)}"
+    override fun getPageTitle(): String =
+        "${requireContext().resources.getString(R.string.input_methods_conf)}: ${
+            requireStringArg(ARG_NAME)
+        }"
 
     override fun obtainConfig(fcitx: Fcitx): RawConfig =
         fcitx.imConfig[requireStringArg(ARG_UNIQUE_NAME)]

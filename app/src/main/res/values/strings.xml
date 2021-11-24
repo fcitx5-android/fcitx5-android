@@ -9,5 +9,5 @@
     <string name="addons">Addons</string>
     <string name="addons_conf">Configure Addons</string>
     <string name="conf">Configuration</string>
-    <string name="global_options">Global Options</string>
+    <string name="global_options_conf">Configure Global Options</string>
 </resources>

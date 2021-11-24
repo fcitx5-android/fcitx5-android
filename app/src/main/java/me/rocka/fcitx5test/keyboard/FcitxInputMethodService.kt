@@ -1,4 +1,4 @@
-package me.rocka.fcitx5test
+package me.rocka.fcitx5test.keyboard
 
 import android.content.ServiceConnection
 import android.inputmethodservice.InputMethodService
@@ -8,11 +8,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import me.rocka.fcitx5test.bindFcitxDaemon
 import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
 import me.rocka.fcitx5test.databinding.QwertyKeyboardBinding
 import me.rocka.fcitx5test.native.Fcitx
 
-class FcitxIMEService : InputMethodService() {
+class FcitxInputMethodService : InputMethodService() {
 
     private lateinit var keyboardPresenter: KeyboardPresenter
     private lateinit var keyboardView: KeyboardView
