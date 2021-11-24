@@ -7,9 +7,7 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
-import androidx.fragment.app.Fragment
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -66,8 +64,4 @@ fun Context.bindFcitxDaemon(
         Intent(this, FcitxDaemon::class.java),
         it, Context.BIND_AUTO_CREATE
     )
-}
-
-fun Fragment.setToolbarTitle(title: String) {
-    (requireActivity() as AppCompatActivity).supportActionBar!!.title = title
 }
