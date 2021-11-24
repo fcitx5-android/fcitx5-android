@@ -44,6 +44,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
     fun select(idx: Int) = selectCandidate(idx)
     fun isEmpty() = isInputPanelEmpty()
     fun reset() = resetInputPanel()
+    fun moveCursor(position: Int) = repositionCursor(position)
     fun availableIme() = availableInputMethods() ?: arrayOf()
     fun enabledIme() = listInputMethods() ?: arrayOf()
     fun setEnabledIme(array: Array<String>) = setEnabledInputMethods(array)
@@ -123,6 +124,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
 
         @JvmStatic
         external fun resetInputPanel()
+
+        @JvmStatic
+        external fun repositionCursor(position: Int)
 
         @JvmStatic
         external fun listInputMethods(): Array<InputMethodEntry>?

@@ -16,7 +16,7 @@ public:
 
     void updateCandidateList(const std::vector<std::string> &candidates);
     void commitString(const std::string &str);
-    void updatePreedit(const std::string &preedit, const std::string &clientPreedit);
+    void updatePreedit(const std::string &preedit, const std::string &clientPreedit, const int cursor);
     void updateInputPanelAux(const std::string &auxUp, const std::string &auxDown);
 
     ICUUID createInputContext(const std::string &program);
@@ -25,6 +25,7 @@ public:
     void selectCandidate(ICUUID uuid, int idx);
     bool isInputPanelEmpty(ICUUID uuid);
     void resetInputPanel(ICUUID uuid);
+    void repositionCursor(ICUUID uuid, int idx);
     void setCandidateListCallback(const CandidateListCallback &callback);
     void setCommitStringCallback(const CommitStringCallback &callback);
     void setPreeditCallback(const PreeditCallback &callback);
@@ -39,6 +40,7 @@ private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, selectCandidate);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, isInputPanelEmpty);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, resetInputPanel);
+    FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, repositionCursor);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCandidateListCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCommitStringCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setPreeditCallback);
@@ -51,7 +53,7 @@ private:
 
     CandidateListCallback candidateListCallback = [](const std::vector<std::string> &) {};
     CommitStringCallback commitStringCallback = [](const std::string &) {};
-    PreeditCallback preeditCallback = [](const std::string &, const std::string &) {};
+    PreeditCallback preeditCallback = [](const std::string &, const std::string &, const int) {};
     InputPanelAuxCallback inputPanelAuxCallback = [](const std::string &, const std::string &) {};
     KeyEventCallback keyEventCallback = [](int, const std::string &) {};
     InputMethodChangeCallback imChangeCallback = [] {};

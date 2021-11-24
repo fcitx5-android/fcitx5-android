@@ -1,6 +1,7 @@
 #include <fcitx/addonfactory.h>
 #include <fcitx/addonmanager.h>
 #include <fcitx/inputcontextmanager.h>
+#include <fcitx/inputmethodengine.h>
 #include <fcitx/inputpanel.h>
 #include <fcitx/instance.h>
 
@@ -41,8 +42,8 @@ public:
     void updateClientSideUIImpl() override {
         InputPanel &ip = inputPanel();
         auto preedit = ip.preedit().toString();
-        auto clientPreedit = ip.clientPreedit().toString();
-        frontend_->updatePreedit(preedit, clientPreedit);
+        const auto& clientPreedit = ip.clientPreedit();
+        frontend_->updatePreedit(preedit, clientPreedit.toString(), clientPreedit.cursor());
         auto auxUp = ip.auxUp().toString();
         auto auxDown = ip.auxDown().toString();
         frontend_->updateInputPanelAux(auxUp, auxDown);
@@ -145,8 +146,8 @@ void AndroidFrontend::updateCandidateList(const std::vector<std::string> &candid
     candidateListCallback(candidates);
 }
 
-void AndroidFrontend::updatePreedit(const std::string &preedit, const std::string &clientPreedit) {
-    preeditCallback(preedit, clientPreedit);
+void AndroidFrontend::updatePreedit(const std::string &preedit, const std::string &clientPreedit, const int cursor) {
+    preeditCallback(preedit, clientPreedit, cursor);
 }
 
 void AndroidFrontend::updateInputPanelAux(const std::string &auxUp, const std::string &auxDown) {
@@ -168,6 +169,13 @@ void AndroidFrontend::resetInputPanel(ICUUID uuid) {
     // `InputPanel::reset()` seems to have no effect
     // ic->inputPanel().reset();
     ic->reset(ResetReason::LostFocus);
+}
+
+void AndroidFrontend::repositionCursor(ICUUID uuid, int position) {
+    auto ic = instance_->inputContextManager().findByUUID(uuid);
+    auto engine = instance_->inputMethodEngine(ic);
+    InvokeActionEvent event(InvokeActionEvent::Action::LeftClick, position, ic);
+    engine->invokeAction(*(instance_->inputMethodEntry(ic)), event);
 }
 
 void AndroidFrontend::setCandidateListCallback(const CandidateListCallback &callback) {

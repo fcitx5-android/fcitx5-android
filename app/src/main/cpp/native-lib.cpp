@@ -84,6 +84,12 @@ public:
         });
     }
 
+    void repositionCursor(int position) {
+        p_dispatcher->schedule([position, this]() {
+            p_frontend->call<fcitx::IAndroidFrontend::repositionCursor>(p_uuid, position);
+        });
+    }
+
     std::vector<const fcitx::InputMethodEntry *> listInputMethods() {
         const auto &imMgr = p_instance->inputMethodManager();
         const auto &list = imMgr.currentGroup().inputMethodList();
@@ -408,10 +414,11 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 1, vararg);
         env->DeleteLocalRef(vararg);
     };
-    auto preeditCallback = [&](const std::string &preedit, const std::string &clientPreedit) {
-        jobjectArray vararg = env->NewObjectArray(2, ObjectClass, nullptr);
+    auto preeditCallback = [&](const std::string &preedit, const std::string &clientPreedit, const int cursor) {
+        jobjectArray vararg = env->NewObjectArray(3, ObjectClass, nullptr);
         env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(preedit.c_str()));
         env->SetObjectArrayElement(vararg, 1, env->NewStringUTF(clientPreedit.c_str()));
+        env->SetObjectArrayElement(vararg, 2, env->NewObject(IntegerClass, IntegerInit, cursor));
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 2, vararg);
         env->DeleteLocalRef(vararg);
     };
@@ -512,6 +519,13 @@ JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_resetInputPanel(JNIEnv *env, jclass clazz) {
     RETURN_IF_NOT_RUNNING
     Fcitx::Instance().resetInputPanel();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_repositionCursor(JNIEnv *env, jclass clazz, jint position) {
+    jniLog("repositionCursor: to " + std::to_string(position));
+    Fcitx::Instance().repositionCursor(position);
 }
 
 jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry, jclass imEntryClass, jmethodID imEntryInit) {

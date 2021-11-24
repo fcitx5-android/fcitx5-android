@@ -20,7 +20,7 @@ class KeyboardPresenter(
     private var backspaceTimer: Timer? = null
 
     private var cachedPreedit = KeyboardContract.PreeditContent(
-        FcitxEvent.PreeditEvent.Data("", ""),
+        FcitxEvent.PreeditEvent.Data("", "", 0),
         FcitxEvent.InputPanelAuxEvent.Data("", "")
     )
 
@@ -30,31 +30,34 @@ class KeyboardPresenter(
 
     override fun handleFcitxEvent(event: FcitxEvent<*>) {
         when (event) {
-            is FcitxEvent.CandidateListEvent -> view.updateCandidates(event.data)
-            is FcitxEvent.CommitStringEvent -> service.currentInputConnection?.commitText(
-                event.data,
-                1
-            )
-            is FcitxEvent.IMChangeEvent -> view.updateSpaceButtonText(event.data.status)
+            is FcitxEvent.CandidateListEvent -> {
+                view.updateCandidates(event.data)
+            }
+            is FcitxEvent.CommitStringEvent -> {
+                service.currentInputConnection?.commitText(event.data, 1)
+            }
+            is FcitxEvent.IMChangeEvent -> {
+                view.updateSpaceButtonText(event.data.status)
+            }
             is FcitxEvent.InputPanelAuxEvent -> {
                 cachedPreedit.aux = event.data
                 view.updatePreedit(cachedPreedit)
             }
-            is FcitxEvent.KeyEvent -> {
-                if (Character.isISOControl(event.data.code)) {
-                    when (event.data.code) {
+            is FcitxEvent.KeyEvent -> event.data.let {
+                if (Character.isISOControl(it.code)) {
+                    when (it.code) {
                         '\b'.code -> service.sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
                         '\r'.code -> service.sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
-                        else -> Log.d("KeyEvent", event.data.toString())
+                        else -> Log.d("KeyEvent", it.toString())
                     }
                 } else {
-                    service.sendKeyChar(Char(event.data.code))
+                    service.sendKeyChar(Char(it.code))
                 }
             }
-            is FcitxEvent.PreeditEvent -> {
-                cachedPreedit.preedit = event.data
+            is FcitxEvent.PreeditEvent -> event.data.let {
+                cachedPreedit.preedit = it
                 view.updatePreedit(cachedPreedit)
-                service.currentInputConnection?.setComposingText(event.data.clientPreedit, 1)
+                service.updateComposingTextWithCursor(it.clientPreedit, it.cursor)
             }
             is FcitxEvent.ReadyEvent -> {
                 fcitx.ime().let { view.updateSpaceButtonText(it) }

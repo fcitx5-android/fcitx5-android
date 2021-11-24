@@ -1,5 +1,5 @@
 set(Fcitx5Core_FOUND TRUE)
-set(Fcitx5Core_VERSION 5.0.4)
+set(Fcitx5Core_VERSION 5.0.11)
 set(FCITX_INSTALL_CMAKECONFIG_DIR "${CMAKE_SOURCE_DIR}/cmake/dummy")
 
 include(FindPackageHandleStandardArgs)
