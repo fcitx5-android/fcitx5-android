@@ -6,53 +6,14 @@
     android:layout_height="match_parent"
     tools:context=".MainFragment">
 
-    <TextView
-        android:id="@+id/open_ime_settings_guide"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/open_ime_settings_guide"
-        app:layout_constraintBottom_toTopOf="@id/open_ime_settings"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed" />
-
-    <Button
-        android:id="@+id/open_ime_settings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/button_open_ime_settings"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/open_ime_settings_guide" />
-
-    <Button
-        android:id="@+id/global_options"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Global Options"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/open_ime_settings" />
-
-    <Button
-        android:id="@+id/input_methods"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Input Methods"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/global_options" />
-
-    <Button
-        android:id="@+id/addons"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Addons"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/input_methods" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/settings_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        app:layoutManager="LinearLayoutManager"
+        tools:listitem="@layout/setting_entry" />
 
     <TextView
         android:id="@+id/version_info"
