@@ -47,6 +47,7 @@ abstract class FcitxPreferenceFragment : PreferenceFragmentCompat() {
 
     override fun onDestroy() {
         connection?.let { requireActivity().unbindService(it) }
+        connection = null
         super.onDestroy()
     }
 }
