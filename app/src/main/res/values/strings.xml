@@ -9,4 +9,6 @@
     <string name="addons_conf">Configure Addons</string>
     <string name="conf">Configuration</string>
     <string name="global_options">Global Options</string>
+    <string name="behavior">Behavior</string>
+    <string name="ignore_sys_cursor">Ignore System Cursor Position</string>
 </resources>

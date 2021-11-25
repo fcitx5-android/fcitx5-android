@@ -30,6 +30,13 @@
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_mainFragment_to_behaviorSettingsFragment"
+            app:destination="@id/behaviorSettingsFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
 
     <fragment
@@ -67,5 +74,9 @@
     <fragment
         android:id="@+id/addonConfigFragment"
         android:name="me.rocka.fcitx5test.settings.addon.AddonConfigFragment" />
+
+    <fragment
+        android:id="@+id/behaviorSettingsFragment"
+        android:name="me.rocka.fcitx5test.settings.BehaviorSettingsFragment" />
 
 </navigation>

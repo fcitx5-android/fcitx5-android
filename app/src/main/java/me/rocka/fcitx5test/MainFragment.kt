@@ -36,6 +36,9 @@ class MainFragment : Fragment() {
                 context.getString(R.string.addons) to {
                     findNavController().navigate(R.id.action_mainFragment_to_addonListFragment)
                 },
+                context.getString(R.string.behavior) to {
+                    findNavController().navigate(R.id.behaviorSettingsFragment)
+                }
             )
         }
 

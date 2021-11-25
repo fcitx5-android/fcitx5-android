@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+        android:title="@string/behavior"
+        app:iconSpaceReserved="false">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="ignore_system_cursor"
+            android:title="@string/ignore_sys_cursor"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+    </PreferenceCategory>
+</PreferenceScreen>
