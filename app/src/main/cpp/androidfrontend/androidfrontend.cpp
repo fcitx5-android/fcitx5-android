@@ -110,6 +110,7 @@ ICUUID AndroidFrontend::createInputContext(const std::string &program) {
     auto *ic = new AndroidInputContext(this, instance_->inputContextManager(), program);
     ic->setCapabilityFlags(CapabilityFlags{
             CapabilityFlag::Preedit,
+            CapabilityFlag::ClientUnfocusCommit,
             CapabilityFlag::ClientSideInputPanel
     });
     // focus needed for `InputContext::reset` to work
