@@ -32,6 +32,8 @@ android {
         setProperty("archivesBaseName", "$applicationId-v$versionName-$gitRevCount-g$gitHashShort")
         buildConfigField("String", "BUILD_GIT_HASH", "\"$gitHashShort\"")
         buildConfigField("long", "BUILD_TIME", System.currentTimeMillis().toString())
+        // increase this value when update assets
+        buildConfigField("long","ASSETS_VERSION", "1");
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {

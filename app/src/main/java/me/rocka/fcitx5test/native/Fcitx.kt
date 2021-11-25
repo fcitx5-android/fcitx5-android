@@ -2,13 +2,17 @@ package me.rocka.fcitx5test.native
 
 import android.content.Context
 import android.util.Log
+import androidx.core.content.edit
+import androidx.preference.PreferenceManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import me.rocka.fcitx5test.BuildConfig
 import me.rocka.fcitx5test.copyFileOrDir
 import me.rocka.fcitx5test.native.FcitxEvent.Companion.EventType
 import me.rocka.fcitx5test.native.FcitxState.*
+import me.rocka.fcitx5test.settings.PreferenceKeys
 
 class Fcitx(private val context: Context) : FcitxLifecycleOwner {
 
@@ -97,6 +101,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
                 onBufferOverflow = BufferOverflow.DROP_OLDEST
             )
 
+        private var firstRun = false
 
         init {
             System.loadLibrary("native-lib")
@@ -185,8 +190,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
                 "${EventType[type]}[${params.size}]${params.take(10).joinToString()}"
             )
             val event = FcitxEvent.create(type, params.asList())
-            if (event is FcitxEvent.ReadyEvent)
+            if (event is FcitxEvent.ReadyEvent) {
                 fcitxState_ = Ready
+            }
             eventFlow_.tryEmit(event)
         }
     }
@@ -197,7 +203,17 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
         fcitxState_ = Starting
         with(context) {
             fcitxJob = launch {
-                copyFileOrDir("fcitx5")
+                PreferenceManager.getDefaultSharedPreferences(context).run {
+                    val prefKey = PreferenceKeys.AssetsVersion
+                    val ver = getLong(prefKey, -1)
+                    if (ver == -1L) {
+                        firstRun = true
+                    }
+                    if (BuildConfig.ASSETS_VERSION > ver) {
+                        copyFileOrDir("fcitx5")
+                        edit { putLong(prefKey, BuildConfig.ASSETS_VERSION) }
+                    }
+                }
                 val externalFilesDir = getExternalFilesDir(null)!!
                 startupFcitx(
                     applicationInfo.dataDir,
