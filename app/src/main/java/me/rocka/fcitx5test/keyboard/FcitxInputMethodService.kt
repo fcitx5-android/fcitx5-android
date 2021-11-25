@@ -97,7 +97,9 @@ class FcitxInputMethodService : InputMethodService() {
 
     override fun onDestroy() {
         eventHandlerJob?.cancel()
+        eventHandlerJob = null
         connection?.let { unbindService(it) }
+        connection = null
         super.onDestroy()
     }
 }
