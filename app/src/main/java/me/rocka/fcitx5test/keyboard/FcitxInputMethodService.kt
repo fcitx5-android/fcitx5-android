@@ -30,9 +30,6 @@ class FcitxInputMethodService : InputMethodService() {
     override fun onCreate() {
         connection = bindFcitxDaemon {
             fcitx = getFcitxInstance()
-            eventHandlerJob = fcitx.eventFlow.onEach {
-                keyboardPresenter.handleFcitxEvent(it)
-            }.launchIn(MainScope())
         }
         super.onCreate()
     }
@@ -46,6 +43,12 @@ class FcitxInputMethodService : InputMethodService() {
         keyboardView.presenter = keyboardPresenter
 
         fcitx.ime().let { keyboardView.updateSpaceButtonText(it) }
+
+        if (eventHandlerJob == null)
+            eventHandlerJob = fcitx.eventFlow.onEach {
+                keyboardPresenter.handleFcitxEvent(it)
+            }.launchIn(MainScope())
+
         return keyboardView.keyboardBinding.root
     }
 
