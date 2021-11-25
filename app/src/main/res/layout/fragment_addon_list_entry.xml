@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="60dp"
+    android:layout_height="wrap_content"
     android:orientation="horizontal">
 
     <CheckBox
@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="12dp"
         app:layout_constraintEnd_toStartOf="@id/addon_name"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toStartOf="parent"
@@ -19,13 +19,14 @@
 
     <TextView
         android:id="@+id/addon_name"
-        android:layout_width="250dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
-        android:maxLines="5"
-        android:singleLine="false"
+        android:layout_marginEnd="12dp"
+        android:paddingTop="18dp"
+        android:paddingBottom="18dp"
         android:textAppearance="?attr/textAppearanceListItem"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/addon_settings"
         app:layout_constraintStart_toEndOf="@id/addon_enable"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Addon Name" />
@@ -34,10 +35,10 @@
         android:id="@+id/addon_settings"
         android:layout_width="36dp"
         android:layout_height="36dp"
+        android:layout_marginTop="12dp"
         android:layout_marginEnd="12dp"
         android:background="?android:selectableItemBackground"
         android:src="@drawable/ic_baseline_settings_24"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
