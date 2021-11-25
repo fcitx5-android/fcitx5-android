@@ -14,12 +14,15 @@ import me.rocka.fcitx5test.databinding.FragmentInputMethodEntryBinding
 import me.rocka.fcitx5test.native.Fcitx
 import java.util.*
 
-class InputMethodListAdapter(private val fcitx: Fcitx, val fab: FloatingActionButton) :
+class InputMethodListAdapter(
+    private val fcitx: Fcitx,
+    private val fab: FloatingActionButton
+) :
     RecyclerView.Adapter<InputMethodListAdapter.ViewHolder>() {
 
     private val entries = fcitx.enabledIme().toMutableList()
 
-    val unEnabledIme
+    private val unEnabledIme
         get() = fcitx.availableIme().toSet() - entries.toSet()
 
     fun updateFAB() {

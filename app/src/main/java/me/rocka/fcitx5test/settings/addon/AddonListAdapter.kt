@@ -23,7 +23,7 @@ class AddonListAdapter(private val fcitx: Fcitx) :
         val settingsButton: ImageButton = binding.addonSettings
     }
 
-    private val values = fcitx.addons()
+    private val values = fcitx.addons().also { it.sortBy { it.name } }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
@@ -49,6 +49,8 @@ class AddonListAdapter(private val fcitx: Fcitx) :
                 values[position] = item.copy(enabled = isChecked)
                 updateAddonState()
             }
+            // our addon shouldn't be disabled
+            enabled.isEnabled = item.uniqueName != "androidfrontend"
             settingsButton.visibility =
                 if (item.isConfigurable and item.enabled) View.VISIBLE else View.INVISIBLE
             settingsButton.setOnClickListener {
