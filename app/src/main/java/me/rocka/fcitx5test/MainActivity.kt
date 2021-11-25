@@ -2,10 +2,9 @@ package me.rocka.fcitx5test
 
 import android.content.ServiceConnection
 import android.os.Bundle
-import android.view.View
+import android.view.Menu
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.get
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
@@ -30,26 +29,26 @@ class MainActivity : AppCompatActivity() {
         )
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        binding.toolbar.setupWithNavController(
-            navHostFragment.navController,
-            appBarConfiguration
-        )
+        binding.toolbar.setupWithNavController(navHostFragment.navController, appBarConfiguration)
         viewModel.toolbarTitle.observe(this) {
             binding.toolbar.title = it
         }
         viewModel.toolbarSaveButtonOnClickListener.observe(this) {
-            val saveButton = binding.toolbar[0]
-            if (it != null) {
-                saveButton.visibility = View.VISIBLE
-                saveButton.setOnClickListener { _ -> it() }
-            } else
-                saveButton.visibility = View.INVISIBLE
+            binding.toolbar.menu.findItem(R.id.activity_main_menu_save).run {
+                isVisible = it != null
+                setOnMenuItemClickListener { _ -> it?.invoke(); true }
+            }
         }
+    }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.activity_main_menu, menu)
+        return true
     }
 
     override fun onDestroy() {
         connection?.let { unbindService(it) }
+        connection = null
         super.onDestroy()
     }
 }

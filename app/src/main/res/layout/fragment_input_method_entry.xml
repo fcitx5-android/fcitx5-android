@@ -26,6 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:layout_marginEnd="12dp"
+        android:minHeight="60dp"
         android:paddingTop="18dp"
         android:paddingBottom="18dp"
         android:textAppearance="?attr/textAppearanceListItem"
@@ -37,12 +38,11 @@
 
     <ImageButton
         android:id="@+id/input_method_configure"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="12dp"
+        android:layout_width="60dp"
+        android:layout_height="0dp"
         android:background="?android:selectableItemBackground"
         android:src="@drawable/ic_baseline_settings_24"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
