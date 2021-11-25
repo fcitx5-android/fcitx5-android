@@ -5,6 +5,7 @@ import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import androidx.recyclerview.widget.LinearLayoutManager
+import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.allChildren
 import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
 import me.rocka.fcitx5test.databinding.QwertyKeyboardBinding
@@ -94,6 +95,15 @@ class KeyboardView(
         candidateViewAdp.candidates = data
         candidateViewAdp.notifyDataSetChanged()
         candidateLytMgr.scrollToPosition(0)
+    }
+
+    override fun updateCapsButtonState(state: KeyboardContract.CapsState) {
+        // TODO: if system color scheme changes, capslock1 icon won't be recolored; why?
+        keyboardBinding.buttonCaps.setImageResource(when (state) {
+            KeyboardContract.CapsState.None -> R.drawable.ic_baseline_keyboard_capslock0_24
+            KeyboardContract.CapsState.Once -> R.drawable.ic_baseline_keyboard_capslock1_24
+            KeyboardContract.CapsState.Lock -> R.drawable.ic_baseline_keyboard_capslock2_24
+        })
     }
 
     override fun updateSpaceButtonText(entry: InputMethodEntry) {

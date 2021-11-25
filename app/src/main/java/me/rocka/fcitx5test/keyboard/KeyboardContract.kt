@@ -18,6 +18,8 @@ interface KeyboardContract {
 
         fun updateCandidates(data: List<String>)
 
+        fun updateCapsButtonState(state: CapsState)
+
         fun updateSpaceButtonText(entry: InputMethodEntry)
 
     }

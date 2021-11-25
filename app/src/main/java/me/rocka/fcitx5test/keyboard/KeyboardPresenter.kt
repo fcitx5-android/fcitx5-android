@@ -81,6 +81,7 @@ class KeyboardPresenter(
             CapsState.Once -> CapsState.Lock
             CapsState.Lock -> CapsState.None
         }
+        view.updateCapsButtonState(capsState)
     }
 
     override fun onKeyPress(key: Char) {
@@ -92,6 +93,7 @@ class KeyboardPresenter(
             CapsState.Once -> {
                 c = c.uppercaseChar()
                 capsState = CapsState.None
+                view.updateCapsButtonState(capsState)
             }
             CapsState.Lock -> {
                 c = c.uppercaseChar()
