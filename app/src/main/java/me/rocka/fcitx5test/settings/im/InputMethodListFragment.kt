@@ -33,10 +33,8 @@ class InputMethodListFragment : Fragment() {
             connection = requireActivity().bindFcitxDaemon {
                 fcitx = getFcitxInstance()
                 adapter = InputMethodListAdapter(fcitx, binding.fab).also { it.updateFAB() }
-                ItemTouchHelper(InputMethodListTouchCallback(adapter as InputMethodListAdapter)).attachToRecyclerView(
-                    this@run
-                )
-
+                ItemTouchHelper(InputMethodListTouchCallback(adapter as InputMethodListAdapter))
+                    .attachToRecyclerView(this@run)
             }
         }
 

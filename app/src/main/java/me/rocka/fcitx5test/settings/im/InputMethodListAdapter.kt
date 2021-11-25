@@ -1,7 +1,6 @@
 package me.rocka.fcitx5test.settings.im
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
@@ -14,10 +13,7 @@ import me.rocka.fcitx5test.databinding.FragmentInputMethodEntryBinding
 import me.rocka.fcitx5test.native.Fcitx
 import java.util.*
 
-class InputMethodListAdapter(
-    private val fcitx: Fcitx,
-    private val fab: FloatingActionButton
-) :
+class InputMethodListAdapter(private val fcitx: Fcitx, private val fab: FloatingActionButton) :
     RecyclerView.Adapter<InputMethodListAdapter.ViewHolder>() {
 
     private val entries = fcitx.enabledIme().toMutableList()
@@ -27,10 +23,10 @@ class InputMethodListAdapter(
 
     fun updateFAB() {
         val unEnabled = unEnabledIme.toList()
-        if (unEnabled.isEmpty())
-            fab.visibility = View.GONE
-        else {
-            fab.visibility = View.VISIBLE
+        if (unEnabled.isEmpty()) {
+            fab.hide()
+        } else {
+            fab.show()
             fab.setOnClickListener {
                 val items = unEnabled.map { it.name }.toTypedArray()
                 AlertDialog.Builder(fab.context)
