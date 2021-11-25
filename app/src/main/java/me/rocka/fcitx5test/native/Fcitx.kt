@@ -192,8 +192,24 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
             val event = FcitxEvent.create(type, params.asList())
             if (event is FcitxEvent.ReadyEvent) {
                 fcitxState_ = Ready
+                if (firstRun) {
+                    onFirstRun()
+                }
             }
             eventFlow_.tryEmit(event)
+        }
+
+        private fun onFirstRun() {
+            Log.i("Fcitx", "onFirstRun")
+            getFcitxGlobalConfig()?.get("cfg")?.run {
+                get("Behavior")["PreeditEnabledByDefault"].value = "False"
+                setFcitxGlobalConfig(this)
+            }
+            getFcitxAddonConfig("pinyin")?.get("cfg")?.run {
+                get("PreeditInApplication").value = "False"
+                get("PreeditCursorPositionAtBeginning").value = "False"
+                setFcitxAddonConfig("pinyin", this)
+            }
         }
     }
 
