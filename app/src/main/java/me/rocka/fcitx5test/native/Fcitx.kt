@@ -7,6 +7,7 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import me.rocka.fcitx5test.copyFileOrDir
+import me.rocka.fcitx5test.native.FcitxEvent.Companion.EventType
 import me.rocka.fcitx5test.native.FcitxState.*
 
 class Fcitx(private val context: Context) : FcitxLifecycleOwner {
@@ -181,7 +182,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
         fun handleFcitxEvent(type: Int, vararg params: Any) {
             Log.d(
                 "FcitxEvent",
-                "type=${type}, params=[${params.size}]${params.take(10).joinToString()}"
+                "${EventType[type]}[${params.size}]${params.take(10).joinToString()}"
             )
             val event = FcitxEvent.create(type, params.asList())
             if (event is FcitxEvent.ReadyEvent)

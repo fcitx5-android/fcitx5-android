@@ -40,6 +40,16 @@ sealed class FcitxEvent<T>(open val data: T) {
         private const val KEY_EVENT_ID = 5
         private const val IM_CHANGE_ID = 6
 
+        val EventType = mapOf(
+            CANDIDATE_LIST_ID to "Candidate",
+            COMMIT_STRING_ID to "Commit",
+            PREEDIT_ID to "Preedit",
+            INPUT_PANEL_AUX_ID to "Aux",
+            READY_ID to "Ready",
+            KEY_EVENT_ID to "Key",
+            IM_CHANGE_ID to "Change"
+        )
+
         @Suppress("UNCHECKED_CAST")
         fun create(type: Int, params: List<Any>) =
             when (type) {
