@@ -23,7 +23,7 @@ class AddonListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewModel.setToolbarTitle(requireContext().resources.getString(R.string.addons_conf))
+        viewModel.setToolbarTitle(requireContext().getString(R.string.addons_conf))
         viewModel.disableToolbarSaveButton()
         val binding = FragmentAddonListBinding.inflate(inflater)
         binding.list.apply {

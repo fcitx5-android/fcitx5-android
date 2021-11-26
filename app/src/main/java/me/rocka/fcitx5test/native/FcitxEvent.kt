@@ -1,69 +1,90 @@
 package me.rocka.fcitx5test.native
 
 sealed class FcitxEvent<T>(open val data: T) {
+
+    abstract val eventType: EventType
+
     data class CandidateListEvent(override val data: List<String>) :
-        FcitxEvent<List<String>>(data)
+        FcitxEvent<List<String>>(data) {
+        override val eventType: EventType
+            get() = EventType.Candidate
+    }
 
     data class CommitStringEvent(override val data: String) :
-        FcitxEvent<String>(data)
+        FcitxEvent<String>(data) {
+        override val eventType: EventType
+            get() = EventType.Commit
+    }
 
     data class PreeditEvent(override val data: Data) :
         FcitxEvent<PreeditEvent.Data>(data) {
+        override val eventType: EventType
+            get() = EventType.Preedit
+
         data class Data(val preedit: String, val clientPreedit: String, val cursor: Int)
     }
 
     data class InputPanelAuxEvent(override val data: Data) :
         FcitxEvent<InputPanelAuxEvent.Data>(data) {
+        override val eventType: EventType
+            get() = EventType.Aux
+
         data class Data(val auxUp: String, val auxDown: String)
     }
 
-    data class ReadyEvent(override val data: Unit = Unit) : FcitxEvent<Unit>(data)
+    data class ReadyEvent(override val data: Unit = Unit) : FcitxEvent<Unit>(data) {
+        override val eventType: EventType
+            get() = EventType.Ready
+    }
 
     data class KeyEvent(override val data: Data) :
         FcitxEvent<KeyEvent.Data>(data) {
+        override val eventType: EventType
+            get() = EventType.Key
+
         data class Data(val code: Int, val sym: String)
     }
 
     data class IMChangeEvent(override val data: Data) :
         FcitxEvent<IMChangeEvent.Data>(data) {
+        override val eventType: EventType
+            get() = EventType.Change
+
         data class Data(val status: InputMethodEntry)
     }
 
-    data class UnknownEvent(override val data: List<Any>) : FcitxEvent<List<Any>>(data)
+    data class UnknownEvent(override val data: List<Any>) : FcitxEvent<List<Any>>(data) {
+        override val eventType: EventType
+            get() = EventType.Unknown
+    }
+
+    enum class EventType {
+        Candidate,
+        Commit,
+        Preedit,
+        Aux,
+        Ready,
+        Key,
+        Change,
+        Unknown
+    }
 
     companion object {
-        private const val CANDIDATE_LIST_ID = 0
-        private const val COMMIT_STRING_ID = 1
-        private const val PREEDIT_ID = 2
-        private const val INPUT_PANEL_AUX_ID = 3
-        private const val READY_ID = 4
-        private const val KEY_EVENT_ID = 5
-        private const val IM_CHANGE_ID = 6
-
-        val EventType = mapOf(
-            CANDIDATE_LIST_ID to "Candidate",
-            COMMIT_STRING_ID to "Commit",
-            PREEDIT_ID to "Preedit",
-            INPUT_PANEL_AUX_ID to "Aux",
-            READY_ID to "Ready",
-            KEY_EVENT_ID to "Key",
-            IM_CHANGE_ID to "Change"
-        )
 
         @Suppress("UNCHECKED_CAST")
         fun create(type: Int, params: List<Any>) =
-            when (type) {
-                CANDIDATE_LIST_ID -> CandidateListEvent(params as List<String>)
-                COMMIT_STRING_ID -> CommitStringEvent(params.first() as String)
-                PREEDIT_ID -> PreeditEvent(
+            when (EventType.values()[type]) {
+                EventType.Candidate -> CandidateListEvent(params as List<String>)
+                EventType.Commit -> CommitStringEvent(params.first() as String)
+                EventType.Preedit -> PreeditEvent(
                     PreeditEvent.Data(params[0] as String, params[1] as String, params[2] as Int)
                 )
-                INPUT_PANEL_AUX_ID -> InputPanelAuxEvent(
+                EventType.Aux -> InputPanelAuxEvent(
                     InputPanelAuxEvent.Data(params[0] as String, params[1] as String)
                 )
-                READY_ID -> ReadyEvent()
-                KEY_EVENT_ID -> KeyEvent(KeyEvent.Data(params[0] as Int, params[1] as String))
-                IM_CHANGE_ID -> IMChangeEvent(IMChangeEvent.Data(params[0] as InputMethodEntry))
+                EventType.Ready -> ReadyEvent()
+                EventType.Key -> KeyEvent(KeyEvent.Data(params[0] as Int, params[1] as String))
+                EventType.Change -> IMChangeEvent(IMChangeEvent.Data(params[0] as InputMethodEntry))
                 else -> UnknownEvent(params)
             }
     }

@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import me.rocka.fcitx5test.BuildConfig
 import me.rocka.fcitx5test.copyFileOrDir
-import me.rocka.fcitx5test.native.FcitxEvent.Companion.EventType
 import me.rocka.fcitx5test.native.FcitxState.*
 import me.rocka.fcitx5test.settings.PreferenceKeys
 
@@ -185,11 +184,11 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
         @Suppress("unused")
         @JvmStatic
         fun handleFcitxEvent(type: Int, vararg params: Any) {
+            val event = FcitxEvent.create(type, params.asList())
             Log.d(
                 "FcitxEvent",
-                "${EventType[type]}[${params.size}]${params.take(10).joinToString()}"
+                "${event.eventType}[${params.size}]${params.take(10).joinToString()}"
             )
-            val event = FcitxEvent.create(type, params.asList())
             if (event is FcitxEvent.ReadyEvent) {
                 fcitxState_ = Ready
                 if (firstRun) {

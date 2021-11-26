@@ -1,5 +1,6 @@
 package me.rocka.fcitx5test
 
+import androidx.annotation.IdRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 

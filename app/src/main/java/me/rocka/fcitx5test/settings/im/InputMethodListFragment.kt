@@ -25,7 +25,7 @@ class InputMethodListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewModel.setToolbarTitle(requireContext().resources.getString(R.string.input_methods_conf))
+        viewModel.setToolbarTitle(requireContext().getString(R.string.input_methods_conf))
         viewModel.disableToolbarSaveButton()
         val binding = FragmentInputMethodListBinding.inflate(inflater)
         binding.list.run {
