@@ -23,7 +23,7 @@ class AddonListAdapter(private val fcitx: Fcitx) :
         val settingsButton: ImageButton = binding.addonSettings
     }
 
-    private val values = fcitx.addons().also { it.sortBy { it.name } }
+    private val values = fcitx.addons().apply { sortBy { it.uniqueName } }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
@@ -44,7 +44,7 @@ class AddonListAdapter(private val fcitx: Fcitx) :
         val item = values[position]
         with(holder) {
             enabled.isChecked = item.enabled
-            addonName.text = item.name
+            addonName.text = item.displayName
             enabled.setOnCheckedChangeListener { _, isChecked ->
                 values[position] = item.copy(enabled = isChecked)
                 updateAddonState()
@@ -58,7 +58,7 @@ class AddonListAdapter(private val fcitx: Fcitx) :
                     R.id.action_addonListFragment_to_addonConfigFragment,
                     bundleOf(
                         AddonConfigFragment.ARG_UNIQUE_NAME to item.uniqueName,
-                        AddonConfigFragment.ARG_NAME to item.name
+                        AddonConfigFragment.ARG_NAME to item.displayName
                     )
                 )
             }

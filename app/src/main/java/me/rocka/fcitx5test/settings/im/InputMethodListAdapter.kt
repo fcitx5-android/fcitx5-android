@@ -28,7 +28,7 @@ class InputMethodListAdapter(private val fcitx: Fcitx, private val fab: Floating
         } else {
             fab.show()
             fab.setOnClickListener {
-                val items = unEnabled.map { it.name }.toTypedArray()
+                val items = unEnabled.map { it.displayName }.toTypedArray()
                 AlertDialog.Builder(fab.context)
                     .setTitle(R.string.input_methods)
                     .setItems(items) { _, which ->
@@ -94,13 +94,13 @@ class InputMethodListAdapter(private val fcitx: Fcitx, private val fab: Floating
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = entries[position]
         holder.run {
-            name.text = item.name
+            name.text = item.displayName
             holder.configureButton.setOnClickListener {
                 it.findNavController().navigate(
                     R.id.action_imListFragment_to_imConfigFragment,
                     bundleOf(
                         InputMethodConfigFragment.ARG_UNIQUE_NAME to item.uniqueName,
-                        InputMethodConfigFragment.ARG_NAME to item.name
+                        InputMethodConfigFragment.ARG_NAME to item.displayName
                     )
                 )
             }

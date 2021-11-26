@@ -11,14 +11,17 @@ data class InputMethodEntry(
     val label: String,
     val languageCode: String,
     val isConfigurable: Boolean
-)
+) {
+    val displayName: String
+        get() = if (name.isNotEmpty()) name else uniqueName
+}
 
 data class RawConfig(
     val name: String,
     val comment: String,
     var value: String,
     var subItems: Array<RawConfig>? = arrayOf()
-) :Serializable {
+) : Serializable {
     constructor(name: String, value: String) : this(name, "", value, null)
     constructor(name: String, v: Boolean) : this(name, "", if (v) "True" else "False", null)
     constructor(subItems: Array<RawConfig>) : this("", "", "", subItems)
@@ -96,4 +99,6 @@ data class AddonInfo(
         enabled,
         onDemand
     )
+    val displayName: String
+        get() = if (name.isNotEmpty()) name else uniqueName
 }

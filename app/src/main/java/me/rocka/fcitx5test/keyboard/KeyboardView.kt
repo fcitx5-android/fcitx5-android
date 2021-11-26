@@ -107,7 +107,7 @@ class KeyboardView(
     }
 
     override fun updateSpaceButtonText(entry: InputMethodEntry) {
-        keyboardBinding.buttonSpace.text = entry.name
+        keyboardBinding.buttonSpace.text = entry.displayName
     }
 
 }
