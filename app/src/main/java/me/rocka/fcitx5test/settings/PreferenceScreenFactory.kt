@@ -49,29 +49,32 @@ object PreferenceScreenFactory {
         val itemDesc = cfg.findByName("Description")?.value ?: cfg.name
         val defValue = cfg.findByName("DefaultValue")?.value ?: ""
         return when (type) {
-            "Boolean" -> SwitchPreferenceCompat(context)
+            "Boolean" -> SwitchPreferenceCompat(context) .apply {
+                setDefaultValue(defValue == "True")
+            }
             "Integer" -> SeekBarPreference(context).apply {
                 showSeekBarValue = true
+                setDefaultValue(defValue.toInt())
                 cfg.findByName("IntMin")?.value?.toInt()?.let { min = it }
                 cfg.findByName("IntMax")?.value?.toInt()?.let { max = it }
             }
-            "Enum" -> DropDownPreference(context).apply {
+            "Enum" -> ListPreference(context).apply {
                 val enums = cfg["Enum"].subItems?.map { it.value }?.toTypedArray() ?: arrayOf()
-                entries = enums
+                val names = cfg["EnumI18n"].subItems?.map { it.value }?.toTypedArray() ?: arrayOf()
+                entries = names
                 entryValues = enums
-                summary = store.getString(cfg.name, defValue)
-                setOnPreferenceChangeListener { pref, v ->
-                    pref.summary = (v as String)
-                    true
+                dialogTitle = itemDesc
+                summaryProvider = Preference.SummaryProvider { pref: ListPreference ->
+                    names[enums.indexOf(pref.value)]
                 }
+                setDefaultValue(defValue)
             }
             "String" -> EditTextPreference(context).apply {
-                summary = store.getString(cfg.name, defValue)
                 dialogTitle = itemDesc
-                setOnPreferenceChangeListener { pref, v ->
-                    pref.summary = (v as Int).toString()
-                    true
+                summaryProvider = Preference.SummaryProvider { pref: EditTextPreference ->
+                    pref.text
                 }
+                setDefaultValue(defValue)
             }
             else -> Preference(context).apply {
                 summary = "⛔ Unimplemented type '$type'"
