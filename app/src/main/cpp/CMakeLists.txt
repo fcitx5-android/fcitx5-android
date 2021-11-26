@@ -23,7 +23,6 @@ set(fmt_DIR "${PREBUILT_DIR}/fmt/${ANDROID_ABI}/lib/cmake/fmt")
 # prebuilt libintl-lite
 set(LibIntl_DIR "${PREBUILT_DIR}/libintl-lite/${ANDROID_ABI}/lib/cmake")
 find_package(LibIntl)
-add_library(LibIntl::LibIntl ALIAS intl)
 
 # prebuilt libevent
 set(Libevent_DIR "${PREBUILT_DIR}/libevent/${ANDROID_ABI}/lib/cmake/libevent")
