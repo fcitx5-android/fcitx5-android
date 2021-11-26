@@ -33,7 +33,7 @@ android {
         buildConfigField("String", "BUILD_GIT_HASH", "\"$gitHashShort\"")
         buildConfigField("long", "BUILD_TIME", System.currentTimeMillis().toString())
         // increase this value when update assets
-        buildConfigField("long","ASSETS_VERSION", "1");
+        buildConfigField("long","ASSETS_VERSION", "2");
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
