@@ -1,6 +1,7 @@
 package me.rocka.fcitx5test.native
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
@@ -107,7 +108,12 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
         }
 
         @JvmStatic
-        external fun startupFcitx(appData: String, appLib: String, extData: String): Int
+        external fun startupFcitx(
+            locale: String,
+            appData: String,
+            appLib: String,
+            extData: String
+        ): Int
 
         @JvmStatic
         external fun exitFcitx()
@@ -229,8 +235,14 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
                         edit { putLong(prefKey, BuildConfig.ASSETS_VERSION) }
                     }
                 }
+                val locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    resources.configuration.locales[0].run { "${language}_${country}" }
+                } else {
+                    resources.configuration.locale.run { "${language}_${country}" }
+                }
                 val externalFilesDir = getExternalFilesDir(null)!!
                 startupFcitx(
+                    locale,
                     applicationInfo.dataDir,
                     applicationInfo.nativeLibraryDir,
                     externalFilesDir.absolutePath

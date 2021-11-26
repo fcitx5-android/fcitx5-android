@@ -363,7 +363,7 @@ jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntr
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, jstring appData, jstring appLib, jstring extData) {
+Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, jstring locale, jstring appData, jstring appLib, jstring extData) {
     if (Fcitx::Instance().isRunning()) {
         jniLog("startupFcitx: already running!");
         return 2;
@@ -372,14 +372,18 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
 
     setenv("SKIP_FCITX_PATH", "true", 1);
 
+    const char *locale_char = env->GetStringUTFChars(locale, nullptr);
     const char *app_data = env->GetStringUTFChars(appData, nullptr);
     const char *app_lib = env->GetStringUTFChars(appLib, nullptr);
     const char *ext_data = env->GetStringUTFChars(extData, nullptr);
     std::string config_home = fcitx::stringutils::joinPath(ext_data, "config");
     std::string data_home = fcitx::stringutils::joinPath(ext_data, "data");
+    std::string locale_dir = fcitx::stringutils::joinPath(app_data, "fcitx5", "locale");
     std::string libime_data = fcitx::stringutils::joinPath(app_data, "fcitx5", "libime");
     const char *app_data_libime = libime_data.c_str();
 
+    setenv("LANGUAGE", locale_char, 1);
+    setenv("FCITX_LOCALE_DIR", locale_dir.c_str(), 1);
     setenv("HOME", ext_data, 1);
     setenv("XDG_DATA_DIRS", app_data, 1);
     setenv("XDG_CONFIG_HOME", ext_data, 1);
@@ -390,6 +394,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
     setenv("LIBIME_MODEL_DIRS", app_data_libime, 1);
     setenv("LIBIME_INSTALL_PKGDATADIR", app_data_libime, 1);
 
+    env->ReleaseStringUTFChars(locale, locale_char);
     env->ReleaseStringUTFChars(appData, app_data);
     env->ReleaseStringUTFChars(appLib, app_lib);
     env->ReleaseStringUTFChars(extData, ext_data);
