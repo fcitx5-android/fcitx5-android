@@ -11,4 +11,5 @@
     <string name="global_options">Global Options</string>
     <string name="behavior">Behavior</string>
     <string name="ignore_sys_cursor">Ignore System Cursor Position</string>
+    <string name="_not_available_">(Not Available)</string>
 </resources>
