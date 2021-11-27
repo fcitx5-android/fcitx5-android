@@ -3,6 +3,7 @@ package me.rocka.fcitx5test.keyboard
 import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.inputmethodservice.InputMethodService
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
@@ -33,6 +34,7 @@ class FcitxInputMethodService : InputMethodService() {
     private var selectionStart = -1
     private var composingTextStart = -1
     private var composingText = ""
+    private var fcitxCursor = -1
 
     override fun onCreate() {
         connection = bindFcitxDaemon {
@@ -45,9 +47,10 @@ class FcitxInputMethodService : InputMethodService() {
                 }
             }
         }
-        PreferenceManager
-            .getDefaultSharedPreferences(applicationContext)
-            .registerOnSharedPreferenceChangeListener(onPrefChange)
+        PreferenceManager.getDefaultSharedPreferences(applicationContext).run {
+            onPrefChange.onSharedPreferenceChanged(this, PreferenceKeys.IgnoreSystemCursor)
+            registerOnSharedPreferenceChangeListener(onPrefChange)
+        }
         super.onCreate()
     }
 
@@ -77,18 +80,30 @@ class FcitxInputMethodService : InputMethodService() {
         currentInputConnection.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
     }
 
+    // FIXME: cursor flicker
+    // because setComposingText(text, cursor) can only put cursor at end of composing,
+    // sometimes onUpdateCursorAnchorInfo would receive event with wrong cursor position.
+    // those events need to be filtered.
     override fun onUpdateCursorAnchorInfo(info: CursorAnchorInfo?) {
         if (ignoreSystemCursor) return
         if (info == null) return
         selectionStart = info.selectionStart
         composingTextStart = info.composingTextStart
+        Log.d("IMS", "AnchorInfo: selStart=$selectionStart cmpStart=$composingTextStart")
         info.composingText?.let { composing ->
-            if ((info.composingTextStart <= info.selectionStart) and
-                (info.selectionStart <= info.composingTextStart + composing.length)
+            // check if cursor inside composing text
+            if ((composingTextStart <= selectionStart) and
+                (selectionStart <= composingTextStart + composing.length)
             ) {
-                val position = info.selectionStart - info.composingTextStart
-                fcitx.moveCursor(position)
-                return
+                val position = selectionStart - composingTextStart
+                // move fcitx cursor when:
+                // - cursor position changed
+                // - cursor position in composing text range; when user long press backspace key,
+                //   onUpdateCursorAnchorInfo can be left behind, thus position is invalid.
+                if ((position != fcitxCursor) and (position <= composingText.length)) {
+                    fcitx.moveCursor(position)
+                    return
+                }
             }
             // TODO: maybe pass delete key directly when cursor outside of composing
         }
@@ -97,14 +112,23 @@ class FcitxInputMethodService : InputMethodService() {
     // because of https://android.googlesource.com/platform/frameworks/base.git/+/refs/tags/android-11.0.0_r45/core/java/android/view/inputmethod/BaseInputConnection.java#851
     // it's not possible to set cursor inside composing text
     fun updateComposingTextWithCursor(text: String, cursor: Int) {
+        fcitxCursor = cursor
         currentInputConnection.run {
             if (text != composingText) {
                 composingText = text
+                // set composing text AND put cursor at end of composing
                 setComposingText(text, 1)
+                if (cursor == text.length) {
+                    // cursor already at end of composing, skip cursor reposition
+                    return
+                }
             }
             if (ignoreSystemCursor or (cursor < 0)) return
-            val p = cursor + if (composingTextStart >= 0) composingTextStart else selectionStart
+            // when user starts typing and there is no composing text, composingTextStart would be -1
+            val p = cursor + composingTextStart
+            Log.d("IMS", "TextWithCursor: p=$p composingStart=$composingTextStart")
             if (p != selectionStart) {
+                Log.d("IMS", "TextWithCursor: move cursor $p")
                 selectionStart = p
                 setSelection(p, p)
             }

@@ -107,7 +107,7 @@ class KeyboardPresenter(
     }
 
     override fun startDeleting() {
-        backspaceTimer = timer(period = 40L, action = { backspace() })
+        backspaceTimer = timer(period = 60L, action = { backspace() })
     }
 
     override fun stopDeleting() {
