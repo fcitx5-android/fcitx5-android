@@ -1,3 +1,6 @@
+# Generated locale
+/app/src/main/assets/fcitx5/locale
+
 # Intellij
 .idea/*
 !.idea/codeStyles/

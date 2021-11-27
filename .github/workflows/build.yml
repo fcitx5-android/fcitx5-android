@@ -24,7 +24,7 @@ jobs:
       - name: Install extra-cmake-modules
         run: |
           sudo apt update
-          sudo apt install extra-cmake-modules
+          sudo apt install extra-cmake-modules gettext
 
       - name: Cache JNI build
         uses: actions/cache@v2

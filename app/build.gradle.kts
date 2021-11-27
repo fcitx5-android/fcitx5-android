@@ -1,3 +1,4 @@
+import com.android.build.gradle.internal.tasks.factory.dependsOn
 import java.io.ByteArrayOutputStream
 
 fun exec(cmd: String): String = ByteArrayOutputStream().let {
@@ -33,8 +34,7 @@ android {
         buildConfigField("String", "BUILD_GIT_HASH", "\"$gitHashShort\"")
         buildConfigField("long", "BUILD_TIME", System.currentTimeMillis().toString())
         // increase this value when update assets
-        buildConfigField("long","ASSETS_VERSION", "2");
-
+        buildConfigField("long", "ASSETS_VERSION", "3");
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a")
@@ -42,7 +42,6 @@ android {
     }
 
     buildTypes {
-
         getByName("release") {
             isMinifyEnabled = false
             proguardFiles(
@@ -51,6 +50,7 @@ android {
             )
         }
     }
+
     externalNativeBuild {
         cmake {
             version = "3.18.1"
@@ -72,6 +72,16 @@ android {
     }
 }
 
+listOf("fcitx5", "fcitx5-chinese-addons").forEach {
+    val taskName = "MsgFmt-$it"
+    tasks.register<MsgFmtTask>(taskName) {
+        domain.set(it)
+        inputDir.set(file("src/main/cpp/$it/po"))
+        outputDir.set(file("src/main/assets/fcitx5/locale"))
+    }
+    tasks.preBuild.dependsOn(taskName)
+}
+
 dependencies {
     implementation("androidx.core:core-ktx:1.7.0")
     implementation("androidx.appcompat:appcompat:1.4.0")
@@ -91,4 +101,40 @@ dependencies {
     androidTestImplementation("androidx.test:rules:1.4.0")
     androidTestImplementation("androidx.lifecycle:lifecycle-runtime-testing:2.4.0")
     androidTestImplementation("junit:junit:4.13.2")
+}
+
+abstract class MsgFmtTask : DefaultTask() {
+    @get:Incremental
+    @get:PathSensitive(PathSensitivity.NAME_ONLY)
+    @get:InputDirectory
+    abstract val inputDir: DirectoryProperty
+
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
+
+    @get:Input
+    abstract val domain: Property<String>
+
+    @TaskAction
+    fun execute(inputChanges: InputChanges) {
+        inputChanges.getFileChanges(inputDir).forEach { change ->
+            val fileName = change.normalizedPath
+            if ((change.fileType == FileType.DIRECTORY) or (!fileName.endsWith(".po")))
+                return@forEach
+            println("${change.changeType}: $fileName")
+            val locale = fileName.replace(".po", "")
+            val targetDir = "$locale/LC_MESSAGES"
+            outputDir.file(targetDir).get().asFile.mkdirs()
+            val targetFile = outputDir.file("$targetDir/${domain.get()}.mo").get().asFile
+            if (change.changeType == ChangeType.REMOVED) {
+                targetFile.delete()
+            } else {
+                project.exec {
+                    executable = "msgfmt"
+                    args(change.file.absolutePath)
+                    args("-o", targetFile.absolutePath)
+                }
+            }
+        }
+    }
 }
