@@ -10,6 +10,7 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import me.rocka.fcitx5test.BuildConfig
+import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.copyFileOrDir
 import me.rocka.fcitx5test.native.FcitxState.*
 import me.rocka.fcitx5test.settings.PreferenceKeys
@@ -55,7 +56,15 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
     fun setEnabledIme(array: Array<String>) = setEnabledInputMethods(array)
     fun activateIme(ime: String) = setInputMethod(ime)
     fun ime() =
-        inputMethodStatus() ?: InputMethodEntry("", "(Not Available)", "", "", "×", "", false)
+        inputMethodStatus() ?: InputMethodEntry(
+            "",
+            context.getString(R.string._not_available_),
+            "",
+            "",
+            "×",
+            "",
+            false
+        )
 
     var globalConfig: RawConfig
         get() = getFcitxGlobalConfig() ?: RawConfig(arrayOf())

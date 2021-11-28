@@ -7,6 +7,7 @@
 #include <fcitx/inputmethodentry.h>
 #include <fcitx/inputmethodengine.h>
 #include <fcitx/inputmethodmanager.h>
+#include <fcitx-utils/i18n.h>
 #include <fcitx-utils/eventdispatcher.h>
 #include <fcitx-utils/stringutils.h>
 
@@ -379,11 +380,12 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
     std::string config_home = fcitx::stringutils::joinPath(ext_data, "config");
     std::string data_home = fcitx::stringutils::joinPath(ext_data, "data");
     std::string locale_dir = fcitx::stringutils::joinPath(app_data, "fcitx5", "locale");
+    const char *locale_dir_char = locale_dir.c_str();
     std::string libime_data = fcitx::stringutils::joinPath(app_data, "fcitx5", "libime");
     const char *app_data_libime = libime_data.c_str();
 
     setenv("LANGUAGE", locale_char, 1);
-    setenv("FCITX_LOCALE_DIR", locale_dir.c_str(), 1);
+    setenv("FCITX_LOCALE", locale_char, 1);
     setenv("HOME", ext_data, 1);
     setenv("XDG_DATA_DIRS", app_data, 1);
     setenv("XDG_CONFIG_HOME", ext_data, 1);
@@ -393,6 +395,9 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
     setenv("FCITX_ADDON_DIRS", app_lib, 1);
     setenv("LIBIME_MODEL_DIRS", app_data_libime, 1);
     setenv("LIBIME_INSTALL_PKGDATADIR", app_data_libime, 1);
+
+    fcitx::registerDomain("fcitx5", locale_dir_char);
+    fcitx::registerDomain("fcitx5-chinese-addons", locale_dir_char);
 
     env->ReleaseStringUTFChars(locale, locale_char);
     env->ReleaseStringUTFChars(appData, app_data);

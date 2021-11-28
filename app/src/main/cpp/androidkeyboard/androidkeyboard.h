@@ -1,6 +1,8 @@
 #ifndef _FCITX_IM_ANDROIDKEYBOARD_ANDROIDKEYBOARD_H_
 #define _FCITX_IM_ANDROIDKEYBOARD_ANDROIDKEYBOARD_H_
 
+#define FCITX_GETTEXT_DOMAIN "fcitx5"
+
 #include <fcitx-config/iniparser.h>
 #include <fcitx-utils/inputbuffer.h>
 #include <fcitx-utils/i18n.h>
