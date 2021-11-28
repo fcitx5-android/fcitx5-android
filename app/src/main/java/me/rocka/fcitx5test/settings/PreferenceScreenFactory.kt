@@ -1,13 +1,35 @@
 package me.rocka.fcitx5test.settings
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.preference.*
 import me.rocka.fcitx5test.native.RawConfig
 
 object PreferenceScreenFactory {
 
+    private var hideKeyConfig = true
+    private var onPrefChange: SharedPreferences.OnSharedPreferenceChangeListener? = null
+
+    private fun setupOnPrefChangeListener(sp: SharedPreferences) {
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { pref, key ->
+            when (key) {
+                PreferenceKeys.HideKeyConfig -> {
+                    hideKeyConfig = pref.getBoolean(key, true)
+                }
+            }
+        }
+        onPrefChange = listener
+        sp.run {
+            listener.onSharedPreferenceChanged(this, PreferenceKeys.HideKeyConfig)
+            registerOnSharedPreferenceChangeListener(listener)
+        }
+    }
+
     fun create(preferenceManager: PreferenceManager, raw: RawConfig): PreferenceScreen {
+        if (onPrefChange == null) {
+            setupOnPrefChangeListener(preferenceManager.sharedPreferences)
+        }
         val context = preferenceManager.context
         val screen = preferenceManager.createPreferenceScreen(context)
         val cfg = raw["cfg"]
@@ -26,11 +48,11 @@ object PreferenceScreenFactory {
                         }
                         screen.addPreference(subPref)
                         desc[type].subItems?.forEach { item ->
-                            subPref.addPreference(createSinglePreference(context, item, subStore))
+                            createSingle(context, item, subStore)?.let { subPref.addPreference(it) }
                         }
                     }
                     type.isNotEmpty() -> {
-                        screen.addPreference(createSinglePreference(context, item, store))
+                        createSingle(context, item, store)?.let { screen.addPreference(it) }
                     }
                     else -> {
                         Log.i(javaClass.name, "unexpected subItem '$item'")
@@ -41,15 +63,16 @@ object PreferenceScreenFactory {
         return screen
     }
 
-    private fun createSinglePreference(
+    private fun createSingle(
         context: Context,
         cfg: RawConfig, store: PreferenceDataStore
-    ): Preference {
+    ): Preference? {
         val type = cfg["Type"].value
+        if (hideKeyConfig and type.endsWith("Key")) return null
         val itemDesc = cfg.findByName("Description")?.value ?: cfg.name
         val defValue = cfg.findByName("DefaultValue")?.value ?: ""
         return when (type) {
-            "Boolean" -> SwitchPreferenceCompat(context) .apply {
+            "Boolean" -> SwitchPreferenceCompat(context).apply {
                 setDefaultValue(defValue == "True")
             }
             "Integer" -> SeekBarPreference(context).apply {
