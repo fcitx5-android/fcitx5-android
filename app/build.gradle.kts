@@ -96,10 +96,13 @@ dependencies {
     implementation("androidx.preference:preference-ktx:1.1.1")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
-    implementation("androidx.navigation:navigation-fragment-ktx:2.3.5")
-    implementation("androidx.navigation:navigation-ui-ktx:2.3.5")
-    implementation("com.louiscad.splitties:splitties-views-dsl:3.0.0")
-    implementation("com.louiscad.splitties:splitties-views-dsl-constraintlayout:3.0.0")
+    val navVersion = "2.3.5"
+    implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
+    implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
+    implementation("cn.berberman:girls-self-use:0.1.0")
+    val splittiesVersion = "3.0.0"
+    implementation("com.louiscad.splitties:splitties-views-dsl:$splittiesVersion")
+    implementation("com.louiscad.splitties:splitties-views-dsl-constraintlayout:$splittiesVersion")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.4.0")
     androidTestImplementation("androidx.test:rules:1.4.0")
