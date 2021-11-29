@@ -75,8 +75,11 @@ class FcitxInputMethodService : InputMethodService() {
     // we don't create preedit view here, but in onCreateInputView.
     override fun onCreateCandidatesView(): View = keyboardView.preeditBinding.root
 
-    override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
+    override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
         fcitx.reset()
+    }
+
+    override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         currentInputConnection.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
     }
 
@@ -136,10 +139,7 @@ class FcitxInputMethodService : InputMethodService() {
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
-        fcitx.reset()
-    }
-
-    override fun onFinishInput() {
+        currentInputConnection.requestCursorUpdates(0)
         fcitx.reset()
     }
 
