@@ -167,9 +167,7 @@ bool AndroidFrontend::isInputPanelEmpty(ICUUID uuid) {
 
 void AndroidFrontend::resetInputPanel(ICUUID uuid) {
     auto *ic = instance_->inputContextManager().findByUUID(uuid);
-    // `InputPanel::reset()` seems to have no effect
-    // ic->inputPanel().reset();
-    ic->reset(ResetReason::LostFocus);
+    ic->reset();
 }
 
 void AndroidFrontend::repositionCursor(ICUUID uuid, int position) {
