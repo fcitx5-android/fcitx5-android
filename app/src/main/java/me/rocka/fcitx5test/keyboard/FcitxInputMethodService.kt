@@ -61,9 +61,6 @@ class FcitxInputMethodService :
         return keyboardView.keyboardView.root
     }
 
-    // we don't create preedit view here, but in onCreateInputView.
-    override fun onCreateCandidatesView(): View = keyboardView.preeditBinding.root
-
     override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
         fcitx.reset()
     }

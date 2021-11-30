@@ -2,9 +2,12 @@ package me.rocka.fcitx5test.keyboard
 
 import android.content.SharedPreferences
 import android.inputmethodservice.InputMethodService
+import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
+import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
+import android.widget.PopupWindow
 import androidx.recyclerview.widget.LinearLayoutManager
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
@@ -18,9 +21,17 @@ import me.rocka.fcitx5test.settings.PreferenceKeys
 
 class KeyboardView(
     val service: FcitxInputMethodService,
-    val preeditBinding: KeyboardPreeditBinding
+    private val preeditBinding: KeyboardPreeditBinding
 ) : KeyboardContract.View, SharedPreferences.OnSharedPreferenceChangeListener {
 
+    private val preeditPopup = PopupWindow(
+        preeditBinding.root,
+        WindowManager.LayoutParams.MATCH_PARENT,
+        WindowManager.LayoutParams.WRAP_CONTENT
+    ).apply {
+        isTouchable = false
+        isClippingEnabled = false
+    }
     var keyboardView: CustomKeyboardView
     private val candidateLytMgr =
         LinearLayoutManager(service, LinearLayoutManager.HORIZONTAL, false)
@@ -81,12 +92,31 @@ class KeyboardView(
         val end = data.aux.auxDown
         val hasStart = start.isNotEmpty()
         val hasEnd = end.isNotEmpty()
-        service.setCandidatesViewShown(hasStart or hasEnd)
-        with(preeditBinding) {
+        preeditBinding.run {
             keyboardPreeditText.alpha = if (hasStart) 1f else 0f
             keyboardPreeditAfterText.alpha = if (hasEnd) 1f else 0f
             keyboardPreeditText.text = start
             keyboardPreeditAfterText.text = end
+        }
+        preeditPopup.run {
+            if ((!hasStart) and (!hasEnd)) {
+                dismiss()
+                return
+            }
+            // FIXME: it can only measure height of 1 line
+            val height = preeditBinding.root.run {
+                measure(0, 0)
+                measuredHeight
+            }
+            if (isShowing) {
+                update(
+                    0, -height,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.WRAP_CONTENT
+                )
+            } else {
+                showAtLocation(keyboardView.root, Gravity.NO_GRAVITY, 0, -height)
+            }
         }
     }
 
@@ -97,12 +127,13 @@ class KeyboardView(
     }
 
     override fun updateCapsButtonState(state: KeyboardContract.CapsState) {
-        // FIXME: if system color scheme changes, capslock1 icon won't be recolored; why?
-        keyboardView.caps.setImageResource(when (state) {
-            KeyboardContract.CapsState.None -> R.drawable.ic_baseline_keyboard_capslock0_24
-            KeyboardContract.CapsState.Once -> R.drawable.ic_baseline_keyboard_capslock1_24
-            KeyboardContract.CapsState.Lock -> R.drawable.ic_baseline_keyboard_capslock2_24
-        })
+        keyboardView.caps.setImageResource(
+            when (state) {
+                KeyboardContract.CapsState.None -> R.drawable.ic_baseline_keyboard_capslock0_24
+                KeyboardContract.CapsState.Once -> R.drawable.ic_baseline_keyboard_capslock1_24
+                KeyboardContract.CapsState.Lock -> R.drawable.ic_baseline_keyboard_capslock2_24
+            }
+        )
     }
 
     override fun updateSpaceButtonText(entry: InputMethodEntry) {
