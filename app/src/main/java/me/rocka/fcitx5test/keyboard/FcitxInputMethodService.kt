@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import me.rocka.fcitx5test.bindFcitxDaemon
 import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
-import me.rocka.fcitx5test.databinding.QwertyKeyboardBinding
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.settings.PreferenceKeys
 
@@ -55,10 +54,9 @@ class FcitxInputMethodService : InputMethodService() {
     }
 
     override fun onCreateInputView(): View {
-        val keyboardBinding = QwertyKeyboardBinding.inflate(layoutInflater)
         val preeditBinding = KeyboardPreeditBinding.inflate(layoutInflater)
 
-        keyboardView = KeyboardView(this, keyboardBinding, preeditBinding)
+        keyboardView = KeyboardView(this, preeditBinding)
         keyboardPresenter = KeyboardPresenter(this, keyboardView, fcitx)
         keyboardView.presenter = keyboardPresenter
 
@@ -69,7 +67,7 @@ class FcitxInputMethodService : InputMethodService() {
                 keyboardPresenter.handleFcitxEvent(it)
             }.launchIn(MainScope())
 
-        return keyboardView.keyboardBinding.root
+        return keyboardView.keyboardView.root
     }
 
     // we don't create preedit view here, but in onCreateInputView.

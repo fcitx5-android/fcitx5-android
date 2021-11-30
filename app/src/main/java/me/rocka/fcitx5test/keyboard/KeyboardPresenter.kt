@@ -24,6 +24,10 @@ class KeyboardPresenter(
         FcitxEvent.InputPanelAuxEvent.Data("", "")
     )
 
+    override fun reset() {
+        fcitx.reset()
+    }
+
     override fun selectCandidate(idx: Int) {
         fcitx.select(idx)
     }
@@ -134,5 +138,9 @@ class KeyboardPresenter(
             "En" -> 'e'
             else -> 'z'
         }.also { fcitx.sendKey(it) }
+    }
+
+    override fun customEvent(fn: (Fcitx) -> Unit) {
+        fn(fcitx)
     }
 }

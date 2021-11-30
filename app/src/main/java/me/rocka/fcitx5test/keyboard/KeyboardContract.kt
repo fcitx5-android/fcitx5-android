@@ -29,6 +29,8 @@ interface KeyboardContract {
 
         var capsState: CapsState
 
+        fun reset()
+
         fun selectCandidate(idx: Int)
 
         fun handleFcitxEvent(event: FcitxEvent<*>)
@@ -53,5 +55,6 @@ interface KeyboardContract {
 
         fun punctuation()
 
+        fun customEvent(fn: (Fcitx) -> Unit)
     }
 }

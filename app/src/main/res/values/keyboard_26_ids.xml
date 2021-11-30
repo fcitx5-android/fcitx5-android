@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="keyboard_26" type="id"/>
+    <item name="candidate_list" type="id"/>
+    <item name="button_caps" type="id"/>
+    <item name="button_backspace" type="id"/>
+    <item name="button_quickphrase" type="id"/>
+    <item name="button_lang" type="id"/>
+    <item name="button_space" type="id"/>
+    <item name="button_punctuation" type="id"/>
+    <item name="button_return" type="id"/>
+</resources>

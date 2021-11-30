@@ -11,21 +11,15 @@ class SettingItemRecyclerViewAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(
-            SettingEntryBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            )
+            SettingEntryBinding
+                .inflate(LayoutInflater.from(parent.context), parent, false)
         )
-
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val (string, action) = settingItems[position]
-        with(holder) {
+        holder.run {
             textView.text = string
-            rootView.setOnClickListener {
-                action()
-            }
+            rootView.setOnClickListener { action() }
         }
     }
 
