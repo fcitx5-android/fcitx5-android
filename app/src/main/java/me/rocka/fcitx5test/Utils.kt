@@ -65,3 +65,18 @@ fun Context.bindFcitxDaemon(
         it, Context.BIND_AUTO_CREATE
     )
 }
+
+interface MyOnClickListener : View.OnClickListener, View.OnLongClickListener {
+    fun View.setOnClickListenerWithMe(block: (View) -> Unit) {
+        setOnClickListener {
+            this@MyOnClickListener.onClick(it)
+            block(it)
+        }
+    }
+
+    fun View.setOnLongClickListenerWithMe(block: (View) -> Boolean) {
+        setOnLongClickListener {
+            this@MyOnClickListener.onLongClick(it) and block(it)
+        }
+    }
+}

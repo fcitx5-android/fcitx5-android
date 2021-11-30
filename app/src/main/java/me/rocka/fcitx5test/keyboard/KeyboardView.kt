@@ -1,10 +1,13 @@
 package me.rocka.fcitx5test.keyboard
 
 import android.inputmethodservice.InputMethodService
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
+import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import androidx.recyclerview.widget.LinearLayoutManager
+import me.rocka.fcitx5test.MyOnClickListener
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.allChildren
 import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
@@ -17,7 +20,7 @@ class KeyboardView(
     val keyboardBinding: QwertyKeyboardBinding,
     val preeditBinding: KeyboardPreeditBinding
 ) :
-    KeyboardContract.View {
+    KeyboardContract.View, MyOnClickListener {
 
     private val candidateLytMgr =
         LinearLayoutManager(service, LinearLayoutManager.HORIZONTAL, false)
@@ -34,7 +37,7 @@ class KeyboardView(
                 it.adapter = candidateViewAdp
             }
 
-            buttonCaps.setOnClickListener { presenter.switchCapsState() }
+            buttonCaps.setOnClickListenerWithMe { presenter.switchCapsState() }
 
             buttonBackspace.let {
                 it.setOnTouchListener { v, e ->
@@ -44,16 +47,16 @@ class KeyboardView(
                     }
                     false
                 }
-                it.setOnClickListener { presenter.backspace() }
-                it.setOnLongClickListener {
+                it.setOnClickListenerWithMe { presenter.backspace() }
+                it.setOnLongClickListenerWithMe {
                     presenter.startDeleting()
                     true
                 }
             }
 
             buttonLang.let {
-                it.setOnClickListener { presenter.switchLang() }
-                it.setOnLongClickListener {
+                it.setOnClickListenerWithMe { presenter.switchLang() }
+                it.setOnLongClickListenerWithMe {
                     (service.getSystemService(InputMethodService.INPUT_METHOD_SERVICE)
                             as InputMethodManager).showInputMethodPicker()
                     true
@@ -64,15 +67,16 @@ class KeyboardView(
                 // unstable, assuming all letter keys names have the pattern: button_X
                 .filter { it.resources.getResourceName(it.id).takeLast(2).startsWith('_') }
                 .mapNotNull { it as? Button }
-                .forEach { it.setOnClickListener { _ -> presenter.onKeyPress(it.text[0]) } }
+                .forEach { it.setOnClickListenerWithMe { _ -> presenter.onKeyPress(it.text[0]) } }
 
-            buttonQuickphrase.setOnClickListener { presenter.quickPhrase() }
+            buttonQuickphrase.setOnClickListenerWithMe { presenter.quickPhrase() }
 
-            buttonSpace.setOnClickListener { presenter.space() }
+            buttonSpace.setOnClickListenerWithMe { presenter.space() }
 
-            buttonPunctuation.setOnClickListener { presenter.punctuation() }
+            buttonPunctuation.setOnClickListenerWithMe { presenter.punctuation() }
 
-            buttonEnter.setOnClickListener { presenter.enter() }
+            buttonEnter.setOnClickListenerWithMe { presenter.enter() }
+
         }
 
     }
@@ -108,6 +112,15 @@ class KeyboardView(
 
     override fun updateSpaceButtonText(entry: InputMethodEntry) {
         keyboardBinding.buttonSpace.text = entry.displayName
+    }
+
+    override fun onClick(v: View) {
+        v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+    }
+
+    override fun onLongClick(v: View): Boolean {
+        v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+        return true
     }
 
 }
