@@ -14,4 +14,5 @@
     <string name="ignore_sys_cursor">Ignore System Cursor Position</string>
     <string name="hide_key_config">Hide Hotkey Configurations</string>
     <string name="_not_available_">(Not Available)</string>
+    <string name="button_haptic_feedback">Haptic Feedback on Button Press</string>
 </resources>

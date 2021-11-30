@@ -1,13 +1,11 @@
 package me.rocka.fcitx5test
 
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
 import android.os.IBinder
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.children
+import androidx.preference.PreferenceManager
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -79,4 +77,22 @@ interface MyOnClickListener : View.OnClickListener, View.OnLongClickListener {
             this@MyOnClickListener.onLongClick(it) and block(it)
         }
     }
+}
+
+fun Context.registerSharedPerfChangeListener(
+    listener: SharedPreferences.OnSharedPreferenceChangeListener,
+    vararg keys: String
+) {
+    PreferenceManager.getDefaultSharedPreferences(this).let { sp ->
+        sp.registerOnSharedPreferenceChangeListener(listener)
+        keys.forEach { listener.onSharedPreferenceChanged(sp, it) }
+    }
+}
+
+fun Context.unregisterSharedPerfChangeListener(
+    listener: SharedPreferences.OnSharedPreferenceChangeListener
+) {
+    PreferenceManager
+        .getDefaultSharedPreferences(this)
+        .unregisterOnSharedPreferenceChangeListener(listener)
 }

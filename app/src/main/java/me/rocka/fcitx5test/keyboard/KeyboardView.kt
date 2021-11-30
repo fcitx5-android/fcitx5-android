@@ -1,5 +1,6 @@
 package me.rocka.fcitx5test.keyboard
 
+import android.content.SharedPreferences
 import android.inputmethodservice.InputMethodService
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
@@ -12,12 +13,13 @@ import me.rocka.fcitx5test.keyboard.layout.CustomKeyboardView
 import me.rocka.fcitx5test.keyboard.layout.Factory
 import me.rocka.fcitx5test.keyboard.layout.Preset
 import me.rocka.fcitx5test.native.InputMethodEntry
-
+import me.rocka.fcitx5test.registerSharedPerfChangeListener
+import me.rocka.fcitx5test.settings.PreferenceKeys
 
 class KeyboardView(
     val service: FcitxInputMethodService,
     val preeditBinding: KeyboardPreeditBinding
-) : KeyboardContract.View {
+) : KeyboardContract.View, SharedPreferences.OnSharedPreferenceChangeListener {
 
     var keyboardView: CustomKeyboardView
     private val candidateLytMgr =
@@ -26,9 +28,14 @@ class KeyboardView(
 
     lateinit var presenter: KeyboardPresenter
 
+    private var hapticFeedback = true
+
     init {
-        keyboardView = Factory.create(service.applicationContext, Preset.Qwerty) { v, it, long ->
-            if (!long) {
+        val context = service.applicationContext
+        context.registerSharedPerfChangeListener(this, PreferenceKeys.ButtonHapticFeedback)
+        keyboardView = Factory.create(context, Preset.Qwerty) { v, it, long ->
+            if (hapticFeedback and (!long)) {
+                // TODO: write our own button to handle haptic feedback for both tap and long click
                 v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
             }
             when (it) {
@@ -100,6 +107,14 @@ class KeyboardView(
 
     override fun updateSpaceButtonText(entry: InputMethodEntry) {
         keyboardView.space.text = entry.displayName
+    }
+
+    override fun onSharedPreferenceChanged(pref: SharedPreferences, key: String) {
+        when (key) {
+            PreferenceKeys.ButtonHapticFeedback -> {
+                hapticFeedback = pref.getBoolean(key, true)
+            }
+        }
     }
 
 }

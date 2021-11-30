@@ -8,7 +8,6 @@ import android.view.View
 import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
-import androidx.preference.PreferenceManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.launchIn
@@ -16,9 +15,12 @@ import kotlinx.coroutines.flow.onEach
 import me.rocka.fcitx5test.bindFcitxDaemon
 import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
 import me.rocka.fcitx5test.native.Fcitx
+import me.rocka.fcitx5test.registerSharedPerfChangeListener
 import me.rocka.fcitx5test.settings.PreferenceKeys
+import me.rocka.fcitx5test.unregisterSharedPerfChangeListener
 
-class FcitxInputMethodService : InputMethodService() {
+class FcitxInputMethodService :
+    InputMethodService(), SharedPreferences.OnSharedPreferenceChangeListener {
 
     private lateinit var keyboardPresenter: KeyboardPresenter
     private lateinit var keyboardView: KeyboardView
@@ -26,7 +28,6 @@ class FcitxInputMethodService : InputMethodService() {
     private var eventHandlerJob: Job? = null
     private var connection: ServiceConnection? = null
 
-    private lateinit var onPrefChange: SharedPreferences.OnSharedPreferenceChangeListener
     private var ignoreSystemCursor = true
 
     // `-1` means invalid, or don't know yet
@@ -39,17 +40,7 @@ class FcitxInputMethodService : InputMethodService() {
         connection = bindFcitxDaemon {
             fcitx = getFcitxInstance()
         }
-        onPrefChange = SharedPreferences.OnSharedPreferenceChangeListener { pref, key ->
-            when (key) {
-                PreferenceKeys.IgnoreSystemCursor -> {
-                    ignoreSystemCursor = pref.getBoolean(key, true)
-                }
-            }
-        }
-        PreferenceManager.getDefaultSharedPreferences(applicationContext).run {
-            onPrefChange.onSharedPreferenceChanged(this, PreferenceKeys.IgnoreSystemCursor)
-            registerOnSharedPreferenceChangeListener(onPrefChange)
-        }
+        registerSharedPerfChangeListener(this, PreferenceKeys.IgnoreSystemCursor)
         super.onCreate()
     }
 
@@ -146,9 +137,15 @@ class FcitxInputMethodService : InputMethodService() {
         eventHandlerJob = null
         connection?.let { unbindService(it) }
         connection = null
-        PreferenceManager
-            .getDefaultSharedPreferences(applicationContext)
-            .unregisterOnSharedPreferenceChangeListener(onPrefChange)
+        unregisterSharedPerfChangeListener(this)
         super.onDestroy()
+    }
+
+    override fun onSharedPreferenceChanged(pref: SharedPreferences, key: String) {
+        when (key) {
+            PreferenceKeys.IgnoreSystemCursor -> {
+                ignoreSystemCursor = pref.getBoolean(key, true)
+            }
+        }
     }
 }

@@ -16,5 +16,11 @@
             android:title="@string/hide_key_config"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="button_haptic_feedback"
+            android:title="@string/button_haptic_feedback"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
     </PreferenceCategory>
 </PreferenceScreen>
