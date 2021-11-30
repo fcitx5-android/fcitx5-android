@@ -1,9 +1,11 @@
 package me.rocka.fcitx5test
 
 import android.content.*
+import android.inputmethodservice.InputMethodService
 import android.os.IBinder
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputConnection
 import androidx.core.view.children
 import androidx.preference.PreferenceManager
 import java.io.File
@@ -30,11 +32,13 @@ fun Context.copyFileOrDir(path: String): Unit = runCatching {
 
 private fun Context.copyFile(filename: String) = runCatching {
     with(assets) {
-        open(filename).copyTo(
-            FileOutputStream("${applicationInfo.dataDir}/${filename}")
-        )
+        open(filename).use { i ->
+            FileOutputStream("${applicationInfo.dataDir}/${filename}").use { o ->
+                i.copyTo(o)
+                o.close()
+            }
+        }
     }
-    Unit
 }.getOrThrow()
 
 fun View.allChildren(): List<View> {
@@ -96,3 +100,6 @@ fun Context.unregisterSharedPerfChangeListener(
         .getDefaultSharedPreferences(this)
         .unregisterOnSharedPreferenceChangeListener(listener)
 }
+
+val InputMethodService.inputConnection: InputConnection?
+    get() = currentInputConnection

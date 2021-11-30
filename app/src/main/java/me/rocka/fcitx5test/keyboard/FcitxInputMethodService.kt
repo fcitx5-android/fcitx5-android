@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import me.rocka.fcitx5test.bindFcitxDaemon
 import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
+import me.rocka.fcitx5test.inputConnection
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.registerSharedPerfChangeListener
 import me.rocka.fcitx5test.settings.PreferenceKeys
@@ -66,7 +67,7 @@ class FcitxInputMethodService :
     }
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
-        currentInputConnection.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
+        inputConnection?.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
     }
 
     // FIXME: cursor flicker
@@ -102,7 +103,7 @@ class FcitxInputMethodService :
     // it's not possible to set cursor inside composing text
     fun updateComposingTextWithCursor(text: String, cursor: Int) {
         fcitxCursor = cursor
-        currentInputConnection.run {
+        inputConnection?.run {
             if (text != composingText) {
                 composingText = text
                 // set composing text AND put cursor at end of composing
@@ -125,7 +126,7 @@ class FcitxInputMethodService :
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
-        currentInputConnection.requestCursorUpdates(0)
+        inputConnection?.requestCursorUpdates(0)
         fcitx.reset()
     }
 

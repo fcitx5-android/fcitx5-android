@@ -11,6 +11,7 @@ import android.widget.PopupWindow
 import androidx.recyclerview.widget.LinearLayoutManager
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
+import me.rocka.fcitx5test.inputConnection
 import me.rocka.fcitx5test.keyboard.layout.ButtonAction
 import me.rocka.fcitx5test.keyboard.layout.CustomKeyboardView
 import me.rocka.fcitx5test.keyboard.layout.Factory
@@ -54,7 +55,7 @@ class KeyboardView(
                 is ButtonAction.CommitAction -> {
                     // TODO: this should be handled more gracefully
                     presenter.reset()
-                    service.currentInputConnection.commitText(it.act, 1)
+                    service.inputConnection?.commitText(it.act, 1)
                 }
                 is ButtonAction.CapsAction -> presenter.switchCapsState()
                 is ButtonAction.BackspaceAction -> presenter.backspace()
