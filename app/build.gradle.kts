@@ -34,10 +34,13 @@ android {
         buildConfigField("String", "BUILD_GIT_HASH", "\"$gitHashShort\"")
         buildConfigField("long", "BUILD_TIME", System.currentTimeMillis().toString())
         // increase this value when update assets
-        buildConfigField("long", "ASSETS_VERSION", "3");
+        buildConfigField("long", "ASSETS_VERSION", "4")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a")
+        }
+        vectorDrawables {
+            useSupportLibrary = true
         }
     }
 
@@ -93,10 +96,13 @@ dependencies {
     implementation("androidx.preference:preference-ktx:1.1.1")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
-    val nav_version = "2.3.5"
-    implementation("androidx.navigation:navigation-fragment-ktx:$nav_version")
-    implementation("androidx.navigation:navigation-ui-ktx:$nav_version")
+    val navVersion = "2.3.5"
+    implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
+    implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
     implementation("cn.berberman:girls-self-use:0.1.0")
+    val splittiesVersion = "3.0.0"
+    implementation("com.louiscad.splitties:splitties-views-dsl:$splittiesVersion")
+    implementation("com.louiscad.splitties:splitties-views-dsl-constraintlayout:$splittiesVersion")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.4.0")
     androidTestImplementation("androidx.test:rules:1.4.0")
