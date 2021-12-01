@@ -3,17 +3,15 @@ package me.rocka.fcitx5test.native
 import android.content.Context
 import android.os.Build
 import android.util.Log
-import androidx.core.content.edit
-import androidx.preference.PreferenceManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import me.rocka.fcitx5test.AppSharedPreferences
 import me.rocka.fcitx5test.BuildConfig
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.copyFileOrDir
 import me.rocka.fcitx5test.native.FcitxState.*
-import me.rocka.fcitx5test.settings.PreferenceKeys
 
 class Fcitx(private val context: Context) : FcitxLifecycleOwner {
 
@@ -86,6 +84,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
     fun triggerQuickPhrase() = triggerQuickPhraseInput()
     fun punctuation(c: Char, language: String = "zh_CN"): Pair<String, String> =
         queryPunctuation(c, language)?.let { Pair(it[0], it[1]) } ?: "$c".let { Pair(it, it) }
+
     fun triggerUnicode() = triggerUnicodeInput()
 
     init {
@@ -237,17 +236,17 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
         fcitxState_ = Starting
         with(context) {
             fcitxJob = launch {
-                PreferenceManager.getDefaultSharedPreferences(context).run {
-                    val prefKey = PreferenceKeys.AssetsVersion
-                    val ver = getLong(prefKey, -1)
-                    if (ver == -1L) {
-                        firstRun = true
-                    }
-                    if (BuildConfig.ASSETS_VERSION > ver) {
-                        copyFileOrDir("fcitx5")
-                        edit { putLong(prefKey, BuildConfig.ASSETS_VERSION) }
-                    }
+                val ver = AppSharedPreferences.getInstance().assetsVersion
+
+                if (ver == -1L) {
+                    firstRun = true
                 }
+
+                if (BuildConfig.ASSETS_VERSION > ver) {
+                    copyFileOrDir("fcitx5")
+                    AppSharedPreferences.getInstance().assetsVersion = BuildConfig.ASSETS_VERSION
+                }
+
                 val locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     resources.configuration.locales[0].run { "${language}_${country}" }
                 } else {

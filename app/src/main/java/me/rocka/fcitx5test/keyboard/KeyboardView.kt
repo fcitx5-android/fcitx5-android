@@ -1,6 +1,5 @@
 package me.rocka.fcitx5test.keyboard
 
-import android.content.SharedPreferences
 import android.inputmethodservice.InputMethodService
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
@@ -10,6 +9,7 @@ import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.PopupWindow
 import androidx.recyclerview.widget.LinearLayoutManager
+import me.rocka.fcitx5test.AppSharedPreferences
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
 import me.rocka.fcitx5test.inputConnection
@@ -18,13 +18,11 @@ import me.rocka.fcitx5test.keyboard.layout.CustomKeyboardView
 import me.rocka.fcitx5test.keyboard.layout.Factory
 import me.rocka.fcitx5test.keyboard.layout.Preset
 import me.rocka.fcitx5test.native.InputMethodEntry
-import me.rocka.fcitx5test.registerSharedPerfChangeListener
-import me.rocka.fcitx5test.settings.PreferenceKeys
 
 class KeyboardView(
-    val service: FcitxInputMethodService,
+    private val service: FcitxInputMethodService,
     private val preeditBinding: KeyboardPreeditBinding
-) : KeyboardContract.View, SharedPreferences.OnSharedPreferenceChangeListener {
+) : KeyboardContract.View {
 
     private val preeditPopup = PopupWindow(
         preeditBinding.root,
@@ -41,13 +39,10 @@ class KeyboardView(
 
     lateinit var presenter: KeyboardPresenter
 
-    private var hapticFeedback = true
-
     init {
         val context = service.applicationContext
-        context.registerSharedPerfChangeListener(this, PreferenceKeys.ButtonHapticFeedback)
         keyboardView = Factory.create(context, Preset.Qwerty) { v, it, long ->
-            if (hapticFeedback and (!long)) {
+            if (AppSharedPreferences.getInstance().buttonHapticFeedback && (!long)) {
                 // TODO: write our own button to handle haptic feedback for both tap and long click
                 v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
             }
@@ -107,7 +102,8 @@ class KeyboardView(
                 return
             }
             val height = preeditBinding.root.run {
-                val widthSpec = MeasureSpec.makeMeasureSpec(preeditBinding.root.width, MeasureSpec.EXACTLY)
+                val widthSpec =
+                    MeasureSpec.makeMeasureSpec(preeditBinding.root.width, MeasureSpec.EXACTLY)
                 val heightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
                 measure(widthSpec, heightSpec)
                 measuredHeight
@@ -143,13 +139,4 @@ class KeyboardView(
     override fun updateSpaceButtonText(entry: InputMethodEntry) {
         keyboardView.space.text = entry.displayName
     }
-
-    override fun onSharedPreferenceChanged(pref: SharedPreferences, key: String) {
-        when (key) {
-            PreferenceKeys.ButtonHapticFeedback -> {
-                hapticFeedback = pref.getBoolean(key, true)
-            }
-        }
-    }
-
 }

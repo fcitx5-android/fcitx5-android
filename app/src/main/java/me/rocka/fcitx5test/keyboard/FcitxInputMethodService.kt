@@ -1,7 +1,6 @@
 package me.rocka.fcitx5test.keyboard
 
 import android.content.ServiceConnection
-import android.content.SharedPreferences
 import android.inputmethodservice.InputMethodService
 import android.util.Log
 import android.view.View
@@ -12,24 +11,19 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import me.rocka.fcitx5test.AppSharedPreferences
 import me.rocka.fcitx5test.bindFcitxDaemon
 import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
 import me.rocka.fcitx5test.inputConnection
 import me.rocka.fcitx5test.native.Fcitx
-import me.rocka.fcitx5test.registerSharedPerfChangeListener
-import me.rocka.fcitx5test.settings.PreferenceKeys
-import me.rocka.fcitx5test.unregisterSharedPerfChangeListener
 
-class FcitxInputMethodService :
-    InputMethodService(), SharedPreferences.OnSharedPreferenceChangeListener {
+class FcitxInputMethodService : InputMethodService() {
 
     private lateinit var keyboardPresenter: KeyboardPresenter
     private lateinit var keyboardView: KeyboardView
     private lateinit var fcitx: Fcitx
     private var eventHandlerJob: Job? = null
     private var connection: ServiceConnection? = null
-
-    private var ignoreSystemCursor = true
 
     // `-1` means invalid, or don't know yet
     private var selectionStart = -1
@@ -41,7 +35,6 @@ class FcitxInputMethodService :
         connection = bindFcitxDaemon {
             fcitx = getFcitxInstance()
         }
-        registerSharedPerfChangeListener(this, PreferenceKeys.IgnoreSystemCursor)
         super.onCreate()
     }
 
@@ -75,7 +68,7 @@ class FcitxInputMethodService :
     // sometimes onUpdateCursorAnchorInfo would receive event with wrong cursor position.
     // those events need to be filtered.
     override fun onUpdateCursorAnchorInfo(info: CursorAnchorInfo?) {
-        if (ignoreSystemCursor) return
+        if (AppSharedPreferences.getInstance().ignoreSystemCursor) return
         if (info == null) return
         selectionStart = info.selectionStart
         composingTextStart = info.composingTextStart
@@ -113,7 +106,7 @@ class FcitxInputMethodService :
                     return
                 }
             }
-            if (ignoreSystemCursor or (cursor < 0)) return
+            if (AppSharedPreferences.getInstance().ignoreSystemCursor || (cursor < 0)) return
             // when user starts typing and there is no composing text, composingTextStart would be -1
             val p = cursor + composingTextStart
             Log.d("IMS", "TextWithCursor: p=$p composingStart=$composingTextStart")
@@ -135,15 +128,6 @@ class FcitxInputMethodService :
         eventHandlerJob = null
         connection?.let { unbindService(it) }
         connection = null
-        unregisterSharedPerfChangeListener(this)
         super.onDestroy()
-    }
-
-    override fun onSharedPreferenceChanged(pref: SharedPreferences, key: String) {
-        when (key) {
-            PreferenceKeys.IgnoreSystemCursor -> {
-                ignoreSystemCursor = pref.getBoolean(key, true)
-            }
-        }
     }
 }
