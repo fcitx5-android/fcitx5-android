@@ -1,9 +1,12 @@
 package me.rocka.fcitx5test.settings
 
 import android.content.Context
-import android.util.Log
 import androidx.preference.*
+import cn.berberman.girls.utils.either.otherwise
+import cn.berberman.girls.utils.either.then
 import me.rocka.fcitx5test.native.RawConfig
+import me.rocka.fcitx5test.settings.parsed.ConfigDescriptor
+import me.rocka.fcitx5test.settings.parsed.ConfigType
 
 object PreferenceScreenFactory {
 
@@ -13,78 +16,95 @@ object PreferenceScreenFactory {
         val cfg = raw["cfg"]
         val desc = raw["desc"]
         val store = FcitxRawConfigStore(cfg)
-        desc.subItems?.get(0)?.subItems?.forEach { item ->
-            item["Type"].value.let { type ->
-                when {
-                    type.contains("$") -> cfg[item.name].let { subCategory ->
-                        val subStore = FcitxRawConfigStore(subCategory)
-                        val subPref = PreferenceCategory(context).apply {
-                            key = item.name
-                            title = item.findByName("Description")?.value ?: item.name
-                            isSingleLineTitle = false
-                            isIconSpaceReserved = false
-                        }
-                        screen.addPreference(subPref)
-                        desc[type].subItems?.forEach { item ->
-                            subPref.addPreference(createSinglePreference(context, item, subStore))
-                        }
-                    }
-                    type.isNotEmpty() -> {
-                        screen.addPreference(createSinglePreference(context, item, store))
-                    }
-                    else -> {
-                        Log.i(javaClass.name, "unexpected subItem '$item'")
-                    }
+
+        ConfigDescriptor
+            .parseTopLevel(desc)
+            .otherwise { throw it }
+            .then {
+                screen.title = it.name
+                it.values.forEach { d ->
+                    general(context, cfg, screen, d, store)
                 }
             }
-        }
+
         return screen
     }
 
-    private fun createSinglePreference(
+
+    private fun general(
         context: Context,
-        cfg: RawConfig, store: PreferenceDataStore
-    ): Preference {
-        val type = cfg["Type"].value
-        val itemDesc = cfg.findByName("Description")?.value ?: cfg.name
-        val defValue = cfg.findByName("DefaultValue")?.value ?: ""
-        return when (type) {
-            "Boolean" -> SwitchPreferenceCompat(context) .apply {
-                setDefaultValue(defValue == "True")
+        cfg: RawConfig,
+        screen: PreferenceScreen,
+        descriptor: ConfigDescriptor<*, *>,
+        store: PreferenceDataStore
+    ) {
+        if (descriptor is ConfigDescriptor.ConfigCustom) {
+            custom(context, cfg, screen, descriptor)
+            return
+        }
+
+        fun stubPreference() = Preference(context).apply {
+            summary = "⛔ Unimplemented type '${ConfigType.pretty(descriptor.type)}'"
+        }
+
+        when (descriptor) {
+            is ConfigDescriptor.ConfigBool -> SwitchPreferenceCompat(context).apply {
+                setDefaultValue(descriptor.defaultValue)
             }
-            "Integer" -> SeekBarPreference(context).apply {
-                showSeekBarValue = true
-                setDefaultValue(defValue.toInt())
-                cfg.findByName("IntMin")?.value?.toInt()?.let { min = it }
-                cfg.findByName("IntMax")?.value?.toInt()?.let { max = it }
-            }
-            "Enum" -> ListPreference(context).apply {
-                val enums = cfg["Enum"].subItems?.map { it.value }?.toTypedArray() ?: arrayOf()
-                val names = cfg["EnumI18n"].subItems?.map { it.value }?.toTypedArray() ?: arrayOf()
-                entries = names
-                entryValues = enums
-                dialogTitle = itemDesc
+            is ConfigDescriptor.ConfigEnum -> ListPreference(context).apply {
+                entries = (descriptor.entriesI18n ?: descriptor.entries).toTypedArray()
+                entryValues = descriptor.entries.toTypedArray()
+                dialogTitle = descriptor.description ?: descriptor.name
                 summaryProvider = Preference.SummaryProvider { pref: ListPreference ->
-                    names[enums.indexOf(pref.value)]
+                    entries[entryValues.indexOf(pref.value)]
                 }
-                setDefaultValue(defValue)
+                setDefaultValue(descriptor.defaultValue)
             }
-            "String" -> EditTextPreference(context).apply {
-                dialogTitle = itemDesc
+            is ConfigDescriptor.ConfigEnumList -> stubPreference() // TODO
+            is ConfigDescriptor.ConfigExternal -> stubPreference()
+            is ConfigDescriptor.ConfigInt -> SeekBarPreference(context).apply {
+                showSeekBarValue = true
+                setDefaultValue(descriptor.defaultValue)
+                descriptor.intMin?.let { min = it }
+                descriptor.intMax?.let { max = it }
+            }
+            is ConfigDescriptor.ConfigKey -> stubPreference()
+            is ConfigDescriptor.ConfigList -> stubPreference() // TODO
+            is ConfigDescriptor.ConfigString -> EditTextPreference(context).apply {
+                dialogTitle = descriptor.description ?: descriptor.name
                 summaryProvider = Preference.SummaryProvider { pref: EditTextPreference ->
                     pref.text
                 }
-                setDefaultValue(defValue)
+                setDefaultValue(descriptor.defaultValue)
             }
-            else -> Preference(context).apply {
-                summary = "⛔ Unimplemented type '$type'"
-            }
+            is ConfigDescriptor.ConfigCustom -> throw IllegalAccessException("Impossible!")
         }.apply {
-            key = cfg.name
-            title = itemDesc
+            key = descriptor.name
+            title = descriptor.description ?: descriptor.name
             isSingleLineTitle = false
             isIconSpaceReserved = false
             preferenceDataStore = store
+        }.let {
+            screen.addPreference(it)
         }
     }
+
+    private fun custom(
+        context: Context,
+        cfg: RawConfig,
+        screen: PreferenceScreen,
+        descriptor: ConfigDescriptor.ConfigCustom
+    ) {
+        val subStore = FcitxRawConfigStore(cfg[descriptor.name])
+        val subPref = PreferenceCategory(context).apply {
+            key = descriptor.name
+            title = descriptor.description ?: descriptor.name
+            isSingleLineTitle = false
+            isIconSpaceReserved = false
+        }
+        screen.addPreference(subPref)
+        descriptor.customTypeDef!!.values.forEach { general(context, cfg[descriptor.name], screen, it, subStore) }
+    }
+
+
 }

@@ -66,7 +66,7 @@ sealed class ConfigDescriptor<T, U> {
         override val description: String? = null,
         override val defaultValue: String? = null,
         val entries: List<String>,
-        val entryValues: List<String>
+        val entriesI18n: List<String>?
     ) : ConfigDescriptor<ConfigType.TyEnum, String>() {
         override val type: ConfigType<ConfigType.TyEnum>
             get() = ConfigType.TyEnum
@@ -102,7 +102,7 @@ sealed class ConfigDescriptor<T, U> {
         override val description: String? = null,
         override val defaultValue: List<String>? = null,
         val entries: List<String>,
-        val entryValues: List<String>
+        val entriesI18n: List<String>?
     ) :
         ConfigDescriptor<ConfigType.TyList, List<String>>() {
         override val type: ConfigType<ConfigType.TyList>
@@ -145,7 +145,6 @@ sealed class ConfigDescriptor<T, U> {
                 ParseException()
 
             data class NoEnumFound(val config: RawConfig) : ParseException()
-            data class NoEnumI18nFound(val config: RawConfig) : ParseException()
             data class BadFormList(val type: ConfigType<*>) : ParseException()
             data class BadFormDesc(val config: RawConfig) : ParseException()
         }
@@ -170,14 +169,12 @@ sealed class ConfigDescriptor<T, U> {
                         )
                         ConfigType.TyEnum -> {
                             val entries = raw.enum ?: throw ParseException.NoEnumFound(raw)
-                            val entriesI18n =
-                                raw.enumI18n ?: throw  ParseException.NoEnumI18nFound(raw)
                             ConfigEnum(
                                 raw.name,
                                 raw.description,
                                 raw.defaultValue,
-                                entriesI18n,
                                 entries,
+                                raw.enumI18n
                             )
                         }
                         ConfigType.TyInt -> ConfigInt(
@@ -191,14 +188,12 @@ sealed class ConfigDescriptor<T, U> {
                         is ConfigType.TyList ->
                             if (it.subtype == ConfigType.TyEnum) {
                                 val entries = raw.enum ?: throw ParseException.NoEnumFound(raw)
-                                val entriesI18n =
-                                    raw.enumI18n ?: throw  ParseException.NoEnumI18nFound(raw)
                                 ConfigEnumList(
                                     raw.name,
                                     raw.description,
                                     raw.findByName("DefaultValue")?.subItems?.map { ele -> ele.value },
-                                    entriesI18n,
-                                    entries
+                                    entries,
+                                    raw.enumI18n
                                 )
                             } else
                                 ConfigList(
