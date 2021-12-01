@@ -36,8 +36,6 @@ class FcitxInputMethodService : InputMethodService() {
         connection = bindFcitxDaemon {
             fcitx = getFcitxInstance()
         }
-        // TODO: it's also initialized in MainActivity
-        AppSharedPreferences.init(PreferenceManager.getDefaultSharedPreferences(this))
         super.onCreate()
     }
 

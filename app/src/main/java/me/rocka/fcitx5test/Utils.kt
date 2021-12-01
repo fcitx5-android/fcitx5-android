@@ -68,38 +68,5 @@ fun Context.bindFcitxDaemon(
     )
 }
 
-interface MyOnClickListener : View.OnClickListener, View.OnLongClickListener {
-    fun View.setOnClickListenerWithMe(block: (View) -> Unit) {
-        setOnClickListener {
-            this@MyOnClickListener.onClick(it)
-            block(it)
-        }
-    }
-
-    fun View.setOnLongClickListenerWithMe(block: (View) -> Boolean) {
-        setOnLongClickListener {
-            this@MyOnClickListener.onLongClick(it) and block(it)
-        }
-    }
-}
-
-fun Context.registerSharedPerfChangeListener(
-    listener: SharedPreferences.OnSharedPreferenceChangeListener,
-    vararg keys: String
-) {
-    PreferenceManager.getDefaultSharedPreferences(this).let { sp ->
-        sp.registerOnSharedPreferenceChangeListener(listener)
-        keys.forEach { listener.onSharedPreferenceChanged(sp, it) }
-    }
-}
-
-fun Context.unregisterSharedPerfChangeListener(
-    listener: SharedPreferences.OnSharedPreferenceChangeListener
-) {
-    PreferenceManager
-        .getDefaultSharedPreferences(this)
-        .unregisterOnSharedPreferenceChangeListener(listener)
-}
-
 val InputMethodService.inputConnection: InputConnection?
     get() = currentInputConnection
