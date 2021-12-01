@@ -52,7 +52,7 @@ class AppSharedPreferences(private val sharedPreferences: SharedPreferences) {
         @Synchronized
         fun init(sharedPreferences: SharedPreferences) {
             if (instance != null)
-                throw IllegalStateException("Shared preference is already initialized!")
+                return
             instance = AppSharedPreferences(sharedPreferences)
         }
 

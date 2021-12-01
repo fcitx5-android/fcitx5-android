@@ -7,6 +7,7 @@ import android.view.View
 import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
+import androidx.preference.PreferenceManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.launchIn
@@ -35,6 +36,8 @@ class FcitxInputMethodService : InputMethodService() {
         connection = bindFcitxDaemon {
             fcitx = getFcitxInstance()
         }
+        // TODO: it's also initialized in MainActivity
+        AppSharedPreferences.init(PreferenceManager.getDefaultSharedPreferences(this))
         super.onCreate()
     }
 

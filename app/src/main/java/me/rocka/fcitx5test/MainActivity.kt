@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
         // keep connection with daemon, so that it won't exit when fragment switches
         connection = bindFcitxDaemon { }
         val binding = ActivityMainBinding.inflate(layoutInflater)
+        // TODO: it's also initialized in FcitxInputMethodService
         AppSharedPreferences.init(PreferenceManager.getDefaultSharedPreferences(this))
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
