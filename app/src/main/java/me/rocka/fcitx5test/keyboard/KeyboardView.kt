@@ -5,6 +5,7 @@ import android.inputmethodservice.InputMethodService
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
+import android.view.View.MeasureSpec
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.PopupWindow
@@ -104,9 +105,10 @@ class KeyboardView(
                 dismiss()
                 return
             }
-            // FIXME: it can only measure height of 1 line
             val height = preeditBinding.root.run {
-                measure(0, 0)
+                val widthSpec = MeasureSpec.makeMeasureSpec(preeditBinding.root.width, MeasureSpec.EXACTLY)
+                val heightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
+                measure(widthSpec, heightSpec)
                 measuredHeight
             }
             if (isShowing) {
