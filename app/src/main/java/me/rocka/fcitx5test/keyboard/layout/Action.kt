@@ -8,11 +8,13 @@ sealed class ButtonAction<T>(open val act: T) {
 
     class CommitAction(override val act: String) : ButtonAction<String>(act)
 
-    class CapsAction() : ButtonAction<Unit>(Unit)
+    class CapsAction : ButtonAction<Unit>(Unit)
 
-    class BackspaceAction() : ButtonAction<Unit>(Unit)
+    class BackspaceAction : ButtonAction<Unit>(Unit)
 
     class QuickPhraseAction : ButtonAction<Unit>(Unit)
+
+    class UnicodeAction : ButtonAction<Unit>(Unit)
 
     class LangSwitchAction : ButtonAction<Unit>(Unit)
 

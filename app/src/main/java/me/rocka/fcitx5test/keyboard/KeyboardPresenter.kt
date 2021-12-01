@@ -141,6 +141,10 @@ class KeyboardPresenter(
         }.also { fcitx.sendKey(it) }
     }
 
+    override fun unicode() {
+        fcitx.triggerUnicode()
+    }
+
     override fun customEvent(fn: (Fcitx) -> Unit) {
         fn(fcitx)
     }

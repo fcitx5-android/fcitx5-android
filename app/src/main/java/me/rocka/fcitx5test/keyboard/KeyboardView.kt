@@ -61,6 +61,7 @@ class KeyboardView(
                 is ButtonAction.CapsAction -> presenter.switchCapsState()
                 is ButtonAction.BackspaceAction -> presenter.backspace()
                 is ButtonAction.QuickPhraseAction -> presenter.quickPhrase()
+                is ButtonAction.UnicodeAction -> presenter.unicode()
                 is ButtonAction.LangSwitchAction -> presenter.switchLang()
                 is ButtonAction.InputMethodSwitchAction ->
                     (service.getSystemService(InputMethodService.INPUT_METHOD_SERVICE) as InputMethodManager)

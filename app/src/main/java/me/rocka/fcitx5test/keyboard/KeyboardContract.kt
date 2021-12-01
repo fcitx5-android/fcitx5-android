@@ -55,6 +55,8 @@ interface KeyboardContract {
 
         fun punctuation()
 
+        fun unicode()
+
         fun customEvent(fn: (Fcitx) -> Unit)
     }
 }
