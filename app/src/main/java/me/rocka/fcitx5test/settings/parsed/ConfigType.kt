@@ -1,23 +1,47 @@
 package me.rocka.fcitx5test.settings.parsed
 
 import cn.berberman.girls.utils.either.Either
-import cn.berberman.girls.utils.either.runCatchingEither
+import cn.berberman.girls.utils.either.wrapEither
 
 
 sealed class ConfigType<T> {
-    object TyInt : ConfigType<TyInt>()
-    object TyString : ConfigType<TyString>()
-    object TyBool : ConfigType<TyBool>()
-    object TyKey : ConfigType<TyKey>()
-    object TyEnum : ConfigType<TyEnum>()
+    object TyInt : ConfigType<TyInt>() {
+        override fun toString(): String = javaClass.simpleName
+    }
+
+    object TyString : ConfigType<TyString>() {
+        override fun toString(): String = javaClass.simpleName
+    }
+
+    object TyBool : ConfigType<TyBool>() {
+        override fun toString(): String = javaClass.simpleName
+    }
+
+    object TyKey : ConfigType<TyKey>() {
+        override fun toString(): String = javaClass.simpleName
+    }
+
+    object TyEnum : ConfigType<TyEnum>() {
+        override fun toString(): String = javaClass.simpleName
+    }
+
+    object TyExternal : ConfigType<TyExternal>() {
+        override fun toString(): String = javaClass.simpleName
+    }
+
     data class TyCustom(val typeName: String) : ConfigType<TyCustom>()
     data class TyList(val subtype: ConfigType<*>) : ConfigType<TyList>()
+
     companion object : MyParser<String, ConfigType<*>, Companion.UnknownConfigTypeException> {
 
-        class UnknownConfigTypeException(val type: String) : Exception()
+        data class UnknownConfigTypeException(val type: String) : Exception()
 
         override fun parse(raw: String): Either<UnknownConfigTypeException, ConfigType<*>> =
-            parseE(raw).runCatchingEither { this }
+            try {
+                wrapEither(parseE(raw))
+            } catch (e: UnknownConfigTypeException) {
+                Either.left(e)
+            }
 
         private fun parseE(raw: String): ConfigType<*> =
             when (raw) {
@@ -26,6 +50,7 @@ sealed class ConfigType<T> {
                 "Boolean" -> TyBool
                 "Key" -> TyKey
                 "Enum" -> TyEnum
+                "External" -> TyExternal
                 else -> {
                     when {
                         raw.startsWith("List|") -> TyList(parseE(raw.drop(5)))
@@ -43,6 +68,7 @@ sealed class ConfigType<T> {
             TyKey -> "Key"
             is TyList -> "List|${pretty(raw.subtype)}"
             TyString -> "String"
+            TyExternal -> "External"
         }
     }
 }

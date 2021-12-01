@@ -3,86 +3,122 @@ package me.rocka.fcitx5test.settings.parsed
 import cn.berberman.girls.utils.either.*
 import me.rocka.fcitx5test.native.RawConfig
 
-sealed class ConfigDescriptor<T, U>(
-    val name: String,
-    val type: ConfigType<T>,
-    val description: String? = null,
-    val defaultValue: U? = null
-) {
+sealed class ConfigDescriptor<T, U> {
+    abstract val name: String
+    abstract val type: ConfigType<T>
+    abstract val description: String?
+    abstract val defaultValue: U?
 
-    class ConfigTopLevelDef(
+    data class ConfigTopLevelDef(
         val name: String,
         val values: List<ConfigDescriptor<*, *>>,
         val customTypes: List<ConfigCustomTypeDef>
     )
 
-    class ConfigCustomTypeDef(
+    data class ConfigCustomTypeDef(
         val name: String,
         val values: List<ConfigDescriptor<*, *>>
     )
 
-    class ConfigInt(
-        name: String,
-        description: String? = null,
-        defaultValue: Int? = null,
+    data class ConfigInt(
+        override val name: String,
+        override val description: String? = null,
+        override val defaultValue: Int? = null,
         val intMax: Int?,
         val intMin: Int?,
-    ) : ConfigDescriptor<ConfigType.TyInt, Int>(
-        name, ConfigType.TyInt, description, defaultValue
-    )
+    ) : ConfigDescriptor<ConfigType.TyInt, Int>() {
+        override val type: ConfigType<ConfigType.TyInt>
+            get() = ConfigType.TyInt
+    }
 
-    class ConfigString(
-        name: String,
-        description: String? = null,
-        defaultValue: String? = null,
-    ) : ConfigDescriptor<ConfigType.TyString, String>(
-        name, ConfigType.TyString, description, defaultValue
-    )
+    data class ConfigString(
+        override val name: String,
+        override val description: String? = null,
+        override val defaultValue: String? = null,
+    ) : ConfigDescriptor<ConfigType.TyString, String>() {
+        override val type: ConfigType<ConfigType.TyString>
+            get() = ConfigType.TyString
+    }
 
-    class ConfigBool(
-        name: String,
-        description: String? = null,
-        defaultValue: Boolean? = null,
-    ) : ConfigDescriptor<ConfigType.TyBool, Boolean>(
-        name, ConfigType.TyBool, description, defaultValue
-    )
+    data class ConfigBool(
+        override val name: String,
+        override val description: String? = null,
+        override val defaultValue: Boolean? = null,
+    ) : ConfigDescriptor<ConfigType.TyBool, Boolean>() {
+        override val type: ConfigType<ConfigType.TyBool>
+            get() = ConfigType.TyBool
 
-    class ConfigKey(
-        name: String,
-        description: String? = null,
-        defaultValue: String? = null,
-    ) : ConfigDescriptor<ConfigType.TyKey, String>(
-        name, ConfigType.TyKey, description, defaultValue
-    )
+    }
 
-    class ConfigEnum(
-        name: String,
-        description: String? = null,
-        defaultValue: String? = null,
+    // TODO: Placeholder
+    data class ConfigKey(
+        override val name: String,
+        override val description: String? = null,
+        override val defaultValue: String? = null,
+    ) : ConfigDescriptor<ConfigType.TyKey, String>() {
+        override val type: ConfigType<ConfigType.TyKey>
+            get() = ConfigType.TyKey
+
+    }
+
+    data class ConfigEnum(
+        override val name: String,
+        override val description: String? = null,
+        override val defaultValue: String? = null,
         val entries: List<String>,
-        val entriesI18n: List<String>
-    ) : ConfigDescriptor<ConfigType.TyEnum, String>(
-        name, ConfigType.TyEnum, description, defaultValue
-    )
+        val entryValues: List<String>
+    ) : ConfigDescriptor<ConfigType.TyEnum, String>() {
+        override val type: ConfigType<ConfigType.TyEnum>
+            get() = ConfigType.TyEnum
 
-    class ConfigCustom(
-        name: String,
-        type: ConfigType.TyCustom,
-        description: String? = null,
+    }
+
+    data class ConfigCustom(
+        override val name: String,
+        override val type: ConfigType.TyCustom,
+        override val description: String? = null,
         // will be filled in parseTopLevel
-        var children: ConfigCustomTypeDef? = null
-    ) : ConfigDescriptor<ConfigType.TyCustom, Nothing>(
-        name, type, description, null
-    )
+        var customTypeDef: ConfigCustomTypeDef? = null
+    ) : ConfigDescriptor<ConfigType.TyCustom, Nothing>() {
+        override val defaultValue: Nothing?
+            get() = null
+    }
 
-    class ConfigList(
-        name: String,
-        type: ConfigType.TyList,
-        description: String? = null,
-        defaultValue: List<Any?>? = null,
-    ) : ConfigDescriptor<ConfigType.TyList, List<Any?>>(
-        name, type, description, defaultValue
-    )
+    data class ConfigList(
+        override val name: String,
+        override val type: ConfigType.TyList,
+        override val description: String? = null,
+        /**
+         * [Any?] is used for a union type. See [parseE] for details.
+         */
+        override val defaultValue: List<Any?>? = null,
+    ) : ConfigDescriptor<ConfigType.TyList, List<Any?>>()
+
+    /**
+     * Specialized [ConfigList] for enum
+     */
+    data class ConfigEnumList(
+        override val name: String,
+        override val description: String? = null,
+        override val defaultValue: List<String>? = null,
+        val entries: List<String>,
+        val entryValues: List<String>
+    ) :
+        ConfigDescriptor<ConfigType.TyList, List<String>>() {
+        override val type: ConfigType<ConfigType.TyList>
+            get() = ConfigType.TyList(ConfigType.TyEnum)
+    }
+
+    // TODO: Placeholder
+    data class ConfigExternal(
+        override val name: String,
+        override val description: String? = null,
+    ) : ConfigDescriptor<ConfigType.TyExternal, Nothing>() {
+        override val type: ConfigType<ConfigType.TyExternal>
+            get() = ConfigType.TyExternal
+        override val defaultValue: Nothing?
+            get() = null
+    }
 
     companion object :
         MyParser<RawConfig, ConfigDescriptor<*, *>, Companion.ParseException> {
@@ -104,14 +140,14 @@ sealed class ConfigDescriptor<T, U>(
 
 
         sealed class ParseException : Exception() {
-            class NoTypeExist(val config: RawConfig) : ParseException()
-            class TypeNoParse(val sup: ConfigType.Companion.UnknownConfigTypeException) :
+            data class NoTypeExist(val config: RawConfig) : ParseException()
+            data class TypeNoParse(val sup: ConfigType.Companion.UnknownConfigTypeException) :
                 ParseException()
 
-            class NoEnumFound(val config: RawConfig) : ParseException()
-            class NoEnumI18nFound(val config: RawConfig) : ParseException()
-            class BadFormList(val type: ConfigType<*>) : ParseException()
-            class BadFormDesc(val config: RawConfig) : ParseException()
+            data class NoEnumFound(val config: RawConfig) : ParseException()
+            data class NoEnumI18nFound(val config: RawConfig) : ParseException()
+            data class BadFormList(val type: ConfigType<*>) : ParseException()
+            data class BadFormDesc(val config: RawConfig) : ParseException()
         }
 
         private fun parseE(raw: RawConfig): ConfigDescriptor<*, *> {
@@ -133,15 +169,15 @@ sealed class ConfigDescriptor<T, U>(
                             raw.description
                         )
                         ConfigType.TyEnum -> {
-                            val entries = raw.enum ?: throw  ParseException.NoEnumFound(raw)
+                            val entries = raw.enum ?: throw ParseException.NoEnumFound(raw)
                             val entriesI18n =
                                 raw.enumI18n ?: throw  ParseException.NoEnumI18nFound(raw)
                             ConfigEnum(
                                 raw.name,
                                 raw.description,
                                 raw.defaultValue,
+                                entriesI18n,
                                 entries,
-                                entriesI18n
                             )
                         }
                         ConfigType.TyInt -> ConfigInt(
@@ -152,24 +188,42 @@ sealed class ConfigDescriptor<T, U>(
                             raw.intMin
                         )
                         ConfigType.TyKey -> ConfigKey(raw.name, raw.description, raw.defaultValue)
-                        is ConfigType.TyList -> ConfigList(
-                            raw.name,
-                            it,
-                            raw.description,
-                            raw.findByName("DefaultValue")?.subItems?.map { ele ->
-                                when (it.subtype) {
-                                    ConfigType.TyBool -> ele.value.toBoolean()
-                                    ConfigType.TyInt -> ele.value.toInt()
-                                    ConfigType.TyKey -> ele.value
-                                    ConfigType.TyString -> ele.value
-                                    else -> throw  ParseException.BadFormList(it)
-                                }
-                            }
-                        )
+                        is ConfigType.TyList ->
+                            if (it.subtype == ConfigType.TyEnum) {
+                                val entries = raw.enum ?: throw ParseException.NoEnumFound(raw)
+                                val entriesI18n =
+                                    raw.enumI18n ?: throw  ParseException.NoEnumI18nFound(raw)
+                                ConfigEnumList(
+                                    raw.name,
+                                    raw.description,
+                                    raw.findByName("DefaultValue")?.subItems?.map { ele -> ele.value },
+                                    entriesI18n,
+                                    entries
+                                )
+                            } else
+                                ConfigList(
+                                    raw.name,
+                                    it,
+                                    raw.description,
+                                    raw.findByName("DefaultValue")?.subItems?.map { ele ->
+                                        when (it.subtype) {
+                                            ConfigType.TyBool -> ele.value.toBoolean()
+                                            ConfigType.TyInt -> ele.value.toInt()
+                                            ConfigType.TyKey -> ele.value
+                                            ConfigType.TyString -> ele.value
+                                            ConfigType.TyEnum -> throw IllegalAccessException("Impossible!")
+                                            else -> throw  ParseException.BadFormList(it)
+                                        }
+                                    }
+                                )
                         ConfigType.TyString -> ConfigString(
                             raw.name,
                             raw.description,
                             raw.defaultValue
+                        )
+                        ConfigType.TyExternal -> ConfigExternal(
+                            raw.name,
+                            raw.description
                         )
                     }
                 }
@@ -190,8 +244,8 @@ sealed class ConfigDescriptor<T, U>(
             val topDesc = topLevel.subItems?.map {
                 val parsed = parseE(it)
                 if (parsed is ConfigCustom)
-                    parsed.children = customTypeDef.find { cTy ->
-                        cTy.name == (parsed.type as ConfigType.TyCustom).typeName
+                    parsed.customTypeDef = customTypeDef.find { cTy ->
+                        cTy.name == parsed.type.typeName
                     }
                 parsed
             } ?: listOf()
@@ -199,7 +253,11 @@ sealed class ConfigDescriptor<T, U>(
         }
 
         fun parseTopLevel(raw: RawConfig): Either<ParseException, ConfigTopLevelDef> {
-            return parseTopLevelE(raw).runCatchingEither { this }
+            return try {
+                wrapEither(parseTopLevelE(raw))
+            } catch (e: ParseException) {
+                Either.left(e)
+            }
 
         }
     }
