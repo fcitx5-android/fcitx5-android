@@ -6,50 +6,34 @@ import me.rocka.fcitx5test.AppSharedPreferences.PreferenceKeys.AssetsVersion
 import me.rocka.fcitx5test.AppSharedPreferences.PreferenceKeys.ButtonHapticFeedback
 import me.rocka.fcitx5test.AppSharedPreferences.PreferenceKeys.HideKeyConfig
 import me.rocka.fcitx5test.AppSharedPreferences.PreferenceKeys.IgnoreSystemCursor
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
-class AppSharedPreferences(private val sharedPreferences: SharedPreferences) :
-    SharedPreferences.OnSharedPreferenceChangeListener {
+class AppSharedPreferences(private val sharedPreferences: SharedPreferences) {
 
-    init {
-        sharedPreferences.registerOnSharedPreferenceChangeListener(this)
-        sharedPreferences.all.keys.forEach {
-            onSharedPreferenceChanged(sharedPreferences, it)
-        }
-    }
+    private inline fun <reified T> preference(key: String) =
+        object : ReadWriteProperty<AppSharedPreferences, T> {
+            override fun getValue(thisRef: AppSharedPreferences, property: KProperty<*>): T {
+                return thisRef.sharedPreferences.all[key] as T
+            }
 
-    private var _assetsVersion: Long = -1L
-    private var _ignoreSystemCursor: Boolean = true
-    private var _hideKeyConfig: Boolean = true
-    private var _buttonHapticFeedback: Boolean = true
+            override fun setValue(thisRef: AppSharedPreferences, property: KProperty<*>, value: T) {
+                when (value) {
+                    is Boolean -> thisRef.sharedPreferences.edit { putBoolean(key, value) }
+                    is Long -> thisRef.sharedPreferences.edit { putLong(key, value) }
+                    is Float -> thisRef.sharedPreferences.edit { putFloat(key, value) }
+                    is Int -> thisRef.sharedPreferences.edit { putInt(key, value) }
+                    is String -> thisRef.sharedPreferences.edit { putString(key, value) }
+                }
+            }
 
-    var assetsVersion
-        get() = _assetsVersion
-        set(value) {
-            sharedPreferences.edit {
-                putLong(AssetsVersion, value)
-            }
         }
-    var ignoreSystemCursor
-        get() = _ignoreSystemCursor
-        set(value) {
-            sharedPreferences.edit {
-                putBoolean(IgnoreSystemCursor, value)
-            }
-        }
-    var hideKeyConfig
-        get() = _hideKeyConfig
-        set(value) {
-            sharedPreferences.edit {
-                putBoolean(HideKeyConfig, value)
-            }
-        }
-    var buttonHapticFeedback
-        get() = _buttonHapticFeedback
-        set(value) {
-            sharedPreferences.edit {
-                putBoolean(ButtonHapticFeedback, value)
-            }
-        }
+
+
+    var assetsVersion by preference<Long>(AssetsVersion)
+    var ignoreSystemCursor by preference<Boolean>(IgnoreSystemCursor)
+    var hideKeyConfig by preference<Boolean>(HideKeyConfig)
+    var buttonHapticFeedback by preference<Boolean>(ButtonHapticFeedback)
 
     object PreferenceKeys {
         const val AssetsVersion = "assets_version"
@@ -58,18 +42,6 @@ class AppSharedPreferences(private val sharedPreferences: SharedPreferences) :
         const val ButtonHapticFeedback = "button_haptic_feedback"
     }
 
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        when (key) {
-            AssetsVersion -> _assetsVersion = sharedPreferences.getLong(key, _assetsVersion)
-            IgnoreSystemCursor -> _ignoreSystemCursor =
-                sharedPreferences.getBoolean(key, _ignoreSystemCursor)
-            HideKeyConfig -> _hideKeyConfig = sharedPreferences.getBoolean(key, _hideKeyConfig)
-            ButtonHapticFeedback -> _buttonHapticFeedback =
-                sharedPreferences.getBoolean(key, _buttonHapticFeedback)
-        }
-
-    }
 
     companion object {
         private var instance: AppSharedPreferences? = null
