@@ -83,7 +83,8 @@ object PreferenceScreenFactory {
             }
             "Enum" -> ListPreference(context).apply {
                 val enums = cfg["Enum"].subItems?.map { it.value }?.toTypedArray() ?: arrayOf()
-                val names = cfg["EnumI18n"].subItems?.map { it.value }?.toTypedArray() ?: arrayOf()
+                val names = cfg.findByName("EnumI18n")
+                    ?.subItems?.map { it.value }?.toTypedArray() ?: enums
                 entries = names
                 entryValues = enums
                 dialogTitle = itemDesc
