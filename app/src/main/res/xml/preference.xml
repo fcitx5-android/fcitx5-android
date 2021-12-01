@@ -10,5 +10,17 @@
             android:title="@string/ignore_sys_cursor"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="hide_key_config"
+            android:title="@string/hide_key_config"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="button_haptic_feedback"
+            android:title="@string/button_haptic_feedback"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
     </PreferenceCategory>
 </PreferenceScreen>

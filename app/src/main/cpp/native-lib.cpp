@@ -11,8 +11,9 @@
 #include <fcitx-utils/eventdispatcher.h>
 #include <fcitx-utils/stringutils.h>
 
-#include "fcitx5/src/modules/quickphrase/quickphrase_public.h"
-#include "fcitx5-chinese-addons/modules/punctuation/punctuation_public.h"
+#include <quickphrase_public.h>
+#include <punctuation_public.h>
+#include <unicode_public.h>
 
 #include "androidfrontend/androidfrontend_public.h"
 #include "androidstreambuf.h"
@@ -45,6 +46,7 @@ public:
             p_frontend = addonMgr.addon("androidfrontend");
             p_quickphrase = addonMgr.addon("quickphrase");
             p_punctuation = addonMgr.addon("punctuation", true);
+            p_unicode = addonMgr.addon("unicode");
             p_uuid = p_frontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
             setupCallback(p_frontend);
         });
@@ -300,6 +302,14 @@ public:
         return p_punctuation->call<fcitx::IPunctuation::getPunctuation>(language, unicode);
     }
 
+    void triggerUnicode() {
+        if (!p_unicode) return;
+        p_dispatcher->schedule([this]() {
+            auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
+            p_unicode->call<fcitx::IUnicode::trigger>(ic);
+        });
+    }
+
     void saveConfig() {
         p_dispatcher->schedule([this]() {
             p_instance->globalConfig().safeSave();
@@ -321,6 +331,7 @@ private:
     fcitx::AddonInstance *p_frontend = nullptr;
     fcitx::AddonInstance *p_quickphrase = nullptr;
     fcitx::AddonInstance *p_punctuation = nullptr;
+    fcitx::AddonInstance *p_unicode = nullptr;
     fcitx::ICUUID p_uuid{};
 
     void resetGlobalPointers() {
@@ -329,6 +340,7 @@ private:
         p_frontend = nullptr;
         p_quickphrase = nullptr;
         p_punctuation = nullptr;
+        p_unicode = nullptr;
         p_uuid = {};
     }
 };
@@ -783,4 +795,10 @@ Java_me_rocka_fcitx5test_native_Fcitx_queryPunctuation(JNIEnv *env, jclass clazz
     env->SetObjectArrayElement(array, 1, env->NewStringUTF(pair.second.c_str()));
     env->DeleteLocalRef(s);
     return array;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_triggerUnicodeInput(JNIEnv *env, jclass clazz) {
+    Fcitx::Instance().triggerUnicode();
 }

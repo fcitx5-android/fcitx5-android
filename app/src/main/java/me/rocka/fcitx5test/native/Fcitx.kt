@@ -86,6 +86,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
     fun triggerQuickPhrase() = triggerQuickPhraseInput()
     fun punctuation(c: Char, language: String = "zh_CN"): Pair<String, String> =
         queryPunctuation(c, language)?.let { Pair(it[0], it[1]) } ?: "$c".let { Pair(it, it) }
+    fun triggerUnicode() = triggerUnicodeInput()
 
     init {
         if (fcitxState_ != Stopped)
@@ -192,6 +193,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
 
         @JvmStatic
         external fun queryPunctuation(c: Char, language: String): Array<String>?
+
+        @JvmStatic
+        external fun triggerUnicodeInput()
 
         /**
          * Called from native-lib

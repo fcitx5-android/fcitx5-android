@@ -235,13 +235,7 @@ void AndroidKeyboardEngine::setConfig(const RawConfig &config) {
 
 void AndroidKeyboardEngine::reset(const InputMethodEntry &entry, InputContextEvent &event) {
     auto *inputContext = event.inputContext();
-    // The reason that we do not commit here is we want to force the behavior.
-    // When client get unfocused, the framework will try to commit the string.
-    if (event.type() != EventType::InputContextFocusOut) {
-        commitBuffer(inputContext);
-    } else {
-        resetState(inputContext);
-    }
+    resetState(inputContext);
     inputContext->inputPanel().reset();
     inputContext->updatePreedit();
     inputContext->updateUserInterface(UserInterfaceComponent::InputPanel);

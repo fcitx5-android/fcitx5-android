@@ -59,7 +59,7 @@ jobs:
           path: ${{ github.event_name == 'push' && steps.sign_apk.outputs.signedReleaseFile || 'app/build/outputs/apk/release/*.apk' }}
 
       - name: Notify Telegram group
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ always() && github.event_name == 'push' }}
         run: |
           curl -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
             -H "content-type: application/json" \

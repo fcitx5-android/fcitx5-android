@@ -1,13 +1,13 @@
 package me.rocka.fcitx5test
 
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
+import android.inputmethodservice.InputMethodService
 import android.os.IBinder
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputConnection
 import androidx.core.view.children
+import androidx.preference.PreferenceManager
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -32,11 +32,13 @@ fun Context.copyFileOrDir(path: String): Unit = runCatching {
 
 private fun Context.copyFile(filename: String) = runCatching {
     with(assets) {
-        open(filename).copyTo(
-            FileOutputStream("${applicationInfo.dataDir}/${filename}")
-        )
+        open(filename).use { i ->
+            FileOutputStream("${applicationInfo.dataDir}/${filename}").use { o ->
+                i.copyTo(o)
+                o.close()
+            }
+        }
     }
-    Unit
 }.getOrThrow()
 
 fun View.allChildren(): List<View> {
@@ -65,3 +67,39 @@ fun Context.bindFcitxDaemon(
         it, Context.BIND_AUTO_CREATE
     )
 }
+
+interface MyOnClickListener : View.OnClickListener, View.OnLongClickListener {
+    fun View.setOnClickListenerWithMe(block: (View) -> Unit) {
+        setOnClickListener {
+            this@MyOnClickListener.onClick(it)
+            block(it)
+        }
+    }
+
+    fun View.setOnLongClickListenerWithMe(block: (View) -> Boolean) {
+        setOnLongClickListener {
+            this@MyOnClickListener.onLongClick(it) and block(it)
+        }
+    }
+}
+
+fun Context.registerSharedPerfChangeListener(
+    listener: SharedPreferences.OnSharedPreferenceChangeListener,
+    vararg keys: String
+) {
+    PreferenceManager.getDefaultSharedPreferences(this).let { sp ->
+        sp.registerOnSharedPreferenceChangeListener(listener)
+        keys.forEach { listener.onSharedPreferenceChanged(sp, it) }
+    }
+}
+
+fun Context.unregisterSharedPerfChangeListener(
+    listener: SharedPreferences.OnSharedPreferenceChangeListener
+) {
+    PreferenceManager
+        .getDefaultSharedPreferences(this)
+        .unregisterOnSharedPreferenceChangeListener(listener)
+}
+
+val InputMethodService.inputConnection: InputConnection?
+    get() = currentInputConnection

@@ -20,6 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
+        android:contentDescription="@string/add_input_method"
         android:src="@drawable/ic_baseline_plus_24"
         android:tint="?android:attr/colorForegroundInverse" />
 

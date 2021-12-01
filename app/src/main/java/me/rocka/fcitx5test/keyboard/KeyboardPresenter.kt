@@ -2,6 +2,7 @@ package me.rocka.fcitx5test.keyboard
 
 import android.util.Log
 import android.view.KeyEvent
+import me.rocka.fcitx5test.inputConnection
 import me.rocka.fcitx5test.keyboard.KeyboardContract.CapsState
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxEvent
@@ -9,7 +10,7 @@ import java.util.*
 import kotlin.concurrent.timer
 
 class KeyboardPresenter(
-    val service: FcitxInputMethodService,
+    private val service: FcitxInputMethodService,
     val view: KeyboardContract.View,
     override val fcitx: Fcitx,
 ) :
@@ -24,6 +25,10 @@ class KeyboardPresenter(
         FcitxEvent.InputPanelAuxEvent.Data("", "")
     )
 
+    override fun reset() {
+        fcitx.reset()
+    }
+
     override fun selectCandidate(idx: Int) {
         fcitx.select(idx)
     }
@@ -34,7 +39,7 @@ class KeyboardPresenter(
                 view.updateCandidates(event.data)
             }
             is FcitxEvent.CommitStringEvent -> {
-                service.currentInputConnection?.commitText(event.data, 1)
+                service.inputConnection?.commitText(event.data, 1)
             }
             is FcitxEvent.IMChangeEvent -> {
                 view.updateSpaceButtonText(event.data.status)
@@ -134,5 +139,13 @@ class KeyboardPresenter(
             "En" -> 'e'
             else -> 'z'
         }.also { fcitx.sendKey(it) }
+    }
+
+    override fun unicode() {
+        fcitx.triggerUnicode()
+    }
+
+    override fun customEvent(fn: (Fcitx) -> Unit) {
+        fn(fcitx)
     }
 }
