@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
+import androidx.preference.PreferenceManager
 import me.rocka.fcitx5test.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -21,6 +22,7 @@ class MainActivity : AppCompatActivity() {
         // keep connection with daemon, so that it won't exit when fragment switches
         connection = bindFcitxDaemon { }
         val binding = ActivityMainBinding.inflate(layoutInflater)
+        AppSharedPreferences.init(PreferenceManager.getDefaultSharedPreferences(this))
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         val appBarConfiguration = AppBarConfiguration(

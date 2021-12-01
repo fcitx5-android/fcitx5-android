@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.preference.*
 import cn.berberman.girls.utils.either.otherwise
 import cn.berberman.girls.utils.either.then
+import me.rocka.fcitx5test.AppSharedPreferences
 import me.rocka.fcitx5test.native.RawConfig
 import me.rocka.fcitx5test.settings.parsed.ConfigDescriptor
 import me.rocka.fcitx5test.settings.parsed.ConfigType
@@ -38,6 +39,13 @@ object PreferenceScreenFactory {
         descriptor: ConfigDescriptor<*, *>,
         store: PreferenceDataStore
     ) {
+
+        // Hide key related configs
+        if (AppSharedPreferences.getInstance().hideKeyConfig && ConfigType.pretty(descriptor.type)
+                .contains("Key")
+        )
+            return
+
         if (descriptor is ConfigDescriptor.ConfigCustom) {
             custom(context, cfg, screen, descriptor)
             return
@@ -103,7 +111,15 @@ object PreferenceScreenFactory {
             isIconSpaceReserved = false
         }
         screen.addPreference(subPref)
-        descriptor.customTypeDef!!.values.forEach { general(context, cfg[descriptor.name], screen, it, subStore) }
+        descriptor.customTypeDef!!.values.forEach {
+            general(
+                context,
+                cfg[descriptor.name],
+                screen,
+                it,
+                subStore
+            )
+        }
     }
 
 
