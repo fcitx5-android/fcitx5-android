@@ -69,6 +69,9 @@ option(ENABLE_CLOUDPINYIN "" OFF)
 add_subdirectory(fcitx5-chinese-addons)
 
 add_library(native-lib SHARED native-lib.cpp)
-find_library(Libc c)
-find_library(AndroidLog log)
-target_link_libraries(native-lib ${Libc} ${AndroidLog} Fcitx5::Core)
+target_link_libraries(native-lib
+        log
+        Fcitx5::Core
+        Fcitx5::Module::QuickPhrase
+        Fcitx5::Module::Punctuation
+        Fcitx5::Module::Unicode)
