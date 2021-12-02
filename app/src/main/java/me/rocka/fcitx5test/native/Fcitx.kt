@@ -13,7 +13,9 @@ import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.copyFileOrDir
 import me.rocka.fcitx5test.native.FcitxState.*
 
-class Fcitx(private val context: Context) : FcitxLifecycleOwner {
+class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope by CoroutineScope(
+    SupervisorJob() + Dispatchers.IO
+) {
 
     interface RawConfigMap {
         operator fun get(key: String): RawConfig
@@ -34,8 +36,6 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
             }
             field = value
         }
-
-    private var fcitxJob: Job? = null
 
     /**
      * Subscribe this flow to receive event sent from fcitx
@@ -92,8 +92,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
             throw IllegalAccessException("Fcitx5 is already running!")
     }
 
-    private companion object JNI :
-        CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.IO) {
+    private companion object JNI {
 
         @Volatile
         private var fcitxState_ = Stopped
@@ -235,7 +234,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
             return
         fcitxState_ = Starting
         with(context) {
-            fcitxJob = launch {
+            launch {
                 val ver = AppSharedPreferences.getInstance().assetsVersion
 
                 if (ver == -1L) {
@@ -268,10 +267,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
             return
         fcitxState_ = Stopping
         exitFcitx()
-        runBlocking {
-            fcitxJob?.cancelAndJoin()
-        }
-        fcitxJob = null
+        coroutineContext.cancel()
         fcitxState_ = Stopped
     }
 

@@ -2,26 +2,63 @@ package me.rocka.fcitx5test.keyboard.layout
 
 import me.rocka.fcitx5test.native.Fcitx
 
-sealed class ButtonAction<T>(open val act: T) {
+sealed class ButtonAction<T> {
 
-    class FcitxKeyAction(override val act: String) : ButtonAction<String>(act)
+    abstract val act: T
 
-    class CommitAction(override val act: String) : ButtonAction<String>(act)
+    data class FcitxKeyAction(override val act: String) : ButtonAction<String>()
 
-    class CapsAction : ButtonAction<Unit>(Unit)
+    data class CommitAction(override val act: String) : ButtonAction<String>()
 
-    class BackspaceAction : ButtonAction<Unit>(Unit)
+    object CapsAction : ButtonAction<Unit>() {
+        override val act: Unit
+            get() = Unit
 
-    class QuickPhraseAction : ButtonAction<Unit>(Unit)
+        override fun toString(): String = javaClass.simpleName
+    }
 
-    class UnicodeAction : ButtonAction<Unit>(Unit)
+    object BackspaceAction : ButtonAction<Unit>() {
+        override val act: Unit
+            get() = Unit
 
-    class LangSwitchAction : ButtonAction<Unit>(Unit)
+        override fun toString(): String = javaClass.simpleName
+    }
 
-    class InputMethodSwitchAction : ButtonAction<Unit>(Unit)
+    object QuickPhraseAction : ButtonAction<Unit>() {
+        override val act: Unit
+            get() = Unit
 
-    class ReturnAction : ButtonAction<Unit>(Unit)
+        override fun toString(): String = javaClass.simpleName
+    }
 
-    class CustomAction(override val act: (Fcitx) -> Unit) : ButtonAction<(Fcitx) -> Unit>(act)
+    object UnicodeAction : ButtonAction<Unit>() {
+        override val act: Unit
+            get() = Unit
+
+        override fun toString(): String = javaClass.simpleName
+    }
+
+    object LangSwitchAction : ButtonAction<Unit>() {
+        override val act: Unit
+            get() = Unit
+
+        override fun toString(): String = javaClass.simpleName
+    }
+
+    object InputMethodSwitchAction : ButtonAction<Unit>() {
+        override val act: Unit
+            get() = Unit
+
+        override fun toString(): String = javaClass.simpleName
+    }
+
+    object ReturnAction : ButtonAction<Unit>() {
+        override val act: Unit
+            get() = Unit
+
+        override fun toString(): String = javaClass.simpleName
+    }
+
+    data class CustomAction(override val act: (Fcitx) -> Unit) : ButtonAction<(Fcitx) -> Unit>()
 
 }

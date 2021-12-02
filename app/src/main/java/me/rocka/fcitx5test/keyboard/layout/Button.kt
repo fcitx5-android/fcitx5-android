@@ -9,21 +9,21 @@ open class LongPressButton(text: String = "", val altText: String = "") : BaseBu
 }
 
 open class CapsButton : BaseButton() {
-    override fun onPress() = ButtonAction.CapsAction()
+    override fun onPress() = ButtonAction.CapsAction
 }
 
 open class BackspaceButton : BaseButton() {
-    override fun onPress() = ButtonAction.BackspaceAction()
+    override fun onPress() = ButtonAction.BackspaceAction
 }
 
 open class QuickPhraseButton : LongPressButton() {
-    override fun onPress() = ButtonAction.QuickPhraseAction()
-    override fun onLongPress() = ButtonAction.UnicodeAction()
+    override fun onPress() = ButtonAction.QuickPhraseAction
+    override fun onLongPress() = ButtonAction.UnicodeAction
 }
 
 open class LangSwitchButton : LongPressButton() {
-    override fun onPress() = ButtonAction.LangSwitchAction()
-    override fun onLongPress() = ButtonAction.InputMethodSwitchAction()
+    override fun onPress() = ButtonAction.LangSwitchAction
+    override fun onLongPress() = ButtonAction.InputMethodSwitchAction
 }
 
 open class SpaceButton : BaseButton() {
@@ -31,5 +31,5 @@ open class SpaceButton : BaseButton() {
 }
 
 open class ReturnButton : BaseButton() {
-    override fun onPress() = ButtonAction.ReturnAction()
+    override fun onPress() = ButtonAction.ReturnAction
 }

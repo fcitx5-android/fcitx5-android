@@ -7,9 +7,7 @@ import android.view.View
 import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
-import androidx.preference.PreferenceManager
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import me.rocka.fcitx5test.AppSharedPreferences
@@ -18,7 +16,8 @@ import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
 import me.rocka.fcitx5test.inputConnection
 import me.rocka.fcitx5test.native.Fcitx
 
-class FcitxInputMethodService : InputMethodService() {
+class FcitxInputMethodService : InputMethodService(),
+    CoroutineScope by MainScope() + SupervisorJob() {
 
     private lateinit var keyboardPresenter: KeyboardPresenter
     private lateinit var keyboardView: KeyboardView
@@ -51,7 +50,7 @@ class FcitxInputMethodService : InputMethodService() {
         if (eventHandlerJob == null)
             eventHandlerJob = fcitx.eventFlow.onEach {
                 keyboardPresenter.handleFcitxEvent(it)
-            }.launchIn(MainScope())
+            }.launchIn(this)
 
         return keyboardView.keyboardView.root
     }
