@@ -7,20 +7,20 @@ import androidx.recyclerview.widget.RecyclerView
 import me.rocka.fcitx5test.R
 
 class CustomKeyboardView(val root: ViewGroup) {
-    val candidateList: RecyclerView
+    val candidateList: RecyclerView?
         get() = root.findViewById(R.id.candidate_list)
-    val caps: ImageButton
+    val caps: ImageButton?
         get() = root.findViewById(R.id.button_caps)
-    val backspace: ImageButton
+    val backspace: ImageButton?
         get() = root.findViewById(R.id.button_backspace)
-    val quickphrase: ImageButton
+    val quickphrase: ImageButton?
         get() = root.findViewById(R.id.button_quickphrase)
-    val lang: ImageButton
+    val lang: ImageButton?
         get() = root.findViewById(R.id.button_lang)
-    val space: Button
+    val space: Button?
         get() = root.findViewById(R.id.button_space)
-    val punctuation: Button
+    val punctuation: Button?
         get() = root.findViewById(R.id.button_lang)
-    val `return`: Button
+    val `return`: Button?
         get() = root.findViewById(R.id.button_return)
 }

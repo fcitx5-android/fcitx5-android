@@ -249,6 +249,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
                 val locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     resources.configuration.locales[0].run { "${language}_${country}" }
                 } else {
+                    @Suppress("DEPRECATION")
                     resources.configuration.locale.run { "${language}_${country}" }
                 }
                 val externalFilesDir = getExternalFilesDir(null)!!
