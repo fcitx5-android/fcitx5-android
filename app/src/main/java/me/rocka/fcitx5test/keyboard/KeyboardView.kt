@@ -1,5 +1,6 @@
 package me.rocka.fcitx5test.keyboard
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.util.DisplayMetrics
 import android.view.Gravity
@@ -9,14 +10,12 @@ import android.view.View.MeasureSpec
 import android.view.WindowManager
 import android.widget.PopupWindow
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import me.rocka.fcitx5test.AppSharedPreferences
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
 import me.rocka.fcitx5test.inputConnection
-import me.rocka.fcitx5test.keyboard.layout.ButtonAction
-import me.rocka.fcitx5test.keyboard.layout.CustomKeyboardView
-import me.rocka.fcitx5test.keyboard.layout.Factory
-import me.rocka.fcitx5test.keyboard.layout.Preset
+import me.rocka.fcitx5test.keyboard.layout.*
 import me.rocka.fcitx5test.native.InputMethodEntry
 import splitties.systemservices.inputMethodManager
 import splitties.systemservices.windowManager
@@ -35,9 +34,8 @@ class KeyboardView(
         isClippingEnabled = false
     }
     var keyboardView: CustomKeyboardView
-    private val candidateLytMgr =
-        LinearLayoutManager(service, LinearLayoutManager.HORIZONTAL, false)
-    private val candidateViewAdp = CandidateViewAdapter()
+    private lateinit var candidateLytMgr: RecyclerView.LayoutManager
+    private lateinit var candidateViewAdp: CandidateViewAdapter
 
     lateinit var presenter: KeyboardPresenter
 
@@ -51,8 +49,11 @@ class KeyboardView(
                 it.widthPixels
             }
         }
-        val context = service.applicationContext
-        keyboardView = Factory.create(context, Preset.Qwerty) { v, it, long ->
+        keyboardView = createKeyboardView(Preset.Qwerty)
+    }
+
+    private fun createKeyboardView(layout: List<List<BaseButton>>): CustomKeyboardView {
+        return Factory.create(service.applicationContext, layout) { v, it, long ->
             if (AppSharedPreferences.getInstance().buttonHapticFeedback && (!long)) {
                 // TODO: write our own button to handle haptic feedback for both tap and long click
                 v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
@@ -72,24 +73,28 @@ class KeyboardView(
                 is ButtonAction.InputMethodSwitchAction -> inputMethodManager.showInputMethodPicker()
                 is ButtonAction.ReturnAction -> presenter.enter()
                 is ButtonAction.CustomAction -> presenter.customEvent(it.act)
+                is ButtonAction.LayoutSwitchAction -> TODO()
             }
-        }
-        keyboardView.candidateList.run {
-            layoutManager = candidateLytMgr
-            candidateViewAdp.onSelectCallback = { idx -> presenter.selectCandidate(idx) }
-            adapter = candidateViewAdp
-        }
-        keyboardView.backspace.let {
-            it.setOnTouchListener { v, e ->
-                when (e.action) {
-                    MotionEvent.ACTION_BUTTON_PRESS -> v.performClick()
-                    MotionEvent.ACTION_UP -> presenter.stopDeleting()
+        }.apply {
+            candidateList?.run {
+                candidateLytMgr = LinearLayoutManager(service, LinearLayoutManager.HORIZONTAL, false)
+                layoutManager = candidateLytMgr
+                candidateViewAdp = CandidateViewAdapter()
+                candidateViewAdp.onSelectCallback = { idx -> presenter.selectCandidate(idx) }
+                adapter = candidateViewAdp
+            }
+            backspace?.run {
+                setOnTouchListener { v, e ->
+                    when (e.action) {
+                        MotionEvent.ACTION_BUTTON_PRESS -> v.performClick()
+                        MotionEvent.ACTION_UP -> presenter.stopDeleting()
+                    }
+                    false
                 }
-                false
-            }
-            it.setOnLongClickListener {
-                presenter.startDeleting()
-                true
+                setOnLongClickListener {
+                    presenter.startDeleting()
+                    true
+                }
             }
         }
     }
@@ -128,6 +133,7 @@ class KeyboardView(
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun updateCandidates(data: List<String>) {
         candidateViewAdp.candidates = data
         candidateViewAdp.notifyDataSetChanged()
@@ -135,7 +141,7 @@ class KeyboardView(
     }
 
     override fun updateCapsButtonState(state: KeyboardContract.CapsState) {
-        keyboardView.caps.setImageResource(
+        keyboardView.caps?.setImageResource(
             when (state) {
                 KeyboardContract.CapsState.None -> R.drawable.ic_baseline_keyboard_capslock0_24
                 KeyboardContract.CapsState.Once -> R.drawable.ic_baseline_keyboard_capslock1_24
@@ -145,6 +151,6 @@ class KeyboardView(
     }
 
     override fun updateSpaceButtonText(entry: InputMethodEntry) {
-        keyboardView.space.text = entry.displayName
+        keyboardView.space?.text = entry.displayName
     }
 }

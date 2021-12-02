@@ -1,8 +1,10 @@
 package me.rocka.fcitx5test.keyboard.layout
 
 import android.content.Context
-import android.graphics.PorterDuff.Mode.SRC_IN
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.view.View
+import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import me.rocka.fcitx5test.R
@@ -12,10 +14,7 @@ import splitties.resources.styledColor
 import splitties.resources.styledColorSL
 import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.NO_THEME
-import splitties.views.dsl.core.button
-import splitties.views.dsl.core.imageButton
-import splitties.views.dsl.core.view
+import splitties.views.dsl.core.*
 import splitties.views.imageResource
 import splitties.views.padding
 
@@ -33,12 +32,12 @@ object Factory {
                 val keyRows = keyLayout.map { row ->
                     val keyButtons = row.map { key ->
                         createButton(context, key).apply {
-                            setOnClickListener { onAction(this, key.onPress(), false) }
-                            if (key is LongPressButton) {
-                                setOnLongClickListener {
-                                    onAction(this, key.onLongPress(), true)
-                                    true
-                                }
+                            if (key is IPressKey) setOnClickListener {
+                                onAction(this, key.onPress(), false)
+                            }
+                            if (key is ILongPressKey) setOnLongClickListener {
+                                onAction(this, key.onLongPress(), true)
+                                true
                             }
                         }
                     }
@@ -54,26 +53,8 @@ object Factory {
                                 } else after(keyButtons[index - 1])
                                 if (index == keyButtons.size - 1) endOfParent()
                                 else before(keyButtons[index + 1])
-                                when (row[index]) {
-                                    is CapsButton -> {
-                                        matchConstraintPercentWidth = 0.15F
-                                    }
-                                    is BackspaceButton -> {
-                                        matchConstraintPercentWidth = 0.15F
-                                    }
-                                    is QuickPhraseButton -> {
-                                        matchConstraintPercentWidth = 0.15F
-                                    }
-                                    is ReturnButton -> {
-                                        matchConstraintPercentWidth = 0.15F
-                                    }
-                                    is SpaceButton -> {
-                                        width = 0
-                                    }
-                                    else -> {
-                                        matchConstraintPercentWidth = 0.1F
-                                    }
-                                }
+                                val buttonDef = row[index]
+                                matchConstraintPercentWidth = buttonDef.percentWidth
                             })
                         }
                     }
@@ -98,43 +79,39 @@ object Factory {
                     })
                 }
             }
-            return CustomKeyboardView(root)
+            val wrapper = view(::FrameLayout) {
+                add(root, lParams(matchParent, matchParent))
+            }
+            return CustomKeyboardView(wrapper)
         }
     }
 
-    private fun createButton(context: Context, btn: BaseButton): View {
-        with(context) {
-            return when (btn) {
-                is CapsButton -> imageButton(R.id.button_caps) {
-                    imageResource = R.drawable.ic_baseline_keyboard_capslock0_24
+    private fun createButton(context: Context, btn: BaseButton): View = with(context) {
+        val view = when (btn) {
+            is IImageKey -> imageButton {
+                imageResource = btn.src
+                if (btn is ITintKey) {
+                    backgroundTintList = styledColorSL(btn.background)
+                    colorFilter =
+                        PorterDuffColorFilter(styledColor(btn.foreground), PorterDuff.Mode.SRC_IN)
                 }
-                is BackspaceButton -> imageButton(R.id.button_backspace) {
-                    imageResource = R.drawable.ic_baseline_backspace_24
-                }
-                is QuickPhraseButton -> imageButton(R.id.button_quickphrase) {
-                    imageResource = R.drawable.ic_baseline_format_quote_24
-                }
-                is LangSwitchButton -> imageButton(R.id.button_lang) {
-                    imageResource = R.drawable.ic_baseline_language_24
-                }
-                is SpaceButton -> button(R.id.button_space) {
-                    isAllCaps = false
-                }
-                is ReturnButton -> imageButton(R.id.button_return) {
-                    imageResource = R.drawable.ic_baseline_keyboard_return_24
-                    backgroundTintList = styledColorSL(R.attr.colorAccent)
-                    setColorFilter(styledColor(android.R.attr.colorForegroundInverse), SRC_IN)
-                }
-                is LongPressButton -> button {
-                    padding = 0
-                    text = "${btn.text}\n${btn.altText}"
-                    textSize = dp(5.5f)
-                }
-                else -> button { text = btn.text }
-            }.apply {
-                setTheme(NO_THEME)
-                elevation = dp(2f)
+            }
+            is ITextKey -> button {
+                text = btn.displayText
+                isAllCaps = false
+            }
+            else -> button {}
+        }
+        when (btn) {
+            is IKeyId -> {
+                view.id = btn.id
             }
         }
+        view.apply {
+            setTheme(NO_THEME)
+            padding = 0
+            elevation = dp(2f)
+        }
+        return view
     }
 }
