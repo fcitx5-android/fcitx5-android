@@ -1,12 +1,12 @@
 package me.rocka.fcitx5test.keyboard
 
-import android.inputmethodservice.InputMethodService
+import android.os.Build
+import android.util.DisplayMetrics
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View.MeasureSpec
 import android.view.WindowManager
-import android.view.inputmethod.InputMethodManager
 import android.widget.PopupWindow
 import androidx.recyclerview.widget.LinearLayoutManager
 import me.rocka.fcitx5test.AppSharedPreferences
@@ -18,6 +18,8 @@ import me.rocka.fcitx5test.keyboard.layout.CustomKeyboardView
 import me.rocka.fcitx5test.keyboard.layout.Factory
 import me.rocka.fcitx5test.keyboard.layout.Preset
 import me.rocka.fcitx5test.native.InputMethodEntry
+import splitties.systemservices.inputMethodManager
+import splitties.systemservices.windowManager
 
 class KeyboardView(
     private val service: FcitxInputMethodService,
@@ -40,6 +42,15 @@ class KeyboardView(
     lateinit var presenter: KeyboardPresenter
 
     init {
+        preeditPopup.width = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            windowManager.currentWindowMetrics.bounds.width()
+        } else {
+            DisplayMetrics().let {
+                @Suppress("DEPRECATION")
+                windowManager.defaultDisplay.getMetrics(it)
+                it.widthPixels
+            }
+        }
         val context = service.applicationContext
         keyboardView = Factory.create(context, Preset.Qwerty) { v, it, long ->
             if (AppSharedPreferences.getInstance().buttonHapticFeedback && (!long)) {
@@ -58,9 +69,7 @@ class KeyboardView(
                 is ButtonAction.QuickPhraseAction -> presenter.quickPhrase()
                 is ButtonAction.UnicodeAction -> presenter.unicode()
                 is ButtonAction.LangSwitchAction -> presenter.switchLang()
-                is ButtonAction.InputMethodSwitchAction ->
-                    (service.getSystemService(InputMethodService.INPUT_METHOD_SERVICE) as InputMethodManager)
-                        .showInputMethodPicker()
+                is ButtonAction.InputMethodSwitchAction -> inputMethodManager.showInputMethodPicker()
                 is ButtonAction.ReturnAction -> presenter.enter()
                 is ButtonAction.CustomAction -> presenter.customEvent(it.act)
             }
@@ -101,10 +110,9 @@ class KeyboardView(
                 dismiss()
                 return
             }
+            val widthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY)
+            val heightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
             val height = preeditBinding.root.run {
-                val widthSpec =
-                    MeasureSpec.makeMeasureSpec(preeditBinding.root.width, MeasureSpec.EXACTLY)
-                val heightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
                 measure(widthSpec, heightSpec)
                 measuredHeight
             }
