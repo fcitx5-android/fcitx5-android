@@ -7,11 +7,11 @@ import me.rocka.fcitx5test.R
 interface IKeyBehavior
 
 interface IPressKey : IKeyBehavior {
-    fun onPress(): ButtonAction<*>
+    fun onPress(): KeyAction<*>
 }
 
 interface ILongPressKey : IPressKey {
-    fun onLongPress(): ButtonAction<*>
+    fun onLongPress(): KeyAction<*>
 }
 
 interface IKeyAppearance {
@@ -39,77 +39,77 @@ interface IKeyId : IKeyProps {
     val id: Int
 }
 
-abstract class BaseButton(override val percentWidth: Float = 0.1f) :
+abstract class BaseKey(override val percentWidth: Float = 0.1f) :
     IKeyBehavior, IKeyAppearance, IKeyProps
 
-open class TextButton(
+open class TextKey(
     open val text: String,
     percentWidth: Float = 0.1f
-) : BaseButton(percentWidth), ITextKey, IPressKey {
+) : BaseKey(percentWidth), ITextKey, IPressKey {
     override val displayText: String get() = text
-    override fun onPress(): ButtonAction<*> = ButtonAction.FcitxKeyAction(text)
+    override fun onPress(): KeyAction<*> = KeyAction.FcitxKeyAction(text)
 }
 
-open class AltTextButton(
+open class AltTextKey(
     override val text: String = "",
     private val altText: String = "",
     percentWidth: Float = 0.1f
-) : TextButton(text, percentWidth), ILongPressKey {
+) : TextKey(text, percentWidth), ILongPressKey {
     override val displayText: String get() = "$text\n$altText"
-    override fun onLongPress(): ButtonAction<*> = ButtonAction.FcitxKeyAction(altText)
+    override fun onLongPress(): KeyAction<*> = KeyAction.FcitxKeyAction(altText)
 }
 
-open class CapsButton(
+open class CapsKey(
     override val src: Int = R.drawable.ic_baseline_keyboard_capslock0_24,
     override val id: Int = R.id.button_caps
-) : BaseButton(0.15f), IPressKey, IImageKey, IKeyId {
-    override fun onPress() = ButtonAction.CapsAction
+) : BaseKey(0.15f), IPressKey, IImageKey, IKeyId {
+    override fun onPress() = KeyAction.CapsAction
 }
 
-open class BackspaceButton(
+open class BackspaceKey(
     override val src: Int = R.drawable.ic_baseline_backspace_24,
     override val id: Int = R.id.button_backspace
-) : BaseButton(0.15f), IImageKey, IPressKey, IKeyId {
-    override fun onPress() = ButtonAction.BackspaceAction
+) : BaseKey(0.15f), IImageKey, IPressKey, IKeyId {
+    override fun onPress() = KeyAction.BackspaceAction
 }
 
-open class QuickPhraseButton(
+open class QuickPhraseKey(
     override val src: Int = R.drawable.ic_baseline_format_quote_24
-) : BaseButton(0.1f), IImageKey, ILongPressKey {
-    override fun onPress() = ButtonAction.QuickPhraseAction
-    override fun onLongPress() = ButtonAction.UnicodeAction
+) : BaseKey(0.1f), IImageKey, ILongPressKey {
+    override fun onPress() = KeyAction.QuickPhraseAction
+    override fun onLongPress() = KeyAction.UnicodeAction
 }
 
-open class LangSwitchButton(
+open class LangSwitchKey(
     override val src: Int = R.drawable.ic_baseline_language_24
-) : BaseButton(), IImageKey, ILongPressKey {
-    override fun onPress() = ButtonAction.LangSwitchAction
-    override fun onLongPress() = ButtonAction.InputMethodSwitchAction
+) : BaseKey(), IImageKey, ILongPressKey {
+    override fun onPress() = KeyAction.LangSwitchAction
+    override fun onLongPress() = KeyAction.InputMethodSwitchAction
 }
 
-open class SpaceButton(
+open class SpaceKey(
     percentWidth: Float = 0f,
     override val id: Int = R.id.button_space,
-) : TextButton(" ", percentWidth), IKeyId
+) : TextKey(" ", percentWidth), IKeyId
 
-open class ReturnButton(
+open class ReturnKey(
     override val src: Int = R.drawable.ic_baseline_keyboard_return_24,
     override val foreground: Int = android.R.attr.colorForegroundInverse,
     override val background: Int = R.attr.colorAccent
-) : BaseButton(0.15f), IImageKey, IPressKey, ITintKey {
-    override fun onPress() = ButtonAction.ReturnAction
+) : BaseKey(0.15f), IImageKey, IPressKey, ITintKey {
+    override fun onPress() = KeyAction.ReturnAction
 }
 
-open class MiniSpaceButton(
+open class MiniSpaceKey(
     override val src: Int = R.drawable.ic_baseline_space_bar_24,
     override val id: Int = R.id.button_mini_space
-) : BaseButton(0.15f), IImageKey, IPressKey, IKeyId {
-    override fun onPress() = ButtonAction.FcitxKeyAction(" ")
+) : BaseKey(0.15f), IImageKey, IPressKey, IKeyId {
+    override fun onPress() = KeyAction.FcitxKeyAction(" ")
 }
 
-open class LayoutSwitchButton(
+open class LayoutSwitchKey(
     override val src: Int = R.drawable.ic_baseline_keyboard_24,
     override val id: Int = R.id.button_layout_switch
-) : BaseButton(0.15f) ,IImageKey, IPressKey, IKeyId {
-    override fun onPress() = ButtonAction.LayoutSwitchAction()
+) : BaseKey(0.15f) ,IImageKey, IPressKey, IKeyId {
+    override fun onPress() = KeyAction.LayoutSwitchAction()
 }

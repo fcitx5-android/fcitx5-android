@@ -1,78 +1,78 @@
 package me.rocka.fcitx5test.keyboard.layout
 
 object Preset {
-    val Qwerty: List<List<BaseButton>> = listOf(
+    val Qwerty: List<List<BaseKey>> = listOf(
         listOf(
-            AltTextButton("Q", "1"),
-            AltTextButton("W", "2"),
-            AltTextButton("E", "3"),
-            AltTextButton("R", "4"),
-            AltTextButton("T", "5"),
-            AltTextButton("Y", "6"),
-            AltTextButton("U", "7"),
-            AltTextButton("I", "8"),
-            AltTextButton("O", "9"),
-            AltTextButton("P", "0")
+            AltTextKey("Q", "1"),
+            AltTextKey("W", "2"),
+            AltTextKey("E", "3"),
+            AltTextKey("R", "4"),
+            AltTextKey("T", "5"),
+            AltTextKey("Y", "6"),
+            AltTextKey("U", "7"),
+            AltTextKey("I", "8"),
+            AltTextKey("O", "9"),
+            AltTextKey("P", "0")
         ),
         listOf(
-            AltTextButton("A", "@"),
-            AltTextButton("S", "*"),
-            AltTextButton("D", "+"),
-            AltTextButton("F", "-"),
-            AltTextButton("G", "="),
-            AltTextButton("H", "/"),
-            AltTextButton("J", "#"),
-            AltTextButton("K", "("),
-            AltTextButton("L", ")")
+            AltTextKey("A", "@"),
+            AltTextKey("S", "*"),
+            AltTextKey("D", "+"),
+            AltTextKey("F", "-"),
+            AltTextKey("G", "="),
+            AltTextKey("H", "/"),
+            AltTextKey("J", "#"),
+            AltTextKey("K", "("),
+            AltTextKey("L", ")")
         ),
         listOf(
-            CapsButton(),
-            AltTextButton("Z", "'"),
-            AltTextButton("X", ":"),
-            AltTextButton("C", "\""),
-            AltTextButton("V", "?"),
-            AltTextButton("B", "!"),
-            AltTextButton("N", "~"),
-            AltTextButton("M", "\\"),
-            BackspaceButton()
+            CapsKey(),
+            AltTextKey("Z", "'"),
+            AltTextKey("X", ":"),
+            AltTextKey("C", "\""),
+            AltTextKey("V", "?"),
+            AltTextKey("B", "!"),
+            AltTextKey("N", "~"),
+            AltTextKey("M", "\\"),
+            BackspaceKey()
         ),
         listOf(
-            LayoutSwitchButton(),
-            QuickPhraseButton(),
-            LangSwitchButton(),
-            SpaceButton(),
-            AltTextButton(",", "."),
-            ReturnButton()
+            LayoutSwitchKey(),
+            QuickPhraseKey(),
+            LangSwitchKey(),
+            SpaceKey(),
+            AltTextKey(",", "."),
+            ReturnKey()
         ),
     )
-    val T9: List<List<BaseButton>> = listOf(
+    val T9: List<List<BaseKey>> = listOf(
         listOf(
-            TextButton("+", 0.15F),
-            TextButton("1", 0F),
-            TextButton("2", 0F),
-            TextButton("3", 0F),
-            TextButton("/", 0.15F),
+            TextKey("+", 0.15F),
+            TextKey("1", 0F),
+            TextKey("2", 0F),
+            TextKey("3", 0F),
+            TextKey("/", 0.15F),
         ),
         listOf(
-            TextButton("-", 0.15F),
-            TextButton("4", 0F),
-            TextButton("5", 0F),
-            TextButton("6", 0F),
-            MiniSpaceButton()
+            TextKey("-", 0.15F),
+            TextKey("4", 0F),
+            TextKey("5", 0F),
+            TextKey("6", 0F),
+            MiniSpaceKey()
         ),
         listOf(
-            TextButton("*", 0.15F),
-            TextButton("7", 0F),
-            TextButton("8", 0F),
-            TextButton("9", 0F),
-            BackspaceButton()
+            TextKey("*", 0.15F),
+            TextKey("7", 0F),
+            TextKey("8", 0F),
+            TextKey("9", 0F),
+            BackspaceKey()
         ),
         listOf(
-            QuickPhraseButton(),
-            TextButton("#", 0F),
-            TextButton("0", 0F),
-            AltTextButton(".", "=", 0F),
-            ReturnButton()
+            LayoutSwitchKey(),
+            TextKey("#", 0F),
+            TextKey("0", 0F),
+            AltTextKey(".", "=", 0F),
+            ReturnKey()
         ),
     )
 }
