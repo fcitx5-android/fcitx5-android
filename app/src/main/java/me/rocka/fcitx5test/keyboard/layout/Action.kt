@@ -2,51 +2,51 @@ package me.rocka.fcitx5test.keyboard.layout
 
 import me.rocka.fcitx5test.native.Fcitx
 
-sealed class ButtonAction<T> {
+sealed class KeyAction<T> {
 
     abstract val act: T
 
-    data class FcitxKeyAction(override val act: String) : ButtonAction<String>()
+    data class FcitxKeyAction(override val act: String) : KeyAction<String>()
 
-    data class CommitAction(override val act: String) : ButtonAction<String>()
+    data class CommitAction(override val act: String) : KeyAction<String>()
 
-    object CapsAction : ButtonAction<Unit>() {
+    object CapsAction : KeyAction<Unit>() {
         override val act: Unit get() = Unit
         override fun toString(): String = javaClass.simpleName
     }
 
-    object BackspaceAction : ButtonAction<Unit>() {
+    object BackspaceAction : KeyAction<Unit>() {
         override val act: Unit get() = Unit
         override fun toString(): String = javaClass.simpleName
     }
 
-    object QuickPhraseAction : ButtonAction<Unit>() {
+    object QuickPhraseAction : KeyAction<Unit>() {
         override val act: Unit get() = Unit
         override fun toString(): String = javaClass.simpleName
     }
 
-    object UnicodeAction : ButtonAction<Unit>() {
+    object UnicodeAction : KeyAction<Unit>() {
         override val act: Unit get() = Unit
         override fun toString(): String = javaClass.simpleName
     }
 
-    object LangSwitchAction : ButtonAction<Unit>() {
+    object LangSwitchAction : KeyAction<Unit>() {
         override val act: Unit get() = Unit
         override fun toString(): String = javaClass.simpleName
     }
 
-    object InputMethodSwitchAction : ButtonAction<Unit>() {
+    object InputMethodSwitchAction : KeyAction<Unit>() {
         override val act: Unit get() = Unit
         override fun toString(): String = javaClass.simpleName
     }
 
-    object ReturnAction : ButtonAction<Unit>() {
+    object ReturnAction : KeyAction<Unit>() {
         override val act: Unit get() = Unit
         override fun toString(): String = javaClass.simpleName
     }
 
-    data class LayoutSwitchAction(override val act: String = "") : ButtonAction<String>()
+    data class LayoutSwitchAction(override val act: String = "") : KeyAction<String>()
 
-    data class CustomAction(override val act: (Fcitx) -> Unit) : ButtonAction<(Fcitx) -> Unit>()
+    data class CustomAction(override val act: (Fcitx) -> Unit) : KeyAction<(Fcitx) -> Unit>()
 
 }

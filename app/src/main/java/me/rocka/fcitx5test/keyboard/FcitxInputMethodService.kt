@@ -3,6 +3,7 @@ package me.rocka.fcitx5test.keyboard
 import android.content.ServiceConnection
 import android.inputmethodservice.InputMethodService
 import android.util.Log
+import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
@@ -11,16 +12,18 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import me.rocka.fcitx5test.AppSharedPreferences
+import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.bindFcitxDaemon
-import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
 import me.rocka.fcitx5test.inputConnection
+import me.rocka.fcitx5test.keyboard.layout.KeyAction
 import me.rocka.fcitx5test.native.Fcitx
+import me.rocka.fcitx5test.native.FcitxEvent
+import splitties.systemservices.inputMethodManager
 
 class FcitxInputMethodService : InputMethodService(),
     CoroutineScope by MainScope() + SupervisorJob() {
 
-    private lateinit var keyboardPresenter: KeyboardPresenter
-    private lateinit var keyboardView: KeyboardView
+    private lateinit var inputView: InputView
     private lateinit var fcitx: Fcitx
     private var eventHandlerJob: Job? = null
     private var connection: ServiceConnection? = null
@@ -32,27 +35,58 @@ class FcitxInputMethodService : InputMethodService(),
     private var fcitxCursor = -1
 
     override fun onCreate() {
+        setTheme(R.style.Theme_AppCompat_DayNight)
         connection = bindFcitxDaemon {
             fcitx = getFcitxInstance()
         }
         super.onCreate()
     }
 
+    private fun handleFcitxEvent(event: FcitxEvent<*>) {
+        when (event) {
+            is FcitxEvent.CommitStringEvent -> {
+                inputConnection?.commitText(event.data, 1)
+            }
+            is FcitxEvent.KeyEvent -> event.data.let {
+                if (Character.isISOControl(it.code)) {
+                    when (it.code) {
+                        '\b'.code -> sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
+                        '\r'.code -> sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
+                        else -> Log.d("KeyEvent", it.toString())
+                    }
+                } else {
+                    sendKeyChar(Char(it.code))
+                }
+            }
+            is FcitxEvent.PreeditEvent -> event.data.let {
+                updateComposingTextWithCursor(it.clientPreedit, it.cursor)
+            }
+            else -> {}
+        }
+        inputView.handleFcitxEvent(event)
+    }
+
+    private fun onAction(v: View, it: KeyAction<*>, long: Boolean) {
+        when (it) {
+            is KeyAction.CommitAction -> {
+                fcitx.reset()
+                inputConnection?.commitText(it.act, 1)
+            }
+            is KeyAction.InputMethodSwitchAction -> {
+                inputMethodManager.showInputMethodPicker()
+            }
+            else -> {}
+        }
+    }
+
     override fun onCreateInputView(): View {
-        val preeditBinding = KeyboardPreeditBinding.inflate(layoutInflater)
-
-        keyboardView = KeyboardView(this, preeditBinding)
-        keyboardPresenter = KeyboardPresenter(this, keyboardView, fcitx)
-        keyboardView.presenter = keyboardPresenter
-
-        fcitx.ime().let { keyboardView.updateSpaceButtonText(it) }
-
-        if (eventHandlerJob == null)
+        if (eventHandlerJob == null) {
             eventHandlerJob = fcitx.eventFlow.onEach {
-                keyboardPresenter.handleFcitxEvent(it)
+                handleFcitxEvent(it)
             }.launchIn(this)
-
-        return keyboardView.keyboardView.root
+        }
+        inputView = InputView(this, fcitx) { v, it, long -> onAction(v, it, long) }
+        return inputView
     }
 
     override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
