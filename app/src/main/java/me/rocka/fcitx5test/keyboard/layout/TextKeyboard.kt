@@ -13,25 +13,18 @@ import me.rocka.fcitx5test.native.InputMethodEntry
 class TextKeyboard(
     context: Context,
     private val fcitx: Fcitx,
-    private val passAction: (View, KeyAction<*>, Boolean) -> Unit
+    passAction: (View, KeyAction<*>, Boolean) -> Unit
 ) : BaseKeyboard(context, fcitx, Preset.Qwerty, passAction) {
 
     enum class CapsState { None, Once, Lock }
 
-    val caps: ImageButton
-        get() = findViewById(R.id.button_caps)
-    val backspace: ImageButton
-        get() = findViewById(R.id.button_backspace)
-    val layoutSwitch: ImageButton
-        get() = findViewById(R.id.button_layout_switch)
-    val quickphrase: ImageButton
-        get() = findViewById(R.id.button_quickphrase)
-    val lang: ImageButton
-        get() = findViewById(R.id.button_lang)
-    val space: Button
-        get() = findViewById(R.id.button_space)
-    val `return`: Button
-        get() = findViewById(R.id.button_return)
+    val caps: ImageButton by lazy { findViewById(R.id.button_caps) }
+    val backspace: ImageButton by lazy { findViewById(R.id.button_backspace) }
+    val layoutSwitch: ImageButton by lazy { findViewById(R.id.button_layout_switch) }
+    val quickphrase: ImageButton by lazy { findViewById(R.id.button_quickphrase) }
+    val lang: ImageButton by lazy { findViewById(R.id.button_lang) }
+    val space: Button by lazy { findViewById(R.id.button_space) }
+    val `return`: Button by lazy { findViewById(R.id.button_return) }
 
     var capsState: CapsState = CapsState.None
 
@@ -51,7 +44,7 @@ class TextKeyboard(
         }
     }
 
-    override fun handleFcitxEvent(event: FcitxEvent<*>)  = when (event) {
+    override fun handleFcitxEvent(event: FcitxEvent<*>) = when (event) {
         is FcitxEvent.ReadyEvent -> {
             updateSpaceButtonText(fcitx.ime())
         }

@@ -10,18 +10,15 @@ import me.rocka.fcitx5test.native.FcitxEvent
 
 class NumberKeyboard(
     context: Context,
-    private val fcitx: Fcitx,
-    private val passAction: (View, KeyAction<*>, Boolean) -> Unit
+    fcitx: Fcitx,
+    passAction: (View, KeyAction<*>, Boolean) -> Unit
 ) : BaseKeyboard(context, fcitx, Preset.T9, passAction) {
 
-    val backspace: ImageButton
-        get() = findViewById(R.id.button_backspace)
-    val layoutSwitch: ImageButton
-        get() = findViewById(R.id.button_layout_switch)
-    val space: Button
-        get() = findViewById(R.id.button_mini_space)
-    val `return`: Button
-        get() = findViewById(R.id.button_return)
+    val backspace: ImageButton by lazy { findViewById(R.id.button_backspace) }
+    val layoutSwitch: ImageButton by lazy { findViewById(R.id.button_layout_switch) }
+    val space: Button by lazy { findViewById(R.id.button_mini_space) }
+    val `return`: Button by lazy { findViewById(R.id.button_return) }
+
 
     override fun handleFcitxEvent(event: FcitxEvent<*>) {
         // nothing to do
