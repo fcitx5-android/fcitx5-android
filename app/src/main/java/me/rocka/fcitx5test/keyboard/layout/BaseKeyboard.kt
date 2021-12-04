@@ -5,6 +5,7 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.view.HapticFeedbackConstants
 import android.view.View
+import androidx.annotation.CallSuper
 import androidx.constraintlayout.widget.ConstraintLayout
 import me.rocka.fcitx5test.AppSharedPreferences
 import me.rocka.fcitx5test.keyboard.layout.*
@@ -106,6 +107,7 @@ abstract class BaseKeyboard(
 
     abstract fun handleFcitxEvent(event: FcitxEvent<*>)
 
+    @CallSuper
     open fun onAction(v: View, it: KeyAction<*>, long: Boolean) {
         if (AppSharedPreferences.getInstance().buttonHapticFeedback && (!long)) {
             // TODO: write our own button to handle haptic feedback for both tap and long click
