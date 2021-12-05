@@ -207,7 +207,7 @@ sealed class ConfigDescriptor<T, U> {
                                             ConfigType.TyKey -> ele.value
                                             ConfigType.TyString -> ele.value
                                             ConfigType.TyEnum -> throw IllegalAccessException("Impossible!")
-                                            else -> throw  ParseException.BadFormList(it)
+                                            else -> throw ParseException.BadFormList(it)
                                         }
                                     }
                                 )
@@ -247,13 +247,9 @@ sealed class ConfigDescriptor<T, U> {
             return ConfigTopLevelDef(topLevel.name, topDesc, customTypeDef)
         }
 
-        fun parseTopLevel(raw: RawConfig): Either<ParseException, ConfigTopLevelDef> {
-            return try {
-                wrapEither(parseTopLevelE(raw))
-            } catch (e: ParseException) {
-                Either.left(e)
+        fun parseTopLevel(raw: RawConfig): Either<ParseException, ConfigTopLevelDef> =
+            runCatchingEither {
+                parseTopLevelE(raw)
             }
-
-        }
     }
 }
