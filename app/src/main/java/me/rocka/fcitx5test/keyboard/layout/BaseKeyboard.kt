@@ -3,14 +3,11 @@ package me.rocka.fcitx5test.keyboard.layout
 import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
-import android.view.HapticFeedbackConstants
 import android.view.View
 import androidx.annotation.CallSuper
 import androidx.constraintlayout.widget.ConstraintLayout
-import me.rocka.fcitx5test.AppSharedPreferences
 import me.rocka.fcitx5test.keyboard.layout.*
-import me.rocka.fcitx5test.native.Fcitx
-import me.rocka.fcitx5test.native.FcitxEvent
+import me.rocka.fcitx5test.native.InputMethodEntry
 import splitties.dimensions.dp
 import splitties.resources.styledColor
 import splitties.resources.styledColorSL
@@ -20,17 +17,13 @@ import splitties.views.dsl.core.button
 import splitties.views.dsl.core.imageButton
 import splitties.views.imageResource
 import splitties.views.padding
-import java.util.*
-import kotlin.concurrent.timer
 
 abstract class BaseKeyboard(
     context: Context,
-    private val fcitx: Fcitx,
-    private val keyLayout: List<List<BaseKey>>,
-    private val passAction: (View, KeyAction<*>, Boolean) -> Unit
+    private val keyLayout: List<List<BaseKey>>
 ) : ConstraintLayout(context) {
 
-    private var backspaceTimer: Timer? = null
+    private var passAction: ((View, KeyAction<*>, Boolean) -> Unit)? = null
 
     init {
         with(context) {
@@ -105,61 +98,25 @@ abstract class BaseKeyboard(
         }
     }
 
-    abstract fun handleFcitxEvent(event: FcitxEvent<*>)
+    fun setOnKeyActionListener(f: ((View, KeyAction<*>, Boolean) -> Unit)?) {
+        passAction = f
+    }
 
     @CallSuper
-    open fun onAction(v: View, it: KeyAction<*>, long: Boolean) {
-        if (AppSharedPreferences.getInstance().buttonHapticFeedback && (!long)) {
-            // TODO: write our own button to handle haptic feedback for both tap and long click
-            v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-        }
-        passAction(v, it, long)
+    open fun onAction(view: View, action: KeyAction<*>, long: Boolean) {
+        passAction?.invoke(view, action, long)
     }
 
-    open fun onKeyPress(key: String) {
-        fcitx.sendKey(key)
+    open fun onAttach() {
+        // do nothing by default
     }
 
-    fun backspace() {
-        fcitx.sendKey("BackSpace")
+    open fun onInputMethodChange(ime: InputMethodEntry) {
+        // do nothing by default
     }
 
-    fun startDeleting() {
-        backspaceTimer = timer(period = 60L, action = { backspace() })
-    }
-
-    fun stopDeleting() {
-        backspaceTimer?.run { cancel(); purge() }
-    }
-
-    fun quickPhrase() {
-        fcitx.reset()
-        fcitx.triggerQuickPhrase()
-    }
-
-    fun unicode() {
-        fcitx.triggerUnicode()
-    }
-
-    fun switchLang() {
-        val list = fcitx.enabledIme()
-        if (list.isEmpty()) return
-        val status = fcitx.ime()
-        val index = list.indexOfFirst { it.uniqueName == status.uniqueName }
-        val next = list[(index + 1) % list.size]
-        fcitx.activateIme(next.uniqueName)
-    }
-
-    fun space() {
-        fcitx.sendKey("space")
-    }
-
-    fun enter() {
-        fcitx.sendKey("Return")
-    }
-
-    fun customEvent(fn: (Fcitx) -> Unit) {
-        fn(fcitx)
+    open fun onDetach() {
+        // do nothing by default
     }
 
 }

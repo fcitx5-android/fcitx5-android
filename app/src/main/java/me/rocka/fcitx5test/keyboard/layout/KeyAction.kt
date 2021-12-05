@@ -6,16 +6,19 @@ sealed class KeyAction<T> {
 
     abstract val act: T
 
-    data class FcitxKeyAction(override val act: String) : KeyAction<String>()
+    data class FcitxKeyAction(override var act: String) : KeyAction<String>() {
+        fun upper() {
+            act = act.uppercase()
+        }
+
+        fun lower() {
+            act = act.lowercase()
+        }
+    }
 
     data class CommitAction(override val act: String) : KeyAction<String>()
 
     object CapsAction : KeyAction<Unit>() {
-        override val act: Unit get() = Unit
-        override fun toString(): String = javaClass.simpleName
-    }
-
-    object BackspaceAction : KeyAction<Unit>() {
         override val act: Unit get() = Unit
         override fun toString(): String = javaClass.simpleName
     }
@@ -36,11 +39,6 @@ sealed class KeyAction<T> {
     }
 
     object InputMethodSwitchAction : KeyAction<Unit>() {
-        override val act: Unit get() = Unit
-        override fun toString(): String = javaClass.simpleName
-    }
-
-    object ReturnAction : KeyAction<Unit>() {
         override val act: Unit get() = Unit
         override fun toString(): String = javaClass.simpleName
     }

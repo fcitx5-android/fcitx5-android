@@ -4,14 +4,17 @@ import android.annotation.SuppressLint
 import android.os.Build
 import android.util.DisplayMetrics
 import android.view.Gravity
+import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import me.rocka.fcitx5test.AppSharedPreferences
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
+import me.rocka.fcitx5test.inputConnection
 import me.rocka.fcitx5test.keyboard.layout.BaseKeyboard
 import me.rocka.fcitx5test.keyboard.layout.KeyAction
 import me.rocka.fcitx5test.keyboard.layout.NumberKeyboard
@@ -19,14 +22,14 @@ import me.rocka.fcitx5test.keyboard.layout.TextKeyboard
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxEvent
 import splitties.dimensions.dp
+import splitties.systemservices.inputMethodManager
 import splitties.systemservices.layoutInflater
 import splitties.systemservices.windowManager
 import splitties.views.dsl.core.*
 
 class InputView(
-    service: FcitxInputMethodService,
-    val fcitx: Fcitx,
-    val passAction: (View, KeyAction<*>, Boolean) -> Unit
+    val service: FcitxInputMethodService,
+    val fcitx: Fcitx
 ) : LinearLayout(service) {
 
     data class PreeditContent(
@@ -58,14 +61,15 @@ class InputView(
     }
 
     private var keyboards: HashMap<String, BaseKeyboard> = hashMapOf(
-        "qwerty" to TextKeyboard(context, fcitx) { v, it, long ->
-            onAction(v, it, long)
-        },
-        "t9" to NumberKeyboard(context, fcitx) { v, it, long ->
-            onAction(v, it, long)
-        },
+        "qwerty" to TextKeyboard(context),
+        "number" to NumberKeyboard(context)
     )
-    private var currentKeyboard = "qwerty"
+    private var currentKeyboardName = "qwerty"
+    private val currentKeyboard: BaseKeyboard get() = keyboards.getValue(currentKeyboardName)
+
+    private val onKeyAction: (View, KeyAction<*>, Boolean) -> Unit = { view, action, long ->
+        onAction(view, action, long)
+    }
 
     init {
         preeditPopup.width = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -79,7 +83,10 @@ class InputView(
         }
         orientation = VERTICAL
         add(candidateView, lParams(matchParent, dp(40)))
-        add(keyboards[currentKeyboard]!!, lParams(matchParent, wrapContent))
+        add(currentKeyboard, lParams(matchParent, wrapContent))
+        currentKeyboard.setOnKeyActionListener(onKeyAction)
+        currentKeyboard.onAttach()
+        currentKeyboard.onInputMethodChange(fcitx.ime())
     }
 
     fun handleFcitxEvent(it: FcitxEvent<*>) {
@@ -87,24 +94,44 @@ class InputView(
             is FcitxEvent.CandidateListEvent -> {
                 updateCandidates(it.data)
             }
+            is FcitxEvent.PreeditEvent -> it.data.let {
+                cachedPreedit.preedit = it
+                updatePreedit(cachedPreedit)
+            }
             is FcitxEvent.InputPanelAuxEvent -> {
                 cachedPreedit.aux = it.data
                 updatePreedit(cachedPreedit)
             }
-            is FcitxEvent.PreeditEvent -> it.data.let {
-                cachedPreedit.preedit = it
-                updatePreedit(cachedPreedit)
+            is FcitxEvent.ReadyEvent -> {
+                currentKeyboard.onInputMethodChange(fcitx.ime())
+            }
+            is FcitxEvent.IMChangeEvent -> {
+                currentKeyboard.onInputMethodChange(it.data.status)
             }
             else -> {}
         }
     }
 
-    private fun onAction(v: View, it: KeyAction<*>, long: Boolean) {
-        when (it) {
+    private fun onAction(view: View, action: KeyAction<*>, long: Boolean) {
+        if (AppSharedPreferences.getInstance().buttonHapticFeedback && (!long)) {
+            // TODO: write our own button to handle haptic feedback for both tap and long click
+            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+        }
+        when (action) {
+            is KeyAction.FcitxKeyAction -> fcitx.sendKey(action.act)
+            is KeyAction.CommitAction -> {
+                // TODO: this should be handled more gracefully; or CommitAction should be removed?
+                fcitx.reset()
+                service.inputConnection?.commitText(action.act, 1)
+            }
+            is KeyAction.QuickPhraseAction -> quickPhrase()
+            is KeyAction.UnicodeAction -> unicode()
+            is KeyAction.LangSwitchAction -> switchLang()
+            is KeyAction.InputMethodSwitchAction -> inputMethodManager.showInputMethodPicker()
             is KeyAction.LayoutSwitchAction -> switchLayout()
+            is KeyAction.CustomAction -> customEvent(action.act)
             else -> {}
         }
-        passAction(v, it, long)
     }
 
     fun updatePreedit(data: PreeditContent) {
@@ -119,7 +146,7 @@ class InputView(
             keyboardPreeditAfterText.text = end
         }
         preeditPopup.run {
-            if ((!hasStart) and (!hasEnd)) {
+            if ((!hasStart) && (!hasEnd)) {
                 dismiss()
                 return
             }
@@ -149,12 +176,38 @@ class InputView(
     }
 
     private fun switchLayout() {
-        removeView(keyboards[currentKeyboard])
-        currentKeyboard = when (currentKeyboard) {
-            "qwerty" -> "t9"
+        currentKeyboard.setOnKeyActionListener(null)
+        currentKeyboard.onDetach()
+        removeView(currentKeyboard)
+        currentKeyboardName = when (currentKeyboardName) {
+            "qwerty" -> "number"
             else -> "qwerty"
         }
-        add(keyboards[currentKeyboard]!!, lParams(matchParent, wrapContent))
+        add(currentKeyboard, lParams(matchParent, wrapContent))
+        currentKeyboard.setOnKeyActionListener(onKeyAction)
+        currentKeyboard.onAttach()
+        currentKeyboard.onInputMethodChange(fcitx.ime())
     }
 
+    private fun quickPhrase() {
+        fcitx.reset()
+        fcitx.triggerQuickPhrase()
+    }
+
+    private fun unicode() {
+        fcitx.triggerUnicode()
+    }
+
+    private fun switchLang() {
+        val list = fcitx.enabledIme()
+        if (list.isEmpty()) return
+        val status = fcitx.ime()
+        val index = list.indexOfFirst { it.uniqueName == status.uniqueName }
+        val next = list[(index + 1) % list.size]
+        fcitx.activateIme(next.uniqueName)
+    }
+
+    private fun customEvent(fn: (Fcitx) -> Unit) {
+        fn(fcitx)
+    }
 }

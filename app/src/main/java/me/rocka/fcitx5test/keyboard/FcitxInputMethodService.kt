@@ -15,10 +15,8 @@ import me.rocka.fcitx5test.AppSharedPreferences
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.bindFcitxDaemon
 import me.rocka.fcitx5test.inputConnection
-import me.rocka.fcitx5test.keyboard.layout.KeyAction
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxEvent
-import splitties.systemservices.inputMethodManager
 
 class FcitxInputMethodService : InputMethodService(),
     CoroutineScope by MainScope() + SupervisorJob() {
@@ -66,26 +64,13 @@ class FcitxInputMethodService : InputMethodService(),
         inputView.handleFcitxEvent(event)
     }
 
-    private fun onAction(v: View, it: KeyAction<*>, long: Boolean) {
-        when (it) {
-            is KeyAction.CommitAction -> {
-                fcitx.reset()
-                inputConnection?.commitText(it.act, 1)
-            }
-            is KeyAction.InputMethodSwitchAction -> {
-                inputMethodManager.showInputMethodPicker()
-            }
-            else -> {}
-        }
-    }
-
     override fun onCreateInputView(): View {
         if (eventHandlerJob == null) {
             eventHandlerJob = fcitx.eventFlow.onEach {
                 handleFcitxEvent(it)
             }.launchIn(this)
         }
-        inputView = InputView(this, fcitx) { v, it, long -> onAction(v, it, long) }
+        inputView = InputView(this, fcitx)
         return inputView
     }
 
@@ -128,7 +113,7 @@ class FcitxInputMethodService : InputMethodService(),
 
     // because of https://android.googlesource.com/platform/frameworks/base.git/+/refs/tags/android-11.0.0_r45/core/java/android/view/inputmethod/BaseInputConnection.java#851
     // it's not possible to set cursor inside composing text
-    fun updateComposingTextWithCursor(text: String, cursor: Int) {
+    private fun updateComposingTextWithCursor(text: String, cursor: Int) {
         fcitxCursor = cursor
         inputConnection?.run {
             if (text != composingText) {
