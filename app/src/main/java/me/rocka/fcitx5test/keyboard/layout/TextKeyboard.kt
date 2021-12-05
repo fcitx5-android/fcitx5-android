@@ -1,24 +1,67 @@
 package me.rocka.fcitx5test.keyboard.layout
 
 import android.content.Context
-import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import me.rocka.fcitx5test.R
-import me.rocka.fcitx5test.native.Fcitx
-import me.rocka.fcitx5test.native.FcitxEvent
 import me.rocka.fcitx5test.native.InputMethodEntry
 
 class TextKeyboard(
-    context: Context,
-    private val fcitx: Fcitx,
-    passAction: (View, KeyAction<*>, Boolean) -> Unit
-) : BaseKeyboard(context, fcitx, Preset.Qwerty, passAction) {
+    context: Context
+) : BaseKeyboard(context, Layout) {
 
     enum class CapsState { None, Once, Lock }
 
+    companion object {
+        val Layout: List<List<BaseKey>> = listOf(
+            listOf(
+                AltTextKey("Q", "1"),
+                AltTextKey("W", "2"),
+                AltTextKey("E", "3"),
+                AltTextKey("R", "4"),
+                AltTextKey("T", "5"),
+                AltTextKey("Y", "6"),
+                AltTextKey("U", "7"),
+                AltTextKey("I", "8"),
+                AltTextKey("O", "9"),
+                AltTextKey("P", "0")
+            ),
+            listOf(
+                AltTextKey("A", "@"),
+                AltTextKey("S", "*"),
+                AltTextKey("D", "+"),
+                AltTextKey("F", "-"),
+                AltTextKey("G", "="),
+                AltTextKey("H", "/"),
+                AltTextKey("J", "#"),
+                AltTextKey("K", "("),
+                AltTextKey("L", ")")
+            ),
+            listOf(
+                CapsKey(),
+                AltTextKey("Z", "'"),
+                AltTextKey("X", ":"),
+                AltTextKey("C", "\""),
+                AltTextKey("V", "?"),
+                AltTextKey("B", "!"),
+                AltTextKey("N", "~"),
+                AltTextKey("M", "\\"),
+                BackspaceKey()
+            ),
+            listOf(
+                LayoutSwitchKey(),
+                QuickPhraseKey(),
+                LangSwitchKey(),
+                SpaceKey(),
+                AltTextKey(",", "."),
+                ReturnKey()
+            ),
+        )
+    }
+
     val caps: ImageButton by lazy { findViewById(R.id.button_caps) }
+    // TODO: handle backspace long press repeat somehow
     val backspace: ImageButton by lazy { findViewById(R.id.button_backspace) }
     val layoutSwitch: ImageButton by lazy { findViewById(R.id.button_layout_switch) }
     val quickphrase: ImageButton by lazy { findViewById(R.id.button_quickphrase) }
@@ -28,63 +71,32 @@ class TextKeyboard(
 
     var capsState: CapsState = CapsState.None
 
-    init {
-        backspace.run {
-            setOnTouchListener { v, e ->
-                when (e.action) {
-                    MotionEvent.ACTION_BUTTON_PRESS -> v.performClick()
-                    MotionEvent.ACTION_UP -> stopDeleting()
-                }
-                false
-            }
-            setOnLongClickListener {
-                startDeleting()
-                true
-            }
-        }
-    }
-
-    override fun handleFcitxEvent(event: FcitxEvent<*>) = when (event) {
-        is FcitxEvent.ReadyEvent -> {
-            updateSpaceButtonText(fcitx.ime())
-        }
-        is FcitxEvent.IMChangeEvent -> {
-            updateSpaceButtonText(event.data.status)
-        }
-        else -> {}
-    }
-
-    override fun onAction(v: View, it: KeyAction<*>, long: Boolean) {
-        super.onAction(v, it, long)
-        when (it) {
-            is KeyAction.FcitxKeyAction -> onKeyPress(it.act)
+    override fun onAction(view: View, action: KeyAction<*>, long: Boolean) {
+        when (action) {
+            is KeyAction.FcitxKeyAction -> transformKeyAction(action)
             is KeyAction.CapsAction -> switchCapsState()
-            is KeyAction.BackspaceAction -> backspace()
-            is KeyAction.QuickPhraseAction -> quickPhrase()
-            is KeyAction.UnicodeAction -> unicode()
-            is KeyAction.LangSwitchAction -> switchLang()
-            is KeyAction.ReturnAction -> enter()
-            is KeyAction.CustomAction -> customEvent(it.act)
             else -> {}
         }
+        super.onAction(view, action, long)
     }
 
-    override fun onKeyPress(key: String) {
-        val k = key[0]
-        val c = when (capsState) {
-            CapsState.None -> {
-                k.lowercaseChar()
-            }
+    private fun transformKeyAction(action: KeyAction.FcitxKeyAction) {
+        if (action.act.length > 1) {
+            return
+        }
+        when (capsState) {
+            CapsState.None -> action.lower()
             CapsState.Once -> {
                 capsState = CapsState.None
                 updateCapsButtonIcon()
-                k.uppercaseChar()
+                action.upper()
             }
-            CapsState.Lock -> {
-                k.uppercaseChar()
-            }
+            CapsState.Lock -> action.upper()
         }
-        fcitx.sendKey(c)
+    }
+
+    override fun onInputMethodChange(ime: InputMethodEntry) {
+        space.text = ime.displayName
     }
 
     private fun switchCapsState() {
@@ -104,10 +116,6 @@ class TextKeyboard(
                 CapsState.Lock -> R.drawable.ic_baseline_keyboard_capslock2_24
             }
         )
-    }
-
-    private fun updateSpaceButtonText(entry: InputMethodEntry) {
-        space.text = entry.displayName
     }
 
 }

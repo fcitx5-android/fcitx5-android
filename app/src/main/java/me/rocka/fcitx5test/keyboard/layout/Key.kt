@@ -70,7 +70,7 @@ open class BackspaceKey(
     override val src: Int = R.drawable.ic_baseline_backspace_24,
     override val id: Int = R.id.button_backspace
 ) : BaseKey(0.15f), IImageKey, IPressKey, IKeyId {
-    override fun onPress() = KeyAction.BackspaceAction
+    override fun onPress() = KeyAction.FcitxKeyAction("BackSpace")
 }
 
 open class QuickPhraseKey(
@@ -97,7 +97,7 @@ open class ReturnKey(
     override val foreground: Int = android.R.attr.colorForegroundInverse,
     override val background: Int = R.attr.colorAccent
 ) : BaseKey(0.15f), IImageKey, IPressKey, ITintKey {
-    override fun onPress() = KeyAction.ReturnAction
+    override fun onPress() = KeyAction.FcitxKeyAction("Return")
 }
 
 open class MiniSpaceKey(
