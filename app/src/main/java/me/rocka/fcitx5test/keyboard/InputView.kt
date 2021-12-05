@@ -22,9 +22,11 @@ import me.rocka.fcitx5test.keyboard.layout.TextKeyboard
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxEvent
 import splitties.dimensions.dp
+import splitties.resources.styledColor
 import splitties.systemservices.inputMethodManager
 import splitties.systemservices.layoutInflater
 import splitties.systemservices.windowManager
+import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
 
 class InputView(
@@ -37,11 +39,13 @@ class InputView(
         var aux: FcitxEvent.InputPanelAuxEvent.Data
     )
 
+    private val themedContext = context.withTheme(R.style.Theme_AppCompat_DayNight)
+
     private var cachedPreedit = PreeditContent(
         FcitxEvent.PreeditEvent.Data("", "", 0),
         FcitxEvent.InputPanelAuxEvent.Data("", "")
     )
-    private val preeditBinding = KeyboardPreeditBinding.inflate(context.layoutInflater)
+    private val preeditBinding = KeyboardPreeditBinding.inflate(themedContext.layoutInflater)
     private var preeditPopup = PopupWindow(
         preeditBinding.root,
         WindowManager.LayoutParams.MATCH_PARENT,
@@ -55,14 +59,15 @@ class InputView(
         orientation = LinearLayoutManager.HORIZONTAL
     }
     private var candidateViewAdp = CandidateViewAdapter { fcitx.select(it) }
-    private var candidateView = view(::RecyclerView, R.id.candidate_list) {
+    private var candidateView = themedContext.view(::RecyclerView, R.id.candidate_list) {
+        backgroundColor = styledColor(android.R.attr.colorBackground)
         layoutManager = candidateLytMgr
         adapter = candidateViewAdp
     }
 
     private var keyboards: HashMap<String, BaseKeyboard> = hashMapOf(
-        "qwerty" to TextKeyboard(context),
-        "number" to NumberKeyboard(context)
+        "qwerty" to TextKeyboard(themedContext),
+        "number" to NumberKeyboard(themedContext)
     )
     private var currentKeyboardName = "qwerty"
     private val currentKeyboard: BaseKeyboard get() = keyboards.getValue(currentKeyboardName)

@@ -12,7 +12,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import me.rocka.fcitx5test.AppSharedPreferences
-import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.bindFcitxDaemon
 import me.rocka.fcitx5test.inputConnection
 import me.rocka.fcitx5test.native.Fcitx
@@ -33,7 +32,6 @@ class FcitxInputMethodService : InputMethodService(),
     private var fcitxCursor = -1
 
     override fun onCreate() {
-        setTheme(R.style.Theme_AppCompat_DayNight)
         connection = bindFcitxDaemon {
             fcitx = getFcitxInstance()
         }
