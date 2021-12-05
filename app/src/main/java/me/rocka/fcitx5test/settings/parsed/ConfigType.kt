@@ -1,7 +1,7 @@
 package me.rocka.fcitx5test.settings.parsed
 
 import cn.berberman.girls.utils.either.Either
-import cn.berberman.girls.utils.either.wrapEither
+import cn.berberman.girls.utils.either.runCatchingEither
 
 
 sealed class ConfigType<T> {
@@ -37,10 +37,8 @@ sealed class ConfigType<T> {
         data class UnknownConfigTypeException(val type: String) : Exception()
 
         override fun parse(raw: String): Either<UnknownConfigTypeException, ConfigType<*>> =
-            try {
-                wrapEither(parseE(raw))
-            } catch (e: UnknownConfigTypeException) {
-                Either.left(e)
+            runCatchingEither {
+                parseE(raw)
             }
 
         private fun parseE(raw: String): ConfigType<*> =

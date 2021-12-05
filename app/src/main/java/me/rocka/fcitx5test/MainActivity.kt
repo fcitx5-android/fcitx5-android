@@ -1,5 +1,6 @@
 package me.rocka.fcitx5test
 
+import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.view.Menu
@@ -19,6 +20,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // TODO: debug
+        startActivity(Intent(this,TestActivity::class.java))
         // keep connection with daemon, so that it won't exit when fragment switches
         connection = bindFcitxDaemon { }
         val binding = ActivityMainBinding.inflate(layoutInflater)

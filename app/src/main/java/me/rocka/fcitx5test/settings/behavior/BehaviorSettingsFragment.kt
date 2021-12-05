@@ -1,4 +1,4 @@
-package me.rocka.fcitx5test.settings
+package me.rocka.fcitx5test.settings.behavior
 
 import android.os.Bundle
 import androidx.fragment.app.activityViewModels

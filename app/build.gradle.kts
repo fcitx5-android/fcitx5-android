@@ -99,12 +99,15 @@ dependencies {
     val navVersion = "2.3.5"
     implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
     implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
-    implementation("cn.berberman:girls-self-use:0.1.0")
+    implementation("cn.berberman:girls-self-use:0.1.1")
     val splittiesVersion = "3.0.0"
     implementation("com.louiscad.splitties:splitties-bitflags:$splittiesVersion")
     implementation("com.louiscad.splitties:splitties-systemservices:$splittiesVersion")
     implementation("com.louiscad.splitties:splitties-views-dsl:$splittiesVersion")
     implementation("com.louiscad.splitties:splitties-views-dsl-constraintlayout:$splittiesVersion")
+    implementation("com.louiscad.splitties:splitties-views-dsl-recyclerview:$splittiesVersion")
+    implementation("com.louiscad.splitties:splitties-views-recyclerview:$splittiesVersion")
+    implementation("com.louiscad.splitties:splitties-views-dsl-material:$splittiesVersion")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.4.0")
     androidTestImplementation("androidx.test:rules:1.4.0")

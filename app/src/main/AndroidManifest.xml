@@ -19,6 +19,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- TODO: debug -->
+        <activity android:name=".TestActivity" />
 
         <service android:name=".FcitxDaemon" />
         <service
