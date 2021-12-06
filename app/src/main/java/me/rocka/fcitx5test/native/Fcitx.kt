@@ -45,6 +45,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
     fun saveConfig() = saveFcitxConfig()
     fun sendKey(key: String) = sendKeyToFcitxString(key)
     fun sendKey(c: Char) = sendKeyToFcitxChar(c)
+    fun sendKey(i: Int) = sendKeyToFcitxInt(i)
     fun select(idx: Int) = selectCandidate(idx)
     fun isEmpty() = isInputPanelEmpty()
     fun reset() = resetInputPanel()
@@ -134,6 +135,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
 
         @JvmStatic
         external fun sendKeyToFcitxChar(c: Char)
+
+        @JvmStatic
+        external fun sendKeyToFcitxInt(i: Int)
 
         @JvmStatic
         external fun selectCandidate(idx: Int)

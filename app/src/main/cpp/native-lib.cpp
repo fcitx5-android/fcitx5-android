@@ -523,6 +523,14 @@ Java_me_rocka_fcitx5test_native_Fcitx_sendKeyToFcitxChar(JNIEnv *env, jclass cla
 
 extern "C"
 JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_sendKeyToFcitxInt(JNIEnv *env, jclass clazz, jint i) {
+    RETURN_IF_NOT_RUNNING
+    auto key = fcitx::Key::fromKeyCode(i);
+    Fcitx::Instance().sendKey(key);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_selectCandidate(JNIEnv *env, jclass clazz, jint idx) {
     RETURN_IF_NOT_RUNNING
     jniLog("selectCandidate: #" + std::to_string(idx));
