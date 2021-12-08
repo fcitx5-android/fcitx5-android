@@ -11,10 +11,10 @@ import kotlin.reflect.KProperty
 
 class AppSharedPreferences(private val sharedPreferences: SharedPreferences) {
 
-    private inline fun <reified T> preference(key: String) =
+    private inline fun <reified T> preference(key: String, defaultValue: T) =
         object : ReadWriteProperty<AppSharedPreferences, T> {
             override fun getValue(thisRef: AppSharedPreferences, property: KProperty<*>): T {
-                return thisRef.sharedPreferences.all[key] as T
+                return (thisRef.sharedPreferences.all[key] ?: defaultValue) as T
             }
 
             override fun setValue(thisRef: AppSharedPreferences, property: KProperty<*>, value: T) {
@@ -30,10 +30,10 @@ class AppSharedPreferences(private val sharedPreferences: SharedPreferences) {
         }
 
 
-    var assetsVersion by preference<Long>(AssetsVersion)
-    var ignoreSystemCursor by preference<Boolean>(IgnoreSystemCursor)
-    var hideKeyConfig by preference<Boolean>(HideKeyConfig)
-    var buttonHapticFeedback by preference<Boolean>(ButtonHapticFeedback)
+    var assetsVersion by preference(AssetsVersion, -1L)
+    var ignoreSystemCursor by preference(IgnoreSystemCursor, true)
+    var hideKeyConfig by preference(HideKeyConfig, true)
+    var buttonHapticFeedback by preference(ButtonHapticFeedback, true)
 
     object PreferenceKeys {
         const val AssetsVersion = "assets_version"
