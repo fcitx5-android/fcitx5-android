@@ -43,7 +43,8 @@ abstract class BaseOrderedListUi<T>(
         /**
          * Pick one from a list of [T]
          */
-        data class ChooseOne<T>(val candidatesSource: () -> Array<T>) : Mode<T>()
+        data class ChooseOne<T>(val candidatesSource: BaseOrderedListUi<T>.() -> Array<T>) :
+            Mode<T>()
 
         /**
          * Enter a string that can be converted into [T]
@@ -77,9 +78,26 @@ abstract class BaseOrderedListUi<T>(
                 }
             }
         }
-        setOnItemChangedListener(object : OnItemChangedListener<T> {
+        addOnItemChangedListener(object : OnItemChangedListener<T> {
             override fun onItemSwapped(fromIdx: Int, toIdx: Int, item: T) {
-
+                updateFAB()
+                Snackbar.make(
+                    fab,
+                    "${showEntry(item)} swapped from #${fromIdx} -> #$toIdx}",
+                    Snackbar.LENGTH_SHORT
+                )
+                    .setAction(R.string.undo) { swapItem(toIdx, fromIdx) }
+                    .show()
+                Log.d(
+                    javaClass.name,
+                    "${showEntry(item)} swapped from #${fromIdx} -> #$toIdx}, current: ${
+                        entries.joinToString {
+                            showEntry(
+                                it
+                            )
+                        }
+                    }"
+                )
             }
 
             override fun onItemAdded(idx: Int, item: T) {
@@ -122,7 +140,7 @@ abstract class BaseOrderedListUi<T>(
     open fun updateFAB() {
         when (mode) {
             is Mode.ChooseOne -> {
-                val candidatesSource = mode.candidatesSource()
+                val candidatesSource = mode.candidatesSource(this)
                 if (candidatesSource.isEmpty()) {
                     fab.hide()
                 } else {
@@ -212,7 +230,7 @@ abstract class BaseOrderedListUi<T>(
             gravity = gravityEndBottom
             margin = dip(16)
         })
-    }
+    }.also { updateFAB() }
 
 
 }

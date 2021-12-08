@@ -45,8 +45,7 @@
 
     <fragment
         android:id="@+id/imListFragment"
-        android:name="me.rocka.fcitx5test.settings.im.InputMethodListFragment"
-        tools:layout="@layout/fragment_input_method_list">
+        android:name="me.rocka.fcitx5test.settings.im.InputMethodListFragment">
         <action
             android:id="@+id/action_imListFragment_to_imConfigFragment"
             app:destination="@id/imConfigFragment"

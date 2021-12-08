@@ -12,6 +12,6 @@ class TestActivity : AppCompatActivity() {
         setContentView(object :
             BaseOrderedListUi<String>(this, Mode.FreeAddString(), listOf("A", "B", "C"), false) {
             override fun showEntry(x: String): String = x
-        }.also { it.updateFAB() })
+        })
     }
 }

@@ -1,11 +1,7 @@
 package me.rocka.fcitx5test
 
-import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
 import android.inputmethodservice.InputMethodService
-import android.os.IBinder
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputConnection
@@ -57,24 +53,6 @@ fun View.allChildren(): List<View> {
     return result.toList()
 }
 
-fun Context.bindFcitxDaemon(
-    onDisconnected: () -> Unit = {},
-    onConnected: FcitxDaemon.FcitxBinder.() -> Unit
-): ServiceConnection = object : ServiceConnection {
-    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-        onConnected(service as FcitxDaemon.FcitxBinder)
-    }
-
-    override fun onServiceDisconnected(name: ComponentName?) {
-        onDisconnected()
-    }
-
-}.also {
-    bindService(
-        Intent(this, FcitxDaemon::class.java),
-        it, Context.BIND_AUTO_CREATE
-    )
-}
 
 val InputMethodService.inputConnection: InputConnection?
     get() = currentInputConnection

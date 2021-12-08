@@ -1,6 +1,5 @@
 package me.rocka.fcitx5test.keyboard
 
-import android.content.ServiceConnection
 import android.inputmethodservice.InputMethodService
 import android.util.Log
 import android.view.KeyEvent
@@ -12,7 +11,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import me.rocka.fcitx5test.AppSharedPreferences
-import me.rocka.fcitx5test.bindFcitxDaemon
+import me.rocka.fcitx5test.FcitxDaemonManager
 import me.rocka.fcitx5test.inputConnection
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxEvent
@@ -24,7 +23,6 @@ class FcitxInputMethodService
     private lateinit var inputView: InputView
     private lateinit var fcitx: Fcitx
     private var eventHandlerJob: Job? = null
-    private var connection: ServiceConnection? = null
 
     var editorInfo: EditorInfo? = null
 
@@ -37,7 +35,7 @@ class FcitxInputMethodService
     private var fcitxCursor = -1
 
     override fun onCreate() {
-        connection = bindFcitxDaemon {
+        FcitxDaemonManager.instance.bindFcitxDaemonAsync(this, javaClass.name) {
             fcitx = getFcitxInstance()
         }
         super.onCreate()
@@ -199,9 +197,8 @@ class FcitxInputMethodService
     override fun onDestroy() {
         // cancel all coroutines in MainScope
         cancel()
+        FcitxDaemonManager.instance.unbind(this, javaClass.name)
         eventHandlerJob = null
-        connection?.let { unbindService(it) }
-        connection = null
         super.onDestroy()
     }
 }

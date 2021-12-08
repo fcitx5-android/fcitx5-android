@@ -1,7 +1,6 @@
 package me.rocka.fcitx5test
 
 import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Bundle
 import android.view.Menu
 import androidx.activity.viewModels
@@ -9,21 +8,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
-import androidx.preference.PreferenceManager
 import me.rocka.fcitx5test.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-    private var connection: ServiceConnection? = null
 
     private val viewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // TODO: debug
-        startActivity(Intent(this,TestActivity::class.java))
-        // keep connection with daemon, so that it won't exit when fragment switches
-        connection = bindFcitxDaemon { }
+        startActivity(Intent(this, TestActivity::class.java))
+        // now fragments use fcitx instance from activity
+        FcitxDaemonManager.bindFcitxDaemonAsync(this, javaClass.name) {
+            viewModel.fcitx = getFcitxInstance()
+        }
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
@@ -51,8 +50,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        connection?.let { unbindService(it) }
-        connection = null
+        FcitxDaemonManager.unbind(this, javaClass.name)
         super.onDestroy()
     }
 }
