@@ -1,6 +1,5 @@
 package me.rocka.fcitx5test.ui.olist
 
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -27,8 +26,12 @@ abstract class OrderedAdapter<T>(
 
     abstract fun showEntry(x: T): String
 
-    fun setOnItemChangedListener(x: OnItemChangedListener<T>?) {
-        listener = x
+    fun removeItemChangedListener() {
+        listener = null
+    }
+
+    fun addOnItemChangedListener(x: OnItemChangedListener<T>) {
+        listener = listener?.let { OnItemChangedListener.merge(it, x) } ?: x
     }
 
     inner class ViewHolder(entryUi: OrderedListEntryUi) : RecyclerView.ViewHolder(entryUi.root) {
@@ -43,7 +46,6 @@ abstract class OrderedAdapter<T>(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = _entries[position]
-        Log.d(javaClass.name, "Binding holder: ${showEntry(item)}")
         with(holder) {
             handleImage.visibility = if (enableOrder) View.VISIBLE else View.GONE
             nameText.text = showEntry(item)
