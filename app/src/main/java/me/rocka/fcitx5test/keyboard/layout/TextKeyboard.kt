@@ -61,7 +61,6 @@ class TextKeyboard(
     }
 
     val caps: ImageButton by lazy { findViewById(R.id.button_caps) }
-    // TODO: handle backspace long press repeat somehow
     val backspace: ImageButton by lazy { findViewById(R.id.button_backspace) }
     val layoutSwitch: ImageButton by lazy { findViewById(R.id.button_layout_switch) }
     val quickphrase: ImageButton by lazy { findViewById(R.id.button_quickphrase) }

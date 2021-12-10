@@ -28,6 +28,9 @@ import splitties.systemservices.layoutInflater
 import splitties.systemservices.windowManager
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
+import java.util.*
+import kotlin.collections.HashMap
+import kotlin.concurrent.timer
 
 class InputView(
     val service: FcitxInputMethodService,
@@ -64,6 +67,8 @@ class InputView(
         layoutManager = candidateLytMgr
         adapter = candidateViewAdp
     }
+
+    private val repeatTimers = HashMap<String, Timer>()
 
     private var keyboards: HashMap<String, BaseKeyboard> = hashMapOf(
         "qwerty" to TextKeyboard(themedContext),
@@ -129,6 +134,11 @@ class InputView(
                 fcitx.reset()
                 service.inputConnection?.commitText(action.act, 1)
             }
+            is KeyAction.RepeatStartAction -> action.act.let {
+                cancelRepeat(it)
+                repeatTimers[it] = timer(period = 60L, action = { fcitx.sendKey(it) })
+            }
+            is KeyAction.RepeatEndAction -> cancelRepeat(action.act)
             is KeyAction.QuickPhraseAction -> quickPhrase()
             is KeyAction.UnicodeAction -> unicode()
             is KeyAction.LangSwitchAction -> switchLang()
@@ -178,6 +188,14 @@ class InputView(
         candidateViewAdp.candidates = data
         candidateViewAdp.notifyDataSetChanged()
         candidateLytMgr.scrollToPosition(0)
+    }
+
+    private fun cancelRepeat(key: String) {
+        repeatTimers[key]?.run {
+            cancel()
+            purge()
+            repeatTimers.remove(key)
+        }
     }
 
     private fun switchLayout(to: String) {
