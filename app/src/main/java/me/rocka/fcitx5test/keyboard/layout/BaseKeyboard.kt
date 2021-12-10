@@ -3,6 +3,7 @@ package me.rocka.fcitx5test.keyboard.layout
 import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.CallSuper
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -23,7 +24,7 @@ abstract class BaseKeyboard(
     private val keyLayout: List<List<BaseKey>>
 ) : ConstraintLayout(context) {
 
-    class KeyActionListener (val onKeyAction: (View, KeyAction<*>, Boolean) -> Unit)
+    class KeyActionListener(val onKeyAction: (View, KeyAction<*>, Boolean) -> Unit)
 
     var keyActionListener: KeyActionListener? = null
 
@@ -39,6 +40,19 @@ abstract class BaseKeyboard(
                         if (key is ILongPressKey) setOnLongClickListener {
                             onAction(this, key.onLongPress(), true)
                             true
+                        }
+                        if (key is IRepeatKey) {
+                            setOnTouchListener { v, e ->
+                                when (e.action) {
+                                    MotionEvent.ACTION_BUTTON_PRESS -> v.performClick()
+                                    MotionEvent.ACTION_UP -> onAction(v, key.onRelease(), false)
+                                }
+                                false
+                            }
+                            setOnLongClickListener {
+                                onAction(this, key.onHold(), true)
+                                true
+                            }
                         }
                     }
                 }

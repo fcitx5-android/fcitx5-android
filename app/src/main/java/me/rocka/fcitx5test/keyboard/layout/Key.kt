@@ -14,6 +14,11 @@ interface ILongPressKey : IPressKey {
     fun onLongPress(): KeyAction<*>
 }
 
+interface IRepeatKey : IKeyBehavior {
+    fun onHold(): KeyAction<*>
+    fun onRelease(): KeyAction<*>
+}
+
 interface IKeyAppearance {
     val percentWidth: Float
 }
@@ -69,8 +74,10 @@ open class CapsKey(
 open class BackspaceKey(
     override val src: Int = R.drawable.ic_baseline_backspace_24,
     override val id: Int = R.id.button_backspace
-) : BaseKey(0.15f), IImageKey, IPressKey, IKeyId {
+) : BaseKey(0.15f), IImageKey, IPressKey, IRepeatKey, IKeyId {
     override fun onPress() = KeyAction.FcitxKeyAction("BackSpace")
+    override fun onHold() = KeyAction.RepeatStartAction("BackSpace")
+    override fun onRelease() = KeyAction.RepeatEndAction("BackSpace")
 }
 
 open class QuickPhraseKey(
@@ -110,6 +117,6 @@ open class MiniSpaceKey(
 open class LayoutSwitchKey(
     override val src: Int = R.drawable.ic_baseline_keyboard_24,
     override val id: Int = R.id.button_layout_switch
-) : BaseKey(0.15f) ,IImageKey, IPressKey, IKeyId {
+) : BaseKey(0.15f), IImageKey, IPressKey, IKeyId {
     override fun onPress() = KeyAction.LayoutSwitchAction()
 }

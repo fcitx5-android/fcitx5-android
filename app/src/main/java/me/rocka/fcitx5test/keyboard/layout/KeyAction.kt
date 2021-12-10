@@ -18,6 +18,10 @@ sealed class KeyAction<T> {
 
     data class CommitAction(override val act: String) : KeyAction<String>()
 
+    data class RepeatStartAction(override val act: String) : KeyAction<String>()
+
+    data class RepeatEndAction(override val act: String) : KeyAction<String>()
+
     object CapsAction : KeyAction<Unit>() {
         override val act: Unit get() = Unit
         override fun toString(): String = javaClass.simpleName
