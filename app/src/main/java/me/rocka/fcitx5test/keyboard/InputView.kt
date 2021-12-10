@@ -72,7 +72,7 @@ class InputView(
     private var currentKeyboardName = "qwerty"
     private val currentKeyboard: BaseKeyboard get() = keyboards.getValue(currentKeyboardName)
 
-    private val onKeyAction: (View, KeyAction<*>, Boolean) -> Unit = { view, action, long ->
+    private val keyActionListener = BaseKeyboard.KeyActionListener { view, action, long ->
         onAction(view, action, long)
     }
 
@@ -89,7 +89,7 @@ class InputView(
         orientation = VERTICAL
         add(candidateView, lParams(matchParent, dp(40)))
         add(currentKeyboard, lParams(matchParent, wrapContent))
-        currentKeyboard.setOnKeyActionListener(onKeyAction)
+        currentKeyboard.keyActionListener = keyActionListener
         currentKeyboard.onAttach()
         currentKeyboard.onInputMethodChange(fcitx.ime())
     }
@@ -133,7 +133,7 @@ class InputView(
             is KeyAction.UnicodeAction -> unicode()
             is KeyAction.LangSwitchAction -> switchLang()
             is KeyAction.InputMethodSwitchAction -> inputMethodManager.showInputMethodPicker()
-            is KeyAction.LayoutSwitchAction -> switchLayout()
+            is KeyAction.LayoutSwitchAction -> switchLayout(action.act)
             is KeyAction.CustomAction -> customEvent(action.act)
             else -> {}
         }
@@ -180,16 +180,18 @@ class InputView(
         candidateLytMgr.scrollToPosition(0)
     }
 
-    private fun switchLayout() {
-        currentKeyboard.setOnKeyActionListener(null)
+    private fun switchLayout(to: String) {
+        currentKeyboard.keyActionListener = null
         currentKeyboard.onDetach()
         removeView(currentKeyboard)
-        currentKeyboardName = when (currentKeyboardName) {
+        currentKeyboardName = if (to.isNotEmpty()) {
+            to
+        } else when (currentKeyboardName) {
             "qwerty" -> "number"
             else -> "qwerty"
         }
         add(currentKeyboard, lParams(matchParent, wrapContent))
-        currentKeyboard.setOnKeyActionListener(onKeyAction)
+        currentKeyboard.keyActionListener = keyActionListener
         currentKeyboard.onAttach()
         currentKeyboard.onInputMethodChange(fcitx.ime())
     }

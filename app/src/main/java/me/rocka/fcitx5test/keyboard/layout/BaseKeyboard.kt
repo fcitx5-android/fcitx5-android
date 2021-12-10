@@ -23,7 +23,9 @@ abstract class BaseKeyboard(
     private val keyLayout: List<List<BaseKey>>
 ) : ConstraintLayout(context) {
 
-    private var passAction: ((View, KeyAction<*>, Boolean) -> Unit)? = null
+    class KeyActionListener (val onKeyAction: (View, KeyAction<*>, Boolean) -> Unit)
+
+    var keyActionListener: KeyActionListener? = null
 
     init {
         with(context) {
@@ -98,13 +100,9 @@ abstract class BaseKeyboard(
         }
     }
 
-    fun setOnKeyActionListener(f: ((View, KeyAction<*>, Boolean) -> Unit)?) {
-        passAction = f
-    }
-
     @CallSuper
     open fun onAction(view: View, action: KeyAction<*>, long: Boolean) {
-        passAction?.invoke(view, action, long)
+        keyActionListener?.run { onKeyAction.invoke(view, action, long) }
     }
 
     open fun onAttach() {
