@@ -34,7 +34,7 @@ android {
         buildConfigField("String", "BUILD_GIT_HASH", "\"$gitHashShort\"")
         buildConfigField("long", "BUILD_TIME", System.currentTimeMillis().toString())
         // increase this value when update assets
-        buildConfigField("long", "ASSETS_VERSION", "4")
+        buildConfigField("long", "ASSETS_VERSION", "5")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a")
@@ -80,7 +80,7 @@ listOf("fcitx5", "fcitx5-chinese-addons").forEach {
     tasks.register<MsgFmtTask>(taskName) {
         domain.set(it)
         inputDir.set(file("src/main/cpp/$it/po"))
-        outputDir.set(file("src/main/assets/fcitx5/locale"))
+        outputDir.set(file("src/main/assets/usr/share/locale"))
     }
     tasks.preBuild.dependsOn(taskName)
 }

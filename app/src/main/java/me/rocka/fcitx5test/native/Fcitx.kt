@@ -246,7 +246,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
                 }
 
                 if (BuildConfig.ASSETS_VERSION > ver) {
-                    copyFileOrDir("fcitx5")
+                    copyFileOrDir("usr")
                     AppSharedPreferences.getInstance().assetsVersion = BuildConfig.ASSETS_VERSION
                 }
 
