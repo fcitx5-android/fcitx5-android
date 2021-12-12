@@ -95,7 +95,17 @@ class TextKeyboard(
     }
 
     override fun onInputMethodChange(ime: InputMethodEntry) {
-        space.text = ime.displayName
+        val s = StringBuilder(ime.displayName)
+        ime.subMode.run {
+            when {
+                label.isNotEmpty() -> label
+                name.isNotEmpty() -> name
+                else -> null
+            }?.let {
+                s.append(" ($it)")
+            }
+        }
+        space.text = s
     }
 
     private fun switchCapsState() {

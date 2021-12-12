@@ -104,13 +104,19 @@ public:
         return std::move(entries);
     }
 
-    const fcitx::InputMethodEntry *inputMethodStatus() {
-        // TODO(rocka): report `subMode` and `subModeLabel`
+    std::tuple<const fcitx::InputMethodEntry *, const std::vector<std::string>> inputMethodStatus() {
         auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
-        if (ic) {
-            return p_instance->inputMethodEntry(ic);
+        auto *engine = p_instance->inputMethodEngine(ic);
+        const auto *entry = p_instance->inputMethodEntry(ic);
+        if (engine) {
+            auto subMode = engine->subMode(*entry, *ic);
+            auto subModeLabel = engine->subModeLabel(*entry, *ic);
+            auto subModeIcon = engine->subModeIcon(*entry, *ic);
+            return std::make_tuple(entry, std::vector{subMode, subModeLabel, subModeIcon});
+        } else if (entry) {
+            return std::make_tuple(entry, std::vector<std::string>{});
         }
-        return nullptr;
+        return std::make_tuple(nullptr, std::vector<std::string>{});
     }
 
     void setInputMethod(std::string string) {
@@ -294,7 +300,7 @@ public:
         });
     }
 
-    std::pair<std::string, std::string> queryPunctuation(uint32_t unicode, const std::string& language) {
+    std::pair<std::string, std::string> queryPunctuation(uint32_t unicode, const std::string &language) {
         if (!p_punctuation) {
             std::string s(1, unicode);
             return std::make_pair(s, s);
@@ -372,7 +378,7 @@ JNI_OnLoad(JavaVM * /* jvm */, void * /* reserved */) {
     return JNI_VERSION_1_6;
 }
 
-jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry);
+jobject fcitxInputMethodEntryWithSubModeToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry, const std::vector<std::string> &subMode);
 
 extern "C"
 JNIEXPORT jint JNICALL
@@ -464,8 +470,8 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
     };
     auto imChangeCallback = [&]() {
         jobjectArray vararg = env->NewObjectArray(1, ObjectClass, nullptr);
-        const auto *entry = Fcitx::Instance().inputMethodStatus();
-        auto obj = fcitxInputMethodEntryToJObject(env, entry);
+        const auto status = Fcitx::Instance().inputMethodStatus();
+        auto obj = fcitxInputMethodEntryWithSubModeToJObject(env, std::get<0>(status), std::get<1>(status));
         env->SetObjectArrayElement(vararg, 0, obj);
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 6, vararg);
         env->DeleteLocalRef(vararg);
@@ -594,12 +600,31 @@ Java_me_rocka_fcitx5test_native_Fcitx_listInputMethods(JNIEnv *env, jclass clazz
     return fcitxInputMethodEntriesToJObjectArray(env, entries);
 }
 
+jobject fcitxInputMethodEntryWithSubModeToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry, const std::vector<std::string> &subMode) {
+    if (!entry) return nullptr;
+    if (subMode.empty()) return fcitxInputMethodEntryToJObject(env, entry);
+    jclass imEntryClass = env->FindClass("me/rocka/fcitx5test/native/InputMethodEntry");
+    jmethodID imEntryInit = env->GetMethodID(imEntryClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+    return env->NewObject(imEntryClass, imEntryInit,
+                          env->NewStringUTF(entry->uniqueName().c_str()),
+                          env->NewStringUTF(entry->name().c_str()),
+                          env->NewStringUTF(entry->icon().c_str()),
+                          env->NewStringUTF(entry->nativeName().c_str()),
+                          env->NewStringUTF(entry->label().c_str()),
+                          env->NewStringUTF(entry->languageCode().c_str()),
+                          entry->isConfigurable(),
+                          env->NewStringUTF(subMode[0].c_str()),
+                          env->NewStringUTF(subMode[1].c_str()),
+                          env->NewStringUTF(subMode[2].c_str())
+    );
+}
+
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_inputMethodStatus(JNIEnv *env, jclass clazz) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
-    const auto *entry = Fcitx::Instance().inputMethodStatus();
-    return fcitxInputMethodEntryToJObject(env, entry);
+    const auto status = Fcitx::Instance().inputMethodStatus();
+    return fcitxInputMethodEntryWithSubModeToJObject(env, std::get<0>(status), std::get<1>(status));
 }
 
 extern "C"

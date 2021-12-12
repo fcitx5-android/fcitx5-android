@@ -2,6 +2,9 @@ package me.rocka.fcitx5test.native
 
 import java.io.Serializable
 
+data class InputMethodSubMode(val name: String, val label: String, val icon: String) {
+    constructor() : this("", "", "")
+}
 
 data class InputMethodEntry(
     val uniqueName: String,
@@ -10,8 +13,50 @@ data class InputMethodEntry(
     val nativeName: String,
     val label: String,
     val languageCode: String,
-    val isConfigurable: Boolean
+    val isConfigurable: Boolean,
+    val subMode: InputMethodSubMode
 ) {
+    constructor(
+        uniqueName: String,
+        name: String,
+        icon: String,
+        nativeName: String,
+        label: String,
+        languageCode: String,
+        isConfigurable: Boolean
+    ) : this(
+        uniqueName,
+        name,
+        icon,
+        nativeName,
+        label,
+        languageCode,
+        isConfigurable,
+        InputMethodSubMode()
+    )
+
+    constructor(
+        uniqueName: String,
+        name: String,
+        icon: String,
+        nativeName: String,
+        label: String,
+        languageCode: String,
+        isConfigurable: Boolean,
+        subMode: String,
+        subModeLabel: String,
+        subModeIcon: String
+    ) : this(
+        uniqueName,
+        name,
+        icon,
+        nativeName,
+        label,
+        languageCode,
+        isConfigurable,
+        InputMethodSubMode(subMode, subModeLabel, subModeIcon)
+    )
+
     val displayName: String
         get() = if (name.isNotEmpty()) name else uniqueName
 }
@@ -69,7 +114,8 @@ enum class AddonCategory {
     InputMethod, Frontend, Loader, Module, UI;
 
     companion object {
-        fun fromInt(i: Int) = values().first { it.ordinal == i }
+        private val Values = values()
+        fun fromInt(i: Int) = Values[i]
     }
 }
 
@@ -99,6 +145,7 @@ data class AddonInfo(
         enabled,
         onDemand
     )
+
     val displayName: String
         get() = if (name.isNotEmpty()) name else uniqueName
 }
