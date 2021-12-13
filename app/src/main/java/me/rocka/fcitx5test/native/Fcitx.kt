@@ -7,10 +7,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import me.rocka.fcitx5test.AppSharedPreferences
-import me.rocka.fcitx5test.BuildConfig
-import me.rocka.fcitx5test.R
-import me.rocka.fcitx5test.copyFileOrDir
+import me.rocka.fcitx5test.*
 import me.rocka.fcitx5test.native.FcitxState.*
 
 class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope by CoroutineScope(
@@ -246,6 +243,8 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
                 }
 
                 if (BuildConfig.ASSETS_VERSION > ver) {
+                    deleteDir("fcitx5")
+                    deleteDir("usr")
                     copyFileOrDir("usr")
                     AppSharedPreferences.getInstance().assetsVersion = BuildConfig.ASSETS_VERSION
                 }

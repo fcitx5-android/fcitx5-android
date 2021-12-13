@@ -1,17 +1,25 @@
 package me.rocka.fcitx5test
 
-import android.content.*
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.inputmethodservice.InputMethodService
 import android.os.IBinder
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputConnection
 import androidx.core.view.children
-import androidx.preference.PreferenceManager
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
+fun Context.deleteDir(path: String) {
+    val file = File("${applicationInfo.dataDir}/${path}")
+    if (file.isDirectory) {
+        file.deleteRecursively()
+    }
+}
 
 fun Context.copyFileOrDir(path: String): Unit = runCatching {
     with(assets) {
