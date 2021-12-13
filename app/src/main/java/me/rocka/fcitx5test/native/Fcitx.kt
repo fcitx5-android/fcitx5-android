@@ -250,7 +250,13 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
                 }
 
                 val locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    resources.configuration.locales[0].run { "${language}_${country}" }
+                    val locales = resources.configuration.locales
+                    StringBuilder().apply {
+                        for (i in 0 until locales.size()) {
+                            if (i != 0) append(":")
+                            append(locales[i].run { "${language}_${country}" })
+                        }
+                    }.toString()
                 } else {
                     @Suppress("DEPRECATION")
                     resources.configuration.locale.run { "${language}_${country}" }
