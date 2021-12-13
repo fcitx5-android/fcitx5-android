@@ -4,8 +4,8 @@ sealed class FcitxEvent<T>(open val data: T) {
 
     abstract val eventType: EventType
 
-    data class CandidateListEvent(override val data: List<String>) :
-        FcitxEvent<List<String>>(data) {
+    data class CandidateListEvent(override val data: Array<String>) :
+        FcitxEvent<Array<String>>(data) {
         override val eventType: EventType
             get() = EventType.Candidate
     }
@@ -53,7 +53,7 @@ sealed class FcitxEvent<T>(open val data: T) {
         data class Data(val status: InputMethodEntry)
     }
 
-    data class UnknownEvent(override val data: List<Any>) : FcitxEvent<List<Any>>(data) {
+    data class UnknownEvent(override val data: Array<Any>) : FcitxEvent<Array<Any>>(data) {
         override val eventType: EventType
             get() = EventType.Unknown
     }
@@ -71,11 +71,13 @@ sealed class FcitxEvent<T>(open val data: T) {
 
     companion object {
 
+        private val Types = EventType.values()
+
         @Suppress("UNCHECKED_CAST")
-        fun create(type: Int, params: List<Any>) =
-            when (EventType.values()[type]) {
-                EventType.Candidate -> CandidateListEvent(params as List<String>)
-                EventType.Commit -> CommitStringEvent(params.first() as String)
+        fun create(type: Int, params: Array<Any>) =
+            when (Types[type]) {
+                EventType.Candidate -> CandidateListEvent(params as Array<String>)
+                EventType.Commit -> CommitStringEvent(params[0] as String)
                 EventType.Preedit -> PreeditEvent(
                     PreeditEvent.Data(params[0] as String, params[1] as String, params[2] as Int)
                 )

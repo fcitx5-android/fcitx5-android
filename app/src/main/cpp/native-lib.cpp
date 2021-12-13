@@ -420,12 +420,13 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
     env->ReleaseStringUTFChars(extData, ext_data);
 
     jclass ObjectClass = env->FindClass("java/lang/Object");
+    jclass StringClass = env->FindClass("java/lang/String");
     jclass IntegerClass = env->FindClass("java/lang/Integer");
     jmethodID IntegerInit = env->GetMethodID(IntegerClass, "<init>", "(I)V");
     jmethodID handleFcitxEvent = env->GetStaticMethodID(clazz, "handleFcitxEvent", "(I[Ljava/lang/Object;)V");
     auto candidateListCallback = [&](const std::vector<std::string> &candidateList) {
         size_t size = candidateList.size();
-        jobjectArray vararg = env->NewObjectArray(size, ObjectClass, nullptr);
+        jobjectArray vararg = env->NewObjectArray(size, StringClass, nullptr);
         size_t i = 0;
         for (const auto &s : candidateList) {
             env->SetObjectArrayElement(vararg, i++, env->NewStringUTF(s.c_str()));
@@ -434,7 +435,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
         env->DeleteLocalRef(vararg);
     };
     auto commitStringCallback = [&](const std::string &str) {
-        jobjectArray vararg = env->NewObjectArray(1, ObjectClass, nullptr);
+        jobjectArray vararg = env->NewObjectArray(1, StringClass, nullptr);
         env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(str.c_str()));
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 1, vararg);
         env->DeleteLocalRef(vararg);
@@ -448,7 +449,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
         env->DeleteLocalRef(vararg);
     };
     auto inputPanelAuxCallback = [&](const std::string &auxUp, const std::string &auxDown) {
-        jobjectArray vararg = env->NewObjectArray(2, ObjectClass, nullptr);
+        jobjectArray vararg = env->NewObjectArray(2, StringClass, nullptr);
         env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(auxUp.c_str()));
         env->SetObjectArrayElement(vararg, 1, env->NewStringUTF(auxDown.c_str()));
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 3, vararg);

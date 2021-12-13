@@ -1,6 +1,5 @@
 package me.rocka.fcitx5test.keyboard
 
-import android.annotation.SuppressLint
 import android.os.Build
 import android.util.DisplayMetrics
 import android.view.Gravity
@@ -58,13 +57,10 @@ class InputView(
         isClippingEnabled = false
     }
 
-    private var candidateLytMgr = LinearLayoutManager(context).apply {
-        orientation = LinearLayoutManager.HORIZONTAL
-    }
     private var candidateViewAdp = CandidateViewAdapter { fcitx.select(it) }
     private var candidateView = themedContext.view(::RecyclerView, R.id.candidate_list) {
         backgroundColor = styledColor(android.R.attr.colorBackground)
-        layoutManager = candidateLytMgr
+        layoutManager = LinearLayoutManager(null, RecyclerView.HORIZONTAL, false)
         adapter = candidateViewAdp
     }
 
@@ -183,11 +179,9 @@ class InputView(
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    private fun updateCandidates(data: List<String>) {
+    private fun updateCandidates(data: Array<String>) {
         candidateViewAdp.candidates = data
-        candidateViewAdp.notifyDataSetChanged()
-        candidateLytMgr.scrollToPosition(0)
+        candidateView.layoutManager?.scrollToPosition(0)
     }
 
     private fun cancelRepeat(key: String) {

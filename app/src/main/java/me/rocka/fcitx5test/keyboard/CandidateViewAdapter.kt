@@ -1,5 +1,6 @@
 package me.rocka.fcitx5test.keyboard
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +15,12 @@ class CandidateViewAdapter(val onSelect: (Int) -> Unit) :
         var idx = -1
     }
 
-    var candidates: List<String> = ArrayList()
+    var candidates: Array<String> = arrayOf()
+        @SuppressLint("NotifyDataSetChanged")
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CandidateItemHolder {
         val v = LayoutInflater.from(parent.context).inflate(R.layout.candidate_item, parent, false)

@@ -204,8 +204,8 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
          */
         @Suppress("unused")
         @JvmStatic
-        fun handleFcitxEvent(type: Int, vararg params: Any) {
-            val event = FcitxEvent.create(type, params.asList())
+        fun handleFcitxEvent(type: Int, params: Array<Any>) {
+            val event = FcitxEvent.create(type, params)
             Log.d(
                 "FcitxEvent",
                 "${event.eventType}[${params.size}]${params.take(10).joinToString()}"
