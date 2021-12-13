@@ -26,14 +26,6 @@ jobs:
           sudo apt update
           sudo apt install extra-cmake-modules gettext
 
-      - name: Cache JNI build
-        uses: actions/cache@v2
-        with:
-          path: |
-            app/.cxx
-            app/build/intermediates
-          key: ${{ runner.os }}-jni-build
-
       - name: Build Release APK
         uses: burrunan/gradle-cache-action@v1
         with:
@@ -42,7 +34,7 @@ jobs:
 
       - name: Sign APK
         if: ${{ github.event_name == 'push' }}
-        uses: r0adkll/sign-android-release@v1
+        uses: rpavlik/sign-android-release@trim-unsigned
         # ID used to access action output
         id: sign_apk
         with:
