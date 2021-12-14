@@ -2,10 +2,12 @@ package me.rocka.fcitx5test.keyboard.layout
 
 import android.content.Context
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.ImageButton
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.native.InputMethodEntry
+import splitties.views.imageResource
 
 class TextKeyboard(
     context: Context
@@ -66,7 +68,7 @@ class TextKeyboard(
     val quickphrase: ImageButton by lazy { findViewById(R.id.button_quickphrase) }
     val lang: ImageButton by lazy { findViewById(R.id.button_lang) }
     val space: Button by lazy { findViewById(R.id.button_space) }
-    val `return`: Button by lazy { findViewById(R.id.button_return) }
+    val `return`: ImageButton by lazy { findViewById(R.id.button_return) }
 
     var capsState: CapsState = CapsState.None
 
@@ -92,6 +94,10 @@ class TextKeyboard(
             }
             CapsState.Lock -> action.upper()
         }
+    }
+
+    override fun onAttach(info: EditorInfo?) {
+        `return`.imageResource = drawableForReturn(info)
     }
 
     override fun onInputMethodChange(ime: InputMethodEntry) {

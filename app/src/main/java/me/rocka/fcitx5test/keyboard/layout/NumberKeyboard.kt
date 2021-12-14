@@ -1,9 +1,11 @@
 package me.rocka.fcitx5test.keyboard.layout
 
 import android.content.Context
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.ImageButton
 import me.rocka.fcitx5test.R
+import splitties.views.imageResource
 
 class NumberKeyboard(
     context: Context
@@ -45,6 +47,10 @@ class NumberKeyboard(
     val backspace: ImageButton by lazy { findViewById(R.id.button_backspace) }
     val layoutSwitch: ImageButton by lazy { findViewById(R.id.button_layout_switch) }
     val space: Button by lazy { findViewById(R.id.button_mini_space) }
-    val `return`: Button by lazy { findViewById(R.id.button_return) }
+    val `return`: ImageButton by lazy { findViewById(R.id.button_return) }
+
+    override fun onAttach(info: EditorInfo?) {
+        `return`.imageResource = drawableForReturn(info)
+    }
 
 }

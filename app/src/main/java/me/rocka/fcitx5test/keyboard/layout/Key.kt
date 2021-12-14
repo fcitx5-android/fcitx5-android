@@ -81,15 +81,17 @@ open class BackspaceKey(
 }
 
 open class QuickPhraseKey(
-    override val src: Int = R.drawable.ic_baseline_format_quote_24
-) : BaseKey(0.1f), IImageKey, ILongPressKey {
+    override val src: Int = R.drawable.ic_baseline_format_quote_24,
+    override val id: Int = R.id.button_quickphrase
+) : BaseKey(0.1f), IImageKey, ILongPressKey, IKeyId {
     override fun onPress() = KeyAction.QuickPhraseAction
     override fun onLongPress() = KeyAction.UnicodeAction
 }
 
 open class LangSwitchKey(
-    override val src: Int = R.drawable.ic_baseline_language_24
-) : BaseKey(), IImageKey, ILongPressKey {
+    override val src: Int = R.drawable.ic_baseline_language_24,
+    override val id: Int = R.id.button_lang
+) : BaseKey(), IImageKey, ILongPressKey, IKeyId {
     override fun onPress() = KeyAction.LangSwitchAction
     override fun onLongPress() = KeyAction.InputMethodSwitchAction
 }
@@ -102,8 +104,9 @@ open class SpaceKey(
 open class ReturnKey(
     override val src: Int = R.drawable.ic_baseline_keyboard_return_24,
     override val foreground: Int = android.R.attr.colorForegroundInverse,
-    override val background: Int = R.attr.colorAccent
-) : BaseKey(0.15f), IImageKey, IPressKey, ITintKey {
+    override val background: Int = R.attr.colorAccent,
+    override val id: Int = R.id.button_return
+) : BaseKey(0.15f), IImageKey, IPressKey, ITintKey, IKeyId {
     override fun onPress() = KeyAction.FcitxKeyAction("Return")
 }
 

@@ -7,9 +7,12 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.annotation.CallSuper
+import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
+import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.keyboard.layout.*
 import me.rocka.fcitx5test.native.InputMethodEntry
+import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
 import splitties.resources.styledColor
 import splitties.resources.styledColorSL
@@ -112,6 +115,22 @@ abstract class BaseKeyboard(
             }
             padding = 0
             elevation = dp(2f)
+        }
+    }
+
+    @DrawableRes
+    fun drawableForReturn(info: EditorInfo?): Int {
+        if (info?.imeOptions?.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION) == true) {
+            return R.drawable.ic_baseline_keyboard_return_24
+        }
+        return when (info?.imeOptions?.and(EditorInfo.IME_MASK_ACTION)) {
+            EditorInfo.IME_ACTION_GO -> R.drawable.ic_baseline_arrow_forward_24
+            EditorInfo.IME_ACTION_SEARCH -> R.drawable.ic_baseline_search_24
+            EditorInfo.IME_ACTION_SEND -> R.drawable.ic_baseline_send_24
+            EditorInfo.IME_ACTION_NEXT -> R.drawable.ic_baseline_keyboard_tab_24
+            EditorInfo.IME_ACTION_DONE -> R.drawable.ic_baseline_done_24
+            EditorInfo.IME_ACTION_PREVIOUS -> R.drawable.ic_baseline_keyboard_tab_reverse_24
+            else -> R.drawable.ic_baseline_keyboard_return_24
         }
     }
 
