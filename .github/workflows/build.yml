@@ -34,7 +34,7 @@ jobs:
 
       - name: Sign APK
         if: ${{ github.event_name == 'push' }}
-        uses: rpavlik/sign-android-release@trim-unsigned
+        uses: rpavlik/sign-android-release@master
         # ID used to access action output
         id: sign_apk
         with:
@@ -43,6 +43,9 @@ jobs:
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           alias: ${{ secrets.KEY_ALIAS }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
+          trimUnsigned: true
+        env:
+          BUILD_TOOLS_VERSION: "31.0.0"
 
       - name: Upload APK
         uses: actions/upload-artifact@v2
