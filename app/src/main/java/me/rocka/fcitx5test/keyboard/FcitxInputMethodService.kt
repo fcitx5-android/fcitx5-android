@@ -16,6 +16,7 @@ import me.rocka.fcitx5test.bindFcitxDaemon
 import me.rocka.fcitx5test.inputConnection
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxEvent
+import splitties.bitflags.hasFlag
 
 class FcitxInputMethodService : InputMethodService(),
     CoroutineScope by MainScope() + SupervisorJob() {
@@ -24,6 +25,8 @@ class FcitxInputMethodService : InputMethodService(),
     private lateinit var fcitx: Fcitx
     private var eventHandlerJob: Job? = null
     private var connection: ServiceConnection? = null
+
+    var editorInfo: EditorInfo? = null
 
     // `-1` means invalid, or don't know yet
     private var selectionStart = -1
@@ -47,8 +50,8 @@ class FcitxInputMethodService : InputMethodService(),
                 if (Character.isISOControl(it.code)) {
                     when (it.code) {
                         '\b'.code -> sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
-                        '\r'.code -> sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
-                        else -> Log.d("KeyEvent", it.toString())
+                        '\r'.code -> handleReturn()
+                        else -> Log.d("IMS", it.toString())
                     }
                 } else {
                     sendKeyChar(Char(it.code))
@@ -62,6 +65,20 @@ class FcitxInputMethodService : InputMethodService(),
         inputView.handleFcitxEvent(event)
     }
 
+    private fun handleReturn() {
+        if (editorInfo == null || editorInfo?.imeOptions?.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION) == true) {
+            sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
+            return
+        }
+        editorInfo?.run {
+            if (actionLabel?.isNotEmpty() == true) {
+                inputConnection?.performEditorAction(actionId)
+                return
+            }
+            inputConnection?.performEditorAction(imeOptions and EditorInfo.IME_MASK_ACTION)
+        }
+    }
+
     override fun onCreateInputView(): View {
         if (eventHandlerJob == null) {
             eventHandlerJob = fcitx.eventFlow.onEach {
@@ -73,11 +90,12 @@ class FcitxInputMethodService : InputMethodService(),
     }
 
     override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
-        fcitx.reset()
+        inputConnection?.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
+        editorInfo = attribute
     }
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
-        inputConnection?.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
+        inputView.onShow(info)
     }
 
     // FIXME: cursor flicker
@@ -136,8 +154,13 @@ class FcitxInputMethodService : InputMethodService(),
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
-        inputConnection?.requestCursorUpdates(0)
         fcitx.reset()
+    }
+
+    override fun onFinishInput() {
+        inputConnection?.requestCursorUpdates(0)
+        editorInfo = null
+        super.onFinishInput()
     }
 
     override fun onDestroy() {

@@ -5,6 +5,7 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.view.MotionEvent
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import androidx.annotation.CallSuper
 import androidx.constraintlayout.widget.ConstraintLayout
 import me.rocka.fcitx5test.keyboard.layout.*
@@ -119,7 +120,7 @@ abstract class BaseKeyboard(
         keyActionListener?.run { onKeyAction.invoke(view, action, long) }
     }
 
-    open fun onAttach() {
+    open fun onAttach(info: EditorInfo? = null) {
         // do nothing by default
     }
 

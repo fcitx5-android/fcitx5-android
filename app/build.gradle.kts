@@ -101,6 +101,8 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
     implementation("cn.berberman:girls-self-use:0.1.0")
     val splittiesVersion = "3.0.0"
+    implementation("com.louiscad.splitties:splitties-bitflags:$splittiesVersion")
+    implementation("com.louiscad.splitties:splitties-systemservices:$splittiesVersion")
     implementation("com.louiscad.splitties:splitties-views-dsl:$splittiesVersion")
     implementation("com.louiscad.splitties:splitties-views-dsl-constraintlayout:$splittiesVersion")
     testImplementation("junit:junit:4.13.2")

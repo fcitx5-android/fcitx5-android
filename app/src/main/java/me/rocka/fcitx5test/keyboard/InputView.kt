@@ -6,6 +6,7 @@ import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.WindowManager
+import android.view.inputmethod.EditorInfo
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -70,7 +71,7 @@ class InputView(
         "qwerty" to TextKeyboard(themedContext),
         "number" to NumberKeyboard(themedContext)
     )
-    private var currentKeyboardName = "qwerty"
+    private var currentKeyboardName = ""
     private val currentKeyboard: BaseKeyboard get() = keyboards.getValue(currentKeyboardName)
 
     private val keyActionListener = BaseKeyboard.KeyActionListener { view, action, long ->
@@ -89,9 +90,16 @@ class InputView(
         }
         orientation = VERTICAL
         add(candidateView, lParams(matchParent, dp(40)))
-        add(currentKeyboard, lParams(matchParent, wrapContent))
-        currentKeyboard.keyActionListener = keyActionListener
-        currentKeyboard.onAttach()
+        switchLayout("qwerty")
+    }
+
+    override fun onDetachedFromWindow() {
+        preeditPopup.dismiss()
+        super.onDetachedFromWindow()
+    }
+
+    fun onShow(info: EditorInfo? = null) {
+        currentKeyboard.onAttach(info)
         currentKeyboard.onInputMethodChange(fcitx.ime())
     }
 
@@ -193,9 +201,11 @@ class InputView(
     }
 
     private fun switchLayout(to: String) {
-        currentKeyboard.keyActionListener = null
-        currentKeyboard.onDetach()
-        removeView(currentKeyboard)
+        keyboards[currentKeyboardName]?.let {
+            it.keyActionListener = null
+            it.onDetach()
+            removeView(it)
+        }
         currentKeyboardName = if (to.isNotEmpty()) {
             to
         } else when (currentKeyboardName) {
@@ -204,7 +214,7 @@ class InputView(
         }
         add(currentKeyboard, lParams(matchParent, wrapContent))
         currentKeyboard.keyActionListener = keyActionListener
-        currentKeyboard.onAttach()
+        currentKeyboard.onAttach(service.editorInfo)
         currentKeyboard.onInputMethodChange(fcitx.ime())
     }
 
