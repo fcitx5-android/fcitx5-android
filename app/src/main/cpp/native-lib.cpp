@@ -420,10 +420,10 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
     env->ReleaseStringUTFChars(appLib, app_lib);
     env->ReleaseStringUTFChars(extData, ext_data);
 
-    jclass ObjectClass = env->FindClass("java/lang/Object");
-    jclass StringClass = env->FindClass("java/lang/String");
-    jclass IntegerClass = env->FindClass("java/lang/Integer");
-    jmethodID IntegerInit = env->GetMethodID(IntegerClass, "<init>", "(I)V");
+    auto ObjectClass = JClass(env, "java/lang/Object");
+    auto StringClass = JClass(env, "java/lang/String");
+    auto IntegerClass = JClass(env, "java/lang/Integer");
+    jmethodID IntegerInit = env->GetMethodID(*IntegerClass, "<init>", "(I)V");
     jmethodID handleFcitxEvent = env->GetStaticMethodID(clazz, "handleFcitxEvent", "(I[Ljava/lang/Object;)V");
     auto candidateListCallback = [&](const std::vector<std::string> &candidateList) {
         size_t size = candidateList.size();
@@ -576,14 +576,14 @@ jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntr
 }
 
 jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry) {
-    jclass imEntryClass = env->FindClass("me/rocka/fcitx5test/native/InputMethodEntry");
-    jmethodID imEntryInit = env->GetMethodID(imEntryClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
+    auto imEntryClass = JClass(env, "me/rocka/fcitx5test/native/InputMethodEntry");
+    jmethodID imEntryInit = env->GetMethodID(*imEntryClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
     return fcitxInputMethodEntryToJObject(env, entry, imEntryClass, imEntryInit);
 }
 
 jobjectArray fcitxInputMethodEntriesToJObjectArray(JNIEnv *env, const std::vector<const fcitx::InputMethodEntry *> &entries) {
-    jclass imEntryClass = env->FindClass("me/rocka/fcitx5test/native/InputMethodEntry");
-    jmethodID imEntryInit = env->GetMethodID(imEntryClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
+    auto imEntryClass = JClass(env, "me/rocka/fcitx5test/native/InputMethodEntry");
+    jmethodID imEntryInit = env->GetMethodID(*imEntryClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
     jobjectArray array = env->NewObjectArray(entries.size(), imEntryClass, nullptr);
     size_t i = 0;
     for (const auto &entry : entries) {
@@ -605,8 +605,8 @@ Java_me_rocka_fcitx5test_native_Fcitx_listInputMethods(JNIEnv *env, jclass clazz
 jobject fcitxInputMethodEntryWithSubModeToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry, const std::vector<std::string> &subMode) {
     if (!entry) return nullptr;
     if (subMode.empty()) return fcitxInputMethodEntryToJObject(env, entry);
-    jclass imEntryClass = env->FindClass("me/rocka/fcitx5test/native/InputMethodEntry");
-    jmethodID imEntryInit = env->GetMethodID(imEntryClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+    auto imEntryClass = JClass(env, "me/rocka/fcitx5test/native/InputMethodEntry");
+    jmethodID imEntryInit = env->GetMethodID(*imEntryClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
     return env->NewObject(imEntryClass, imEntryInit,
                           *JString(env, entry->uniqueName()),
                           *JString(env, entry->name()),
@@ -680,9 +680,9 @@ jobject fcitxRawConfigToJObject(JNIEnv *env, jclass cls, jmethodID init, jmethod
 }
 
 jobject fcitxRawConfigToJObject(JNIEnv *env, const fcitx::RawConfig &cfg) {
-    jclass cls = env->FindClass("me/rocka/fcitx5test/native/RawConfig");
-    jmethodID init = env->GetMethodID(cls, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lme/rocka/fcitx5test/native/RawConfig;)V");
-    jmethodID setSubItems = env->GetMethodID(cls, "setSubItems", "([Lme/rocka/fcitx5test/native/RawConfig;)V");
+    auto cls = JClass(env, "me/rocka/fcitx5test/native/RawConfig");
+    jmethodID init = env->GetMethodID(*cls, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lme/rocka/fcitx5test/native/RawConfig;)V");
+    jmethodID setSubItems = env->GetMethodID(*cls, "setSubItems", "([Lme/rocka/fcitx5test/native/RawConfig;)V");
     return fcitxRawConfigToJObject(env, cls, init, setSubItems, cfg);
 }
 
@@ -733,10 +733,10 @@ void jobjectFillRawConfig(JNIEnv *env, jclass cls, jfieldID fName, jfieldID fVal
 
 fcitx::RawConfig jobjectToRawConfig(JNIEnv *env, jobject jConfig) {
     fcitx::RawConfig config;
-    jclass cls = env->FindClass("me/rocka/fcitx5test/native/RawConfig");
-    jfieldID fName = env->GetFieldID(cls, "name", "Ljava/lang/String;");
-    jfieldID fValue = env->GetFieldID(cls, "value", "Ljava/lang/String;");
-    jfieldID fSubItems = env->GetFieldID(cls, "subItems", "[Lme/rocka/fcitx5test/native/RawConfig;");
+    auto cls = JClass(env, "me/rocka/fcitx5test/native/RawConfig");
+    jfieldID fName = env->GetFieldID(*cls, "name", "Ljava/lang/String;");
+    jfieldID fValue = env->GetFieldID(*cls, "value", "Ljava/lang/String;");
+    jfieldID fSubItems = env->GetFieldID(*cls, "subItems", "[Lme/rocka/fcitx5test/native/RawConfig;");
     jobjectFillRawConfig(env, cls, fName, fValue, fSubItems, jConfig, config);
     return config;
 }
@@ -769,9 +769,9 @@ extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddons(JNIEnv *env, jclass clazz) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
-    jclass cls = env->FindClass("me/rocka/fcitx5test/native/AddonInfo");
+    auto cls = JClass(env, "me/rocka/fcitx5test/native/AddonInfo");
     const auto &addons = Fcitx::Instance().getAddons();
-    jmethodID init = env->GetMethodID(cls, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZZZ)V");
+    jmethodID init = env->GetMethodID(*cls, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZZZ)V");
     jobjectArray array = env->NewObjectArray(addons.size(), cls, nullptr);
     size_t i = 0;
     for (const auto addon : addons) {
@@ -823,11 +823,10 @@ JNIEXPORT jobjectArray JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_queryPunctuation(JNIEnv *env, jclass clazz, jchar c, jstring language) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     const auto pair = Fcitx::Instance().queryPunctuation(c, jstringToString(env, language));
-    jclass s = env->FindClass("java/lang/String");
+    auto s = JClass(env, "java/lang/String");
     jobjectArray array = env->NewObjectArray(2, s, nullptr);
     env->SetObjectArrayElement(array, 0, JString(env, pair.first));
     env->SetObjectArrayElement(array, 1, JString(env, pair.second));
-    env->DeleteLocalRef(s);
     return array;
 }
 

@@ -26,4 +26,22 @@ public:
     jstring operator*() { return jstring_; }
 };
 
+class JClass {
+private:
+    JNIEnv *env_;
+    jclass jclass_;
+
+public:
+    JClass(JNIEnv *env, const char *name)
+            : env_(env), jclass_(env->FindClass(name)) {}
+
+    ~JClass() {
+        env_->DeleteLocalRef(jclass_);
+    }
+
+    operator jclass() { return jclass_; }
+
+    jclass operator*() { return jclass_; }
+};
+
 #endif //FCITX5TEST_JNI_UTILS_H
