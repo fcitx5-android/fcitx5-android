@@ -17,6 +17,7 @@
 
 #include "androidfrontend/androidfrontend_public.h"
 #include "androidstreambuf.h"
+#include "jni-utils.h"
 
 class Fcitx {
 public:
@@ -429,29 +430,29 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
         jobjectArray vararg = env->NewObjectArray(size, StringClass, nullptr);
         size_t i = 0;
         for (const auto &s : candidateList) {
-            env->SetObjectArrayElement(vararg, i++, env->NewStringUTF(s.c_str()));
+            env->SetObjectArrayElement(vararg, i++, JString(env, s));
         }
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 0, vararg);
         env->DeleteLocalRef(vararg);
     };
     auto commitStringCallback = [&](const std::string &str) {
         jobjectArray vararg = env->NewObjectArray(1, StringClass, nullptr);
-        env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(str.c_str()));
+        env->SetObjectArrayElement(vararg, 0, JString(env, str));
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 1, vararg);
         env->DeleteLocalRef(vararg);
     };
     auto preeditCallback = [&](const std::string &preedit, const std::string &clientPreedit, const int cursor) {
         jobjectArray vararg = env->NewObjectArray(3, ObjectClass, nullptr);
-        env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(preedit.c_str()));
-        env->SetObjectArrayElement(vararg, 1, env->NewStringUTF(clientPreedit.c_str()));
+        env->SetObjectArrayElement(vararg, 0, JString(env, preedit));
+        env->SetObjectArrayElement(vararg, 1, JString(env, clientPreedit));
         env->SetObjectArrayElement(vararg, 2, env->NewObject(IntegerClass, IntegerInit, cursor));
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 2, vararg);
         env->DeleteLocalRef(vararg);
     };
     auto inputPanelAuxCallback = [&](const std::string &auxUp, const std::string &auxDown) {
         jobjectArray vararg = env->NewObjectArray(2, StringClass, nullptr);
-        env->SetObjectArrayElement(vararg, 0, env->NewStringUTF(auxUp.c_str()));
-        env->SetObjectArrayElement(vararg, 1, env->NewStringUTF(auxDown.c_str()));
+        env->SetObjectArrayElement(vararg, 0, JString(env, auxUp));
+        env->SetObjectArrayElement(vararg, 1, JString(env, auxDown));
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 3, vararg);
         env->DeleteLocalRef(vararg);
     };
@@ -464,7 +465,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
         jobjectArray vararg = env->NewObjectArray(2, ObjectClass, nullptr);
         auto integer = env->NewObject(IntegerClass, IntegerInit, code);
         env->SetObjectArrayElement(vararg, 0, integer);
-        env->SetObjectArrayElement(vararg, 1, env->NewStringUTF(sym.c_str()));
+        env->SetObjectArrayElement(vararg, 1, JString(env, sym));
         env->CallStaticVoidMethod(clazz, handleFcitxEvent, 5, vararg);
         env->DeleteLocalRef(vararg);
         env->DeleteLocalRef(integer);
@@ -564,12 +565,12 @@ Java_me_rocka_fcitx5test_native_Fcitx_repositionCursor(JNIEnv *env, jclass clazz
 
 jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry, jclass imEntryClass, jmethodID imEntryInit) {
     return env->NewObject(imEntryClass, imEntryInit,
-                          env->NewStringUTF(entry->uniqueName().c_str()),
-                          env->NewStringUTF(entry->name().c_str()),
-                          env->NewStringUTF(entry->icon().c_str()),
-                          env->NewStringUTF(entry->nativeName().c_str()),
-                          env->NewStringUTF(entry->label().c_str()),
-                          env->NewStringUTF(entry->languageCode().c_str()),
+                          *JString(env, entry->uniqueName()),
+                          *JString(env, entry->name()),
+                          *JString(env, entry->icon()),
+                          *JString(env, entry->nativeName()),
+                          *JString(env, entry->label()),
+                          *JString(env, entry->languageCode()),
                           entry->isConfigurable()
     );
 }
@@ -607,16 +608,16 @@ jobject fcitxInputMethodEntryWithSubModeToJObject(JNIEnv *env, const fcitx::Inpu
     jclass imEntryClass = env->FindClass("me/rocka/fcitx5test/native/InputMethodEntry");
     jmethodID imEntryInit = env->GetMethodID(imEntryClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
     return env->NewObject(imEntryClass, imEntryInit,
-                          env->NewStringUTF(entry->uniqueName().c_str()),
-                          env->NewStringUTF(entry->name().c_str()),
-                          env->NewStringUTF(entry->icon().c_str()),
-                          env->NewStringUTF(entry->nativeName().c_str()),
-                          env->NewStringUTF(entry->label().c_str()),
-                          env->NewStringUTF(entry->languageCode().c_str()),
+                          *JString(env, entry->uniqueName()),
+                          *JString(env, entry->name()),
+                          *JString(env, entry->icon()),
+                          *JString(env, entry->nativeName()),
+                          *JString(env, entry->label()),
+                          *JString(env, entry->languageCode()),
                           entry->isConfigurable(),
-                          env->NewStringUTF(subMode[0].c_str()),
-                          env->NewStringUTF(subMode[1].c_str()),
-                          env->NewStringUTF(subMode[2].c_str())
+                          *JString(env, subMode[0]),
+                          *JString(env, subMode[1]),
+                          *JString(env, subMode[2])
     );
 }
 
@@ -659,17 +660,19 @@ Java_me_rocka_fcitx5test_native_Fcitx_setEnabledInputMethods(JNIEnv *env, jclass
 
 jobject fcitxRawConfigToJObject(JNIEnv *env, jclass cls, jmethodID init, jmethodID setSubItems, const fcitx::RawConfig &cfg) {
     jobject obj = env->NewObject(cls, init,
-                                 env->NewStringUTF(cfg.name().c_str()),
-                                 env->NewStringUTF(cfg.comment().c_str()),
-                                 env->NewStringUTF(cfg.value().c_str()),
+                                 *JString(env, cfg.name()),
+                                 *JString(env, cfg.comment()),
+                                 *JString(env, cfg.value()),
                                  nullptr);
     if (!cfg.hasSubItems()) {
         return obj;
     }
     jobjectArray array = env->NewObjectArray(cfg.subItemsSize(), cls, nullptr);
     size_t i = 0;
-    for (const auto &option : cfg.subItems()) {
-        env->SetObjectArrayElement(array, i++, fcitxRawConfigToJObject(env, cls, init, setSubItems, *cfg.get(option)));
+    for (const auto &item : cfg.subItems()) {
+        jobject jItem = fcitxRawConfigToJObject(env, cls, init, setSubItems, *cfg.get(item));
+        env->SetObjectArrayElement(array, i++, jItem);
+        env->DeleteLocalRef(jItem);
     }
     env->CallVoidMethod(obj, setSubItems, array);
     env->DeleteLocalRef(array);
@@ -774,9 +777,9 @@ Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddons(JNIEnv *env, jclass clazz) 
     for (const auto addon : addons) {
         const auto *info = addon.first;
         jobject obj = env->NewObject(cls, init,
-                                     env->NewStringUTF(info->uniqueName().c_str()),
-                                     env->NewStringUTF(info->name().match().c_str()),
-                                     env->NewStringUTF(info->comment().match().c_str()),
+                                     *JString(env, info->uniqueName()),
+                                     *JString(env, info->name().match()),
+                                     *JString(env, info->comment().match()),
                                      static_cast<int32_t>(info->category()),
                                      info->isConfigurable(),
                                      addon.second,
@@ -822,8 +825,8 @@ Java_me_rocka_fcitx5test_native_Fcitx_queryPunctuation(JNIEnv *env, jclass clazz
     const auto pair = Fcitx::Instance().queryPunctuation(c, jstringToString(env, language));
     jclass s = env->FindClass("java/lang/String");
     jobjectArray array = env->NewObjectArray(2, s, nullptr);
-    env->SetObjectArrayElement(array, 0, env->NewStringUTF(pair.first.c_str()));
-    env->SetObjectArrayElement(array, 1, env->NewStringUTF(pair.second.c_str()));
+    env->SetObjectArrayElement(array, 0, JString(env, pair.first));
+    env->SetObjectArrayElement(array, 1, JString(env, pair.second));
     env->DeleteLocalRef(s);
     return array;
 }
@@ -831,5 +834,6 @@ Java_me_rocka_fcitx5test_native_Fcitx_queryPunctuation(JNIEnv *env, jclass clazz
 extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_triggerUnicodeInput(JNIEnv *env, jclass clazz) {
+    RETURN_IF_NOT_RUNNING
     Fcitx::Instance().triggerUnicode();
 }
