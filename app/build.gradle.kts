@@ -22,12 +22,12 @@ plugins {
 android {
     compileSdk = 31
     buildToolsVersion = "31.0.0"
-    ndkVersion = "23.1.7779620"
+    ndkVersion = System.getenv("NDK_VERSION") ?: "23.1.7779620"
 
     defaultConfig {
         applicationId = "me.rocka.fcitx5test"
         minSdk = 21
-        targetSdk = 30
+        targetSdk = 31
         versionCode = 1
         versionName = "0.0.1"
         setProperty("archivesBaseName", "$applicationId-v$versionName-$gitRevCount-g$gitHashShort")
