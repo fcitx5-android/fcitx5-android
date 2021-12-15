@@ -1,12 +1,14 @@
-let
-  hostPkgs = import <nixpkgs> { };
-  pinnedPkgs = hostPkgs.fetchFromGitHub {
-    owner = "berberman";
-    repo = "nixpkgs";
-    rev = "43af7a9fba97e51ef23ea0eab9359b51892ef7cc";
-    sha256 = "0wl0r7richxwsh7cggmici3sk8qz82wg97w30kq4v55am2wgdwlk";
-  };
-in import pinnedPkgs {
+# let
+#   hostPkgs = import <nixpkgs> { };
+#   pinnedPkgs = hostPkgs.fetchFromGitHub {
+#     owner = "berberman";
+#     repo = "nixpkgs";
+#     rev = "0ad7ad0f0d06cc7e98434eb4d5ae803462f0687a";
+#     sha256 = "yv46KKe1FFkllG2aqvrIzpl92kP0v0Lt3Epl40U5fjE=";
+#   };
+# in
+import <nixpkgs> {
   config.android_sdk.accept_license = true;
+  config.allowUnfree = true;
   overlays = [ (self: super: (import ./sdk.nix) self super) ];
 }
