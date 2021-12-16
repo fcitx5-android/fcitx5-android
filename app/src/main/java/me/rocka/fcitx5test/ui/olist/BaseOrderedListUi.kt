@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import cn.berberman.girls.utils.identity
 import com.google.android.material.snackbar.Snackbar
 import me.rocka.fcitx5test.R
-import splitties.dimensions.dip
+import splitties.dimensions.dp
 import splitties.resources.styledColor
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.coordinatorlayout.coordinatorLayout
@@ -28,10 +28,11 @@ abstract class BaseOrderedListUi<T>(
     override val ctx: Context,
     private val mode: Mode<T>,
     initialEntries: List<T>,
-    enableOrder: Boolean,
+    enableOrder: Boolean = false,
+    enableCheckBox: Boolean = false,
     initSettingsButton: (ImageButton.(Int) -> Unit) = { visibility = View.GONE }
 ) : Ui,
-    OrderedAdapter<T>(initialEntries, enableOrder, {}, initSettingsButton) {
+    OrderedAdapter<T>(initialEntries, enableOrder, enableCheckBox, {}, initSettingsButton) {
 
     private val fab = floatingActionButton {
         setImageResource(R.drawable.ic_baseline_plus_24)
@@ -182,12 +183,12 @@ abstract class BaseOrderedListUi<T>(
         val editText = editText(initView = initEditText)
         val layout = constraintLayout {
             add(editText, lParams {
-                height = dip(64)
+                height = wrapContent
                 width = matchParent
-                topOfParent(16)
-                bottomOfParent(16)
-                leftOfParent(16)
-                rightOfParent(16)
+                topOfParent()
+                bottomOfParent()
+                leftOfParent(dp(20))
+                rightOfParent(dp(20))
             })
         }
         val dialog = AlertDialog.Builder(ctx)
@@ -199,6 +200,7 @@ abstract class BaseOrderedListUi<T>(
                 dialog.cancel()
             }
             .show()
+        editText.requestFocus()
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             val t = editText.editableText.toString()
             if (validator(t)) {
@@ -228,7 +230,7 @@ abstract class BaseOrderedListUi<T>(
 
         add(fab, defaultLParams {
             gravity = gravityEndBottom
-            margin = dip(16)
+            margin = dp(16)
         })
     }.also { updateFAB() }
 

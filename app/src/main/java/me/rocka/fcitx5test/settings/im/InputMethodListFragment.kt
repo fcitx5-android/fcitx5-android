@@ -34,11 +34,14 @@ class InputMethodListFragment : Fragment(), OnItemChangedListener<InputMethodEnt
 
     private val ui: BaseOrderedListUi<InputMethodEntry> by lazy {
         object : BaseOrderedListUi<InputMethodEntry>(
-            requireContext(),
-            Mode.ChooseOne {
+            ctx = requireContext(),
+            mode = Mode.ChooseOne {
                 val unEnabled = fcitx.availableIme().toSet() - entries.toSet()
                 unEnabled.toTypedArray()
-            }, fcitx.enabledIme().toList(), true, { idx ->
+            },
+            initialEntries = fcitx.enabledIme().toList(),
+            enableOrder = true,
+            initSettingsButton = { idx ->
                 setOnClickListener {
                     it.findNavController().navigate(
                         R.id.action_imListFragment_to_imConfigFragment,

@@ -25,15 +25,17 @@ class OrderedListEntryUi(override val ctx: Context) : Ui {
         colorFilter = PorterDuffColorFilter(styledColor(R.attr.colorAccent), PorterDuff.Mode.SRC_IN)
     }
 
+    val checkBox = checkBox { }
+
     val nameText = textView {
         minHeight = dp(60)
         setPaddingDp(0, 18, 0, 18)
         textAppearance = ctx.resolveThemeAttribute(R.attr.textAppearanceListItem)
     }
 
-    val editButton = button {
+    val editButton = imageButton {
         background = styledDrawable(android.R.attr.selectableItemBackground)
-        setText(R.string.edit)
+        imageResource = R.drawable.ic_baseline_edit_24
     }
 
     val settingsButton = imageButton {
@@ -47,9 +49,16 @@ class OrderedListEntryUi(override val ctx: Context) : Ui {
 
         add(handleImage, lParams {
             width = dp(24)
-            height = dp(24)
-            topOfParent(dp(18))
+            height = dp(60)
+            topOfParent()
             startOfParent(dp(18))
+        })
+
+        add(checkBox, lParams {
+            width = dp(30)
+            height = dp(60)
+            topOfParent()
+            after(handleImage, dp(12))
         })
 
         add(nameText, lParams {
@@ -57,15 +66,15 @@ class OrderedListEntryUi(override val ctx: Context) : Ui {
             height = wrapContent
             bottomOfParent()
             before(editButton, dp(12))
-            after(handleImage, dp(16))
+            after(checkBox, dp(16))
             topOfParent()
         })
 
         add(editButton, lParams {
-            width = wrapContent
-            height = wrapContent
-            before(settingsButton, dp(12))
-            after(nameText, dp(16))
+            width = dp(60)
+            height = 0
+            before(settingsButton)
+            after(nameText)
             topOfParent()
             bottomOfParent()
         })

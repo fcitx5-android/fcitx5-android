@@ -2,7 +2,6 @@ package me.rocka.fcitx5test.ui.olist
 
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageButton
 import androidx.annotation.CallSuper
 import androidx.recyclerview.widget.RecyclerView
@@ -11,7 +10,8 @@ import java.util.*
 abstract class OrderedAdapter<T>(
     initialEntries: List<T>,
     val enableOrder: Boolean = true,
-    var initEditButton: (Button.(Int) -> Unit) = { visibility = View.GONE },
+    val enableCheckBox: Boolean = false,
+    var initEditButton: (ImageButton.(Int) -> Unit) = { visibility = View.GONE },
     var initSettingsButton: (ImageButton.(Int) -> Unit) = { visibility = View.GONE }
 ) :
     RecyclerView.Adapter<OrderedAdapter<T>.ViewHolder>() {
@@ -36,6 +36,7 @@ abstract class OrderedAdapter<T>(
 
     inner class ViewHolder(entryUi: OrderedListEntryUi) : RecyclerView.ViewHolder(entryUi.root) {
         val handleImage = entryUi.handleImage
+        val checkBox = entryUi.checkBox
         val nameText = entryUi.nameText
         val editButton = entryUi.editButton
         val settingsButton = entryUi.settingsButton
@@ -48,6 +49,7 @@ abstract class OrderedAdapter<T>(
         val item = _entries[position]
         with(holder) {
             handleImage.visibility = if (enableOrder) View.VISIBLE else View.GONE
+            checkBox.visibility = if (enableCheckBox) View.VISIBLE else View.GONE
             nameText.text = showEntry(item)
             initSettingsButton(settingsButton, position)
             initEditButton(editButton, position)
