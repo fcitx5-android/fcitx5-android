@@ -12,7 +12,6 @@ import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxLifecycleObserver
 import me.rocka.fcitx5test.native.FcitxState
 import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.atomic.AtomicInteger
 
 class FcitxDaemon : Service(), CoroutineScope by MainScope() {
     private val fcitx = Fcitx(this).apply {
@@ -31,7 +30,6 @@ class FcitxDaemon : Service(), CoroutineScope by MainScope() {
 
         }
     }
-    private val bindingCount = AtomicInteger(0)
 
     private val leftoverOnReadyListeners = ConcurrentLinkedQueue<() -> Unit>()
 
@@ -53,17 +51,9 @@ class FcitxDaemon : Service(), CoroutineScope by MainScope() {
     }
 
     override fun onBind(intent: Intent?): IBinder {
-        bindingCount.getAndIncrement()
-        Log.d(javaClass.name, "FcitxDaemon onBind, count = ${bindingCount.get()}")
+        Log.d(javaClass.name, "FcitxDaemon onBind")
         fcitx.start()
         return FcitxBinder()
-    }
-
-    override fun onUnbind(intent: Intent?): Boolean {
-        Log.d(javaClass.name, "FcitxDaemon onUnbind, count = ${bindingCount.get()}")
-        if (bindingCount.decrementAndGet() == 0)
-            fcitx.stop()
-        return super.onUnbind(intent)
     }
 
     override fun onDestroy() {

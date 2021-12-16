@@ -1,14 +1,20 @@
 package me.rocka.fcitx5test
 
+import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import me.rocka.fcitx5test.native.Fcitx
 
 class MainViewModel : ViewModel() {
+
+    private val context: Context
+        get() = FcitxApplication.getInstance().applicationContext
+
     val toolbarTitle = MutableLiveData<String>()
 
     val toolbarSaveButtonOnClickListener = MutableLiveData<(() -> Unit)?>()
 
+    // don't block initialization
     lateinit var fcitx: Fcitx
 
     fun setToolbarTitle(title: String) {
@@ -23,4 +29,13 @@ class MainViewModel : ViewModel() {
         toolbarSaveButtonOnClickListener.value = null
     }
 
+    init {
+        FcitxDaemonManager.instance.bindFcitxDaemonAsync(context, javaClass.name) {
+            fcitx = getFcitxInstance()
+        }
+    }
+
+    override fun onCleared() {
+        FcitxDaemonManager.instance.unbind(context, javaClass.name)
+    }
 }

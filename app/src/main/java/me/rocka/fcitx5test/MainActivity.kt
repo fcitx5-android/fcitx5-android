@@ -19,10 +19,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         // TODO: debug
         startActivity(Intent(this, TestActivity::class.java))
-        // now fragments use fcitx instance from activity
-        FcitxDaemonManager.bindFcitxDaemonAsync(this, javaClass.name) {
-            viewModel.fcitx = getFcitxInstance()
-        }
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
@@ -47,10 +43,5 @@ class MainActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.activity_main_menu, menu)
         return true
-    }
-
-    override fun onDestroy() {
-        FcitxDaemonManager.unbind(this, javaClass.name)
-        super.onDestroy()
     }
 }
