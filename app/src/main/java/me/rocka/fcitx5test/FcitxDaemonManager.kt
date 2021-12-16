@@ -6,12 +6,12 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import me.rocka.fcitx5test.native.Fcitx
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-object FcitxDaemonManager {
-    private val connections: ConcurrentHashMap<String, ServiceConnection> = ConcurrentHashMap()
+class FcitxDaemonManager {
+
+    private val connections: HashMap<String, ServiceConnection> = hashMapOf()
 
     fun bindFcitxDaemonAsync(
         context: Context,
@@ -65,4 +65,8 @@ object FcitxDaemonManager {
         connections.clear()
     }
 
+    companion object {
+        // for thread safety, this class shouldn't be used concurrently
+        val instance by lazy { FcitxDaemonManager() }
+    }
 }
