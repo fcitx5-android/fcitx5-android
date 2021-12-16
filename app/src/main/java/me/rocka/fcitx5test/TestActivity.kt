@@ -10,7 +10,7 @@ class TestActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(object :
-            BaseOrderedListUi<String>(this, Mode.FreeAddString(), listOf("A", "B", "C"), false) {
+            BaseOrderedListUi<String>(this, Mode.FreeAddString(), listOf("A", "B", "C"), true, true) {
             override fun showEntry(x: String): String = x
         })
     }
