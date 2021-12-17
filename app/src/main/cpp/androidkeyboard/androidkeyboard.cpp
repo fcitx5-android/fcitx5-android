@@ -277,9 +277,10 @@ void AndroidKeyboardEngine::updateUI(InputContext *inputContext) {
         preedit.setCursor(length);
     }
     inputContext->inputPanel().setClientPreedit(preedit);
-    if (!inputContext->capabilityFlags().test(CapabilityFlag::Preedit)) {
-        inputContext->inputPanel().setPreedit(preedit);
-    }
+    // we don't want preedit here ...
+//    if (!inputContext->capabilityFlags().test(CapabilityFlag::Preedit)) {
+//        inputContext->inputPanel().setPreedit(preedit);
+//    }
     inputContext->updatePreedit();
     inputContext->updateUserInterface(UserInterfaceComponent::InputPanel);
 }
