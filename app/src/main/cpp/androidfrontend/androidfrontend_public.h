@@ -30,6 +30,9 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, resetInputPanel,
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, repositionCursor,
                              void(ICUUID, int))
 
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, focusInputContext,
+                             void(ICUUID, bool))
+
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setCandidateListCallback,
                              void(const CandidateListCallback &))
 

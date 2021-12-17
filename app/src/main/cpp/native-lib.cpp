@@ -317,6 +317,13 @@ public:
         });
     }
 
+    void focusInputContext(bool focus) {
+        if (!p_instance) return;
+        p_dispatcher->schedule([this, focus]() {
+            p_frontend->call<fcitx::IAndroidFrontend::focusInputContext>(p_uuid, focus);
+        });
+    }
+
     void saveConfig() {
         p_dispatcher->schedule([this]() {
             p_instance->globalConfig().safeSave();
@@ -835,4 +842,11 @@ JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_triggerUnicodeInput(JNIEnv *env, jclass clazz) {
     RETURN_IF_NOT_RUNNING
     Fcitx::Instance().triggerUnicode();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_focusInputContext(JNIEnv *env, jclass clazz, jboolean focus) {
+    RETURN_IF_NOT_RUNNING
+    Fcitx::Instance().focusInputContext(focus == JNI_TRUE);
 }

@@ -95,6 +95,12 @@ class FcitxInputMethodService : InputMethodService(),
     }
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
+        if (restarting) {
+            // sometimes input won't finish before starts again; it restarts instead
+            // so reset is needed to clear previous input state
+            fcitx.reset()
+        }
+        fcitx.focus()
         inputView.onShow(info)
     }
 
@@ -154,13 +160,14 @@ class FcitxInputMethodService : InputMethodService(),
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
-        fcitx.reset()
+        // default implementation would finish composing text
+        super.onFinishInputView(finishingInput)
+        fcitx.focus(false)
     }
 
     override fun onFinishInput() {
         inputConnection?.requestCursorUpdates(0)
         editorInfo = null
-        super.onFinishInput()
     }
 
     override fun onDestroy() {

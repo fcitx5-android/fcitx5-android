@@ -113,8 +113,6 @@ ICUUID AndroidFrontend::createInputContext(const std::string &program) {
             CapabilityFlag::ClientUnfocusCommit,
             CapabilityFlag::ClientSideInputPanel
     });
-    // focus needed for `InputContext::reset` to work
-    ic->focusIn();
     return ic->uuid();
 }
 
@@ -175,6 +173,15 @@ void AndroidFrontend::repositionCursor(ICUUID uuid, int position) {
     auto engine = instance_->inputMethodEngine(ic);
     InvokeActionEvent event(InvokeActionEvent::Action::LeftClick, position, ic);
     engine->invokeAction(*(instance_->inputMethodEntry(ic)), event);
+}
+
+void AndroidFrontend::focusInputContext(ICUUID uuid, bool focus) {
+    auto ic = instance_->inputContextManager().findByUUID(uuid);
+    if (focus) {
+        ic->focusIn();
+    } else {
+        ic->focusOut();
+    }
 }
 
 void AndroidFrontend::setCandidateListCallback(const CandidateListCallback &callback) {
