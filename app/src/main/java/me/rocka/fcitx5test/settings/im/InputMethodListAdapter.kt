@@ -30,7 +30,8 @@ class InputMethodListAdapter(private val fcitx: Fcitx, private val fab: Floating
             fab.setOnClickListener {
                 val items = unEnabled.map { it.displayName }.toTypedArray()
                 AlertDialog.Builder(fab.context)
-                    .setTitle(R.string.input_methods)
+                    .setTitle(R.string.add_input_method)
+                    .setNegativeButton(R.string.cancel) { dlg, _ -> dlg.dismiss() }
                     .setItems(items) { _, which ->
                         entries.add(unEnabled[which])
                         updateIMState()
@@ -44,10 +45,8 @@ class InputMethodListAdapter(private val fcitx: Fcitx, private val fab: Floating
                                 // the index of element just added is current last element's index + 1
                                 notifyItemRemoved(entries.size)
                                 updateFAB()
-                            }
-                            .show()
-                    }
-                    .show()
+                            }.show()
+                    }.show()
             }
         }
     }
