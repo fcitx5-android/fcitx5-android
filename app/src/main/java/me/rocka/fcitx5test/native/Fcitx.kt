@@ -258,12 +258,15 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
                     StringBuilder().apply {
                         for (i in 0 until locales.size()) {
                             if (i != 0) append(":")
-                            append(locales[i].run { "${language}_${country}" })
+                            append(locales[i].run { "${language}_${country}:$language" })
+                            // since there is not an `en.mo` file, `en` must be the only locale
+                            // in order to use default english translation
+                            if (i == 0 && locales[i].language == "en") break
                         }
                     }.toString()
                 } else {
                     @Suppress("DEPRECATION")
-                    resources.configuration.locale.run { "${language}_${country}" }
+                    resources.configuration.locale.run { "${language}_${country}:$language" }
                 }
                 val externalFilesDir = getExternalFilesDir(null)!!
                 startupFcitx(

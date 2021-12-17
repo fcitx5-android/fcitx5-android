@@ -403,6 +403,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
     const char *app_data = env->GetStringUTFChars(appData, nullptr);
     const char *app_lib = env->GetStringUTFChars(appLib, nullptr);
     const char *ext_data = env->GetStringUTFChars(extData, nullptr);
+    std::string lang = fcitx::stringutils::split(locale_char, ":")[0];
     std::string config_home = fcitx::stringutils::joinPath(ext_data, "config");
     std::string data_home = fcitx::stringutils::joinPath(ext_data, "data");
     std::string usr_share = fcitx::stringutils::joinPath(app_data, "usr", "share");
@@ -410,6 +411,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
     const char *locale_dir_char = locale_dir.c_str();
     std::string libime_data = fcitx::stringutils::joinPath(usr_share, "libime");
 
+    setenv("LANG", lang.c_str(), 1);
     setenv("LANGUAGE", locale_char, 1);
     setenv("FCITX_LOCALE", locale_char, 1);
     setenv("HOME", ext_data, 1);
