@@ -18,8 +18,8 @@ import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxEvent
 import splitties.bitflags.hasFlag
 
-class FcitxInputMethodService : InputMethodService(),
-    CoroutineScope by MainScope() + SupervisorJob() {
+class FcitxInputMethodService
+    : InputMethodService(), CoroutineScope by MainScope() {
 
     private lateinit var inputView: InputView
     private lateinit var fcitx: Fcitx
@@ -27,6 +27,8 @@ class FcitxInputMethodService : InputMethodService(),
     private var connection: ServiceConnection? = null
 
     var editorInfo: EditorInfo? = null
+
+    private var keyRepeatingJobs = hashMapOf<String, Job>()
 
     // `-1` means invalid, or don't know yet
     private var selectionStart = -1
@@ -50,7 +52,7 @@ class FcitxInputMethodService : InputMethodService(),
                 if (Character.isISOControl(it.code)) {
                     when (it.code) {
                         '\b'.code -> sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
-                        '\r'.code -> handleReturn()
+                        '\r'.code -> handleReturnKey()
                         else -> Log.d("IMS", it.toString())
                     }
                 } else {
@@ -65,18 +67,41 @@ class FcitxInputMethodService : InputMethodService(),
         inputView.handleFcitxEvent(event)
     }
 
-    private fun handleReturn() {
-        if (editorInfo == null || editorInfo?.imeOptions?.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION) == true) {
+    private fun handleReturnKey() {
+        if (editorInfo == null || editorInfo!!.imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION)) {
             sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
             return
         }
-        editorInfo?.run {
+        editorInfo!!.run {
             if (actionLabel?.isNotEmpty() == true) {
-                inputConnection?.performEditorAction(actionId)
-                return
-            }
-            inputConnection?.performEditorAction(imeOptions and EditorInfo.IME_MASK_ACTION)
+                actionId
+            } else {
+                imeOptions and EditorInfo.IME_MASK_ACTION
+            }.let { inputConnection?.performEditorAction(it) }
         }
+    }
+
+    fun startRepeating(key: String) {
+        if (keyRepeatingJobs.containsKey(key)) {
+            return
+        }
+        keyRepeatingJobs[key] = launch {
+            while (true) {
+                fcitx.sendKey(key)
+                delay(60L)
+            }
+        }
+    }
+
+    fun cancelRepeating(key: String) {
+        keyRepeatingJobs.run {
+            get(key)?.cancel()
+            remove(key)
+        }
+    }
+
+    private fun cancelRepeatingAll() {
+        keyRepeatingJobs.forEach { cancelRepeating(it.key) }
     }
 
     override fun onCreateInputView(): View {
@@ -162,6 +187,7 @@ class FcitxInputMethodService : InputMethodService(),
     override fun onFinishInputView(finishingInput: Boolean) {
         // default implementation would finish composing text
         super.onFinishInputView(finishingInput)
+        cancelRepeatingAll()
         fcitx.focus(false)
     }
 
@@ -171,7 +197,8 @@ class FcitxInputMethodService : InputMethodService(),
     }
 
     override fun onDestroy() {
-        eventHandlerJob?.cancel()
+        // cancel all coroutines in MainScope
+        cancel()
         eventHandlerJob = null
         connection?.let { unbindService(it) }
         connection = null
