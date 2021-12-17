@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Fcitx5Test</string>
+    <string name="app_name">Fcitx5 for Android</string>
     <string name="open_ime_settings">Open System IME Settings</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
