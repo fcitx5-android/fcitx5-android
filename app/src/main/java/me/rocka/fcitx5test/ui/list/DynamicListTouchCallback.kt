@@ -1,15 +1,17 @@
-package me.rocka.fcitx5test.ui.olist
+package me.rocka.fcitx5test.ui.list
 
 import android.graphics.Canvas
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 
-class OrderedTouchCallback<T>(private val adapter: OrderedAdapter<T>) :
+class DynamicListTouchCallback<T>(private val adapter: DynamicListAdapter<T>) :
     ItemTouchHelper.SimpleCallback(
         if (adapter.enableOrder)
             ItemTouchHelper.UP or ItemTouchHelper.DOWN
         else ItemTouchHelper.ACTION_STATE_IDLE,
-        ItemTouchHelper.LEFT
+        if (adapter.enableAddAndDelete)
+            ItemTouchHelper.LEFT
+        else ItemTouchHelper.ACTION_STATE_IDLE
     ) {
     private var selected = true
     private var reset = false
@@ -56,7 +58,8 @@ class OrderedTouchCallback<T>(private val adapter: OrderedAdapter<T>) :
                     }.start()
                 }
             }
-            ItemTouchHelper.ACTION_STATE_SWIPE -> {}
+            ItemTouchHelper.ACTION_STATE_SWIPE -> {
+            }
         }
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
     }

@@ -1,20 +1,22 @@
-package me.rocka.fcitx5test.ui.olist
+package me.rocka.fcitx5test.ui.list
 
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.ImageButton
 import androidx.annotation.CallSuper
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
 
-abstract class OrderedAdapter<T>(
+abstract class DynamicListAdapter<T>(
     initialEntries: List<T>,
+    val enableAddAndDelete: Boolean = true,
     val enableOrder: Boolean = true,
-    val enableCheckBox: Boolean = false,
+    val initCheckBox: (CheckBox.(Int) -> Unit) = { visibility = View.GONE },
     var initEditButton: (ImageButton.(Int) -> Unit) = { visibility = View.GONE },
     var initSettingsButton: (ImageButton.(Int) -> Unit) = { visibility = View.GONE }
 ) :
-    RecyclerView.Adapter<OrderedAdapter<T>.ViewHolder>() {
+    RecyclerView.Adapter<DynamicListAdapter<T>.ViewHolder>() {
 
     private val _entries = initialEntries.toMutableList()
 
@@ -34,7 +36,7 @@ abstract class OrderedAdapter<T>(
         listener = listener?.let { OnItemChangedListener.merge(it, x) } ?: x
     }
 
-    inner class ViewHolder(entryUi: OrderedListEntryUi) : RecyclerView.ViewHolder(entryUi.root) {
+    inner class ViewHolder(entryUi: DynamicListEntryUi) : RecyclerView.ViewHolder(entryUi.root) {
         val handleImage = entryUi.handleImage
         val checkBox = entryUi.checkBox
         val nameText = entryUi.nameText
@@ -43,14 +45,14 @@ abstract class OrderedAdapter<T>(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(OrderedListEntryUi(parent.context))
+        ViewHolder(DynamicListEntryUi(parent.context))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = _entries[position]
         with(holder) {
             handleImage.visibility = if (enableOrder) View.VISIBLE else View.GONE
-            checkBox.visibility = if (enableCheckBox) View.VISIBLE else View.GONE
             nameText.text = showEntry(item)
+            initCheckBox(checkBox, position)
             initSettingsButton(settingsButton, position)
             initEditButton(editButton, position)
         }

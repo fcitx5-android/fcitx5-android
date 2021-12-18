@@ -1,7 +1,6 @@
 package me.rocka.fcitx5test.settings.im
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,8 +12,8 @@ import me.rocka.fcitx5test.MainViewModel
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.InputMethodEntry
-import me.rocka.fcitx5test.ui.olist.BaseOrderedListUi
-import me.rocka.fcitx5test.ui.olist.OnItemChangedListener
+import me.rocka.fcitx5test.ui.list.BaseDynamicListUi
+import me.rocka.fcitx5test.ui.list.OnItemChangedListener
 
 class InputMethodListFragment : Fragment(), OnItemChangedListener<InputMethodEntry> {
 
@@ -28,12 +27,11 @@ class InputMethodListFragment : Fragment(), OnItemChangedListener<InputMethodEnt
 
 
     private fun updateIMState() {
-        Log.d(javaClass.name, "IM state updated: ${entries.joinToString { it.displayName }}")
         fcitx.setEnabledIme(entries.map { it.uniqueName }.toTypedArray())
     }
 
-    private val ui: BaseOrderedListUi<InputMethodEntry> by lazy {
-        object : BaseOrderedListUi<InputMethodEntry>(
+    private val ui: BaseDynamicListUi<InputMethodEntry> by lazy {
+        object : BaseDynamicListUi<InputMethodEntry>(
             ctx = requireContext(),
             mode = Mode.ChooseOne {
                 val unEnabled = fcitx.availableIme().toSet() - entries.toSet()

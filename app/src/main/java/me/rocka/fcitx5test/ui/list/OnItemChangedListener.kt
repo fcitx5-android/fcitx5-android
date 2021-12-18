@@ -1,4 +1,4 @@
-package me.rocka.fcitx5test.ui.olist
+package me.rocka.fcitx5test.ui.list
 
 
 /**
@@ -6,13 +6,13 @@ package me.rocka.fcitx5test.ui.olist
  */
 interface OnItemChangedListener<T> {
 
-    fun onItemSwapped(fromIdx: Int, toIdx: Int, item: T)
+    fun onItemSwapped(fromIdx: Int, toIdx: Int, item: T) {}
 
-    fun onItemAdded(idx: Int, item: T)
+    fun onItemAdded(idx: Int, item: T) {}
 
-    fun onItemRemoved(idx: Int, item: T)
+    fun onItemRemoved(idx: Int, item: T) {}
 
-    fun onItemUpdated(idx: Int, old: T, new: T)
+    fun onItemUpdated(idx: Int, old: T, new: T) {}
 
     companion object {
         /**
