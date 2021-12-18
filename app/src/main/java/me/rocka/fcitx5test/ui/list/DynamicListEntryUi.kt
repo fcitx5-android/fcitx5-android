@@ -1,4 +1,4 @@
-package me.rocka.fcitx5test.ui.olist
+package me.rocka.fcitx5test.ui.list
 
 import android.content.Context
 import android.graphics.PorterDuff
@@ -18,7 +18,7 @@ import splitties.views.setPaddingDp
 import splitties.views.textAppearance
 
 
-class OrderedListEntryUi(override val ctx: Context) : Ui {
+class DynamicListEntryUi(override val ctx: Context) : Ui {
 
     val handleImage = imageView {
         imageResource = R.drawable.ic_baseline_drag_handle_24

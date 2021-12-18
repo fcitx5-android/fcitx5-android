@@ -60,8 +60,7 @@
 
     <fragment
         android:id="@+id/addonListFragment"
-        android:name="me.rocka.fcitx5test.settings.addon.AddonListFragment"
-        tools:layout="@layout/fragment_addon_list">
+        android:name="me.rocka.fcitx5test.settings.addon.AddonListFragment">
         <action
             android:id="@+id/action_addonListFragment_to_addonConfigFragment"
             app:destination="@id/addonConfigFragment"

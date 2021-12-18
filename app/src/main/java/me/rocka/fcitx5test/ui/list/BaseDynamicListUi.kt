@@ -1,10 +1,10 @@
-package me.rocka.fcitx5test.ui.olist
+package me.rocka.fcitx5test.ui.list
 
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.PorterDuff
-import android.util.Log
 import android.view.View
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageButton
 import androidx.core.widget.addTextChangedListener
@@ -24,15 +24,22 @@ import splitties.views.gravityEndBottom
 import splitties.views.recyclerview.verticalLayoutManager
 
 
-abstract class BaseOrderedListUi<T>(
+abstract class BaseDynamicListUi<T>(
     override val ctx: Context,
     private val mode: Mode<T>,
     initialEntries: List<T>,
-    enableOrder: Boolean = false,
-    enableCheckBox: Boolean = false,
+    enableOrder: Boolean = true,
+    initCheckBox: (CheckBox.(Int) -> Unit) = { visibility = View.GONE },
     initSettingsButton: (ImageButton.(Int) -> Unit) = { visibility = View.GONE }
 ) : Ui,
-    OrderedAdapter<T>(initialEntries, enableOrder, enableCheckBox, {}, initSettingsButton) {
+    DynamicListAdapter<T>(
+        initialEntries,
+        enableOrder,
+        mode !is Mode.Immutable,
+        initCheckBox,
+        {},
+        initSettingsButton
+    ) {
 
     private val fab = floatingActionButton {
         setImageResource(R.drawable.ic_baseline_plus_24)
@@ -44,7 +51,7 @@ abstract class BaseOrderedListUi<T>(
         /**
          * Pick one from a list of [T]
          */
-        data class ChooseOne<T>(val candidatesSource: BaseOrderedListUi<T>.() -> Array<T>) :
+        data class ChooseOne<T>(val candidatesSource: BaseDynamicListUi<T>.() -> Array<T>) :
             Mode<T>()
 
         /**
@@ -55,6 +62,8 @@ abstract class BaseOrderedListUi<T>(
             val converter: (String) -> T,
             val validator: (String) -> Boolean = { it.isNotBlank() }
         ) : Mode<T>()
+
+        class Immutable<T> : Mode<T>()
 
         @Suppress("FunctionName")
         companion object {
@@ -78,27 +87,18 @@ abstract class BaseOrderedListUi<T>(
                     }
                 }
             }
+            is Mode.Immutable -> { _ -> visibility = View.GONE }
         }
         addOnItemChangedListener(object : OnItemChangedListener<T> {
             override fun onItemSwapped(fromIdx: Int, toIdx: Int, item: T) {
                 updateFAB()
                 Snackbar.make(
                     fab,
-                    "${showEntry(item)} swapped from #${fromIdx} -> #$toIdx}",
+                    "${showEntry(entries[toIdx])} <-> ${showEntry(entries[fromIdx])}",
                     Snackbar.LENGTH_SHORT
                 )
                     .setAction(R.string.undo) { swapItem(toIdx, fromIdx) }
                     .show()
-                Log.d(
-                    javaClass.name,
-                    "${showEntry(item)} swapped from #${fromIdx} -> #$toIdx}, current: ${
-                        entries.joinToString {
-                            showEntry(
-                                it
-                            )
-                        }
-                    }"
-                )
             }
 
             override fun onItemAdded(idx: Int, item: T) {
@@ -106,10 +106,6 @@ abstract class BaseOrderedListUi<T>(
                 Snackbar.make(fab, "${showEntry(item)} added", Snackbar.LENGTH_SHORT)
                     .setAction(R.string.undo) { removeItem(idx) }
                     .show()
-                Log.d(
-                    javaClass.name,
-                    "${showEntry(item)} added, current: ${entries.joinToString { showEntry(it) }}"
-                )
             }
 
             override fun onItemRemoved(idx: Int, item: T) {
@@ -117,22 +113,18 @@ abstract class BaseOrderedListUi<T>(
                 Snackbar.make(fab, "${showEntry(item)} removed", Snackbar.LENGTH_SHORT)
                     .setAction(R.string.undo) { addItem(idx, item) }
                     .show()
-                Log.d(
-                    javaClass.name,
-                    "${showEntry(item)} removed, current: ${entries.joinToString { showEntry(it) }}"
-                )
             }
 
             override fun onItemUpdated(idx: Int, old: T, new: T) {
                 updateFAB()
-                Snackbar.make(fab, "${showEntry(old)} -> ${showEntry(new)}", Snackbar.LENGTH_SHORT)
-                    .setAction(R.string.undo) { updateItem(idx, old) }
-                    .show()
-                Log.d(
-                    javaClass.name,
-                    "${showEntry(old)} -> ${showEntry(new)}" +
-                            ", current: ${entries.joinToString { showEntry(it) }}"
-                )
+                if (mode !is Mode.Immutable)
+                    Snackbar.make(
+                        fab,
+                        "${showEntry(old)} -> ${showEntry(new)}",
+                        Snackbar.LENGTH_SHORT
+                    )
+                        .setAction(R.string.undo) { updateItem(idx, old) }
+                        .show()
             }
 
         })
@@ -170,6 +162,7 @@ abstract class BaseOrderedListUi<T>(
 
                 }
             }
+            is Mode.Immutable -> fab.hide()
         }
 
     }
@@ -219,9 +212,11 @@ abstract class BaseOrderedListUi<T>(
 
     override val root: View = coordinatorLayout {
         add(recyclerView {
-            adapter = this@BaseOrderedListUi
+            adapter = this@BaseDynamicListUi
             layoutManager = verticalLayoutManager()
-            ItemTouchHelper(OrderedTouchCallback(this@BaseOrderedListUi)).attachToRecyclerView(this)
+            ItemTouchHelper(DynamicListTouchCallback(this@BaseDynamicListUi)).attachToRecyclerView(
+                this
+            )
 
         }, defaultLParams {
             height = matchParent
