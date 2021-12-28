@@ -1,6 +1,9 @@
 package me.rocka.fcitx5test.settings
 
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.preference.PreferenceFragmentCompat
@@ -24,14 +27,23 @@ abstract class FcitxPreferenceFragment : PreferenceFragmentCompat() {
         requireArguments().getString(key)
             ?: throw IllegalStateException("No $key found in bundle")
 
-    final override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         viewModel.setToolbarTitle(getPageTitle())
         viewModel.enableToolbarSaveButton {
             saveConfig(fcitx, raw["cfg"])
             Toast.makeText(requireContext(), "Saved", Toast.LENGTH_SHORT).show()
         }
+        return super.onCreateView(inflater, container, savedInstanceState)
+    }
+
+    final override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         raw = obtainConfig(fcitx)
-        preferenceScreen = PreferenceScreenFactory.create(preferenceManager, raw)
+        preferenceScreen =
+            PreferenceScreenFactory.create(preferenceManager, parentFragmentManager, raw)
     }
 
     override fun onPause() {

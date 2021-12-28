@@ -2,8 +2,10 @@ package me.rocka.fcitx5test.settings.parsed
 
 import cn.berberman.girls.utils.either.*
 import me.rocka.fcitx5test.native.RawConfig
+import java.io.Serializable
 
-sealed class ConfigDescriptor<T, U> {
+
+sealed class ConfigDescriptor<T, U> : Serializable {
     abstract val name: String
     abstract val type: ConfigType<T>
     abstract val description: String?
@@ -13,12 +15,12 @@ sealed class ConfigDescriptor<T, U> {
         val name: String,
         val values: List<ConfigDescriptor<*, *>>,
         val customTypes: List<ConfigCustomTypeDef>
-    )
+    ) : Serializable
 
     data class ConfigCustomTypeDef(
         val name: String,
         val values: List<ConfigDescriptor<*, *>>
-    )
+    ) : Serializable
 
     data class ConfigInt(
         override val name: String,

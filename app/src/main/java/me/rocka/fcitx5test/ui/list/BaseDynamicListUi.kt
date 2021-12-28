@@ -28,14 +28,14 @@ abstract class BaseDynamicListUi<T>(
     override val ctx: Context,
     private val mode: Mode<T>,
     initialEntries: List<T>,
-    enableOrder: Boolean = true,
+    enableOrder: Boolean = false,
     initCheckBox: (CheckBox.(Int) -> Unit) = { visibility = View.GONE },
     initSettingsButton: (ImageButton.(Int) -> Unit) = { visibility = View.GONE }
 ) : Ui,
     DynamicListAdapter<T>(
         initialEntries,
-        enableOrder,
         mode !is Mode.Immutable,
+        enableOrder,
         initCheckBox,
         {},
         initSettingsButton
