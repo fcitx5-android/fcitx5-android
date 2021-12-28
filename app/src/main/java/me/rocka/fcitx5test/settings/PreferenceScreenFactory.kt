@@ -1,17 +1,25 @@
 package me.rocka.fcitx5test.settings
 
 import android.content.Context
+import androidx.core.os.bundleOf
+import androidx.fragment.app.FragmentManager
+import androidx.navigation.fragment.findNavController
 import androidx.preference.*
 import cn.berberman.girls.utils.either.otherwise
 import cn.berberman.girls.utils.either.then
 import me.rocka.fcitx5test.AppSharedPreferences
+import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.native.RawConfig
 import me.rocka.fcitx5test.settings.parsed.ConfigDescriptor
 import me.rocka.fcitx5test.settings.parsed.ConfigType
 
 object PreferenceScreenFactory {
 
-    fun create(preferenceManager: PreferenceManager, raw: RawConfig): PreferenceScreen {
+    fun create(
+        preferenceManager: PreferenceManager,
+        fragmentManager: FragmentManager,
+        raw: RawConfig
+    ): PreferenceScreen {
         val context = preferenceManager.context
         val screen = preferenceManager.createPreferenceScreen(context)
         val cfg = raw["cfg"]
@@ -24,7 +32,7 @@ object PreferenceScreenFactory {
             .then {
                 screen.title = it.name
                 it.values.forEach { d ->
-                    general(context, cfg, screen, d, store)
+                    general(context, fragmentManager, cfg, screen, d, store)
                 }
             }
 
@@ -34,6 +42,7 @@ object PreferenceScreenFactory {
 
     private fun general(
         context: Context,
+        fragmentManager: FragmentManager,
         cfg: RawConfig,
         screen: PreferenceScreen,
         descriptor: ConfigDescriptor<*, *>,
@@ -47,12 +56,32 @@ object PreferenceScreenFactory {
             return
 
         if (descriptor is ConfigDescriptor.ConfigCustom) {
-            custom(context, cfg, screen, descriptor)
+            custom(context, fragmentManager, cfg, screen, descriptor)
             return
         }
 
         fun stubPreference() = Preference(context).apply {
             summary = "⛔ Unimplemented type '${ConfigType.pretty(descriptor.type)}'"
+        }
+
+        fun listPreference() = Preference(context).apply {
+            setOnPreferenceClickListener {
+                val currentFragment =
+                    fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
+                currentFragment.findNavController().navigate(
+                    R.id.listFragment, bundleOf(
+                        ListFragment.ARG_CFG to cfg[descriptor.name],
+                        ListFragment.ARG_DESC to descriptor,
+                    )
+                )
+                fragmentManager.setFragmentResultListener(
+                    descriptor.name,
+                    currentFragment
+                ) { _, v ->
+                    cfg[descriptor.name].subItems = (v[descriptor.name] as RawConfig).subItems
+                }
+                true
+            }
         }
 
         when (descriptor) {
@@ -68,7 +97,7 @@ object PreferenceScreenFactory {
                 }
                 setDefaultValue(descriptor.defaultValue)
             }
-            is ConfigDescriptor.ConfigEnumList -> stubPreference() // TODO
+            is ConfigDescriptor.ConfigEnumList -> listPreference()
             is ConfigDescriptor.ConfigExternal -> stubPreference()
             is ConfigDescriptor.ConfigInt -> SeekBarPreference(context).apply {
                 showSeekBarValue = true
@@ -77,7 +106,10 @@ object PreferenceScreenFactory {
                 descriptor.intMax?.let { max = it }
             }
             is ConfigDescriptor.ConfigKey -> stubPreference()
-            is ConfigDescriptor.ConfigList -> stubPreference() // TODO
+            is ConfigDescriptor.ConfigList -> if (descriptor.type.subtype in ListFragment.supportedSubtypes)
+                listPreference()
+            else
+                stubPreference()
             is ConfigDescriptor.ConfigString -> EditTextPreference(context).apply {
                 dialogTitle = descriptor.description ?: descriptor.name
                 summaryProvider = Preference.SummaryProvider { pref: EditTextPreference ->
@@ -99,6 +131,7 @@ object PreferenceScreenFactory {
 
     private fun custom(
         context: Context,
+        fragmentManager: FragmentManager,
         cfg: RawConfig,
         screen: PreferenceScreen,
         descriptor: ConfigDescriptor.ConfigCustom
@@ -114,6 +147,7 @@ object PreferenceScreenFactory {
         descriptor.customTypeDef!!.values.forEach {
             general(
                 context,
+                fragmentManager,
                 cfg[descriptor.name],
                 screen,
                 it,

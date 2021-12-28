@@ -2,9 +2,10 @@ package me.rocka.fcitx5test.settings.parsed
 
 import cn.berberman.girls.utils.either.Either
 import cn.berberman.girls.utils.either.runCatchingEither
+import java.io.Serializable
 
 
-sealed class ConfigType<T> {
+sealed class ConfigType<T> : Serializable {
     object TyInt : ConfigType<TyInt>() {
         override fun toString(): String = javaClass.simpleName
     }

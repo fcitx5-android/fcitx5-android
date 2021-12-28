@@ -8,6 +8,21 @@ sealed class FcitxEvent<T>(open val data: T) {
         FcitxEvent<Array<String>>(data) {
         override val eventType: EventType
             get() = EventType.Candidate
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as CandidateListEvent
+
+            if (!data.contentEquals(other.data)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            return data.contentHashCode()
+        }
     }
 
     data class CommitStringEvent(override val data: String) :
@@ -56,6 +71,21 @@ sealed class FcitxEvent<T>(open val data: T) {
     data class UnknownEvent(override val data: Array<Any>) : FcitxEvent<Array<Any>>(data) {
         override val eventType: EventType
             get() = EventType.Unknown
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as UnknownEvent
+
+            if (!data.contentEquals(other.data)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            return data.contentHashCode()
+        }
     }
 
     enum class EventType {
