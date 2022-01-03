@@ -19,4 +19,5 @@
     <string name="edit">Edit</string>
     <string name="undo">Undo</string>
     <string name="ok">OK</string>
+    <string name="clean_and_sync_assets">Delete and sync runtime data</string>
 </resources>

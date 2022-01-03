@@ -1,9 +1,9 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
-import java.io.ByteArrayOutputStream
-import java.beans.XMLEncoder
-import java.beans.XMLDecoder
-import com.google.common.io.Files
 import com.google.common.hash.Hashing
+import com.google.common.io.Files
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import java.io.ByteArrayOutputStream
 
 fun exec(cmd: String): String = ByteArrayOutputStream().use {
     project.exec {
@@ -23,6 +23,8 @@ plugins {
     id("kotlin-android")
 }
 
+val assetDescriptorName = "descriptor.json"
+
 android {
     compileSdk = 31
     buildToolsVersion = "31.0.0"
@@ -37,8 +39,7 @@ android {
         setProperty("archivesBaseName", "$applicationId-v$versionName-$gitRevCount-g$gitHashShort")
         buildConfigField("String", "BUILD_GIT_HASH", "\"$gitHashShort\"")
         buildConfigField("long", "BUILD_TIME", System.currentTimeMillis().toString())
-        // increase this value when update assets
-        buildConfigField("long", "ASSETS_VERSION", "7")
+        buildConfigField("String", "ASSETS_DESCRIPTOR_NAME", "\"${assetDescriptorName}\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a")
@@ -70,18 +71,18 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
 
 val generateAssetDescriptor = tasks.register<AssetDescriptorTask>("generateAssetDescriptor") {
-    inputDir.set(file("src/main/assets/usr"))
-    outputFile.set(file("src/main/assets/descriptor.xml"))
+    inputDir.set(file("src/main/assets"))
+    outputFile.set(file("src/main/assets/${assetDescriptorName}"))
 
 }.also { tasks.preBuild.dependsOn(it) }
 
@@ -175,27 +176,16 @@ abstract class AssetDescriptorTask : DefaultTask() {
 
     private fun serialize(map: Map<String, String>) {
         file.deleteOnExit()
-        val fos = file.outputStream()
-        val encoder = XMLEncoder(fos)
-        encoder.writeObject(map)
-        encoder.close()
-        fos.close()
+        file.writeText(JsonOutput.prettyPrint(JsonOutput.toJson(map)))
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun deserialize(): Map<String, String> {
-        val fis = file.inputStream()
-        val decoder = XMLDecoder(fis)
-        val map = decoder.readObject()
-        decoder.close()
-        fis.close()
-        return map as Map<String, String>
-    }
+    private fun deserialize(): Map<String, String> =
+        JsonSlurper().parseText(file.readText()) as Map<String, String>
 
     companion object {
         fun md5(file: File): String =
             Files.asByteSource(file).hash(Hashing.sha256()).toString()
-
     }
 
     @TaskAction

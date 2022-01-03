@@ -6,9 +6,14 @@ import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import me.rocka.fcitx5test.asset.AssetManager
 import me.rocka.fcitx5test.databinding.FragmentMainBinding
 
 class MainFragment : Fragment() {
@@ -38,6 +43,12 @@ class MainFragment : Fragment() {
                 },
                 context.getString(R.string.behavior) to {
                     findNavController().navigate(R.id.behaviorSettingsFragment)
+                },
+                context.getString(R.string.clean_and_sync_assets) to {
+                    GlobalScope.launch(Dispatchers.IO) {
+                        AssetManager.cleanAndSync()
+                    }
+                    Toast.makeText(context, "Synced!", Toast.LENGTH_SHORT).show()
                 }
             )
         }

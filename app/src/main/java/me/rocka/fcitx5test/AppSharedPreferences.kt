@@ -2,8 +2,8 @@ package me.rocka.fcitx5test
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import me.rocka.fcitx5test.AppSharedPreferences.PreferenceKeys.AssetsVersion
 import me.rocka.fcitx5test.AppSharedPreferences.PreferenceKeys.ButtonHapticFeedback
+import me.rocka.fcitx5test.AppSharedPreferences.PreferenceKeys.FirstRun
 import me.rocka.fcitx5test.AppSharedPreferences.PreferenceKeys.HideKeyConfig
 import me.rocka.fcitx5test.AppSharedPreferences.PreferenceKeys.IgnoreSystemCursor
 import kotlin.properties.ReadWriteProperty
@@ -30,13 +30,13 @@ class AppSharedPreferences(private val sharedPreferences: SharedPreferences) {
         }
 
 
-    var assetsVersion by preference(AssetsVersion, -1L)
+    var firstRun by preference(FirstRun, true)
     var ignoreSystemCursor by preference(IgnoreSystemCursor, true)
     var hideKeyConfig by preference(HideKeyConfig, true)
     var buttonHapticFeedback by preference(ButtonHapticFeedback, true)
 
     object PreferenceKeys {
-        const val AssetsVersion = "assets_version"
+        const val FirstRun = "first_run"
         const val IgnoreSystemCursor = "ignore_system_cursor"
         const val HideKeyConfig = "hide_key_config"
         const val ButtonHapticFeedback = "button_haptic_feedback"
