@@ -1,5 +1,7 @@
 # Generated locale
 /app/src/main/assets/usr/share/locale
+# Generated asset descriptor
+/app/src/main/assets/descriptor.xml
 
 # Intellij
 .idea/*

@@ -1,7 +1,11 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
 import java.io.ByteArrayOutputStream
+import java.beans.XMLEncoder
+import java.beans.XMLDecoder
+import com.google.common.io.Files
+import com.google.common.hash.Hashing
 
-fun exec(cmd: String): String = ByteArrayOutputStream().let {
+fun exec(cmd: String): String = ByteArrayOutputStream().use {
     project.exec {
         commandLine = cmd.split(" ")
         standardOutput = it
@@ -75,15 +79,22 @@ android {
     }
 }
 
+val generateAssetDescriptor = tasks.register<AssetDescriptorTask>("generateAssetDescriptor") {
+    inputDir.set(file("src/main/assets/usr"))
+    outputFile.set(file("src/main/assets/descriptor.xml"))
+
+}.also { tasks.preBuild.dependsOn(it) }
+
+
 listOf("fcitx5", "fcitx5-chinese-addons").forEach {
-    val taskName = "MsgFmt-$it"
-    tasks.register<MsgFmtTask>(taskName) {
+    val task = tasks.register<MsgFmtTask>("MsgFmt-$it") {
         domain.set(it)
         inputDir.set(file("src/main/cpp/$it/po"))
         outputDir.set(file("src/main/assets/usr/share/locale"))
     }
-    tasks.preBuild.dependsOn(taskName)
+    generateAssetDescriptor.dependsOn(task)
 }
+
 
 dependencies {
     implementation("androidx.core:core-ktx:1.7.0")
@@ -131,7 +142,7 @@ abstract class MsgFmtTask : DefaultTask() {
     fun execute(inputChanges: InputChanges) {
         inputChanges.getFileChanges(inputDir).forEach { change ->
             val fileName = change.normalizedPath
-            if ((change.fileType == FileType.DIRECTORY) or (!fileName.endsWith(".po")))
+            if ((change.fileType == FileType.DIRECTORY) || (!fileName.endsWith(".po")))
                 return@forEach
             println("${change.changeType}: $fileName")
             val locale = fileName.replace(".po", "")
@@ -148,5 +159,63 @@ abstract class MsgFmtTask : DefaultTask() {
                 }
             }
         }
+    }
+}
+
+abstract class AssetDescriptorTask : DefaultTask() {
+    @get:Incremental
+    @get:PathSensitive(PathSensitivity.NAME_ONLY)
+    @get:InputDirectory
+    abstract val inputDir: DirectoryProperty
+
+    @get:OutputFile
+    abstract val outputFile: RegularFileProperty
+
+    private val file by lazy { outputFile.get().asFile }
+
+    private fun serialize(map: Map<String, String>) {
+        file.deleteOnExit()
+        val fos = file.outputStream()
+        val encoder = XMLEncoder(fos)
+        encoder.writeObject(map)
+        encoder.close()
+        fos.close()
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun deserialize(): Map<String, String> {
+        val fis = file.inputStream()
+        val decoder = XMLDecoder(fis)
+        val map = decoder.readObject()
+        decoder.close()
+        fis.close()
+        return map as Map<String, String>
+    }
+
+    companion object {
+        fun md5(file: File): String =
+            Files.asByteSource(file).hash(Hashing.sha256()).toString()
+
+    }
+
+    @TaskAction
+    fun execute(inputChanges: InputChanges) {
+        val map =
+            file.exists()
+                .takeIf { it }
+                ?.runCatching { deserialize().toMutableMap() }
+                ?.getOrNull()
+                ?: mutableMapOf()
+        inputChanges.getFileChanges(inputDir).forEach { change ->
+            if (change.fileType == FileType.DIRECTORY) return@forEach
+            println("${change.changeType}: ${change.normalizedPath}")
+            val key = change.file.relativeTo(file.parentFile).path
+            if (change.changeType == ChangeType.REMOVED) {
+                map.remove(key)
+            } else {
+                map[key] = md5(change.file)
+            }
+        }
+        serialize(map)
     }
 }
