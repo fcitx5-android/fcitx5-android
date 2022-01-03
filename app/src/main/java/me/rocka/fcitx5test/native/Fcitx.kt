@@ -7,7 +7,9 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import me.rocka.fcitx5test.*
+import me.rocka.fcitx5test.AppSharedPreferences
+import me.rocka.fcitx5test.R
+import me.rocka.fcitx5test.asset.AssetManager
 import me.rocka.fcitx5test.native.FcitxState.*
 
 class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope by CoroutineScope(
@@ -107,8 +109,6 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
                 extraBufferCapacity = 15,
                 onBufferOverflow = BufferOverflow.DROP_OLDEST
             )
-
-        private var firstRun = false
 
         init {
             System.loadLibrary("native-lib")
@@ -213,7 +213,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
             )
             if (event is FcitxEvent.ReadyEvent) {
                 fcitxState_ = Ready
-                if (firstRun) {
+                if (AppSharedPreferences.getInstance().firstRun) {
                     onFirstRun()
                 }
             }
@@ -231,6 +231,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
                 get("PreeditCursorPositionAtBeginning").value = "False"
                 setFcitxAddonConfig("pinyin", this)
             }
+            AppSharedPreferences.getInstance().firstRun = false
         }
     }
 
@@ -240,18 +241,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
         fcitxState_ = Starting
         with(context) {
             launch {
-                val ver = AppSharedPreferences.getInstance().assetsVersion
-
-                if (ver == -1L) {
-                    firstRun = true
-                }
-
-                if (BuildConfig.ASSETS_VERSION > ver) {
-                    deleteDir("fcitx5")
-                    deleteDir("usr")
-                    copyFileOrDir("usr")
-                    AppSharedPreferences.getInstance().assetsVersion = BuildConfig.ASSETS_VERSION
-                }
+                AssetManager.syncDataDir()
 
                 val locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     val locales = resources.configuration.locales

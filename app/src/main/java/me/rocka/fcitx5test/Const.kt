@@ -11,4 +11,5 @@ object Const {
         Build Git Hash: ${BuildConfig.BUILD_GIT_HASH}
         Build Date: $buildTime
         """.trimIndent()
+    const val assetDescriptorName = BuildConfig.ASSETS_DESCRIPTOR_NAME
 }
