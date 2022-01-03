@@ -15,6 +15,7 @@ import me.rocka.fcitx5test.ui.list.BaseDynamicListUi
 
 class ListFragment : Fragment() {
 
+    @Suppress("UNCHECKED_CAST")
     private val descriptor: ConfigDescriptor<*, out List<*>> by lazy {
         requireArguments().get(ARG_DESC) as ConfigDescriptor<*, List<*>>
     }
