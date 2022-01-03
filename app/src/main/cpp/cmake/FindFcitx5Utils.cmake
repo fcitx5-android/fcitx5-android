@@ -1,5 +1,5 @@
 set(Fcitx5Utils_FOUND TRUE)
-set(FCITX_INSTALL_CMAKECONFIG_DIR "${CMAKE_SOURCE_DIR}/cmake/dummy")
+set(FCITX_INSTALL_CMAKECONFIG_DIR "${CMAKE_SOURCE_DIR}/cmake")
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Fcitx5Utils
@@ -8,5 +8,3 @@ find_package_handle_standard_args(Fcitx5Utils
     REQUIRED_VARS
         FCITX_INSTALL_CMAKECONFIG_DIR
 )
-
-mark_as_advanced(Fcitx5Utils_FOUND FCITX_INSTALL_CMAKECONFIG_DIR)

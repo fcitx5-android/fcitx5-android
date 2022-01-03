@@ -8,5 +8,3 @@ find_package_handle_standard_args(Gettext
     REQUIRED_VARS
         GETTEXT_VERSION_STRING
 )
-
-mark_as_advanced(Gettext_FOUND GETTEXT_VERSION_STRING)
