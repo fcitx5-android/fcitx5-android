@@ -17,30 +17,40 @@ object AssetManager {
     private val context: Context
         get() = FcitxApplication.getInstance().applicationContext
 
+    // should be consistent with the deserialization in build.gradle.kts (:app)
     private fun deserialize(raw: String): Result<AssetDescriptor> = runCatching {
 
         val jObject = JSONObject(raw)
-
-        val keys = jObject.names()!!
-        val jArray = jObject.toJSONArray(jObject.names())!!
+        val sum = jObject.getInt("sum")
+        val files = jObject.getJSONObject("files")
+        val keys = files.names()!!
+        val jArray = files.toJSONArray(keys)!!
 
         val map = mutableMapOf<String, String>()
         for (i in 0 until jArray.length()) {
             map[keys.getString(i)] = jArray.getString(i)
         }
-        map
+        sum to map
     }
 
     private fun diff(old: AssetDescriptor, new: AssetDescriptor): List<Diff> =
-        new.mapNotNull {
-            when {
-                it.key !in old -> Diff.New(it.key, it.value)
-                old[it.key] != it.value -> Diff.Update(it.key, old.getValue(it.key), it.value)
-                else -> null
+        if (old.first == new.first)
+            listOf()
+        else
+            new.second.mapNotNull {
+                when {
+                    it.key !in old.second -> Diff.New(it.key, it.value)
+                    old.second[it.key] != it.value -> Diff.Update(
+                        it.key,
+                        old.second.getValue(it.key),
+                        it.value
+                    )
+                    else -> null
+                }
+            }.toMutableList().apply {
+                addAll(old.second.filterKeys { it !in new.second }
+                    .map { Diff.Delete(it.key, it.value) })
             }
-        }.toMutableList().apply {
-            addAll(old.filterKeys { it !in new }.map { Diff.Delete(it.key, it.value) })
-        }
 
     fun syncDataDir() {
         val destDescriptor =
@@ -50,7 +60,8 @@ object AssetManager {
                 ?.getOrNull()
                 ?.let { deserialize(it) }
                 ?.getOrNull()
-                ?: mapOf()
+                ?: 0 to mapOf()
+
         val bundledDescriptor =
             context.assets
                 .open(Const.assetDescriptorName)
@@ -67,6 +78,8 @@ object AssetManager {
                 is Diff.Update -> context.copyFile(it.key)
             }
         }
+
+        context.copyFile(Const.assetDescriptorName)
 
         Log.i(javaClass.name, "Synced!")
     }
