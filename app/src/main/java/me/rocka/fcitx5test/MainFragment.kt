@@ -47,8 +47,10 @@ class MainFragment : Fragment() {
                 context.getString(R.string.clean_and_sync_assets) to {
                     GlobalScope.launch(Dispatchers.IO) {
                         AssetManager.cleanAndSync()
+                        launch(Dispatchers.Main){
+                            Toast.makeText(context, "Synced!", Toast.LENGTH_SHORT).show()
+                        }
                     }
-                    Toast.makeText(context, "Synced!", Toast.LENGTH_SHORT).show()
                 }
             )
         }
