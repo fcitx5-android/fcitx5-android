@@ -1,7 +1,7 @@
 package me.rocka.fcitx5test.asset
 
 typealias SHA256 = String
-typealias AssetDescriptor = Pair<Int, Map<String, SHA256>>
+typealias AssetDescriptor = Pair<SHA256, Map<String, SHA256>>
 
 sealed class Diff {
     abstract val key: String

@@ -4,6 +4,7 @@ import com.google.common.io.Files
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import java.io.ByteArrayOutputStream
+import java.nio.charset.Charset
 
 fun exec(cmd: String): String = ByteArrayOutputStream().use {
     project.exec {
@@ -180,7 +181,12 @@ abstract class AssetDescriptorTask : DefaultTask() {
             JsonOutput.prettyPrint(
                 JsonOutput.toJson(
                     mapOf<Any, Any>(
-                        "sum" to map.hashCode(),
+                        "sha256" to Hashing.sha256()
+                            .hashString(
+                                map.entries.joinToString { it.key + it.value },
+                                Charset.defaultCharset()
+                            )
+                            .toString(),
                         "files" to map
                     )
                 )
