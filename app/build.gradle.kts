@@ -176,12 +176,21 @@ abstract class AssetDescriptorTask : DefaultTask() {
 
     private fun serialize(map: Map<String, String>) {
         file.deleteOnExit()
-        file.writeText(JsonOutput.prettyPrint(JsonOutput.toJson(map)))
+        file.writeText(
+            JsonOutput.prettyPrint(
+                JsonOutput.toJson(
+                    mapOf<Any, Any>(
+                        "sum" to map.hashCode(),
+                        "files" to map
+                    )
+                )
+            )
+        )
     }
 
     @Suppress("UNCHECKED_CAST")
     private fun deserialize(): Map<String, String> =
-        JsonSlurper().parseText(file.readText()) as Map<String, String>
+        ((JsonSlurper().parseText(file.readText()) as Map<Any, Any>))["files"] as Map<String, String>
 
     companion object {
         fun md5(file: File): String =
@@ -197,7 +206,8 @@ abstract class AssetDescriptorTask : DefaultTask() {
                 ?.getOrNull()
                 ?: mutableMapOf()
         inputChanges.getFileChanges(inputDir).forEach { change ->
-            if (change.fileType == FileType.DIRECTORY) return@forEach
+            if (change.fileType == FileType.DIRECTORY || change.file.name == file.name)
+                return@forEach
             println("${change.changeType}: ${change.normalizedPath}")
             val key = change.file.relativeTo(file.parentFile).path
             if (change.changeType == ChangeType.REMOVED) {
