@@ -21,7 +21,7 @@ object AssetManager {
     private fun deserialize(raw: String): Result<AssetDescriptor> = runCatching {
 
         val jObject = JSONObject(raw)
-        val sum = jObject.getInt("sum")
+        val sha256 = jObject.getString("sha256")
         val files = jObject.getJSONObject("files")
         val keys = files.names()!!
         val jArray = files.toJSONArray(keys)!!
@@ -30,7 +30,7 @@ object AssetManager {
         for (i in 0 until jArray.length()) {
             map[keys.getString(i)] = jArray.getString(i)
         }
-        sum to map
+        sha256 to map
     }
 
     private fun diff(old: AssetDescriptor, new: AssetDescriptor): List<Diff> =
@@ -60,7 +60,7 @@ object AssetManager {
                 ?.getOrNull()
                 ?.let { deserialize(it) }
                 ?.getOrNull()
-                ?: 0 to mapOf()
+                ?: "" to mapOf()
 
         val bundledDescriptor =
             context.assets
