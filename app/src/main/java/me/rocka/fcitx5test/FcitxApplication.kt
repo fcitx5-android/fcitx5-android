@@ -3,6 +3,7 @@ package me.rocka.fcitx5test
 import android.app.Application
 import androidx.preference.PreferenceManager
 import me.rocka.fcitx5test.content.AppSharedPreferences
+import me.rocka.fcitx5test.utils.InputMethodUtil
 
 class FcitxApplication : Application() {
     override fun onCreate() {
