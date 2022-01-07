@@ -1,5 +1,6 @@
 package me.rocka.fcitx5test.ui.main
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import androidx.activity.viewModels
@@ -9,6 +10,8 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.databinding.ActivityMainBinding
+import me.rocka.fcitx5test.ui.setup.SetupActivity
+import me.rocka.fcitx5test.ui.setup.SetupPage
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,6 +39,8 @@ class MainActivity : AppCompatActivity() {
                 setOnMenuItemClickListener { _ -> it?.invoke(); true }
             }
         }
+        if (SetupPage.hasUndonePage())
+            startActivity(Intent(this, SetupActivity::class.java))
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

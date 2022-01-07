@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorAccent">?android:attr/colorAccent</color>
+    <color name="gray">#808080</color>
 </resources>

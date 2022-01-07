@@ -20,4 +20,11 @@
     <string name="undo">Undo</string>
     <string name="ok">OK</string>
     <string name="clean_and_sync_assets">Delete and sync runtime data</string>
+    <string name="enable_ime">Enable Input Method</string>
+    <string name="enable_ime_hint">Enable in Language and input settings</string>
+    <string name="select_ime">Select Input Method</string>
+    <string name="select_ime_hint">Select as your default input method</string>
+    <string name="next">Next</string>
+    <string name="prev">Prev</string>
+    <string name="done">Done</string>
 </resources>
