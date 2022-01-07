@@ -7,7 +7,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import me.rocka.fcitx5test.AppSharedPreferences
+import me.rocka.fcitx5test.content.AppSharedPreferences
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.asset.AssetManager
 import me.rocka.fcitx5test.native.FcitxState.*

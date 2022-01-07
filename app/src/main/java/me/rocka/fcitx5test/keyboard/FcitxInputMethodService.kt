@@ -10,9 +10,9 @@ import android.view.inputmethod.InputConnection
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import me.rocka.fcitx5test.AppSharedPreferences
-import me.rocka.fcitx5test.FcitxDaemonManager
-import me.rocka.fcitx5test.inputConnection
+import me.rocka.fcitx5test.content.AppSharedPreferences
+import me.rocka.fcitx5test.service.FcitxDaemonManager
+import me.rocka.fcitx5test.utils.inputConnection
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxEvent
 import splitties.bitflags.hasFlag

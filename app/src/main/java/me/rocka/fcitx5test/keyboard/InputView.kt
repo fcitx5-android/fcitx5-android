@@ -11,10 +11,10 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import me.rocka.fcitx5test.AppSharedPreferences
+import me.rocka.fcitx5test.content.AppSharedPreferences
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
-import me.rocka.fcitx5test.inputConnection
+import me.rocka.fcitx5test.utils.inputConnection
 import me.rocka.fcitx5test.keyboard.layout.BaseKeyboard
 import me.rocka.fcitx5test.keyboard.layout.KeyAction
 import me.rocka.fcitx5test.keyboard.layout.NumberKeyboard
