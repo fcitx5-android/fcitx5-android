@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/mainFragment"
-        android:name="me.rocka.fcitx5test.MainFragment"
+        android:name="me.rocka.fcitx5test.ui.main.MainFragment"
         tools:layout="@layout/fragment_main">
         <action
             android:id="@+id/action_mainFragment_to_globalConfigFragment"
@@ -41,11 +41,11 @@
 
     <fragment
         android:id="@+id/globalConfigFragment"
-        android:name="me.rocka.fcitx5test.settings.global.GlobalConfigFragment" />
+        android:name="me.rocka.fcitx5test.ui.main.settings.global.GlobalConfigFragment" />
 
     <fragment
         android:id="@+id/imListFragment"
-        android:name="me.rocka.fcitx5test.settings.im.InputMethodListFragment">
+        android:name="me.rocka.fcitx5test.ui.main.settings.im.InputMethodListFragment">
         <action
             android:id="@+id/action_imListFragment_to_imConfigFragment"
             app:destination="@id/imConfigFragment"
@@ -56,7 +56,7 @@
     </fragment>
     <fragment
         android:id="@+id/imConfigFragment"
-        android:name="me.rocka.fcitx5test.settings.im.InputMethodConfigFragment">
+        android:name="me.rocka.fcitx5test.ui.main.settings.im.InputMethodConfigFragment">
         <action
             android:id="@+id/action_imConfigFragment_to_enumListFragment"
             app:destination="@id/listFragment"
@@ -68,7 +68,7 @@
 
     <fragment
         android:id="@+id/addonListFragment"
-        android:name="me.rocka.fcitx5test.settings.addon.AddonListFragment">
+        android:name="me.rocka.fcitx5test.ui.main.settings.addon.AddonListFragment">
         <action
             android:id="@+id/action_addonListFragment_to_addonConfigFragment"
             app:destination="@id/addonConfigFragment"
@@ -79,7 +79,7 @@
     </fragment>
     <fragment
         android:id="@+id/addonConfigFragment"
-        android:name="me.rocka.fcitx5test.settings.addon.AddonConfigFragment">
+        android:name="me.rocka.fcitx5test.ui.main.settings.addon.AddonConfigFragment">
         <action
             android:id="@+id/action_addonConfigFragment_to_enumListFragment"
             app:destination="@id/listFragment"
@@ -91,10 +91,10 @@
 
     <fragment
         android:id="@+id/behaviorSettingsFragment"
-        android:name="me.rocka.fcitx5test.settings.behavior.BehaviorSettingsFragment" />
+        android:name="me.rocka.fcitx5test.ui.main.settings.behavior.BehaviorSettingsFragment" />
 
     <fragment
         android:id="@+id/listFragment"
-        android:name="me.rocka.fcitx5test.settings.ListFragment" />
+        android:name="me.rocka.fcitx5test.ui.main.settings.ListFragment" />
 
 </navigation>

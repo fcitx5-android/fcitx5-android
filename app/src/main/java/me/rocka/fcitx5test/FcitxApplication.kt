@@ -2,6 +2,7 @@ package me.rocka.fcitx5test
 
 import android.app.Application
 import androidx.preference.PreferenceManager
+import me.rocka.fcitx5test.content.AppSharedPreferences
 
 class FcitxApplication : Application() {
     override fun onCreate() {

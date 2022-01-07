@@ -2,10 +2,10 @@ package me.rocka.fcitx5test.asset
 
 import android.content.Context
 import android.util.Log
-import me.rocka.fcitx5test.Const
+import me.rocka.fcitx5test.content.Const
 import me.rocka.fcitx5test.FcitxApplication
-import me.rocka.fcitx5test.copyFile
-import me.rocka.fcitx5test.deleteFileOrDir
+import me.rocka.fcitx5test.utils.copyFile
+import me.rocka.fcitx5test.utils.deleteFileOrDir
 import org.json.JSONObject
 import java.io.File
 
