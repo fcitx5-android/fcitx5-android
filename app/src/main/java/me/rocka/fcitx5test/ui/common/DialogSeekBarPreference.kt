@@ -23,7 +23,6 @@ import me.rocka.fcitx5test.databinding.DialogSeekBarBinding
  * @property unit The unit to show after the value. Set to an empty string to disable this feature.
  */
 class DialogSeekBarPreference : Preference {
-    val dialogView = DialogSeekBarBinding.inflate(LayoutInflater.from(context))
     var defaultValue: Int = 0
     var min: Int = 0
     var max: Int = 100
@@ -48,7 +47,9 @@ class DialogSeekBarPreference : Preference {
 
     override fun onAttachedToHierarchy(preferenceManager: PreferenceManager?) {
         super.onAttachedToHierarchy(preferenceManager)
-        summary = getTextForValue(defaultValue)
+        summary = getTextForValue(
+            preferenceDataStore?.getInt(key, defaultValue) ?: defaultValue
+        )
     }
 
     /**
@@ -66,10 +67,8 @@ class DialogSeekBarPreference : Preference {
      * Shows the seek bar dialog.
      */
     private fun showSeekBarDialog() {
-        val inflater =
-            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val dialogView = DialogSeekBarBinding.inflate(inflater)
-        val initValue = defaultValue
+        val dialogView = DialogSeekBarBinding.inflate(LayoutInflater.from(context))
+        val initValue = preferenceDataStore?.getInt(key, defaultValue) ?: defaultValue
         dialogView.seekBar.max = actualValueToSeekBarProgress(max)
         dialogView.seekBar.progress = actualValueToSeekBarProgress(initValue)
         dialogView.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -86,13 +85,15 @@ class DialogSeekBarPreference : Preference {
             setView(dialogView.root)
             setPositiveButton(android.R.string.ok) { _, _ ->
                 val actualValue = seekBarProgressToActualValue(dialogView.seekBar.progress)
-                //sharedPreferences.edit().putInt(key, actualValue).apply()
+                preferenceDataStore?.putInt(key, actualValue)
             }
             setNeutralButton(R.string.save) { _, _ ->
-                dialogView.seekBar.progress = actualValueToSeekBarProgress(defaultValue)
+                preferenceDataStore?.putInt(key, defaultValue)
             }
             setNegativeButton(android.R.string.cancel, null)
-            setOnDismissListener { summary = getTextForValue(defaultValue) }
+            setOnDismissListener { summary = getTextForValue(
+                preferenceDataStore?.getInt(key, defaultValue) ?: defaultValue
+            ) }
             create()
             show()
         }
