@@ -87,9 +87,6 @@ class DialogSeekBarPreference : Preference {
                 val actualValue = seekBarProgressToActualValue(dialogView.seekBar.progress)
                 preferenceDataStore?.putInt(key, actualValue)
             }
-            setNeutralButton(R.string.save) { _, _ ->
-                preferenceDataStore?.putInt(key, defaultValue)
-            }
             setNegativeButton(android.R.string.cancel, null)
             setOnDismissListener { summary = getTextForValue(
                 preferenceDataStore?.getInt(key, defaultValue) ?: defaultValue
