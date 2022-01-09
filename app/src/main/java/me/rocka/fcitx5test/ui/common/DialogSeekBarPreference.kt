@@ -26,8 +26,8 @@ class DialogSeekBarPreference : Preference {
     var defaultValue: Int = 0
     var min: Int = 0
     var max: Int = 100
-    private var step: Int = 1
-    private var unit: String = ""
+    var step: Int = 1
+    var unit: String = ""
 
     @Suppress("unused")
     constructor(context: Context) : this(context, null)
