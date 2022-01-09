@@ -82,7 +82,6 @@ class DialogSeekBarPreference : Preference {
         dialogView.seekBarValue.text = getTextForValue(initValue)
         AlertDialog.Builder(context).apply {
             setTitle(this@DialogSeekBarPreference.title)
-            setCancelable(true)
             setView(dialogView.root)
             setPositiveButton(android.R.string.ok) { _, _ ->
                 val actualValue = seekBarProgressToActualValue(dialogView.seekBar.progress)
@@ -90,7 +89,6 @@ class DialogSeekBarPreference : Preference {
             }
             setNegativeButton(android.R.string.cancel, null)
             setOnDismissListener { summary = getTextForValue(currentValue) }
-            create()
             show()
         }
     }
