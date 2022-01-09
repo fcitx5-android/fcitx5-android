@@ -10,6 +10,7 @@ import cn.berberman.girls.utils.either.then
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.content.AppSharedPreferences
 import me.rocka.fcitx5test.native.RawConfig
+import me.rocka.fcitx5test.ui.common.DialogSeekBarPreference
 import me.rocka.fcitx5test.utils.config.ConfigDescriptor
 import me.rocka.fcitx5test.utils.config.ConfigType
 
@@ -99,9 +100,8 @@ object PreferenceScreenFactory {
             }
             is ConfigDescriptor.ConfigEnumList -> listPreference()
             is ConfigDescriptor.ConfigExternal -> stubPreference()
-            is ConfigDescriptor.ConfigInt -> SeekBarPreference(context).apply {
-                showSeekBarValue = true
-                setDefaultValue(descriptor.defaultValue)
+            is ConfigDescriptor.ConfigInt -> DialogSeekBarPreference(context).apply {
+                descriptor.defaultValue?.let { defaultValue = it }
                 descriptor.intMin?.let { min = it }
                 descriptor.intMax?.let { max = it }
             }
