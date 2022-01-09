@@ -42,6 +42,9 @@ class SetupActivity : FragmentActivity() {
         viewPager.adapter = Adapter()
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
+                // manually call following observer when page changed
+                // intentionally before changing the text of nextButton
+                viewModel.isAllDone.value = viewModel.isAllDone.value
                 // hide prev button for the first page
                 prevButton.visibility = if (position != 0) View.VISIBLE else View.GONE
                 nextButton.text =
@@ -49,8 +52,6 @@ class SetupActivity : FragmentActivity() {
                         if (position.isLastPage())
                             R.string.done else R.string.next
                     )
-                // manually call following observer when page changed
-                viewModel.isAllDone.postValue(viewModel.isAllDone.value)
             }
         })
         viewModel.isAllDone.observe(this) { allDone ->
