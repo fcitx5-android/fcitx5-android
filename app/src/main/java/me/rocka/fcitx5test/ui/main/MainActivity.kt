@@ -11,7 +11,6 @@ import androidx.navigation.ui.setupWithNavController
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.databinding.ActivityMainBinding
 import me.rocka.fcitx5test.ui.setup.SetupActivity
-import me.rocka.fcitx5test.ui.setup.SetupPage
 
 class MainActivity : AppCompatActivity() {
 
@@ -39,7 +38,7 @@ class MainActivity : AppCompatActivity() {
                 setOnMenuItemClickListener { _ -> it?.invoke(); true }
             }
         }
-        if (SetupPage.hasUndonePage())
+        if (SetupActivity.shouldShowUp())
             startActivity(Intent(this, SetupActivity::class.java))
     }
 

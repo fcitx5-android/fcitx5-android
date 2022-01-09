@@ -64,6 +64,7 @@ class SetupActivity : FragmentActivity() {
         }
         // skip to undone page
         firstUndonePage()?.let { viewPager.currentItem = it.ordinal }
+        shown = true
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -77,5 +78,10 @@ class SetupActivity : FragmentActivity() {
         override fun createFragment(position: Int): Fragment =
             SetupFragment(SetupPage.values()[position])
 
+    }
+
+    companion object {
+        private var shown = false
+        fun shouldShowUp() = !shown && SetupPage.hasUndonePage()
     }
 }
