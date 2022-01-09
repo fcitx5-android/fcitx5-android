@@ -7,9 +7,9 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import me.rocka.fcitx5test.content.AppSharedPreferences
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.asset.AssetManager
+import me.rocka.fcitx5test.content.AppSharedPreferences
 import me.rocka.fcitx5test.native.FcitxState.*
 
 class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope by CoroutineScope(
@@ -47,7 +47,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
     fun sendKey(i: Int) = sendKeyToFcitxInt(i)
     fun select(idx: Int) = selectCandidate(idx)
     fun isEmpty() = isInputPanelEmpty()
-    fun reset() = resetInputPanel()
+    fun reset() = resetInputContext()
     fun moveCursor(position: Int) = repositionCursor(position)
     fun availableIme() = availableInputMethods() ?: arrayOf()
     fun enabledIme() = listInputMethods() ?: arrayOf()
@@ -144,7 +144,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
         external fun isInputPanelEmpty(): Boolean
 
         @JvmStatic
-        external fun resetInputPanel()
+        external fun resetInputContext()
 
         @JvmStatic
         external fun repositionCursor(position: Int)

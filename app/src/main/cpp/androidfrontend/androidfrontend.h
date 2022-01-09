@@ -24,7 +24,7 @@ public:
     void keyEvent(ICUUID uuid, const Key &key, bool isRelease);
     void selectCandidate(ICUUID uuid, int idx);
     bool isInputPanelEmpty(ICUUID uuid);
-    void resetInputPanel(ICUUID uuid);
+    void resetInputContext(ICUUID uuid);
     void repositionCursor(ICUUID uuid, int idx);
     void focusInputContext(ICUUID uuid, bool focus);
     void setCandidateListCallback(const CandidateListCallback &callback);
@@ -40,7 +40,7 @@ private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, keyEvent);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, selectCandidate);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, isInputPanelEmpty);
-    FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, resetInputPanel);
+    FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, resetInputContext);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, repositionCursor);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, focusInputContext);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCandidateListCallback);

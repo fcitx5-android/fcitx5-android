@@ -42,7 +42,7 @@ public:
     void updateClientSideUIImpl() override {
         InputPanel &ip = inputPanel();
         auto preedit = ip.preedit().toString();
-        const auto& clientPreedit = ip.clientPreedit();
+        const auto &clientPreedit = ip.clientPreedit();
         frontend_->updatePreedit(preedit, clientPreedit.toString(), clientPreedit.cursor());
         auto auxUp = ip.auxUp().toString();
         auto auxDown = ip.auxDown().toString();
@@ -163,7 +163,7 @@ bool AndroidFrontend::isInputPanelEmpty(ICUUID uuid) {
     return ic->inputPanel().empty();
 }
 
-void AndroidFrontend::resetInputPanel(ICUUID uuid) {
+void AndroidFrontend::resetInputContext(ICUUID uuid) {
     auto *ic = instance_->inputContextManager().findByUUID(uuid);
     ic->reset();
 }

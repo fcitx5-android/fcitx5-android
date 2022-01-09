@@ -24,7 +24,7 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, selectCandidate,
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, isInputPanelEmpty,
                              bool(ICUUID))
 
-FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, resetInputPanel,
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, resetInputContext,
                              void(ICUUID))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, repositionCursor,
