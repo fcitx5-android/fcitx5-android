@@ -8,12 +8,12 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
-import me.rocka.fcitx5test.ui.main.MainViewModel
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.InputMethodEntry
 import me.rocka.fcitx5test.ui.common.BaseDynamicListUi
 import me.rocka.fcitx5test.ui.common.OnItemChangedListener
+import me.rocka.fcitx5test.ui.main.MainViewModel
 
 class InputMethodListFragment : Fragment(), OnItemChangedListener<InputMethodEntry> {
 
@@ -59,12 +59,15 @@ class InputMethodListFragment : Fragment(), OnItemChangedListener<InputMethodEnt
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewModel.setToolbarTitle(requireContext().getString(R.string.input_methods_conf))
         viewModel.disableToolbarSaveButton()
         ui.addOnItemChangedListener(this)
         return ui.root
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.setToolbarTitle(requireContext().getString(R.string.input_methods_conf))
+    }
 
     override fun onItemSwapped(fromIdx: Int, toIdx: Int, item: InputMethodEntry) {
         updateIMState()

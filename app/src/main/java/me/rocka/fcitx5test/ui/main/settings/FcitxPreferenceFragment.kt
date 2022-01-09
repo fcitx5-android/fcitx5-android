@@ -7,9 +7,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.preference.PreferenceFragmentCompat
-import me.rocka.fcitx5test.ui.main.MainViewModel
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.RawConfig
+import me.rocka.fcitx5test.ui.main.MainViewModel
 
 abstract class FcitxPreferenceFragment : PreferenceFragmentCompat() {
     abstract fun getPageTitle(): String
@@ -32,7 +32,6 @@ abstract class FcitxPreferenceFragment : PreferenceFragmentCompat() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        viewModel.setToolbarTitle(getPageTitle())
         viewModel.enableToolbarSaveButton {
             saveConfig(fcitx, raw["cfg"])
             Toast.makeText(requireContext(), "Saved", Toast.LENGTH_SHORT).show()
@@ -44,6 +43,11 @@ abstract class FcitxPreferenceFragment : PreferenceFragmentCompat() {
         raw = obtainConfig(fcitx)
         preferenceScreen =
             PreferenceScreenFactory.create(preferenceManager, parentFragmentManager, raw)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.setToolbarTitle(getPageTitle())
     }
 
     override fun onPause() {

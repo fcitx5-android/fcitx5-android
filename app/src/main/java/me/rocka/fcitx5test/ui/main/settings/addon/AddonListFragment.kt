@@ -8,12 +8,12 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
-import me.rocka.fcitx5test.ui.main.MainViewModel
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.native.AddonInfo
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.ui.common.CheckBoxListUi
 import me.rocka.fcitx5test.ui.common.OnItemChangedListener
+import me.rocka.fcitx5test.ui.main.MainViewModel
 
 class AddonListFragment : Fragment(), OnItemChangedListener<AddonInfo> {
     private val viewModel: MainViewModel by activityViewModels()
@@ -64,9 +64,13 @@ class AddonListFragment : Fragment(), OnItemChangedListener<AddonInfo> {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewModel.setToolbarTitle(requireContext().getString(R.string.addons_conf))
         viewModel.disableToolbarSaveButton()
         return ui.root
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.setToolbarTitle(requireContext().getString(R.string.addons_conf))
     }
 
     override fun onItemUpdated(idx: Int, old: AddonInfo, new: AddonInfo) {
