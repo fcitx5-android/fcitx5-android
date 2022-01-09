@@ -81,6 +81,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner,
 
     fun triggerUnicode() = triggerUnicodeInput()
     fun focus(focus: Boolean = true) = focusInputContext(focus)
+    fun setCapFlags(flags: CapabilityFlags) = setCapabilityFlags(flags.toLong())
 
     init {
         if (fcitxState_ != Stopped)
@@ -197,6 +198,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner,
         @JvmStatic
         external fun focusInputContext(focus: Boolean)
 
+        @JvmStatic
+        external fun setCapabilityFlags(flags: Long)
+
         /**
          * Called from native-lib
          */
@@ -213,6 +217,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner,
                 if (AppSharedPreferences.getInstance().firstRun) {
                     onFirstRun()
                 }
+                onReady()
             }
             eventFlow_.tryEmit(event)
         }
@@ -229,6 +234,10 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner,
                 setFcitxAddonConfig("pinyin", this)
             }
             AppSharedPreferences.getInstance().firstRun = false
+        }
+
+        private fun onReady() {
+            setCapabilityFlags(CapabilityFlags.DefaultFlags.toLong())
         }
     }
 

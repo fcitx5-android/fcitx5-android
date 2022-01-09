@@ -337,6 +337,13 @@ public:
         });
     }
 
+    void setCapabilityFlags(uint64_t flags) {
+        if (!p_frontend) return;
+        p_dispatcher->schedule([this, flags]() {
+            p_frontend->call<fcitx::IAndroidFrontend::setCapabilityFlags>(p_uuid, flags);
+        });
+    }
+
     void saveConfig() {
         p_dispatcher->schedule([this]() {
             p_instance->globalConfig().safeSave();
@@ -878,4 +885,13 @@ JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_focusInputContext(JNIEnv *env, jclass clazz, jboolean focus) {
     RETURN_IF_NOT_RUNNING
     Fcitx::Instance().focusInputContext(focus == JNI_TRUE);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_setCapabilityFlags(JNIEnv *env, jclass clazz, jlong flags) {
+    RETURN_IF_NOT_RUNNING
+    uint64_t u;
+    std::memcpy(&u, &flags, sizeof(uint64_t));
+    Fcitx::Instance().setCapabilityFlags(u);
 }
