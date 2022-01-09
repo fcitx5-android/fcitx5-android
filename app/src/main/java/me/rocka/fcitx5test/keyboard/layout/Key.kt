@@ -55,6 +55,16 @@ open class TextKey(
     override fun onPress(): KeyAction<*> = KeyAction.FcitxKeyAction(text)
 }
 
+open class KPKey(
+    open val key: String,
+    override val displayText: String,
+    percentWidth: Float = 0.1f
+) : BaseKey(percentWidth), ITextKey, IPressKey {
+    constructor(key: String, percentWidth: Float) : this(key, key, percentWidth)
+
+    override fun onPress(): KeyAction<*> = KeyAction.FcitxKeyAction("KP_$key")
+}
+
 open class AltTextKey(
     override val text: String = "",
     private val altText: String = "",

@@ -14,30 +14,30 @@ class NumberKeyboard(
     companion object {
         val Layout: List<List<BaseKey>> = listOf(
             listOf(
-                TextKey("+", 0.15F),
-                TextKey("1", 0F),
-                TextKey("2", 0F),
-                TextKey("3", 0F),
-                TextKey("/", 0.15F),
+                KPKey("Add", "+", 0.15F),
+                KPKey("1", 0F),
+                KPKey("2", 0F),
+                KPKey("3", 0F),
+                KPKey("Divide", "/", 0.15F),
             ),
             listOf(
-                TextKey("-", 0.15F),
-                TextKey("4", 0F),
-                TextKey("5", 0F),
-                TextKey("6", 0F),
+                KPKey("Subtract", "-", 0.15F),
+                KPKey("4", 0F),
+                KPKey("5", 0F),
+                KPKey("6", 0F),
                 MiniSpaceKey()
             ),
             listOf(
-                TextKey("*", 0.15F),
-                TextKey("7", 0F),
-                TextKey("8", 0F),
-                TextKey("9", 0F),
+                KPKey("Multiply", "*", 0.15F),
+                KPKey("7", 0F),
+                KPKey("8", 0F),
+                KPKey("9", 0F),
                 BackspaceKey()
             ),
             listOf(
                 LayoutSwitchKey(),
                 TextKey("#", 0F),
-                TextKey("0", 0F),
+                KPKey("0", 0F),
                 AltTextKey(".", "=", 0F),
                 ReturnKey()
             ),
