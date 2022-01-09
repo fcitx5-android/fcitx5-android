@@ -82,9 +82,9 @@ public:
         return p_frontend->call<fcitx::IAndroidFrontend::isInputPanelEmpty>(p_uuid);
     }
 
-    void resetInputPanel() {
+    void resetInputContext() {
         p_dispatcher->schedule([this]() {
-            p_frontend->call<fcitx::IAndroidFrontend::resetInputPanel>(p_uuid);
+            p_frontend->call<fcitx::IAndroidFrontend::resetInputContext>(p_uuid);
         });
     }
 
@@ -560,9 +560,9 @@ Java_me_rocka_fcitx5test_native_Fcitx_isInputPanelEmpty(JNIEnv *env, jclass claz
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_resetInputPanel(JNIEnv *env, jclass clazz) {
+Java_me_rocka_fcitx5test_native_Fcitx_resetInputContext(JNIEnv *env, jclass clazz) {
     RETURN_IF_NOT_RUNNING
-    Fcitx::Instance().resetInputPanel();
+    Fcitx::Instance().resetInputContext();
 }
 
 extern "C"
