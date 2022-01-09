@@ -28,4 +28,5 @@
     <string name="next">Next</string>
     <string name="prev">Prev</string>
     <string name="done">Done</string>
+    <string name="setup_keyboard">Finish setting up the keyboard</string>
 </resources>

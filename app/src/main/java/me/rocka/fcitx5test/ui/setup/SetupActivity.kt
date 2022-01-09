@@ -1,9 +1,16 @@
 package me.rocka.fcitx5test.ui.setup
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import androidx.activity.viewModels
+import androidx.core.app.NotificationCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -13,6 +20,7 @@ import me.rocka.fcitx5test.databinding.ActivitySetupBinding
 import me.rocka.fcitx5test.ui.setup.SetupPage.Companion.firstUndonePage
 import me.rocka.fcitx5test.ui.setup.SetupPage.Companion.isLastPage
 import me.rocka.fcitx5test.utils.getCurrentFragment
+import splitties.systemservices.notificationManager
 
 class SetupActivity : FragmentActivity() {
 
@@ -65,6 +73,7 @@ class SetupActivity : FragmentActivity() {
         // skip to undone page
         firstUndonePage()?.let { viewPager.currentItem = it.ordinal }
         shown = true
+        createNotificationChannel()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -72,16 +81,51 @@ class SetupActivity : FragmentActivity() {
         (viewPager.getCurrentFragment(supportFragmentManager) as SetupFragment).sync()
     }
 
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                CHANNEL_ID,
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply { description = CHANNEL_ID }
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    override fun onPause() {
+        if (SetupPage.hasUndonePage())
+            NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_baseline_keyboard_24)
+                .setContentTitle(getText(R.string.app_name))
+                .setContentText(getText(R.string.setup_keyboard))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentIntent(
+                    PendingIntent.getActivity(
+                        this,
+                        0,
+                        Intent(this, javaClass),
+                        PendingIntent.FLAG_IMMUTABLE
+                    )
+                )
+                .setAutoCancel(true)
+                .build()
+                .let { notificationManager.notify(233, it) }
+        super.onPause()
+    }
+
     private inner class Adapter : FragmentStateAdapter(this) {
         override fun getItemCount(): Int = SetupPage.values().size
 
         override fun createFragment(position: Int): Fragment =
-            SetupFragment(SetupPage.values()[position])
+            SetupFragment().apply {
+                arguments = bundleOf("page" to SetupPage.values()[position])
+            }
 
     }
 
     companion object {
         private var shown = false
+        private const val CHANNEL_ID = "setup"
         fun shouldShowUp() = !shown && SetupPage.hasUndonePage()
     }
 }

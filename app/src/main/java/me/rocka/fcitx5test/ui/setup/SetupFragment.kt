@@ -8,25 +8,28 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import me.rocka.fcitx5test.databinding.FragmentSetupBinding
 import me.rocka.fcitx5test.ui.setup.SetupPage.Companion.isLastPage
-import kotlin.properties.Delegates
 
-class SetupFragment(private val page: SetupPage) : Fragment() {
+class SetupFragment : Fragment() {
 
     private val viewModel: SetupViewModel by activityViewModels()
 
     private lateinit var binding: FragmentSetupBinding
 
-    private var isDone: Boolean by Delegates.observable(page.isDone()) { _, _, new ->
-        if (new && page.isLastPage())
-            viewModel.isAllDone.value = true
-        with(binding) {
-            hintText.text = page.getHintText(requireContext())
-            actionButton.visibility = if (new) View.GONE else View.VISIBLE
-            actionButton.text = page.getButtonText(requireContext())
-            actionButton.setOnClickListener { page.getButtonAction(requireContext()) }
-            doneText.visibility = if (new) View.VISIBLE else View.GONE
+    private val page: SetupPage by lazy { requireArguments().get("page") as SetupPage }
+
+    private var isDone: Boolean = false
+        set(new) {
+            if (new && page.isLastPage())
+                viewModel.isAllDone.value = true
+            with(binding) {
+                hintText.text = page.getHintText(requireContext())
+                actionButton.visibility = if (new) View.GONE else View.VISIBLE
+                actionButton.text = page.getButtonText(requireContext())
+                actionButton.setOnClickListener { page.getButtonAction(requireContext()) }
+                doneText.visibility = if (new) View.VISIBLE else View.GONE
+            }
+            field = new
         }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
