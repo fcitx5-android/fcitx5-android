@@ -29,6 +29,9 @@ class DialogSeekBarPreference : Preference {
     var step: Int = 1
     var unit: String = ""
 
+    private val currentValue: Int =
+        preferenceDataStore?.getInt(key, defaultValue) ?: defaultValue
+
     @Suppress("unused")
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) :
@@ -47,9 +50,7 @@ class DialogSeekBarPreference : Preference {
 
     override fun onAttachedToHierarchy(preferenceManager: PreferenceManager?) {
         super.onAttachedToHierarchy(preferenceManager)
-        summary = getTextForValue(
-            preferenceDataStore?.getInt(key, defaultValue) ?: defaultValue
-        )
+        summary = getTextForValue(currentValue)
     }
 
     /**
@@ -68,7 +69,7 @@ class DialogSeekBarPreference : Preference {
      */
     private fun showSeekBarDialog() {
         val dialogView = DialogSeekBarBinding.inflate(LayoutInflater.from(context))
-        val initValue = preferenceDataStore?.getInt(key, defaultValue) ?: defaultValue
+        val initValue = currentValue
         dialogView.seekBar.max = actualValueToSeekBarProgress(max)
         dialogView.seekBar.progress = actualValueToSeekBarProgress(initValue)
         dialogView.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -88,9 +89,7 @@ class DialogSeekBarPreference : Preference {
                 preferenceDataStore?.putInt(key, actualValue)
             }
             setNegativeButton(android.R.string.cancel, null)
-            setOnDismissListener { summary = getTextForValue(
-                preferenceDataStore?.getInt(key, defaultValue) ?: defaultValue
-            ) }
+            setOnDismissListener { summary = getTextForValue(currentValue) }
             create()
             show()
         }
