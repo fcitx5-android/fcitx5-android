@@ -31,17 +31,15 @@ class DialogSeekBarPreference : Preference {
 
     private val currentValue: Int
         get() = preferenceDataStore?.getInt(key, defaultValue) ?: defaultValue
-
-    @Suppress("unused")
+    
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) :
             this(context, attrs, R.attr.preferenceStyle)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
-            super(context, attrs, defStyleAttr) {
-        onPreferenceClickListener = OnPreferenceClickListener {
-            showSeekBarDialog()
-            true
-        }
+            super(context, attrs, defStyleAttr)
+
+    override fun onClick() {
+        showSeekBarDialog()
     }
 
     override fun onAttachedToHierarchy(preferenceManager: PreferenceManager?) {
@@ -81,8 +79,10 @@ class DialogSeekBarPreference : Preference {
             setView(dialogView.root)
             setPositiveButton(android.R.string.ok) { _, _ ->
                 val actualValue = seekBarProgressToActualValue(dialogView.seekBar.progress)
-                preferenceDataStore?.putInt(key, actualValue)
-                summary = getTextForValue(currentValue)
+                if (callChangeListener(actualValue)) {
+                    preferenceDataStore?.putInt(key, actualValue)
+                    summary = getTextForValue(currentValue)
+                }
             }
             setNegativeButton(android.R.string.cancel, null)
             show()
