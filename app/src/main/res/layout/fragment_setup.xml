@@ -18,13 +18,14 @@
 
     <TextView
         android:id="@+id/hint_text"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="20sp"
+        android:layout_marginHorizontal="24dp"
+        android:gravity="center"
+        android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Hint text here ..." />
 
     <Button
         android:id="@+id/action_button"
@@ -33,16 +34,32 @@
         android:layout_marginTop="24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/hint_text" />
+        app:layout_constraintTop_toBottomOf="@+id/hint_text"
+        tools:text="Action" />
+
+    <ImageView
+        android:id="@+id/done_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginEnd="8dp"
+        android:src="@drawable/ic_baseline_check_circle_24"
+        android:tint="?android:attr/colorAccent"
+        app:layout_constraintEnd_toStartOf="@id/done_text"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/hint_text" />
+
     <TextView
         android:id="@+id/done_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:textSize="30sp"
         android:text="@string/done"
-        android:textStyle="bold|italic"
+        android:textColor="?android:attr/colorAccent"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/done_icon"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/hint_text" />
+        app:layout_constraintStart_toEndOf="@id/done_icon"
+        app:layout_constraintTop_toTopOf="@id/done_icon" />
 </androidx.constraintlayout.widget.ConstraintLayout>
