@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><!DOCTYPE resources [<!ENTITY appname "Fcitx5 for Android">]>
 <resources>
-    <string name="app_name">Fcitx5 for Android</string>
+    <string name="app_name">&appname;</string>
     <string name="open_ime_settings">Open System IME Settings</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
@@ -21,9 +22,9 @@
     <string name="ok">OK</string>
     <string name="clean_and_sync_assets">Delete and sync runtime data</string>
     <string name="enable_ime">Enable Input Method</string>
-    <string name="enable_ime_hint">Enable in Language and input settings</string>
+    <string name="enable_ime_hint">Enable <b>&appname;</b> in Language and input settings</string>
     <string name="select_ime">Select Input Method</string>
-    <string name="select_ime_hint">Select as your default input method</string>
+    <string name="select_ime_hint">Select <b>&appname;</b> as your default input method</string>
     <string name="next">Next</string>
     <string name="prev">Prev</string>
     <string name="done">Done</string>

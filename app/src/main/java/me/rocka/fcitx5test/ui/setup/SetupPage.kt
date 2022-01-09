@@ -7,14 +7,14 @@ import me.rocka.fcitx5test.utils.InputMethodUtil
 enum class SetupPage {
     Enable, Select;
 
-    fun getHintText(context: Context) = context.getString(
+    fun getHintText(context: Context) = context.getText(
         when (this) {
             Enable -> R.string.enable_ime_hint
             Select -> R.string.select_ime_hint
         }
     )
 
-    fun getButtonText(context: Context) = context.getString(
+    fun getButtonText(context: Context) = context.getText(
         when (this) {
             Enable -> R.string.enable_ime
             Select -> R.string.select_ime
