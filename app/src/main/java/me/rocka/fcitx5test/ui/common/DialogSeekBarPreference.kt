@@ -29,8 +29,8 @@ class DialogSeekBarPreference : Preference {
     var step: Int = 1
     var unit: String = ""
 
-    private val currentValue: Int =
-        preferenceDataStore?.getInt(key, defaultValue) ?: defaultValue
+    private val currentValue: Int
+        get() = preferenceDataStore?.getInt(key, defaultValue) ?: defaultValue
 
     @Suppress("unused")
     constructor(context: Context) : this(context, null)
