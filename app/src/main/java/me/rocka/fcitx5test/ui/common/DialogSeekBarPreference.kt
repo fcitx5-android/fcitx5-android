@@ -38,10 +38,6 @@ class DialogSeekBarPreference : Preference {
             this(context, attrs, R.attr.preferenceStyle)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
             super(context, attrs, defStyleAttr) {
-        onPreferenceChangeListener = OnPreferenceChangeListener { _, newValue ->
-            summary = getTextForValue(newValue.toString())
-            true
-        }
         onPreferenceClickListener = OnPreferenceClickListener {
             showSeekBarDialog()
             true
