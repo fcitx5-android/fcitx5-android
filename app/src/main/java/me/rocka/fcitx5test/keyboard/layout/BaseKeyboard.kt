@@ -10,6 +10,7 @@ import androidx.annotation.CallSuper
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import me.rocka.fcitx5test.R
+import me.rocka.fcitx5test.keyboard.InputView
 import me.rocka.fcitx5test.keyboard.layout.*
 import me.rocka.fcitx5test.native.InputMethodEntry
 import splitties.bitflags.hasFlag
@@ -140,6 +141,10 @@ abstract class BaseKeyboard(
     }
 
     open fun onAttach(info: EditorInfo? = null) {
+        // do nothing by default
+    }
+
+    open fun onPreeditChange(info: EditorInfo?, content: InputView.PreeditContent) {
         // do nothing by default
     }
 

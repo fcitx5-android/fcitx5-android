@@ -11,10 +11,10 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import me.rocka.fcitx5test.content.AppSharedPreferences
-import me.rocka.fcitx5test.service.FcitxDaemonManager
-import me.rocka.fcitx5test.utils.inputConnection
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxEvent
+import me.rocka.fcitx5test.service.FcitxDaemonManager
+import me.rocka.fcitx5test.utils.inputConnection
 import splitties.bitflags.hasFlag
 
 class FcitxInputMethodService
@@ -124,7 +124,7 @@ class FcitxInputMethodService
             fcitx.reset()
         }
         fcitx.focus()
-        inputView.onShow(info)
+        inputView.onShow()
     }
 
     // FIXME: cursor flicker

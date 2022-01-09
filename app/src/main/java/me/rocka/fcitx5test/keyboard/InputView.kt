@@ -6,21 +6,20 @@ import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.WindowManager
-import android.view.inputmethod.EditorInfo
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import me.rocka.fcitx5test.content.AppSharedPreferences
 import me.rocka.fcitx5test.R
+import me.rocka.fcitx5test.content.AppSharedPreferences
 import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
-import me.rocka.fcitx5test.utils.inputConnection
 import me.rocka.fcitx5test.keyboard.layout.BaseKeyboard
 import me.rocka.fcitx5test.keyboard.layout.KeyAction
 import me.rocka.fcitx5test.keyboard.layout.NumberKeyboard
 import me.rocka.fcitx5test.keyboard.layout.TextKeyboard
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxEvent
+import me.rocka.fcitx5test.utils.inputConnection
 import splitties.dimensions.dp
 import splitties.resources.styledColor
 import splitties.systemservices.inputMethodManager
@@ -93,8 +92,8 @@ class InputView(
         super.onDetachedFromWindow()
     }
 
-    fun onShow(info: EditorInfo? = null) {
-        currentKeyboard.onAttach(info)
+    fun onShow() {
+        currentKeyboard.onAttach(service.editorInfo)
         currentKeyboard.onInputMethodChange(fcitx.ime())
     }
 
@@ -145,11 +144,12 @@ class InputView(
         }
     }
 
-    fun updatePreedit(data: PreeditContent) {
-        val start = data.aux.auxUp + data.preedit.preedit
-        val end = data.aux.auxDown
+    fun updatePreedit(content: PreeditContent) {
+        val start = content.aux.auxUp + content.preedit.preedit
+        val end = content.aux.auxDown
         val hasStart = start.isNotEmpty()
         val hasEnd = end.isNotEmpty()
+        currentKeyboard.onPreeditChange(service.editorInfo, content)
         preeditBinding.run {
             keyboardPreeditText.alpha = if (hasStart) 1f else 0f
             keyboardPreeditAfterText.alpha = if (hasEnd) 1f else 0f
