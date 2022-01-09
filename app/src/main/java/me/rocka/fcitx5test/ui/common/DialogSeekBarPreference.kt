@@ -31,7 +31,7 @@ class DialogSeekBarPreference : Preference {
 
     private val currentValue: Int
         get() = preferenceDataStore?.getInt(key, defaultValue) ?: defaultValue
-    
+
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) :
             this(context, attrs, R.attr.preferenceStyle)
@@ -50,12 +50,8 @@ class DialogSeekBarPreference : Preference {
     /**
      * Generates the text for the given [value] and adds the defined [unit] at the end.
      */
-    private fun getTextForValue(value: Any): String {
-        return if (value !is Int) {
-            "??$unit"
-        } else {
-            value.toString() + unit
-        }
+    private fun getTextForValue(value: Int): String {
+        return value.toString() + unit
     }
 
     /**
