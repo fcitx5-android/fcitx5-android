@@ -177,9 +177,10 @@ void AndroidFrontend::repositionCursor(ICUUID uuid, int position) {
 
 void AndroidFrontend::focusInputContext(ICUUID uuid, bool focus) {
     auto ic = instance_->inputContextManager().findByUUID(uuid);
-    if (focus) {
+    bool focused = ic->hasFocus();
+    if (focus && !focused) {
         ic->focusIn();
-    } else {
+    } else if (!focus && focused) {
         ic->focusOut();
     }
 }

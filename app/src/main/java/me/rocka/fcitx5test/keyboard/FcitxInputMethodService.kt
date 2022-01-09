@@ -113,15 +113,16 @@ class FcitxInputMethodService
     }
 
     override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
-        inputConnection?.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
+        if (!AppSharedPreferences.getInstance().ignoreSystemCursor) {
+            inputConnection?.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
+        }
         editorInfo = attribute
     }
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         if (restarting) {
-            // sometimes input won't finish before starts again; it restarts instead
-            // so reset is needed to clear previous input state
-            fcitx.reset()
+            // when input restarts in the same editor, unfocus it to clear previous state
+            fcitx.focus(false)
         }
         fcitx.focus()
         inputView.onShow()
@@ -132,7 +133,6 @@ class FcitxInputMethodService
     // sometimes onUpdateCursorAnchorInfo would receive event with wrong cursor position.
     // those events need to be filtered.
     override fun onUpdateCursorAnchorInfo(info: CursorAnchorInfo?) {
-        if (AppSharedPreferences.getInstance().ignoreSystemCursor) return
         if (info == null) return
         selectionStart = info.selectionStart
         composingTextStart = info.composingTextStart
@@ -183,14 +183,15 @@ class FcitxInputMethodService
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
-        // default implementation would finish composing text
-        super.onFinishInputView(finishingInput)
         cancelRepeatingAll()
+        inputConnection?.finishComposingText()
         fcitx.focus(false)
     }
 
     override fun onFinishInput() {
-        inputConnection?.requestCursorUpdates(0)
+        if (!AppSharedPreferences.getInstance().ignoreSystemCursor) {
+            inputConnection?.requestCursorUpdates(0)
+        }
         editorInfo = null
     }
 
