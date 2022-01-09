@@ -29,7 +29,9 @@ abstract class BaseKeyboard(
     private val keyLayout: List<List<BaseKey>>
 ) : ConstraintLayout(context) {
 
-    class KeyActionListener(val onKeyAction: (View, KeyAction<*>, Boolean) -> Unit)
+    fun interface KeyActionListener {
+        fun onKeyAction(view: View, action: KeyAction<*>, isLong: Boolean)
+    }
 
     var keyActionListener: KeyActionListener? = null
 
@@ -137,7 +139,7 @@ abstract class BaseKeyboard(
 
     @CallSuper
     open fun onAction(view: View, action: KeyAction<*>, long: Boolean) {
-        keyActionListener?.run { onKeyAction.invoke(view, action, long) }
+        keyActionListener?.onKeyAction(view, action, long)
     }
 
     open fun onAttach(info: EditorInfo? = null) {
