@@ -33,6 +33,9 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, repositionCursor,
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, focusInputContext,
                              void(ICUUID, bool))
 
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setCapabilityFlags,
+                             void(ICUUID, uint64_t))
+
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setCandidateListCallback,
                              void(const CandidateListCallback &))
 

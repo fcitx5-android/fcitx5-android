@@ -27,6 +27,7 @@ public:
     void resetInputContext(ICUUID uuid);
     void repositionCursor(ICUUID uuid, int idx);
     void focusInputContext(ICUUID uuid, bool focus);
+    void setCapabilityFlags(ICUUID uuid, uint64_t flag);
     void setCandidateListCallback(const CandidateListCallback &callback);
     void setCommitStringCallback(const CommitStringCallback &callback);
     void setPreeditCallback(const PreeditCallback &callback);
@@ -43,6 +44,7 @@ private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, resetInputContext);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, repositionCursor);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, focusInputContext);
+    FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCapabilityFlags);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCandidateListCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCommitStringCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setPreeditCallback);

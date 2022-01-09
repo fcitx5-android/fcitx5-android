@@ -108,11 +108,6 @@ AndroidFrontend::~AndroidFrontend() = default;
 
 ICUUID AndroidFrontend::createInputContext(const std::string &program) {
     auto *ic = new AndroidInputContext(this, instance_->inputContextManager(), program);
-    ic->setCapabilityFlags(CapabilityFlags{
-            CapabilityFlag::Preedit,
-            CapabilityFlag::ClientUnfocusCommit,
-            CapabilityFlag::ClientSideInputPanel
-    });
     return ic->uuid();
 }
 
@@ -183,6 +178,11 @@ void AndroidFrontend::focusInputContext(ICUUID uuid, bool focus) {
     } else if (!focus && focused) {
         ic->focusOut();
     }
+}
+
+void AndroidFrontend::setCapabilityFlags(ICUUID uuid, uint64_t flag) {
+    auto ic = instance_->inputContextManager().findByUUID(uuid);
+    ic->setCapabilityFlags(CapabilityFlags{flag});
 }
 
 void AndroidFrontend::setCandidateListCallback(const CandidateListCallback &callback) {
