@@ -318,7 +318,7 @@ public:
     }
 
     void focusInputContext(bool focus) {
-        if (!p_instance) return;
+        if (!p_frontend) return;
         p_dispatcher->schedule([this, focus]() {
             p_frontend->call<fcitx::IAndroidFrontend::focusInputContext>(p_uuid, focus);
         });
@@ -340,8 +340,8 @@ public:
     }
 
 private:
-    std::unique_ptr<fcitx::Instance> p_instance{};
-    std::unique_ptr<fcitx::EventDispatcher> p_dispatcher{};
+    std::unique_ptr<fcitx::Instance> p_instance;
+    std::unique_ptr<fcitx::EventDispatcher> p_dispatcher;
     fcitx::AddonInstance *p_frontend = nullptr;
     fcitx::AddonInstance *p_quickphrase = nullptr;
     fcitx::AddonInstance *p_punctuation = nullptr;
