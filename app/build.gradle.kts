@@ -107,8 +107,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-common-java8:2.4.0")
     implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-android", "1.4.2")
     implementation("androidx.preference:preference-ktx:1.1.1")
-    implementation("androidx.legacy:legacy-support-v4:1.0.0")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
     val navVersion = "2.3.5"
     implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
     implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
