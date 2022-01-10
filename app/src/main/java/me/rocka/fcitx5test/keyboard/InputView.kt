@@ -212,12 +212,7 @@ class InputView(
     }
 
     private fun switchLang() {
-        val list = fcitx.enabledIme()
-        if (list.isEmpty()) return
-        val status = fcitx.ime()
-        val index = list.indexOfFirst { it.uniqueName == status.uniqueName }
-        val next = list[(index + 1) % list.size]
-        fcitx.activateIme(next.uniqueName)
+        fcitx.enumerateIme()
     }
 
     private fun customEvent(fn: (Fcitx) -> Unit) {

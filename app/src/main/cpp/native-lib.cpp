@@ -94,6 +94,12 @@ public:
         });
     }
 
+    void nextInputMethod(bool forward) {
+        p_dispatcher->schedule([this, forward]() {
+            p_instance->enumerate(forward);
+        });
+    }
+
     std::vector<const fcitx::InputMethodEntry *> listInputMethods() {
         const auto &imMgr = p_instance->inputMethodManager();
         const auto &list = imMgr.currentGroup().inputMethodList();
@@ -570,6 +576,13 @@ JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_repositionCursor(JNIEnv *env, jclass clazz, jint position) {
     jniLog("repositionCursor: to " + std::to_string(position));
     Fcitx::Instance().repositionCursor(position);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_nextInputMethod(JNIEnv *env, jclass clazz, jboolean forward) {
+    RETURN_IF_NOT_RUNNING
+    Fcitx::Instance().nextInputMethod(forward == JNI_TRUE);
 }
 
 jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry, jclass imEntryClass, jmethodID imEntryInit) {

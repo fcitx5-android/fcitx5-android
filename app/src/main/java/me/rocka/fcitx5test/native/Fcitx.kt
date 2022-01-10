@@ -53,6 +53,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
     fun enabledIme() = listInputMethods() ?: arrayOf()
     fun setEnabledIme(array: Array<String>) = setEnabledInputMethods(array)
     fun activateIme(ime: String) = setInputMethod(ime)
+    fun enumerateIme(forward: Boolean = true) = nextInputMethod(forward)
     fun ime() =
         inputMethodStatus() ?: InputMethodEntry(
             "",
@@ -148,6 +149,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
 
         @JvmStatic
         external fun repositionCursor(position: Int)
+
+        @JvmStatic
+        external fun nextInputMethod(forward: Boolean)
 
         @JvmStatic
         external fun listInputMethods(): Array<InputMethodEntry>?
