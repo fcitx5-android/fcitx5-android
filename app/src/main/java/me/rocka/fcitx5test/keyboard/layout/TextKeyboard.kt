@@ -32,12 +32,12 @@ class TextKeyboard(
             ),
             listOf(
                 AltTextKey("A", "@"),
-                AltTextKey("S", "*"),
-                AltTextKey("D", "+"),
-                AltTextKey("F", "-"),
-                AltTextKey("G", "="),
+                AltTextKey("S", "`"),
+                AltTextKey("D", "$"),
+                AltTextKey("F", "_"),
+                AltTextKey("G", "&"),
                 AltTextKey("H", "/"),
-                AltTextKey("J", "#"),
+                AltTextKey("J", ";"),
                 AltTextKey("K", "("),
                 AltTextKey("L", ")")
             ),
