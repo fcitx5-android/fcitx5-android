@@ -64,7 +64,8 @@ jobs:
           "text": "Job [${{ github.workflow }} / ${{ github.job }} \\\(${{ github.event_name }}\\\) \\\#${{ github.run_number }}]\
           (https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) \
           by [${{ github.actor }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) \
-          ${{ job.status == 'success' && 'succeed ✔' || 'failed ✘' }}",
+          ${{ job.status == 'success' && 'succeed ✔' || 'failed ✘' }} \
+          [Download APK](https://nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }}/Release%20APK.zip)",
           "parse_mode": "MarkdownV2",
           "disable_web_page_preview": true
           }
