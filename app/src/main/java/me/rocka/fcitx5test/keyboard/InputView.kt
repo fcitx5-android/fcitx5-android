@@ -1,5 +1,6 @@
 package me.rocka.fcitx5test.keyboard
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.util.DisplayMetrics
 import android.view.Gravity
@@ -10,6 +11,7 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.content.AppSharedPreferences
 import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
@@ -19,8 +21,10 @@ import me.rocka.fcitx5test.keyboard.layout.NumberKeyboard
 import me.rocka.fcitx5test.keyboard.layout.TextKeyboard
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxEvent
+import me.rocka.fcitx5test.native.InputMethodEntry
 import me.rocka.fcitx5test.utils.inputConnection
 import splitties.dimensions.dp
+import splitties.resources.str
 import splitties.resources.styledColor
 import splitties.systemservices.inputMethodManager
 import splitties.systemservices.layoutInflater
@@ -28,6 +32,7 @@ import splitties.systemservices.windowManager
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
 
+@SuppressLint("ViewConstructor")
 class InputView(
     val service: FcitxInputMethodService,
     val fcitx: Fcitx
@@ -40,6 +45,7 @@ class InputView(
 
     private val themedContext = context.withTheme(R.style.Theme_AppCompat_DayNight)
 
+    private var currentIme = InputMethodEntry(service.str(R.string._not_available_))
     private var cachedPreedit = PreeditContent(
         FcitxEvent.PreeditEvent.Data("", "", 0),
         FcitxEvent.InputPanelAuxEvent.Data("", "")
@@ -73,6 +79,10 @@ class InputView(
     }
 
     init {
+        service.launch {
+            currentIme = fcitx.currentImeAsync().await()
+            currentKeyboard.onInputMethodChange(currentIme)
+        }
         preeditPopup.width = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             windowManager.currentWindowMetrics.bounds.width()
         } else {
@@ -94,7 +104,7 @@ class InputView(
 
     fun onShow() {
         currentKeyboard.onAttach(service.editorInfo)
-        currentKeyboard.onInputMethodChange(fcitx.ime())
+        currentKeyboard.onInputMethodChange(currentIme)
     }
 
     fun handleFcitxEvent(it: FcitxEvent<*>) {
@@ -110,11 +120,9 @@ class InputView(
                 cachedPreedit.aux = it.data
                 updatePreedit(cachedPreedit)
             }
-            is FcitxEvent.ReadyEvent -> {
-                currentKeyboard.onInputMethodChange(fcitx.ime())
-            }
             is FcitxEvent.IMChangeEvent -> {
-                currentKeyboard.onInputMethodChange(it.data.status)
+                currentIme = it.data.status
+                currentKeyboard.onInputMethodChange(currentIme)
             }
             else -> {}
         }
@@ -199,7 +207,7 @@ class InputView(
         add(currentKeyboard, lParams(matchParent, wrapContent))
         currentKeyboard.keyActionListener = keyActionListener
         currentKeyboard.onAttach(service.editorInfo)
-        currentKeyboard.onInputMethodChange(fcitx.ime())
+        currentKeyboard.onInputMethodChange(currentIme)
     }
 
     private fun quickPhrase() {

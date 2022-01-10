@@ -1,5 +1,6 @@
 #include <jni.h>
 #include <memory>
+#include <future>
 #include <android/log.h>
 
 #include <fcitx/instance.h>
@@ -100,6 +101,10 @@ public:
         });
     }
 
+    void schedule(const std::function<void(Fcitx *)> &fn) {
+        p_dispatcher->schedule([&fn, this]() { fn(this); });
+    }
+
     std::vector<const fcitx::InputMethodEntry *> listInputMethods() {
         const auto &imMgr = p_instance->inputMethodManager();
         const auto &list = imMgr.currentGroup().inputMethodList();
@@ -111,7 +116,9 @@ public:
         return std::move(entries);
     }
 
-    std::tuple<const fcitx::InputMethodEntry *, const std::vector<std::string>> inputMethodStatus() {
+    typedef std::tuple<const fcitx::InputMethodEntry *, const std::vector<std::string>> IMStatus;
+
+    IMStatus inputMethodStatus() {
         auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
         auto *engine = p_instance->inputMethodEngine(ic);
         const auto *entry = p_instance->inputMethodEntry(ic);
@@ -647,7 +654,14 @@ extern "C"
 JNIEXPORT jobject JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_inputMethodStatus(JNIEnv *env, jclass clazz) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
-    const auto status = Fcitx::Instance().inputMethodStatus();
+    std::promise<Fcitx::IMStatus> promise;
+    Fcitx::Instance().schedule([&promise](Fcitx *fcitx) {
+        const auto st = fcitx->inputMethodStatus();
+        promise.set_value(st);
+    });
+    auto future = promise.get_future();
+    future.wait();
+    const auto &status = future.get();
     return fcitxInputMethodEntryWithSubModeToJObject(env, std::get<0>(status), std::get<1>(status));
 }
 

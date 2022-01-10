@@ -11,10 +11,10 @@ import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.asset.AssetManager
 import me.rocka.fcitx5test.content.AppSharedPreferences
 import me.rocka.fcitx5test.native.FcitxState.*
+import splitties.resources.str
 
-class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope by CoroutineScope(
-    SupervisorJob() + Dispatchers.IO
-) {
+class Fcitx(private val context: Context) : FcitxLifecycleOwner,
+    CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.IO) {
 
     interface RawConfigMap {
         operator fun get(key: String): RawConfig
@@ -54,16 +54,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
     fun setEnabledIme(array: Array<String>) = setEnabledInputMethods(array)
     fun activateIme(ime: String) = setInputMethod(ime)
     fun enumerateIme(forward: Boolean = true) = nextInputMethod(forward)
-    fun ime() =
-        inputMethodStatus() ?: InputMethodEntry(
-            "",
-            context.getString(R.string._not_available_),
-            "",
-            "",
-            "×",
-            "",
-            false
-        )
+    fun currentImeAsync() = async {
+        inputMethodStatus() ?: InputMethodEntry(context.str(R.string._not_available_))
+    }
 
     var globalConfig: RawConfig
         get() = getFcitxGlobalConfig() ?: RawConfig(arrayOf())

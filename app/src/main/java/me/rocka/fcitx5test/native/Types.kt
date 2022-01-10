@@ -57,6 +57,8 @@ data class InputMethodEntry(
         InputMethodSubMode(subMode, subModeLabel, subModeIcon)
     )
 
+    constructor(name: String) : this("", name, "", "", "×", "", false)
+
     val displayName: String
         get() = if (name.isNotEmpty()) name else uniqueName
 }
