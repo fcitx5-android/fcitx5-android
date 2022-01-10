@@ -85,7 +85,7 @@ class SetupActivity : FragmentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                CHANNEL_ID,
+                getText(R.string.setup_channel),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply { description = CHANNEL_ID }
             notificationManager.createNotificationChannel(channel)
@@ -109,8 +109,13 @@ class SetupActivity : FragmentActivity() {
                 )
                 .setAutoCancel(true)
                 .build()
-                .let { notificationManager.notify(233, it) }
+                .let { notificationManager.notify(NOTIFY_ID, it) }
         super.onPause()
+    }
+
+    override fun onResume() {
+        notificationManager.cancel(NOTIFY_ID)
+        super.onResume()
     }
 
     private inner class Adapter : FragmentStateAdapter(this) {
@@ -120,12 +125,12 @@ class SetupActivity : FragmentActivity() {
             SetupFragment().apply {
                 arguments = bundleOf("page" to SetupPage.values()[position])
             }
-
     }
 
     companion object {
         private var shown = false
         private const val CHANNEL_ID = "setup"
+        private const val NOTIFY_ID = 233
         fun shouldShowUp() = !shown && SetupPage.hasUndonePage()
     }
 }
