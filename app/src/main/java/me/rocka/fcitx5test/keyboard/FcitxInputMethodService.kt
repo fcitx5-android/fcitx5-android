@@ -11,6 +11,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import me.rocka.fcitx5test.content.AppSharedPreferences
+import me.rocka.fcitx5test.native.CapabilityFlags
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxEvent
 import me.rocka.fcitx5test.service.FcitxDaemonManager
@@ -117,6 +118,7 @@ class FcitxInputMethodService
             inputConnection?.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
         }
         editorInfo = attribute
+        fcitx.setCapFlags(CapabilityFlags.fromEditorInfo(editorInfo))
     }
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
@@ -193,6 +195,7 @@ class FcitxInputMethodService
             inputConnection?.requestCursorUpdates(0)
         }
         editorInfo = null
+        fcitx.setCapFlags(CapabilityFlags.DefaultFlags)
     }
 
     override fun onDestroy() {

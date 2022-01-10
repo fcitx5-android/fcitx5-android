@@ -1,5 +1,9 @@
 package me.rocka.fcitx5test.native
 
+import android.text.InputType
+import android.view.inputmethod.EditorInfo
+import splitties.bitflags.hasFlag
+
 /**
  * translated from
  * [fcitx-utils/capabilityflags.h](https://github.com/fcitx/fcitx5/blob/5.0.13/src/lib/fcitx-utils/capabilityflags.h)
@@ -31,7 +35,7 @@ enum class CapabilityFlag(val flag: ULong) {
     NoSpellCheck(1UL shl 17),
     WordCompletion(1UL shl 18),
     UppercaseWords(1UL shl 19),
-    UppwercaseSentences(1UL shl 20),
+    UppercaseSentences(1UL shl 20),
     Alpha(1UL shl 21),
     Name(1UL shl 22),
     GetIMInfoOnFocus(1UL shl 23),
@@ -60,23 +64,103 @@ enum class CapabilityFlag(val flag: ULong) {
 
 }
 
-class CapabilityFlags(val flags: ULong) {
-    companion object {
-        fun mergeFlags(list: Array<out CapabilityFlag>): ULong {
-            var acc = CapabilityFlag.NoFlag.flag
-            list.forEach { acc = acc or it.flag }
-            return acc
-        }
+operator fun ULong.plus(other: CapabilityFlag) = or(other.flag)
+operator fun ULong.minus(other: CapabilityFlag) = and(other.flag.inv())
 
-        val DefaultFlags: CapabilityFlags
+@JvmInline
+value class CapabilityFlags constructor(val flags: ULong) {
+    companion object {
+        fun mergeFlags(arr: Array<out CapabilityFlag>): ULong =
+            arr.fold(CapabilityFlag.NoFlag.flag) { acc, it -> acc or it.flag }
+
+        val DefaultFlags
             get() = CapabilityFlags(
                 CapabilityFlag.Preedit,
                 CapabilityFlag.ClientUnfocusCommit,
                 CapabilityFlag.ClientSideInputPanel,
             )
+
+        fun fromEditorInfo(info: EditorInfo?): CapabilityFlags {
+            var flags = DefaultFlags.flags
+            info?.imeOptions?.let {
+                if (it.hasFlag(EditorInfo.IME_FLAG_FORCE_ASCII)) {
+                    flags += CapabilityFlag.Alpha
+                }
+            }
+            info?.inputType?.let {
+                if (it == InputType.TYPE_NULL) {
+                    flags += CapabilityFlag.NoSpellCheck
+                    return@let
+                }
+                when (it and InputType.TYPE_MASK_CLASS) {
+                    InputType.TYPE_CLASS_TEXT -> {
+                        (it and InputType.TYPE_MASK_FLAGS).run {
+                            if (hasFlag(InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE) ||
+                                hasFlag(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS)
+                            ) {
+                                flags += CapabilityFlag.NoSpellCheck
+                            }
+                            if (hasFlag(InputType.TYPE_TEXT_FLAG_AUTO_CORRECT)) {
+                                flags += CapabilityFlag.SpellCheck
+                            }
+                            if (hasFlag(InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS)) {
+                                flags += CapabilityFlag.Uppercase
+                            }
+                            if (hasFlag(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES)) {
+                                flags += CapabilityFlag.UppercaseSentences
+                            }
+                            if (hasFlag(InputType.TYPE_TEXT_FLAG_CAP_WORDS)) {
+                                flags += CapabilityFlag.UppercaseWords
+                            }
+                            if (hasFlag(InputType.TYPE_TEXT_FLAG_IME_MULTI_LINE) ||
+                                hasFlag(InputType.TYPE_TEXT_FLAG_MULTI_LINE)
+                            ) {
+                                flags += CapabilityFlag.Multiline
+                            }
+                        }
+                        (it and InputType.TYPE_MASK_VARIATION).run {
+                            if (hasFlag(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS) ||
+                                hasFlag((InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS))
+                            ) {
+                                flags += CapabilityFlag.Email
+                            }
+                            if (hasFlag(InputType.TYPE_TEXT_VARIATION_PASSWORD) ||
+                                hasFlag(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) ||
+                                hasFlag(InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD)
+                            ) {
+                                flags += CapabilityFlag.Password
+                            }
+                            if (hasFlag(InputType.TYPE_TEXT_VARIATION_URI)) {
+                                flags += CapabilityFlag.Url
+                            }
+                        }
+                    }
+                    InputType.TYPE_CLASS_NUMBER -> {
+                        flags += CapabilityFlag.NoSpellCheck
+                        flags += CapabilityFlag.Number
+                    }
+                    InputType.TYPE_CLASS_PHONE -> {
+                        flags += CapabilityFlag.NoSpellCheck
+                        flags += CapabilityFlag.Dialable
+                    }
+                    InputType.TYPE_CLASS_DATETIME -> {
+                        flags += CapabilityFlag.NoSpellCheck
+                        (it and InputType.TYPE_MASK_VARIATION).run {
+                            if (hasFlag(InputType.TYPE_DATETIME_VARIATION_DATE)) {
+                                flags += CapabilityFlag.Date
+                            }
+                            if (hasFlag(InputType.TYPE_DATETIME_VARIATION_TIME)) {
+                                flags += CapabilityFlag.Time
+                            }
+                        }
+                    }
+                }
+            }
+            return CapabilityFlags(flags)
+        }
     }
 
-    constructor(vararg list: CapabilityFlag) : this(mergeFlags(list))
+    constructor(vararg flags: CapabilityFlag) : this(mergeFlags(flags))
 
     fun toLong() = flags.toLong()
 }
