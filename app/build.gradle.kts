@@ -33,7 +33,7 @@ android {
 
     defaultConfig {
         applicationId = "me.rocka.fcitx5test"
-        minSdk = 21
+        minSdk = 23
         targetSdk = 31
         versionCode = 1
         versionName = "0.0.1"
@@ -43,7 +43,7 @@ android {
         buildConfigField("String", "ASSETS_DESCRIPTOR_NAME", "\"${assetDescriptorName}\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
-            abiFilters += listOf("armeabi-v7a", "arm64-v8a")
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
         }
         vectorDrawables {
             useSupportLibrary = true
@@ -78,6 +78,12 @@ android {
 
     kotlinOptions {
         jvmTarget = "11"
+    }
+
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
     }
 }
 

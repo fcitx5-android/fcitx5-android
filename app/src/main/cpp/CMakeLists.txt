@@ -48,8 +48,8 @@ add_subdirectory(androidfrontend)
 add_subdirectory(androidkeyboard)
 
 # prebuilt boost
-set(BOOST_VERSION "1.76.0")
-set(BOOST_MODULES headers filesystem iostreams regex)
+set(BOOST_VERSION "1.78.0")
+set(BOOST_MODULES headers filesystem atomic iostreams regex)
 set(BOOST_ROOT "${PREBUILT_DIR}/boost/${ANDROID_ABI}")
 set(Boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
 foreach(mod IN LISTS BOOST_MODULES)
