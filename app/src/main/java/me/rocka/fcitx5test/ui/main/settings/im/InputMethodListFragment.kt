@@ -40,12 +40,13 @@ class InputMethodListFragment : Fragment(), OnItemChangedListener<InputMethodEnt
             initialEntries = fcitx.enabledIme().toList(),
             enableOrder = true,
             initSettingsButton = { idx ->
+                val entry = entries[idx]
                 setOnClickListener {
                     it.findNavController().navigate(
                         R.id.action_imListFragment_to_imConfigFragment,
                         bundleOf(
-                            InputMethodConfigFragment.ARG_UNIQUE_NAME to entries[idx].uniqueName,
-                            InputMethodConfigFragment.ARG_NAME to entries[idx].displayName
+                            InputMethodConfigFragment.ARG_UNIQUE_NAME to entry.uniqueName,
+                            InputMethodConfigFragment.ARG_NAME to entry.displayName
                         )
                     )
                 }
