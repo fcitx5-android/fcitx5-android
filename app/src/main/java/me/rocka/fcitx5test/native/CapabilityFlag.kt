@@ -120,7 +120,7 @@ value class CapabilityFlags constructor(val flags: ULong) {
                         }
                         (it and InputType.TYPE_MASK_VARIATION).run {
                             if (hasFlag(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS) ||
-                                hasFlag((InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS))
+                                hasFlag(InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS)
                             ) {
                                 flags += CapabilityFlag.Email
                             }
