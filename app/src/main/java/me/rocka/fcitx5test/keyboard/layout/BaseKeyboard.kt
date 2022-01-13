@@ -41,26 +41,46 @@ abstract class BaseKeyboard(
             val keyRows = keyLayout.map { row ->
                 val keyButtons = row.map { key ->
                     createButton(context, key).apply {
-                        if (key is IPressKey) setOnClickListener {
-                            onAction(this, key.onPress(), false)
+                        setOnClickListener {
+                            if (key is IPressKey)
+                                onAction(it, key.onPress(), false)
                         }
-                        if (key is ILongPressKey) setOnLongClickListener {
-                            onAction(this, key.onLongPress(), true)
-                            true
-                        }
-                        if (key is IRepeatKey) {
-                            setOnTouchListener { v, e ->
-                                when (e.action) {
-                                    MotionEvent.ACTION_BUTTON_PRESS -> v.performClick()
-                                    MotionEvent.ACTION_UP -> onAction(v, key.onRelease(), false)
+                        setOnLongClickListener {
+                            when (key) {
+                                is ILongPressKey -> {
+                                    onAction(it, key.onLongPress(), true)
+                                    true
                                 }
-                                false
-                            }
-                            setOnLongClickListener {
-                                onAction(this, key.onHold(), true)
-                                true
+                                is IRepeatKey -> {
+                                    onAction(it, key.onHold(), true)
+                                    true
+                                }
+                                else -> false
                             }
                         }
+                        setupOnGestureListener(object : MyOnGestureListener() {
+
+                            override fun onSwipeDown(): Boolean {
+                                return if (key is AltTextKey) {
+                                    onAction(this@apply, key.onLongPress(), false)
+                                    true
+                                } else false
+                            }
+
+                            override fun onRawTouchEvent(motionEvent: MotionEvent): Boolean {
+                                if (key is IRepeatKey) {
+                                    when (motionEvent.action) {
+                                        MotionEvent.ACTION_BUTTON_PRESS -> this@apply.performClick()
+                                        MotionEvent.ACTION_UP -> onAction(
+                                            this@apply,
+                                            key.onRelease(),
+                                            false
+                                        )
+                                    }
+                                }
+                                return false
+                            }
+                        })
                     }
                 }
                 constraintLayout Row@{
