@@ -119,18 +119,18 @@ value class CapabilityFlags constructor(val flags: ULong) {
                             }
                         }
                         (it and InputType.TYPE_MASK_VARIATION).run {
-                            if (hasFlag(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS) ||
-                                hasFlag(InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS)
+                            if (equals(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS) ||
+                                equals(InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS)
                             ) {
                                 flags += CapabilityFlag.Email
                             }
-                            if (hasFlag(InputType.TYPE_TEXT_VARIATION_PASSWORD) ||
-                                hasFlag(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) ||
-                                hasFlag(InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD)
+                            if (equals(InputType.TYPE_TEXT_VARIATION_PASSWORD) ||
+                                equals(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) ||
+                                equals(InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD)
                             ) {
                                 flags += CapabilityFlag.Password
                             }
-                            if (hasFlag(InputType.TYPE_TEXT_VARIATION_URI)) {
+                            if (equals(InputType.TYPE_TEXT_VARIATION_URI)) {
                                 flags += CapabilityFlag.Url
                             }
                         }
