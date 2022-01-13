@@ -344,11 +344,9 @@ public:
         });
     }
 
-    void saveConfig() {
+    void save() {
         p_dispatcher->schedule([this]() {
-            p_instance->globalConfig().safeSave();
-            p_instance->inputMethodManager().save();
-            p_instance->addonManager().saveAll();
+            p_instance->save();
         });
     }
 
@@ -532,9 +530,9 @@ Java_me_rocka_fcitx5test_native_Fcitx_exitFcitx(JNIEnv *env, jclass clazz) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_saveFcitxConfig(JNIEnv *env, jclass clazz) {
+Java_me_rocka_fcitx5test_native_Fcitx_saveFcitxState(JNIEnv *env, jclass clazz) {
     RETURN_IF_NOT_RUNNING
-    Fcitx::Instance().saveConfig();
+    Fcitx::Instance().save();
 }
 
 extern "C"

@@ -41,7 +41,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner,
      */
     val eventFlow = eventFlow_.asSharedFlow()
 
-    fun saveConfig() = saveFcitxConfig()
+    fun save() = saveFcitxState()
     fun sendKey(key: String) = sendKeyToFcitxString(key)
     fun sendKey(c: Char) = sendKeyToFcitxChar(c)
     fun sendKey(i: Int) = sendKeyToFcitxInt(i)
@@ -121,7 +121,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner,
         external fun exitFcitx()
 
         @JvmStatic
-        external fun saveFcitxConfig()
+        external fun saveFcitxState()
 
         @JvmStatic
         external fun sendKeyToFcitxString(key: String)
