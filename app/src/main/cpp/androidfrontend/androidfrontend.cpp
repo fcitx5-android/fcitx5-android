@@ -98,7 +98,7 @@ private:
 AndroidFrontend::AndroidFrontend(Instance *instance)
         : instance_(instance) {
     eventHandlers_.emplace_back(instance_->watchEvent(
-            EventType::InputContextSwitchInputMethod,
+            EventType::InputContextInputMethodActivated,
             EventWatcherPhase::Default,
             [this](Event &event) { imChangeCallback(); }
     ));
