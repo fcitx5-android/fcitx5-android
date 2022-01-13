@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <exclude
+        domain="file"
+        path="usr" />
+    <exclude
+        domain="file"
+        path="descriptor.json" />
+</full-backup-content>
