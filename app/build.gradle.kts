@@ -42,9 +42,7 @@ android {
         buildConfigField("long", "BUILD_TIME", System.currentTimeMillis().toString())
         buildConfigField("String", "ASSETS_DESCRIPTOR_NAME", "\"${assetDescriptorName}\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        ndk {
-            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
-        }
+
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -53,10 +51,32 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
+            isDebuggable = false
+            isJniDebuggable = false
+            multiDexEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        getByName("debug") {
+            applicationIdSuffix = ".debug"
+            isDebuggable = true
+            isDefault = true
+            isJniDebuggable = true
+            multiDexEnabled = true
+        }
+    }
+
+    splits {
+        abi {
+            isEnable = true
+            System.getenv("ABI")
+                ?.takeIf { it.isNotBlank() }
+                ?.let {
+                    reset()
+                    include(it)
+                }
         }
     }
 
