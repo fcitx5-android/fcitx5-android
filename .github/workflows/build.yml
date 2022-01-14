@@ -65,15 +65,16 @@ jobs:
           path: ${{ github.event_name == 'push' && steps.sign_apk.outputs.signedReleaseFile || 'app/build/outputs/apk/release/*.apk' }}
 
       - name: Send build failure to Telegram Group
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ failure() && github.event_name == 'push' }}
         run: |
           curl -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
             -H "content-type: application/json" \
             -d @- << EOF
           {
           "chat_id": ${{ secrets.TELEGRAM_TO }},
-          "text": "Job [${{ github.workflow }} / ${{ github.job }} \\\(${{ github.event_name }}\\\) \\\#${{ github.run_number }} for ${{ matrix.abi }}]\
+          "text": "Job [${{ github.workflow }} / ${{ github.job }} \\\(${{ github.event_name }}\\\) \\\#${{ github.run_number }}]\
           (https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) \
+          for *${{ matrix.abi.replace('-', '\\-') }}* \
           by [${{ github.actor }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) failed ✘",
           "parse_mode": "MarkdownV2",
           "disable_web_page_preview": true
@@ -91,7 +92,7 @@ jobs:
           "chat_id": ${{ secrets.TELEGRAM_TO }},
           "text": "Job [${{ github.workflow }} / ${{ needs.Release.job }} \\\(${{ github.event_name }}\\\) \\\#${{ github.run_number }}]\
           (https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) \
-          by [${{ github.actor }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) succeed ✔ \
+          by [${{ github.actor }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) *ALL* succeed ✔ \
           [Download APK](https://nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }}/Release%20APK.zip)",
           "parse_mode": "MarkdownV2",
           "disable_web_page_preview": true
