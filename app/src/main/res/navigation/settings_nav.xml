@@ -58,7 +58,7 @@
         android:id="@+id/imConfigFragment"
         android:name="me.rocka.fcitx5test.ui.main.settings.im.InputMethodConfigFragment">
         <action
-            android:id="@+id/action_imConfigFragment_to_enumListFragment"
+            android:id="@+id/action_imConfigFragment_to_listFragment"
             app:destination="@id/listFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
@@ -81,7 +81,7 @@
         android:id="@+id/addonConfigFragment"
         android:name="me.rocka.fcitx5test.ui.main.settings.addon.AddonConfigFragment">
         <action
-            android:id="@+id/action_addonConfigFragment_to_enumListFragment"
+            android:id="@+id/action_addonConfigFragment_to_listFragment"
             app:destination="@id/listFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"

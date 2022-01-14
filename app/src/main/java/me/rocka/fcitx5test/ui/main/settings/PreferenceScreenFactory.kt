@@ -11,6 +11,8 @@ import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.content.AppSharedPreferences
 import me.rocka.fcitx5test.native.RawConfig
 import me.rocka.fcitx5test.ui.common.DialogSeekBarPreference
+import me.rocka.fcitx5test.ui.main.settings.addon.AddonConfigFragment
+import me.rocka.fcitx5test.ui.main.settings.im.InputMethodConfigFragment
 import me.rocka.fcitx5test.utils.config.ConfigDescriptor
 import me.rocka.fcitx5test.utils.config.ConfigType
 
@@ -69,8 +71,13 @@ object PreferenceScreenFactory {
             setOnPreferenceClickListener {
                 val currentFragment =
                     fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
+                val action = when (currentFragment) {
+                    is AddonConfigFragment -> R.id.action_addonConfigFragment_to_listFragment
+                    is InputMethodConfigFragment -> R.id.action_imConfigFragment_to_listFragment
+                    else -> throw IllegalStateException("Can not navigate to listFragment from current fragment")
+                }
                 currentFragment.findNavController().navigate(
-                    R.id.listFragment, bundleOf(
+                    action, bundleOf(
                         ListFragment.ARG_CFG to cfg[descriptor.name],
                         ListFragment.ARG_DESC to descriptor,
                     )
