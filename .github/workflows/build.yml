@@ -17,8 +17,6 @@ jobs:
           - x86_64
     env:
       ABI: ${{ matrix.abi }}
-    outputs:
-      job: ${{ github.job }}
     steps:
       - name: Fetch source code
         uses: actions/checkout@v2
@@ -91,7 +89,7 @@ jobs:
             -d @- << EOF
           {
           "chat_id": ${{ secrets.TELEGRAM_TO }},
-          "text": "Job [${{ github.workflow }} / ${{ needs.Release.job }} \\\(${{ github.event_name }}\\\) \\\#${{ github.run_number }}]\
+          "text": "Job [${{ github.workflow }} \\\(${{ github.event_name }}\\\) \\\#${{ github.run_number }}]\
           (https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) \
           by [${{ github.actor }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) *ALL* succeed ✔ \
           [Download APK](https://nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }}/Release%20APK.zip)",
