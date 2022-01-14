@@ -12,6 +12,9 @@ class MainViewModel : ViewModel() {
     private val context: Context
         get() = FcitxApplication.getInstance().applicationContext
 
+    val isFcitxInitialized
+        get() = this::fcitx.isInitialized
+
     val toolbarTitle = MutableLiveData<String>()
 
     val toolbarSaveButtonOnClickListener = MutableLiveData<(() -> Unit)?>()

@@ -1,5 +1,6 @@
 package me.rocka.fcitx5test.keyboard
 
+import android.content.Intent
 import android.inputmethodservice.InputMethodService
 import android.util.Log
 import android.view.KeyEvent
@@ -61,7 +62,8 @@ class FcitxInputMethodService
             is FcitxEvent.PreeditEvent -> event.data.let {
                 updateComposingTextWithCursor(it.clientPreedit, it.cursor)
             }
-            else -> {}
+            else -> {
+            }
         }
         inputView.handleFcitxEvent(event)
     }
@@ -197,6 +199,13 @@ class FcitxInputMethodService
         editorInfo = null
         fcitx.setCapFlags(CapabilityFlags.DefaultFlags)
     }
+
+    override fun onUnbind(intent: Intent?): Boolean {
+        Log.d(javaClass.name, "onUnbind")
+        fcitx.save()
+        return super.onUnbind(intent)
+    }
+
 
     override fun onDestroy() {
         // cancel all coroutines in MainScope
