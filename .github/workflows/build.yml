@@ -67,6 +67,7 @@ jobs:
       - name: Send build failure to Telegram Group
         if: ${{ failure() && github.event_name == 'push' }}
         run: |
+          export ESCAPED_ABI=$(echo $ABI | sed -r 's/-/\\\\-/g')
           curl -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
             -H "content-type: application/json" \
             -d @- << EOF
@@ -74,7 +75,7 @@ jobs:
           "chat_id": ${{ secrets.TELEGRAM_TO }},
           "text": "Job [${{ github.workflow }} / ${{ github.job }} \\\(${{ github.event_name }}\\\) \\\#${{ github.run_number }}]\
           (https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) \
-          for *${{ matrix.abi.replace('-', '\\-') }}* \
+          for *$ESCAPED_ABI* \
           by [${{ github.actor }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) failed ✘",
           "parse_mode": "MarkdownV2",
           "disable_web_page_preview": true
