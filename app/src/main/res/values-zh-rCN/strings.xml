@@ -1,8 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?><!DOCTYPE resources [<!ENTITY appname "小企鹅输入法5">]>
 <resources>
-    <string name="open_ime_settings">打开“语言和输入法”设置</string>
     <string name="save">保存</string>
-    <string name="cancel">取消</string>
     <string name="input_methods">输入法</string>
     <string name="add_input_method">添加输入法</string>
     <string name="input_methods_conf">配置输入法</string>
@@ -15,5 +13,19 @@
     <string name="hide_key_config">隐藏快捷键配置</string>
     <string name="_not_available_">（不可用）</string>
     <string name="button_haptic_feedback">按键时震动</string>
-    <string name="app_name">Fcitx5 for Android</string>
+    <string name="app_name">&appname;</string>
+    <string name="add">添加</string>
+    <string name="edit">修改</string>
+    <string name="undo">撤销</string>
+    <string name="setup_channel">设置向导</string>
+    <string name="setup_keyboard">请完成键盘设置</string>
+    <string name="done">完成</string>
+    <string name="enable_ime">启用输入法</string>
+    <string name="enable_ime_hint">在“语言和输入法设置”中启用<b>&appname;</b></string>
+    <string name="select_ime_hint">选择<b>&appname;</b>作为默认输入法</string>
+    <string name="next">下一步</string>
+    <string name="prev">上一步</string>
+    <string name="clean_and_sync_assets">删除并同步运行数据</string>
+    <string name="select_ime">选择输入法</string>
+    <string name="synced">已同步！</string>
 </resources>

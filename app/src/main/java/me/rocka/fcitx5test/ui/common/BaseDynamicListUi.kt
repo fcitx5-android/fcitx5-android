@@ -187,9 +187,9 @@ abstract class BaseDynamicListUi<T>(
         val dialog = AlertDialog.Builder(ctx)
             .setTitle(title)
             .setView(layout)
-            .setPositiveButton(R.string.ok) { _, _ ->
+            .setPositiveButton(android.R.string.ok) { _, _ ->
             }
-            .setNegativeButton(R.string.cancel) { dialog, _ ->
+            .setNegativeButton(android.R.string.cancel) { dialog, _ ->
                 dialog.cancel()
             }
             .show()

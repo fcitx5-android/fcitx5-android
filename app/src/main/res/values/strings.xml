@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE resources [<!ENTITY appname "Fcitx5 for Android">]>
 <resources>
     <string name="app_name">&appname;</string>
-    <string name="open_ime_settings">Open System IME Settings</string>
     <string name="save">Save</string>
-    <string name="cancel">Cancel</string>
     <string name="input_methods">Input Methods</string>
     <string name="add_input_method">Add Input Method</string>
     <string name="input_methods_conf">Configure Input Methods</string>
@@ -19,7 +17,6 @@
     <string name="add">Add</string>
     <string name="edit">Edit</string>
     <string name="undo">Undo</string>
-    <string name="ok">OK</string>
     <string name="clean_and_sync_assets">Delete and sync runtime data</string>
     <string name="enable_ime">Enable Input Method</string>
     <string name="enable_ime_hint">Enable <b>&appname;</b> in Language and input settings</string>
@@ -30,4 +27,5 @@
     <string name="done">Done</string>
     <string name="setup_keyboard">Finish setting up the keyboard</string>
     <string name="setup_channel">Setup Wizard</string>
+    <string name="synced">Synced!</string>
 </resources>

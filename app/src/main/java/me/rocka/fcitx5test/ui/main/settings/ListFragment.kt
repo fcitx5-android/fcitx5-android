@@ -8,10 +8,10 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import me.rocka.fcitx5test.native.RawConfig
-import me.rocka.fcitx5test.utils.config.ConfigDescriptor
-import me.rocka.fcitx5test.utils.config.ConfigType
 import me.rocka.fcitx5test.ui.common.BaseDynamicListUi
 import me.rocka.fcitx5test.ui.main.MainViewModel
+import me.rocka.fcitx5test.utils.config.ConfigDescriptor
+import me.rocka.fcitx5test.utils.config.ConfigType
 
 class ListFragment : Fragment() {
 
@@ -85,7 +85,7 @@ class ListFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewModel.setToolbarTitle(descriptor.name)
+        viewModel.setToolbarTitle(descriptor.description ?: descriptor.name)
         viewModel.disableToolbarSaveButton()
         return ui.root
     }

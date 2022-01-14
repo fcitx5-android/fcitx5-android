@@ -1,8 +1,6 @@
 package me.rocka.fcitx5test.ui.main
 
-import android.content.Intent
 import android.os.Bundle
-import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,9 +29,6 @@ class MainFragment : Fragment() {
         val binding = FragmentMainBinding.inflate(inflater, container, false)
         binding.settingsList.apply {
             adapter = SettingItemRecyclerViewAdapter(
-                context.getString(R.string.open_ime_settings) to {
-                    startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
-                },
                 context.getString(R.string.global_options) to {
                     findNavController().navigate(R.id.action_mainFragment_to_globalConfigFragment)
                 },
@@ -49,8 +44,9 @@ class MainFragment : Fragment() {
                 context.getString(R.string.clean_and_sync_assets) to {
                     GlobalScope.launch(Dispatchers.IO) {
                         AssetManager.cleanAndSync()
-                        launch(Dispatchers.Main){
-                            Toast.makeText(context, "Synced!", Toast.LENGTH_SHORT).show()
+                        launch(Dispatchers.Main) {
+                            Toast.makeText(context, getString(R.string.synced), Toast.LENGTH_SHORT)
+                                .show()
                         }
                     }
                 }
