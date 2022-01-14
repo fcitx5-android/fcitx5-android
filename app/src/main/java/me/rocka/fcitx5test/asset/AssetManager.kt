@@ -2,12 +2,14 @@ package me.rocka.fcitx5test.asset
 
 import android.content.Context
 import android.util.Log
-import me.rocka.fcitx5test.content.Const
 import me.rocka.fcitx5test.FcitxApplication
+import me.rocka.fcitx5test.content.Const
 import me.rocka.fcitx5test.utils.copyFile
 import me.rocka.fcitx5test.utils.deleteFileOrDir
 import org.json.JSONObject
 import java.io.File
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 object AssetManager {
 
@@ -16,6 +18,8 @@ object AssetManager {
 
     private val context: Context
         get() = FcitxApplication.getInstance().applicationContext
+
+    private val lock = ReentrantLock()
 
     // should be consistent with the deserialization in build.gradle.kts (:app)
     private fun deserialize(raw: String): Result<AssetDescriptor> = runCatching {
@@ -52,7 +56,7 @@ object AssetManager {
                     .map { Diff.Delete(it.key, it.value) })
             }
 
-    fun syncDataDir() {
+    fun syncDataDir() = lock.withLock {
         val destDescriptor =
             destDescriptorFile
                 .takeIf { it.exists() && it.isFile }
