@@ -3,6 +3,7 @@ package me.rocka.fcitx5test.keyboard.layout
 import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.view.HapticFeedbackConstants.*
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -10,6 +11,7 @@ import androidx.annotation.CallSuper
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import me.rocka.fcitx5test.R
+import me.rocka.fcitx5test.content.AppSharedPreferences
 import me.rocka.fcitx5test.keyboard.InputView
 import me.rocka.fcitx5test.keyboard.layout.*
 import me.rocka.fcitx5test.native.InputMethodEntry
@@ -24,13 +26,14 @@ import splitties.views.dsl.core.imageButton
 import splitties.views.imageResource
 import splitties.views.padding
 
+
 abstract class BaseKeyboard(
     context: Context,
     private val keyLayout: List<List<BaseKey>>
 ) : ConstraintLayout(context) {
 
     fun interface KeyActionListener {
-        fun onKeyAction(view: View, action: KeyAction<*>, isLong: Boolean)
+        fun onKeyAction(view: View, action: KeyAction<*>)
     }
 
     var keyActionListener: KeyActionListener? = null
@@ -42,17 +45,19 @@ abstract class BaseKeyboard(
                 val keyButtons = row.map { key ->
                     createButton(context, key).apply {
                         setOnClickListener {
+                            haptic(false)
                             if (key is IPressKey)
-                                onAction(it, key.onPress(), false)
+                                onAction(it, key.onPress())
                         }
                         setOnLongClickListener {
+                            haptic(true)
                             when (key) {
                                 is ILongPressKey -> {
-                                    onAction(it, key.onLongPress(), true)
+                                    onAction(it, key.onLongPress())
                                     true
                                 }
                                 is IRepeatKey -> {
-                                    onAction(it, key.onHold(), true)
+                                    onAction(it, key.onHold())
                                     true
                                 }
                                 else -> false
@@ -62,7 +67,8 @@ abstract class BaseKeyboard(
 
                             override fun onSwipeDown(): Boolean {
                                 return if (key is AltTextKey) {
-                                    onAction(this@apply, key.onLongPress(), false)
+                                    haptic(false)
+                                    onAction(this@apply, key.onLongPress())
                                     true
                                 } else false
                             }
@@ -73,8 +79,7 @@ abstract class BaseKeyboard(
                                         MotionEvent.ACTION_BUTTON_PRESS -> this@apply.performClick()
                                         MotionEvent.ACTION_UP -> onAction(
                                             this@apply,
-                                            key.onRelease(),
-                                            false
+                                            key.onRelease()
                                         )
                                     }
                                 }
@@ -141,6 +146,16 @@ abstract class BaseKeyboard(
         }
     }
 
+    private fun haptic(long: Boolean) {
+
+        if (AppSharedPreferences.getInstance().buttonHapticFeedback)
+            performHapticFeedback(
+                if (!long)
+                    KEYBOARD_TAP else LONG_PRESS,
+                FLAG_IGNORE_GLOBAL_SETTING or FLAG_IGNORE_VIEW_SETTING
+            )
+    }
+
     @DrawableRes
     fun drawableForReturn(info: EditorInfo?): Int {
         if (info?.imeOptions?.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION) == true) {
@@ -158,8 +173,8 @@ abstract class BaseKeyboard(
     }
 
     @CallSuper
-    open fun onAction(view: View, action: KeyAction<*>, long: Boolean) {
-        keyActionListener?.onKeyAction(view, action, long)
+    open fun onAction(view: View, action: KeyAction<*>) {
+        keyActionListener?.onKeyAction(view, action)
     }
 
     open fun onAttach(info: EditorInfo? = null) {

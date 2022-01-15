@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Build
 import android.util.DisplayMetrics
 import android.view.Gravity
-import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.WindowManager
 import android.widget.LinearLayout
@@ -13,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
-import me.rocka.fcitx5test.content.AppSharedPreferences
 import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
 import me.rocka.fcitx5test.keyboard.layout.BaseKeyboard
 import me.rocka.fcitx5test.keyboard.layout.KeyAction
@@ -74,8 +72,8 @@ class InputView(
     private var currentKeyboardName = ""
     private val currentKeyboard: BaseKeyboard get() = keyboards.getValue(currentKeyboardName)
 
-    private val keyActionListener = BaseKeyboard.KeyActionListener { view, action, long ->
-        onAction(view, action, long)
+    private val keyActionListener = BaseKeyboard.KeyActionListener { view, action ->
+        onAction(view, action)
     }
 
     init {
@@ -124,15 +122,12 @@ class InputView(
                 currentIme = it.data.status
                 currentKeyboard.onInputMethodChange(currentIme)
             }
-            else -> {}
+            else -> {
+            }
         }
     }
 
-    private fun onAction(view: View, action: KeyAction<*>, long: Boolean) {
-        if (AppSharedPreferences.getInstance().buttonHapticFeedback && (!long)) {
-            // TODO: write our own button to handle haptic feedback for both tap and long click
-            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-        }
+    private fun onAction(view: View, action: KeyAction<*>) {
         when (action) {
             is KeyAction.FcitxKeyAction -> fcitx.sendKey(action.act)
             is KeyAction.CommitAction -> {
@@ -148,7 +143,8 @@ class InputView(
             is KeyAction.InputMethodSwitchAction -> inputMethodManager.showInputMethodPicker()
             is KeyAction.LayoutSwitchAction -> switchLayout(action.act)
             is KeyAction.CustomAction -> customEvent(action.act)
-            else -> {}
+            else -> {
+            }
         }
     }
 

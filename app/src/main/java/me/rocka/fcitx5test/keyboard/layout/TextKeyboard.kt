@@ -73,13 +73,13 @@ class TextKeyboard(
 
     var capsState: CapsState = CapsState.None
 
-    override fun onAction(view: View, action: KeyAction<*>, long: Boolean) {
+    override fun onAction(view: View, action: KeyAction<*>) {
         when (action) {
             is KeyAction.FcitxKeyAction -> transformKeyAction(action)
             is KeyAction.CapsAction -> switchCapsState()
             else -> {}
         }
-        super.onAction(view, action, long)
+        super.onAction(view, action)
     }
 
     private fun transformKeyAction(action: KeyAction.FcitxKeyAction) {
