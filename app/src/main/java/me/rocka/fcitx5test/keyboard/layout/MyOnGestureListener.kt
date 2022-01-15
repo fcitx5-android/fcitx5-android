@@ -11,8 +11,7 @@ abstract class MyOnGestureListener : GestureDetector.SimpleOnGestureListener() {
     open fun onSwipeUp(): Boolean = false
     open fun onSwipeDown(): Boolean = false
     open fun onRawTouchEvent(motionEvent: MotionEvent) = false
-
-    override fun onDoubleTapEvent(e: MotionEvent?) = onDoubleTap()
+    override fun onDoubleTap(e: MotionEvent?): Boolean = onDoubleTap()
     override fun onFling(
         e1: MotionEvent?,
         e2: MotionEvent?,

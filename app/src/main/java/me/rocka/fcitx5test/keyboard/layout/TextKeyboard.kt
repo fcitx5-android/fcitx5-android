@@ -72,12 +72,27 @@ class TextKeyboard(
     val `return`: ImageButton by lazy { findViewById(R.id.button_return) }
 
     var capsState: CapsState = CapsState.None
+        private set(value) {
+            lastCapsState = field
+            field = value
+            updateCapsButtonIcon()
+        }
+
+    // capsState before last update
+    var lastCapsState: CapsState? = null
+        private set
 
     override fun onAction(view: View, action: KeyAction<*>) {
         when (action) {
             is KeyAction.FcitxKeyAction -> transformKeyAction(action)
-            is KeyAction.CapsAction -> switchCapsState()
-            else -> {}
+            is KeyAction.CapsAction -> {
+                if (lastCapsState != CapsState.Lock && action.lock)
+                    capsState = CapsState.Lock
+                else
+                    switchCapsState()
+            }
+            else -> {
+            }
         }
         super.onAction(view, action)
     }
@@ -130,10 +145,9 @@ class TextKeyboard(
     private fun switchCapsState() {
         capsState = when (capsState) {
             CapsState.None -> CapsState.Once
-            CapsState.Once -> CapsState.Lock
+            CapsState.Once -> CapsState.None
             CapsState.Lock -> CapsState.None
         }
-        updateCapsButtonIcon()
     }
 
     private fun updateCapsButtonIcon() {

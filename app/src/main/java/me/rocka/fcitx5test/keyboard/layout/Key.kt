@@ -78,7 +78,7 @@ open class CapsKey(
     override val src: Int = R.drawable.ic_baseline_keyboard_capslock0_24,
     override val id: Int = R.id.button_caps
 ) : BaseKey(0.15f), IPressKey, IImageKey, IKeyId {
-    override fun onPress() = KeyAction.CapsAction
+    override fun onPress() = KeyAction.CapsAction(false)
 }
 
 open class BackspaceKey(

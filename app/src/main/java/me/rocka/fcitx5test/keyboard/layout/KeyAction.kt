@@ -22,9 +22,8 @@ sealed class KeyAction<T> {
 
     data class RepeatEndAction(override val act: String) : KeyAction<String>()
 
-    object CapsAction : KeyAction<Unit>() {
+    data class CapsAction(val lock: Boolean) : KeyAction<Unit>() {
         override val act: Unit get() = Unit
-        override fun toString(): String = javaClass.simpleName
     }
 
     object QuickPhraseAction : KeyAction<Unit>() {

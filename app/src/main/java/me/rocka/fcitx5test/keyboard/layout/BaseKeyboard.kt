@@ -65,6 +65,13 @@ abstract class BaseKeyboard(
                         }
                         setupOnGestureListener(object : MyOnGestureListener() {
 
+                            override fun onDoubleTap(): Boolean {
+                                return if (key is CapsKey) {
+                                    onAction(this@apply, KeyAction.CapsAction(true))
+                                    true
+                                } else false
+                            }
+
                             override fun onSwipeDown(): Boolean {
                                 return if (key is AltTextKey) {
                                     haptic(false)
