@@ -1,4 +1,4 @@
-package me.rocka.fcitx5test.content
+package me.rocka.fcitx5test.utils
 
 import me.rocka.fcitx5test.BuildConfig
 import java.text.SimpleDateFormat
@@ -12,5 +12,5 @@ object Const {
         Build Git Hash: ${BuildConfig.BUILD_GIT_HASH}
         Build Date: $buildTime
         """.trimIndent()
-    const val assetDescriptorName = BuildConfig.ASSETS_DESCRIPTOR_NAME
+    const val dataDescriptorName = BuildConfig.DATA_DESCRIPTOR_NAME
 }

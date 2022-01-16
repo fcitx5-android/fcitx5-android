@@ -12,9 +12,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
-import me.rocka.fcitx5test.asset.AssetManager
-import me.rocka.fcitx5test.content.Const
+import me.rocka.fcitx5test.data.DataManager
 import me.rocka.fcitx5test.databinding.FragmentMainBinding
+import me.rocka.fcitx5test.utils.Const
 
 class MainFragment : Fragment() {
 
@@ -41,9 +41,9 @@ class MainFragment : Fragment() {
                 context.getString(R.string.behavior) to {
                     findNavController().navigate(R.id.behaviorSettingsFragment)
                 },
-                context.getString(R.string.clean_and_sync_assets) to {
+                context.getString(R.string.delete_and_sync_data) to {
                     GlobalScope.launch(Dispatchers.IO) {
-                        AssetManager.cleanAndSync()
+                        DataManager.deleteAndSync()
                         launch(Dispatchers.Main) {
                             Toast.makeText(context, getString(R.string.synced), Toast.LENGTH_SHORT)
                                 .show()

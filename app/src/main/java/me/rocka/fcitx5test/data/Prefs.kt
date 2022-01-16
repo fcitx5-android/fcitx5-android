@@ -1,23 +1,23 @@
-package me.rocka.fcitx5test.content
+package me.rocka.fcitx5test.data
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import me.rocka.fcitx5test.content.AppSharedPreferences.PreferenceKeys.ButtonHapticFeedback
-import me.rocka.fcitx5test.content.AppSharedPreferences.PreferenceKeys.FirstRun
-import me.rocka.fcitx5test.content.AppSharedPreferences.PreferenceKeys.HideKeyConfig
-import me.rocka.fcitx5test.content.AppSharedPreferences.PreferenceKeys.IgnoreSystemCursor
+import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.ButtonHapticFeedback
+import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.FirstRun
+import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.HideKeyConfig
+import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.IgnoreSystemCursor
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-class AppSharedPreferences(private val sharedPreferences: SharedPreferences) {
+class Prefs(private val sharedPreferences: SharedPreferences) {
 
     private inline fun <reified T> preference(key: String, defaultValue: T) =
-        object : ReadWriteProperty<AppSharedPreferences, T> {
-            override fun getValue(thisRef: AppSharedPreferences, property: KProperty<*>): T {
+        object : ReadWriteProperty<Prefs, T> {
+            override fun getValue(thisRef: Prefs, property: KProperty<*>): T {
                 return (thisRef.sharedPreferences.all[key] ?: defaultValue) as T
             }
 
-            override fun setValue(thisRef: AppSharedPreferences, property: KProperty<*>, value: T) {
+            override fun setValue(thisRef: Prefs, property: KProperty<*>, value: T) {
                 when (value) {
                     is Boolean -> thisRef.sharedPreferences.edit { putBoolean(key, value) }
                     is Long -> thisRef.sharedPreferences.edit { putLong(key, value) }
@@ -44,7 +44,7 @@ class AppSharedPreferences(private val sharedPreferences: SharedPreferences) {
 
 
     companion object {
-        private var instance: AppSharedPreferences? = null
+        private var instance: Prefs? = null
 
         /**
          * MUST call before use
@@ -53,7 +53,7 @@ class AppSharedPreferences(private val sharedPreferences: SharedPreferences) {
         fun init(sharedPreferences: SharedPreferences) {
             if (instance != null)
                 return
-            instance = AppSharedPreferences(sharedPreferences)
+            instance = Prefs(sharedPreferences)
         }
 
         @Synchronized

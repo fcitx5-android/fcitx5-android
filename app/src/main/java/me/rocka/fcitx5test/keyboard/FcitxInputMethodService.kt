@@ -11,7 +11,7 @@ import android.view.inputmethod.InputConnection
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import me.rocka.fcitx5test.content.AppSharedPreferences
+import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.native.CapabilityFlags
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.FcitxEvent
@@ -116,7 +116,7 @@ class FcitxInputMethodService
     }
 
     override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
-        if (!AppSharedPreferences.getInstance().ignoreSystemCursor) {
+        if (!Prefs.getInstance().ignoreSystemCursor) {
             inputConnection?.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
         }
         editorInfo = attribute
@@ -174,7 +174,7 @@ class FcitxInputMethodService
                     return
                 }
             }
-            if (AppSharedPreferences.getInstance().ignoreSystemCursor || (cursor < 0)) return
+            if (Prefs.getInstance().ignoreSystemCursor || (cursor < 0)) return
             // when user starts typing and there is no composing text, composingTextStart would be -1
             val p = cursor + composingTextStart
             Log.d("IMS", "TextWithCursor: p=$p composingStart=$composingTextStart")
@@ -193,7 +193,7 @@ class FcitxInputMethodService
     }
 
     override fun onFinishInput() {
-        if (!AppSharedPreferences.getInstance().ignoreSystemCursor) {
+        if (!Prefs.getInstance().ignoreSystemCursor) {
             inputConnection?.requestCursorUpdates(0)
         }
         editorInfo = null

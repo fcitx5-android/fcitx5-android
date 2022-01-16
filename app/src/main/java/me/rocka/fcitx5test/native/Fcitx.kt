@@ -8,8 +8,8 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import me.rocka.fcitx5test.R
-import me.rocka.fcitx5test.asset.AssetManager
-import me.rocka.fcitx5test.content.AppSharedPreferences
+import me.rocka.fcitx5test.data.DataManager
+import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.native.FcitxState.*
 import splitties.resources.str
 
@@ -214,7 +214,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner,
             )
             if (event is FcitxEvent.ReadyEvent) {
                 fcitxState_ = Ready
-                if (AppSharedPreferences.getInstance().firstRun) {
+                if (Prefs.getInstance().firstRun) {
                     onFirstRun()
                 }
                 onReady()
@@ -233,7 +233,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner,
                 get("PreeditCursorPositionAtBeginning").value = "False"
                 setFcitxAddonConfig("pinyin", this)
             }
-            AppSharedPreferences.getInstance().firstRun = false
+            Prefs.getInstance().firstRun = false
         }
 
         private fun onReady() {
@@ -247,8 +247,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner,
         fcitxState_ = Starting
         with(context) {
             launch {
-                AssetManager.syncDataDir()
-
+                DataManager.sync()
                 val locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     val locales = resources.configuration.locales
                     StringBuilder().apply {

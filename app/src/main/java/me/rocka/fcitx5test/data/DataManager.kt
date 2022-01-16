@@ -1,28 +1,36 @@
-package me.rocka.fcitx5test.asset
+package me.rocka.fcitx5test.data
 
-import android.content.Context
 import android.util.Log
 import me.rocka.fcitx5test.FcitxApplication
-import me.rocka.fcitx5test.content.Const
-import me.rocka.fcitx5test.utils.copyFile
-import me.rocka.fcitx5test.utils.deleteFileOrDir
+import me.rocka.fcitx5test.utils.Const
 import org.json.JSONObject
 import java.io.File
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-object AssetManager {
+typealias SHA256 = String
+typealias DataDescriptor = Pair<SHA256, Map<String, SHA256>>
+
+object DataManager {
+
+    sealed class Diff {
+        abstract val key: String
+
+        data class New(override val key: String, val new: String) : Diff()
+        data class Update(override val key: String, val old: String, val new: String) : Diff()
+        data class Delete(override val key: String, val old: String) : Diff()
+    }
 
     private val dataDir = File(context.applicationInfo.dataDir)
-    private val destDescriptorFile = File(dataDir, Const.assetDescriptorName)
+    private val destDescriptorFile = File(dataDir, Const.dataDescriptorName)
 
-    private val context: Context
+    private val context
         get() = FcitxApplication.getInstance().applicationContext
 
     private val lock = ReentrantLock()
 
     // should be consistent with the deserialization in build.gradle.kts (:app)
-    private fun deserialize(raw: String): Result<AssetDescriptor> = runCatching {
+    private fun deserialize(raw: String): Result<DataDescriptor> = runCatching {
 
         val jObject = JSONObject(raw)
         val sha256 = jObject.getString("sha256")
@@ -37,7 +45,7 @@ object AssetManager {
         sha256 to map
     }
 
-    private fun diff(old: AssetDescriptor, new: AssetDescriptor): List<Diff> =
+    private fun diff(old: DataDescriptor, new: DataDescriptor): List<Diff> =
         if (old.first == new.first)
             listOf()
         else
@@ -56,7 +64,7 @@ object AssetManager {
                     .map { Diff.Delete(it.key, it.value) })
             }
 
-    fun syncDataDir() = lock.withLock {
+    fun sync() = lock.withLock {
         val destDescriptor =
             destDescriptorFile
                 .takeIf { it.exists() && it.isFile }
@@ -68,7 +76,7 @@ object AssetManager {
 
         val bundledDescriptor =
             context.assets
-                .open(Const.assetDescriptorName)
+                .open(Const.dataDescriptorName)
                 .bufferedReader()
                 .readText()
                 .let { deserialize(it) }
@@ -77,21 +85,41 @@ object AssetManager {
         diff(destDescriptor, bundledDescriptor).forEach {
             Log.d(javaClass.name, it.toString())
             when (it) {
-                is Diff.Delete -> context.deleteFileOrDir(it.key)
-                is Diff.New -> context.copyFile(it.key)
-                is Diff.Update -> context.copyFile(it.key)
+                is Diff.Delete -> deleteFileOrDir(it.key)
+                is Diff.New -> copyFile(it.key)
+                is Diff.Update -> copyFile(it.key)
             }
         }
 
-        context.copyFile(Const.assetDescriptorName)
+        copyFile(Const.dataDescriptorName)
 
         Log.i(javaClass.name, "Synced!")
     }
 
-    fun cleanAndSync() {
+    fun deleteAndSync() {
         dataDir.deleteRecursively()
-        syncDataDir()
+        sync()
     }
+
+    private fun deleteFileOrDir(path: String) = runCatching {
+        val file = File(dataDir, path)
+        if (file.isDirectory) {
+            file.deleteRecursively()
+        }
+    }.getOrThrow()
+
+    private fun copyFile(filename: String) = runCatching {
+        with(context.assets) {
+            open(filename).use { i ->
+                File(dataDir, filename)
+                    .also { it.parentFile?.mkdirs() }
+                    .outputStream().use { o ->
+                        i.copyTo(o)
+                        Unit
+                    }
+            }
+        }
+    }.getOrThrow()
 
 
 }

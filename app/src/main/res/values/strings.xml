@@ -17,7 +17,7 @@
     <string name="add">Add</string>
     <string name="edit">Edit</string>
     <string name="undo">Undo</string>
-    <string name="clean_and_sync_assets">Delete and sync runtime data</string>
+    <string name="delete_and_sync_data">Delete and sync runtime data</string>
     <string name="enable_ime">Enable Input Method</string>
     <string name="enable_ime_hint">Enable <b>&appname;</b> in Language and input settings</string>
     <string name="select_ime">Select Input Method</string>

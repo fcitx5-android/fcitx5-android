@@ -11,7 +11,7 @@ import androidx.annotation.CallSuper
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import me.rocka.fcitx5test.R
-import me.rocka.fcitx5test.content.AppSharedPreferences
+import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.keyboard.InputView
 import me.rocka.fcitx5test.keyboard.layout.*
 import me.rocka.fcitx5test.native.InputMethodEntry
@@ -155,7 +155,7 @@ abstract class BaseKeyboard(
 
     private fun haptic(long: Boolean) {
 
-        if (AppSharedPreferences.getInstance().buttonHapticFeedback)
+        if (Prefs.getInstance().buttonHapticFeedback)
             performHapticFeedback(
                 if (!long)
                     KEYBOARD_TAP else LONG_PRESS,

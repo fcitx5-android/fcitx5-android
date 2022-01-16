@@ -24,7 +24,7 @@ plugins {
     id("kotlin-android")
 }
 
-val assetDescriptorName = "descriptor.json"
+val dataDescriptorName = "descriptor.json"
 
 android {
     compileSdk = 31
@@ -40,7 +40,7 @@ android {
         setProperty("archivesBaseName", "$applicationId-v$versionName-$gitRevCount-g$gitHashShort")
         buildConfigField("String", "BUILD_GIT_HASH", "\"$gitHashShort\"")
         buildConfigField("long", "BUILD_TIME", System.currentTimeMillis().toString())
-        buildConfigField("String", "ASSETS_DESCRIPTOR_NAME", "\"${assetDescriptorName}\"")
+        buildConfigField("String", "DATA_DESCRIPTOR_NAME", "\"${dataDescriptorName}\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         vectorDrawables {
@@ -107,9 +107,9 @@ android {
     }
 }
 
-val generateAssetDescriptor = tasks.register<AssetDescriptorTask>("generateAssetDescriptor") {
+val generateDataDescriptor = tasks.register<DataDescriptorTask>("generateDataDescriptor") {
     inputDir.set(file("src/main/assets"))
-    outputFile.set(file("src/main/assets/${assetDescriptorName}"))
+    outputFile.set(file("src/main/assets/${dataDescriptorName}"))
 
 }.also { tasks.preBuild.dependsOn(it) }
 
@@ -120,7 +120,7 @@ listOf("fcitx5", "fcitx5-chinese-addons").forEach {
         inputDir.set(file("src/main/cpp/$it/po"))
         outputDir.set(file("src/main/assets/usr/share/locale"))
     }
-    generateAssetDescriptor.dependsOn(task)
+    generateDataDescriptor.dependsOn(task)
 }
 
 
@@ -190,7 +190,7 @@ abstract class MsgFmtTask : DefaultTask() {
     }
 }
 
-abstract class AssetDescriptorTask : DefaultTask() {
+abstract class DataDescriptorTask : DefaultTask() {
     @get:Incremental
     @get:PathSensitive(PathSensitivity.NAME_ONLY)
     @get:InputDirectory
