@@ -10,6 +10,11 @@ JNI_OnLoad(JavaVM * /* jvm */, void * /* reserved */) {
 }
 
 
+void throwJavaException(JNIEnv *env, const char *msg) {
+    jclass c = env->FindClass("java/io/IOException");
+    env->ThrowNew(c, msg);
+}
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_data_PinyinDictManager_pinyinDictConv(JNIEnv *env, jclass clazz, jstring src, jstring dest, jboolean mode) {
@@ -17,11 +22,15 @@ Java_me_rocka_fcitx5test_data_PinyinDictManager_pinyinDictConv(JNIEnv *env, jcla
     const char *src_file = env->GetStringUTFChars(src, nullptr);
     const char *dest_file = env->GetStringUTFChars(dest, nullptr);
     PinyinDictionary dict;
-    dict.load(PinyinDictionary::SystemDict, src_file,
-              mode == JNI_TRUE ? PinyinDictFormat::Binary : PinyinDictFormat::Text);
+    try {
+        dict.load(PinyinDictionary::SystemDict, src_file,
+                  mode == JNI_TRUE ? PinyinDictFormat::Binary : PinyinDictFormat::Text);
 
-    std::ofstream out;
-    out.open(dest_file, std::ios::out | std::ios::binary);
-    dict.save(PinyinDictionary::SystemDict, out,
-              mode == JNI_TRUE ? PinyinDictFormat::Text : PinyinDictFormat::Binary);
+        std::ofstream out;
+        out.open(dest_file, std::ios::out | std::ios::binary);
+        dict.save(PinyinDictionary::SystemDict, out,
+                  mode == JNI_TRUE ? PinyinDictFormat::Text : PinyinDictFormat::Binary);
+    } catch (const std::ios_base::failure &e) {
+        throwJavaException(env, e.what());
+    }
 }
