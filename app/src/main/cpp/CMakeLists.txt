@@ -9,11 +9,11 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 # extra-cmake-modules
-if(DEFINED ENV{ECM_DIR})
+if (DEFINED ENV{ECM_DIR})
     set(ECM_DIR $ENV{ECM_DIR})
-else()
+else ()
     set(ECM_DIR /usr/share/ECM/cmake)
-endif()
+endif ()
 
 set(PREBUILT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/prebuilt")
 
@@ -52,9 +52,9 @@ set(BOOST_VERSION "1.78.0")
 set(BOOST_MODULES headers filesystem atomic iostreams regex)
 set(BOOST_ROOT "${PREBUILT_DIR}/boost/${ANDROID_ABI}")
 set(Boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
-foreach(mod IN LISTS BOOST_MODULES)
+foreach (mod IN LISTS BOOST_MODULES)
     set("boost_${mod}_DIR" "${BOOST_ROOT}/lib/cmake/boost_${mod}-${BOOST_VERSION}")
-endforeach()
+endforeach ()
 
 option(ENABLE_TEST "" OFF)
 set(_Fcitx5Macro_SELF_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fcitx5/src/lib/fcitx-utils)
@@ -75,3 +75,6 @@ target_link_libraries(native-lib
         Fcitx5::Module::QuickPhrase
         Fcitx5::Module::Punctuation
         Fcitx5::Module::Unicode)
+
+add_library(pinyindictionaryutils SHARED pinyindictionaryutils.cpp)
+target_link_libraries(pinyindictionaryutils LibIME::Pinyin)

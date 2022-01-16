@@ -1,7 +1,10 @@
 package me.rocka.fcitx5test.utils
 
+import android.content.ContentResolver
 import android.content.Context
 import android.inputmethodservice.InputMethodService
+import android.net.Uri
+import android.provider.OpenableColumns
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputConnection
@@ -28,3 +31,14 @@ fun ViewPager2.getCurrentFragment(fragmentManager: FragmentManager): Fragment? =
 
 val appContext: Context
     get() = FcitxApplication.getInstance().applicationContext
+
+
+fun Uri.queryFileName(contentResolver: ContentResolver) =
+    contentResolver.query(
+        this,
+        null, null, null, null
+    )?.use {
+        val index = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        it.moveToFirst()
+        it.getString(index)
+    }
