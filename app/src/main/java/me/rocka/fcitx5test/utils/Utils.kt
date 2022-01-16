@@ -1,5 +1,6 @@
 package me.rocka.fcitx5test.utils
 
+import android.content.Context
 import android.inputmethodservice.InputMethodService
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +9,7 @@ import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.viewpager2.widget.ViewPager2
+import me.rocka.fcitx5test.FcitxApplication
 
 fun View.allChildren(): List<View> {
     if (this !is ViewGroup)
@@ -23,3 +25,6 @@ val InputMethodService.inputConnection: InputConnection?
 
 fun ViewPager2.getCurrentFragment(fragmentManager: FragmentManager): Fragment? =
     fragmentManager.findFragmentByTag("f$currentItem")
+
+val appContext: Context
+    get() = FcitxApplication.getInstance().applicationContext

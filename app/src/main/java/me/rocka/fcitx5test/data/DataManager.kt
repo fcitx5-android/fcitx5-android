@@ -1,8 +1,8 @@
 package me.rocka.fcitx5test.data
 
 import android.util.Log
-import me.rocka.fcitx5test.FcitxApplication
 import me.rocka.fcitx5test.utils.Const
+import me.rocka.fcitx5test.utils.appContext
 import org.json.JSONObject
 import java.io.File
 import java.util.concurrent.locks.ReentrantLock
@@ -21,11 +21,8 @@ object DataManager {
         data class Delete(override val key: String, val old: String) : Diff()
     }
 
-    private val dataDir = File(context.applicationInfo.dataDir)
+    private val dataDir = File(appContext.applicationInfo.dataDir)
     private val destDescriptorFile = File(dataDir, Const.dataDescriptorName)
-
-    private val context
-        get() = FcitxApplication.getInstance().applicationContext
 
     private val lock = ReentrantLock()
 
@@ -75,7 +72,7 @@ object DataManager {
                 ?: "" to mapOf()
 
         val bundledDescriptor =
-            context.assets
+            appContext.assets
                 .open(Const.dataDescriptorName)
                 .bufferedReader()
                 .readText()
@@ -109,7 +106,7 @@ object DataManager {
     }.getOrThrow()
 
     private fun copyFile(filename: String) = runCatching {
-        with(context.assets) {
+        with(appContext.assets) {
             open(filename).use { i ->
                 File(dataDir, filename)
                     .also { it.parentFile?.mkdirs() }

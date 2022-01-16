@@ -5,22 +5,19 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import android.view.inputmethod.InputMethodManager
-import me.rocka.fcitx5test.FcitxApplication
 import me.rocka.fcitx5test.keyboard.FcitxInputMethodService
 
 object InputMethodUtil {
-    private val context: Context
-        get() = FcitxApplication.getInstance().applicationContext
     private val serviceName =
-        ComponentName(context, FcitxInputMethodService::class.java).flattenToShortString()
+        ComponentName(appContext, FcitxInputMethodService::class.java).flattenToShortString()
 
     fun isEnabled() = serviceName in Settings.Secure.getString(
-        context.contentResolver,
+        appContext.contentResolver,
         Settings.Secure.ENABLED_INPUT_METHODS
     ).split(':')
 
     fun isSelected() = serviceName == Settings.Secure.getString(
-        context.contentResolver,
+        appContext.contentResolver,
         Settings.Secure.DEFAULT_INPUT_METHOD
     )
 

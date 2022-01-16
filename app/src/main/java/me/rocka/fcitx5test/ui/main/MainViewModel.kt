@@ -1,16 +1,12 @@
 package me.rocka.fcitx5test.ui.main
 
-import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import me.rocka.fcitx5test.FcitxApplication
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.service.FcitxDaemonManager
+import me.rocka.fcitx5test.utils.appContext
 
 class MainViewModel : ViewModel() {
-
-    private val context: Context
-        get() = FcitxApplication.getInstance().applicationContext
 
     val isFcitxInitialized
         get() = this::fcitx.isInitialized
@@ -35,12 +31,12 @@ class MainViewModel : ViewModel() {
     }
 
     init {
-        FcitxDaemonManager.instance.bindFcitxDaemonAsync(context, javaClass.name) {
+        FcitxDaemonManager.instance.bindFcitxDaemonAsync(appContext, javaClass.name) {
             fcitx = getFcitxInstance()
         }
     }
 
     override fun onCleared() {
-        FcitxDaemonManager.instance.unbind(context, javaClass.name)
+        FcitxDaemonManager.instance.unbind(appContext, javaClass.name)
     }
 }
