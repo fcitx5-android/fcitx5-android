@@ -59,7 +59,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v2
         with:
-          name: Release APK
+          name: ${{ matrix.abi }}
           path: ${{ github.event_name == 'push' && steps.sign_apk.outputs.signedReleaseFile || 'app/build/outputs/apk/release/*.apk' }}
 
       - name: Send build failure to Telegram Group
@@ -92,7 +92,7 @@ jobs:
           "text": "Job [${{ github.workflow }} \\\(${{ github.event_name }}\\\) \\\#${{ github.run_number }}]\
           (https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) \
           by [${{ github.actor }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) *ALL* succeed ✔ \
-          [Download APK](https://nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }}/Release%20APK.zip)",
+          [Download APK](https://nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }})",
           "parse_mode": "MarkdownV2",
           "disable_web_page_preview": true
           }
