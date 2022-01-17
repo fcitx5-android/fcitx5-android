@@ -55,7 +55,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun processAddDictIntent(intent: Intent?) {
         if (intent != null && intent.action == Intent.ACTION_VIEW) {
-            Log.d(javaClass.name, (intent.data == null).toString())
             intent.data?.let {
                 AlertDialog.Builder(this)
                     .setTitle(R.string.pinyin_dict)
