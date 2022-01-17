@@ -15,7 +15,7 @@ object PinyinDictManager {
 
     private val pinyinDicDir = File(
         appContext.getExternalFilesDir(null)!!, "data/pinyin/dictionaries"
-    )
+    ).also { it.mkdirs() }
 
     private val nativeDir = File(appContext.applicationInfo.nativeLibraryDir)
 
@@ -26,7 +26,10 @@ object PinyinDictManager {
         ?.mapNotNull { Dictionary.new(it) }
         ?.toList() ?: listOf()
 
-    fun importFromFile(file: File) {
+    fun libIMEDictionaries(): List<LibIMEDictionary> =
+        dictionaries().mapNotNull { it as? LibIMEDictionary }
+
+    fun importFromFile(file: File): LibIMEDictionary {
         val raw = Dictionary.new(file)
             ?: throw IllegalArgumentException("${file.path} is not a libime/text/sougou dictionary")
         // convert to libime format in dictionaries dir
@@ -34,19 +37,21 @@ object PinyinDictManager {
         val new = raw.toLibIMEDictionary(
             File(
                 pinyinDicDir,
-                file.nameWithoutExtension + LibIMEDictionary.EXT
+                file.nameWithoutExtension + ".${Dictionary.Type.LibIME.ext}"
             )
         )
         Log.i(javaClass.name, "Converted $raw to $new")
+        return new
     }
 
-    fun importFromInputStream(stream: InputStream, name: String) {
+    fun importFromInputStream(stream: InputStream, name: String): LibIMEDictionary {
         val tempFile = File(appContext.cacheDir, name)
         tempFile.outputStream().use {
             stream.copyTo(it)
         }
-        importFromFile(tempFile)
+        val new = importFromFile(tempFile)
         tempFile.delete()
+        return new
     }
 
     fun sougouDictConv(src: String, dest: String) {

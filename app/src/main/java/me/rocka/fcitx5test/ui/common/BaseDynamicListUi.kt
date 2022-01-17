@@ -41,7 +41,7 @@ abstract class BaseDynamicListUi<T>(
         initSettingsButton
     ) {
 
-    private val fab = floatingActionButton {
+    protected val fab = floatingActionButton {
         setImageResource(R.drawable.ic_baseline_plus_24)
         setColorFilter(styledColor(android.R.attr.colorForegroundInverse), PorterDuff.Mode.SRC_IN)
     }
@@ -64,6 +64,11 @@ abstract class BaseDynamicListUi<T>(
         ) : Mode<T>()
 
         class Immutable<T> : Mode<T>()
+
+        /**
+         * Do nothing
+         */
+        class Custom<T> : Mode<T>()
 
         @Suppress("FunctionName")
         companion object {
@@ -88,6 +93,7 @@ abstract class BaseDynamicListUi<T>(
                 }
             }
             is Mode.Immutable -> { _ -> visibility = View.GONE }
+            is Mode.Custom -> { _ -> visibility = View.GONE }
         }
         addOnItemChangedListener(object : OnItemChangedListener<T> {
             override fun onItemSwapped(fromIdx: Int, toIdx: Int, item: T) {
@@ -163,6 +169,8 @@ abstract class BaseDynamicListUi<T>(
                 }
             }
             is Mode.Immutable -> fab.hide()
+            is Mode.Custom -> {
+            }
         }
 
     }

@@ -211,6 +211,14 @@ public:
         addonInstance->setConfig(config);
     }
 
+    void setAddonSubConfig(const std::string &addonName, const std::string &path, const fcitx::RawConfig &config) {
+        auto addonInstance = getAddonInstance(addonName);
+        if (!addonInstance) {
+            return;
+        }
+        addonInstance->setSubConfig(path, config);
+    }
+
     std::unique_ptr<fcitx::RawConfig> getInputMethodConfig(const std::string &imName) {
         const auto *entry = p_instance->inputMethodManager().entry(imName);
         if (!entry || !entry->isConfigurable()) {
@@ -892,4 +900,13 @@ Java_me_rocka_fcitx5test_native_Fcitx_setCapabilityFlags(JNIEnv *env, jclass cla
     uint64_t u;
     std::memcpy(&u, &flags, sizeof(uint64_t));
     Fcitx::Instance().setCapabilityFlags(u);
+}
+
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_setAddonSubConfig(JNIEnv *env, jclass clazz, jstring addon, jstring path, jobject config) {
+    RETURN_IF_NOT_RUNNING
+    auto rawConfig = jobjectToRawConfig(env, config);
+    Fcitx::Instance().setAddonSubConfig(jstringToString(env, addon), jstringToString(env, path), rawConfig);
 }

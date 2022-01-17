@@ -7,9 +7,11 @@ class SougouDictionary(file: File) : Dictionary() {
     override var file: File = file
         private set
 
+    override val type: Type = Type.Sougou
+
     init {
         ensureFileExists()
-        if (file.extension != EXT)
+        if (file.extension != type.ext)
             throw IllegalArgumentException("Not a sougou dict ${file.name}")
     }
 
@@ -26,7 +28,4 @@ class SougouDictionary(file: File) : Dictionary() {
         return libimeDict
     }
 
-    companion object {
-        const val EXT = "scel"
-    }
 }

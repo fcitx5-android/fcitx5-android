@@ -82,6 +82,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner,
     fun triggerUnicode() = triggerUnicodeInput()
     fun focus(focus: Boolean = true) = focusInputContext(focus)
     fun setCapFlags(flags: CapabilityFlags) = setCapabilityFlags(flags.toLong())
+    fun reloadPinyinDict() = setAddonSubConfig("pinyin", "dictmanager", RawConfig(arrayOf()))
 
     init {
         if (fcitxState_ != Stopped)
@@ -200,6 +201,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner,
 
         @JvmStatic
         external fun setCapabilityFlags(flags: Long)
+
+        @JvmStatic
+        external fun setAddonSubConfig(addon: String, path: String, config: RawConfig)
 
         /**
          * Called from native-lib

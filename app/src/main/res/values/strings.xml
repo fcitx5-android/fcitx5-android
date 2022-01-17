@@ -27,5 +27,11 @@
     <string name="done">Done</string>
     <string name="setup_keyboard">Finish setting up the keyboard</string>
     <string name="setup_channel">Setup Wizard</string>
+    <string name="pinyin_dict">Pinyin Dictionaries</string>
+    <string name="refreshing">Refreshing</string>
+    <string name="importing">Importing</string>
+    <string name="import_error">Import Error</string>
+    <string name="dict_already_exists">Dictionary already exists</string>
+    <string name="invalid_dict">Invalid type of dictionary</string>
     <string name="synced">Synced!</string>
 </resources>

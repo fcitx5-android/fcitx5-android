@@ -11,13 +11,19 @@ class LibIMEDictionary(file: File) : Dictionary() {
     var isEnabled: Boolean = true
         private set
 
+    override val type: Type = Type.LibIME
+
+    override val name: String
+        get() = if (isEnabled) super.name
+        else file.name.substringBefore(".${type.ext}.$DISABLE")
+
     init {
         ensureFileExists()
         isEnabled = when {
-            file.extension == EXT -> {
+            file.extension == type.ext -> {
                 true
             }
-            file.name.endsWith(".$EXT.$DISABLE") -> {
+            file.name.endsWith(".${type.ext}.$DISABLE") -> {
                 false
             }
             else -> throw IllegalArgumentException("Not a libime dict ${file.name}")
@@ -27,7 +33,7 @@ class LibIMEDictionary(file: File) : Dictionary() {
     fun enable() {
         if (isEnabled)
             return
-        val newFile = file.resolveSibling(file.nameWithoutExtension + ".$EXT")
+        val newFile = file.resolveSibling(name + ".${type.ext}")
         file.renameTo(newFile)
         file = newFile
         isEnabled = true
@@ -36,7 +42,7 @@ class LibIMEDictionary(file: File) : Dictionary() {
     fun disable() {
         if (!isEnabled)
             return
-        val newFile = file.resolveSibling(file.nameWithoutExtension + ".$EXT.$DISABLE")
+        val newFile = file.resolveSibling(name + ".${type.ext}.$DISABLE")
         file.renameTo(newFile)
         file = newFile
         isEnabled = false
@@ -59,7 +65,6 @@ class LibIMEDictionary(file: File) : Dictionary() {
     }
 
     companion object {
-        const val EXT = "dict"
         const val DISABLE = "disable"
     }
 }

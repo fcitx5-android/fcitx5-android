@@ -7,9 +7,11 @@ class TextDictionary(file: File) : Dictionary() {
     override var file: File = file
         private set
 
+    override val type: Type = Type.Text
+
     init {
         ensureFileExists()
-        if (file.extension != EXT)
+        if (file.extension != type.ext)
             throw IllegalArgumentException("Not a text dict ${file.name}")
     }
 
@@ -28,9 +30,4 @@ class TextDictionary(file: File) : Dictionary() {
         )
         return LibIMEDictionary(dest)
     }
-
-    companion object {
-        const val EXT = "txt"
-    }
-
 }

@@ -67,6 +67,20 @@ object PreferenceScreenFactory {
             summary = "⛔ Unimplemented type '${ConfigType.pretty(descriptor.type)}'"
         }
 
+        fun pinyinDictionary() = Preference(context).apply {
+            setOnPreferenceClickListener {
+                val currentFragment =
+                    fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
+                val action = when (currentFragment) {
+                    is AddonConfigFragment -> R.id.action_addonConfigFragment_to_pinyinDictionaryFragment
+                    is InputMethodConfigFragment -> R.id.action_imConfigFragment_to_pinyinDictionaryFragment
+                    else -> throw IllegalStateException("Can not navigate to pinyin dictionary from current fragment")
+                }
+                currentFragment.findNavController().navigate(action)
+                true
+            }
+        }
+
         fun listPreference() = Preference(context).apply {
             setOnPreferenceClickListener {
                 val currentFragment =
@@ -106,7 +120,7 @@ object PreferenceScreenFactory {
                 setDefaultValue(descriptor.defaultValue)
             }
             is ConfigDescriptor.ConfigEnumList -> listPreference()
-            is ConfigDescriptor.ConfigExternal -> stubPreference()
+            is ConfigDescriptor.ConfigExternal -> if (descriptor.name == "DictManager") pinyinDictionary() else stubPreference()
             is ConfigDescriptor.ConfigInt -> DialogSeekBarPreference(context).apply {
                 descriptor.defaultValue?.let { defaultValue = it }
                 descriptor.intMin?.let { min = it }
