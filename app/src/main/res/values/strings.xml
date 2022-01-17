@@ -33,5 +33,7 @@
     <string name="import_error">Import Error</string>
     <string name="dict_already_exists">Dictionary already exists</string>
     <string name="invalid_dict">Invalid type of dictionary</string>
+    <string name="whether_import_dict">Do you want to import this dictionary?</string>
+    <string name="import_">Import</string>
     <string name="synced">Synced!</string>
 </resources>

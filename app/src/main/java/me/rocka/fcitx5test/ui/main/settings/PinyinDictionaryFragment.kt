@@ -3,6 +3,7 @@ package me.rocka.fcitx5test.ui.main.settings
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.ContentResolver
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -94,6 +95,11 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
         return ui.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        arguments?.get("uri")?.let { it as? Uri }?.let { importFromUri(it) }
+        super.onViewCreated(view, savedInstanceState)
+    }
+
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -106,57 +112,60 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
     }
 
     private fun registerLauncher() {
-        launcher = registerForActivityResult(ActivityResultContracts.GetContent()) { mUri ->
-            launch {
-                Maybe.fx {
-                    val uri = bind(mUri.toMaybe())
-                    val file = File(bind(uri.queryFileName(contentResolver).toMaybe()))
-                    when {
-                        file.nameWithoutExtension in entries.map { it.name } -> {
-                            errorDialog(getString(R.string.dict_already_exists))
-                            return@fx pure(Unit)
-                        }
-                        Dictionary.Type.fromFileName(file.name) == null -> {
-                            errorDialog(getString(R.string.invalid_dict))
-                            return@fx pure(Unit)
-                        }
-                    }
-                    val builder =
-                        NotificationCompat.Builder(requireContext(), CHANNEL_ID)
-                            .setSmallIcon(R.drawable.ic_baseline_library_books_24)
-                            .setContentTitle(getString(R.string.pinyin_dict))
-                            .setContentText("${getString(R.string.importing)} ${file.nameWithoutExtension}")
-                            .setOngoing(true)
-                            .setProgress(100, 0, true)
-                            .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    val id = IMPORT_ID++
-                    builder.build().let { notificationManager.notify(id, it) }
-                    val inputStream =
-                        bind(contentResolver.openInputStream(uri).toMaybe())
-                    runCatching {
-                        val result: LibIMEDictionary
-                        measureTimeMillis {
-                            result = PinyinDictManager.importFromInputStream(
-                                inputStream,
-                                file.name
-                            )
-                        }.also { Log.d(javaClass.name, "Took $it to import $result") }
-                        result
-                    }
-                        .onFailure {
-                            errorDialog(it.localizedMessage ?: it.stackTraceToString())
-                        }
-                        .onSuccess {
-                            launch(Dispatchers.Main) {
-                                ui.addItem(item = it)
-                            }
-                        }
-                    notificationManager.cancel(id)
-                    pure(Unit)
-                }
-            }
+        launcher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            if (uri != null)
+                importFromUri(uri)
         }
     }
+
+    private fun importFromUri(uri: Uri) =
+        launch {
+            val id = IMPORT_ID++
+            Maybe.fx {
+                val file = File(bind(uri.queryFileName(contentResolver).toMaybe()))
+                when {
+                    file.nameWithoutExtension in entries.map { it.name } -> {
+                        errorDialog(getString(R.string.dict_already_exists))
+                        return@fx pure(Unit)
+                    }
+                    Dictionary.Type.fromFileName(file.name) == null -> {
+                        errorDialog(getString(R.string.invalid_dict))
+                        return@fx pure(Unit)
+                    }
+                }
+                val builder =
+                    NotificationCompat.Builder(requireContext(), CHANNEL_ID)
+                        .setSmallIcon(R.drawable.ic_baseline_library_books_24)
+                        .setContentTitle(getString(R.string.pinyin_dict))
+                        .setContentText("${getString(R.string.importing)} ${file.nameWithoutExtension}")
+                        .setOngoing(true)
+                        .setProgress(100, 0, true)
+                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+                builder.build().let { notificationManager.notify(id, it) }
+                val inputStream =
+                    bind(contentResolver.openInputStream(uri).toMaybe())
+                runCatching {
+                    val result: LibIMEDictionary
+                    measureTimeMillis {
+                        result = PinyinDictManager.importFromInputStream(
+                            inputStream,
+                            file.name
+                        )
+                    }.also { Log.d(javaClass.name, "Took $it to import $result") }
+                    result
+                }
+                    .onFailure {
+                        errorDialog(it.localizedMessage ?: it.stackTraceToString())
+                    }
+                    .onSuccess {
+                        launch(Dispatchers.Main) {
+                            ui.addItem(item = it)
+                        }
+                    }
+                pure(Unit)
+            }
+            notificationManager.cancel(id)
+        }
 
     private fun errorDialog(message: String) {
         launch(Dispatchers.Main) {
