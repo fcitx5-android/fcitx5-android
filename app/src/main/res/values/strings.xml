@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE resources [<!ENTITY appname "Fcitx5 for Android">]>
 <resources>
-    <string name="app_name">&appname;</string>
+    <string name="app_name_release">&appname;</string>
+    <string name="app_name_debug">&appname; (Debug)</string>
     <string name="save">Save</string>
     <string name="input_methods">Input Methods</string>
     <string name="add_input_method">Add Input Method</string>
