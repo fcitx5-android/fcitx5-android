@@ -747,7 +747,15 @@ extern "C"
 JNIEXPORT jobject JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddonConfig(JNIEnv *env, jclass clazz, jstring addon) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
-    auto result = Fcitx::Instance().getAddonConfig(jstringToString(env, addon));
+    auto addonName = jstringToString(env, addon);
+    std::promise<std::unique_ptr<fcitx::RawConfig>> promise;
+    Fcitx::Instance().schedule([&](Fcitx *fcitx) {
+        auto cfg = fcitx->getAddonConfig(addonName);
+        promise.set_value(std::move(cfg));
+    });
+    auto future = promise.get_future();
+    future.wait();
+    const auto result = future.get();
     return result ? fcitxRawConfigToJObject(env, *result) : nullptr;
 }
 
@@ -755,7 +763,15 @@ extern "C"
 JNIEXPORT jobject JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_getFcitxInputMethodConfig(JNIEnv *env, jclass clazz, jstring im) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
-    auto result = Fcitx::Instance().getInputMethodConfig(jstringToString(env, im));
+    auto imName = jstringToString(env, im);
+    std::promise<std::unique_ptr<fcitx::RawConfig>> promise;
+    Fcitx::Instance().schedule([&](Fcitx *fcitx) {
+        auto cfg = fcitx->getInputMethodConfig(imName);
+        promise.set_value(std::move(cfg));
+    });
+    auto future = promise.get_future();
+    future.wait();
+    const auto result = future.get();
     return result ? fcitxRawConfigToJObject(env, *result) : nullptr;
 }
 
@@ -901,7 +917,6 @@ Java_me_rocka_fcitx5test_native_Fcitx_setCapabilityFlags(JNIEnv *env, jclass cla
     std::memcpy(&u, &flags, sizeof(uint64_t));
     Fcitx::Instance().setCapabilityFlags(u);
 }
-
 
 extern "C"
 JNIEXPORT void JNICALL
