@@ -60,10 +60,10 @@ object PinyinDictManager {
                 arrayOf(scel2org5.absolutePath, src),
                 arrayOf("LD_LIBRARY_PATH=${nativeDir.absolutePath}")
             )
+        val output = process.inputStream.bufferedReader().readText()
         process.waitFor()
         when (process.exitValue()) {
-            0 -> File(dest).also { it.deleteOnExit() }.outputStream()
-                .use { process.inputStream.copyTo(it) }
+            0 -> File(dest).also { it.deleteOnExit() }.writeText(output)
             else -> throw IOException(process.errorStream.bufferedReader().readText())
         }
     }
