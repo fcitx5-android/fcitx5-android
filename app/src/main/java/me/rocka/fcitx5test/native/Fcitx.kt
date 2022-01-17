@@ -170,7 +170,13 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner,
         external fun getFcitxAddonConfig(addon: String): RawConfig?
 
         @JvmStatic
+        external fun getFcitxAddonConfigPrivate(addon: String): RawConfig?
+
+        @JvmStatic
         external fun getFcitxInputMethodConfig(im: String): RawConfig?
+
+        @JvmStatic
+        external fun getFcitxInputMethodConfigPrivate(im: String): RawConfig?
 
         @JvmStatic
         external fun setFcitxGlobalConfig(config: RawConfig)
@@ -219,6 +225,8 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner,
             if (event is FcitxEvent.ReadyEvent) {
                 fcitxState_ = Ready
                 if (Prefs.getInstance().firstRun) {
+                    // this method runs in same thread with `startupFcitx`
+                    // block it will also block fcitx
                     onFirstRun()
                 }
                 onReady()
@@ -232,7 +240,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner,
                 get("Behavior")["PreeditEnabledByDefault"].value = "False"
                 setFcitxGlobalConfig(this)
             }
-            getFcitxAddonConfig("pinyin")?.get("cfg")?.run {
+            getFcitxAddonConfigPrivate("pinyin")?.get("cfg")?.run {
                 get("PreeditInApplication").value = "False"
                 get("PreeditCursorPositionAtBeginning").value = "False"
                 setFcitxAddonConfig("pinyin", this)

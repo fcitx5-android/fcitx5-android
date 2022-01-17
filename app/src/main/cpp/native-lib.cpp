@@ -761,6 +761,14 @@ Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddonConfig(JNIEnv *env, jclass cl
 
 extern "C"
 JNIEXPORT jobject JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddonConfigPrivate(JNIEnv *env, jclass clazz, jstring addon) {
+    RETURN_VALUE_IF_NOT_RUNNING(nullptr)
+    auto result = Fcitx::Instance().getAddonConfig(jstringToString(env, addon));
+    return result ? fcitxRawConfigToJObject(env, *result) : nullptr;
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_getFcitxInputMethodConfig(JNIEnv *env, jclass clazz, jstring im) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     auto imName = jstringToString(env, im);
@@ -772,6 +780,14 @@ Java_me_rocka_fcitx5test_native_Fcitx_getFcitxInputMethodConfig(JNIEnv *env, jcl
     auto future = promise.get_future();
     future.wait();
     const auto result = future.get();
+    return result ? fcitxRawConfigToJObject(env, *result) : nullptr;
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_getFcitxInputMethodConfigPrivate(JNIEnv *env, jclass clazz, jstring im) {
+    RETURN_VALUE_IF_NOT_RUNNING(nullptr)
+    auto result = Fcitx::Instance().getInputMethodConfig(jstringToString(env, im));
     return result ? fcitxRawConfigToJObject(env, *result) : nullptr;
 }
 
