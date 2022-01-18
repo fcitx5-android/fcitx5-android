@@ -69,15 +69,11 @@ public:
     }
 
     void sendKey(fcitx::Key key) {
-        p_dispatcher->schedule([this, key]() {
-            p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, key, false);
-        });
+        p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, key, false);
     }
 
     void select(int idx) {
-        p_dispatcher->schedule([this, idx]() {
-            p_frontend->call<fcitx::IAndroidFrontend::selectCandidate>(p_uuid, idx);
-        });
+        p_frontend->call<fcitx::IAndroidFrontend::selectCandidate>(p_uuid, idx);
     }
 
     bool isInputPanelEmpty() {
@@ -85,25 +81,15 @@ public:
     }
 
     void resetInputContext() {
-        p_dispatcher->schedule([this]() {
-            p_frontend->call<fcitx::IAndroidFrontend::resetInputContext>(p_uuid);
-        });
+        p_frontend->call<fcitx::IAndroidFrontend::resetInputContext>(p_uuid);
     }
 
     void repositionCursor(int position) {
-        p_dispatcher->schedule([position, this]() {
-            p_frontend->call<fcitx::IAndroidFrontend::repositionCursor>(p_uuid, position);
-        });
+        p_frontend->call<fcitx::IAndroidFrontend::repositionCursor>(p_uuid, position);
     }
 
     void nextInputMethod(bool forward) {
-        p_dispatcher->schedule([this, forward]() {
-            p_instance->enumerate(forward);
-        });
-    }
-
-    void schedule(const std::function<void(Fcitx *)> &fn) {
-        p_dispatcher->schedule([&fn, this]() { fn(this); });
+        p_instance->enumerate(forward);
     }
 
     std::vector<const fcitx::InputMethodEntry *> listInputMethods() {
@@ -134,10 +120,8 @@ public:
         return std::make_tuple(nullptr, std::vector<std::string>{});
     }
 
-    void setInputMethod(std::string string) {
-        p_dispatcher->schedule([this, ime = std::move(string)]() {
-            p_instance->setCurrentInputMethod(ime);
-        });
+    void setInputMethod(const std::string &ime) {
+        p_instance->setCurrentInputMethod(ime);
     }
 
     std::vector<const fcitx::InputMethodEntry *> availableInputMethods() {
@@ -150,17 +134,15 @@ public:
     }
 
     void setEnabledInputMethods(std::vector<std::string> &entries) {
-        p_dispatcher->schedule([this, entries]() {
-            auto &imMgr = p_instance->inputMethodManager();
-            fcitx::InputMethodGroup newGroup(imMgr.currentGroup().name());
-            newGroup.setDefaultLayout("us");
-            auto &list = newGroup.inputMethodList();
-            for (const auto &e : entries) {
-                list.emplace_back(e);
-            }
-            imMgr.setGroup(std::move(newGroup));
-            imMgr.save();
-        });
+        auto &imMgr = p_instance->inputMethodManager();
+        fcitx::InputMethodGroup newGroup(imMgr.currentGroup().name());
+        newGroup.setDefaultLayout("us");
+        auto &list = newGroup.inputMethodList();
+        for (const auto &e : entries) {
+            list.emplace_back(e);
+        }
+        imMgr.setGroup(std::move(newGroup));
+        imMgr.save();
     }
 
     static fcitx::RawConfig mergeConfigDesc(const fcitx::Configuration *conf) {
@@ -304,23 +286,18 @@ public:
                 disabledSet.insert(uniqueName);
             }
         }
-        p_dispatcher->schedule([this, e = std::move(enabledSet), d = std::move(disabledSet)] {
-            auto &globalConfig = p_instance->globalConfig();
-            globalConfig.setEnabledAddons({e.begin(), e.end()});
-            globalConfig.setDisabledAddons({d.begin(), d.end()});
-            globalConfig.safeSave();
-            p_instance->reloadConfig();
-        });
+        globalConfig.setEnabledAddons({enabledSet.begin(), enabledSet.end()});
+        globalConfig.setDisabledAddons({disabledSet.begin(), disabledSet.end()});
+        globalConfig.safeSave();
+        p_instance->reloadConfig();
     }
 
     void triggerQuickPhrase() {
         if (!p_quickphrase) return;
-        p_dispatcher->schedule([this]() {
-            auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
-            p_quickphrase->call<fcitx::IQuickPhrase::trigger>(
-                    ic, "", "", "", "", fcitx::Key{FcitxKey_None}
-            );
-        });
+        auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
+        p_quickphrase->call<fcitx::IQuickPhrase::trigger>(
+                ic, "", "", "", "", fcitx::Key{FcitxKey_None}
+        );
     }
 
     std::pair<std::string, std::string> queryPunctuation(uint32_t unicode, const std::string &language) {
@@ -333,30 +310,22 @@ public:
 
     void triggerUnicode() {
         if (!p_unicode) return;
-        p_dispatcher->schedule([this]() {
-            auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
-            p_unicode->call<fcitx::IUnicode::trigger>(ic);
-        });
+        auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
+        p_unicode->call<fcitx::IUnicode::trigger>(ic);
     }
 
     void focusInputContext(bool focus) {
         if (!p_frontend) return;
-        p_dispatcher->schedule([this, focus]() {
-            p_frontend->call<fcitx::IAndroidFrontend::focusInputContext>(p_uuid, focus);
-        });
+        p_frontend->call<fcitx::IAndroidFrontend::focusInputContext>(p_uuid, focus);
     }
 
     void setCapabilityFlags(uint64_t flags) {
         if (!p_frontend) return;
-        p_dispatcher->schedule([this, flags]() {
-            p_frontend->call<fcitx::IAndroidFrontend::setCapabilityFlags>(p_uuid, flags);
-        });
+        p_frontend->call<fcitx::IAndroidFrontend::setCapabilityFlags>(p_uuid, flags);
     }
 
     void save() {
-        p_dispatcher->schedule([this]() {
-            p_instance->save();
-        });
+        p_instance->save();
     }
 
     void exit() {
@@ -664,14 +633,7 @@ extern "C"
 JNIEXPORT jobject JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_inputMethodStatus(JNIEnv *env, jclass clazz) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
-    std::promise<Fcitx::IMStatus> promise;
-    Fcitx::Instance().schedule([&promise](Fcitx *fcitx) {
-        const auto st = fcitx->inputMethodStatus();
-        promise.set_value(st);
-    });
-    auto future = promise.get_future();
-    future.wait();
-    const auto &status = future.get();
+    const auto &status = Fcitx::Instance().inputMethodStatus();
     return fcitxInputMethodEntryWithSubModeToJObject(env, std::get<0>(status), std::get<1>(status));
 }
 
@@ -733,25 +695,10 @@ Java_me_rocka_fcitx5test_native_Fcitx_getFcitxGlobalConfig(JNIEnv *env, jclass c
     return fcitxRawConfigToJObject(env, cfg);
 }
 
-extern "C"
-JNIEXPORT jobject JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddonConfig(JNIEnv *env, jclass clazz, jstring addon) {
-    RETURN_VALUE_IF_NOT_RUNNING(nullptr)
-    auto addonName = jstringToString(env, addon);
-    std::promise<std::unique_ptr<fcitx::RawConfig>> promise;
-    Fcitx::Instance().schedule([&](Fcitx *fcitx) {
-        auto cfg = fcitx->getAddonConfig(addonName);
-        promise.set_value(std::move(cfg));
-    });
-    auto future = promise.get_future();
-    future.wait();
-    const auto result = future.get();
-    return result ? fcitxRawConfigToJObject(env, *result) : nullptr;
-}
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddonConfigPrivate(JNIEnv *env, jclass clazz, jstring addon) {
+Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddonConfig(JNIEnv *env, jclass clazz, jstring addon) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     auto result = Fcitx::Instance().getAddonConfig(jstringToString(env, addon));
     return result ? fcitxRawConfigToJObject(env, *result) : nullptr;
@@ -760,22 +707,6 @@ Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddonConfigPrivate(JNIEnv *env, jc
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_getFcitxInputMethodConfig(JNIEnv *env, jclass clazz, jstring im) {
-    RETURN_VALUE_IF_NOT_RUNNING(nullptr)
-    auto imName = jstringToString(env, im);
-    std::promise<std::unique_ptr<fcitx::RawConfig>> promise;
-    Fcitx::Instance().schedule([&](Fcitx *fcitx) {
-        auto cfg = fcitx->getInputMethodConfig(imName);
-        promise.set_value(std::move(cfg));
-    });
-    auto future = promise.get_future();
-    future.wait();
-    const auto result = future.get();
-    return result ? fcitxRawConfigToJObject(env, *result) : nullptr;
-}
-
-extern "C"
-JNIEXPORT jobject JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_getFcitxInputMethodConfigPrivate(JNIEnv *env, jclass clazz, jstring im) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     auto result = Fcitx::Instance().getInputMethodConfig(jstringToString(env, im));
     return result ? fcitxRawConfigToJObject(env, *result) : nullptr;
