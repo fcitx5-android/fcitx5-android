@@ -20,6 +20,13 @@
 #include "androidstreambuf.h"
 #include "jni-utils.h"
 
+#include <event2/event.h>
+#include <fcitx-utils/event.h>
+
+static void jniLog(const std::string &s) {
+    __android_log_write(ANDROID_LOG_DEBUG, "JNI", s.c_str());
+}
+
 class Fcitx {
 public:
     Fcitx() = default;
@@ -35,36 +42,30 @@ public:
         return p_instance != nullptr && p_dispatcher != nullptr && p_frontend != nullptr;
     }
 
-    int startup(std::function<void(fcitx::AddonInstance *)> setupCallback) {
+    event_base *get_event_base() {
+        fcitx::EventLoop &event_loop = p_instance->eventLoop();
+        return static_cast<event_base *>(event_loop.nativeHandle());
+    }
+
+    int loopOnce() {
+        return event_base_loop(get_event_base(), EVLOOP_ONCE);
+    }
+
+    void startup(const std::function<void(fcitx::AddonInstance *)> &setupCallback) {
         char arg0[] = "";
         char *argv[] = {arg0};
         p_instance = std::make_unique<fcitx::Instance>(FCITX_ARRAY_SIZE(argv), argv);
         p_instance->addonManager().registerDefaultLoader(nullptr);
         p_dispatcher = std::make_unique<fcitx::EventDispatcher>();
         p_dispatcher->attach(&p_instance->eventLoop());
-
-        p_dispatcher->schedule([&, this]() {
-            auto &addonMgr = p_instance->addonManager();
-            p_frontend = addonMgr.addon("androidfrontend");
-            p_quickphrase = addonMgr.addon("quickphrase");
-            p_punctuation = addonMgr.addon("punctuation", true);
-            p_unicode = addonMgr.addon("unicode");
-            p_uuid = p_frontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
-            setupCallback(p_frontend);
-        });
-
-        int code = -1;
-        try {
-            code = p_instance->exec();
-        } catch (const fcitx::InstanceQuietQuit &) {
-            FCITX_INFO() << "fcitx exited quietly";
-            code = 0;
-        } catch (const std::exception &e) {
-            FCITX_ERROR() << "fcitx exited with exception: " << e.what();
-            code = 1;
-        }
-        resetGlobalPointers();
-        return code;
+        p_instance->initialize();
+        auto &addonMgr = p_instance->addonManager();
+        p_frontend = addonMgr.addon("androidfrontend");
+        p_quickphrase = addonMgr.addon("quickphrase");
+        p_punctuation = addonMgr.addon("punctuation", true);
+        p_unicode = addonMgr.addon("unicode");
+        p_uuid = p_frontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
+        setupCallback(p_frontend);
     }
 
     void sendKey(fcitx::Key key) {
@@ -361,8 +362,13 @@ public:
     void exit() {
         p_dispatcher->schedule([this]() {
             p_dispatcher->detach();
-            p_instance->exit();
+//            p_instance->exit();
         });
+        resetGlobalPointers();
+    }
+
+    void scheduleEmpty(){
+        p_dispatcher->schedule(nullptr);
     }
 
 private:
@@ -385,9 +391,6 @@ private:
     }
 };
 
-static void jniLog(const std::string &s) {
-    __android_log_write(ANDROID_LOG_DEBUG, "JNI", s.c_str());
-}
 
 #define DO_IF_NOT_RUNNING(expr) \
     if (!Fcitx::Instance().isRunning()) { \
@@ -415,11 +418,11 @@ JNI_OnLoad(JavaVM * /* jvm */, void * /* reserved */) {
 jobject fcitxInputMethodEntryWithSubModeToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry, const std::vector<std::string> &subMode);
 
 extern "C"
-JNIEXPORT jint JNICALL
+JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, jstring locale, jstring appData, jstring appLib, jstring extData) {
     if (Fcitx::Instance().isRunning()) {
         jniLog("startupFcitx: already running!");
-        return 2;
+        return;
     }
     jniLog("startupFcitx: starting...");
 
@@ -515,7 +518,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
         env->DeleteLocalRef(obj);
     };
 
-    int code = Fcitx::Instance().startup([&](auto *androidfrontend) {
+    Fcitx::Instance().startup([&](auto *androidfrontend) {
         jniLog("startupFcitx: setupCallback");
         readyCallback();
         androidfrontend->template call<fcitx::IAndroidFrontend::setCandidateListCallback>(candidateListCallback);
@@ -525,8 +528,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
         androidfrontend->template call<fcitx::IAndroidFrontend::setKeyEventCallback>(keyEventCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setInputMethodChangeCallback>(imChangeCallback);
     });
-    jniLog("startupFcitx: returned with code " + std::to_string(code));
-    return code;
+    jniLog("startupFcitx done");
 }
 
 extern "C"
@@ -940,4 +942,16 @@ Java_me_rocka_fcitx5test_native_Fcitx_setAddonSubConfig(JNIEnv *env, jclass claz
     RETURN_IF_NOT_RUNNING
     auto rawConfig = jobjectToRawConfig(env, config);
     Fcitx::Instance().setAddonSubConfig(jstringToString(env, addon), jstringToString(env, path), rawConfig);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_loopOnce(JNIEnv *env, jclass clazz) {
+    Fcitx::Instance().loopOnce();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_native_Fcitx_scheduleEmpty(JNIEnv *env, jclass clazz) {
+    Fcitx::Instance().scheduleEmpty();
 }
