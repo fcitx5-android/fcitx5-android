@@ -3,12 +3,15 @@
 #include <future>
 #include <android/log.h>
 
+#include <event2/event.h>
+
 #include <fcitx/instance.h>
 #include <fcitx/addonmanager.h>
 #include <fcitx/inputmethodentry.h>
 #include <fcitx/inputmethodengine.h>
 #include <fcitx/inputmethodmanager.h>
 #include <fcitx-utils/i18n.h>
+#include <fcitx-utils/event.h>
 #include <fcitx-utils/eventdispatcher.h>
 #include <fcitx-utils/stringutils.h>
 
@@ -19,9 +22,6 @@
 #include "androidfrontend/androidfrontend_public.h"
 #include "androidstreambuf.h"
 #include "jni-utils.h"
-
-#include <event2/event.h>
-#include <fcitx-utils/event.h>
 
 static void jniLog(const std::string &s) {
     __android_log_write(ANDROID_LOG_DEBUG, "JNI", s.c_str());
@@ -367,7 +367,7 @@ public:
         resetGlobalPointers();
     }
 
-    void scheduleEmpty(){
+    void scheduleEmpty() {
         p_dispatcher->schedule(nullptr);
     }
 
@@ -407,8 +407,11 @@ std::string jstringToString(JNIEnv *env, jstring j) {
     return s;
 }
 
+static GlobalRefSingleton *GlobalRef;
+
 JNIEXPORT jint JNICALL
-JNI_OnLoad(JavaVM * /* jvm */, void * /* reserved */) {
+JNI_OnLoad(JavaVM *jvm, void * /* reserved */) {
+    GlobalRef = new GlobalRefSingleton(jvm);
     static std::ostream stream(new AndroidStreamBuf("fcitx5", 512));
     fcitx::Log::setLogStream(stream);
     // return supported JNI version; or it will crash
@@ -458,62 +461,64 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
     env->ReleaseStringUTFChars(appLib, app_lib);
     env->ReleaseStringUTFChars(extData, ext_data);
 
-    auto ObjectClass = JClass(env, "java/lang/Object");
-    auto StringClass = JClass(env, "java/lang/String");
-    auto IntegerClass = JClass(env, "java/lang/Integer");
-    jmethodID IntegerInit = env->GetMethodID(*IntegerClass, "<init>", "(I)V");
-    jmethodID handleFcitxEvent = env->GetStaticMethodID(clazz, "handleFcitxEvent", "(I[Ljava/lang/Object;)V");
-    auto candidateListCallback = [&](const std::vector<std::string> &candidateList) {
+    auto candidateListCallback = [](const std::vector<std::string> &candidateList) {
+        auto env = GlobalRef->AttachEnv();
         size_t size = candidateList.size();
-        jobjectArray vararg = env->NewObjectArray(size, StringClass, nullptr);
+        jobjectArray vararg = env->NewObjectArray(size, GlobalRef->String, nullptr);
         size_t i = 0;
         for (const auto &s : candidateList) {
             env->SetObjectArrayElement(vararg, i++, JString(env, s));
         }
-        env->CallStaticVoidMethod(clazz, handleFcitxEvent, 0, vararg);
+        env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 0, vararg);
         env->DeleteLocalRef(vararg);
     };
-    auto commitStringCallback = [&](const std::string &str) {
-        jobjectArray vararg = env->NewObjectArray(1, StringClass, nullptr);
+    auto commitStringCallback = [](const std::string &str) {
+        auto env = GlobalRef->AttachEnv();
+        jobjectArray vararg = env->NewObjectArray(1, GlobalRef->String, nullptr);
         env->SetObjectArrayElement(vararg, 0, JString(env, str));
-        env->CallStaticVoidMethod(clazz, handleFcitxEvent, 1, vararg);
+        env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 1, vararg);
         env->DeleteLocalRef(vararg);
     };
-    auto preeditCallback = [&](const std::string &preedit, const std::string &clientPreedit, const int cursor) {
-        jobjectArray vararg = env->NewObjectArray(3, ObjectClass, nullptr);
+    auto preeditCallback = [](const std::string &preedit, const std::string &clientPreedit, const int cursor) {
+        auto env = GlobalRef->AttachEnv();
+        jobjectArray vararg = env->NewObjectArray(3, GlobalRef->Object, nullptr);
         env->SetObjectArrayElement(vararg, 0, JString(env, preedit));
         env->SetObjectArrayElement(vararg, 1, JString(env, clientPreedit));
-        env->SetObjectArrayElement(vararg, 2, env->NewObject(IntegerClass, IntegerInit, cursor));
-        env->CallStaticVoidMethod(clazz, handleFcitxEvent, 2, vararg);
+        env->SetObjectArrayElement(vararg, 2, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, cursor));
+        env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 2, vararg);
         env->DeleteLocalRef(vararg);
     };
-    auto inputPanelAuxCallback = [&](const std::string &auxUp, const std::string &auxDown) {
-        jobjectArray vararg = env->NewObjectArray(2, StringClass, nullptr);
+    auto inputPanelAuxCallback = [](const std::string &auxUp, const std::string &auxDown) {
+        auto env = GlobalRef->AttachEnv();
+        jobjectArray vararg = env->NewObjectArray(2, GlobalRef->String, nullptr);
         env->SetObjectArrayElement(vararg, 0, JString(env, auxUp));
         env->SetObjectArrayElement(vararg, 1, JString(env, auxDown));
-        env->CallStaticVoidMethod(clazz, handleFcitxEvent, 3, vararg);
+        env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 3, vararg);
         env->DeleteLocalRef(vararg);
     };
-    auto readyCallback = [&]() {
-        jobjectArray vararg = env->NewObjectArray(0, ObjectClass, nullptr);
-        env->CallStaticVoidMethod(clazz, handleFcitxEvent, 4, vararg);
+    auto readyCallback = []() {
+        auto env = GlobalRef->AttachEnv();
+        jobjectArray vararg = env->NewObjectArray(0, GlobalRef->Object, nullptr);
+        env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 4, vararg);
         env->DeleteLocalRef(vararg);
     };
-    auto keyEventCallback = [&](const int code, const std::string &sym) {
-        jobjectArray vararg = env->NewObjectArray(2, ObjectClass, nullptr);
-        auto integer = env->NewObject(IntegerClass, IntegerInit, code);
+    auto keyEventCallback = [](const int code, const std::string &sym) {
+        auto env = GlobalRef->AttachEnv();
+        jobjectArray vararg = env->NewObjectArray(2, GlobalRef->Object, nullptr);
+        auto integer = env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, code);
         env->SetObjectArrayElement(vararg, 0, integer);
         env->SetObjectArrayElement(vararg, 1, JString(env, sym));
-        env->CallStaticVoidMethod(clazz, handleFcitxEvent, 5, vararg);
+        env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 5, vararg);
         env->DeleteLocalRef(vararg);
         env->DeleteLocalRef(integer);
     };
-    auto imChangeCallback = [&]() {
-        jobjectArray vararg = env->NewObjectArray(1, ObjectClass, nullptr);
+    auto imChangeCallback = []() {
+        auto env = GlobalRef->AttachEnv();
+        jobjectArray vararg = env->NewObjectArray(1, GlobalRef->Object, nullptr);
         const auto status = Fcitx::Instance().inputMethodStatus();
         auto obj = fcitxInputMethodEntryWithSubModeToJObject(env, std::get<0>(status), std::get<1>(status));
         env->SetObjectArrayElement(vararg, 0, obj);
-        env->CallStaticVoidMethod(clazz, handleFcitxEvent, 6, vararg);
+        env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 6, vararg);
         env->DeleteLocalRef(vararg);
         env->DeleteLocalRef(obj);
     };
@@ -607,8 +612,8 @@ Java_me_rocka_fcitx5test_native_Fcitx_nextInputMethod(JNIEnv *env, jclass clazz,
     Fcitx::Instance().nextInputMethod(forward == JNI_TRUE);
 }
 
-jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry, jclass imEntryClass, jmethodID imEntryInit) {
-    return env->NewObject(imEntryClass, imEntryInit,
+jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry) {
+    return env->NewObject(GlobalRef->InputMethodEntry, GlobalRef->InputMethodEntryInit,
                           *JString(env, entry->uniqueName()),
                           *JString(env, entry->name()),
                           *JString(env, entry->icon()),
@@ -619,16 +624,8 @@ jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntr
     );
 }
 
-jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry) {
-    auto imEntryClass = JClass(env, "me/rocka/fcitx5test/native/InputMethodEntry");
-    jmethodID imEntryInit = env->GetMethodID(*imEntryClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
-    return fcitxInputMethodEntryToJObject(env, entry, imEntryClass, imEntryInit);
-}
-
 jobjectArray fcitxInputMethodEntriesToJObjectArray(JNIEnv *env, const std::vector<const fcitx::InputMethodEntry *> &entries) {
-    auto imEntryClass = JClass(env, "me/rocka/fcitx5test/native/InputMethodEntry");
-    jmethodID imEntryInit = env->GetMethodID(*imEntryClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
-    jobjectArray array = env->NewObjectArray(entries.size(), imEntryClass, nullptr);
+    jobjectArray array = env->NewObjectArray(entries.size(), GlobalRef->InputMethodEntry, nullptr);
     size_t i = 0;
     for (const auto &entry : entries) {
         jobject obj = fcitxInputMethodEntryToJObject(env, entry);
@@ -649,9 +646,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_listInputMethods(JNIEnv *env, jclass clazz
 jobject fcitxInputMethodEntryWithSubModeToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry, const std::vector<std::string> &subMode) {
     if (!entry) return nullptr;
     if (subMode.empty()) return fcitxInputMethodEntryToJObject(env, entry);
-    auto imEntryClass = JClass(env, "me/rocka/fcitx5test/native/InputMethodEntry");
-    jmethodID imEntryInit = env->GetMethodID(*imEntryClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
-    return env->NewObject(imEntryClass, imEntryInit,
+    return env->NewObject(GlobalRef->InputMethodEntry, GlobalRef->InputMethodEntryInit,
                           *JString(env, entry->uniqueName()),
                           *JString(env, entry->name()),
                           *JString(env, entry->icon()),
@@ -709,8 +704,8 @@ Java_me_rocka_fcitx5test_native_Fcitx_setEnabledInputMethods(JNIEnv *env, jclass
     Fcitx::Instance().setEnabledInputMethods(entries);
 }
 
-jobject fcitxRawConfigToJObject(JNIEnv *env, jclass cls, jmethodID init, jmethodID setSubItems, const fcitx::RawConfig &cfg) {
-    jobject obj = env->NewObject(cls, init,
+jobject fcitxRawConfigToJObject(JNIEnv *env, const fcitx::RawConfig &cfg) {
+    jobject obj = env->NewObject(GlobalRef->RawConfig, GlobalRef->RawConfigInit,
                                  *JString(env, cfg.name()),
                                  *JString(env, cfg.comment()),
                                  *JString(env, cfg.value()),
@@ -718,23 +713,16 @@ jobject fcitxRawConfigToJObject(JNIEnv *env, jclass cls, jmethodID init, jmethod
     if (!cfg.hasSubItems()) {
         return obj;
     }
-    jobjectArray array = env->NewObjectArray(cfg.subItemsSize(), cls, nullptr);
+    jobjectArray array = env->NewObjectArray(cfg.subItemsSize(), GlobalRef->RawConfig, nullptr);
     size_t i = 0;
     for (const auto &item : cfg.subItems()) {
-        jobject jItem = fcitxRawConfigToJObject(env, cls, init, setSubItems, *cfg.get(item));
+        jobject jItem = fcitxRawConfigToJObject(env, *cfg.get(item));
         env->SetObjectArrayElement(array, i++, jItem);
         env->DeleteLocalRef(jItem);
     }
-    env->CallVoidMethod(obj, setSubItems, array);
+    env->CallVoidMethod(obj, GlobalRef->RawConfigSetSubItems, array);
     env->DeleteLocalRef(array);
     return obj;
-}
-
-jobject fcitxRawConfigToJObject(JNIEnv *env, const fcitx::RawConfig &cfg) {
-    auto cls = JClass(env, "me/rocka/fcitx5test/native/RawConfig");
-    jmethodID init = env->GetMethodID(*cls, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lme/rocka/fcitx5test/native/RawConfig;)V");
-    jmethodID setSubItems = env->GetMethodID(*cls, "setSubItems", "([Lme/rocka/fcitx5test/native/RawConfig;)V");
-    return fcitxRawConfigToJObject(env, cls, init, setSubItems, cfg);
 }
 
 extern "C"
@@ -793,20 +781,20 @@ Java_me_rocka_fcitx5test_native_Fcitx_getFcitxInputMethodConfigPrivate(JNIEnv *e
     return result ? fcitxRawConfigToJObject(env, *result) : nullptr;
 }
 
-void jobjectFillRawConfig(JNIEnv *env, jclass cls, jfieldID fName, jfieldID fValue, jfieldID fSubItems, jobject jConfig, fcitx::RawConfig &config) {
-    auto subItems = reinterpret_cast<jobjectArray>(env->GetObjectField(jConfig, fSubItems));
+void jobjectFillRawConfig(JNIEnv *env, jobject jConfig, fcitx::RawConfig &config) {
+    auto subItems = reinterpret_cast<jobjectArray>(env->GetObjectField(jConfig, GlobalRef->RawConfigSubItems));
     if (subItems == nullptr) {
-        auto jValue = reinterpret_cast<jstring>(env->GetObjectField(jConfig, fValue));
+        auto jValue = reinterpret_cast<jstring>(env->GetObjectField(jConfig, GlobalRef->RawConfigValue));
         config = jstringToString(env, jValue);
         env->DeleteLocalRef(jValue);
     } else {
         size_t size = env->GetArrayLength(subItems);
         for (size_t i = 0; i < size; i++) {
             jobject item = env->GetObjectArrayElement(subItems, i);
-            auto jName = reinterpret_cast<jstring>(env->GetObjectField(item, fName));
+            auto jName = reinterpret_cast<jstring>(env->GetObjectField(item, GlobalRef->RawConfigName));
             auto name = jstringToString(env, jName);
             auto subConfig = config.get(name, true);
-            jobjectFillRawConfig(env, cls, fName, fValue, fSubItems, item, *subConfig);
+            jobjectFillRawConfig(env, item, *subConfig);
             env->DeleteLocalRef(jName);
             env->DeleteLocalRef(item);
         }
@@ -816,11 +804,7 @@ void jobjectFillRawConfig(JNIEnv *env, jclass cls, jfieldID fName, jfieldID fVal
 
 fcitx::RawConfig jobjectToRawConfig(JNIEnv *env, jobject jConfig) {
     fcitx::RawConfig config;
-    auto cls = JClass(env, "me/rocka/fcitx5test/native/RawConfig");
-    jfieldID fName = env->GetFieldID(*cls, "name", "Ljava/lang/String;");
-    jfieldID fValue = env->GetFieldID(*cls, "value", "Ljava/lang/String;");
-    jfieldID fSubItems = env->GetFieldID(*cls, "subItems", "[Lme/rocka/fcitx5test/native/RawConfig;");
-    jobjectFillRawConfig(env, cls, fName, fValue, fSubItems, jConfig, config);
+    jobjectFillRawConfig(env, jConfig, config);
     return config;
 }
 
@@ -852,14 +836,12 @@ extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddons(JNIEnv *env, jclass clazz) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
-    auto cls = JClass(env, "me/rocka/fcitx5test/native/AddonInfo");
     const auto &addons = Fcitx::Instance().getAddons();
-    jmethodID init = env->GetMethodID(*cls, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZZZ)V");
-    jobjectArray array = env->NewObjectArray(addons.size(), cls, nullptr);
+    jobjectArray array = env->NewObjectArray(addons.size(), GlobalRef->AddonInfo, nullptr);
     size_t i = 0;
     for (const auto addon : addons) {
         const auto *info = addon.first;
-        jobject obj = env->NewObject(cls, init,
+        jobject obj = env->NewObject(GlobalRef->AddonInfo, GlobalRef->AddonInfoInit,
                                      *JString(env, info->uniqueName()),
                                      *JString(env, info->name().match()),
                                      *JString(env, info->comment().match()),
@@ -906,8 +888,7 @@ JNIEXPORT jobjectArray JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_queryPunctuation(JNIEnv *env, jclass clazz, jchar c, jstring language) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     const auto pair = Fcitx::Instance().queryPunctuation(c, jstringToString(env, language));
-    auto s = JClass(env, "java/lang/String");
-    jobjectArray array = env->NewObjectArray(2, s, nullptr);
+    jobjectArray array = env->NewObjectArray(2, GlobalRef->String, nullptr);
     env->SetObjectArrayElement(array, 0, JString(env, pair.first));
     env->SetObjectArrayElement(array, 1, JString(env, pair.second));
     return array;
