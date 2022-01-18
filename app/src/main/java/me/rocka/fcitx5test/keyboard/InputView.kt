@@ -8,6 +8,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.PopupWindow
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
@@ -77,22 +78,22 @@ class InputView(
     }
 
     init {
-        service.launch {
-            currentIme = fcitx.currentImeAsync().await()
+        service.lifecycleScope.launch {
+            currentIme = fcitx.currentIme()
             currentKeyboard.onInputMethodChange(currentIme)
-        }
-        preeditPopup.width = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            windowManager.currentWindowMetrics.bounds.width()
-        } else {
-            DisplayMetrics().let {
-                @Suppress("DEPRECATION")
-                windowManager.defaultDisplay.getMetrics(it)
-                it.widthPixels
+            preeditPopup.width = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                windowManager.currentWindowMetrics.bounds.width()
+            } else {
+                DisplayMetrics().let {
+                    @Suppress("DEPRECATION")
+                    windowManager.defaultDisplay.getMetrics(it)
+                    it.widthPixels
+                }
             }
+            orientation = VERTICAL
+            add(candidateView, lParams(matchParent, dp(40)))
+            switchLayout("qwerty")
         }
-        orientation = VERTICAL
-        add(candidateView, lParams(matchParent, dp(40)))
-        switchLayout("qwerty")
     }
 
     override fun onDetachedFromWindow() {
@@ -127,7 +128,7 @@ class InputView(
         }
     }
 
-    private fun onAction(view: View, action: KeyAction<*>) {
+    private suspend fun onAction(view: View, action: KeyAction<*>) {
         when (action) {
             is KeyAction.FcitxKeyAction -> fcitx.sendKey(action.act)
             is KeyAction.CommitAction -> {
@@ -206,20 +207,20 @@ class InputView(
         currentKeyboard.onInputMethodChange(currentIme)
     }
 
-    private fun quickPhrase() {
+    private suspend fun quickPhrase() {
         fcitx.reset()
         fcitx.triggerQuickPhrase()
     }
 
-    private fun unicode() {
+    private suspend fun unicode() {
         fcitx.triggerUnicode()
     }
 
-    private fun switchLang() {
+    private suspend fun switchLang() {
         fcitx.enumerateIme()
     }
 
-    private fun customEvent(fn: (Fcitx) -> Unit) {
+    private inline fun customEvent(fn: (Fcitx) -> Unit) {
         fn(fcitx)
     }
 }

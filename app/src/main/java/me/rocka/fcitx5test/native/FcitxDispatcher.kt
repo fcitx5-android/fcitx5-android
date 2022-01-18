@@ -5,7 +5,11 @@ import kotlinx.coroutines.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlin.system.measureTimeMillis
 
 class FcitxDispatcher(private val controller: FcitxController) : Runnable, CoroutineDispatcher() {
@@ -35,13 +39,17 @@ class FcitxDispatcher(private val controller: FcitxController) : Runnable, Corou
             installed = null
         }
 
-        inline fun withWatchdog(block: () -> Unit) {
+        inline fun <T> withWatchdog(block: () -> T): T {
             install()
-            block()
-            teardown()
+            try {
+                return block()
+            } finally {
+                teardown()
+            }
         }
-
     }
+
+    private val lock = ReentrantLock()
 
     private val queue = ConcurrentLinkedQueue<Runnable>()
 
@@ -50,32 +58,35 @@ class FcitxDispatcher(private val controller: FcitxController) : Runnable, Corou
     val isRunning: Boolean
         get() = _isRunning.get()
 
-    private var nativeLooping = AtomicBoolean(false)
-
     override fun run() {
-        Log.i(javaClass.name, "start running")
+        Log.i(javaClass.name, "Start running")
         if (_isRunning.compareAndSet(false, true)) {
-            Log.i(javaClass.name, "calling native startup")
+            Log.d(javaClass.name, "Calling native startup")
             controller.nativeStartup()
         }
         while (isRunning) {
-            nativeLooping.set(true)
-            // blocking...
-            measureTimeMillis {
-                controller.nativeLoopOnce()
-            }.let { Log.d(javaClass.name, "native loop done, took $it ms") }
-            nativeLooping.set(false)
-            // do rest jobs
-            measureTimeMillis {
-                while (queue.peek() != null) {
-                    val block = queue.poll()!!
-                    Watchdog.withWatchdog {
-                        block.run()
+            Watchdog.withWatchdog {
+                // blocking...
+                lock.withLock {
+                    measureTimeMillis {
+                        controller.nativeLoopOnce()
+                    }.let {
+                        Log.d(
+                            javaClass.name,
+                            "Finishing executing native loop once, took $it ms"
+                        )
                     }
                 }
-            }.let { Log.d(javaClass.name, "jobs done, took $it ms") }
+                // do scheduled jobs
+                measureTimeMillis {
+                    while (queue.peek() != null) {
+                        val block = queue.poll()!!
+                        block.run()
+                    }
+                }.let { Log.d(javaClass.name, "Finishing running scheduled jobs, took $it ms") }
+            }
         }
-        Log.i(javaClass.name, "calling native exit")
+        Log.i(javaClass.name, "Calling native exit")
         controller.nativeExit()
     }
 
@@ -86,11 +97,17 @@ class FcitxDispatcher(private val controller: FcitxController) : Runnable, Corou
             rest
         } else emptyList()
 
-    fun dispatch(block: Runnable) {
+    private fun dispatch(block: Runnable) {
         queue.offer(block)
-        // notify native
-        if (nativeLooping.get())
+        // bypass nativeLoopOnce if no code is executing in native dispatcher
+        if (lock.isLocked)
             controller.nativeScheduleEmpty()
+    }
+
+    suspend fun <T> dispatch(block: () -> T): T = suspendCoroutine {
+        dispatch(Runnable {
+            it.resume(block())
+        })
     }
 
     override fun dispatch(context: CoroutineContext, block: Runnable) {

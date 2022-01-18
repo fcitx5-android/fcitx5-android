@@ -7,7 +7,10 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.InputMethodEntry
@@ -27,17 +30,19 @@ class InputMethodListFragment : Fragment(), OnItemChangedListener<InputMethodEnt
 
 
     private fun updateIMState() {
-        fcitx.setEnabledIme(entries.map { it.uniqueName }.toTypedArray())
+        lifecycleScope.launch {
+            fcitx.setEnabledIme(entries.map { it.uniqueName }.toTypedArray())
+        }
     }
 
     private val ui: BaseDynamicListUi<InputMethodEntry> by lazy {
         object : BaseDynamicListUi<InputMethodEntry>(
             ctx = requireContext(),
             mode = Mode.ChooseOne {
-                val unEnabled = fcitx.availableIme().toSet() - entries.toSet()
+                val unEnabled = runBlocking { fcitx.availableIme().toSet() - entries.toSet() }
                 unEnabled.toTypedArray()
             },
-            initialEntries = fcitx.enabledIme().toList(),
+            initialEntries = runBlocking { fcitx.enabledIme().toList() },
             enableOrder = true,
             initSettingsButton = { idx ->
                 val entry = entries[idx]

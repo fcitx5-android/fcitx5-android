@@ -7,7 +7,10 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.native.AddonInfo
 import me.rocka.fcitx5test.native.Fcitx
@@ -27,7 +30,7 @@ class AddonListFragment : Fragment(), OnItemChangedListener<AddonInfo> {
     private val ui: CheckBoxListUi<AddonInfo> by lazy {
         CheckBoxListUi(
             requireContext(),
-            fcitx.addons().sortedBy { it.uniqueName },
+            runBlocking {  fcitx.addons().sortedBy { it.uniqueName }},
             {
                 // our addon shouldn't be disabled
                 isEnabled = entries[it].uniqueName != "androidfrontend"
@@ -56,7 +59,9 @@ class AddonListFragment : Fragment(), OnItemChangedListener<AddonInfo> {
         with(entries) {
             val ids = map { it.uniqueName }.toTypedArray()
             val state = map { it.enabled }.toBooleanArray()
-            fcitx.setAddonState(ids, state)
+            lifecycleScope.launch {
+                fcitx.setAddonState(ids, state)
+            }
         }
     }
 

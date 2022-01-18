@@ -1,16 +1,19 @@
 package me.rocka.fcitx5test.keyboard
 
 import android.content.Intent
-import android.inputmethodservice.InputMethodService
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
-import kotlinx.coroutines.*
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.native.CapabilityFlags
 import me.rocka.fcitx5test.native.Fcitx
@@ -19,8 +22,7 @@ import me.rocka.fcitx5test.service.FcitxDaemonManager
 import me.rocka.fcitx5test.utils.inputConnection
 import splitties.bitflags.hasFlag
 
-class FcitxInputMethodService
-    : InputMethodService(), CoroutineScope by MainScope() {
+class FcitxInputMethodService : LifecycleInputMethodService() {
 
     private lateinit var inputView: InputView
     private lateinit var fcitx: Fcitx
@@ -86,7 +88,7 @@ class FcitxInputMethodService
         if (keyRepeatingJobs.containsKey(key)) {
             return
         }
-        keyRepeatingJobs[key] = launch {
+        keyRepeatingJobs[key] = lifecycleScope.launch {
             while (true) {
                 fcitx.sendKey(key)
                 delay(60L)
@@ -109,7 +111,7 @@ class FcitxInputMethodService
         if (eventHandlerJob == null) {
             eventHandlerJob = fcitx.eventFlow.onEach {
                 handleFcitxEvent(it)
-            }.launchIn(this)
+            }.launchIn(lifecycleScope)
         }
         inputView = InputView(this, fcitx)
         return inputView
@@ -202,14 +204,14 @@ class FcitxInputMethodService
 
     override fun onUnbind(intent: Intent?): Boolean {
         Log.d(javaClass.name, "onUnbind")
-        fcitx.save()
+        runBlocking {
+            fcitx.save()
+        }
         return super.onUnbind(intent)
     }
 
 
     override fun onDestroy() {
-        // cancel all coroutines in MainScope
-        cancel()
         FcitxDaemonManager.instance.unbind(this, javaClass.name)
         eventHandlerJob = null
         super.onDestroy()
