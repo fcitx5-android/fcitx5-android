@@ -3,28 +3,25 @@ package me.rocka.fcitx5test.native
 import android.content.Context
 import android.os.Build
 import android.util.Log
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.data.DataManager
 import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.native.FcitxState.*
 import splitties.resources.str
-import kotlin.coroutines.CoroutineContext
 
-class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope {
-
-    interface RawConfigMap {
-        operator fun get(key: String): RawConfig
-        operator fun set(key: String, value: RawConfig)
-    }
+class Fcitx(private val context: Context) : FcitxLifecycleOwner {
 
     override val currentState: FcitxState
         get() = fcitxState_
 
     @Volatile
+    // called in android main thread
     override var observer: FcitxLifecycleObserver? = null
         set(value) {
             onStateChanged = {
@@ -41,48 +38,74 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
      */
     val eventFlow = eventFlow_.asSharedFlow()
 
-    fun save() = saveFcitxState()
-    fun sendKey(key: String) = sendKeyToFcitxString(key)
-    fun sendKey(c: Char) = sendKeyToFcitxChar(c)
-    fun sendKey(i: Int) = sendKeyToFcitxInt(i)
-    fun select(idx: Int) = selectCandidate(idx)
-    fun isEmpty() = isInputPanelEmpty()
-    fun reset() = resetInputContext()
-    fun moveCursor(position: Int) = repositionCursor(position)
-    fun availableIme() = availableInputMethods() ?: arrayOf()
-    fun enabledIme() = listInputMethods() ?: arrayOf()
-    fun setEnabledIme(array: Array<String>) = setEnabledInputMethods(array)
-    fun activateIme(ime: String) = setInputMethod(ime)
-    fun enumerateIme(forward: Boolean = true) = nextInputMethod(forward)
-    fun currentImeAsync() = GlobalScope.async {
-        inputMethodStatus() ?: InputMethodEntry(context.str(R.string._not_available_))
+    suspend fun save() = dispatcher.dispatch { saveFcitxState() }
+    suspend fun sendKey(key: String) = dispatcher.dispatch { sendKeyToFcitxString(key) }
+    suspend fun sendKey(c: Char) = dispatcher.dispatch { sendKeyToFcitxChar(c) }
+    suspend fun sendKey(i: Int) = dispatcher.dispatch { sendKeyToFcitxInt(i) }
+    suspend fun select(idx: Int) = dispatcher.dispatch { selectCandidate(idx) }
+    suspend fun isEmpty() = dispatcher.dispatch { isInputPanelEmpty() }
+    suspend fun reset() = dispatcher.dispatch { resetInputContext() }
+    suspend fun moveCursor(position: Int) = dispatcher.dispatch { repositionCursor(position) }
+    suspend fun availableIme() =
+        dispatcher.dispatch { availableInputMethods() ?: arrayOf() }
+
+    suspend fun enabledIme() =
+        dispatcher.dispatch { listInputMethods() ?: arrayOf() }
+
+    suspend fun setEnabledIme(array: Array<String>) =
+        dispatcher.dispatch { setEnabledInputMethods(array) }
+
+    suspend fun activateIme(ime: String) = dispatcher.dispatch { setInputMethod(ime) }
+    suspend fun enumerateIme(forward: Boolean = true) =
+        dispatcher.dispatch { nextInputMethod(forward) }
+
+    suspend fun currentIme() =
+        dispatcher.dispatch {
+            inputMethodStatus() ?: InputMethodEntry(context.str(R.string._not_available_))
+        }
+
+    suspend fun getGlobalConfig() = dispatcher.dispatch {
+        getFcitxGlobalConfig() ?: RawConfig(arrayOf())
     }
 
-    var globalConfig: RawConfig
-        get() = getFcitxGlobalConfig() ?: RawConfig(arrayOf())
-        set(value) = setFcitxGlobalConfig(value)
-    var addonConfig = object : RawConfigMap {
-        override operator fun get(key: String) = getFcitxAddonConfig(key) ?: RawConfig(arrayOf())
-        override operator fun set(key: String, value: RawConfig) = setFcitxAddonConfig(key, value)
-    }
-    var imConfig = object : RawConfigMap {
-        override operator fun get(key: String) =
-            getFcitxInputMethodConfig(key) ?: RawConfig(arrayOf())
-
-        override operator fun set(key: String, value: RawConfig) =
-            setFcitxInputMethodConfig(key, value)
+    suspend fun setGlobalConfig(config: RawConfig) = dispatcher.dispatch {
+        setFcitxGlobalConfig(config)
     }
 
-    fun addons() = getFcitxAddons() ?: arrayOf()
-    fun setAddonState(name: Array<String>, state: BooleanArray) = setFcitxAddonState(name, state)
-    fun triggerQuickPhrase() = triggerQuickPhraseInput()
-    fun punctuation(c: Char, language: String = "zh_CN"): Pair<String, String> =
-        queryPunctuation(c, language)?.let { Pair(it[0], it[1]) } ?: "$c".let { Pair(it, it) }
+    suspend fun getAddonConfig(key: String) = dispatcher.dispatch {
+        getFcitxAddonConfig(key) ?: RawConfig(arrayOf())
+    }
 
-    fun triggerUnicode() = triggerUnicodeInput()
-    fun focus(focus: Boolean = true) = focusInputContext(focus)
-    fun setCapFlags(flags: CapabilityFlags) = setCapabilityFlags(flags.toLong())
-    fun reloadPinyinDict() = setAddonSubConfig("pinyin", "dictmanager", RawConfig(arrayOf()))
+    suspend fun setAddonConfig(key: String, config: RawConfig) = dispatcher.dispatch {
+        setFcitxAddonConfig(key, config)
+    }
+
+    suspend fun getImConfig(key: String) = dispatcher.dispatch {
+        getFcitxInputMethodConfig(key) ?: RawConfig(arrayOf())
+    }
+
+    suspend fun setImConfig(key: String, config: RawConfig) = dispatcher.dispatch {
+        setFcitxInputMethodConfig(key, config)
+    }
+
+
+    suspend fun addons() = dispatcher.dispatch { getFcitxAddons() ?: arrayOf() }
+    suspend fun setAddonState(name: Array<String>, state: BooleanArray) =
+        dispatcher.dispatch { setFcitxAddonState(name, state) }
+
+    suspend fun triggerQuickPhrase() = dispatcher.dispatch { triggerQuickPhraseInput() }
+    suspend fun punctuation(c: Char, language: String = "zh_CN"): Pair<String, String> =
+        dispatcher.dispatch {
+            queryPunctuation(c, language)?.let { it[0] to it[1] } ?: "$c".let { it to it }
+        }
+
+    suspend fun triggerUnicode() = dispatcher.dispatch { triggerUnicodeInput() }
+    suspend fun focus(focus: Boolean = true) = dispatcher.dispatch { focusInputContext(focus) }
+    suspend fun setCapFlags(flags: CapabilityFlags) =
+        dispatcher.dispatch { setCapabilityFlags(flags.toLong()) }
+
+    suspend fun reloadPinyinDict() =
+        dispatcher.dispatch { setAddonSubConfig("pinyin", "dictmanager", RawConfig(arrayOf())) }
 
     init {
         if (fcitxState_ != Stopped)
@@ -170,13 +193,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
         external fun getFcitxAddonConfig(addon: String): RawConfig?
 
         @JvmStatic
-        external fun getFcitxAddonConfigPrivate(addon: String): RawConfig?
-
-        @JvmStatic
         external fun getFcitxInputMethodConfig(im: String): RawConfig?
-
-        @JvmStatic
-        external fun getFcitxInputMethodConfigPrivate(im: String): RawConfig?
 
         @JvmStatic
         external fun setFcitxGlobalConfig(config: RawConfig)
@@ -240,13 +257,14 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
             eventFlow_.tryEmit(event)
         }
 
+        // will be called in fcitx main thread
         private fun onFirstRun() {
             Log.i("Fcitx", "onFirstRun")
             getFcitxGlobalConfig()?.get("cfg")?.run {
                 get("Behavior")["PreeditEnabledByDefault"].value = "False"
                 setFcitxGlobalConfig(this)
             }
-            getFcitxAddonConfigPrivate("pinyin")?.get("cfg")?.run {
+            getFcitxAddonConfig("pinyin")?.get("cfg")?.run {
                 get("PreeditInApplication").value = "False"
                 get("PreeditCursorPositionAtBeginning").value = "False"
                 setFcitxAddonConfig("pinyin", this)
@@ -254,6 +272,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
             Prefs.getInstance().firstRun = false
         }
 
+        // will be called in fcitx main thread
         private fun onReady() {
             setCapabilityFlags(CapabilityFlags.DefaultFlags.toLong())
         }
@@ -321,7 +340,5 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope 
         }
         fcitxState_ = Stopped
     }
-
-    override val coroutineContext: CoroutineContext = SupervisorJob() + dispatcher
 
 }

@@ -82,7 +82,7 @@ class TextKeyboard(
     var lastCapsState: CapsState? = null
         private set
 
-    override fun onAction(view: View, action: KeyAction<*>) {
+    override suspend fun onAction(view: View, action: KeyAction<*>) {
         when (action) {
             is KeyAction.FcitxKeyAction -> transformKeyAction(action)
             is KeyAction.CapsAction -> {

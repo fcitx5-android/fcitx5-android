@@ -9,10 +9,9 @@ class GlobalConfigFragment : FcitxPreferenceFragment() {
     override fun getPageTitle(): String =
         requireContext().resources.getString(R.string.global_options)
 
-    override fun obtainConfig(fcitx: Fcitx): RawConfig = fcitx.globalConfig
+    override suspend fun obtainConfig(fcitx: Fcitx): RawConfig = fcitx.getGlobalConfig()
 
-    override fun saveConfig(fcitx: Fcitx, newConfig: RawConfig) {
-        fcitx.globalConfig = newConfig
-    }
+    override suspend fun saveConfig(fcitx: Fcitx, newConfig: RawConfig) =
+        fcitx.setGlobalConfig(newConfig)
 
 }

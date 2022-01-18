@@ -11,6 +11,7 @@ import androidx.core.os.bundleOf
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
+import kotlinx.coroutines.runBlocking
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.databinding.ActivityMainBinding
 import me.rocka.fcitx5test.ui.setup.SetupActivity
@@ -82,7 +83,9 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         Log.d(javaClass.name, "onStop")
         if (viewModel.isFcitxInitialized)
-            viewModel.fcitx.save()
+            runBlocking {
+                viewModel.fcitx.save()
+            }
         super.onStop()
     }
 }

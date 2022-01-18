@@ -7,11 +7,11 @@ import me.rocka.fcitx5test.ui.main.settings.FcitxPreferenceFragment
 class AddonConfigFragment : FcitxPreferenceFragment() {
     override fun getPageTitle(): String = requireStringArg(ARG_NAME)
 
-    override fun obtainConfig(fcitx: Fcitx): RawConfig =
-        fcitx.addonConfig[requireStringArg(ARG_UNIQUE_NAME)]
+    override suspend fun obtainConfig(fcitx: Fcitx): RawConfig =
+        fcitx.getAddonConfig(requireStringArg(ARG_UNIQUE_NAME))
 
-    override fun saveConfig(fcitx: Fcitx, newConfig: RawConfig) {
-        fcitx.addonConfig[requireStringArg(ARG_UNIQUE_NAME)] = newConfig
+    override suspend fun saveConfig(fcitx: Fcitx, newConfig: RawConfig) {
+        fcitx.setAddonConfig(requireStringArg(ARG_UNIQUE_NAME), newConfig)
     }
 
     companion object {
