@@ -12,9 +12,9 @@ import me.rocka.fcitx5test.data.DataManager
 import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.native.FcitxState.*
 import splitties.resources.str
+import kotlin.coroutines.CoroutineContext
 
-class Fcitx(private val context: Context) : FcitxLifecycleOwner,
-    CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.IO) {
+class Fcitx(private val context: Context) : FcitxLifecycleOwner, CoroutineScope {
 
     interface RawConfigMap {
         operator fun get(key: String): RawConfig
@@ -54,7 +54,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner,
     fun setEnabledIme(array: Array<String>) = setEnabledInputMethods(array)
     fun activateIme(ime: String) = setInputMethod(ime)
     fun enumerateIme(forward: Boolean = true) = nextInputMethod(forward)
-    fun currentImeAsync() = async {
+    fun currentImeAsync() = GlobalScope.async {
         inputMethodStatus() ?: InputMethodEntry(context.str(R.string._not_available_))
     }
 
@@ -116,7 +116,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner,
             appData: String,
             appLib: String,
             extData: String
-        ): Int
+        )
 
         @JvmStatic
         external fun exitFcitx()
@@ -211,6 +211,12 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner,
         @JvmStatic
         external fun setAddonSubConfig(addon: String, path: String, config: RawConfig)
 
+        @JvmStatic
+        external fun loopOnce()
+
+        @JvmStatic
+        external fun scheduleEmpty()
+
         /**
          * Called from native-lib
          */
@@ -253,12 +259,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner,
         }
     }
 
-    override fun start() {
-        if (fcitxState_ != Stopped)
-            return
-        fcitxState_ = Starting
-        with(context) {
-            launch {
+    val dispatcher = FcitxDispatcher(object : FcitxDispatcher.FcitxController {
+        override fun nativeStartup() {
+            with(context) {
                 DataManager.sync()
                 val locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     val locales = resources.configuration.locales
@@ -284,15 +287,41 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner,
                 )
             }
         }
+
+        override fun nativeLoopOnce() {
+            loopOnce()
+        }
+
+        override fun nativeScheduleEmpty() {
+            scheduleEmpty()
+        }
+
+        override fun nativeExit() {
+            exitFcitx()
+        }
+
+    })
+
+    override fun start() {
+        if (fcitxState_ != Stopped)
+            return
+        fcitxState_ = Starting
+        GlobalScope.launch(Dispatchers.IO) {
+            // this is fcitx main thread
+            dispatcher.run()
+        }
     }
 
     override fun stop() {
         if (fcitxState_ != Ready)
             return
         fcitxState_ = Stopping
-        exitFcitx()
-        coroutineContext.cancel()
+        dispatcher.stop().let {
+            Log.w(javaClass.name, "${it.size} runnable not run")
+        }
         fcitxState_ = Stopped
     }
+
+    override val coroutineContext: CoroutineContext = SupervisorJob() + dispatcher
 
 }

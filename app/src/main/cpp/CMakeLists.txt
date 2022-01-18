@@ -74,6 +74,7 @@ add_library(native-lib SHARED native-lib.cpp)
 target_link_libraries(native-lib
         log
         Fcitx5::Core
+        libevent::core
         Fcitx5::Module::QuickPhrase
         Fcitx5::Module::Punctuation
         Fcitx5::Module::Unicode)
