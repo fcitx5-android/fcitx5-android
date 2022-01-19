@@ -122,15 +122,19 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             inputConnection?.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
         }
         editorInfo = attribute
-        fcitx.setCapFlags(CapabilityFlags.fromEditorInfo(editorInfo))
+        lifecycleScope.launch {
+            fcitx.setCapFlags(CapabilityFlags.fromEditorInfo(editorInfo))
+        }
     }
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
-        if (restarting) {
-            // when input restarts in the same editor, unfocus it to clear previous state
-            fcitx.focus(false)
+        lifecycleScope.launch {
+            if (restarting) {
+                // when input restarts in the same editor, unfocus it to clear previous state
+                fcitx.focus(false)
+            }
+            fcitx.focus()
         }
-        fcitx.focus()
         inputView.onShow()
     }
 
@@ -154,7 +158,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 // - cursor position in composing text range; when user long press backspace key,
                 //   onUpdateCursorAnchorInfo can be left behind, thus position is invalid.
                 if ((position != fcitxCursor) and (position <= composingText.length)) {
-                    fcitx.moveCursor(position)
+                    lifecycleScope.launch {
+                        fcitx.moveCursor(position)
+                    }
                     return
                 }
             }
@@ -191,7 +197,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     override fun onFinishInputView(finishingInput: Boolean) {
         cancelRepeatingAll()
         inputConnection?.finishComposingText()
-        fcitx.focus(false)
+        lifecycleScope.launch {
+            fcitx.focus(false)
+        }
     }
 
     override fun onFinishInput() {
@@ -199,7 +207,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             inputConnection?.requestCursorUpdates(0)
         }
         editorInfo = null
-        fcitx.setCapFlags(CapabilityFlags.DefaultFlags)
+        lifecycleScope.launch {
+            fcitx.setCapFlags(CapabilityFlags.DefaultFlags)
+        }
     }
 
     override fun onUnbind(intent: Intent?): Boolean {

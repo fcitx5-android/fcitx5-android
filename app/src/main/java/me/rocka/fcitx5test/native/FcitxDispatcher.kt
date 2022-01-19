@@ -65,18 +65,18 @@ class FcitxDispatcher(private val controller: FcitxController) : Runnable, Corou
             controller.nativeStartup()
         }
         while (isRunning) {
-            Watchdog.withWatchdog {
-                // blocking...
-                lock.withLock {
-                    measureTimeMillis {
-                        controller.nativeLoopOnce()
-                    }.let {
-                        Log.d(
-                            javaClass.name,
-                            "Finishing executing native loop once, took $it ms"
-                        )
-                    }
+            // blocking...
+            lock.withLock {
+                measureTimeMillis {
+                    controller.nativeLoopOnce()
+                }.let {
+                    Log.d(
+                        javaClass.name,
+                        "Finishing executing native loop once, took $it ms"
+                    )
                 }
+            }
+            Watchdog.withWatchdog {
                 // do scheduled jobs
                 measureTimeMillis {
                     while (queue.peek() != null) {
