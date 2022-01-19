@@ -18,7 +18,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import cn.berberman.girls.utils.maybe.Maybe
 import cn.berberman.girls.utils.maybe.fx
-import cn.berberman.girls.utils.maybe.toMaybe
 import kotlinx.coroutines.*
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.data.PinyinDictManager
@@ -122,7 +121,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
         launch {
             val id = IMPORT_ID++
             Maybe.fx {
-                val file = File(bind(uri.queryFileName(contentResolver).toMaybe()))
+                val file = uri.queryFileName(contentResolver).bindNullable().let { File(it) }
                 when {
                     file.nameWithoutExtension in entries.map { it.name } -> {
                         errorDialog(getString(R.string.dict_already_exists))
@@ -142,8 +141,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                         .setProgress(100, 0, true)
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                 builder.build().let { notificationManager.notify(id, it) }
-                val inputStream =
-                    bind(contentResolver.openInputStream(uri).toMaybe())
+                val inputStream = contentResolver.openInputStream(uri).bindNullable()
                 runCatching {
                     val result: LibIMEDictionary
                     measureTimeMillis {
