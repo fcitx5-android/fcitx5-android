@@ -59,7 +59,9 @@ class InputView(
         isClippingEnabled = false
     }
 
-    private var candidateViewAdp = CandidateViewAdapter { fcitx.select(it) }
+    private var candidateViewAdp = CandidateViewAdapter {
+        service.lifecycleScope.launch { fcitx.select(it) }
+    }
     private var candidateView = themedContext.view(::RecyclerView, R.id.candidate_list) {
         backgroundColor = styledColor(android.R.attr.colorBackground)
         layoutManager = LinearLayoutManager(null, RecyclerView.HORIZONTAL, false)
@@ -81,19 +83,19 @@ class InputView(
         service.lifecycleScope.launch {
             currentIme = fcitx.currentIme()
             currentKeyboard.onInputMethodChange(currentIme)
-            preeditPopup.width = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                windowManager.currentWindowMetrics.bounds.width()
-            } else {
-                DisplayMetrics().let {
-                    @Suppress("DEPRECATION")
-                    windowManager.defaultDisplay.getMetrics(it)
-                    it.widthPixels
-                }
-            }
-            orientation = VERTICAL
-            add(candidateView, lParams(matchParent, dp(40)))
-            switchLayout("qwerty")
         }
+        preeditPopup.width = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            windowManager.currentWindowMetrics.bounds.width()
+        } else {
+            DisplayMetrics().let {
+                @Suppress("DEPRECATION")
+                windowManager.defaultDisplay.getMetrics(it)
+                it.widthPixels
+            }
+        }
+        orientation = VERTICAL
+        add(candidateView, lParams(matchParent, dp(40)))
+        switchLayout("qwerty")
     }
 
     override fun onDetachedFromWindow() {
@@ -128,7 +130,7 @@ class InputView(
         }
     }
 
-    private suspend fun onAction(view: View, action: KeyAction<*>) {
+    private fun onAction(view: View, action: KeyAction<*>) = service.lifecycleScope.launch {
         when (action) {
             is KeyAction.FcitxKeyAction -> fcitx.sendKey(action.act)
             is KeyAction.CommitAction -> {
