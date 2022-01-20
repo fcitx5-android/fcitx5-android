@@ -17,7 +17,7 @@ class FcitxDaemon : LifecycleService() {
         Fcitx(this).also {
             lifecycleScope.launch {
                 it.lifecycle.whenStarted {
-                    Timber.tag(this@FcitxDaemon.javaClass.name).d("onReady")
+                    Timber.d("onReady")
                     while (leftoverOnReadyListeners.isNotEmpty())
                         leftoverOnReadyListeners.remove()()
                 }
