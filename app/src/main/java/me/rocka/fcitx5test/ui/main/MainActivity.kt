@@ -82,7 +82,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         Log.d(javaClass.name, "onStop")
-        if (viewModel.isFcitxInitialized)
+        if (viewModel.isFcitxReady)
+        // FIXME
             runBlocking {
                 viewModel.fcitx.save()
             }

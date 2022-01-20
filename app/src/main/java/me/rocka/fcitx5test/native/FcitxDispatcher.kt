@@ -12,9 +12,12 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlin.system.measureTimeMillis
 
-class FcitxDispatcher(private val controller: FcitxController) : Runnable, CoroutineDispatcher() {
+class FcitxDispatcher(private val controller: FcitxController) : CoroutineScope by controller {
 
-    interface FcitxController {
+    // this is fcitx main thread
+    private val internalDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+
+    interface FcitxController : CoroutineScope {
         fun nativeStartup()
         fun nativeLoopOnce()
         fun nativeScheduleEmpty()
@@ -22,13 +25,13 @@ class FcitxDispatcher(private val controller: FcitxController) : Runnable, Corou
     }
 
     // not concurrent
-    object Watchdog {
+    object Watchdog : CoroutineScope {
         private var installed: Job? = null
         private val dispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
         fun install() {
             if (installed != null)
                 throw IllegalStateException("Watchdog has been installed!")
-            installed = GlobalScope.launch(dispatcher) {
+            installed = launch {
                 delay(SINGLE_JOB_TIME_LIMIT)
                 throw RuntimeException("Fcitx main thread had been blocked for $SINGLE_JOB_TIME_LIMIT ms!")
             }
@@ -47,6 +50,8 @@ class FcitxDispatcher(private val controller: FcitxController) : Runnable, Corou
                 teardown()
             }
         }
+
+        override val coroutineContext: CoroutineContext = dispatcher
     }
 
     private val lock = ReentrantLock()
@@ -58,7 +63,7 @@ class FcitxDispatcher(private val controller: FcitxController) : Runnable, Corou
     val isRunning: Boolean
         get() = _isRunning.get()
 
-    override fun run() {
+    fun start() = launch(internalDispatcher) {
         Log.i(javaClass.name, "Start running")
         if (_isRunning.compareAndSet(false, true)) {
             Log.d(javaClass.name, "Calling native startup")
@@ -79,8 +84,8 @@ class FcitxDispatcher(private val controller: FcitxController) : Runnable, Corou
             Watchdog.withWatchdog {
                 // do scheduled jobs
                 measureTimeMillis {
-                    while (queue.peek() != null) {
-                        val block = queue.poll()!!
+                    while (true) {
+                        val block = queue.poll() ?: break
                         block.run()
                     }
                 }.let { Log.d(javaClass.name, "Finishing running scheduled jobs, took $it ms") }
@@ -90,8 +95,10 @@ class FcitxDispatcher(private val controller: FcitxController) : Runnable, Corou
         controller.nativeExit()
     }
 
+
     fun stop(): List<Runnable> =
         if (_isRunning.compareAndSet(true, false)) {
+            cancel()
             val rest = queue.toList()
             queue.clear()
             rest
@@ -108,10 +115,6 @@ class FcitxDispatcher(private val controller: FcitxController) : Runnable, Corou
         dispatch(Runnable {
             it.resume(block())
         })
-    }
-
-    override fun dispatch(context: CoroutineContext, block: Runnable) {
-        dispatch(block)
     }
 
     companion object {
