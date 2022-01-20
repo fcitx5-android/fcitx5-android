@@ -6,7 +6,6 @@ import android.view.View
 import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -215,8 +214,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onUnbind(intent: Intent?): Boolean {
         Timber.d("onUnbind")
-        if (this::fcitx.isInitialized && fcitx.lifecycle.currentState == Lifecycle.State.STARTED)
-        // FIXME
+        if (this::fcitx.isInitialized && fcitx.isReady)
             runBlocking {
                 fcitx.save()
             }
@@ -228,5 +226,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         FcitxDaemonManager.instance.unbind(this, javaClass.name)
         eventHandlerJob = null
         super.onDestroy()
+    }
+
+    companion object {
+        val isBoundToFcitxDaemon =
+            FcitxDaemonManager.instance.hasConnection(FcitxInputMethodService::javaClass.name)
     }
 }

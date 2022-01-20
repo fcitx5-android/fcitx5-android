@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Build
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -14,7 +13,6 @@ import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.utils.abusedLifecycleRegistry
 import splitties.resources.str
 import timber.log.Timber
-import kotlin.coroutines.CoroutineContext
 
 class Fcitx(private val context: Context) : LifecycleOwner by JNI {
 
@@ -22,6 +20,8 @@ class Fcitx(private val context: Context) : LifecycleOwner by JNI {
      * Subscribe this flow to receive event sent from fcitx
      */
     val eventFlow = eventFlow_.asSharedFlow()
+
+    val isReady = lifecycle.currentState == Lifecycle.State.STARTED
 
     suspend fun save() = dispatcher.dispatch { saveFcitxState() }
     suspend fun sendKey(key: String) = dispatcher.dispatch { sendKeyToFcitxString(key) }
@@ -221,7 +221,6 @@ class Fcitx(private val context: Context) : LifecycleOwner by JNI {
         fun handleFcitxEvent(type: Int, params: Array<Any>) {
             val event = FcitxEvent.create(type, params)
             Timber
-                .tag(Fcitx::class.java.name)
                 .d(
                     "Event ${event.eventType}[${params.size}]${
                         params.take(10).joinToString()
@@ -303,23 +302,27 @@ class Fcitx(private val context: Context) : LifecycleOwner by JNI {
             exitFcitx()
         }
 
-        override val coroutineContext: CoroutineContext
-            get() = lifecycleScope.coroutineContext
     })
 
     fun start() {
-        if (!lifecycle.currentState.isAtLeast(Lifecycle.State.DESTROYED))
+        if (!lifecycle.currentState.isAtLeast(Lifecycle.State.DESTROYED)) {
+            Timber.w("Skip starting fcitx: not at destroyed state!")
             return
+        }
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
         dispatcher.start()
     }
 
     fun stop() {
-        if (lifecycle.currentState != Lifecycle.State.STARTED)
+        if (lifecycle.currentState != Lifecycle.State.STARTED) {
+            Timber.w("Skip stopping fcitx: not at started state!")
             return
+        }
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        Timber.i("stop")
         dispatcher.stop().let {
-            Timber.w("${it.size} runnable not run")
+            if (it.isNotEmpty())
+                Timber.w("${it.size} job(s) didn't get a chance to run!")
         }
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     }

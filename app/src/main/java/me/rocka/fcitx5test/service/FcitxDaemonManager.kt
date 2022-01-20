@@ -41,17 +41,6 @@ class FcitxDaemonManager {
         }
     }
 
-    suspend fun bindFcitxDaemon(context: Context, name: String): Fcitx =
-        suspendCoroutine { cont ->
-            bindFcitxDaemonAsync(context, name) { cont.resume(getFcitxInstance()) }
-        }
-
-    suspend fun bindFcitxDaemonReady(context: Context, name: String): Fcitx =
-        suspendCoroutine { cont ->
-            bindFcitxDaemonAsync(context, name) { onReady { cont.resume(getFcitxInstance()) } }
-        }
-
-
     fun unbind(context: Context, name: String) {
         connections.remove(name)?.let {
             context.unbindService(it)
@@ -64,6 +53,8 @@ class FcitxDaemonManager {
         }
         connections.clear()
     }
+
+    fun hasConnection(name: String) = name in connections
 
     companion object {
         // for thread safety, this class shouldn't be used concurrently

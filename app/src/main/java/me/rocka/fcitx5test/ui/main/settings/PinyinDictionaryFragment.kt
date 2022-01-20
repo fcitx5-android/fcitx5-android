@@ -150,10 +150,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                             inputStream,
                             file.name
                         )
-                    }.also {
-                        Timber.tag(this@PinyinDictionaryFragment.javaClass.name)
-                            .d("Took $it to import $result")
-                    }
+                    }.also { Timber.d("Took $it to import $result") }
                     result
                 }
                     .onFailure {
@@ -196,10 +193,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                 builder.build().let { notificationManager.notify(id, it) }
                 measureTimeMillis {
                     viewModel.fcitx.reloadPinyinDict()
-                }.let {
-                    Timber.tag(this@PinyinDictionaryFragment.javaClass.name)
-                        .d("Took $it to reload dict")
-                }
+                }.let { Timber.d("Took $it to reload dict") }
                 notificationManager.cancel(id)
                 busy.set(false)
                 clean()
