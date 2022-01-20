@@ -10,9 +10,27 @@ import kotlin.concurrent.withLock
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-import kotlin.system.measureTimeMillis
 
-class FcitxDispatcher(private val controller: FcitxController) : CoroutineScope by controller {
+class FcitxDispatcher(private val controller: FcitxController) : CoroutineScope {
+
+    class WrappedRunnable(private val runnable: Runnable, private val name: String? = null) :
+        Runnable by runnable {
+        private val time = System.currentTimeMillis()
+        var started = false
+            private set
+
+        private val delta
+            get() = System.currentTimeMillis() - time
+
+        override fun run() {
+            if (delta > JOB_WAITING_LIMIT)
+                Timber.w("${toString()} has waited $delta ms to get run since created!")
+            started = true
+            runnable.run()
+        }
+
+        override fun toString(): String = "WrappedRunnable[${name ?: hashCode()}]"
+    }
 
     // this is fcitx main thread
     private val internalDispatcher = Executors.newSingleThreadExecutor {
@@ -21,7 +39,7 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineScope 
         }
     }.asCoroutineDispatcher()
 
-    interface FcitxController : CoroutineScope {
+    interface FcitxController {
         fun nativeStartup()
         fun nativeLoopOnce()
         fun nativeScheduleEmpty()
@@ -31,13 +49,18 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineScope 
     // not concurrent
     object Watchdog : CoroutineScope {
         private var installed: Job? = null
-        private val dispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+        private val dispatcher = Executors.newSingleThreadExecutor {
+            Thread(it).apply {
+                name = "Watchdog"
+            }
+        }.asCoroutineDispatcher()
+
         fun install() {
             if (installed != null)
                 throw IllegalStateException("Watchdog has been installed!")
             installed = launch {
-                delay(SINGLE_JOB_TIME_LIMIT)
-                throw RuntimeException("Fcitx main thread had been blocked for $SINGLE_JOB_TIME_LIMIT ms!")
+                delay(JOBS_TIME_LIMIT)
+                throw RuntimeException("Fcitx main thread had been blocked for $JOBS_TIME_LIMIT ms!")
             }
         }
 
@@ -58,74 +81,118 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineScope 
         override val coroutineContext: CoroutineContext = dispatcher
     }
 
-    private val lock = ReentrantLock()
+    inner class AliveChecker(private val period: Long) : CoroutineScope {
+        private var installed: Job? = null
+        private val dispatcher = Executors.newSingleThreadExecutor {
+            Thread(it).apply {
+                name = "AliveChecker"
+            }
+        }.asCoroutineDispatcher()
 
-    private val queue = ConcurrentLinkedQueue<Runnable>()
-
-    private val _isRunning = AtomicBoolean(false)
-
-    val isRunning: Boolean
-        get() = _isRunning.get()
-
-    fun start() = launch(internalDispatcher) {
-        Timber.tag(this@FcitxDispatcher.javaClass.name).i("Start")
-        if (_isRunning.compareAndSet(false, true)) {
-            Timber.tag(this@FcitxDispatcher.javaClass.name).d("Calling native startup")
-            controller.nativeStartup()
-        }
-        while (isRunning) {
-            // blocking...
-            lock.withLock {
-                measureTimeMillis {
-                    controller.nativeLoopOnce()
-                }.let {
-                    Timber.tag(this@FcitxDispatcher.javaClass.name)
-                        .d("Finishing executing native loop once, took $it ms")
+        fun install() {
+            if (installed != null)
+                throw IllegalStateException("AliveChecker has been installed!")
+            installed = launch {
+                // delay at first
+                delay(10000L)
+                while (isActive) {
+                    val emptyRunnable = dispatchInternal(Runnable { })
+                    delay(period)
+                    if (!emptyRunnable.started)
+                        throw RuntimeException("Alive checking failed! The job didn't get run after $period ms!")
                 }
             }
-            Watchdog.withWatchdog {
-                // do scheduled jobs
-                measureTimeMillis {
+        }
+
+        fun teardown() {
+            (installed
+                ?: throw IllegalStateException("AliveChecker has not been installed!")).cancel()
+            installed = null
+        }
+
+
+        override val coroutineContext: CoroutineContext = dispatcher
+    }
+
+    private val nativeLoopLock = ReentrantLock()
+    private val exitingLock = ReentrantLock()
+    private val exitingCondition = exitingLock.newCondition()
+
+    private val queue = ConcurrentLinkedQueue<WrappedRunnable>()
+
+    private val isRunning = AtomicBoolean(false)
+
+    private val aliveChecker = AliveChecker(ALIVE_CHECKER_PERIOD)
+
+    fun start() = launch {
+        Timber.i("Start")
+        if (isRunning.compareAndSet(false, true)) {
+            Timber.d("Calling native startup")
+            controller.nativeStartup()
+            aliveChecker.install()
+            while (isActive && isRunning.get()) {
+                // blocking...
+                nativeLoopLock.withLock {
+                    controller.nativeLoopOnce()
+                }
+                Watchdog.withWatchdog {
+                    // do scheduled jobs
                     while (true) {
                         val block = queue.poll() ?: break
                         block.run()
                     }
-                }.let {
-                    Timber.tag(this@FcitxDispatcher.javaClass.name)
-                        .d("Finishing running scheduled jobs, took $it ms")
+
                 }
             }
+            exitingLock.withLock {
+                Timber.i("Calling native exit")
+                aliveChecker.teardown()
+                controller.nativeExit()
+                exitingCondition.signal()
+            }
         }
-        Timber.tag(this@FcitxDispatcher.javaClass.name).i("Calling native exit")
-        controller.nativeExit()
     }
 
 
+    // blocking until stopped
     fun stop(): List<Runnable> {
         Timber.i("Stop")
-        return if (_isRunning.compareAndSet(true, false)) {
-            cancel()
-            val rest = queue.toList()
-            queue.clear()
-            rest
+        return if (isRunning.compareAndSet(true, false)) {
+            exitingLock.withLock {
+                bypass()
+                exitingCondition.await()
+                val rest = queue.toList()
+                queue.clear()
+                rest
+            }
         } else emptyList()
     }
 
-    private fun dispatch(block: Runnable) {
-        queue.offer(block)
-        // bypass nativeLoopOnce if no code is executing in native dispatcher
-        if (lock.isLocked)
+    private fun dispatchInternal(block: Runnable, name: String? = null): WrappedRunnable {
+        val wrapped = WrappedRunnable(block, name)
+        queue.offer(wrapped)
+        bypass()
+        return wrapped
+    }
+
+    // bypass nativeLoopOnce if no code is executing in native dispatcher
+    private fun bypass() {
+        if (nativeLoopLock.isLocked)
             controller.nativeScheduleEmpty()
     }
 
     suspend fun <T> dispatch(block: () -> T): T = suspendCoroutine {
-        dispatch(Runnable {
+        dispatchInternal(Runnable {
             it.resume(block())
         })
     }
 
+    override val coroutineContext: CoroutineContext = internalDispatcher
+
     companion object {
-        const val SINGLE_JOB_TIME_LIMIT = 5000L
+        const val JOB_WAITING_LIMIT = 2000L
+        const val JOBS_TIME_LIMIT = 5000L
+        const val ALIVE_CHECKER_PERIOD = 8000L
     }
 
 }
