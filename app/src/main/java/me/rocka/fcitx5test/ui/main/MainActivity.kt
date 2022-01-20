@@ -82,7 +82,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         Timber.d("onStop")
-        if (viewModel.isFcitxInitialized)
+        if (viewModel.isFcitxReady)
+        // FIXME
             runBlocking {
                 viewModel.fcitx.save()
             }

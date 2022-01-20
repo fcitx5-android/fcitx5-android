@@ -315,7 +315,7 @@ class Fcitx(private val context: Context) : LifecycleOwner by JNI {
     }
 
     fun stop() {
-        if (!lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))
+        if (lifecycle.currentState != Lifecycle.State.STARTED)
             return
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         dispatcher.stop().let {
