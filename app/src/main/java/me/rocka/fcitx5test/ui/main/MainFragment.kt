@@ -7,9 +7,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.data.DataManager
@@ -42,7 +42,7 @@ class MainFragment : Fragment() {
                     findNavController().navigate(R.id.behaviorSettingsFragment)
                 },
                 context.getString(R.string.delete_and_sync_data) to {
-                    GlobalScope.launch(Dispatchers.IO) {
+                    lifecycleScope.launch(Dispatchers.IO) {
                         DataManager.deleteAndSync()
                         launch(Dispatchers.Main) {
                             Toast.makeText(context, getString(R.string.synced), Toast.LENGTH_SHORT)
