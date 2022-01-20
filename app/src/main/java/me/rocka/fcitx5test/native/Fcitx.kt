@@ -3,35 +3,20 @@ package me.rocka.fcitx5test.native
 import android.content.Context
 import android.os.Build
 import android.util.Log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.data.DataManager
 import me.rocka.fcitx5test.data.Prefs
-import me.rocka.fcitx5test.native.FcitxState.*
 import splitties.resources.str
+import kotlin.coroutines.CoroutineContext
 
-class Fcitx(private val context: Context) : FcitxLifecycleOwner {
-
-    override val currentState: FcitxState
-        get() = fcitxState_
-
-    @Volatile
-    // called in android main thread
-    override var observer: FcitxLifecycleObserver? = null
-        set(value) {
-            onStateChanged = {
-                when (it) {
-                    Starting to Ready -> value?.onReady()
-                    Stopping to Stopped -> value?.onStopped()
-                }
-            }
-            field = value
-        }
+class Fcitx(private val context: Context) : LifecycleOwner by JNI {
 
     /**
      * Subscribe this flow to receive event sent from fcitx
@@ -108,20 +93,13 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
         dispatcher.dispatch { setAddonSubConfig("pinyin", "dictmanager", RawConfig(arrayOf())) }
 
     init {
-        if (fcitxState_ != Stopped)
-            throw IllegalAccessException("Fcitx5 is already running!")
+        if (lifecycle.currentState.isAtLeast(Lifecycle.State.DESTROYED))
+            throw IllegalAccessException("Fcitx5 is already created!")
     }
 
-    private companion object JNI {
+    private companion object JNI : LifecycleOwner {
+        private val lifecycleRegistry by lazy { LifecycleRegistry(this) }
 
-        @Volatile
-        private var fcitxState_ = Stopped
-            set(value) {
-                onStateChanged(field to value)
-                field = value
-            }
-
-        private var onStateChanged: (Pair<FcitxState, FcitxState>) -> Unit = {}
 
         private val eventFlow_ =
             MutableSharedFlow<FcitxEvent<*>>(
@@ -246,7 +224,6 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
                 "${event.eventType}[${params.size}]${params.take(10).joinToString()}"
             )
             if (event is FcitxEvent.ReadyEvent) {
-                fcitxState_ = Ready
                 if (Prefs.getInstance().firstRun) {
                     // this method runs in same thread with `startupFcitx`
                     // block it will also block fcitx
@@ -274,8 +251,11 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
 
         // will be called in fcitx main thread
         private fun onReady() {
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
             setCapabilityFlags(CapabilityFlags.DefaultFlags.toLong())
         }
+
+        override fun getLifecycle(): Lifecycle = lifecycleRegistry
     }
 
     val dispatcher = FcitxDispatcher(object : FcitxDispatcher.FcitxController {
@@ -319,26 +299,25 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner {
             exitFcitx()
         }
 
+        override val coroutineContext: CoroutineContext
+            get() = lifecycleScope.coroutineContext
     })
 
-    override fun start() {
-        if (fcitxState_ != Stopped)
+    fun start() {
+        if (!lifecycle.currentState.isAtLeast(Lifecycle.State.DESTROYED))
             return
-        fcitxState_ = Starting
-        GlobalScope.launch(Dispatchers.IO) {
-            // this is fcitx main thread
-            dispatcher.run()
-        }
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+        dispatcher.start()
     }
 
-    override fun stop() {
-        if (fcitxState_ != Ready)
+    fun stop() {
+        if (lifecycle.currentState != Lifecycle.State.STARTED)
             return
-        fcitxState_ = Stopping
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         dispatcher.stop().let {
             Log.w(javaClass.name, "${it.size} runnable not run")
         }
-        fcitxState_ = Stopped
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     }
 
 }

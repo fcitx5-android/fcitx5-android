@@ -1,5 +1,6 @@
 package me.rocka.fcitx5test.ui.main
 
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import me.rocka.fcitx5test.native.Fcitx
@@ -8,8 +9,8 @@ import me.rocka.fcitx5test.utils.appContext
 
 class MainViewModel : ViewModel() {
 
-    val isFcitxInitialized
-        get() = this::fcitx.isInitialized
+    val isFcitxReady
+        get() = this::fcitx.isInitialized && fcitx.lifecycle.currentState == Lifecycle.State.STARTED
 
     val toolbarTitle = MutableLiveData<String>()
 

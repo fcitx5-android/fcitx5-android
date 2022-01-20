@@ -1,33 +1,26 @@
 package me.rocka.fcitx5test.service
 
-import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import android.util.Log
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.whenStarted
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.native.Fcitx
-import me.rocka.fcitx5test.native.FcitxLifecycleObserver
-import me.rocka.fcitx5test.native.FcitxState
 import java.util.concurrent.ConcurrentLinkedQueue
 
-class FcitxDaemon : Service(), CoroutineScope by MainScope() {
-    private val fcitx = Fcitx(this).apply {
-        observer = object : FcitxLifecycleObserver {
-            override fun onReady() {
-                Log.d(javaClass.name, "FcitxDaemon onReady")
-                launch {
+class FcitxDaemon : LifecycleService() {
+    private val fcitx by lazy {
+        Fcitx(this).also {
+            lifecycleScope.launch {
+                it.lifecycle.whenStarted {
                     while (leftoverOnReadyListeners.isNotEmpty())
                         leftoverOnReadyListeners.remove()()
                 }
             }
-
-            override fun onStopped() {
-                Log.d(javaClass.name, "FcitxDaemon onStopped")
-            }
-
         }
     }
 
@@ -43,14 +36,15 @@ class FcitxDaemon : Service(), CoroutineScope by MainScope() {
 
         fun onReady(block: () -> Unit) {
             // if fcitx is ready, call right now
-            if (fcitx.currentState == FcitxState.Ready)
-                launch { block() }
+            if (fcitx.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))
+                lifecycleScope.launch { block() }
             // otherwise save it
             else leftoverOnReadyListeners.add(block)
         }
     }
 
-    override fun onBind(intent: Intent?): IBinder {
+    override fun onBind(intent: Intent): IBinder {
+        super.onBind(intent)
         Log.d(javaClass.name, "FcitxDaemon onBind")
         fcitx.start()
         return FcitxBinder()
@@ -60,5 +54,6 @@ class FcitxDaemon : Service(), CoroutineScope by MainScope() {
         Log.d(javaClass.name, "FcitxDaemon onDestroy")
         fcitx.stop()
         leftoverOnReadyListeners.clear()
+        super.onDestroy()
     }
 }
