@@ -6,7 +6,6 @@ import android.content.ContentResolver
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,6 +27,7 @@ import me.rocka.fcitx5test.ui.common.OnItemChangedListener
 import me.rocka.fcitx5test.ui.main.MainViewModel
 import me.rocka.fcitx5test.utils.queryFileName
 import splitties.systemservices.notificationManager
+import timber.log.Timber
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.measureTimeMillis
@@ -141,6 +141,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                         .setProgress(100, 0, true)
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                 builder.build().let { notificationManager.notify(id, it) }
+                @Suppress("BlockingMethodInNonBlockingContext")
                 val inputStream = contentResolver.openInputStream(uri).bindNullable()
                 runCatching {
                     val result: LibIMEDictionary
@@ -149,7 +150,10 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                             inputStream,
                             file.name
                         )
-                    }.also { Log.d(javaClass.name, "Took $it to import $result") }
+                    }.also {
+                        Timber.tag(this@PinyinDictionaryFragment.javaClass.name)
+                            .d("Took $it to import $result")
+                    }
                     result
                 }
                     .onFailure {
@@ -193,7 +197,8 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                 measureTimeMillis {
                     viewModel.fcitx.reloadPinyinDict()
                 }.let {
-                    Log.d(javaClass.name, "Took $it to reload dict")
+                    Timber.tag(this@PinyinDictionaryFragment.javaClass.name)
+                        .d("Took $it to reload dict")
                 }
                 notificationManager.cancel(id)
                 busy.set(false)
@@ -228,7 +233,6 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
     }
 
     override fun onItemUpdated(idx: Int, old: LibIMEDictionary, new: LibIMEDictionary) {
-        Log.d(javaClass.name, "$old -> $new")
         dirty()
     }
 

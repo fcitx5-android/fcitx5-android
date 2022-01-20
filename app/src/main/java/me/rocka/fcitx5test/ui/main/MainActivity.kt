@@ -2,7 +2,6 @@ package me.rocka.fcitx5test.ui.main
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -15,6 +14,7 @@ import kotlinx.coroutines.runBlocking
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.databinding.ActivityMainBinding
 import me.rocka.fcitx5test.ui.setup.SetupActivity
+import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
 
@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-        Log.d(javaClass.name, "onStop")
+        Timber.d("onStop")
         if (viewModel.isFcitxReady)
         // FIXME
             runBlocking {

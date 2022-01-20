@@ -1,9 +1,9 @@
 package me.rocka.fcitx5test.data
 
-import android.util.Log
 import me.rocka.fcitx5test.data.pinyin.Dictionary
 import me.rocka.fcitx5test.data.pinyin.LibIMEDictionary
 import me.rocka.fcitx5test.utils.appContext
+import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -40,7 +40,7 @@ object PinyinDictManager {
                 file.nameWithoutExtension + ".${Dictionary.Type.LibIME.ext}"
             )
         )
-        Log.i(javaClass.name, "Converted $raw to $new")
+        Timber.d("Converted $raw to $new")
         return new
     }
 
