@@ -2,10 +2,8 @@ package me.rocka.fcitx5test.native
 
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -13,7 +11,9 @@ import kotlinx.coroutines.flow.asSharedFlow
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.data.DataManager
 import me.rocka.fcitx5test.data.Prefs
+import me.rocka.fcitx5test.utils.abusedLifecycleRegistry
 import splitties.resources.str
+import timber.log.Timber
 import kotlin.coroutines.CoroutineContext
 
 class Fcitx(private val context: Context) : LifecycleOwner by JNI {
@@ -93,12 +93,13 @@ class Fcitx(private val context: Context) : LifecycleOwner by JNI {
         dispatcher.dispatch { setAddonSubConfig("pinyin", "dictmanager", RawConfig(arrayOf())) }
 
     init {
-        if (lifecycle.currentState.isAtLeast(Lifecycle.State.DESTROYED))
+        if (lifecycle.currentState.isAtLeast(Lifecycle.State.CREATED))
             throw IllegalAccessException("Fcitx5 is already created!")
     }
 
     private companion object JNI : LifecycleOwner {
-        private val lifecycleRegistry by lazy { LifecycleRegistry(this) }
+
+        private val lifecycleRegistry by lazy { abusedLifecycleRegistry(this) }
 
 
         private val eventFlow_ =
@@ -219,10 +220,13 @@ class Fcitx(private val context: Context) : LifecycleOwner by JNI {
         @JvmStatic
         fun handleFcitxEvent(type: Int, params: Array<Any>) {
             val event = FcitxEvent.create(type, params)
-            Log.d(
-                "FcitxEvent",
-                "${event.eventType}[${params.size}]${params.take(10).joinToString()}"
-            )
+            Timber
+                .tag(Fcitx::class.java.name)
+                .d(
+                    "Event ${event.eventType}[${params.size}]${
+                        params.take(10).joinToString()
+                    }"
+                )
             if (event is FcitxEvent.ReadyEvent) {
                 if (Prefs.getInstance().firstRun) {
                     // this method runs in same thread with `startupFcitx`
@@ -236,7 +240,7 @@ class Fcitx(private val context: Context) : LifecycleOwner by JNI {
 
         // will be called in fcitx main thread
         private fun onFirstRun() {
-            Log.i("Fcitx", "onFirstRun")
+            Timber.i("onFirstRun")
             getFcitxGlobalConfig()?.get("cfg")?.run {
                 get("Behavior")["PreeditEnabledByDefault"].value = "False"
                 setFcitxGlobalConfig(this)
@@ -315,7 +319,7 @@ class Fcitx(private val context: Context) : LifecycleOwner by JNI {
             return
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         dispatcher.stop().let {
-            Log.w(javaClass.name, "${it.size} runnable not run")
+            Timber.w("${it.size} runnable not run")
         }
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     }

@@ -1,7 +1,6 @@
 package me.rocka.fcitx5test.keyboard
 
 import android.content.Intent
-import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.CursorAnchorInfo
@@ -22,6 +21,7 @@ import me.rocka.fcitx5test.native.FcitxEvent
 import me.rocka.fcitx5test.service.FcitxDaemonManager
 import me.rocka.fcitx5test.utils.inputConnection
 import splitties.bitflags.hasFlag
+import timber.log.Timber
 
 class FcitxInputMethodService : LifecycleInputMethodService() {
 
@@ -56,7 +56,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     when (it.code) {
                         '\b'.code -> sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
                         '\r'.code -> handleReturnKey()
-                        else -> Log.d("IMS", it.toString())
+                        else -> Timber.w("Handled unknown ISO Control key event: $it")
                     }
                 } else {
                     sendKeyChar(Char(it.code))
@@ -147,7 +147,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         if (info == null) return
         selectionStart = info.selectionStart
         composingTextStart = info.composingTextStart
-        Log.d("IMS", "AnchorInfo: selStart=$selectionStart cmpStart=$composingTextStart")
+        Timber.d("AnchorInfo: selStart=$selectionStart cmpStart=$composingTextStart")
         info.composingText?.let { composing ->
             // check if cursor inside composing text
             if ((composingTextStart <= selectionStart) and
@@ -186,9 +186,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             if (Prefs.getInstance().ignoreSystemCursor || (cursor < 0)) return
             // when user starts typing and there is no composing text, composingTextStart would be -1
             val p = cursor + composingTextStart
-            Log.d("IMS", "TextWithCursor: p=$p composingStart=$composingTextStart")
+            Timber.d("TextWithCursor: p=$p composingStart=$composingTextStart")
             if (p != selectionStart) {
-                Log.d("IMS", "TextWithCursor: move cursor $p")
+                Timber.d("TextWithCursor: move cursor $p")
                 selectionStart = p
                 setSelection(p, p)
             }
@@ -214,7 +214,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
-        Log.d(javaClass.name, "onUnbind")
+        Timber.d("onUnbind")
         if (this::fcitx.isInitialized && fcitx.lifecycle.currentState == Lifecycle.State.STARTED)
         // FIXME
             runBlocking {

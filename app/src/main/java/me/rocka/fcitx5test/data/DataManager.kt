@@ -1,9 +1,9 @@
 package me.rocka.fcitx5test.data
 
-import android.util.Log
 import me.rocka.fcitx5test.utils.Const
 import me.rocka.fcitx5test.utils.appContext
 import org.json.JSONObject
+import timber.log.Timber
 import java.io.File
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -80,7 +80,7 @@ object DataManager {
                 .getOrThrow()
 
         diff(destDescriptor, bundledDescriptor).forEach {
-            Log.d(javaClass.name, it.toString())
+            Timber.d("Diff: $it")
             when (it) {
                 is Diff.Delete -> deleteFileOrDir(it.key)
                 is Diff.New -> copyFile(it.key)
@@ -90,7 +90,7 @@ object DataManager {
 
         copyFile(Const.dataDescriptorName)
 
-        Log.i(javaClass.name, "Synced!")
+        Timber.i("Synced!")
     }
 
     fun deleteAndSync() {

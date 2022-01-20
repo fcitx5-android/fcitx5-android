@@ -129,6 +129,7 @@ listOf("fcitx5", "fcitx5-chinese-addons").forEach {
 
 
 dependencies {
+    implementation("com.jakewharton.timber:timber:5.0.1")
     implementation("androidx.core:core-ktx:1.7.0")
     implementation("androidx.appcompat:appcompat:1.4.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
