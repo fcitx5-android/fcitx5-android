@@ -3,13 +3,13 @@ package me.rocka.fcitx5test.service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
-import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenStarted
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.native.Fcitx
+import timber.log.Timber
 import java.util.concurrent.ConcurrentLinkedQueue
 
 class FcitxDaemon : LifecycleService() {
@@ -17,6 +17,7 @@ class FcitxDaemon : LifecycleService() {
         Fcitx(this).also {
             lifecycleScope.launch {
                 it.lifecycle.whenStarted {
+                    Timber.tag(this@FcitxDaemon.javaClass.name).d("onReady")
                     while (leftoverOnReadyListeners.isNotEmpty())
                         leftoverOnReadyListeners.remove()()
                 }
@@ -27,7 +28,7 @@ class FcitxDaemon : LifecycleService() {
     private val leftoverOnReadyListeners = ConcurrentLinkedQueue<() -> Unit>()
 
     override fun onCreate() {
-        Log.d(javaClass.name, "FcitxDaemon onCreate")
+        Timber.d("onCreate")
         super.onCreate()
     }
 
@@ -45,13 +46,13 @@ class FcitxDaemon : LifecycleService() {
 
     override fun onBind(intent: Intent): IBinder {
         super.onBind(intent)
-        Log.d(javaClass.name, "FcitxDaemon onBind")
+        Timber.d("onBind")
         fcitx.start()
         return FcitxBinder()
     }
 
     override fun onDestroy() {
-        Log.d(javaClass.name, "FcitxDaemon onDestroy")
+        Timber.d("onDestroy")
         fcitx.stop()
         leftoverOnReadyListeners.clear()
         super.onDestroy()

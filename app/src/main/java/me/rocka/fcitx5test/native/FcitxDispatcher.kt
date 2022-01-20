@@ -1,7 +1,7 @@
 package me.rocka.fcitx5test.native
 
-import android.util.Log
 import kotlinx.coroutines.*
+import timber.log.Timber
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
@@ -15,7 +15,11 @@ import kotlin.system.measureTimeMillis
 class FcitxDispatcher(private val controller: FcitxController) : CoroutineScope by controller {
 
     // this is fcitx main thread
-    private val internalDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+    private val internalDispatcher = Executors.newSingleThreadExecutor {
+        Thread(it).apply {
+            name = "FcitxMain"
+        }
+    }.asCoroutineDispatcher()
 
     interface FcitxController : CoroutineScope {
         fun nativeStartup()
@@ -64,9 +68,9 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineScope 
         get() = _isRunning.get()
 
     fun start() = launch(internalDispatcher) {
-        Log.i(javaClass.name, "Start running")
+        Timber.tag(this@FcitxDispatcher.javaClass.name).i("Start")
         if (_isRunning.compareAndSet(false, true)) {
-            Log.d(javaClass.name, "Calling native startup")
+            Timber.tag(this@FcitxDispatcher.javaClass.name).d("Calling native startup")
             controller.nativeStartup()
         }
         while (isRunning) {
@@ -75,10 +79,8 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineScope 
                 measureTimeMillis {
                     controller.nativeLoopOnce()
                 }.let {
-                    Log.d(
-                        javaClass.name,
-                        "Finishing executing native loop once, took $it ms"
-                    )
+                    Timber.tag(this@FcitxDispatcher.javaClass.name)
+                        .d("Finishing executing native loop once, took $it ms")
                 }
             }
             Watchdog.withWatchdog {
@@ -88,21 +90,26 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineScope 
                         val block = queue.poll() ?: break
                         block.run()
                     }
-                }.let { Log.d(javaClass.name, "Finishing running scheduled jobs, took $it ms") }
+                }.let {
+                    Timber.tag(this@FcitxDispatcher.javaClass.name)
+                        .d("Finishing running scheduled jobs, took $it ms")
+                }
             }
         }
-        Log.i(javaClass.name, "Calling native exit")
+        Timber.tag(this@FcitxDispatcher.javaClass.name).i("Calling native exit")
         controller.nativeExit()
     }
 
 
-    fun stop(): List<Runnable> =
-        if (_isRunning.compareAndSet(true, false)) {
+    fun stop(): List<Runnable> {
+        Timber.i("Stop")
+        return if (_isRunning.compareAndSet(true, false)) {
             cancel()
             val rest = queue.toList()
             queue.clear()
             rest
         } else emptyList()
+    }
 
     private fun dispatch(block: Runnable) {
         queue.offer(block)
