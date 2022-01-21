@@ -10,7 +10,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.native.AddonInfo
 import me.rocka.fcitx5test.native.Fcitx
@@ -29,9 +28,9 @@ class AddonListFragment : Fragment(), OnItemChangedListener<AddonInfo> {
 
     private val ui: CheckBoxListUi<AddonInfo> by lazy {
         CheckBoxListUi(
-            requireContext(),
-            runBlocking {  fcitx.addons().sortedBy { it.uniqueName }},
-            {
+            ctx = requireContext(),
+            initialEntries = listOf(),
+            initCheckBox = {
                 // our addon shouldn't be disabled
                 isEnabled = entries[it].uniqueName != "androidfrontend"
                 isChecked = entries[it].enabled
@@ -39,7 +38,7 @@ class AddonListFragment : Fragment(), OnItemChangedListener<AddonInfo> {
                     ui.updateItem(it, entries[it].copy(enabled = isChecked))
                 }
             },
-            { idx ->
+            initSettingsButton = { idx ->
                 visibility =
                     if (entries[idx].isConfigurable && entries[idx].enabled) View.VISIBLE else View.INVISIBLE
                 setOnClickListener {
@@ -52,7 +51,8 @@ class AddonListFragment : Fragment(), OnItemChangedListener<AddonInfo> {
                     )
                 }
             },
-            { it.displayName })
+            show = { it.displayName }
+        )
     }
 
     private fun updateAddonState() {
@@ -70,6 +70,9 @@ class AddonListFragment : Fragment(), OnItemChangedListener<AddonInfo> {
         savedInstanceState: Bundle?
     ): View {
         viewModel.disableToolbarSaveButton()
+        lifecycleScope.launch {
+            ui.entries = fcitx.addons().sortedBy { it.uniqueName }.toMutableList()
+        }
         return ui.root
     }
 

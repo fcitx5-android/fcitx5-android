@@ -1,9 +1,6 @@
 package me.rocka.fcitx5test.ui.main.settings
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -29,25 +26,17 @@ abstract class FcitxPreferenceFragment : PreferenceFragmentCompat() {
         requireArguments().getString(key)
             ?: throw IllegalStateException("No $key found in bundle")
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        viewModel.enableToolbarSaveButton {
-            lifecycleScope.launch {
-                saveConfig(fcitx, raw["cfg"])
-                Toast.makeText(requireContext(), "Saved", Toast.LENGTH_SHORT).show()
-            }
-        }
-        return super.onCreateView(inflater, container, savedInstanceState)
-    }
-
     final override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         lifecycleScope.launch {
             raw = obtainConfig(fcitx)
             preferenceScreen =
                 PreferenceScreenFactory.create(preferenceManager, parentFragmentManager, raw)
+            viewModel.enableToolbarSaveButton {
+                lifecycleScope.launch {
+                    saveConfig(fcitx, raw["cfg"])
+                    Toast.makeText(requireContext(), "Saved", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
@@ -57,9 +46,10 @@ abstract class FcitxPreferenceFragment : PreferenceFragmentCompat() {
     }
 
     override fun onPause() {
-        lifecycleScope.launch {
-            saveConfig(fcitx, raw["cfg"])
-        }
+        if (this::raw.isInitialized)
+            lifecycleScope.launch {
+                saveConfig(fcitx, raw["cfg"])
+            }
         super.onPause()
     }
 
