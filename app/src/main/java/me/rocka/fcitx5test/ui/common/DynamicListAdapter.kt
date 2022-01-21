@@ -1,5 +1,6 @@
 package me.rocka.fcitx5test.ui.common
 
+import android.annotation.SuppressLint
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
@@ -18,11 +19,12 @@ abstract class DynamicListAdapter<T>(
 ) :
     RecyclerView.Adapter<DynamicListAdapter<T>.ViewHolder>() {
 
-    private val _entries = initialEntries.toMutableList()
-
-    val entries: List<T>
-        // should have use _entries.toList()
-        get() = _entries
+    var entries: MutableList<T> = initialEntries.toMutableList()
+        @SuppressLint("NotifyDataSetChanged")
+        set(value) {
+            field = value.toMutableList()
+            notifyDataSetChanged()
+        }
 
     private var listener: OnItemChangedListener<T>? = null
 
@@ -48,7 +50,7 @@ abstract class DynamicListAdapter<T>(
         ViewHolder(DynamicListEntryUi(parent.context))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = _entries[position]
+        val item = entries[position]
         with(holder) {
             handleImage.visibility = if (enableOrder) View.VISIBLE else View.GONE
             nameText.text = showEntry(item)
@@ -58,18 +60,18 @@ abstract class DynamicListAdapter<T>(
         }
     }
 
-    override fun getItemCount(): Int = _entries.size
+    override fun getItemCount(): Int = entries.size
 
     @CallSuper
-    open fun addItem(idx: Int = _entries.size, item: T) {
-        _entries.add(idx, item)
+    open fun addItem(idx: Int = entries.size, item: T) {
+        entries.add(idx, item)
         notifyItemInserted(idx)
         listener?.onItemAdded(idx, item)
     }
 
     @CallSuper
     open fun removeItem(idx: Int): T {
-        val item = _entries.removeAt(idx)
+        val item = entries.removeAt(idx)
         notifyItemRemoved(idx)
         listener?.onItemRemoved(idx, item)
         return item
@@ -77,15 +79,15 @@ abstract class DynamicListAdapter<T>(
 
     @CallSuper
     open fun swapItem(fromIdx: Int, toIdx: Int) {
-        Collections.swap(_entries, fromIdx, toIdx)
+        Collections.swap(entries, fromIdx, toIdx)
         notifyItemMoved(fromIdx, toIdx)
-        listener?.onItemSwapped(fromIdx, toIdx, _entries[toIdx])
+        listener?.onItemSwapped(fromIdx, toIdx, entries[toIdx])
     }
 
     @CallSuper
     open fun updateItem(idx: Int, item: T) {
-        val old = _entries[idx]
-        _entries[idx] = item
+        val old = entries[idx]
+        entries[idx] = item
         notifyItemChanged(idx)
         listener?.onItemUpdated(idx, old, item)
     }

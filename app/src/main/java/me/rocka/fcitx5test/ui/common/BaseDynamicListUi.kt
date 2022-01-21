@@ -34,10 +34,10 @@ abstract class BaseDynamicListUi<T>(
 ) : Ui,
     DynamicListAdapter<T>(
         initialEntries,
-        mode !is Mode.Immutable,
+        enableAddAndDelete = mode !is Mode.Immutable,
         enableOrder,
         initCheckBox,
-        {},
+        initEditButton = {},
         initSettingsButton
     ) {
 
@@ -45,7 +45,6 @@ abstract class BaseDynamicListUi<T>(
         setImageResource(R.drawable.ic_baseline_plus_24)
         setColorFilter(styledColor(android.R.attr.colorForegroundInverse), PorterDuff.Mode.SRC_IN)
     }
-
 
     sealed class Mode<T> {
         /**
@@ -217,14 +216,12 @@ abstract class BaseDynamicListUi<T>(
 
     }
 
-
     override val root: View = coordinatorLayout {
         add(recyclerView {
             adapter = this@BaseDynamicListUi
             layoutManager = verticalLayoutManager()
-            ItemTouchHelper(DynamicListTouchCallback(this@BaseDynamicListUi)).attachToRecyclerView(
-                this
-            )
+            ItemTouchHelper(DynamicListTouchCallback(this@BaseDynamicListUi))
+                .attachToRecyclerView(this)
 
         }, defaultLParams {
             height = matchParent
@@ -236,6 +233,5 @@ abstract class BaseDynamicListUi<T>(
             margin = dp(16)
         })
     }.also { updateFAB() }
-
 
 }

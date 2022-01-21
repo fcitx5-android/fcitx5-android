@@ -229,7 +229,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     companion object {
-        val isBoundToFcitxDaemon =
-            FcitxDaemonManager.instance.hasConnection(FcitxInputMethodService::javaClass.name)
+        val isBoundToFcitxDaemon: Boolean
+            get() =
+                FcitxDaemonManager.instance.hasConnection(FcitxInputMethodService::javaClass.name)
     }
 }

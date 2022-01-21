@@ -9,7 +9,6 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class FcitxDispatcher(private val controller: FcitxController) : CoroutineScope {
 
@@ -181,7 +180,7 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineScope 
             controller.nativeScheduleEmpty()
     }
 
-    suspend fun <T> dispatch(block: () -> T): T = suspendCoroutine {
+    suspend fun <T> dispatch(block: () -> T): T = suspendCancellableCoroutine {
         dispatchInternal(Runnable {
             it.resume(block())
         })

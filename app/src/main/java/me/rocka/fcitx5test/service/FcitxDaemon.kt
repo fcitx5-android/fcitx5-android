@@ -19,7 +19,7 @@ class FcitxDaemon : LifecycleService() {
                 it.lifecycle.whenStarted {
                     Timber.d("onReady")
                     while (leftoverOnReadyListeners.isNotEmpty())
-                        leftoverOnReadyListeners.remove()()
+                        leftoverOnReadyListeners.remove().invoke()
                 }
             }
         }
