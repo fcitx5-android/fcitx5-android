@@ -46,40 +46,6 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineScope 
     }
 
     // not concurrent
-    object Watchdog : CoroutineScope {
-        private var installed: Job? = null
-        private val dispatcher = Executors.newSingleThreadExecutor {
-            Thread(it).apply {
-                name = "Watchdog"
-            }
-        }.asCoroutineDispatcher()
-
-        fun install() {
-            if (installed != null)
-                throw IllegalStateException("Watchdog has been installed!")
-            installed = launch {
-                delay(JOBS_TIME_LIMIT)
-                throw RuntimeException("Fcitx main thread had been blocked for $JOBS_TIME_LIMIT ms!")
-            }
-        }
-
-        fun teardown() {
-            (installed ?: throw IllegalStateException("Watchdog has not been installed!")).cancel()
-            installed = null
-        }
-
-        inline fun <T> withWatchdog(block: () -> T): T {
-            install()
-            try {
-                return block()
-            } finally {
-                teardown()
-            }
-        }
-
-        override val coroutineContext: CoroutineContext = dispatcher
-    }
-
     inner class AliveChecker(private val period: Long) : CoroutineScope {
         private var installed: Job? = null
         private val dispatcher = Executors.newSingleThreadExecutor {
@@ -134,13 +100,10 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineScope 
                 nativeLoopLock.withLock {
                     controller.nativeLoopOnce()
                 }
-                Watchdog.withWatchdog {
-                    // do scheduled jobs
-                    while (true) {
-                        val block = queue.poll() ?: break
-                        block.run()
-                    }
-
+                // do scheduled jobs
+                while (true) {
+                    val block = queue.poll() ?: break
+                    block.run()
                 }
             }
             exitingLock.withLock {

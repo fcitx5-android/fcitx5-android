@@ -5,9 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
-import me.rocka.fcitx5test.native.Fcitx
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class FcitxDaemonManager {
 

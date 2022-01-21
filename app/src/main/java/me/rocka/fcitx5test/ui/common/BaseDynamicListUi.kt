@@ -1,12 +1,12 @@
 package me.rocka.fcitx5test.ui.common
 
-import android.app.AlertDialog
 import android.content.Context
 import android.graphics.PorterDuff
 import android.view.View
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageButton
+import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.ItemTouchHelper
 import cn.berberman.girls.utils.identity
