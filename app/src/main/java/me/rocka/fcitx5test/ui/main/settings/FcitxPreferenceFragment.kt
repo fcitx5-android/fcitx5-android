@@ -8,6 +8,7 @@ import androidx.preference.PreferenceFragmentCompat
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.native.RawConfig
+import me.rocka.fcitx5test.ui.common.withLoadingDialog
 import me.rocka.fcitx5test.ui.main.MainViewModel
 
 abstract class FcitxPreferenceFragment : PreferenceFragmentCompat() {
@@ -27,7 +28,7 @@ abstract class FcitxPreferenceFragment : PreferenceFragmentCompat() {
             ?: throw IllegalStateException("No $key found in bundle")
 
     final override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        lifecycleScope.launch {
+        lifecycleScope.withLoadingDialog(requireContext()) {
             raw = obtainConfig(fcitx)
             preferenceScreen =
                 PreferenceScreenFactory.create(preferenceManager, parentFragmentManager, raw)
