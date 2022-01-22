@@ -71,17 +71,17 @@ fun Context.ProgressBarDialogIndeterminate(): AlertDialog.Builder {
 
 fun CoroutineScope.withLoadingDialog(
     context: Context,
-    threshold: Long = 500L,
+    threshold: Long = 200L,
     action: suspend () -> Unit
 ) {
     val loading = context.ProgressBarDialogIndeterminate().create()
-    val jobA = launch {
+    val job = launch {
         delay(threshold)
         loading.show()
     }
     launch {
         action()
-        jobA.cancelAndJoin()
+        job.cancelAndJoin()
         if (loading.isShowing)
             loading.dismiss()
     }
