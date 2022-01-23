@@ -8,9 +8,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.resume
 
-class FcitxDispatcher(private val controller: FcitxController) : CoroutineScope {
+class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispatcher() {
 
     class WrappedRunnable(private val runnable: Runnable, private val name: String? = null) :
         Runnable by runnable {
@@ -37,6 +36,8 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineScope 
             name = "FcitxMain"
         }
     }.asCoroutineDispatcher()
+
+    private val internalScope = CoroutineScope(internalDispatcher)
 
     interface FcitxController {
         fun nativeStartup()
@@ -89,7 +90,7 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineScope 
 
     private val aliveChecker = AliveChecker(ALIVE_CHECKER_PERIOD)
 
-    fun start() = launch {
+    fun start() = internalScope.launch {
         Timber.i("Start")
         if (isRunning.compareAndSet(false, true)) {
             Timber.d("Calling native startup")
@@ -143,17 +144,14 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineScope 
             controller.nativeScheduleEmpty()
     }
 
-    suspend fun <T> dispatch(block: () -> T): T = suspendCancellableCoroutine {
-        dispatchInternal(Runnable {
-            it.resume(block())
-        })
-    }
+    suspend fun <T> dispatch(block: () -> T): T = withContext(this) { block() }
 
-    override val coroutineContext: CoroutineContext = internalDispatcher
+    override fun dispatch(context: CoroutineContext, block: Runnable) {
+        this@FcitxDispatcher.dispatchInternal(block)
+    }
 
     companion object {
         const val JOB_WAITING_LIMIT = 2000L
-        const val JOBS_TIME_LIMIT = 5000L
         const val ALIVE_CHECKER_PERIOD = 8000L
     }
 
