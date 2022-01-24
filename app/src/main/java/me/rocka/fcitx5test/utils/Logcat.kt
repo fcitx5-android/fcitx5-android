@@ -5,7 +5,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 @Suppress("BlockingMethodInNonBlockingContext")
-object Logcat : CoroutineScope by CoroutineScope(Dispatchers.IO) {
+class Logcat : CoroutineScope by CoroutineScope(Dispatchers.IO) {
 
     private var process: java.lang.Process? = null
     private var emittingJob: Job? = null
@@ -61,7 +61,7 @@ object Logcat : CoroutineScope by CoroutineScope(Dispatchers.IO) {
      * Destroy the reading process
      */
     fun shutdownLogFlow() {
-        process?.destroy() ?: throw IllegalStateException("Logcat process already created!")
+        process?.destroy()
         emittingJob?.cancel()
     }
 }
