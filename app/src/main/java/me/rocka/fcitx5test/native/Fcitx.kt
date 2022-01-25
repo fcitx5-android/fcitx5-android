@@ -256,7 +256,8 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
             setCapabilityFlags(CapabilityFlags.DefaultFlags.toLong())
         }
 
-        override val lifecycle: FcitxLifecycle = lifecycleRegistry
+        override val lifecycle: FcitxLifecycle
+            get() = lifecycleRegistry
     }
 
     val dispatcher = FcitxDispatcher(object : FcitxDispatcher.FcitxController {
