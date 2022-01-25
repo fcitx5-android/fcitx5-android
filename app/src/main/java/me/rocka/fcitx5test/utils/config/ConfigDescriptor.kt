@@ -140,7 +140,6 @@ sealed class ConfigDescriptor<T, U> : Serializable {
         private val RawConfig.intMax
             get() = findByName("IntMax")?.value?.toInt()
 
-
         sealed class ParseException : Exception() {
             data class NoTypeExist(val config: RawConfig) : ParseException()
             data class TypeNoParse(val sup: ConfigType.Companion.UnknownConfigTypeException) :

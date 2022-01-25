@@ -10,8 +10,8 @@ import java.lang.ref.WeakReference
 
 object FcitxDaemonManager {
 
-    private val connections: HashMap<String,
-            Pair<WeakReference<Context>, FcitxDaemonConnection>> = hashMapOf()
+    private val connections:
+            HashMap<String, Pair<WeakReference<Context>, FcitxDaemonConnection>> = hashMapOf()
 
     abstract class FcitxDaemonConnection : ServiceConnection {
         lateinit var service: FcitxDaemon.FcitxBinder

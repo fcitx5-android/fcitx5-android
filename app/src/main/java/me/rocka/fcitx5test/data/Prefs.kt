@@ -29,7 +29,6 @@ class Prefs(private val sharedPreferences: SharedPreferences) {
 
         }
 
-
     var firstRun by preference(FirstRun, true)
     var ignoreSystemCursor by preference(IgnoreSystemCursor, true)
     var hideKeyConfig by preference(HideKeyConfig, true)
@@ -41,7 +40,6 @@ class Prefs(private val sharedPreferences: SharedPreferences) {
         const val HideKeyConfig = "hide_key_config"
         const val ButtonHapticFeedback = "button_haptic_feedback"
     }
-
 
     companion object {
         private var instance: Prefs? = null

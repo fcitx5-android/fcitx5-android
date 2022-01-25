@@ -15,7 +15,6 @@ import splitties.views.dsl.core.*
 import splitties.views.dsl.core.styles.AndroidStyles
 import splitties.views.gravityCenter
 
-
 @Suppress("FunctionName")
 fun <T> Context.DynamicListUi(
     mode: BaseDynamicListUi.Mode<T>,

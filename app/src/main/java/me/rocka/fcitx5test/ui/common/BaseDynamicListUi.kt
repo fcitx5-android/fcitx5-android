@@ -23,7 +23,6 @@ import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.gravityEndBottom
 import splitties.views.recyclerview.verticalLayoutManager
 
-
 abstract class BaseDynamicListUi<T>(
     override val ctx: Context,
     private val mode: Mode<T>,

@@ -25,7 +25,6 @@ fun View.allChildren(): List<View> {
     return result.toList()
 }
 
-
 val InputMethodService.inputConnection: InputConnection?
     get() = currentInputConnection
 
@@ -34,7 +33,6 @@ fun ViewPager2.getCurrentFragment(fragmentManager: FragmentManager): Fragment? =
 
 val appContext: Context
     get() = FcitxApplication.getInstance().applicationContext
-
 
 fun Uri.queryFileName(contentResolver: ContentResolver) =
     contentResolver.query(

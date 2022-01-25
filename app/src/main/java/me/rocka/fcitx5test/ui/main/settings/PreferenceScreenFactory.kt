@@ -42,7 +42,6 @@ object PreferenceScreenFactory {
         return screen
     }
 
-
     private fun general(
         context: Context,
         fragmentManager: FragmentManager,
@@ -176,6 +175,5 @@ object PreferenceScreenFactory {
             )
         }
     }
-
 
 }

@@ -55,7 +55,6 @@ class InputMethodListFragment : ProgressFragment(), OnItemChangedListener<InputM
         return ui.root
     }
 
-
     override fun onResume() {
         super.onResume()
         viewModel.disableToolbarSaveButton()

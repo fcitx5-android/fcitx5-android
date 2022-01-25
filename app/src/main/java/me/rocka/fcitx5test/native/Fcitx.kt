@@ -71,7 +71,6 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         setFcitxInputMethodConfig(key, config)
     }
 
-
     suspend fun addons() = dispatcher.dispatch { getFcitxAddons() ?: arrayOf() }
     suspend fun setAddonState(name: Array<String>, state: BooleanArray) =
         dispatcher.dispatch { setFcitxAddonState(name, state) }
@@ -96,7 +95,6 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
     }
 
     private companion object JNI : FcitxLifecycleOwner {
-
 
         private val lifecycleRegistry by lazy { FcitxLifecycleRegistry() }
 

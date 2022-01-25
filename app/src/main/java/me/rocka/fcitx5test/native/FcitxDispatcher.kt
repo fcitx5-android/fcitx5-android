@@ -76,7 +76,6 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
             installed = null
         }
 
-
         override val coroutineContext: CoroutineContext = dispatcher
     }
 
@@ -115,7 +114,6 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
             }
         }
     }
-
 
     // blocking until stopped
     fun stop(): List<Runnable> {

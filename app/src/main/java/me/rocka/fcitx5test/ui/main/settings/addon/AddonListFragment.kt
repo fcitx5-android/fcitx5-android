@@ -31,7 +31,6 @@ class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
         }
     }
 
-
     override suspend fun initialize(): View {
         ui = requireContext().CheckBoxListUi(
             initialEntries = fcitx.addons().sortedBy { it.uniqueName },

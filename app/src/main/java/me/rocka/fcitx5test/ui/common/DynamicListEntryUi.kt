@@ -17,7 +17,6 @@ import splitties.views.imageResource
 import splitties.views.setPaddingDp
 import splitties.views.textAppearance
 
-
 class DynamicListEntryUi(override val ctx: Context) : Ui {
 
     val handleImage = imageView {

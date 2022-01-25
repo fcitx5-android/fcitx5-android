@@ -19,7 +19,6 @@ import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
 
-
     private val viewModel: MainViewModel by viewModels()
 
     private lateinit var navHostFragment: NavHostFragment

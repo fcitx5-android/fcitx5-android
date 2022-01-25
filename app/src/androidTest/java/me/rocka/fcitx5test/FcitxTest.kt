@@ -16,7 +16,6 @@ import org.junit.*
 
 class FcitxTest {
 
-
     private companion object {
 
         lateinit var fcitx: Fcitx
@@ -132,6 +131,5 @@ class FcitxTest {
         log("after second reset: ${fcitx.isEmpty()}")
         Assert.assertEquals(true, fcitx.isEmpty())
     }
-
 
 }

@@ -1,6 +1,5 @@
 package me.rocka.fcitx5test.ui.common
 
-
 /**
  * Functions are called after the container changed
  */

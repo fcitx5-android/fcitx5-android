@@ -221,7 +221,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         return super.onUnbind(intent)
     }
 
-
     override fun onDestroy() {
         FcitxDaemonManager.unbind(javaClass.name)
         eventHandlerJob?.cancel()
@@ -231,7 +230,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     companion object {
         val isBoundToFcitxDaemon: Boolean
-            get() =
-                FcitxDaemonManager.hasConnection(FcitxInputMethodService::javaClass.name)
+            get() = FcitxDaemonManager.hasConnection(FcitxInputMethodService::javaClass.name)
     }
 }
