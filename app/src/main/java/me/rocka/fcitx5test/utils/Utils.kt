@@ -45,8 +45,3 @@ fun Uri.queryFileName(contentResolver: ContentResolver) =
         it.moveToFirst()
         it.getString(index)
     }
-
-@SuppressLint("VisibleForTests")
-// unrelated to Android components
-// no need to be interacted on Android main thread
-fun abusedLifecycleRegistry(owner: LifecycleOwner) = LifecycleRegistry.createUnsafe(owner)
