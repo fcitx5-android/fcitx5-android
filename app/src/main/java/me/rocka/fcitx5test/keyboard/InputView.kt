@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Build
 import android.util.DisplayMetrics
 import android.view.Gravity
-import android.view.View
 import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.PopupWindow
@@ -13,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
-import me.rocka.fcitx5test.databinding.KeyboardPreeditBinding
 import me.rocka.fcitx5test.keyboard.layout.BaseKeyboard
 import me.rocka.fcitx5test.keyboard.layout.KeyAction
 import me.rocka.fcitx5test.keyboard.layout.NumberKeyboard
@@ -26,7 +24,6 @@ import splitties.dimensions.dp
 import splitties.resources.str
 import splitties.resources.styledColor
 import splitties.systemservices.inputMethodManager
-import splitties.systemservices.layoutInflater
 import splitties.systemservices.windowManager
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
@@ -45,13 +42,13 @@ class InputView(
     private val themedContext = context.withTheme(R.style.Theme_AppCompat_DayNight)
 
     private var currentIme = InputMethodEntry(service.str(R.string._not_available_))
-    private var cachedPreedit = PreeditContent(
+    private val cachedPreedit = PreeditContent(
         FcitxEvent.PreeditEvent.Data("", "", 0),
         FcitxEvent.InputPanelAuxEvent.Data("", "")
     )
-    private val preeditBinding = KeyboardPreeditBinding.inflate(themedContext.layoutInflater)
-    private var preeditPopup = PopupWindow(
-        preeditBinding.root,
+    private val preeditUi = PreeditUi(themedContext)
+    private val preeditPopup = PopupWindow(
+        preeditUi.root,
         WindowManager.LayoutParams.MATCH_PARENT,
         WindowManager.LayoutParams.WRAP_CONTENT
     ).apply {
@@ -59,16 +56,19 @@ class InputView(
         isClippingEnabled = false
     }
 
-    private var candidateViewAdp = CandidateViewAdapter {
-        service.lifecycleScope.launch { fcitx.select(it) }
+    private val candidateViewAdp = object : CandidateViewAdapter() {
+        override fun onTouchDown() = currentKeyboard.haptic()
+        override fun onSelect(idx: Int) {
+            service.lifecycleScope.launch { fcitx.select(idx) }
+        }
     }
-    private var candidateView = themedContext.view(::RecyclerView, R.id.candidate_list) {
+    private val candidateView = themedContext.view(::RecyclerView, R.id.candidate_list) {
         backgroundColor = styledColor(android.R.attr.colorBackground)
         layoutManager = LinearLayoutManager(null, RecyclerView.HORIZONTAL, false)
         adapter = candidateViewAdp
     }
 
-    private var keyboards: HashMap<String, BaseKeyboard> = hashMapOf(
+    private val keyboards: HashMap<String, BaseKeyboard> = hashMapOf(
         "qwerty" to TextKeyboard(themedContext),
         "number" to NumberKeyboard(themedContext)
     )
@@ -157,11 +157,11 @@ class InputView(
         val hasStart = start.isNotEmpty()
         val hasEnd = end.isNotEmpty()
         currentKeyboard.onPreeditChange(service.editorInfo, content)
-        preeditBinding.run {
-            keyboardPreeditText.alpha = if (hasStart) 1f else 0f
-            keyboardPreeditAfterText.alpha = if (hasEnd) 1f else 0f
-            keyboardPreeditText.text = start
-            keyboardPreeditAfterText.text = end
+        preeditUi.run {
+            before.alpha = if (hasStart) 1f else 0f
+            after.alpha = if (hasEnd) 1f else 0f
+            before.text = start
+            after.text = end
         }
         preeditPopup.run {
             if ((!hasStart) && (!hasEnd)) {
@@ -170,7 +170,7 @@ class InputView(
             }
             val widthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY)
             val heightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
-            val height = preeditBinding.root.run {
+            val height = preeditUi.root.run {
                 measure(widthSpec, heightSpec)
                 measuredHeight
             }

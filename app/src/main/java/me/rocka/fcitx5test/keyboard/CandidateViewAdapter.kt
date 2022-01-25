@@ -1,17 +1,21 @@
 package me.rocka.fcitx5test.keyboard
 
 import android.annotation.SuppressLint
-import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import me.rocka.fcitx5test.R
+import splitties.dimensions.dp
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.wrapContent
+import splitties.views.gravityVerticalCenter
+import splitties.views.horizontalPadding
 
-class CandidateViewAdapter(val onSelect: (Int) -> Unit) :
-    RecyclerView.Adapter<CandidateViewAdapter.CandidateItemHolder>() {
-    class CandidateItemHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var textView: TextView = itemView.findViewById(R.id.candidate_item_text)
+abstract class CandidateViewAdapter :
+    RecyclerView.Adapter<CandidateViewAdapter.ViewHolder>() {
+    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val textView = itemView as TextView
         var idx = -1
     }
 
@@ -22,17 +26,33 @@ class CandidateViewAdapter(val onSelect: (Int) -> Unit) :
             notifyDataSetChanged()
         }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CandidateItemHolder {
-        val v = LayoutInflater.from(parent.context).inflate(R.layout.candidate_item, parent, false)
-        return CandidateItemHolder(v).apply {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = parent.context.textView {
+            layoutParams = ViewGroup.LayoutParams(wrapContent, dp(40))
+            gravity = gravityVerticalCenter
+            horizontalPadding = dp(10)
+            textSize = 20f // sp
+        }
+        return ViewHolder(view).apply {
             itemView.setOnClickListener { onSelect(this.idx) }
+            itemView.setOnTouchListener { v, event ->
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> onTouchDown()
+                    MotionEvent.ACTION_BUTTON_PRESS -> v.performClick()
+                }
+                false
+            }
         }
     }
 
-    override fun onBindViewHolder(holder: CandidateItemHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.textView.text = candidates[position]
         holder.idx = position
     }
 
     override fun getItemCount() = candidates.size
+
+    abstract fun onTouchDown()
+
+    abstract fun onSelect(idx: Int)
 }
