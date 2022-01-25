@@ -329,10 +329,7 @@ public:
     }
 
     void exit() {
-        p_dispatcher->schedule([this]() {
-            p_dispatcher->detach();
-//            p_instance->exit();
-        });
+        p_dispatcher->detach();
         resetGlobalPointers();
     }
 
