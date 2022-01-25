@@ -33,7 +33,7 @@ abstract class BaseKeyboard(
 ) : ConstraintLayout(context) {
 
     fun interface KeyActionListener {
-        fun onKeyAction(view: View, action: KeyAction<*>)
+        fun onKeyAction(action: KeyAction<*>)
     }
 
     var keyActionListener: KeyActionListener? = null
@@ -43,51 +43,54 @@ abstract class BaseKeyboard(
             backgroundColor = styledColor(android.R.attr.colorBackground)
             val keyRows = keyLayout.map { row ->
                 val keyButtons = row.map { key ->
-                    createButton(context, key).apply {
+                    createButton(context, key).apply Button@{
                         setOnClickListener {
-                            haptic(false)
                             if (key is IPressKey)
-                                onAction(it, key.onPress())
+                                onAction(key.onPress())
                         }
                         setOnLongClickListener {
-                            haptic(true)
                             when (key) {
                                 is ILongPressKey -> {
-                                    onAction(it, key.onLongPress())
+                                    onAction(key.onLongPress())
                                     true
                                 }
                                 is IRepeatKey -> {
-                                    onAction(it, key.onHold())
+                                    onAction(key.onHold())
                                     true
                                 }
                                 else -> false
                             }
                         }
                         setupOnGestureListener(object : MyOnGestureListener() {
-
-                            override fun onDoubleTap(): Boolean {
-                                return if (key is CapsKey) {
-                                    onAction(this@apply, KeyAction.CapsAction(true))
-                                    true
-                                } else false
+                            override fun onDown(e: MotionEvent?): Boolean {
+                                haptic()
+                                return false
                             }
 
-                            override fun onSwipeDown(): Boolean {
-                                return if (key is AltTextKey) {
-                                    haptic(false)
-                                    onAction(this@apply, key.onLongPress())
+                            override fun onDoubleTap() = when (key) {
+                                is IDoublePressKey -> {
+                                    haptic()
+                                    onAction(key.onDoublePress())
                                     true
-                                } else false
+                                }
+                                else -> false
+                            }
+
+                            override fun onSwipeDown() = when (key) {
+                                is ILongPressKey -> {
+                                    onAction(key.onLongPress())
+                                    true
+                                }
+                                else -> false
                             }
 
                             override fun onRawTouchEvent(motionEvent: MotionEvent): Boolean {
-                                if (key is IRepeatKey) {
-                                    when (motionEvent.action) {
-                                        MotionEvent.ACTION_BUTTON_PRESS -> this@apply.performClick()
-                                        MotionEvent.ACTION_UP -> onAction(
-                                            this@apply,
-                                            key.onRelease()
-                                        )
+                                when (key) {
+                                    is IRepeatKey -> {
+                                        when (motionEvent.action) {
+                                            MotionEvent.ACTION_BUTTON_PRESS -> this@Button.performClick()
+                                            MotionEvent.ACTION_UP -> onAction(key.onRelease())
+                                        }
                                     }
                                 }
                                 return false
@@ -150,15 +153,14 @@ abstract class BaseKeyboard(
             }
             padding = 0
             elevation = dp(2f)
+            isHapticFeedbackEnabled = false
         }
     }
 
-    private fun haptic(long: Boolean) {
-
+    fun haptic() {
         if (Prefs.getInstance().buttonHapticFeedback)
             performHapticFeedback(
-                if (!long)
-                    KEYBOARD_TAP else LONG_PRESS,
+                KEYBOARD_TAP,
                 FLAG_IGNORE_GLOBAL_SETTING or FLAG_IGNORE_VIEW_SETTING
             )
     }
@@ -180,8 +182,8 @@ abstract class BaseKeyboard(
     }
 
     @CallSuper
-    open fun onAction(view: View, action: KeyAction<*>) {
-        keyActionListener?.onKeyAction(view, action)
+    open fun onAction(action: KeyAction<*>) {
+        keyActionListener?.onKeyAction(action)
     }
 
     open fun onAttach(info: EditorInfo? = null) {

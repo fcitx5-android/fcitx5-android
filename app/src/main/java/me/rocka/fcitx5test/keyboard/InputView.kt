@@ -75,8 +75,8 @@ class InputView(
     private var currentKeyboardName = ""
     private val currentKeyboard: BaseKeyboard get() = keyboards.getValue(currentKeyboardName)
 
-    private val keyActionListener = BaseKeyboard.KeyActionListener { view, action ->
-        onAction(view, action)
+    private val keyActionListener = BaseKeyboard.KeyActionListener { action ->
+        onAction(action)
     }
 
     init {
@@ -130,7 +130,7 @@ class InputView(
         }
     }
 
-    private fun onAction(view: View, action: KeyAction<*>) = service.lifecycleScope.launch {
+    private fun onAction(action: KeyAction<*>) = service.lifecycleScope.launch {
         when (action) {
             is KeyAction.FcitxKeyAction -> fcitx.sendKey(action.act)
             is KeyAction.CommitAction -> {

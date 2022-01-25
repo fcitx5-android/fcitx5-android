@@ -1,7 +1,6 @@
 package me.rocka.fcitx5test.keyboard.layout
 
 import android.content.Context
-import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.ImageButton
@@ -82,7 +81,7 @@ class TextKeyboard(
     var lastCapsState: CapsState? = null
         private set
 
-    override fun onAction(view: View, action: KeyAction<*>) {
+    override fun onAction(action: KeyAction<*>) {
         when (action) {
             is KeyAction.FcitxKeyAction -> transformKeyAction(action)
             is KeyAction.CapsAction -> {
@@ -94,7 +93,7 @@ class TextKeyboard(
             else -> {
             }
         }
-        super.onAction(view, action)
+        super.onAction(action)
     }
 
     private fun transformKeyAction(action: KeyAction.FcitxKeyAction) {

@@ -14,6 +14,10 @@ interface ILongPressKey : IPressKey {
     fun onLongPress(): KeyAction<*>
 }
 
+interface IDoublePressKey : IPressKey {
+    fun onDoublePress(): KeyAction<*>
+}
+
 interface IRepeatKey : IKeyBehavior {
     fun onHold(): KeyAction<*>
     fun onRelease(): KeyAction<*>
@@ -77,8 +81,9 @@ open class AltTextKey(
 open class CapsKey(
     override val src: Int = R.drawable.ic_baseline_keyboard_capslock0_24,
     override val id: Int = R.id.button_caps
-) : BaseKey(0.15f), IPressKey, IImageKey, IKeyId {
+) : BaseKey(0.15f), IDoublePressKey, IImageKey, IKeyId {
     override fun onPress() = KeyAction.CapsAction(false)
+    override fun onDoublePress() = KeyAction.CapsAction(true)
 }
 
 open class BackspaceKey(
