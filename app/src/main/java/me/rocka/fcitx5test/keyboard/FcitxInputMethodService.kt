@@ -39,8 +39,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private var fcitxCursor = -1
 
     override fun onCreate() {
-        FcitxDaemonManager.instance.bindFcitxDaemonAsync(this, javaClass.name) {
-            fcitx = getFcitxInstance()
+        FcitxDaemonManager.bindFcitxDaemon(javaClass.name, this) {
+            fcitx = getFcitxDaemon().fcitx
         }
         super.onCreate()
     }
@@ -108,11 +108,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onCreateInputView(): View {
-        if (eventHandlerJob == null) {
-            eventHandlerJob = fcitx.eventFlow.onEach {
-                handleFcitxEvent(it)
-            }.launchIn(lifecycleScope)
-        }
+        if (eventHandlerJob == null)
+            eventHandlerJob = fcitx
+                .eventFlow
+                .onEach { handleFcitxEvent(it) }
+                .launchIn(lifecycleScope)
         inputView = InputView(this, fcitx)
         return inputView
     }
@@ -223,7 +223,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
 
     override fun onDestroy() {
-        FcitxDaemonManager.instance.unbind(this, javaClass.name)
+        FcitxDaemonManager.unbind(javaClass.name)
+        eventHandlerJob?.cancel()
         eventHandlerJob = null
         super.onDestroy()
     }
@@ -231,6 +232,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     companion object {
         val isBoundToFcitxDaemon: Boolean
             get() =
-                FcitxDaemonManager.instance.hasConnection(FcitxInputMethodService::javaClass.name)
+                FcitxDaemonManager.hasConnection(FcitxInputMethodService::javaClass.name)
     }
 }

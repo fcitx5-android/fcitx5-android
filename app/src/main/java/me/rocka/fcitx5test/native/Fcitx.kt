@@ -2,26 +2,24 @@ package me.rocka.fcitx5test.native
 
 import android.content.Context
 import android.os.Build
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.data.DataManager
 import me.rocka.fcitx5test.data.Prefs
-import me.rocka.fcitx5test.utils.abusedLifecycleRegistry
 import splitties.resources.str
 import timber.log.Timber
 
-class Fcitx(private val context: Context) : LifecycleOwner by JNI {
+class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
     /**
      * Subscribe this flow to receive event sent from fcitx
      */
     val eventFlow = eventFlow_.asSharedFlow()
 
-    val isReady = lifecycle.currentState == Lifecycle.State.STARTED
+    val isReady
+        get() = lifecycle.currentState == FcitxLifecycle.State.READY
 
     suspend fun save() = dispatcher.dispatch { saveFcitxState() }
     suspend fun sendKey(key: String) = dispatcher.dispatch { sendKeyToFcitxString(key) }
@@ -93,14 +91,14 @@ class Fcitx(private val context: Context) : LifecycleOwner by JNI {
         dispatcher.dispatch { setAddonSubConfig("pinyin", "dictmanager", RawConfig(arrayOf())) }
 
     init {
-        if (lifecycle.currentState.isAtLeast(Lifecycle.State.CREATED))
+        if (lifecycle.currentState != FcitxLifecycle.State.STOPPED)
             throw IllegalAccessException("Fcitx5 is already created!")
     }
 
-    private companion object JNI : LifecycleOwner {
+    private companion object JNI : FcitxLifecycleOwner {
 
-        private val lifecycleRegistry by lazy { abusedLifecycleRegistry(this) }
 
+        private val lifecycleRegistry by lazy { FcitxLifecycleRegistry() }
 
         private val eventFlow_ =
             MutableSharedFlow<FcitxEvent<*>>(
@@ -254,11 +252,11 @@ class Fcitx(private val context: Context) : LifecycleOwner by JNI {
 
         // will be called in fcitx main thread
         private fun onReady() {
-            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+            lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_READY)
             setCapabilityFlags(CapabilityFlags.DefaultFlags.toLong())
         }
 
-        override fun getLifecycle(): Lifecycle = lifecycleRegistry
+        override val lifecycle: FcitxLifecycle = lifecycleRegistry
     }
 
     val dispatcher = FcitxDispatcher(object : FcitxDispatcher.FcitxController {
@@ -280,6 +278,7 @@ class Fcitx(private val context: Context) : LifecycleOwner by JNI {
                     @Suppress("DEPRECATION")
                     resources.configuration.locale.run { "${language}_${country}:$language" }
                 }
+                Timber.i("Current locale is $locale")
                 val externalFilesDir = getExternalFilesDir(null)!!
                 startupFcitx(
                     locale,
@@ -305,26 +304,26 @@ class Fcitx(private val context: Context) : LifecycleOwner by JNI {
     })
 
     fun start() {
-        if (!lifecycle.currentState.isAtLeast(Lifecycle.State.DESTROYED)) {
-            Timber.w("Skip starting fcitx: not at destroyed state!")
+        if (lifecycle.currentState != FcitxLifecycle.State.STOPPED) {
+            Timber.w("Skip starting fcitx: not at stopped state!")
             return
         }
-        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+        lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_START)
         dispatcher.start()
     }
 
     fun stop() {
-        if (lifecycle.currentState != Lifecycle.State.STARTED) {
-            Timber.w("Skip stopping fcitx: not at started state!")
+        if (lifecycle.currentState != FcitxLifecycle.State.READY) {
+            Timber.w("Skip stopping fcitx: not at ready state!")
             return
         }
-        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_STOP)
         Timber.i("stop")
         dispatcher.stop().let {
             if (it.isNotEmpty())
                 Timber.w("${it.size} job(s) didn't get a chance to run!")
         }
-        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_STOPPED)
     }
 
 }

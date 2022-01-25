@@ -2,9 +2,10 @@ package me.rocka.fcitx5test.ui.main
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.native.Fcitx
 import me.rocka.fcitx5test.service.FcitxDaemonManager
-import me.rocka.fcitx5test.utils.appContext
 import timber.log.Timber
 
 class MainViewModel : ViewModel() {
@@ -32,13 +33,13 @@ class MainViewModel : ViewModel() {
 
     init {
         Timber.d("init")
-        FcitxDaemonManager.instance.bindFcitxDaemonAsync(appContext, javaClass.name) {
-            fcitx = getFcitxInstance()
+        FcitxDaemonManager.bindFcitxDaemon(javaClass.name) {
+            fcitx = getFcitxDaemon().fcitx
         }
     }
 
     override fun onCleared() {
         Timber.d("onCleared")
-        FcitxDaemonManager.instance.unbind(appContext, javaClass.name)
+        FcitxDaemonManager.unbind(javaClass.name)
     }
 }

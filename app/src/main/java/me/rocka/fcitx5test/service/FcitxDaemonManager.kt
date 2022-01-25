@@ -5,23 +5,31 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
+import me.rocka.fcitx5test.utils.appContext
+import java.lang.ref.WeakReference
 
-class FcitxDaemonManager {
+object FcitxDaemonManager {
 
-    private val connections: HashMap<String, ServiceConnection> = hashMapOf()
+    private val connections: HashMap<String,
+            Pair<WeakReference<Context>, FcitxDaemonConnection>> = hashMapOf()
 
-    fun bindFcitxDaemonAsync(
-        context: Context,
+    abstract class FcitxDaemonConnection : ServiceConnection {
+        lateinit var service: FcitxDaemon.FcitxBinder
+    }
+
+    fun bindFcitxDaemon(
         name: String,
+        context: Context = appContext,
         onDisconnected: () -> Unit = {},
         onConnected: FcitxDaemon.FcitxBinder.() -> Unit
-    ): ServiceConnection {
+    ): ServiceConnection = synchronized(connections) {
         if (connections.containsKey(name))
-            return connections.getValue(name)
+            return connections.getValue(name).second.also { onConnected(it.service) }
         else {
-            val connection = object : ServiceConnection {
+            val connection = object : FcitxDaemonConnection() {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-                    onConnected(service as FcitxDaemon.FcitxBinder)
+                    this.service = service as FcitxDaemon.FcitxBinder
+                    onConnected(service)
                 }
 
                 override fun onServiceDisconnected(name: ComponentName?) {
@@ -33,19 +41,24 @@ class FcitxDaemonManager {
                 Intent(context, FcitxDaemon::class.java),
                 connection, Context.BIND_AUTO_CREATE
             )
-            connections[name] = connection
+            connections[name] = WeakReference(context) to connection
             return connection
         }
     }
 
-    fun unbind(context: Context, name: String) {
-        connections.remove(name)?.let {
-            context.unbindService(it)
+    fun unbind(name: String) = synchronized(connections) {
+        connections.remove(name)?.let { (contextRef, connection) ->
+            val context = contextRef.get()
+            requireNotNull(context)
+            context.unbindService(connection)
         }
     }
 
-    fun unbindAll(context: Context) {
-        connections.forEach { (_, connection) ->
+    fun unbindAll() = synchronized(connections) {
+        connections.forEach { (_, entry) ->
+            val (contextRef, connection) = entry
+            val context = contextRef.get()
+            requireNotNull(context)
             context.unbindService(connection)
         }
         connections.clear()
@@ -53,8 +66,4 @@ class FcitxDaemonManager {
 
     fun hasConnection(name: String) = name in connections
 
-    companion object {
-        // for thread safety, this class shouldn't be used concurrently
-        val instance by lazy { FcitxDaemonManager() }
-    }
 }
