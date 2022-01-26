@@ -13,7 +13,6 @@ import me.rocka.fcitx5test.R
 import splitties.dimensions.dp
 import splitties.views.dsl.core.*
 import splitties.views.dsl.core.styles.AndroidStyles
-import splitties.views.gravityCenter
 
 @Suppress("FunctionName")
 fun <T> Context.DynamicListUi(
@@ -55,14 +54,13 @@ fun Context.ProgressBarDialogIndeterminate(): AlertDialog.Builder {
     val androidStyles = AndroidStyles(this)
     return AlertDialog.Builder(this)
         .setTitle(R.string.loading)
-        .setView(frameLayout {
+        .setView(verticalLayout {
             add(androidStyles.progressBar.horizontal {
                 isIndeterminate = true
             }, lParams {
                 width = matchParent
-                height = wrapContent
-                gravity = gravityCenter
-                horizontalMargin = dp(18)
+                verticalMargin = dp(20)
+                horizontalMargin = dp(26)
             })
         })
         .setCancelable(false)
