@@ -15,6 +15,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NotificationCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import cn.berberman.girls.utils.maybe.Maybe
 import cn.berberman.girls.utils.maybe.fx
 import kotlinx.coroutines.*
@@ -32,8 +33,7 @@ import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.measureTimeMillis
 
-class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDictionary>,
-    CoroutineScope by CoroutineScope(Dispatchers.IO + SupervisorJob()) {
+class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDictionary> {
 
     private val viewModel: MainViewModel by activityViewModels()
 
@@ -118,7 +118,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
     }
 
     private fun importFromUri(uri: Uri) =
-        launch {
+        lifecycleScope.launch(Dispatchers.IO) {
             val id = IMPORT_ID++
             Maybe.fx {
                 val file = uri.queryFileName(contentResolver).bindNullable().let { File(it) }
@@ -167,7 +167,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
         }
 
     private fun errorDialog(message: String) {
-        launch(Dispatchers.Main) {
+        lifecycleScope.launch {
             AlertDialog.Builder(requireContext())
                 .setTitle(R.string.import_error)
                 .setMessage(message)
@@ -180,7 +180,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
     private fun reloadDict() {
         if (!dirty.get())
             return
-        launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.IO) {
             if (busy.compareAndSet(false, true)) {
                 val builder = NotificationCompat.Builder(requireContext(), CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_baseline_library_books_24)
@@ -203,7 +203,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
 
     private fun dirty() {
         if (dirty.compareAndSet(false, true)) {
-            launch(Dispatchers.Main) {
+            lifecycleScope.launch {
                 viewModel.enableToolbarSaveButton { reloadDict() }
             }
         }
@@ -211,7 +211,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
 
     private fun clean() {
         if (dirty.compareAndSet(true, false)) {
-            launch(Dispatchers.Main) {
+            lifecycleScope.launch {
                 viewModel.disableToolbarSaveButton()
             }
         }
@@ -233,11 +233,6 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
     override fun onPause() {
         reloadDict()
         super.onPause()
-    }
-
-    override fun onDestroy() {
-        coroutineContext.cancel()
-        super.onDestroy()
     }
 
     companion object {
