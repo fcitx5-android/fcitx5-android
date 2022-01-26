@@ -31,6 +31,7 @@ import splitties.systemservices.notificationManager
 import timber.log.Timber
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.properties.Delegates
 import kotlin.system.measureTimeMillis
 
 class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDictionary> {
@@ -45,7 +46,16 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
 
     private lateinit var launcher: ActivityResultLauncher<String>
 
-    private val dirty: AtomicBoolean = AtomicBoolean(false)
+    private val beforeReload: MutableMap<String, Boolean> = mutableMapOf()
+    private var dirty by Delegates.observable(false) { _, old, new ->
+        if (old != new)
+            lifecycleScope.launch {
+                if (new)
+                    viewModel.enableToolbarSaveButton { reloadDict() }
+                else
+                    viewModel.disableToolbarSaveButton()
+            }
+    }
     private val busy: AtomicBoolean = AtomicBoolean(false)
 
     private val ui: BaseDynamicListUi<LibIMEDictionary> by lazy {
@@ -71,6 +81,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                 fab.setOnClickListener {
                     launcher.launch("*/*")
                 }
+                beforeReload.putAll(entries.map { it.name to it.isEnabled })
             }
 
             override fun updateFAB() {
@@ -178,7 +189,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
     }
 
     private fun reloadDict() {
-        if (!dirty.get())
+        if (!dirty)
             return
         lifecycleScope.launch(Dispatchers.IO) {
             if (busy.compareAndSet(false, true)) {
@@ -196,38 +207,33 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                 }.let { Timber.d("Took $it to reload dict") }
                 notificationManager.cancel(id)
                 busy.set(false)
-                clean()
+                dirty = false
+                updateBefore()
             }
         }
     }
 
-    private fun dirty() {
-        if (dirty.compareAndSet(false, true)) {
-            lifecycleScope.launch {
-                viewModel.enableToolbarSaveButton { reloadDict() }
-            }
-        }
+    private fun updateDirty() {
+        dirty = beforeReload.toList() != entries.map { it.name to it.isEnabled }
     }
 
-    private fun clean() {
-        if (dirty.compareAndSet(true, false)) {
-            lifecycleScope.launch {
-                viewModel.disableToolbarSaveButton()
-            }
-        }
+    private fun updateBefore() {
+        beforeReload.clear()
+        beforeReload.putAll(entries.map { it.name to it.isEnabled })
     }
+
 
     override fun onItemAdded(idx: Int, item: LibIMEDictionary) {
-        dirty()
+        updateDirty()
     }
 
     override fun onItemRemoved(idx: Int, item: LibIMEDictionary) {
         item.file.delete()
-        dirty()
+        updateDirty()
     }
 
     override fun onItemUpdated(idx: Int, old: LibIMEDictionary, new: LibIMEDictionary) {
-        dirty()
+        updateDirty()
     }
 
     override fun onPause() {
