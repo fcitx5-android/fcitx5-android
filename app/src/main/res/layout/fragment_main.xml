@@ -10,8 +10,7 @@
         android:id="@+id/settings_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layoutManager="LinearLayoutManager"
-        tools:listitem="@layout/setting_entry" />
+        app:layoutManager="LinearLayoutManager" />
 
     <TextView
         android:id="@+id/version_info"

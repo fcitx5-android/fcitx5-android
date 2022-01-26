@@ -1,18 +1,38 @@
 package me.rocka.fcitx5test.ui.main
 
-import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import me.rocka.fcitx5test.databinding.SettingEntryBinding
+import me.rocka.fcitx5test.R
+import splitties.dimensions.dp
+import splitties.resources.resolveThemeAttribute
+import splitties.resources.styledDrawable
+import splitties.views.dsl.core.*
+import splitties.views.textAppearance
 
 class SettingItemRecyclerViewAdapter(
     private vararg val settingItems: Pair<String, () -> Unit>
 ) : RecyclerView.Adapter<SettingItemRecyclerViewAdapter.ViewHolder>() {
 
+    inner class ViewHolder(val rootView: View, val textView: TextView) :
+        RecyclerView.ViewHolder(rootView)
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(
-            SettingEntryBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        )
+        with(parent.context) {
+            val textView = textView {
+                textAppearance = resolveThemeAttribute(R.attr.textAppearanceListItem)
+                layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
+            }
+            ViewHolder(
+                horizontalLayout {
+                    background = styledDrawable(android.R.attr.selectableItemBackground)
+                    layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
+                    add(textView, lParams { margin = dp(16) })
+                },
+                textView
+            )
+        }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val (string, action) = settingItems[position]
@@ -23,10 +43,5 @@ class SettingItemRecyclerViewAdapter(
     }
 
     override fun getItemCount(): Int = settingItems.size
-
-    inner class ViewHolder(binding: SettingEntryBinding) : RecyclerView.ViewHolder(binding.root) {
-        val textView = binding.content
-        val rootView = binding.root
-    }
 
 }
