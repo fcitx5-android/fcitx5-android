@@ -118,9 +118,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
-        if (!Prefs.getInstance().ignoreSystemCursor) {
-            inputConnection?.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
-        }
+        inputConnection?.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
         editorInfo = attribute
         lifecycleScope.launch {
             fcitx.setCapFlags(CapabilityFlags.fromEditorInfo(editorInfo))
@@ -147,24 +145,32 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         selectionStart = info.selectionStart
         composingTextStart = info.composingTextStart
         Timber.d("AnchorInfo: selStart=$selectionStart cmpStart=$composingTextStart")
-        info.composingText?.let { composing ->
-            // check if cursor inside composing text
-            if ((composingTextStart <= selectionStart) and
-                (selectionStart <= composingTextStart + composing.length)
-            ) {
+        val composing = info.composingText ?: return
+        // check if cursor inside composing text
+        if ((composingTextStart <= selectionStart) &&
+            (selectionStart <= composingTextStart + composing.length)
+        ) {
+            if (!Prefs.getInstance().ignoreSystemCursor) {
                 val position = selectionStart - composingTextStart
                 // move fcitx cursor when:
                 // - cursor position changed
                 // - cursor position in composing text range; when user long press backspace key,
                 //   onUpdateCursorAnchorInfo can be left behind, thus position is invalid.
-                if ((position != fcitxCursor) and (position <= composingText.length)) {
+                if ((position != fcitxCursor) && (position <= composingText.length)) {
                     lifecycleScope.launch {
                         fcitx.moveCursor(position)
                     }
-                    return
                 }
             }
-            // TODO: maybe pass delete key directly when cursor outside of composing
+        } else {
+            // cursor outside composing range, finish composing as-is
+            inputConnection?.finishComposingText()
+            // `fcitx.reset()` here would commit preedit after new cursor position
+            // since we have `ClientUnfocusCommit`, focus out and in would do the trick
+            lifecycleScope.launch {
+                fcitx.focus(false)
+                fcitx.focus()
+            }
         }
     }
 
@@ -203,9 +209,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onFinishInput() {
-        if (!Prefs.getInstance().ignoreSystemCursor) {
-            inputConnection?.requestCursorUpdates(0)
-        }
+        inputConnection?.requestCursorUpdates(0)
         editorInfo = null
         lifecycleScope.launch {
             fcitx.setCapFlags(CapabilityFlags.DefaultFlags)
