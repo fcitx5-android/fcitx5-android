@@ -129,7 +129,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
     }
 
     private fun importFromUri(uri: Uri) =
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
             val id = IMPORT_ID++
             Maybe.fx {
                 val file = uri.queryFileName(contentResolver).bindNullable().let { File(it) }
@@ -191,7 +191,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
     private fun reloadDict() {
         if (!dirty)
             return
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
             if (busy.compareAndSet(false, true)) {
                 val builder = NotificationCompat.Builder(requireContext(), CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_baseline_library_books_24)
