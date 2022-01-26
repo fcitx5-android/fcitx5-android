@@ -21,10 +21,10 @@ class DynamicListEntryUi(override val ctx: Context) : Ui {
 
     val handleImage = imageView {
         imageResource = R.drawable.ic_baseline_drag_handle_24
-        colorFilter = PorterDuffColorFilter(styledColor(R.attr.colorAccent), PorterDuff.Mode.SRC_IN)
+        colorFilter = PorterDuffColorFilter(styledColor(android.R.attr.colorAccent), PorterDuff.Mode.SRC_IN)
     }
 
-    val checkBox = checkBox { }
+    val checkBox = checkBox()
 
     val nameText = textView {
         minHeight = dp(60)
@@ -85,6 +85,5 @@ class DynamicListEntryUi(override val ctx: Context) : Ui {
             endOfParent()
             topOfParent()
         })
-
     }
 }

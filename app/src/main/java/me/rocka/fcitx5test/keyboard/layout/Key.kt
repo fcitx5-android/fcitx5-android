@@ -119,7 +119,7 @@ open class SpaceKey(
 open class ReturnKey(
     override val src: Int = R.drawable.ic_baseline_keyboard_return_24,
     override val foreground: Int = android.R.attr.colorForegroundInverse,
-    override val background: Int = R.attr.colorAccent,
+    override val background: Int = android.R.attr.colorAccent,
     override val id: Int = R.id.button_return
 ) : BaseKey(0.15f), IImageKey, IPressKey, ITintKey, IKeyId {
     override fun onPress() = KeyAction.FcitxKeyAction("Return")
