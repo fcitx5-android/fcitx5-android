@@ -44,7 +44,7 @@ class DialogSeekBarPreference : Preference {
         showSeekBarDialog()
     }
 
-    override fun onAttachedToHierarchy(preferenceManager: PreferenceManager?) {
+    override fun onAttachedToHierarchy(preferenceManager: PreferenceManager) {
         super.onAttachedToHierarchy(preferenceManager)
         summary = textForValue(currentValue)
     }
