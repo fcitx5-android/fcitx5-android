@@ -612,7 +612,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_listInputMethods(JNIEnv *env, jclass clazz
 jobject fcitxInputMethodEntryWithSubModeToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry, const std::vector<std::string> &subMode) {
     if (!entry) return nullptr;
     if (subMode.empty()) return fcitxInputMethodEntryToJObject(env, entry);
-    return env->NewObject(GlobalRef->InputMethodEntry, GlobalRef->InputMethodEntryInit,
+    return env->NewObject(GlobalRef->InputMethodEntry, GlobalRef->InputMethodEntryInitWithSubMode,
                           *JString(env, entry->uniqueName()),
                           *JString(env, entry->name()),
                           *JString(env, entry->icon()),

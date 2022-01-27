@@ -60,6 +60,7 @@ public:
 
     jclass InputMethodEntry;
     jmethodID InputMethodEntryInit;
+    jmethodID InputMethodEntryInitWithSubMode;
 
     jclass RawConfig;
     jfieldID RawConfigName;
@@ -87,6 +88,7 @@ public:
 
         InputMethodEntry = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("me/rocka/fcitx5test/native/InputMethodEntry")));
         InputMethodEntryInit = env->GetMethodID(InputMethodEntry, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
+        InputMethodEntryInitWithSubMode = env->GetMethodID(InputMethodEntry, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
 
         RawConfig = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("me/rocka/fcitx5test/native/RawConfig")));
         RawConfigName = env->GetFieldID(RawConfig, "name", "Ljava/lang/String;");
