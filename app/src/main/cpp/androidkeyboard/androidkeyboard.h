@@ -51,7 +51,7 @@ struct AndroidKeyboardEngineState : public InputContextProperty {
     }
 };
 
-class AndroidKeyboardEngine final : public InputMethodEngine {
+class AndroidKeyboardEngine final : public InputMethodEngineV3 {
 public:
     AndroidKeyboardEngine(Instance *instance);
     ~AndroidKeyboardEngine() = default;
@@ -94,6 +94,8 @@ public:
     // Commit current buffer, also reset the state.
     // See also preeditString().
     void commitBuffer(InputContext *inputContext);
+
+    void invokeActionImpl(const InputMethodEntry &entry, InvokeActionEvent &event) override;
 
 private:
     bool supportHint(const std::string &language);

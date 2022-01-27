@@ -99,17 +99,6 @@ static inline bool isValidSym(const Key &key) {
     return validSyms.count(key.sym());
 }
 
-static inline bool isValidCharacter(const std::string &c) {
-    if (c.empty()) {
-        return false;
-    }
-
-    uint32_t code;
-    auto iter = utf8::getNextChar(c.begin(), c.end(), &code);
-
-    return iter == c.end() && validChars.count(code);
-}
-
 void AndroidKeyboardEngine::keyEvent(const InputMethodEntry &entry, KeyEvent &event) {
     FCITX_UNUSED(entry);
     auto *inputContext = event.inputContext();
@@ -129,17 +118,6 @@ void AndroidKeyboardEngine::keyEvent(const InputMethodEntry &entry, KeyEvent &ev
     auto &buffer = state->buffer_;
     auto keystr = Key::keySymToUTF8(event.key().sym());
 
-    // check compose first.
-    auto composeResult =
-            instance_->processComposeString(inputContext, event.key().sym());
-
-    // compose is invalid, ignore it.
-    if (!composeResult) {
-        return event.filterAndAccept();
-    }
-
-    auto compose = *composeResult;
-
     // check if we can select candidate.
     if (auto candList = inputContext->inputPanel().candidateList()) {
         int idx = event.key().keyListIndex(selectionKeys_);
@@ -150,17 +128,14 @@ void AndroidKeyboardEngine::keyEvent(const InputMethodEntry &entry, KeyEvent &ev
         }
     }
 
-    bool validCharacter = isValidCharacter(compose);
     bool validSym = isValidSym(event.key());
 
     static KeyList FCITX_HYPHEN_APOS = {Key(FcitxKey_minus), Key(FcitxKey_apostrophe)};
     // check for valid character
-    if (validCharacter || event.key().isSimple() || validSym) {
-        if (validCharacter || event.key().isLAZ() || event.key().isUAZ() ||
-            validSym ||
+    if (event.key().isSimple() || validSym) {
+        if (event.key().isLAZ() || event.key().isUAZ() || validSym ||
             (!buffer.empty() && event.key().checkKeyList(FCITX_HYPHEN_APOS))) {
-            auto text = !compose.empty() ? compose
-                                         : Key::keySymToUTF8(event.key().sym());
+            auto text = Key::keySymToUTF8(event.key().sym());
             if (updateBuffer(inputContext, text)) {
                 return event.filterAndAccept();
             }
@@ -177,11 +152,6 @@ void AndroidKeyboardEngine::keyEvent(const InputMethodEntry &entry, KeyEvent &ev
 
     // if we reach here, just commit and discard buffer.
     commitBuffer(inputContext);
-    // and now we want to forward key.
-    if (!compose.empty()) {
-        event.filterAndAccept();
-        inputContext->commitString(compose);
-    }
 }
 
 std::vector<InputMethodEntry> AndroidKeyboardEngine::listInputMethods() {
@@ -278,10 +248,9 @@ void AndroidKeyboardEngine::updateCandidate(const InputMethodEntry &entry, Input
 }
 
 void AndroidKeyboardEngine::updateUI(InputContext *inputContext) {
-    Text preedit(preeditString(inputContext), TextFormatFlag::Underline);
-    if (auto length = preedit.textLength()) {
-        preedit.setCursor(length);
-    }
+    auto *state = inputContext->propertyFor(&factory_);
+    Text preedit(state->buffer_.userInput(), TextFormatFlag::Underline);
+    preedit.setCursor(state->buffer_.cursor());
     inputContext->inputPanel().setClientPreedit(preedit);
     // we don't want preedit here ...
 //    if (!inputContext->capabilityFlags().test(CapabilityFlag::Preedit)) {
@@ -345,9 +314,19 @@ bool AndroidKeyboardEngine::supportHint(const std::string &language) {
 
 std::string AndroidKeyboardEngine::preeditString(InputContext *inputContext) {
     auto *state = inputContext->propertyFor(&factory_);
-    auto candidateList = inputContext->inputPanel().candidateList();
-    std::string preedit;
     return state->buffer_.userInput();
+}
+
+void AndroidKeyboardEngine::invokeActionImpl(const InputMethodEntry &entry, InvokeActionEvent &event) {
+    auto inputContext = event.inputContext();
+    if (event.cursor() < 0 ||
+        event.action() != InvokeActionEvent::Action::LeftClick) {
+        return InputMethodEngineV3::invokeActionImpl(entry, event);
+    }
+    event.filter();
+    auto *state = inputContext->propertyFor(&factory_);
+    state->buffer_.setCursor(event.cursor());
+    updateUI(inputContext);
 }
 
 } // namespace fcitx
