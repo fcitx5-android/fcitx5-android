@@ -129,6 +129,7 @@ listOf("fcitx5", "fcitx5-chinese-addons").forEach {
 
 
 dependencies {
+    implementation("net.java.dev.jna:jna:5.10.0@aar")
     implementation("com.jakewharton.timber:timber:5.0.1")
     implementation("androidx.core:core-ktx:1.7.0")
     implementation("androidx.appcompat:appcompat:1.4.1")
@@ -137,7 +138,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-service:2.4.0")
     implementation("androidx.lifecycle:lifecycle-common-java8:2.4.0")
     implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-android", "1.4.2")
-    implementation("androidx.preference:preference-ktx:1.1.1")
+    implementation("androidx.preference:preference-ktx:1.2.0")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("androidx.viewpager2:viewpager2:1.0.0")
     val navVersion = "2.3.5"
