@@ -44,6 +44,22 @@ public:
     jclass operator*() { return jclass_; }
 };
 
+class JEnv {
+private:
+    JNIEnv *env;
+
+public:
+    JEnv(JavaVM *jvm) {
+        if (jvm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) == JNI_EDETACHED) {
+            jvm->AttachCurrentThread(&env, nullptr);
+        }
+    }
+
+    operator JNIEnv *() { return env; }
+
+    JNIEnv *operator->() { return env; }
+};
+
 class GlobalRefSingleton {
 public:
     JavaVM *jvm;
@@ -101,11 +117,7 @@ public:
         AddonInfoInit = env->GetMethodID(AddonInfo, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZZZ)V");
     }
 
-    JNIEnv *AttachEnv() {
-        JNIEnv *env;
-        jvm->AttachCurrentThread(&env, nullptr);
-        return env;
-    }
+    const JEnv AttachEnv() const { return JEnv(jvm); }
 };
 
 #endif //FCITX5TEST_JNI_UTILS_H
