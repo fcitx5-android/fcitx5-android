@@ -300,9 +300,9 @@ public:
         );
     }
 
-    std::pair<std::string, std::string> queryPunctuation(uint32_t unicode, const std::string &language) {
+    std::pair<std::string, std::string> queryPunctuation(uint16_t unicode, const std::string &language) {
         if (!p_punctuation) {
-            std::string s(1, unicode);
+            std::string s(1, static_cast<char>(unicode));
             return std::make_pair(s, s);
         }
         return p_punctuation->call<fcitx::IPunctuation::getPunctuation>(language, unicode);
@@ -364,7 +364,7 @@ private:
         expr; \
     }
 #define RETURN_IF_NOT_RUNNING DO_IF_NOT_RUNNING(return)
-#define RETURN_VALUE_IF_NOT_RUNNING(v) DO_IF_NOT_RUNNING(return v)
+#define RETURN_VALUE_IF_NOT_RUNNING(v) DO_IF_NOT_RUNNING(return (v))
 
 std::string jstringToString(JNIEnv *env, jstring j) {
     const char *c = env->GetStringUTFChars(j, nullptr);
@@ -429,9 +429,8 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
 
     auto candidateListCallback = [](const std::vector<std::string> &candidateList) {
         auto env = GlobalRef->AttachEnv();
-        size_t size = candidateList.size();
-        jobjectArray vararg = env->NewObjectArray(size, GlobalRef->String, nullptr);
-        size_t i = 0;
+        jobjectArray vararg = env->NewObjectArray(static_cast<int>(candidateList.size()), GlobalRef->String, nullptr);
+        int i = 0;
         for (const auto &s : candidateList) {
             env->SetObjectArrayElement(vararg, i++, JString(env, s));
         }
@@ -591,8 +590,8 @@ jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntr
 }
 
 jobjectArray fcitxInputMethodEntriesToJObjectArray(JNIEnv *env, const std::vector<const fcitx::InputMethodEntry *> &entries) {
-    jobjectArray array = env->NewObjectArray(entries.size(), GlobalRef->InputMethodEntry, nullptr);
-    size_t i = 0;
+    jobjectArray array = env->NewObjectArray(static_cast<int>(entries.size()), GlobalRef->InputMethodEntry, nullptr);
+    int i = 0;
     for (const auto &entry : entries) {
         jobject obj = fcitxInputMethodEntryToJObject(env, entry);
         env->SetObjectArrayElement(array, i++, obj);
@@ -653,9 +652,9 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_setEnabledInputMethods(JNIEnv *env, jclass clazz, jobjectArray array) {
     RETURN_IF_NOT_RUNNING
-    size_t size = env->GetArrayLength(array);
+    int size = env->GetArrayLength(array);
     std::vector<std::string> entries;
-    for (size_t i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++) {
         auto string = reinterpret_cast<jstring>(env->GetObjectArrayElement(array, i));
         entries.emplace_back(jstringToString(env, string));
         env->DeleteLocalRef(string);
@@ -672,8 +671,8 @@ jobject fcitxRawConfigToJObject(JNIEnv *env, const fcitx::RawConfig &cfg) {
     if (!cfg.hasSubItems()) {
         return obj;
     }
-    jobjectArray array = env->NewObjectArray(cfg.subItemsSize(), GlobalRef->RawConfig, nullptr);
-    size_t i = 0;
+    jobjectArray array = env->NewObjectArray(static_cast<int>(cfg.subItemsSize()), GlobalRef->RawConfig, nullptr);
+    int i = 0;
     for (const auto &item : cfg.subItems()) {
         jobject jItem = fcitxRawConfigToJObject(env, *cfg.get(item));
         env->SetObjectArrayElement(array, i++, jItem);
@@ -716,8 +715,8 @@ void jobjectFillRawConfig(JNIEnv *env, jobject jConfig, fcitx::RawConfig &config
         config = jstringToString(env, jValue);
         env->DeleteLocalRef(jValue);
     } else {
-        size_t size = env->GetArrayLength(subItems);
-        for (size_t i = 0; i < size; i++) {
+        int size = env->GetArrayLength(subItems);
+        for (int i = 0; i < size; i++) {
             jobject item = env->GetObjectArrayElement(subItems, i);
             auto jName = reinterpret_cast<jstring>(env->GetObjectField(item, GlobalRef->RawConfigName));
             auto name = jstringToString(env, jName);
@@ -765,8 +764,8 @@ JNIEXPORT jobjectArray JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddons(JNIEnv *env, jclass clazz) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     const auto &addons = Fcitx::Instance().getAddons();
-    jobjectArray array = env->NewObjectArray(addons.size(), GlobalRef->AddonInfo, nullptr);
-    size_t i = 0;
+    jobjectArray array = env->NewObjectArray(static_cast<int>(addons.size()), GlobalRef->AddonInfo, nullptr);
+    int i = 0;
     for (const auto addon : addons) {
         const auto *info = addon.first;
         jobject obj = env->NewObject(GlobalRef->AddonInfo, GlobalRef->AddonInfoInit,
@@ -788,15 +787,15 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_native_Fcitx_setFcitxAddonState(JNIEnv *env, jclass clazz, jobjectArray name, jbooleanArray state) {
     RETURN_IF_NOT_RUNNING
-    size_t nameLength = env->GetArrayLength(name);
-    size_t stateLength = env->GetArrayLength(state);
+    int nameLength = env->GetArrayLength(name);
+    int stateLength = env->GetArrayLength(state);
     if (nameLength != stateLength) {
         jniLog("setFcitxAddonState: name and state length mismatch");
         return;
     }
     std::map<std::string, bool> map;
     const auto enabled = env->GetBooleanArrayElements(state, nullptr);
-    for (size_t i = 0; i < nameLength; i++) {
+    for (int i = 0; i < nameLength; i++) {
         auto jName = reinterpret_cast<jstring>(env->GetObjectArrayElement(name, i));
         map.insert({jstringToString(env, jName), enabled[i]});
         env->DeleteLocalRef(jName);
