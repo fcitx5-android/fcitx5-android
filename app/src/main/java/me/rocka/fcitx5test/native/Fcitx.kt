@@ -106,6 +106,16 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
         init {
             System.loadLibrary("native-lib")
+            NativeLib.instance.setup_log_stream {
+                when (it.first()) {
+                    'F' -> Timber.wtf(it)
+                    'D' -> Timber.d(it)
+                    'I' -> Timber.i(it)
+                    'W' -> Timber.w(it)
+                    'E' -> Timber.e(it)
+                    else -> Timber.d(it)
+                }
+            }
         }
 
         @JvmStatic

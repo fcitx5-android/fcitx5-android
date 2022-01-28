@@ -20,8 +20,8 @@
 #include <unicode_public.h>
 
 #include "androidfrontend/androidfrontend_public.h"
-#include "androidstreambuf.h"
 #include "jni-utils.h"
+#include "nativestreambuf.h"
 
 static void jniLog(const std::string &s) {
     __android_log_write(ANDROID_LOG_DEBUG, "JNI", s.c_str());
@@ -378,10 +378,17 @@ static GlobalRefSingleton *GlobalRef;
 JNIEXPORT jint JNICALL
 JNI_OnLoad(JavaVM *jvm, void * /* reserved */) {
     GlobalRef = new GlobalRefSingleton(jvm);
-    static std::ostream stream(new AndroidStreamBuf("fcitx5", 512));
-    fcitx::Log::setLogStream(stream);
     // return supported JNI version; or it will crash
     return JNI_VERSION_1_6;
+}
+
+typedef void (*log_callback_t)(const char *);
+
+extern "C" void setup_log_stream(log_callback_t callback) {
+    static native_streambuf log_streambuf;
+    log_streambuf.set_callback(callback);
+    static std::ostream stream(&log_streambuf);
+    fcitx::Log::setLogStream(stream);
 }
 
 jobject fcitxInputMethodEntryWithSubModeToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry, const std::vector<std::string> &subMode);
