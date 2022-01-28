@@ -1,4 +1,4 @@
-package me.rocka.fcitx5test.data.pinyin
+package me.rocka.fcitx5test.data.pinyin.dict
 
 import java.io.File
 
@@ -48,13 +48,13 @@ abstract class Dictionary {
     protected fun ensureTxt(dest: File) {
         if (dest.extension != Type.Text.ext)
             throw IllegalArgumentException("Dest file name must end with .${Type.Text.ext}")
-        dest.deleteOnExit()
+        dest.delete()
     }
 
     protected fun ensureBin(dest: File) {
         if (dest.extension != Type.LibIME.ext)
             throw IllegalArgumentException("Dest file name must end with .${Type.LibIME.ext}")
-        dest.deleteOnExit()
+        dest.delete()
     }
 
     override fun toString(): String = "${javaClass.simpleName}[$name -> ${file.path}]"

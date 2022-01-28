@@ -20,9 +20,9 @@ import cn.berberman.girls.utils.maybe.Maybe
 import cn.berberman.girls.utils.maybe.fx
 import kotlinx.coroutines.*
 import me.rocka.fcitx5test.R
-import me.rocka.fcitx5test.data.PinyinDictManager
-import me.rocka.fcitx5test.data.pinyin.Dictionary
-import me.rocka.fcitx5test.data.pinyin.LibIMEDictionary
+import me.rocka.fcitx5test.data.pinyin.PinyinDictManager
+import me.rocka.fcitx5test.data.pinyin.dict.Dictionary
+import me.rocka.fcitx5test.data.pinyin.dict.LibIMEDictionary
 import me.rocka.fcitx5test.ui.common.BaseDynamicListUi
 import me.rocka.fcitx5test.ui.common.OnItemChangedListener
 import me.rocka.fcitx5test.ui.main.MainViewModel

@@ -1,7 +1,7 @@
-package me.rocka.fcitx5test.data
+package me.rocka.fcitx5test.data.pinyin
 
-import me.rocka.fcitx5test.data.pinyin.Dictionary
-import me.rocka.fcitx5test.data.pinyin.LibIMEDictionary
+import me.rocka.fcitx5test.data.pinyin.dict.Dictionary
+import me.rocka.fcitx5test.data.pinyin.dict.LibIMEDictionary
 import me.rocka.fcitx5test.utils.appContext
 import timber.log.Timber
 import java.io.File

@@ -1,6 +1,6 @@
-package me.rocka.fcitx5test.data.pinyin
+package me.rocka.fcitx5test.data.pinyin.dict
 
-import me.rocka.fcitx5test.data.PinyinDictManager
+import me.rocka.fcitx5test.data.pinyin.PinyinDictManager
 import java.io.File
 
 class TextDictionary(file: File) : Dictionary() {

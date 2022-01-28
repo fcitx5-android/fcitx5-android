@@ -17,7 +17,7 @@ void throwJavaException(JNIEnv *env, const char *msg) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_data_PinyinDictManager_pinyinDictConv(JNIEnv *env, jclass clazz, jstring src, jstring dest, jboolean mode) {
+Java_me_rocka_fcitx5test_data_pinyin_PinyinDictManager_pinyinDictConv(JNIEnv *env, jclass clazz, jstring src, jstring dest, jboolean mode) {
     using namespace libime;
     const char *src_file = env->GetStringUTFChars(src, nullptr);
     const char *dest_file = env->GetStringUTFChars(dest, nullptr);
