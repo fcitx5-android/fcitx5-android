@@ -81,3 +81,6 @@ target_link_libraries(native-lib
 
 add_library(pinyindictionaryutils SHARED pinyindictionaryutils.cpp)
 target_link_libraries(pinyindictionaryutils LibIME::Pinyin)
+
+add_library(utf8utils SHARED utf8utils.cpp)
+target_link_libraries(utf8utils Fcitx5Utils)

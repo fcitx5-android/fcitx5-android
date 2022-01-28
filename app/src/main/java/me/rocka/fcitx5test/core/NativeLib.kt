@@ -2,7 +2,7 @@ package me.rocka.fcitx5test.core
 
 import com.sun.jna.Callback
 import com.sun.jna.Library
-import com.sun.jna.Native
+import me.rocka.fcitx5test.utils.nativeLib
 
 @Suppress("FunctionName", "ClassName")
 interface NativeLib : Library {
@@ -13,8 +13,6 @@ interface NativeLib : Library {
     fun setup_log_stream(callback: log_callback_t)
 
     companion object {
-        val instance: NativeLib by lazy {
-            Native.load("native-lib", NativeLib::class.java)
-        }
+        val instance: NativeLib by nativeLib("native-lib")
     }
 }

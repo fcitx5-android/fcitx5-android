@@ -8,8 +8,8 @@ import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.data.clipboard.db.ClipboardDao
 import me.rocka.fcitx5test.data.clipboard.db.ClipboardDatabase
 import me.rocka.fcitx5test.data.clipboard.db.ClipboardEntry
+import me.rocka.fcitx5test.utils.UTF8Utils
 import splitties.systemservices.clipboardManager
-import timber.log.Timber
 
 object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.IO) {
@@ -43,7 +43,10 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     override fun onPrimaryClipChanged() {
         if (!(enabled && this::clbDao.isInitialized))
             return
-        clipboardManager.primaryClip?.let { ClipboardEntry.fromClipData(it) }
+        clipboardManager
+            .primaryClip
+            ?.let { ClipboardEntry.fromClipData(it) }
+            ?.takeIf { UTF8Utils.instance.validateUTF8(it.text) }
             ?.let {
                 launch {
                     clbDao.insertAll(it)
