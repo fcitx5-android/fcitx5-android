@@ -9,7 +9,7 @@ import cn.berberman.girls.utils.either.otherwise
 import cn.berberman.girls.utils.either.then
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.data.Prefs
-import me.rocka.fcitx5test.native.RawConfig
+import me.rocka.fcitx5test.core.RawConfig
 import me.rocka.fcitx5test.ui.common.DialogSeekBarPreference
 import me.rocka.fcitx5test.ui.main.settings.addon.AddonConfigFragment
 import me.rocka.fcitx5test.ui.main.settings.im.InputMethodConfigFragment

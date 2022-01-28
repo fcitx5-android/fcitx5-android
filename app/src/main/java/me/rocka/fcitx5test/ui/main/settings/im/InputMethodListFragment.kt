@@ -6,12 +6,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
-import me.rocka.fcitx5test.native.InputMethodEntry
+import me.rocka.fcitx5test.core.InputMethodEntry
 import me.rocka.fcitx5test.ui.common.BaseDynamicListUi
 import me.rocka.fcitx5test.ui.common.DynamicListUi
 import me.rocka.fcitx5test.ui.common.OnItemChangedListener
 import me.rocka.fcitx5test.ui.main.settings.ProgressFragment
-import splitties.views.dsl.core.*
 
 class InputMethodListFragment : ProgressFragment(), OnItemChangedListener<InputMethodEntry> {
 

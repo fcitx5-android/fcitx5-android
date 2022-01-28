@@ -14,9 +14,9 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import me.rocka.fcitx5test.data.Prefs
-import me.rocka.fcitx5test.native.CapabilityFlags
-import me.rocka.fcitx5test.native.Fcitx
-import me.rocka.fcitx5test.native.FcitxEvent
+import me.rocka.fcitx5test.core.CapabilityFlags
+import me.rocka.fcitx5test.core.Fcitx
+import me.rocka.fcitx5test.core.FcitxEvent
 import me.rocka.fcitx5test.service.FcitxDaemonManager
 import me.rocka.fcitx5test.utils.inputConnection
 import splitties.bitflags.hasFlag

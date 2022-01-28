@@ -3,6 +3,7 @@ package me.rocka.fcitx5test
 import android.app.Application
 import androidx.preference.PreferenceManager
 import me.rocka.fcitx5test.data.Prefs
+import me.rocka.fcitx5test.data.clipboard.ClipboardManager
 import timber.log.Timber
 
 class FcitxApplication : Application() {
@@ -15,6 +16,7 @@ class FcitxApplication : Application() {
             }
         })
         Prefs.init(PreferenceManager.getDefaultSharedPreferences(applicationContext))
+        ClipboardManager.init(applicationContext)
     }
 
     companion object {

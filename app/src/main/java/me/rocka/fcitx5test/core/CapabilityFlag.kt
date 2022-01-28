@@ -1,4 +1,4 @@
-package me.rocka.fcitx5test.native
+package me.rocka.fcitx5test.core
 
 import android.text.InputType
 import android.view.inputmethod.EditorInfo

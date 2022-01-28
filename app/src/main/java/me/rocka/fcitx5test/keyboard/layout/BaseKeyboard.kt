@@ -13,8 +13,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.keyboard.InputView
-import me.rocka.fcitx5test.keyboard.layout.*
-import me.rocka.fcitx5test.native.InputMethodEntry
+import me.rocka.fcitx5test.core.InputMethodEntry
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
 import splitties.resources.styledColor

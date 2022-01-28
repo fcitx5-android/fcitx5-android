@@ -6,7 +6,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
-import me.rocka.fcitx5test.native.AddonInfo
+import me.rocka.fcitx5test.core.AddonInfo
 import me.rocka.fcitx5test.ui.common.BaseDynamicListUi
 import me.rocka.fcitx5test.ui.common.CheckBoxListUi
 import me.rocka.fcitx5test.ui.common.OnItemChangedListener

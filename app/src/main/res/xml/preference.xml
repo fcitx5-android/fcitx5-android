@@ -22,5 +22,11 @@
             android:title="@string/button_haptic_feedback"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="clipboard_enable"
+            android:title="@string/clipboard_enable"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
     </PreferenceCategory>
 </PreferenceScreen>

@@ -1,6 +1,6 @@
 package me.rocka.fcitx5test.keyboard.layout
 
-import me.rocka.fcitx5test.native.Fcitx
+import me.rocka.fcitx5test.core.Fcitx
 
 sealed class KeyAction<T> {
 

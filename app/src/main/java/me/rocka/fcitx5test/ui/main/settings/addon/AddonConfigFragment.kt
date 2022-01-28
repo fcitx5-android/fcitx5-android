@@ -1,7 +1,7 @@
 package me.rocka.fcitx5test.ui.main.settings.addon
 
-import me.rocka.fcitx5test.native.Fcitx
-import me.rocka.fcitx5test.native.RawConfig
+import me.rocka.fcitx5test.core.Fcitx
+import me.rocka.fcitx5test.core.RawConfig
 import me.rocka.fcitx5test.ui.main.settings.FcitxPreferenceFragment
 
 class AddonConfigFragment : FcitxPreferenceFragment() {

@@ -8,7 +8,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import me.rocka.fcitx5test.native.*
+import me.rocka.fcitx5test.core.*
 import timber.log.Timber
 import java.util.concurrent.ConcurrentLinkedQueue
 

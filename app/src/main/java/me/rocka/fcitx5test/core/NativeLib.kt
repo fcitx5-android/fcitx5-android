@@ -1,4 +1,4 @@
-package me.rocka.fcitx5test.native
+package me.rocka.fcitx5test.core
 
 import com.sun.jna.Callback
 import com.sun.jna.Library

@@ -3,6 +3,8 @@ package me.rocka.fcitx5test.data
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.ButtonHapticFeedback
+import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.Clipboard
+import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.ClipboardHistoryLimit
 import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.FirstRun
 import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.HideKeyConfig
 import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.IgnoreSystemCursor
@@ -33,12 +35,17 @@ class Prefs(private val sharedPreferences: SharedPreferences) {
     var ignoreSystemCursor by preference(IgnoreSystemCursor, true)
     var hideKeyConfig by preference(HideKeyConfig, true)
     var buttonHapticFeedback by preference(ButtonHapticFeedback, true)
+    var clipboard by preference(Clipboard, true)
+    // TODO: add to preferences ui
+    var clipboardHistoryLimit by preference(ClipboardHistoryLimit, 5)
 
     object PreferenceKeys {
         const val FirstRun = "first_run"
         const val IgnoreSystemCursor = "ignore_system_cursor"
         const val HideKeyConfig = "hide_key_config"
         const val ButtonHapticFeedback = "button_haptic_feedback"
+        const val Clipboard = "clipboard_enable"
+        const val ClipboardHistoryLimit = "clipboard_limit"
     }
 
     companion object {
