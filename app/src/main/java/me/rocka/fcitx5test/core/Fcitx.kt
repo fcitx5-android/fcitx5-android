@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.data.DataManager
 import me.rocka.fcitx5test.data.Prefs
+import me.rocka.fcitx5test.data.clipboard.ClipboardManager
 import splitties.resources.str
 import timber.log.Timber
 
@@ -82,6 +83,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         }
 
     suspend fun triggerUnicode() = dispatcher.dispatch { triggerUnicodeInput() }
+    private suspend fun setClipboard(string: String) =
+        dispatcher.dispatch { setFcitxClipboard(string) }
+
     suspend fun focus(focus: Boolean = true) = dispatcher.dispatch { focusInputContext(focus) }
     suspend fun setCapFlags(flags: CapabilityFlags) =
         dispatcher.dispatch { setCapabilityFlags(flags.toLong()) }
@@ -205,6 +209,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         external fun triggerUnicodeInput()
 
         @JvmStatic
+        external fun setFcitxClipboard(string: String)
+
+        @JvmStatic
         external fun focusInputContext(focus: Boolean)
 
         @JvmStatic
@@ -312,12 +319,16 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
     })
 
+    private val onClipboardUpdate =
+        ClipboardManager.OnClipboardUpdateListener { setClipboard(it.text) }
+
     fun start() {
         if (lifecycle.currentState != FcitxLifecycle.State.STOPPED) {
             Timber.w("Skip starting fcitx: not at stopped state!")
             return
         }
         lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_START)
+        ClipboardManager.addOnUpdateListener(onClipboardUpdate)
         dispatcher.start()
     }
 
@@ -328,6 +339,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         }
         lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_STOP)
         Timber.i("stop")
+        ClipboardManager.removeOnUpdateListener(onClipboardUpdate)
         dispatcher.stop().let {
             if (it.isNotEmpty())
                 Timber.w("${it.size} job(s) didn't get a chance to run!")

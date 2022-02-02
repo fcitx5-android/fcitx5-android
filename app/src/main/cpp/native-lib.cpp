@@ -18,6 +18,7 @@
 #include <quickphrase_public.h>
 #include <punctuation_public.h>
 #include <unicode_public.h>
+#include <clipboard_public.h>
 
 #include "androidfrontend/androidfrontend_public.h"
 #include "jni-utils.h"
@@ -64,6 +65,7 @@ public:
         p_quickphrase = addonMgr.addon("quickphrase");
         p_punctuation = addonMgr.addon("punctuation", true);
         p_unicode = addonMgr.addon("unicode");
+        p_clipboard = addonMgr.addon("clipboard", true);
         p_uuid = p_frontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
         setupCallback(p_frontend);
     }
@@ -314,6 +316,12 @@ public:
         p_unicode->call<fcitx::IUnicode::trigger>(ic);
     }
 
+    void setClipboard(const std::string &string) {
+        if (!p_clipboard) return;
+        jniLog("set clip " + string);
+        p_clipboard->call<fcitx::IClipboard::setClipboard>("", string);
+    }
+
     void focusInputContext(bool focus) {
         if (!p_frontend) return;
         p_frontend->call<fcitx::IAndroidFrontend::focusInputContext>(p_uuid, focus);
@@ -344,6 +352,7 @@ private:
     fcitx::AddonInstance *p_quickphrase = nullptr;
     fcitx::AddonInstance *p_punctuation = nullptr;
     fcitx::AddonInstance *p_unicode = nullptr;
+    fcitx::AddonInstance *p_clipboard = nullptr;
     fcitx::ICUUID p_uuid{};
 
     void resetGlobalPointers() {
@@ -353,6 +362,7 @@ private:
         p_quickphrase = nullptr;
         p_punctuation = nullptr;
         p_unicode = nullptr;
+        p_clipboard = nullptr;
         p_uuid = {};
     }
 };
@@ -833,6 +843,13 @@ JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_core_Fcitx_triggerUnicodeInput(JNIEnv *env, jclass clazz) {
     RETURN_IF_NOT_RUNNING
     Fcitx::Instance().triggerUnicode();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_core_Fcitx_setFcitxClipboard(JNIEnv *env, jclass clazz, jstring string) {
+    RETURN_IF_NOT_RUNNING
+    Fcitx::Instance().setClipboard(jstringToString(env, string));
 }
 
 extern "C"

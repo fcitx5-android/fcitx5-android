@@ -10,11 +10,26 @@ import me.rocka.fcitx5test.data.clipboard.db.ClipboardDatabase
 import me.rocka.fcitx5test.data.clipboard.db.ClipboardEntry
 import me.rocka.fcitx5test.utils.UTF8Utils
 import splitties.systemservices.clipboardManager
+import java.util.concurrent.ConcurrentLinkedQueue
 
 object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.IO) {
     private lateinit var clbDb: ClipboardDatabase
     private lateinit var clbDao: ClipboardDao
+
+    fun interface OnClipboardUpdateListener {
+        suspend fun onUpdate(entry: ClipboardEntry)
+    }
+
+    private val onUpdateListeners = ConcurrentLinkedQueue<OnClipboardUpdateListener>()
+
+    fun addOnUpdateListener(listener: OnClipboardUpdateListener) {
+        onUpdateListeners.add(listener)
+    }
+
+    fun removeOnUpdateListener(listener: OnClipboardUpdateListener) {
+        onUpdateListeners.remove(listener)
+    }
 
     private val enabled
         get() = Prefs.getInstance().clipboard
@@ -51,6 +66,7 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
                 launch {
                     clbDao.insertAll(it)
                     removeOutdated()
+                    onUpdateListeners.forEach { listener -> listener.onUpdate(it) }
                 }
             }
 
