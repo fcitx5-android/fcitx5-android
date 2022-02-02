@@ -24,9 +24,6 @@
 #include "jni-utils.h"
 #include "nativestreambuf.h"
 
-static void jniLog(const std::string &s) {
-    __android_log_write(ANDROID_LOG_DEBUG, "JNI", s.c_str());
-}
 
 class Fcitx {
 public:
@@ -318,7 +315,6 @@ public:
 
     void setClipboard(const std::string &string) {
         if (!p_clipboard) return;
-        jniLog("set clip " + string);
         p_clipboard->call<fcitx::IClipboard::setClipboard>("", string);
     }
 
@@ -370,7 +366,7 @@ private:
 
 #define DO_IF_NOT_RUNNING(expr) \
     if (!Fcitx::Instance().isRunning()) { \
-        jniLog("fcitx is not running!"); \
+        FCITX_WARN() << "Fcitx is not running!"; \
         expr; \
     }
 #define RETURN_IF_NOT_RUNNING DO_IF_NOT_RUNNING(return)
@@ -399,6 +395,7 @@ extern "C" void setup_log_stream(log_callback_t callback) {
     log_streambuf.set_callback(callback);
     static std::ostream stream(&log_streambuf);
     fcitx::Log::setLogStream(stream);
+    fcitx::Log::setLogRule("notimedate");
 }
 
 jobject fcitxInputMethodEntryWithSubModeToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry, const std::vector<std::string> &subMode);
@@ -407,10 +404,10 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, jstring locale, jstring appData, jstring appLib, jstring extData) {
     if (Fcitx::Instance().isRunning()) {
-        jniLog("startupFcitx: already running!");
+        FCITX_WARN() << "Fcitx is already running!";
         return;
     }
-    jniLog("startupFcitx: starting...");
+    FCITX_INFO() << "Starting...";
 
     setenv("SKIP_FCITX_PATH", "true", 1);
 
@@ -506,7 +503,7 @@ Java_me_rocka_fcitx5test_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, jstr
     };
 
     Fcitx::Instance().startup([&](auto *androidfrontend) {
-        jniLog("startupFcitx: setupCallback");
+        FCITX_INFO() << "Setting up callback";
         readyCallback();
         androidfrontend->template call<fcitx::IAndroidFrontend::setCandidateListCallback>(candidateListCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setCommitStringCallback>(commitStringCallback);
@@ -515,7 +512,7 @@ Java_me_rocka_fcitx5test_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, jstr
         androidfrontend->template call<fcitx::IAndroidFrontend::setKeyEventCallback>(keyEventCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setInputMethodChangeCallback>(imChangeCallback);
     });
-    jniLog("startupFcitx done");
+    FCITX_INFO() << "Finishing startup";
 }
 
 extern "C"
@@ -562,7 +559,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_core_Fcitx_selectCandidate(JNIEnv *env, jclass clazz, jint idx) {
     RETURN_IF_NOT_RUNNING
-    jniLog("selectCandidate: #" + std::to_string(idx));
+    FCITX_INFO() << "selectCandidate: #" << idx;
     Fcitx::Instance().select(idx);
 }
 
@@ -583,7 +580,7 @@ Java_me_rocka_fcitx5test_core_Fcitx_resetInputContext(JNIEnv *env, jclass clazz)
 extern "C"
 JNIEXPORT void JNICALL
 Java_me_rocka_fcitx5test_core_Fcitx_repositionCursor(JNIEnv *env, jclass clazz, jint position) {
-    jniLog("repositionCursor: to " + std::to_string(position));
+    FCITX_INFO() << "repositionCursor: to " << position;
     Fcitx::Instance().repositionCursor(position);
 }
 
@@ -807,7 +804,7 @@ Java_me_rocka_fcitx5test_core_Fcitx_setFcitxAddonState(JNIEnv *env, jclass clazz
     int nameLength = env->GetArrayLength(name);
     int stateLength = env->GetArrayLength(state);
     if (nameLength != stateLength) {
-        jniLog("setFcitxAddonState: name and state length mismatch");
+        FCITX_WARN() << "Addon name and state length mismatch!";
         return;
     }
     std::map<std::string, bool> map;

@@ -112,11 +112,11 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
             System.loadLibrary("native-lib")
             NativeLib.instance.setup_log_stream {
                 when (it.first()) {
-                    'F' -> Timber.wtf(it)
-                    'D' -> Timber.d(it)
-                    'I' -> Timber.i(it)
-                    'W' -> Timber.w(it)
-                    'E' -> Timber.e(it)
+                    'F' -> Timber.wtf(it.drop(1))
+                    'D' -> Timber.d(it.drop(1))
+                    'I' -> Timber.i(it.drop(1))
+                    'W' -> Timber.w(it.drop(1))
+                    'E' -> Timber.e(it.drop(1))
                     else -> Timber.d(it)
                 }
             }
@@ -233,12 +233,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         @JvmStatic
         fun handleFcitxEvent(type: Int, params: Array<Any>) {
             val event = FcitxEvent.create(type, params)
-            Timber
-                .d(
-                    "Event ${event.eventType}[${params.size}]${
-                        params.take(10).joinToString()
-                    }"
-                )
+            Timber.d("Handling $event")
             if (event is FcitxEvent.ReadyEvent) {
                 if (Prefs.getInstance().firstRun) {
                     // this method runs in same thread with `startupFcitx`
