@@ -77,7 +77,11 @@ target_link_libraries(native-lib
         libevent::core
         Fcitx5::Module::QuickPhrase
         Fcitx5::Module::Punctuation
-        Fcitx5::Module::Unicode)
+        Fcitx5::Module::Unicode
+        Fcitx5::Module::Clipboard)
 
 add_library(pinyindictionaryutils SHARED pinyindictionaryutils.cpp)
 target_link_libraries(pinyindictionaryutils LibIME::Pinyin)
+
+add_library(utf8utils SHARED utf8utils.cpp)
+target_link_libraries(utf8utils Fcitx5::Utils)

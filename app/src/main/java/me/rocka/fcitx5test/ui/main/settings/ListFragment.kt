@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import me.rocka.fcitx5test.native.RawConfig
+import me.rocka.fcitx5test.core.RawConfig
 import me.rocka.fcitx5test.ui.common.BaseDynamicListUi
 import me.rocka.fcitx5test.ui.main.MainViewModel
 import me.rocka.fcitx5test.utils.config.ConfigDescriptor

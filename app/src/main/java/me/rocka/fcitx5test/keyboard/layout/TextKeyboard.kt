@@ -6,7 +6,7 @@ import android.widget.Button
 import android.widget.ImageButton
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.keyboard.InputView
-import me.rocka.fcitx5test.native.InputMethodEntry
+import me.rocka.fcitx5test.core.InputMethodEntry
 import splitties.views.imageResource
 
 class TextKeyboard(

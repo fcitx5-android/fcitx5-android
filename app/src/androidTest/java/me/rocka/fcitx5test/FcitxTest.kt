@@ -9,9 +9,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
-import me.rocka.fcitx5test.native.Fcitx
-import me.rocka.fcitx5test.native.FcitxEvent
-import me.rocka.fcitx5test.native.RawConfig
+import me.rocka.fcitx5test.core.Fcitx
+import me.rocka.fcitx5test.core.FcitxEvent
+import me.rocka.fcitx5test.core.RawConfig
 import org.junit.*
 
 class FcitxTest {

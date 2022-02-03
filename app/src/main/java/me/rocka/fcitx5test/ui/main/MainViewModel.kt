@@ -2,9 +2,7 @@ package me.rocka.fcitx5test.ui.main
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
-import me.rocka.fcitx5test.native.Fcitx
+import me.rocka.fcitx5test.core.Fcitx
 import me.rocka.fcitx5test.service.FcitxDaemonManager
 import timber.log.Timber
 

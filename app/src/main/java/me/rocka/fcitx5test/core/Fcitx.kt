@@ -1,4 +1,4 @@
-package me.rocka.fcitx5test.native
+package me.rocka.fcitx5test.core
 
 import android.content.Context
 import android.os.Build
@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.data.DataManager
 import me.rocka.fcitx5test.data.Prefs
+import me.rocka.fcitx5test.data.clipboard.ClipboardManager
 import splitties.resources.str
 import timber.log.Timber
 
@@ -82,6 +83,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         }
 
     suspend fun triggerUnicode() = dispatcher.dispatch { triggerUnicodeInput() }
+    private suspend fun setClipboard(string: String) =
+        dispatcher.dispatch { setFcitxClipboard(string) }
+
     suspend fun focus(focus: Boolean = true) = dispatcher.dispatch { focusInputContext(focus) }
     suspend fun setCapFlags(flags: CapabilityFlags) =
         dispatcher.dispatch { setCapabilityFlags(flags.toLong()) }
@@ -108,11 +112,11 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
             System.loadLibrary("native-lib")
             NativeLib.instance.setup_log_stream {
                 when (it.first()) {
-                    'F' -> Timber.wtf(it)
-                    'D' -> Timber.d(it)
-                    'I' -> Timber.i(it)
-                    'W' -> Timber.w(it)
-                    'E' -> Timber.e(it)
+                    'F' -> Timber.wtf(it.drop(1))
+                    'D' -> Timber.d(it.drop(1))
+                    'I' -> Timber.i(it.drop(1))
+                    'W' -> Timber.w(it.drop(1))
+                    'E' -> Timber.e(it.drop(1))
                     else -> Timber.d(it)
                 }
             }
@@ -205,6 +209,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         external fun triggerUnicodeInput()
 
         @JvmStatic
+        external fun setFcitxClipboard(string: String)
+
+        @JvmStatic
         external fun focusInputContext(focus: Boolean)
 
         @JvmStatic
@@ -226,12 +233,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         @JvmStatic
         fun handleFcitxEvent(type: Int, params: Array<Any>) {
             val event = FcitxEvent.create(type, params)
-            Timber
-                .d(
-                    "Event ${event.eventType}[${params.size}]${
-                        params.take(10).joinToString()
-                    }"
-                )
+            Timber.d("Handling $event")
             if (event is FcitxEvent.ReadyEvent) {
                 if (Prefs.getInstance().firstRun) {
                     // this method runs in same thread with `startupFcitx`
@@ -312,12 +314,16 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
     })
 
+    private val onClipboardUpdate =
+        ClipboardManager.OnClipboardUpdateListener { setClipboard(it.text) }
+
     fun start() {
         if (lifecycle.currentState != FcitxLifecycle.State.STOPPED) {
             Timber.w("Skip starting fcitx: not at stopped state!")
             return
         }
         lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_START)
+        ClipboardManager.addOnUpdateListener(onClipboardUpdate)
         dispatcher.start()
     }
 
@@ -328,6 +334,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         }
         lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_STOP)
         Timber.i("stop")
+        ClipboardManager.removeOnUpdateListener(onClipboardUpdate)
         dispatcher.stop().let {
             if (it.isNotEmpty())
                 Timber.w("${it.size} job(s) didn't get a chance to run!")

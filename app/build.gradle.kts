@@ -22,6 +22,7 @@ plugins {
     id("com.android.application")
     kotlin("android")
     id("kotlin-android")
+    kotlin("kapt")
 }
 
 val dataDescriptorName = "descriptor.json"
@@ -129,6 +130,11 @@ listOf("fcitx5", "fcitx5-chinese-addons").forEach {
 
 
 dependencies {
+    val roomVersion = "2.4.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    annotationProcessor("androidx.room:room-compiler:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
     implementation("net.java.dev.jna:jna:5.10.0@aar")
     implementation("com.jakewharton.timber:timber:5.0.1")
     implementation("androidx.core:core-ktx:1.7.0")

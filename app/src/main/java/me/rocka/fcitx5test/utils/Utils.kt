@@ -1,6 +1,5 @@
 package me.rocka.fcitx5test.utils
 
-import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.Context
 import android.inputmethodservice.InputMethodService
@@ -12,9 +11,9 @@ import android.view.inputmethod.InputConnection
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
 import androidx.viewpager2.widget.ViewPager2
+import com.sun.jna.Library
+import com.sun.jna.Native
 import me.rocka.fcitx5test.FcitxApplication
 
 fun View.allChildren(): List<View> {
@@ -43,3 +42,7 @@ fun Uri.queryFileName(contentResolver: ContentResolver) =
         it.moveToFirst()
         it.getString(index)
     }
+
+inline fun <reified T : Library> nativeLib(name: String): Lazy<T> = lazy {
+    Native.load(name, T::class.java)
+}

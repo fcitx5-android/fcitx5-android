@@ -1,4 +1,4 @@
-package me.rocka.fcitx5test.native
+package me.rocka.fcitx5test.core
 
 sealed class FcitxEvent<T>(open val data: T) {
 

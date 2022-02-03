@@ -1,8 +1,8 @@
 package me.rocka.fcitx5test.ui.main.settings.global
 
 import me.rocka.fcitx5test.R
-import me.rocka.fcitx5test.native.Fcitx
-import me.rocka.fcitx5test.native.RawConfig
+import me.rocka.fcitx5test.core.Fcitx
+import me.rocka.fcitx5test.core.RawConfig
 import me.rocka.fcitx5test.ui.main.settings.FcitxPreferenceFragment
 
 class GlobalConfigFragment : FcitxPreferenceFragment() {

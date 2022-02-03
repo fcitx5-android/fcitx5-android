@@ -22,5 +22,19 @@
             android:title="@string/button_haptic_feedback"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="clipboard_enable"
+            android:title="@string/clipboard_enable"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+        <me.rocka.fcitx5test.ui.common.DialogSeekBarPreference
+            android:defaultValue="5"
+            android:key="clipboard_limit"
+            android:title="@string/clipboard_limit"
+            app:min="1"
+            app:max="50"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
     </PreferenceCategory>
 </PreferenceScreen>

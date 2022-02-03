@@ -1,7 +1,7 @@
 package me.rocka.fcitx5test.ui.main.settings
 
 import androidx.preference.PreferenceDataStore
-import me.rocka.fcitx5test.native.RawConfig
+import me.rocka.fcitx5test.core.RawConfig
 
 class FcitxRawConfigStore(private var cfg: RawConfig) : PreferenceDataStore() {
     override fun getBoolean(key: String?, defValue: Boolean): Boolean {

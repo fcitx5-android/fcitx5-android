@@ -1,7 +1,7 @@
 package me.rocka.fcitx5test.utils.config
 
 import cn.berberman.girls.utils.either.*
-import me.rocka.fcitx5test.native.RawConfig
+import me.rocka.fcitx5test.core.RawConfig
 import me.rocka.fcitx5test.utils.MyParser
 import java.io.Serializable
 

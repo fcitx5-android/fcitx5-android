@@ -16,9 +16,9 @@ import me.rocka.fcitx5test.keyboard.layout.BaseKeyboard
 import me.rocka.fcitx5test.keyboard.layout.KeyAction
 import me.rocka.fcitx5test.keyboard.layout.NumberKeyboard
 import me.rocka.fcitx5test.keyboard.layout.TextKeyboard
-import me.rocka.fcitx5test.native.Fcitx
-import me.rocka.fcitx5test.native.FcitxEvent
-import me.rocka.fcitx5test.native.InputMethodEntry
+import me.rocka.fcitx5test.core.Fcitx
+import me.rocka.fcitx5test.core.FcitxEvent
+import me.rocka.fcitx5test.core.InputMethodEntry
 import me.rocka.fcitx5test.utils.inputConnection
 import splitties.dimensions.dp
 import splitties.resources.str

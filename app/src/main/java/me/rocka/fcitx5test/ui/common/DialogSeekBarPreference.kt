@@ -24,18 +24,29 @@ import splitties.views.gravityHorizontalCenter
  * @property unit The unit to show after the value. Set to an empty string to disable this feature.
  */
 class DialogSeekBarPreference : Preference {
-    var defaultValue: Int = 0
-    var min: Int = 0
-    var max: Int = 100
-    var step: Int = 1
-    var unit: String = ""
+    var defaultValue: Int
+    var min: Int
+    var max: Int
+    var step: Int
+    var unit: String
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) :
             this(context, attrs, R.attr.preferenceStyle)
 
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
-            super(context, attrs, defStyleAttr)
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+        context.theme.obtainStyledAttributes(attrs, R.styleable.DialogSeekBarPreference, 0, 0).run {
+            try {
+                defaultValue = getInteger(R.styleable.DialogSeekBarPreference_android_defaultValue, 0)
+                min = getInteger(R.styleable.DialogSeekBarPreference_min, 0)
+                max = getInteger(R.styleable.DialogSeekBarPreference_max, 100)
+                step = getInteger(R.styleable.DialogSeekBarPreference_step, 1)
+                unit = getString(R.styleable.DialogSeekBarPreference_unit) ?: ""
+            } finally {
+                recycle()
+            }
+        }
+    }
 
     private val currentValue: Int
         get() = preferenceDataStore?.getInt(key, defaultValue) ?: defaultValue

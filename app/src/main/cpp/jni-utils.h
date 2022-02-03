@@ -99,21 +99,21 @@ public:
         Integer = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("java/lang/Integer")));
         IntegerInit = env->GetMethodID(Integer, "<init>", "(I)V");
 
-        Fcitx = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("me/rocka/fcitx5test/native/Fcitx")));
+        Fcitx = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("me/rocka/fcitx5test/core/Fcitx")));
         HandleFcitxEvent = env->GetStaticMethodID(Fcitx, "handleFcitxEvent", "(I[Ljava/lang/Object;)V");
 
-        InputMethodEntry = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("me/rocka/fcitx5test/native/InputMethodEntry")));
+        InputMethodEntry = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("me/rocka/fcitx5test/core/InputMethodEntry")));
         InputMethodEntryInit = env->GetMethodID(InputMethodEntry, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
         InputMethodEntryInitWithSubMode = env->GetMethodID(InputMethodEntry, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
 
-        RawConfig = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("me/rocka/fcitx5test/native/RawConfig")));
+        RawConfig = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("me/rocka/fcitx5test/core/RawConfig")));
         RawConfigName = env->GetFieldID(RawConfig, "name", "Ljava/lang/String;");
         RawConfigValue = env->GetFieldID(RawConfig, "value", "Ljava/lang/String;");
-        RawConfigSubItems = env->GetFieldID(RawConfig, "subItems", "[Lme/rocka/fcitx5test/native/RawConfig;");
-        RawConfigInit = env->GetMethodID(RawConfig, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lme/rocka/fcitx5test/native/RawConfig;)V");
-        RawConfigSetSubItems = env->GetMethodID(RawConfig, "setSubItems", "([Lme/rocka/fcitx5test/native/RawConfig;)V");
+        RawConfigSubItems = env->GetFieldID(RawConfig, "subItems", "[Lme/rocka/fcitx5test/core/RawConfig;");
+        RawConfigInit = env->GetMethodID(RawConfig, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lme/rocka/fcitx5test/core/RawConfig;)V");
+        RawConfigSetSubItems = env->GetMethodID(RawConfig, "setSubItems", "([Lme/rocka/fcitx5test/core/RawConfig;)V");
 
-        AddonInfo = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("me/rocka/fcitx5test/native/AddonInfo")));
+        AddonInfo = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("me/rocka/fcitx5test/core/AddonInfo")));
         AddonInfoInit = env->GetMethodID(AddonInfo, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZZZ)V");
     }
 

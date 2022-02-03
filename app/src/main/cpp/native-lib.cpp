@@ -18,14 +18,12 @@
 #include <quickphrase_public.h>
 #include <punctuation_public.h>
 #include <unicode_public.h>
+#include <clipboard_public.h>
 
 #include "androidfrontend/androidfrontend_public.h"
 #include "jni-utils.h"
 #include "nativestreambuf.h"
 
-static void jniLog(const std::string &s) {
-    __android_log_write(ANDROID_LOG_DEBUG, "JNI", s.c_str());
-}
 
 class Fcitx {
 public:
@@ -64,6 +62,7 @@ public:
         p_quickphrase = addonMgr.addon("quickphrase");
         p_punctuation = addonMgr.addon("punctuation", true);
         p_unicode = addonMgr.addon("unicode");
+        p_clipboard = addonMgr.addon("clipboard", true);
         p_uuid = p_frontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
         setupCallback(p_frontend);
     }
@@ -314,6 +313,11 @@ public:
         p_unicode->call<fcitx::IUnicode::trigger>(ic);
     }
 
+    void setClipboard(const std::string &string) {
+        if (!p_clipboard) return;
+        p_clipboard->call<fcitx::IClipboard::setClipboard>("", string);
+    }
+
     void focusInputContext(bool focus) {
         if (!p_frontend) return;
         p_frontend->call<fcitx::IAndroidFrontend::focusInputContext>(p_uuid, focus);
@@ -344,6 +348,7 @@ private:
     fcitx::AddonInstance *p_quickphrase = nullptr;
     fcitx::AddonInstance *p_punctuation = nullptr;
     fcitx::AddonInstance *p_unicode = nullptr;
+    fcitx::AddonInstance *p_clipboard = nullptr;
     fcitx::ICUUID p_uuid{};
 
     void resetGlobalPointers() {
@@ -353,6 +358,7 @@ private:
         p_quickphrase = nullptr;
         p_punctuation = nullptr;
         p_unicode = nullptr;
+        p_clipboard = nullptr;
         p_uuid = {};
     }
 };
@@ -360,7 +366,7 @@ private:
 
 #define DO_IF_NOT_RUNNING(expr) \
     if (!Fcitx::Instance().isRunning()) { \
-        jniLog("fcitx is not running!"); \
+        FCITX_WARN() << "Fcitx is not running!"; \
         expr; \
     }
 #define RETURN_IF_NOT_RUNNING DO_IF_NOT_RUNNING(return)
@@ -389,18 +395,19 @@ extern "C" void setup_log_stream(log_callback_t callback) {
     log_streambuf.set_callback(callback);
     static std::ostream stream(&log_streambuf);
     fcitx::Log::setLogStream(stream);
+    fcitx::Log::setLogRule("notimedate");
 }
 
 jobject fcitxInputMethodEntryWithSubModeToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry, const std::vector<std::string> &subMode);
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, jstring locale, jstring appData, jstring appLib, jstring extData) {
+Java_me_rocka_fcitx5test_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, jstring locale, jstring appData, jstring appLib, jstring extData) {
     if (Fcitx::Instance().isRunning()) {
-        jniLog("startupFcitx: already running!");
+        FCITX_WARN() << "Fcitx is already running!";
         return;
     }
-    jniLog("startupFcitx: starting...");
+    FCITX_INFO() << "Starting...";
 
     setenv("SKIP_FCITX_PATH", "true", 1);
 
@@ -496,7 +503,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
     };
 
     Fcitx::Instance().startup([&](auto *androidfrontend) {
-        jniLog("startupFcitx: setupCallback");
+        FCITX_INFO() << "Setting up callback";
         readyCallback();
         androidfrontend->template call<fcitx::IAndroidFrontend::setCandidateListCallback>(candidateListCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setCommitStringCallback>(commitStringCallback);
@@ -505,26 +512,26 @@ Java_me_rocka_fcitx5test_native_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, js
         androidfrontend->template call<fcitx::IAndroidFrontend::setKeyEventCallback>(keyEventCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setInputMethodChangeCallback>(imChangeCallback);
     });
-    jniLog("startupFcitx done");
+    FCITX_INFO() << "Finishing startup";
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_exitFcitx(JNIEnv *env, jclass clazz) {
+Java_me_rocka_fcitx5test_core_Fcitx_exitFcitx(JNIEnv *env, jclass clazz) {
     RETURN_IF_NOT_RUNNING
     Fcitx::Instance().exit();
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_saveFcitxState(JNIEnv *env, jclass clazz) {
+Java_me_rocka_fcitx5test_core_Fcitx_saveFcitxState(JNIEnv *env, jclass clazz) {
     RETURN_IF_NOT_RUNNING
     Fcitx::Instance().save();
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_sendKeyToFcitxString(JNIEnv *env, jclass clazz, jstring key) {
+Java_me_rocka_fcitx5test_core_Fcitx_sendKeyToFcitxString(JNIEnv *env, jclass clazz, jstring key) {
     RETURN_IF_NOT_RUNNING
     const char *k = env->GetStringUTFChars(key, nullptr);
     fcitx::Key parsedKey(k);
@@ -534,7 +541,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_sendKeyToFcitxString(JNIEnv *env, jclass c
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_sendKeyToFcitxChar(JNIEnv *env, jclass clazz, jchar c) {
+Java_me_rocka_fcitx5test_core_Fcitx_sendKeyToFcitxChar(JNIEnv *env, jclass clazz, jchar c) {
     RETURN_IF_NOT_RUNNING
     fcitx::Key parsedKey((const char *) &c);
     Fcitx::Instance().sendKey(parsedKey);
@@ -542,7 +549,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_sendKeyToFcitxChar(JNIEnv *env, jclass cla
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_sendKeyToFcitxInt(JNIEnv *env, jclass clazz, jint i) {
+Java_me_rocka_fcitx5test_core_Fcitx_sendKeyToFcitxInt(JNIEnv *env, jclass clazz, jint i) {
     RETURN_IF_NOT_RUNNING
     auto key = fcitx::Key::fromKeyCode(i);
     Fcitx::Instance().sendKey(key);
@@ -550,36 +557,36 @@ Java_me_rocka_fcitx5test_native_Fcitx_sendKeyToFcitxInt(JNIEnv *env, jclass claz
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_selectCandidate(JNIEnv *env, jclass clazz, jint idx) {
+Java_me_rocka_fcitx5test_core_Fcitx_selectCandidate(JNIEnv *env, jclass clazz, jint idx) {
     RETURN_IF_NOT_RUNNING
-    jniLog("selectCandidate: #" + std::to_string(idx));
+    FCITX_INFO() << "selectCandidate: #" << idx;
     Fcitx::Instance().select(idx);
 }
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_isInputPanelEmpty(JNIEnv *env, jclass clazz) {
+Java_me_rocka_fcitx5test_core_Fcitx_isInputPanelEmpty(JNIEnv *env, jclass clazz) {
     RETURN_VALUE_IF_NOT_RUNNING(true)
     return Fcitx::Instance().isInputPanelEmpty();
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_resetInputContext(JNIEnv *env, jclass clazz) {
+Java_me_rocka_fcitx5test_core_Fcitx_resetInputContext(JNIEnv *env, jclass clazz) {
     RETURN_IF_NOT_RUNNING
     Fcitx::Instance().resetInputContext();
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_repositionCursor(JNIEnv *env, jclass clazz, jint position) {
-    jniLog("repositionCursor: to " + std::to_string(position));
+Java_me_rocka_fcitx5test_core_Fcitx_repositionCursor(JNIEnv *env, jclass clazz, jint position) {
+    FCITX_INFO() << "repositionCursor: to " << position;
     Fcitx::Instance().repositionCursor(position);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_nextInputMethod(JNIEnv *env, jclass clazz, jboolean forward) {
+Java_me_rocka_fcitx5test_core_Fcitx_nextInputMethod(JNIEnv *env, jclass clazz, jboolean forward) {
     RETURN_IF_NOT_RUNNING
     Fcitx::Instance().nextInputMethod(forward == JNI_TRUE);
 }
@@ -609,7 +616,7 @@ jobjectArray fcitxInputMethodEntriesToJObjectArray(JNIEnv *env, const std::vecto
 
 extern "C"
 JNIEXPORT jobjectArray JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_listInputMethods(JNIEnv *env, jclass clazz) {
+Java_me_rocka_fcitx5test_core_Fcitx_listInputMethods(JNIEnv *env, jclass clazz) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     const auto entries = Fcitx::Instance().listInputMethods();
     return fcitxInputMethodEntriesToJObjectArray(env, entries);
@@ -634,7 +641,7 @@ jobject fcitxInputMethodEntryWithSubModeToJObject(JNIEnv *env, const fcitx::Inpu
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_inputMethodStatus(JNIEnv *env, jclass clazz) {
+Java_me_rocka_fcitx5test_core_Fcitx_inputMethodStatus(JNIEnv *env, jclass clazz) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     const auto &status = Fcitx::Instance().inputMethodStatus();
     return fcitxInputMethodEntryWithSubModeToJObject(env, std::get<0>(status), std::get<1>(status));
@@ -642,14 +649,14 @@ Java_me_rocka_fcitx5test_native_Fcitx_inputMethodStatus(JNIEnv *env, jclass claz
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_setInputMethod(JNIEnv *env, jclass clazz, jstring ime) {
+Java_me_rocka_fcitx5test_core_Fcitx_setInputMethod(JNIEnv *env, jclass clazz, jstring ime) {
     RETURN_IF_NOT_RUNNING
     Fcitx::Instance().setInputMethod(jstringToString(env, ime));
 }
 
 extern "C"
 JNIEXPORT jobjectArray JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_availableInputMethods(JNIEnv *env, jclass clazz) {
+Java_me_rocka_fcitx5test_core_Fcitx_availableInputMethods(JNIEnv *env, jclass clazz) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     auto entries = Fcitx::Instance().availableInputMethods();
     return fcitxInputMethodEntriesToJObjectArray(env, entries);
@@ -657,7 +664,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_availableInputMethods(JNIEnv *env, jclass 
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_setEnabledInputMethods(JNIEnv *env, jclass clazz, jobjectArray array) {
+Java_me_rocka_fcitx5test_core_Fcitx_setEnabledInputMethods(JNIEnv *env, jclass clazz, jobjectArray array) {
     RETURN_IF_NOT_RUNNING
     int size = env->GetArrayLength(array);
     std::vector<std::string> entries;
@@ -692,7 +699,7 @@ jobject fcitxRawConfigToJObject(JNIEnv *env, const fcitx::RawConfig &cfg) {
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_getFcitxGlobalConfig(JNIEnv *env, jclass clazz) {
+Java_me_rocka_fcitx5test_core_Fcitx_getFcitxGlobalConfig(JNIEnv *env, jclass clazz) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     auto cfg = Fcitx::Instance().getGlobalConfig();
     return fcitxRawConfigToJObject(env, cfg);
@@ -701,7 +708,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_getFcitxGlobalConfig(JNIEnv *env, jclass c
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddonConfig(JNIEnv *env, jclass clazz, jstring addon) {
+Java_me_rocka_fcitx5test_core_Fcitx_getFcitxAddonConfig(JNIEnv *env, jclass clazz, jstring addon) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     auto result = Fcitx::Instance().getAddonConfig(jstringToString(env, addon));
     return result ? fcitxRawConfigToJObject(env, *result) : nullptr;
@@ -709,7 +716,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddonConfig(JNIEnv *env, jclass cl
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_getFcitxInputMethodConfig(JNIEnv *env, jclass clazz, jstring im) {
+Java_me_rocka_fcitx5test_core_Fcitx_getFcitxInputMethodConfig(JNIEnv *env, jclass clazz, jstring im) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     auto result = Fcitx::Instance().getInputMethodConfig(jstringToString(env, im));
     return result ? fcitxRawConfigToJObject(env, *result) : nullptr;
@@ -744,7 +751,7 @@ fcitx::RawConfig jobjectToRawConfig(JNIEnv *env, jobject jConfig) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_setFcitxGlobalConfig(JNIEnv *env, jclass clazz, jobject config) {
+Java_me_rocka_fcitx5test_core_Fcitx_setFcitxGlobalConfig(JNIEnv *env, jclass clazz, jobject config) {
     RETURN_IF_NOT_RUNNING
     auto rawConfig = jobjectToRawConfig(env, config);
     Fcitx::Instance().setGlobalConfig(rawConfig);
@@ -752,7 +759,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_setFcitxGlobalConfig(JNIEnv *env, jclass c
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_setFcitxAddonConfig(JNIEnv *env, jclass clazz, jstring addon, jobject config) {
+Java_me_rocka_fcitx5test_core_Fcitx_setFcitxAddonConfig(JNIEnv *env, jclass clazz, jstring addon, jobject config) {
     RETURN_IF_NOT_RUNNING
     auto rawConfig = jobjectToRawConfig(env, config);
     Fcitx::Instance().setAddonConfig(jstringToString(env, addon), rawConfig);
@@ -760,7 +767,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_setFcitxAddonConfig(JNIEnv *env, jclass cl
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_setFcitxInputMethodConfig(JNIEnv *env, jclass clazz, jstring im, jobject config) {
+Java_me_rocka_fcitx5test_core_Fcitx_setFcitxInputMethodConfig(JNIEnv *env, jclass clazz, jstring im, jobject config) {
     RETURN_IF_NOT_RUNNING
     auto rawConfig = jobjectToRawConfig(env, config);
     Fcitx::Instance().setInputMethodConfig(jstringToString(env, im), rawConfig);
@@ -768,7 +775,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_setFcitxInputMethodConfig(JNIEnv *env, jcl
 
 extern "C"
 JNIEXPORT jobjectArray JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddons(JNIEnv *env, jclass clazz) {
+Java_me_rocka_fcitx5test_core_Fcitx_getFcitxAddons(JNIEnv *env, jclass clazz) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     const auto &addons = Fcitx::Instance().getAddons();
     jobjectArray array = env->NewObjectArray(static_cast<int>(addons.size()), GlobalRef->AddonInfo, nullptr);
@@ -792,12 +799,12 @@ Java_me_rocka_fcitx5test_native_Fcitx_getFcitxAddons(JNIEnv *env, jclass clazz) 
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_setFcitxAddonState(JNIEnv *env, jclass clazz, jobjectArray name, jbooleanArray state) {
+Java_me_rocka_fcitx5test_core_Fcitx_setFcitxAddonState(JNIEnv *env, jclass clazz, jobjectArray name, jbooleanArray state) {
     RETURN_IF_NOT_RUNNING
     int nameLength = env->GetArrayLength(name);
     int stateLength = env->GetArrayLength(state);
     if (nameLength != stateLength) {
-        jniLog("setFcitxAddonState: name and state length mismatch");
+        FCITX_WARN() << "Addon name and state length mismatch!";
         return;
     }
     std::map<std::string, bool> map;
@@ -813,13 +820,13 @@ Java_me_rocka_fcitx5test_native_Fcitx_setFcitxAddonState(JNIEnv *env, jclass cla
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_triggerQuickPhraseInput(JNIEnv *env, jclass clazz) {
+Java_me_rocka_fcitx5test_core_Fcitx_triggerQuickPhraseInput(JNIEnv *env, jclass clazz) {
     Fcitx::Instance().triggerQuickPhrase();
 }
 
 extern "C"
 JNIEXPORT jobjectArray JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_queryPunctuation(JNIEnv *env, jclass clazz, jchar c, jstring language) {
+Java_me_rocka_fcitx5test_core_Fcitx_queryPunctuation(JNIEnv *env, jclass clazz, jchar c, jstring language) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     const auto pair = Fcitx::Instance().queryPunctuation(c, jstringToString(env, language));
     jobjectArray array = env->NewObjectArray(2, GlobalRef->String, nullptr);
@@ -830,21 +837,28 @@ Java_me_rocka_fcitx5test_native_Fcitx_queryPunctuation(JNIEnv *env, jclass clazz
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_triggerUnicodeInput(JNIEnv *env, jclass clazz) {
+Java_me_rocka_fcitx5test_core_Fcitx_triggerUnicodeInput(JNIEnv *env, jclass clazz) {
     RETURN_IF_NOT_RUNNING
     Fcitx::Instance().triggerUnicode();
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_focusInputContext(JNIEnv *env, jclass clazz, jboolean focus) {
+Java_me_rocka_fcitx5test_core_Fcitx_setFcitxClipboard(JNIEnv *env, jclass clazz, jstring string) {
+    RETURN_IF_NOT_RUNNING
+    Fcitx::Instance().setClipboard(jstringToString(env, string));
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_rocka_fcitx5test_core_Fcitx_focusInputContext(JNIEnv *env, jclass clazz, jboolean focus) {
     RETURN_IF_NOT_RUNNING
     Fcitx::Instance().focusInputContext(focus == JNI_TRUE);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_setCapabilityFlags(JNIEnv *env, jclass clazz, jlong flags) {
+Java_me_rocka_fcitx5test_core_Fcitx_setCapabilityFlags(JNIEnv *env, jclass clazz, jlong flags) {
     RETURN_IF_NOT_RUNNING
     uint64_t u;
     std::memcpy(&u, &flags, sizeof(uint64_t));
@@ -853,7 +867,7 @@ Java_me_rocka_fcitx5test_native_Fcitx_setCapabilityFlags(JNIEnv *env, jclass cla
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_setAddonSubConfig(JNIEnv *env, jclass clazz, jstring addon, jstring path, jobject config) {
+Java_me_rocka_fcitx5test_core_Fcitx_setAddonSubConfig(JNIEnv *env, jclass clazz, jstring addon, jstring path, jobject config) {
     RETURN_IF_NOT_RUNNING
     auto rawConfig = jobjectToRawConfig(env, config);
     Fcitx::Instance().setAddonSubConfig(jstringToString(env, addon), jstringToString(env, path), rawConfig);
@@ -861,12 +875,12 @@ Java_me_rocka_fcitx5test_native_Fcitx_setAddonSubConfig(JNIEnv *env, jclass claz
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_loopOnce(JNIEnv *env, jclass clazz) {
+Java_me_rocka_fcitx5test_core_Fcitx_loopOnce(JNIEnv *env, jclass clazz) {
     Fcitx::Instance().loopOnce();
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_rocka_fcitx5test_native_Fcitx_scheduleEmpty(JNIEnv *env, jclass clazz) {
+Java_me_rocka_fcitx5test_core_Fcitx_scheduleEmpty(JNIEnv *env, jclass clazz) {
     Fcitx::Instance().scheduleEmpty();
 }
