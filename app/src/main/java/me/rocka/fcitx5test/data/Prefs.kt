@@ -36,7 +36,6 @@ class Prefs(private val sharedPreferences: SharedPreferences) {
     var hideKeyConfig by preference(HideKeyConfig, true)
     var buttonHapticFeedback by preference(ButtonHapticFeedback, true)
     var clipboard by preference(Clipboard, true)
-    // TODO: add to preferences ui
     var clipboardHistoryLimit by preference(ClipboardHistoryLimit, 5)
 
     object PreferenceKeys {
