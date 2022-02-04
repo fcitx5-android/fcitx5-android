@@ -18,7 +18,6 @@ import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
 import splitties.resources.styledColor
 import splitties.resources.styledColorSL
-import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.button
 import splitties.views.dsl.core.imageButton
@@ -38,7 +37,6 @@ abstract class BaseKeyboard(
 
     init {
         with(context) {
-            backgroundColor = styledColor(android.R.attr.colorBackground)
             val keyRows = keyLayout.map { row ->
                 val keyButtons = row.map { key ->
                     createButton(context, key).apply Button@{
