@@ -152,28 +152,14 @@ class InputView(
     }
 
     fun updatePreedit(content: PreeditContent) {
-        val start = content.aux.auxUp + content.preedit.preedit
-        val end = content.aux.auxDown
-        val hasStart = start.isNotEmpty()
-        val hasEnd = end.isNotEmpty()
         currentKeyboard.onPreeditChange(service.editorInfo, content)
-        preeditUi.run {
-            before.alpha = if (hasStart) 1f else 0f
-            after.alpha = if (hasEnd) 1f else 0f
-            before.text = start
-            after.text = end
-        }
+        preeditUi.update(content)
         preeditPopup.run {
-            if ((!hasStart) && (!hasEnd)) {
+            if (!preeditUi.visible) {
                 dismiss()
                 return
             }
-            val widthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY)
-            val heightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
-            val height = preeditUi.root.run {
-                measure(widthSpec, heightSpec)
-                measuredHeight
-            }
+            val height = preeditUi.measureHeight(width)
             if (isShowing) {
                 update(
                     0, -height,
