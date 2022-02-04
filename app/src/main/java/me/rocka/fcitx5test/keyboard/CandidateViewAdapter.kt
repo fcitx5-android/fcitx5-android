@@ -1,15 +1,18 @@
 package me.rocka.fcitx5test.keyboard
 
 import android.annotation.SuppressLint
+import android.graphics.Paint
+import android.graphics.Rect
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import splitties.dimensions.dp
+import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.textView
-import splitties.views.dsl.core.wrapContent
-import splitties.views.gravityVerticalCenter
+import splitties.views.gravityCenter
 import splitties.views.horizontalPadding
 
 abstract class CandidateViewAdapter :
@@ -25,13 +28,27 @@ abstract class CandidateViewAdapter :
             field = value
             notifyDataSetChanged()
         }
+    private val measuredWidths = mutableMapOf<String, Float>()
+
+    fun measureWidth(position: Int): Float {
+        val candidate = candidates[position]
+        return measuredWidths[candidate] ?: run {
+            val paint = Paint()
+            val bounds = Rect()
+            paint.textSize = 20f
+            paint.getTextBounds(candidate, 0, candidate.length, bounds)
+            (bounds.width() / 20f).also { measuredWidths[candidate] = it }
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = parent.context.textView {
-            layoutParams = ViewGroup.LayoutParams(wrapContent, dp(40))
-            gravity = gravityVerticalCenter
-            horizontalPadding = dp(10)
+            layoutParams = GridLayoutManager.LayoutParams(matchParent, dp(40))
+            gravity = gravityCenter
+            horizontalPadding = dp(8)
             textSize = 20f // sp
+            minWidth = dp(50)
+            isSingleLine = true
         }
         return ViewHolder(view).apply {
             itemView.setOnClickListener { onSelect(this.idx) }

@@ -5,20 +5,24 @@ import android.os.Build
 import android.util.DisplayMetrics
 import android.view.Gravity
 import android.view.WindowManager
-import android.widget.LinearLayout
+import android.widget.FrameLayout
+import android.widget.ImageButton
 import android.widget.PopupWindow
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.PagerSnapHelper
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
+import me.rocka.fcitx5test.core.Fcitx
+import me.rocka.fcitx5test.core.FcitxEvent
+import me.rocka.fcitx5test.core.InputMethodEntry
 import me.rocka.fcitx5test.keyboard.layout.BaseKeyboard
 import me.rocka.fcitx5test.keyboard.layout.KeyAction
 import me.rocka.fcitx5test.keyboard.layout.NumberKeyboard
 import me.rocka.fcitx5test.keyboard.layout.TextKeyboard
-import me.rocka.fcitx5test.core.Fcitx
-import me.rocka.fcitx5test.core.FcitxEvent
-import me.rocka.fcitx5test.core.InputMethodEntry
 import me.rocka.fcitx5test.utils.inputConnection
 import splitties.dimensions.dp
 import splitties.resources.str
@@ -26,13 +30,18 @@ import splitties.resources.styledColor
 import splitties.systemservices.inputMethodManager
 import splitties.systemservices.windowManager
 import splitties.views.backgroundColor
+import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
+import splitties.views.dsl.recyclerview.recyclerView
+import splitties.views.imageResource
+import kotlin.math.ceil
+import kotlin.math.min
 
 @SuppressLint("ViewConstructor")
 class InputView(
     val service: FcitxInputMethodService,
     val fcitx: Fcitx
-) : LinearLayout(service) {
+) : ConstraintLayout(service) {
 
     data class PreeditContent(
         var preedit: FcitxEvent.PreeditEvent.Data,
@@ -62,11 +71,60 @@ class InputView(
             service.lifecycleScope.launch { fcitx.select(idx) }
         }
     }
-    private val candidateView = themedContext.view(::RecyclerView, R.id.candidate_list) {
+    private var candidateViewExpanded = false
+    private val candidateView = themedContext.recyclerView(R.id.candidate_view) {
+        isVerticalScrollBarEnabled = false
         backgroundColor = styledColor(android.R.attr.colorBackground)
-        layoutManager = LinearLayoutManager(null, RecyclerView.HORIZONTAL, false)
+        // fixed 6 columns
+        layoutManager = object : GridLayoutManager(themedContext, 6, VERTICAL, false) {
+            override fun canScrollVertically() =
+                if (!candidateViewExpanded) false else super.canScrollVertically()
+        }.apply {
+            spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int {
+                    // two words per span
+                    return min(ceil(candidateViewAdp.measureWidth(position) / 2).toInt(), spanCount)
+                }
+
+            }
+        }
         adapter = candidateViewAdp
+        addItemDecoration(
+            DividerItemDecoration(
+                themedContext,
+                DividerItemDecoration.HORIZONTAL
+            ).apply {
+                setDrawable(
+                    ResourcesCompat.getDrawable(
+                        resources,
+                        R.drawable.candidate_divider,
+                        context.theme
+                    )!!
+                )
+            })
+        PagerSnapHelper().attachToRecyclerView(this)
     }
+    private val expandCandidateButton = themedContext.imageButton(R.id.expand_candidate_btn) {
+        elevation = dp(2f)
+        imageResource = R.drawable.ic_baseline_expand_more_24
+        setOnClickListener {
+            candidateViewExpanded = !candidateViewExpanded
+            val btn = it as ImageButton
+            val lp = candidateView.layoutParams as LayoutParams
+            if (candidateViewExpanded) {
+                btn.imageResource = R.drawable.ic_baseline_expand_less_24
+                lp.bottomToBottom = LayoutParams.PARENT_ID
+                lp.height = matchConstraints
+            } else {
+                btn.imageResource = R.drawable.ic_baseline_expand_more_24
+                lp.bottomToBottom = LayoutParams.UNSET
+                lp.height = dp(40)
+                candidateView.scrollToPosition(0)
+            }
+            candidateView.requestLayout()
+        }
+    }
+    private val keyboardView = themedContext.frameLayout(R.id.keyboard_view)
 
     private val keyboards: HashMap<String, BaseKeyboard> = hashMapOf(
         "qwerty" to TextKeyboard(themedContext),
@@ -93,8 +151,23 @@ class InputView(
                 it.widthPixels
             }
         }
-        orientation = VERTICAL
-        add(candidateView, lParams(matchParent, dp(40)))
+        backgroundColor = themedContext.styledColor(android.R.attr.colorBackground)
+        add(expandCandidateButton, lParams(matchConstraints, dp(40)) {
+            matchConstraintPercentWidth = 0.1f
+            topOfParent()
+            endOfParent()
+        })
+        add(keyboardView, lParams(matchParent, wrapContent) {
+            below(expandCandidateButton)
+            startOfParent()
+            endOfParent()
+            bottomOfParent()
+        })
+        add(candidateView, lParams(matchConstraints, dp(40)) {
+            topOfParent()
+            startOfParent()
+            before(expandCandidateButton)
+        })
         switchLayout("qwerty")
     }
 
@@ -174,22 +247,22 @@ class InputView(
 
     private fun updateCandidates(data: Array<String>) {
         candidateViewAdp.candidates = data
-        candidateView.layoutManager?.scrollToPosition(0)
+        candidateView.scrollToPosition(0)
     }
 
     private fun switchLayout(to: String) {
         keyboards[currentKeyboardName]?.let {
             it.keyActionListener = null
             it.onDetach()
-            removeView(it)
+            keyboardView.removeView(it)
         }
-        currentKeyboardName = if (to.isNotEmpty()) {
-            to
-        } else when (currentKeyboardName) {
-            "qwerty" -> "number"
-            else -> "qwerty"
+        currentKeyboardName = to.ifEmpty {
+            when (currentKeyboardName) {
+                "qwerty" -> "number"
+                else -> "qwerty"
+            }
         }
-        add(currentKeyboard, lParams(matchParent, wrapContent))
+        keyboardView.add(currentKeyboard, FrameLayout.LayoutParams(matchParent, wrapContent))
         currentKeyboard.keyActionListener = keyActionListener
         currentKeyboard.onAttach(service.editorInfo)
         currentKeyboard.onInputMethodChange(currentIme)
