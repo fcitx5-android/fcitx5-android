@@ -1,0 +1,1 @@
+../../../../../../../cpp/fcitx5-chinese-addons/im/pinyin/pinyin.lua
