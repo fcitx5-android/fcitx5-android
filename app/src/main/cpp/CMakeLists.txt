@@ -28,11 +28,6 @@ set(Libevent_DIR "${PREBUILT_DIR}/libevent/${ANDROID_ABI}/lib/cmake/libevent")
 set(LIBEVENT_STATIC_LINK ON)
 find_package(Libevent)
 
-# prebuilt lua
-set(LUA_LIBRARY "${PREBUILT_DIR}/lua/${ANDROID_ABI}/lib/liblua.a")
-set(LUA_LIBRARIES "${LUA_LIBRARY}")
-set(LUA_INCLUDE_DIR "${PREBUILT_DIR}/lua/include")
-
 option(ENABLE_TEST "" OFF)
 option(ENABLE_COVERAGE "" OFF)
 option(ENABLE_ENCHANT "" OFF)
@@ -64,6 +59,13 @@ option(ENABLE_TEST "" OFF)
 set(_Fcitx5Macro_SELF_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fcitx5/src/lib/fcitx-utils)
 add_subdirectory(libime)
 
+# prebuilt lua
+include("${PREBUILT_DIR}/lua/${ANDROID_ABI}/lib/cmake/LuaConfig.cmake")
+
+# we are using static linking
+option(USE_DLOPEN "" OFF)
+add_subdirectory(fcitx5-lua)
+
 option(ENABLE_TEST "" OFF)
 option(ENABLE_OPENCC "" OFF)
 option(ENABLE_GUI "" OFF)
@@ -73,10 +75,6 @@ option(ENABLE_CLOUDPINYIN "" OFF)
 add_subdirectory(fcitx5-chinese-addons)
 # rename to include this executable in apk
 set_target_properties(scel2org5 PROPERTIES OUTPUT_NAME libscel2org5.so)
-
-# we are using static linking
-set(USE_DLOPEN OFF CACHE BOOL "" FORCE)
-add_subdirectory(fcitx5-lua)
 
 add_library(native-lib SHARED native-lib.cpp)
 target_link_libraries(native-lib
