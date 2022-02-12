@@ -6,12 +6,20 @@ set(ANDROID_STL c++_shared)
 
 set(CMAKE_CXX_STANDARD 17)
 
+set(CMAKE_INSTALL_PREFIX /usr)
+
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 # extra-cmake-modules
 if (DEFINED ENV{ECM_DIR})
     set(ECM_DIR $ENV{ECM_DIR})
 else ()
     set(ECM_DIR /usr/share/ECM/cmake)
+endif ()
+# msgfmt
+if (DEFINED ENV{MSGFMT})
+    set(GETTEXT_MSGFMT_EXECUTABLE $ENV{MSGFMT})
+else ()
+    set(GETTEXT_MSGFMT_EXECUTABLE msgfmt)
 endif ()
 
 set(PREBUILT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/prebuilt")

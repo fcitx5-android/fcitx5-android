@@ -1,4 +1,3 @@
-import com.android.build.gradle.internal.tasks.factory.dependsOn
 import com.google.common.hash.Hashing
 import com.google.common.io.Files
 import groovy.json.JsonOutput
@@ -27,6 +26,9 @@ plugins {
 
 val dataDescriptorName = "descriptor.json"
 
+val targetABI = System.getenv("ABI")
+    ?.takeIf { it.isNotBlank() }
+
 android {
     compileSdk = 31
     buildToolsVersion = "31.0.0"
@@ -47,6 +49,11 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        if (targetABI == null)
+            ndk {
+                abiFilters.add("arm64-v8a")
+            }
     }
 
     buildTypes {
@@ -75,13 +82,11 @@ android {
 
     splits {
         abi {
-            isEnable = true
-            System.getenv("ABI")
-                ?.takeIf { it.isNotBlank() }
-                ?.let {
-                    reset()
-                    include(it)
-                }
+            targetABI?.let {
+                isEnable = true
+                reset()
+                include(it)
+            }
         }
     }
 
@@ -112,15 +117,24 @@ android {
     }
 }
 
-val generateDataDescriptor = tasks.register<DataDescriptorTask>("generateDataDescriptor") {
+val generateDataDescriptor by tasks.register<DataDescriptorTask>("generateDataDescriptor") {
     inputDir.set(file("src/main/assets"))
     outputFile.set(file("src/main/assets/${dataDescriptorName}"))
+}
 
-}.also { tasks.preBuild.dependsOn(it) }
-
+android.applicationVariants.all {
+    val variantName = name.capitalize()
+    val cmakeVariantName = if (variantName == "Debug") "Debug" else "RelWithDebInfo"
+    val buildCMakeABITask = tasks.find { it.name.startsWith("buildCMake${cmakeVariantName}[") }
+        ?: throw RuntimeException("No cmake build task!")
+    val cmakeDir = buildCMakeABITask.outputs.files.first().parentFile
+    if (cmakeDir.exists() && cmakeDir.isDirectory)
+        ext.set("cmakeDir", cmakeDir)
+    tasks.findByName("merge${variantName}Assets")?.dependsOn(generateDataDescriptor)
+}
 
 listOf("fcitx5", "fcitx5-chinese-addons").forEach {
-    val task = tasks.register<MsgFmtTask>("MsgFmt-$it") {
+    val task by tasks.register<MsgFmtTask>("MsgFmt-$it") {
         domain.set(it)
         inputDir.set(file("src/main/cpp/$it/po"))
         outputDir.set(file("src/main/assets/usr/share/locale"))
@@ -128,6 +142,30 @@ listOf("fcitx5", "fcitx5-chinese-addons").forEach {
     generateDataDescriptor.dependsOn(task)
 }
 
+fun installFcitxComponent(targetName: String, componentName: String) {
+    // Deliberately use doLast to wait ext be set
+    val build by tasks.register("buildFcitx${componentName.capitalize()}") {
+        doLast {
+            exec {
+                workingDir = ext.get("cmakeDir") as File
+                commandLine("cmake", "--build", ".", "--target", targetName)
+            }
+        }
+    }
+
+    tasks.register("installFcitx${componentName.capitalize()}") {
+        doLast {
+            exec {
+                environment("DESTDIR", file("src/main/assets").absolutePath)
+                workingDir = ext.get("cmakeDir") as File
+                commandLine("cmake", "--install", ".", "--component", componentName)
+            }
+        }
+        dependsOn(build)
+    }.also { generateDataDescriptor.dependsOn(it) }
+}
+
+installFcitxComponent("generate-desktop-file", "config")
 
 dependencies {
     val roomVersion = "2.4.1"
