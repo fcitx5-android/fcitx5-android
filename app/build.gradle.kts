@@ -117,19 +117,25 @@ android {
     }
 }
 
+
+// This task should have depended on buildCMakeABITask
+val installFcitxComponent by tasks.register("installFcitxComponent")
+
 val generateDataDescriptor by tasks.register<DataDescriptorTask>("generateDataDescriptor") {
     inputDir.set(file("src/main/assets"))
     outputFile.set(file("src/main/assets/${dataDescriptorName}"))
+    dependsOn(installFcitxComponent)
 }
-
+project.gradle.taskGraph.whenReady {
+    val buildCMakeABITask = allTasks
+        .find { it.name.startsWith("buildCMakeDebug[") || it.name.startsWith("buildCMakeRelWithDebInfo[") }
+    if (buildCMakeABITask != null) {
+        val cmakeDir = buildCMakeABITask.outputs.files.first().parentFile
+        ext.set("cmakeDir", cmakeDir)
+    }
+}
 android.applicationVariants.all {
     val variantName = name.capitalize()
-    val cmakeVariantName = if (variantName == "Debug") "Debug" else "RelWithDebInfo"
-    val buildCMakeABITask = tasks.find { it.name.startsWith("buildCMake${cmakeVariantName}[") }
-        ?: throw RuntimeException("No cmake build task!")
-    val cmakeDir = buildCMakeABITask.outputs.files.first().parentFile
-    if (cmakeDir.exists() && cmakeDir.isDirectory)
-        ext.set("cmakeDir", cmakeDir)
     tasks.findByName("merge${variantName}Assets")?.dependsOn(generateDataDescriptor)
 }
 
@@ -142,7 +148,7 @@ listOf("fcitx5", "fcitx5-chinese-addons").forEach {
     generateDataDescriptor.dependsOn(task)
 }
 
-fun installFcitxComponent(targetName: String, componentName: String) {
+fun installFcitxComponent(targetName: String, componentName: String, destDir: File) {
     // Deliberately use doLast to wait ext be set
     val build by tasks.register("buildFcitx${componentName.capitalize()}") {
         doLast {
@@ -156,16 +162,18 @@ fun installFcitxComponent(targetName: String, componentName: String) {
     tasks.register("installFcitx${componentName.capitalize()}") {
         doLast {
             exec {
-                environment("DESTDIR", file("src/main/assets").absolutePath)
+                environment("DESTDIR", destDir.absolutePath)
                 workingDir = ext.get("cmakeDir") as File
                 commandLine("cmake", "--install", ".", "--component", componentName)
             }
         }
         dependsOn(build)
-    }.also { generateDataDescriptor.dependsOn(it) }
+    }.also { installFcitxComponent.dependsOn(it) }
 }
 
-installFcitxComponent("generate-desktop-file", "config")
+// TODO: fix install path
+installFcitxComponent("generate-desktop-file", "config", file("src/main/assets"))
+installFcitxComponent("translation-file", "translation", file("src/main/assets"))
 
 dependencies {
     val roomVersion = "2.4.1"
