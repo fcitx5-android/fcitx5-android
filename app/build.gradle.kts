@@ -139,15 +139,6 @@ android.applicationVariants.all {
     tasks.findByName("merge${variantName}Assets")?.dependsOn(generateDataDescriptor)
 }
 
-listOf("fcitx5", "fcitx5-chinese-addons").forEach {
-    val task by tasks.register<MsgFmtTask>("MsgFmt-$it") {
-        domain.set(it)
-        inputDir.set(file("src/main/cpp/$it/po"))
-        outputDir.set(file("src/main/assets/usr/share/locale"))
-    }
-    generateDataDescriptor.dependsOn(task)
-}
-
 fun installFcitxComponent(targetName: String, componentName: String, destDir: File) {
     // Deliberately use doLast to wait ext be set
     val build by tasks.register("buildFcitx${componentName.capitalize()}") {
@@ -171,7 +162,6 @@ fun installFcitxComponent(targetName: String, componentName: String, destDir: Fi
     }.also { installFcitxComponent.dependsOn(it) }
 }
 
-// TODO: fix install path
 installFcitxComponent("generate-desktop-file", "config", file("src/main/assets"))
 installFcitxComponent("translation-file", "translation", file("src/main/assets"))
 
@@ -210,42 +200,6 @@ dependencies {
     androidTestImplementation("androidx.test:rules:1.4.0")
     androidTestImplementation("androidx.lifecycle:lifecycle-runtime-testing:2.4.0")
     androidTestImplementation("junit:junit:4.13.2")
-}
-
-abstract class MsgFmtTask : DefaultTask() {
-    @get:Incremental
-    @get:PathSensitive(PathSensitivity.NAME_ONLY)
-    @get:InputDirectory
-    abstract val inputDir: DirectoryProperty
-
-    @get:OutputDirectory
-    abstract val outputDir: DirectoryProperty
-
-    @get:Input
-    abstract val domain: Property<String>
-
-    @TaskAction
-    fun execute(inputChanges: InputChanges) {
-        inputChanges.getFileChanges(inputDir).forEach { change ->
-            val fileName = change.normalizedPath
-            if ((change.fileType == FileType.DIRECTORY) || (!fileName.endsWith(".po")))
-                return@forEach
-            println("${change.changeType}: $fileName")
-            val locale = fileName.replace(".po", "")
-            val targetDir = "$locale/LC_MESSAGES"
-            outputDir.file(targetDir).get().asFile.mkdirs()
-            val targetFile = outputDir.file("$targetDir/${domain.get()}.mo").get().asFile
-            if (change.changeType == ChangeType.REMOVED) {
-                targetFile.delete()
-            } else {
-                project.exec {
-                    executable = "msgfmt"
-                    args(change.file.absolutePath)
-                    args("-o", targetFile.absolutePath)
-                }
-            }
-        }
-    }
 }
 
 abstract class DataDescriptorTask : DefaultTask() {
