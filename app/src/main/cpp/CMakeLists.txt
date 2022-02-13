@@ -7,6 +7,9 @@ set(ANDROID_STL c++_shared)
 set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_INSTALL_PREFIX /usr)
+set(FCITX_INSTALL_PKGDATADIR /usr/share/fcitx5)
+set(FCITX_INSTALL_LOCALEDIR /usr/share/locale)
+set(LIBIME_INSTALL_PKGDATADIR table)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 # extra-cmake-modules
