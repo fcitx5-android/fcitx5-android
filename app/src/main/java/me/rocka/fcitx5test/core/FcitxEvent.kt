@@ -23,6 +23,10 @@ sealed class FcitxEvent<T>(open val data: T) {
         override fun hashCode(): Int {
             return data.contentHashCode()
         }
+
+        override fun toString(): String = "CandidateListEvent(data=[${
+            data.take(5).joinToString()
+        }${if (data.size > 5) ", ..." else ""}])"
     }
 
     data class CommitStringEvent(override val data: String) :
@@ -50,6 +54,8 @@ sealed class FcitxEvent<T>(open val data: T) {
     data class ReadyEvent(override val data: Unit = Unit) : FcitxEvent<Unit>(data) {
         override val eventType: EventType
             get() = EventType.Ready
+
+        override fun toString(): String = "ReadyEvent"
     }
 
     data class KeyEvent(override val data: Data) :
