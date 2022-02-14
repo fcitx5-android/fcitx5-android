@@ -173,11 +173,12 @@ fun installFcitxComponent(targetName: String, componentName: String, destDir: Fi
         }
 
         // make sure that this task runs after than the native task
-        mustRunAfter("buildCMakeDebug[$defaultABI]")
-        mustRunAfter("buildCMakeRelWithDebInfo[$defaultABI]")
         targetABI?.let {
             mustRunAfter("buildCMakeDebug[$it]")
             mustRunAfter("buildCMakeRelWithDebInfo[$it]")
+        } ?: run {
+            mustRunAfter("buildCMakeDebug[$defaultABI]")
+            mustRunAfter("buildCMakeRelWithDebInfo[$defaultABI]")
         }
     }
 
