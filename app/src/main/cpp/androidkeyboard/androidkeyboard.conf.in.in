@@ -1,0 +1,12 @@
+[Addon]
+Name=Android Keyboard
+Type=SharedLibrary
+Library=libandroidkeyboard
+Category=InputMethod
+Version=@PROJECT_VERSION@
+Configurable=True
+
+[Addon/OptionalDependencies]
+0=spell
+1=quickphrase
+;2=emoji

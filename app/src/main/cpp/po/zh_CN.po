@@ -1,0 +1,18 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: fcitx5-android-poc\n"
+"Report-Msgid-Bugs-To: https://github.com/rocka/fcitx5-android-poc/issues\n"
+"POT-Creation-Date: 2022-02-14 18:51+0800\n"
+"PO-Revision-Date: 2022-02-14 19:31+0800\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: LANG\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Android Frontend" 
+msgstr "Android 输入法前端"
+
+msgid "Android Keyboard"
+msgstr "Android 英文键盘"

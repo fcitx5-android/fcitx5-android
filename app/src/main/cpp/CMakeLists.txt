@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(fcitx-lib)
+project(fcitx-lib VERSION 0.0.0)
 
 set(ANDROID_STL c++_shared)
 
@@ -54,6 +54,7 @@ option(ENABLE_EMOJI "" OFF)
 option(ENABLE_LIBUUID "" OFF)
 add_subdirectory(fcitx5)
 
+include(fcitx5/src/lib/fcitx-utils/Fcitx5Macros.cmake)
 add_subdirectory(androidfrontend)
 add_subdirectory(androidkeyboard)
 
