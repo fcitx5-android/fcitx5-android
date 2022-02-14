@@ -292,7 +292,7 @@ abstract class DataDescriptorTask : DefaultTask() {
         inputChanges.getFileChanges(inputDir).forEach { change ->
             if (change.fileType == FileType.DIRECTORY || change.file.name == file.name)
                 return@forEach
-            println("${change.changeType}: ${change.normalizedPath}")
+            logger.log(LogLevel.DEBUG, "${change.changeType}: ${change.normalizedPath}")
             val key = change.file.relativeTo(file.parentFile).path
             if (change.changeType == ChangeType.REMOVED) {
                 map.remove(key)
