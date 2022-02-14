@@ -29,6 +29,9 @@ val dataDescriptorName = "descriptor.json"
 val targetABI = System.getenv("ABI")
     ?.takeIf { it.isNotBlank() }
 
+// will be used if `targetABI` is unset
+val defaultABI = "arm64-v8a"
+
 android {
     compileSdk = 31
     buildToolsVersion = "31.0.0"
@@ -52,7 +55,7 @@ android {
 
         if (targetABI == null)
             ndk {
-                abiFilters.add("arm64-v8a")
+                abiFilters.add(defaultABI)
             }
     }
 
@@ -126,6 +129,18 @@ val generateDataDescriptor by tasks.register<DataDescriptorTask>("generateDataDe
     outputFile.set(file("src/main/assets/${dataDescriptorName}"))
     dependsOn(installFcitxComponent)
 }
+/**
+ * Note *Graph*
+ * Tasks registered by [installFcitxComponent] implicitly depend .cxx dir to install generated files.
+ * Since the native task `buildCMake$Variant$ABI` depend on the current variant and ABI,
+ * we should have registered [installFcitxComponent] tasks for the cartesian product of $Variant and $ABI.
+ * However, this would be way more tedious, as the build variant and ABI do not affect components we are going to install.
+ * The essential cause of this situation is that it's impossible for gradle to handle dynamic dependencies,
+ * where once the build graph was evaluated, no dependencies can be changed. So a trick is used here: when the task graph
+ * is evaluated, we look into it to find out the name of the native task which will be executed, and then store its output
+ * path in global variable. Tasks in [installFcitxComponent] are using the output path of the native task WITHOUT explicitly
+ * depending on it.
+ */
 project.gradle.taskGraph.whenReady {
     val buildCMakeABITask = allTasks
         .find { it.name.startsWith("buildCMakeDebug[") || it.name.startsWith("buildCMakeRelWithDebInfo[") }
@@ -139,25 +154,50 @@ android.applicationVariants.all {
     tasks.findByName("merge${variantName}Assets")?.dependsOn(generateDataDescriptor)
 }
 
+/**
+ * DO NOT run these tasks manually. See Note *Graph* for details.
+ */
 fun installFcitxComponent(targetName: String, componentName: String, destDir: File) {
     // Deliberately use doLast to wait ext be set
     val build by tasks.register("buildFcitx${componentName.capitalize()}") {
         doLast {
-            exec {
-                workingDir = ext.get("cmakeDir") as File
-                commandLine("cmake", "--build", ".", "--target", targetName)
+            try {
+                exec {
+                    workingDir = ext.get("cmakeDir") as File
+                    commandLine("cmake", "--build", ".", "--target", targetName)
+                }
+            } catch (e: Exception) {
+                logger.log(LogLevel.ERROR, "Failed to build target $targetName: ${e.message}")
+                logger.log(LogLevel.ERROR, "Did you run this task independently?")
             }
+        }
+
+        // make sure that this task runs after than the native task
+        mustRunAfter("buildCMakeDebug[$defaultABI]")
+        mustRunAfter("buildCMakeRelWithDebInfo[$defaultABI]")
+        targetABI?.let {
+            mustRunAfter("buildCMakeDebug[$it]")
+            mustRunAfter("buildCMakeRelWithDebInfo[$it]")
         }
     }
 
     tasks.register("installFcitx${componentName.capitalize()}") {
         doLast {
-            exec {
-                environment("DESTDIR", destDir.absolutePath)
-                workingDir = ext.get("cmakeDir") as File
-                commandLine("cmake", "--install", ".", "--component", componentName)
+            try {
+                exec {
+                    environment("DESTDIR", destDir.absolutePath)
+                    workingDir = ext.get("cmakeDir") as File
+                    commandLine("cmake", "--install", ".", "--component", componentName)
+                }
+            } catch (e: Exception) {
+                logger.log(
+                    LogLevel.ERROR,
+                    "Failed to install component $componentName: ${e.message}"
+                )
+                logger.log(LogLevel.ERROR, "Did you run this task independently?")
             }
         }
+
         dependsOn(build)
     }.also { installFcitxComponent.dependsOn(it) }
 }
