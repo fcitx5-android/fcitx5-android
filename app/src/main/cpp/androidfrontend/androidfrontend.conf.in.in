@@ -1,0 +1,6 @@
+[Addon]
+Name=Android Frontend
+Type=SharedLibrary
+Library=libandroidfrontend
+Category=Frontend
+Version=@PROJECT_VERSION@
