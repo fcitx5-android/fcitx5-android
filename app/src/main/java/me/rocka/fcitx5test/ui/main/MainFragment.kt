@@ -39,7 +39,7 @@ class MainFragment : Fragment() {
                     findNavController().navigate(R.id.action_mainFragment_to_addonListFragment)
                 },
                 context.getString(R.string.behavior) to {
-                    findNavController().navigate(R.id.behaviorSettingsFragment)
+                    findNavController().navigate(R.id.action_mainFragment_to_behaviorSettingsFragment)
                 },
                 context.getString(R.string.delete_and_sync_data) to {
                     lifecycleScope.launch(Dispatchers.IO) {

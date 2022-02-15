@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
 import android.widget.FrameLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -39,6 +40,10 @@ abstract class ProgressFragment : Fragment() {
             isInitialized = true
             root.removeAllViews()
             root.addView(newView)
+            val animation = AlphaAnimation(0f, 1f)
+            animation.startOffset = 0
+            animation.duration = 250
+            newView.startAnimation(animation)
         }
     }
 }
