@@ -18,12 +18,6 @@ if (DEFINED ENV{ECM_DIR})
 else ()
     set(ECM_DIR /usr/share/ECM/cmake)
 endif ()
-# msgfmt
-if (DEFINED ENV{MSGFMT})
-    set(GETTEXT_MSGFMT_EXECUTABLE $ENV{MSGFMT})
-else ()
-    set(GETTEXT_MSGFMT_EXECUTABLE msgfmt)
-endif ()
 
 set(PREBUILT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/prebuilt")
 
