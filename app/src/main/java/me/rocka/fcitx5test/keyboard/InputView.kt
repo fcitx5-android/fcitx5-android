@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Build
 import android.util.DisplayMetrics
 import android.view.Gravity
+import android.view.ViewTreeObserver
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageButton
@@ -25,6 +26,7 @@ import me.rocka.fcitx5test.keyboard.layout.NumberKeyboard
 import me.rocka.fcitx5test.keyboard.layout.TextKeyboard
 import me.rocka.fcitx5test.utils.inputConnection
 import splitties.dimensions.dp
+import splitties.resources.dimenPxSize
 import splitties.resources.str
 import splitties.resources.styledColor
 import splitties.systemservices.inputMethodManager
@@ -36,6 +38,7 @@ import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.imageResource
 import kotlin.math.ceil
 import kotlin.math.min
+
 
 @SuppressLint("ViewConstructor")
 class InputView(
@@ -75,7 +78,19 @@ class InputView(
     private val candidateView = themedContext.recyclerView(R.id.candidate_view) {
         isVerticalScrollBarEnabled = false
         backgroundColor = styledColor(android.R.attr.colorBackground)
-        // fixed 6 columns
+        var listener: ViewTreeObserver.OnGlobalLayoutListener? = null
+        listener = ViewTreeObserver.OnGlobalLayoutListener {
+            viewTreeObserver.removeOnGlobalLayoutListener(listener)
+            (layoutManager as GridLayoutManager).apply {
+                // set columns according to the width of recycler view
+                spanCount =
+                    (measuredWidth / (dimenPxSize(R.dimen.candidate_min_width)
+                            + dimenPxSize(R.dimen.candidate_padding)))
+                requestLayout()
+            }
+        }
+        viewTreeObserver.addOnGlobalLayoutListener(listener)
+        // initially 6 columns
         layoutManager = object : GridLayoutManager(themedContext, 6, VERTICAL, false) {
             override fun canScrollVertically() =
                 if (!candidateViewExpanded) false else super.canScrollVertically()
@@ -83,7 +98,10 @@ class InputView(
             spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int {
                     // two words per span
-                    return min(ceil(candidateViewAdp.measureWidth(position) / 2).toInt(), spanCount)
+                    return min(
+                        ceil(candidateViewAdp.measureWidth(position) / 2).toInt(),
+                        spanCount
+                    )
                 }
 
             }
