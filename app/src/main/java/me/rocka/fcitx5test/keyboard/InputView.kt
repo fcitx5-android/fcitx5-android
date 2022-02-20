@@ -37,6 +37,7 @@ import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.imageResource
 import kotlin.math.ceil
+import kotlin.math.max
 import kotlin.math.min
 
 
@@ -96,12 +97,43 @@ class InputView(
                 if (!candidateViewExpanded) false else super.canScrollVertically()
         }.apply {
             spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                // enable cache so that we can to some extent get the rid of the nondeterminism
+                init {
+                    isSpanIndexCacheEnabled = true
+                    isSpanGroupIndexCacheEnabled = true
+                }
+
+                private var occupiedSpan = 0
+
+                // two words per span
+                private fun getMinSpanSize(position: Int) = min(
+                    ceil(candidateViewAdp.measureWidth(position) / 2).toInt(), spanCount
+                )
+
                 override fun getSpanSize(position: Int): Int {
-                    // two words per span
-                    return min(
-                        ceil(candidateViewAdp.measureWidth(position) / 2).toInt(),
-                        spanCount
-                    )
+                    if (occupiedSpan >= spanCount)
+                        occupiedSpan = 0
+
+                    val currentSpanSize = getMinSpanSize(position)
+
+                    // this implementation seems flaky and nondeterministic
+                    if (position + 1 < candidateViewAdp.candidates.size) {
+                        val nextSpan = getMinSpanSize(position + 1)
+                        // current row still can accommodate next item
+                        return if (spanCount - (occupiedSpan + currentSpanSize) >= nextSpan) {
+                            occupiedSpan += currentSpanSize
+                            currentSpanSize
+                        } else {
+                            // space in current row can't accommodate next item
+                            // so we fill current row by current item
+                            val newCurrentSpanSize = max(spanCount - occupiedSpan, currentSpanSize)
+                            occupiedSpan += newCurrentSpanSize
+                            newCurrentSpanSize
+                        }
+                    } else {
+                        occupiedSpan += currentSpanSize
+                        return currentSpanSize
+                    }
                 }
 
             }
