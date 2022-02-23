@@ -1,9 +1,12 @@
 package me.rocka.fcitx5test.keyboard
 
 import android.annotation.SuppressLint
+import android.graphics.Canvas
+import android.graphics.Rect
 import android.os.Build
 import android.util.DisplayMetrics
 import android.view.Gravity
+import android.view.View
 import android.view.ViewTreeObserver
 import android.view.WindowManager
 import android.widget.FrameLayout
@@ -12,9 +15,10 @@ import android.widget.PopupWindow
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.core.Fcitx
@@ -37,7 +41,6 @@ import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.imageResource
 import kotlin.math.ceil
-import kotlin.math.max
 import kotlin.math.min
 
 
@@ -85,7 +88,8 @@ class InputView(
             (layoutManager as GridLayoutManager).apply {
                 // set columns according to the width of recycler view
                 spanCount =
-                    (measuredWidth / (dimenPxSize(R.dimen.candidate_min_width)
+                        // last item doesn't need padding, so we assume recycler view is wider
+                    ((measuredWidth + dimenPxSize(R.dimen.candidate_padding)) / (dimenPxSize(R.dimen.candidate_min_width)
                             + dimenPxSize(R.dimen.candidate_padding)))
                 requestLayout()
             }
@@ -111,47 +115,82 @@ class InputView(
                 )
 
                 override fun getSpanSize(position: Int): Int {
-                    if (occupiedSpan >= spanCount)
-                        occupiedSpan = 0
-
-                    val currentSpanSize = getMinSpanSize(position)
-
-                    // this implementation seems flaky and nondeterministic
-                    if (position + 1 < candidateViewAdp.candidates.size) {
-                        val nextSpan = getMinSpanSize(position + 1)
-                        // current row still can accommodate next item
-                        return if (spanCount - (occupiedSpan + currentSpanSize) >= nextSpan) {
-                            occupiedSpan += currentSpanSize
-                            currentSpanSize
-                        } else {
-                            // space in current row can't accommodate next item
-                            // so we fill current row by current item
-                            val newCurrentSpanSize = max(spanCount - occupiedSpan, currentSpanSize)
-                            occupiedSpan += newCurrentSpanSize
-                            newCurrentSpanSize
-                        }
-                    } else {
-                        occupiedSpan += currentSpanSize
-                        return currentSpanSize
-                    }
+                    return getMinSpanSize(position)
+                    // TODO
+//                    if (occupiedSpan >= spanCount)
+//                        occupiedSpan = 0
+//
+//                    val currentSpanSize = getMinSpanSize(position)
+//
+//                    // this implementation seems flaky and nondeterministic
+//                    if (position + 1 < candidateViewAdp.candidates.size) {
+//                        val nextSpan = getMinSpanSize(position + 1)
+//                        // current row still can accommodate next item
+//                        return if (spanCount - (occupiedSpan + currentSpanSize) >= nextSpan) {
+//                            occupiedSpan += currentSpanSize
+//                            currentSpanSize
+//                        } else {
+//                            // space in current row can't accommodate next item
+//                            // so we fill current row by current item
+//                            val newCurrentSpanSize = max(spanCount - occupiedSpan, currentSpanSize)
+//                            occupiedSpan += newCurrentSpanSize
+//                            newCurrentSpanSize
+//                        }
+//                    } else {
+//                        occupiedSpan += currentSpanSize
+//                        return currentSpanSize
+//                    }
                 }
 
             }
         }
         adapter = candidateViewAdp
-        addItemDecoration(
-            DividerItemDecoration(
-                themedContext,
-                DividerItemDecoration.HORIZONTAL
-            ).apply {
-                setDrawable(
-                    ResourcesCompat.getDrawable(
-                        resources,
-                        R.drawable.candidate_divider,
-                        context.theme
-                    )!!
-                )
-            })
+
+        object : ItemDecoration() {
+            val drawable =
+                ResourcesCompat.getDrawable(
+                    resources,
+                    R.drawable.candidate_divider,
+                    context.theme
+                )!!
+
+            override fun getItemOffsets(
+                outRect: Rect,
+                view: View,
+                parent: RecyclerView,
+                state: RecyclerView.State
+            ) {
+                val lp = view.layoutParams as GridLayoutManager.LayoutParams
+                val layoutManager = parent.layoutManager as GridLayoutManager
+                // add space for the last item in each row
+                if (lp.spanIndex + lp.spanSize != layoutManager.spanCount) {
+                    outRect.right = drawable.intrinsicWidth
+                } else {
+                    outRect.set(0, 0, 0, 0)
+                }
+                // always add bottom padding
+                outRect.bottom = dp(10)
+            }
+
+            override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
+                val layoutManager = parent.layoutManager as GridLayoutManager
+                for (i in 0 until layoutManager.childCount) {
+                    val view = parent.getChildAt(i)
+                    val lp = view.layoutParams as GridLayoutManager.LayoutParams
+                    // draw divider if it is not the last item in each row
+                    if (lp.spanIndex + lp.spanSize == layoutManager.spanCount)
+                        continue
+                    val left = view.right + lp.rightMargin
+                    val right = left + drawable.intrinsicWidth
+                    val top = view.top - lp.topMargin
+                    val bottom = view.bottom + lp.bottomMargin
+                    // make the divider shorter
+                    drawable.setBounds(left, top + dp(6), right, bottom - dp(6))
+                    drawable.draw(c)
+                }
+            }
+
+        }.also { addItemDecoration(it) }
         PagerSnapHelper().attachToRecyclerView(this)
     }
     private val expandCandidateButton = themedContext.imageButton(R.id.expand_candidate_btn) {
