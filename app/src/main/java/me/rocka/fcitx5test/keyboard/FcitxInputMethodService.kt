@@ -1,6 +1,7 @@
 package me.rocka.fcitx5test.keyboard
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.CursorAnchorInfo
@@ -13,10 +14,10 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.core.CapabilityFlags
 import me.rocka.fcitx5test.core.Fcitx
 import me.rocka.fcitx5test.core.FcitxEvent
+import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.service.FcitxDaemonManager
 import me.rocka.fcitx5test.utils.inputConnection
 import splitties.bitflags.hasFlag
@@ -105,6 +106,13 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     private fun cancelRepeatingAll() {
         keyRepeatingJobs.forEach { cancelRepeating(it.key) }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        lifecycleScope.launch {
+            fcitx.reset()
+        }
     }
 
     override fun onCreateInputView(): View {
