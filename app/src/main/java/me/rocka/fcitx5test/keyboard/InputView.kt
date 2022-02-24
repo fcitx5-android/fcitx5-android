@@ -2,7 +2,6 @@ package me.rocka.fcitx5test.keyboard
 
 import android.annotation.SuppressLint
 import android.view.Gravity
-import android.view.ViewTreeObserver
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageButton
@@ -11,7 +10,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.PagerSnapHelper
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.core.Fcitx
@@ -21,7 +20,9 @@ import me.rocka.fcitx5test.keyboard.layout.BaseKeyboard
 import me.rocka.fcitx5test.keyboard.layout.KeyAction
 import me.rocka.fcitx5test.keyboard.layout.NumberKeyboard
 import me.rocka.fcitx5test.keyboard.layout.TextKeyboard
+import me.rocka.fcitx5test.utils.globalLayoutListener
 import me.rocka.fcitx5test.utils.inputConnection
+import me.rocka.fcitx5test.utils.oneShotGlobalLayoutListener
 import splitties.dimensions.dp
 import splitties.resources.dimenPxSize
 import splitties.resources.str
@@ -62,55 +63,95 @@ class InputView(
         isClippingEnabled = false
     }
 
-    private val candidateViewAdapter = object : CandidateViewAdapter() {
-        override fun onTouchDown() = currentKeyboard.haptic()
-        override fun onSelect(idx: Int) {
-            service.lifecycleScope.launch { fcitx.select(idx) }
-        }
-    }
-    private var candidateViewExpanded = false
-    private val candidateView = themedContext.recyclerView(R.id.candidate_view) {
-        isVerticalScrollBarEnabled = false
-        backgroundColor = styledColor(android.R.attr.colorBackground)
-        var listener: ViewTreeObserver.OnGlobalLayoutListener? = null
-        listener = ViewTreeObserver.OnGlobalLayoutListener {
-            viewTreeObserver.removeOnGlobalLayoutListener(listener)
-            (layoutManager as GridLayoutManager).apply {
-                // set columns according to the width of recycler view
-                spanCount =
-                        // last item doesn't need padding, so we assume recycler view is wider
-                    ((measuredWidth + dimenPxSize(R.dimen.candidate_padding)) / (dimenPxSize(R.dimen.candidate_min_width)
-                            + dimenPxSize(R.dimen.candidate_padding)))
-                requestLayout()
+
+    @Suppress("PrivatePropertyName")
+    private val Commons = object {
+        fun newCandidateViewAdapter() = object : CandidateViewAdapter() {
+            override fun onTouchDown() = currentKeyboard.haptic()
+            override fun onSelect(idx: Int) {
+                service.lifecycleScope.launch { fcitx.select(idx) }
             }
         }
-        viewTreeObserver.addOnGlobalLayoutListener(listener)
-        // initially 6 columns
-        layoutManager = object : GridLayoutManager(themedContext, 6, VERTICAL, false) {
-            override fun canScrollVertically() =
-                if (!candidateViewExpanded) false else super.canScrollVertically()
 
-        }.apply {
-            SpanHelper(candidateViewAdapter, this).attach()
+        // setup a listener that sets the span count of gird layout according to recycler view's width
+        fun RecyclerView.autoSpanCount() {
+            oneShotGlobalLayoutListener {
+                (layoutManager as GridLayoutManager).apply {
+                    // set columns according to the width of recycler view
+                    // last item doesn't need padding, so we assume recycler view is wider
+                    spanCount = (measuredWidth + dimenPxSize(R.dimen.candidate_padding)) /
+                            (dimenPxSize(R.dimen.candidate_min_width) + dimenPxSize(R.dimen.candidate_padding))
+                    requestLayout()
+                }
+            }
         }
-        adapter = candidateViewAdapter
 
-        GridDecoration(
+        fun RecyclerView.addGridDecoration() = GridDecoration(
             ResourcesCompat.getDrawable(
                 resources,
                 R.drawable.candidate_divider,
                 context.theme
             )!!
         ).also { addItemDecoration(it) }
-        PagerSnapHelper().attachToRecyclerView(this)
+
+        fun RecyclerView.setupGridLayoutManager(
+            adapter: CandidateViewAdapter,
+            scrollVertically: Boolean
+        ) {
+            layoutManager =
+                object : GridLayoutManager(
+                    themedContext, INITIAL_SPAN_COUNT, VERTICAL, false
+                ) {
+                    override fun canScrollVertically(): Boolean {
+                        return scrollVertically
+                    }
+                }.apply {
+                    SpanHelper(adapter, this).attach()
+                }
+            this.adapter = adapter
+        }
+
     }
+
+
+    inner class ExpandedCandidate {
+        val adapter = Commons.newCandidateViewAdapter()
+        val ui = ExpandedCandidateUi(themedContext) {
+            with(Commons) {
+                autoSpanCount()
+                setupGridLayoutManager(this@ExpandedCandidate.adapter, true)
+                addGridDecoration()
+            }
+        }
+    }
+
+    inner class HorizontalCandidate {
+        val adapter = Commons.newCandidateViewAdapter()
+        val recyclerView = themedContext.recyclerView(R.id.candidate_view) {
+            isVerticalScrollBarEnabled = false
+            backgroundColor = styledColor(android.R.attr.colorBackground)
+            with(Commons) {
+                autoSpanCount()
+                setupGridLayoutManager(this@HorizontalCandidate.adapter, false)
+                addGridDecoration()
+            }
+            globalLayoutListener {
+                expandedCandidate.adapter.offset = childCount
+            }
+        }
+    }
+
+    private val horizontalCandidate = HorizontalCandidate()
+    private val expandedCandidate = ExpandedCandidate()
+
+    private var candidateViewExpanded = false
     private val expandCandidateButton = themedContext.imageButton(R.id.expand_candidate_btn) {
         elevation = dp(2f)
         imageResource = R.drawable.ic_baseline_expand_more_24
         setOnClickListener {
             candidateViewExpanded = !candidateViewExpanded
             val btn = it as ImageButton
-            val lp = candidateView.layoutParams as LayoutParams
+            val lp = expandedCandidate.ui.root.layoutParams as LayoutParams
             if (candidateViewExpanded) {
                 btn.imageResource = R.drawable.ic_baseline_expand_less_24
                 lp.bottomToBottom = LayoutParams.PARENT_ID
@@ -118,10 +159,10 @@ class InputView(
             } else {
                 btn.imageResource = R.drawable.ic_baseline_expand_more_24
                 lp.bottomToBottom = LayoutParams.UNSET
-                lp.height = dp(40)
-                candidateView.scrollToPosition(0)
+                lp.height = 0
+                expandedCandidate.ui.resetPosition()
             }
-            candidateView.requestLayout()
+            expandedCandidate.ui.root.requestLayout()
         }
     }
     private val keyboardView = themedContext.frameLayout(R.id.keyboard_view)
@@ -155,10 +196,15 @@ class InputView(
             endOfParent()
             bottomOfParent()
         })
-        add(candidateView, lParams(matchConstraints, dp(40)) {
+        add(horizontalCandidate.recyclerView, lParams(matchConstraints, dp(40)) {
             topOfParent()
             startOfParent()
             before(expandCandidateButton)
+        })
+        add(expandedCandidate.ui.root, lParams(matchConstraints, 0) {
+            below(horizontalCandidate.recyclerView)
+            startOfParent()
+            endOfParent()
         })
         switchLayout("qwerty")
     }
@@ -238,8 +284,9 @@ class InputView(
     }
 
     private fun updateCandidates(data: Array<String>) {
-        candidateViewAdapter.updateCandidates(data)
-        candidateView.scrollToPosition(0)
+        horizontalCandidate.adapter.updateCandidates(data)
+        expandedCandidate.adapter.updateCandidates(data)
+        expandedCandidate.ui.resetPosition()
     }
 
     private fun switchLayout(to: String) {
@@ -275,5 +322,9 @@ class InputView(
 
     private inline fun customEvent(fn: (Fcitx) -> Unit) {
         fn(fcitx)
+    }
+
+    companion object {
+        private const val INITIAL_SPAN_COUNT = 6
     }
 }
