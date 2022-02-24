@@ -18,6 +18,7 @@ class SpanHelper(
     private val layout = SparseArray<ItemLayout>()
 
     private fun getMinSpanSize(position: Int) = min(
+        // approximately four characters or two Chinese characters per span
         ceil(adapter.measureWidth(position) / 2).toInt(), manager.spanCount
     )
 
@@ -53,7 +54,7 @@ class SpanHelper(
         for (i in start..position) {
             var size = getMinSpanSize(i)
             val nextSize =
-                (i + 1).takeIf { it < adapter.candidates.size }?.let {
+                (i + 1).takeIf { it < adapter.itemCount }?.let {
                     getMinSpanSize(it)
                 }
             if (nextSize != null && manager.spanCount - (span + size) < nextSize) {
