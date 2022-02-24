@@ -1,8 +1,6 @@
 package me.rocka.fcitx5test.keyboard
 
 import android.annotation.SuppressLint
-import android.os.Build
-import android.util.DisplayMetrics
 import android.view.Gravity
 import android.view.ViewTreeObserver
 import android.view.WindowManager
@@ -29,7 +27,6 @@ import splitties.resources.dimenPxSize
 import splitties.resources.str
 import splitties.resources.styledColor
 import splitties.systemservices.inputMethodManager
-import splitties.systemservices.windowManager
 import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
@@ -145,15 +142,7 @@ class InputView(
             currentIme = fcitx.currentIme()
             currentKeyboard.onInputMethodChange(currentIme)
         }
-        preeditPopup.width = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            windowManager.currentWindowMetrics.bounds.width()
-        } else {
-            DisplayMetrics().let {
-                @Suppress("DEPRECATION")
-                windowManager.defaultDisplay.getMetrics(it)
-                it.widthPixels
-            }
-        }
+        preeditPopup.width = resources.displayMetrics.widthPixels
         backgroundColor = themedContext.styledColor(android.R.attr.colorBackground)
         add(expandCandidateButton, lParams(matchConstraints, dp(40)) {
             matchConstraintPercentWidth = 0.1f
