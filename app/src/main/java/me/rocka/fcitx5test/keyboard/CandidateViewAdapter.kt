@@ -8,6 +8,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.collection.lruCache
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.rocka.fcitx5test.R
@@ -34,7 +35,7 @@ abstract class CandidateViewAdapter :
         }
 
     // cache measureWidth
-    private val measuredWidths = mutableMapOf<String, Float>()
+    private val measuredWidths = lruCache<String, Float>(500)
 
     fun measureWidth(position: Int): Float {
         val candidate = candidates[position]
@@ -44,7 +45,7 @@ abstract class CandidateViewAdapter :
             // 20f here is chosen randomly, since we only care about the ratio
             paint.textSize = 20f
             paint.getTextBounds(candidate, 0, candidate.length, bounds)
-            (bounds.width() / 20f).also { measuredWidths[candidate] = it }
+            (bounds.width() / 20f).also { measuredWidths.put(candidate, it) }
         }
     }
 
