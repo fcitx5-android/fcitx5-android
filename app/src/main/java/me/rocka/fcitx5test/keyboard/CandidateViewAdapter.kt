@@ -18,8 +18,7 @@ import splitties.resources.dimenPxSize
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.textView
 import splitties.views.gravityCenter
-import splitties.views.horizontalPadding
-import timber.log.Timber
+import kotlin.properties.Delegates
 
 abstract class CandidateViewAdapter :
     RecyclerView.Adapter<CandidateViewAdapter.ViewHolder>() {
@@ -28,9 +27,14 @@ abstract class CandidateViewAdapter :
         var idx = -1
     }
 
+    var offset by Delegates.observable(0) { _, old, new ->
+        if (old != new)
+            notifyItemRangeChanged(0, new)
+    }
+
     private var candidates: Array<String> = arrayOf()
 
-    fun getCandidateAt(position: Int) = candidates[position]
+    fun getCandidateAt(position: Int) = candidates[position + offset]
 
     @SuppressLint("NotifyDataSetChanged")
     fun updateCandidates(data: Array<String>) {
@@ -42,7 +46,7 @@ abstract class CandidateViewAdapter :
     private val measuredWidths = lruCache<String, Float>(200)
 
     fun measureWidth(position: Int): Float {
-        val candidate = candidates[position]
+        val candidate = getCandidateAt(position)
         return measuredWidths[candidate] ?: run {
             val paint = Paint()
             val bounds = Rect()
@@ -74,11 +78,11 @@ abstract class CandidateViewAdapter :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.textView.text = candidates[position]
-        holder.idx = position
+        holder.textView.text = getCandidateAt(position)
+        holder.idx = position + offset
     }
 
-    override fun getItemCount() = candidates.size
+    override fun getItemCount() = candidates.size - offset
 
     abstract fun onTouchDown()
 

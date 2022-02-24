@@ -7,6 +7,7 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.view.inputmethod.InputConnection
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
@@ -46,3 +47,15 @@ fun Uri.queryFileName(contentResolver: ContentResolver) =
 inline fun <reified T : Library> nativeLib(name: String): Lazy<T> = lazy {
     Native.load(name, T::class.java)
 }
+
+fun View.globalLayoutListener(repeat: () -> Boolean = { true }, block: () -> Unit) {
+    viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+        override fun onGlobalLayout() {
+            if (!repeat())
+                viewTreeObserver.removeOnGlobalLayoutListener(this)
+            block()
+        }
+    })
+}
+
+fun View.oneShotGlobalLayoutListener(block: () -> Unit) = globalLayoutListener({ false }, block)
