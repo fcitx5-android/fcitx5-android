@@ -148,6 +148,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         composingTextStart = info.composingTextStart
         Timber.d("AnchorInfo: selStart=$selectionStart cmpStart=$composingTextStart")
         val composing = info.composingText ?: return
+        // workaround some misbehaved editors: report composingText but wrong selectionStart
+        if (selectionStart < 0) return
         // check if cursor inside composing text
         if ((composingTextStart <= selectionStart) &&
             (selectionStart <= composingTextStart + composing.length)
