@@ -117,6 +117,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         return inputView
     }
 
+    override fun onEvaluateFullscreenMode() = false
+
     override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
         inputConnection?.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
         editorInfo = attribute
