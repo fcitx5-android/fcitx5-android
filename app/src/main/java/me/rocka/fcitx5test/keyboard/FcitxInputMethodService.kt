@@ -138,10 +138,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         inputView.onShow()
     }
 
-    // FIXME: cursor flicker
-    // because setComposingText(text, cursor) can only put cursor at end of composing,
-    // sometimes onUpdateCursorAnchorInfo would receive event with wrong cursor position.
-    // those events need to be filtered.
     override fun onUpdateCursorAnchorInfo(info: CursorAnchorInfo?) {
         if (info == null) return
         selectionStart = info.selectionStart
@@ -178,30 +174,37 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
     }
 
+    // FIXME: cursor flicker
+    // because setComposingText(text, cursor) can only put cursor at end of composing,
+    // sometimes onUpdateCursorAnchorInfo would receive event with wrong cursor position.
+    // those events need to be filtered.
     // because of https://android.googlesource.com/platform/frameworks/base.git/+/refs/tags/android-11.0.0_r45/core/java/android/view/inputmethod/BaseInputConnection.java#851
     // it's not possible to set cursor inside composing text
     private fun updateComposingTextWithCursor(text: String, cursor: Int) {
         fcitxCursor = cursor
-        inputConnection?.run {
+        val ic = currentInputConnection ?: return
+        ic.beginBatchEdit()
+        do {
             if (text != composingText) {
                 composingText = text
                 // set composing text AND put cursor at end of composing
-                setComposingText(text, 1)
+                ic.setComposingText(text, 1)
                 if (cursor == text.length) {
                     // cursor already at end of composing, skip cursor reposition
-                    return
+                    break
                 }
             }
-            if (Prefs.getInstance().ignoreSystemCursor || (cursor < 0)) return
+            if (Prefs.getInstance().ignoreSystemCursor || (cursor < 0)) break
             // when user starts typing and there is no composing text, composingTextStart would be -1
             val p = cursor + composingTextStart
             Timber.d("TextWithCursor: p=$p composingStart=$composingTextStart")
             if (p != selectionStart) {
                 Timber.d("TextWithCursor: move cursor $p")
                 selectionStart = p
-                setSelection(p, p)
+                ic.setSelection(p, p)
             }
-        }
+        } while (false)
+        ic.endBatchEdit()
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
