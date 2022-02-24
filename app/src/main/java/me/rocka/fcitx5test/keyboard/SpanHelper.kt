@@ -36,7 +36,7 @@ class SpanHelper(
     }
 
     /**
-     * layout for [position]
+     * Calculate layout for [position] to [layout]
      */
     private fun layoutItem(position: Int) {
         // skip calculation if we already have the result
@@ -45,8 +45,8 @@ class SpanHelper(
         var start = 0
         var span = 0
         var group = 0
-        // start from the last known line
-        // recalculate from the start of that line
+        // we start from the last known line
+        // recalculate from the start of that line to get a correct span
         findFistInLastLine()?.let {
             start = it
             group = layout[it].groupIndex
@@ -57,13 +57,24 @@ class SpanHelper(
                 (i + 1).takeIf { it < adapter.itemCount }?.let {
                     getMinSpanSize(it)
                 }
-            if (nextSize != null && manager.spanCount - (span + size) < nextSize) {
-                // the rest span space can't hold next item
+
+            // we still have rest span spaces,
+            // but it can't hold the next item
+            fun cond1() = nextSize != null && manager.spanCount - (span + size) < nextSize
+
+            // we don't have more items,
+            // but there is rest span spaces
+            fun cond2() = nextSize == null && span + size < manager.spanCount
+
+            if (cond1() || cond2()) {
                 // stretch this item to fill the line
                 size = manager.spanCount - span
             }
+            // save calculated layout
             layout[i] = ItemLayout(span, size, group)
+            // accumulate span size
             span += size
+            // bump group index
             if (span == manager.spanCount) {
                 span = 0
                 group++
