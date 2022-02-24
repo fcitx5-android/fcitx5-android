@@ -62,7 +62,7 @@ class InputView(
         isClippingEnabled = false
     }
 
-    private val candidateViewAdp = object : CandidateViewAdapter() {
+    private val candidateViewAdapter = object : CandidateViewAdapter() {
         override fun onTouchDown() = currentKeyboard.haptic()
         override fun onSelect(idx: Int) {
             service.lifecycleScope.launch { fcitx.select(idx) }
@@ -91,9 +91,9 @@ class InputView(
                 if (!candidateViewExpanded) false else super.canScrollVertically()
 
         }.apply {
-            SpanHelper(candidateViewAdp, this).attach()
+            SpanHelper(candidateViewAdapter, this).attach()
         }
-        adapter = candidateViewAdp
+        adapter = candidateViewAdapter
 
         GridDecoration(
             ResourcesCompat.getDrawable(
@@ -238,7 +238,7 @@ class InputView(
     }
 
     private fun updateCandidates(data: Array<String>) {
-        candidateViewAdp.candidates = data
+        candidateViewAdapter.updateCandidates(data)
         candidateView.scrollToPosition(0)
     }
 

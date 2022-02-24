@@ -19,6 +19,7 @@ import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.textView
 import splitties.views.gravityCenter
 import splitties.views.horizontalPadding
+import timber.log.Timber
 
 abstract class CandidateViewAdapter :
     RecyclerView.Adapter<CandidateViewAdapter.ViewHolder>() {
@@ -27,15 +28,18 @@ abstract class CandidateViewAdapter :
         var idx = -1
     }
 
-    var candidates: Array<String> = arrayOf()
-        @SuppressLint("NotifyDataSetChanged")
-        set(value) {
-            field = value
-            notifyDataSetChanged()
-        }
+    private var candidates: Array<String> = arrayOf()
+
+    fun getCandidateAt(position: Int) = candidates[position]
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun updateCandidates(data: Array<String>) {
+        candidates = data
+        notifyDataSetChanged()
+    }
 
     // cache measureWidth
-    private val measuredWidths = lruCache<String, Float>(500)
+    private val measuredWidths = lruCache<String, Float>(200)
 
     fun measureWidth(position: Int): Float {
         val candidate = candidates[position]
@@ -53,7 +57,6 @@ abstract class CandidateViewAdapter :
         val view = parent.context.textView {
             layoutParams = GridLayoutManager.LayoutParams(matchParent, dp(40))
             gravity = gravityCenter
-            horizontalPadding = dimenPxSize(R.dimen.candidate_padding)
             setTextSize(TypedValue.COMPLEX_UNIT_PX, dimen(R.dimen.candidate_font_size))
             minWidth = dimenPxSize(R.dimen.candidate_min_width)
             isSingleLine = true
