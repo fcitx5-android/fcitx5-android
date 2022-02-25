@@ -207,6 +207,7 @@ installFcitxComponent("generate-desktop-file", "config", file("src/main/assets")
 installFcitxComponent("translation-file", "translation", file("src/main/assets"))
 
 dependencies {
+    implementation("org.mechdancer:dependency:0.1.1")
     val roomVersion = "2.4.1"
     implementation("androidx.room:room-runtime:$roomVersion")
     annotationProcessor("androidx.room:room-compiler:$roomVersion")

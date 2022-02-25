@@ -41,7 +41,7 @@ class PreeditUi(override val ctx: Context) : Ui {
         }
     }
 
-    fun update(content: InputView.PreeditContent) {
+    fun update(content: PreeditContent) {
         val upText = content.aux.auxUp + content.preedit.preedit
         val downText = content.aux.auxDown
         val hasUp = upText.isNotEmpty()

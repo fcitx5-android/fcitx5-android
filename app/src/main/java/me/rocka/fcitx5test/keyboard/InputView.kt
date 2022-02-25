@@ -3,35 +3,31 @@ package me.rocka.fcitx5test.keyboard
 import android.annotation.SuppressLint
 import android.view.Gravity
 import android.view.WindowManager
-import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.PopupWindow
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.core.Fcitx
 import me.rocka.fcitx5test.core.FcitxEvent
-import me.rocka.fcitx5test.core.InputMethodEntry
+import me.rocka.fcitx5test.keyboard.candidates.CandidateViewBuilder
+import me.rocka.fcitx5test.keyboard.candidates.ExpandedCandidate
+import me.rocka.fcitx5test.keyboard.candidates.HorizontalCandidate
 import me.rocka.fcitx5test.keyboard.layout.BaseKeyboard
 import me.rocka.fcitx5test.keyboard.layout.KeyAction
-import me.rocka.fcitx5test.keyboard.layout.NumberKeyboard
-import me.rocka.fcitx5test.keyboard.layout.TextKeyboard
-import me.rocka.fcitx5test.utils.globalLayoutListener
+import me.rocka.fcitx5test.utils.dependency.wrapContext
+import me.rocka.fcitx5test.utils.dependency.wrapFcitx
+import me.rocka.fcitx5test.utils.dependency.wrapFcitxInputMethodService
 import me.rocka.fcitx5test.utils.inputConnection
-import me.rocka.fcitx5test.utils.oneShotGlobalLayoutListener
+import org.mechdancer.dependency.plusAssign
+import org.mechdancer.dependency.scope
 import splitties.dimensions.dp
-import splitties.resources.dimenPxSize
-import splitties.resources.str
 import splitties.resources.styledColor
 import splitties.systemservices.inputMethodManager
 import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
-import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.imageResource
 
 
@@ -41,14 +37,8 @@ class InputView(
     val fcitx: Fcitx
 ) : ConstraintLayout(service) {
 
-    data class PreeditContent(
-        var preedit: FcitxEvent.PreeditEvent.Data,
-        var aux: FcitxEvent.InputPanelAuxEvent.Data
-    )
-
     private val themedContext = context.withTheme(R.style.Theme_AppCompat_DayNight)
 
-    private var currentIme = InputMethodEntry(service.str(R.string._not_available_))
     private val cachedPreedit = PreeditContent(
         FcitxEvent.PreeditEvent.Data("", "", 0),
         FcitxEvent.InputPanelAuxEvent.Data("", "")
@@ -62,87 +52,15 @@ class InputView(
         isTouchable = false
         isClippingEnabled = false
     }
+    private val keyboardManager = KeyboardManager()
 
-
-    @Suppress("PrivatePropertyName")
-    private val Commons = object {
-        fun newCandidateViewAdapter() = object : CandidateViewAdapter() {
-            override fun onTouchDown() = currentKeyboard.haptic()
-            override fun onSelect(idx: Int) {
-                service.lifecycleScope.launch { fcitx.select(idx) }
-            }
-        }
-
-        // setup a listener that sets the span count of gird layout according to recycler view's width
-        fun RecyclerView.autoSpanCount() {
-            oneShotGlobalLayoutListener {
-                (layoutManager as GridLayoutManager).apply {
-                    // set columns according to the width of recycler view
-                    // last item doesn't need padding, so we assume recycler view is wider
-                    spanCount = (measuredWidth + dimenPxSize(R.dimen.candidate_padding)) /
-                            (dimenPxSize(R.dimen.candidate_min_width) + dimenPxSize(R.dimen.candidate_padding))
-                    requestLayout()
-                }
-            }
-        }
-
-        fun RecyclerView.addGridDecoration() = GridDecoration(
-            ResourcesCompat.getDrawable(
-                resources,
-                R.drawable.candidate_divider,
-                context.theme
-            )!!
-        ).also { addItemDecoration(it) }
-
-        fun RecyclerView.setupGridLayoutManager(
-            adapter: CandidateViewAdapter,
-            scrollVertically: Boolean
-        ) {
-            layoutManager =
-                object : GridLayoutManager(
-                    themedContext, INITIAL_SPAN_COUNT, VERTICAL, false
-                ) {
-                    override fun canScrollVertically(): Boolean {
-                        return scrollVertically
-                    }
-                }.apply {
-                    SpanHelper(adapter, this).attach()
-                }
-            this.adapter = adapter
-        }
-
-    }
-
-
-    inner class ExpandedCandidate {
-        val adapter = Commons.newCandidateViewAdapter()
-        val ui = ExpandedCandidateUi(themedContext) {
-            with(Commons) {
-                autoSpanCount()
-                setupGridLayoutManager(this@ExpandedCandidate.adapter, true)
-                addGridDecoration()
-            }
-        }
-    }
-
-    inner class HorizontalCandidate {
-        val adapter = Commons.newCandidateViewAdapter()
-        val recyclerView = themedContext.recyclerView(R.id.candidate_view) {
-            isVerticalScrollBarEnabled = false
-            backgroundColor = styledColor(android.R.attr.colorBackground)
-            with(Commons) {
-                autoSpanCount()
-                setupGridLayoutManager(this@HorizontalCandidate.adapter, false)
-                addGridDecoration()
-            }
-            globalLayoutListener {
-                expandedCandidate.adapter.offset = childCount
-            }
-        }
-    }
+    private val commons: CandidateViewBuilder = CandidateViewBuilder()
 
     private val horizontalCandidate = HorizontalCandidate()
     private val expandedCandidate = ExpandedCandidate()
+
+    private val scope = scope { }
+
 
     private var candidateViewExpanded = false
     private val expandCandidateButton = themedContext.imageButton(R.id.expand_candidate_btn) {
@@ -165,23 +83,25 @@ class InputView(
             expandedCandidate.ui.root.requestLayout()
         }
     }
-    private val keyboardView = themedContext.frameLayout(R.id.keyboard_view)
-
-    private val keyboards: HashMap<String, BaseKeyboard> = hashMapOf(
-        "qwerty" to TextKeyboard(themedContext),
-        "number" to NumberKeyboard(themedContext)
-    )
-    private var currentKeyboardName = ""
-    private val currentKeyboard: BaseKeyboard get() = keyboards.getValue(currentKeyboardName)
 
     private val keyActionListener = BaseKeyboard.KeyActionListener { action ->
         onAction(action)
     }
 
+    private fun setupScope() {
+        scope += wrapFcitxInputMethodService(service)
+        scope += wrapContext(themedContext)
+        scope += wrapFcitx(fcitx)
+        scope += commons
+        scope += keyboardManager
+        scope += expandedCandidate
+        scope += horizontalCandidate
+    }
+
     init {
+        setupScope()
         service.lifecycleScope.launch {
-            currentIme = fcitx.currentIme()
-            currentKeyboard.onInputMethodChange(currentIme)
+            keyboardManager.updateCurrentIme(fcitx.currentIme())
         }
         preeditPopup.width = resources.displayMetrics.widthPixels
         backgroundColor = themedContext.styledColor(android.R.attr.colorBackground)
@@ -190,7 +110,7 @@ class InputView(
             topOfParent()
             endOfParent()
         })
-        add(keyboardView, lParams(matchParent, wrapContent) {
+        add(keyboardManager.keyboardView, lParams(matchParent, wrapContent) {
             below(expandCandidateButton)
             startOfParent()
             endOfParent()
@@ -206,7 +126,7 @@ class InputView(
             startOfParent()
             endOfParent()
         })
-        switchLayout("qwerty")
+        keyboardManager.switchLayout("qwerty", keyActionListener)
     }
 
     override fun onDetachedFromWindow() {
@@ -215,8 +135,7 @@ class InputView(
     }
 
     fun onShow() {
-        currentKeyboard.onAttach(service.editorInfo)
-        currentKeyboard.onInputMethodChange(currentIme)
+        keyboardManager.showKeyboard()
     }
 
     fun handleFcitxEvent(it: FcitxEvent<*>) {
@@ -233,37 +152,41 @@ class InputView(
                 updatePreedit(cachedPreedit)
             }
             is FcitxEvent.IMChangeEvent -> {
-                currentIme = it.data.status
-                currentKeyboard.onInputMethodChange(currentIme)
+                keyboardManager.updateCurrentIme(it.data.status)
             }
             else -> {
             }
         }
     }
 
-    private fun onAction(action: KeyAction<*>) = service.lifecycleScope.launch {
-        when (action) {
-            is KeyAction.FcitxKeyAction -> fcitx.sendKey(action.act)
-            is KeyAction.CommitAction -> {
-                // TODO: this should be handled more gracefully; or CommitAction should be removed?
-                fcitx.reset()
-                service.inputConnection?.commitText(action.act, 1)
-            }
-            is KeyAction.RepeatStartAction -> service.startRepeating(action.act)
-            is KeyAction.RepeatEndAction -> service.cancelRepeating(action.act)
-            is KeyAction.QuickPhraseAction -> quickPhrase()
-            is KeyAction.UnicodeAction -> unicode()
-            is KeyAction.LangSwitchAction -> switchLang()
-            is KeyAction.InputMethodSwitchAction -> inputMethodManager.showInputMethodPicker()
-            is KeyAction.LayoutSwitchAction -> switchLayout(action.act)
-            is KeyAction.CustomAction -> customEvent(action.act)
-            else -> {
+    private fun onAction(action: KeyAction<*>) {
+        service.lifecycleScope.launch {
+            when (action) {
+                is KeyAction.FcitxKeyAction -> fcitx.sendKey(action.act)
+                is KeyAction.CommitAction -> {
+                    // TODO: this should be handled more gracefully; or CommitAction should be removed?
+                    fcitx.reset()
+                    service.inputConnection?.commitText(action.act, 1)
+                }
+                is KeyAction.RepeatStartAction -> service.startRepeating(action.act)
+                is KeyAction.RepeatEndAction -> service.cancelRepeating(action.act)
+                is KeyAction.QuickPhraseAction -> quickPhrase()
+                is KeyAction.UnicodeAction -> unicode()
+                is KeyAction.LangSwitchAction -> switchLang()
+                is KeyAction.InputMethodSwitchAction -> inputMethodManager.showInputMethodPicker()
+                is KeyAction.LayoutSwitchAction -> keyboardManager.switchLayout(
+                    action.act,
+                    keyActionListener
+                )
+                is KeyAction.CustomAction -> customEvent(action.act)
+                else -> {
+                }
             }
         }
     }
 
     fun updatePreedit(content: PreeditContent) {
-        currentKeyboard.onPreeditChange(service.editorInfo, content)
+        keyboardManager.updatePreedit(content)
         preeditUi.update(content)
         preeditPopup.run {
             if (!preeditUi.visible) {
@@ -289,24 +212,6 @@ class InputView(
         expandedCandidate.ui.resetPosition()
     }
 
-    private fun switchLayout(to: String) {
-        keyboards[currentKeyboardName]?.let {
-            it.keyActionListener = null
-            it.onDetach()
-            keyboardView.removeView(it)
-        }
-        currentKeyboardName = to.ifEmpty {
-            when (currentKeyboardName) {
-                "qwerty" -> "number"
-                else -> "qwerty"
-            }
-        }
-        keyboardView.add(currentKeyboard, FrameLayout.LayoutParams(matchParent, wrapContent))
-        currentKeyboard.keyActionListener = keyActionListener
-        currentKeyboard.onAttach(service.editorInfo)
-        currentKeyboard.onInputMethodChange(currentIme)
-    }
-
     private suspend fun quickPhrase() {
         fcitx.reset()
         fcitx.triggerQuickPhrase()
@@ -324,7 +229,4 @@ class InputView(
         fn(fcitx)
     }
 
-    companion object {
-        private const val INITIAL_SPAN_COUNT = 6
-    }
 }
