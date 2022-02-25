@@ -54,7 +54,7 @@ class InputView(
     }
     private val keyboardManager = KeyboardManager()
 
-    private val commons: CandidateViewBuilder = CandidateViewBuilder()
+    private val candidateViewBuilder: CandidateViewBuilder = CandidateViewBuilder()
 
     private val horizontalCandidate = HorizontalCandidate()
     private val expandedCandidate = ExpandedCandidate()
@@ -92,7 +92,7 @@ class InputView(
         scope += wrapFcitxInputMethodService(service)
         scope += wrapContext(themedContext)
         scope += wrapFcitx(fcitx)
-        scope += commons
+        scope += candidateViewBuilder
         scope += keyboardManager
         scope += expandedCandidate
         scope += horizontalCandidate

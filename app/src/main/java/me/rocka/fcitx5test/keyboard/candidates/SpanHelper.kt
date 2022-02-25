@@ -60,13 +60,7 @@ class SpanHelper(
 
             // we still have rest span spaces,
             // but it can't hold the next item
-            fun cond1() = nextSize != null && manager.spanCount - (span + size) < nextSize
-
-            // we don't have more items,
-            // but there is rest span spaces
-            fun cond2() = nextSize == null && span + size < manager.spanCount
-
-            if (cond1() || cond2()) {
+            if (nextSize != null && manager.spanCount - (span + size) < nextSize) {
                 // stretch this item to fill the line
                 size = manager.spanCount - span
             }

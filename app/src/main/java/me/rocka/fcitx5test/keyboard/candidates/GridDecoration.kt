@@ -33,7 +33,10 @@ class GridDecoration(val drawable: Drawable) : RecyclerView.ItemDecoration() {
         for (i in 0 until layoutManager.childCount) {
             val view = parent.getChildAt(i)
             val lp = view.layoutParams as GridLayoutManager.LayoutParams
-            // draw divider if it is not the last item in each row
+            // break if it is the last item in data set
+            if (i == (parent.adapter!!.itemCount - 1))
+                break
+            // skip if it is the last item in each row
             if (lp.spanIndex + lp.spanSize == layoutManager.spanCount)
                 continue
             val left = view.right + lp.rightMargin
