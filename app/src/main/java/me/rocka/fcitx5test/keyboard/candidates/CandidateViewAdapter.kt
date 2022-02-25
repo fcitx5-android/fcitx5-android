@@ -27,14 +27,10 @@ abstract class CandidateViewAdapter :
         var idx = -1
     }
 
-    var offset by Delegates.observable(0) { _, old, new ->
-        if (old != new)
-            notifyItemRangeChanged(0, new)
-    }
+    var candidates: Array<String> = arrayOf()
+        private set
 
-    private var candidates: Array<String> = arrayOf()
-
-    fun getCandidateAt(position: Int) = candidates[position + offset]
+    fun getCandidateAt(position: Int) = candidates[position]
 
     @SuppressLint("NotifyDataSetChanged")
     fun updateCandidates(data: Array<String>) {
@@ -79,10 +75,10 @@ abstract class CandidateViewAdapter :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.textView.text = getCandidateAt(position)
-        holder.idx = position + offset
+        holder.idx = position
     }
 
-    override fun getItemCount() = candidates.size - offset
+    override fun getItemCount() = candidates.size
 
     abstract fun onTouchDown()
 

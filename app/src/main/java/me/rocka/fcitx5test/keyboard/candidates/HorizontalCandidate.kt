@@ -3,7 +3,6 @@ package me.rocka.fcitx5test.keyboard.candidates
 import android.content.Context
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.utils.dependency.context
-import me.rocka.fcitx5test.utils.globalLayoutListener
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
@@ -18,7 +17,6 @@ class HorizontalCandidate : UniqueComponent<HorizontalCandidate>(), Dependent,
 
     private val builder: CandidateViewBuilder by manager.must()
     private val context: Context by manager.context()
-    private val expandedCandidate: ExpandedCandidate by manager.must()
 
     val adapter by lazy { builder.newCandidateViewAdapter() }
     val recyclerView by lazy {
@@ -29,9 +27,6 @@ class HorizontalCandidate : UniqueComponent<HorizontalCandidate>(), Dependent,
                 autoSpanCount()
                 setupGridLayoutManager(this@HorizontalCandidate.adapter, false)
                 addGridDecoration()
-            }
-            globalLayoutListener {
-                expandedCandidate.adapter.offset = childCount
             }
         }
     }
