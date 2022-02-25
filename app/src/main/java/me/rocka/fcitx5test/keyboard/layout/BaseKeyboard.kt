@@ -11,9 +11,9 @@ import androidx.annotation.CallSuper
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import me.rocka.fcitx5test.R
-import me.rocka.fcitx5test.data.Prefs
-import me.rocka.fcitx5test.keyboard.InputView
 import me.rocka.fcitx5test.core.InputMethodEntry
+import me.rocka.fcitx5test.data.Prefs
+import me.rocka.fcitx5test.keyboard.PreeditContent
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
 import splitties.resources.styledColor
@@ -186,7 +186,7 @@ abstract class BaseKeyboard(
         // do nothing by default
     }
 
-    open fun onPreeditChange(info: EditorInfo?, content: InputView.PreeditContent) {
+    open fun onPreeditChange(info: EditorInfo?, content: PreeditContent) {
         // do nothing by default
     }
 

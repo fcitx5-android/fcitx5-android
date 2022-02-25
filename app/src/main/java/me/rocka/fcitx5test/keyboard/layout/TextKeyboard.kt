@@ -5,8 +5,8 @@ import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.ImageButton
 import me.rocka.fcitx5test.R
-import me.rocka.fcitx5test.keyboard.InputView
 import me.rocka.fcitx5test.core.InputMethodEntry
+import me.rocka.fcitx5test.keyboard.PreeditContent
 import splitties.views.imageResource
 
 class TextKeyboard(
@@ -116,7 +116,7 @@ class TextKeyboard(
     }
 
     // FIXME: need some new API to know exactly whether next enter would be captured by fcitx
-    override fun onPreeditChange(info: EditorInfo?, content: InputView.PreeditContent) {
+    override fun onPreeditChange(info: EditorInfo?, content: PreeditContent) {
         val hasPreedit = content.preedit.preedit.isNotEmpty()
         // `auxUp` is not empty when switching input methods, ignore it to reduce flicker
         //        || content.aux.auxUp.isNotEmpty()

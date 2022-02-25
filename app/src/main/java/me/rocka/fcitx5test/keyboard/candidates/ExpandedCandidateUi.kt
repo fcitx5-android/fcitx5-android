@@ -1,4 +1,4 @@
-package me.rocka.fcitx5test.keyboard
+package me.rocka.fcitx5test.keyboard.candidates
 
 import android.content.Context
 import android.graphics.PorterDuff
