@@ -74,10 +74,6 @@ class InputView(
                 btn.imageResource = R.drawable.ic_baseline_expand_less_24
                 lp.bottomToBottom = LayoutParams.PARENT_ID
                 lp.height = matchConstraints
-                val candidates = horizontalCandidate.adapter.candidates
-                expandedCandidate.adapter.updateCandidates(
-                    candidates.sliceArray(childCount until candidates.size)
-                )
             } else {
                 btn.imageResource = R.drawable.ic_baseline_expand_more_24
                 lp.bottomToBottom = LayoutParams.UNSET
