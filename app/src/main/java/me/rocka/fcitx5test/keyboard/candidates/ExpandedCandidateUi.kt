@@ -49,7 +49,7 @@ class ExpandedCandidateUi(
         )
     }
 
-    override val root = constraintLayout {
+    override val root = constraintLayout(R.id.expanded_candidate_view) {
         backgroundColor = styledColor(android.R.attr.colorBackground)
 
         add(pageUpBtn, lParams(matchConstraints, dp(60)) {
