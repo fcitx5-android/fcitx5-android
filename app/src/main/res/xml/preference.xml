@@ -32,8 +32,16 @@
             android:defaultValue="5"
             android:key="clipboard_limit"
             android:title="@string/clipboard_limit"
-            app:min="1"
+            app:iconSpaceReserved="false"
             app:max="50"
+            app:min="1"
+            app:singleLineTitle="false" />
+        <ListPreference
+            android:defaultValue="Grid"
+            android:entries="@array/expandable_candidate_style"
+            android:entryValues="@array/expandable_candidate_style"
+            android:key="expandable_candidate_style"
+            android:title="@string/expandable_candidate_style"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
     </PreferenceCategory>

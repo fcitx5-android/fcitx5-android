@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="expandable_candidate_style">
+        <item>@string/expandable_candidate_style_grid</item>
+        <item>@string/expandable_candidate_style_flexbox</item>
+    </string-array>
+</resources>

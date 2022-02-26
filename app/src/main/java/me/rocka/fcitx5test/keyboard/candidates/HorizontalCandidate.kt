@@ -24,7 +24,7 @@ class HorizontalCandidate : UniqueComponent<HorizontalCandidate>(), Dependent,
 
     private var needsRefreshExpanded = AtomicBoolean(false)
     val adapter by lazy {
-        builder.newCandidateViewAdapter().apply {
+        builder.gridAdapter().apply {
             onDataChanged {
                 needsRefreshExpanded.set(true)
             }

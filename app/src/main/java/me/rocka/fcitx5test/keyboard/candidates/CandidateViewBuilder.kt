@@ -1,14 +1,19 @@
 package me.rocka.fcitx5test.keyboard.candidates
 
+import android.view.ViewGroup
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.flexbox.*
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.core.Fcitx
 import me.rocka.fcitx5test.keyboard.FcitxInputMethodService
 import me.rocka.fcitx5test.keyboard.KeyboardManager
+import me.rocka.fcitx5test.keyboard.candidates.adapter.GridCandidateViewAdapter
+import me.rocka.fcitx5test.keyboard.candidates.adapter.SimpleCandidateViewAdapter
 import me.rocka.fcitx5test.utils.dependency.fcitx
 import me.rocka.fcitx5test.utils.dependency.service
 import me.rocka.fcitx5test.utils.oneShotGlobalLayoutListener
@@ -26,7 +31,14 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
     private val fcitx: Fcitx by manager.fcitx()
     private val keyboardManager: KeyboardManager by manager.must()
 
-    fun newCandidateViewAdapter() = object : CandidateViewAdapter() {
+    fun gridAdapter() = object : GridCandidateViewAdapter() {
+        override fun onTouchDown() = keyboardManager.currentKeyboard.haptic()
+        override fun onSelect(idx: Int) {
+            service.lifecycleScope.launch { fcitx.select(idx) }
+        }
+    }
+
+    fun simpleAdapter() = object : SimpleCandidateViewAdapter() {
         override fun onTouchDown() = keyboardManager.currentKeyboard.haptic()
         override fun onSelect(idx: Int) {
             service.lifecycleScope.launch { fcitx.select(idx) }
@@ -49,13 +61,13 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
     fun RecyclerView.addGridDecoration() = GridDecoration(
         ResourcesCompat.getDrawable(
             resources,
-            R.drawable.candidate_divider,
+            R.drawable.candidate_grid_divider,
             context.theme
         )!!
     ).also { addItemDecoration(it) }
 
     fun RecyclerView.setupGridLayoutManager(
-        adapter: CandidateViewAdapter,
+        adapter: GridCandidateViewAdapter,
         scrollVertically: Boolean
     ) {
         layoutManager =
@@ -70,6 +82,31 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
             }
         this.adapter = adapter
     }
+
+    fun RecyclerView.setupFlexboxLayoutManager(
+        adapter: SimpleCandidateViewAdapter,
+        scrollVertically: Boolean
+    ) {
+        layoutManager = object : FlexboxLayoutManager(context) {
+            override fun generateLayoutParams(lp: ViewGroup.LayoutParams?): RecyclerView.LayoutParams =
+                LayoutParams(lp)
+
+            override fun canScrollVertically(): Boolean = scrollVertically
+        }.apply {
+            flexDirection = FlexDirection.ROW
+
+            justifyContent = JustifyContent.SPACE_AROUND
+            alignItems = AlignItems.FLEX_START
+            flexWrap = FlexWrap.WRAP
+        }
+        this.adapter = adapter
+    }
+
+    fun RecyclerView.addHorizontalDecoration() =
+        DividerItemDecoration(
+            context,
+            DividerItemDecoration.VERTICAL
+        ).also { addItemDecoration(it) }
 
     companion object {
         private const val INITIAL_SPAN_COUNT = 6

@@ -5,9 +5,11 @@ import androidx.core.content.edit
 import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.ButtonHapticFeedback
 import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.Clipboard
 import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.ClipboardHistoryLimit
+import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.ExpandableCandidateStyle
 import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.FirstRun
 import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.HideKeyConfig
 import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.IgnoreSystemCursor
+import me.rocka.fcitx5test.keyboard.candidates.ExpandableCandidate
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -31,12 +33,40 @@ class Prefs(private val sharedPreferences: SharedPreferences) {
 
         }
 
+    private inline fun <reified T> stringLikePreference(
+        key: String,
+        defaultValue: T,
+        crossinline encode: (T) -> String = { toString() },
+        crossinline decode: (String) -> T?
+    ) = object : ReadWriteProperty<Prefs, T> {
+        override fun getValue(thisRef: Prefs, property: KProperty<*>): T {
+            val raw = thisRef.sharedPreferences.all[key] ?: return defaultValue
+            return (raw as? String)?.let(decode) ?: throw RuntimeException("Failed to decode $raw")
+        }
+
+        override fun setValue(thisRef: Prefs, property: KProperty<*>, value: T) {
+            val encoded = encode(value)
+            thisRef.sharedPreferences.edit { putString(key, encoded) }
+        }
+
+    }
+
     var firstRun by preference(FirstRun, true)
     var ignoreSystemCursor by preference(IgnoreSystemCursor, true)
     var hideKeyConfig by preference(HideKeyConfig, true)
     var buttonHapticFeedback by preference(ButtonHapticFeedback, true)
     var clipboard by preference(Clipboard, true)
     var clipboardHistoryLimit by preference(ClipboardHistoryLimit, 5)
+    var expandableCandidateStyle by stringLikePreference(
+        ExpandableCandidateStyle,
+        ExpandableCandidate.Style.Grid
+    ) { ExpandableCandidate.Style.valueOf(it) }
+
+    fun onPreferenceChange(block: Prefs.(key: String) -> Unit) {
+        sharedPreferences.registerOnSharedPreferenceChangeListener { _, key ->
+            block(this, key)
+        }
+    }
 
     object PreferenceKeys {
         const val FirstRun = "first_run"
@@ -45,6 +75,7 @@ class Prefs(private val sharedPreferences: SharedPreferences) {
         const val ButtonHapticFeedback = "button_haptic_feedback"
         const val Clipboard = "clipboard_enable"
         const val ClipboardHistoryLimit = "clipboard_limit"
+        const val ExpandableCandidateStyle = "expandable_candidate_style"
     }
 
     companion object {
