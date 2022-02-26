@@ -42,9 +42,7 @@ class HorizontalCandidate : UniqueComponent<HorizontalCandidate>(), Dependent,
             globalLayoutListener {
                 if (needsRefreshExpanded.compareAndSet(true, false)) {
                     val candidates = this@HorizontalCandidate.adapter.candidates
-                    expandableCandidate.adapter.updateCandidates(
-                        candidates.sliceArray(childCount until candidates.size)
-                    )
+                    expandableCandidate.adapter.updateCandidatesWithOffset(candidates, childCount)
                 }
             }
         }
