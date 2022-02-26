@@ -3,16 +3,16 @@ package me.rocka.fcitx5test.keyboard
 import android.annotation.SuppressLint
 import android.view.Gravity
 import android.view.WindowManager
-import android.widget.ImageButton
 import android.widget.PopupWindow
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.core.Fcitx
 import me.rocka.fcitx5test.core.FcitxEvent
 import me.rocka.fcitx5test.keyboard.candidates.CandidateViewBuilder
-import me.rocka.fcitx5test.keyboard.candidates.ExpandedCandidate
+import me.rocka.fcitx5test.keyboard.candidates.ExpandableCandidate
 import me.rocka.fcitx5test.keyboard.candidates.HorizontalCandidate
 import me.rocka.fcitx5test.keyboard.layout.BaseKeyboard
 import me.rocka.fcitx5test.keyboard.layout.KeyAction
@@ -57,31 +57,15 @@ class InputView(
     private val candidateViewBuilder: CandidateViewBuilder = CandidateViewBuilder()
 
     private val horizontalCandidate = HorizontalCandidate()
-    private val expandedCandidate = ExpandedCandidate()
+    private val expandableCandidate = ExpandableCandidate()
 
     private val scope = scope { }
 
-
-    private var candidateViewExpanded = false
     private val expandCandidateButton = themedContext.imageButton(R.id.expand_candidate_btn) {
         elevation = dp(2f)
         imageResource = R.drawable.ic_baseline_expand_more_24
-        setOnClickListener {
-            candidateViewExpanded = !candidateViewExpanded
-            val btn = it as ImageButton
-            val lp = expandedCandidate.ui.root.layoutParams as LayoutParams
-            if (candidateViewExpanded) {
-                btn.imageResource = R.drawable.ic_baseline_expand_less_24
-                lp.bottomToBottom = LayoutParams.PARENT_ID
-                lp.height = matchConstraints
-            } else {
-                btn.imageResource = R.drawable.ic_baseline_expand_more_24
-                lp.bottomToBottom = LayoutParams.UNSET
-                lp.height = 0
-                expandedCandidate.ui.resetPosition()
-            }
-            expandedCandidate.ui.root.requestLayout()
-        }
+        setOnClickListener { expandableCandidate.expand() }
+        visibility = INVISIBLE
     }
 
     private val keyActionListener = BaseKeyboard.KeyActionListener { action ->
@@ -94,12 +78,38 @@ class InputView(
         scope += wrapFcitx(fcitx)
         scope += candidateViewBuilder
         scope += keyboardManager
-        scope += expandedCandidate
+        scope += expandableCandidate
         scope += horizontalCandidate
     }
 
     init {
+        // MUST call before operation
         setupScope()
+
+        expandableCandidate.onStateUpdate = {
+            when (it) {
+                ExpandableCandidate.State.Expanded -> {
+                    expandCandidateButton.setOnClickListener { expandableCandidate.shrink() }
+                    expandCandidateButton.imageResource = R.drawable.ic_baseline_expand_less_24
+                }
+                ExpandableCandidate.State.Shrunk -> {
+                    expandCandidateButton.setOnClickListener { expandableCandidate.expand() }
+                    expandCandidateButton.imageResource = R.drawable.ic_baseline_expand_more_24
+                }
+            }
+        }
+        expandableCandidate.adapter.registerAdapterDataObserver(object :
+            RecyclerView.AdapterDataObserver() {
+            override fun onChanged() {
+                // shrink if there's no data
+                if (expandableCandidate.adapter.itemCount == 0) {
+                    expandableCandidate.shrink()
+                    expandCandidateButton.visibility = INVISIBLE
+                } else
+                    expandCandidateButton.visibility = VISIBLE
+            }
+
+        })
         service.lifecycleScope.launch {
             keyboardManager.updateCurrentIme(fcitx.currentIme())
         }
@@ -121,7 +131,7 @@ class InputView(
             startOfParent()
             before(expandCandidateButton)
         })
-        add(expandedCandidate.ui.root, lParams(matchConstraints, 0) {
+        add(expandableCandidate.ui.root, lParams(matchConstraints, 0) {
             below(horizontalCandidate.recyclerView)
             startOfParent()
             endOfParent()
@@ -208,7 +218,7 @@ class InputView(
 
     private fun updateCandidates(data: Array<String>) {
         horizontalCandidate.adapter.updateCandidates(data)
-        expandedCandidate.ui.resetPosition()
+        expandableCandidate.ui.resetPosition()
     }
 
     private suspend fun quickPhrase() {
