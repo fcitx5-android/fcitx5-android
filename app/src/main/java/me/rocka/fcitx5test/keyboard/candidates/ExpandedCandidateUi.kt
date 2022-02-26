@@ -21,7 +21,7 @@ class ExpandedCandidateUi(
     initRecyclerView: RecyclerView.() -> Unit = {}
 ) : Ui {
 
-    private val recyclerView = recyclerView {
+    val recyclerView = recyclerView {
         isVerticalScrollBarEnabled = false
     }
 

@@ -5,11 +5,13 @@ import androidx.core.util.containsKey
 import androidx.core.util.size
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import me.rocka.fcitx5test.keyboard.candidates.adapter.BaseCandidateViewAdapter
+import me.rocka.fcitx5test.keyboard.candidates.adapter.GridCandidateViewAdapter
 import kotlin.math.ceil
 import kotlin.math.min
 
 class SpanHelper(
-    private val adapter: CandidateViewAdapter,
+    private val adapter: GridCandidateViewAdapter,
     private val manager: GridLayoutManager
 ) : GridLayoutManager.SpanSizeLookup() {
 

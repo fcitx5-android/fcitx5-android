@@ -3,9 +3,14 @@ package me.rocka.fcitx5test.keyboard.candidates
 import android.content.Context
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 import me.rocka.fcitx5test.R
+import me.rocka.fcitx5test.data.Prefs
+import me.rocka.fcitx5test.keyboard.candidates.adapter.BaseCandidateViewAdapter
+import me.rocka.fcitx5test.keyboard.candidates.adapter.GridCandidateViewAdapter
+import me.rocka.fcitx5test.keyboard.candidates.adapter.SimpleCandidateViewAdapter
 import me.rocka.fcitx5test.utils.dependency.context
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
@@ -21,9 +26,17 @@ class ExpandableCandidate : UniqueComponent<ExpandableCandidate>(), Dependent,
     private val builder: CandidateViewBuilder by manager.must()
     private val context: Context by manager.context()
 
+    var style: Style? = null
+        private set
+
     enum class State {
         Expanded,
         Shrunk
+    }
+
+    enum class Style {
+        Grid,
+        Flexbox
     }
 
     var state: State by Delegates.observable(State.Shrunk) { _, _, new ->
@@ -36,15 +49,43 @@ class ExpandableCandidate : UniqueComponent<ExpandableCandidate>(), Dependent,
     private val parentConstraintLayout
         get() = ui.root.parent as ConstraintLayout
 
-    val adapter by lazy { builder.newCandidateViewAdapter() }
-    val ui by lazy {
-        ExpandedCandidateUi(context) {
+    lateinit var adapter: BaseCandidateViewAdapter
+
+    private var decoration: RecyclerView.ItemDecoration? = null
+
+    fun setStyle(style: Style = this.style ?: Prefs.getInstance().expandableCandidateStyle) {
+        this.style = style
+        adapter = when (style) {
+            Style.Grid -> builder.gridAdapter()
+            Style.Flexbox -> builder.simpleAdapter()
+        }
+        ui.recyclerView.apply {
+            decoration?.let { removeItemDecoration(it) }
             with(builder) {
-                autoSpanCount()
-                setupGridLayoutManager(this@ExpandableCandidate.adapter, true)
-                addGridDecoration()
+                when (style) {
+                    Style.Grid -> {
+                        autoSpanCount()
+                        setupGridLayoutManager(
+                            this@ExpandableCandidate.adapter as GridCandidateViewAdapter,
+                            true
+                        )
+                        decoration = addGridDecoration()
+                    }
+                    Style.Flexbox -> {
+                        setupFlexboxLayoutManager(
+                            this@ExpandableCandidate.adapter as SimpleCandidateViewAdapter,
+                            true
+                        )
+                        decoration = addHorizontalDecoration()
+                    }
+                }
+
             }
         }
+    }
+
+    val ui by lazy {
+        ExpandedCandidateUi(context)
     }
 
     private val shrunkConstraintSet by lazy {

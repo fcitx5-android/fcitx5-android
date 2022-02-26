@@ -40,4 +40,7 @@
     <string name="loading">Loading</string>
     <string name="clipboard_enable">Enable Clipboard Listening</string>
     <string name="clipboard_limit">Clipboard History Limit</string>
+    <string name="expandable_candidate_style">Expandable Candidate Style</string>
+    <string name="expandable_candidate_style_grid">Grid</string>
+    <string name="expandable_candidate_style_flexbox">Flexbox</string>
 </resources>

@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.core.Fcitx
 import me.rocka.fcitx5test.core.FcitxEvent
+import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.keyboard.candidates.CandidateViewBuilder
 import me.rocka.fcitx5test.keyboard.candidates.ExpandableCandidate
 import me.rocka.fcitx5test.keyboard.candidates.HorizontalCandidate
@@ -86,6 +87,11 @@ class InputView(
         // MUST call before operation
         setupScope()
 
+        expandableCandidate.setStyle()
+        Prefs.getInstance().onPreferenceChange {
+            if (it == Prefs.PreferenceKeys.ExpandableCandidateStyle)
+                expandableCandidate.setStyle(expandableCandidateStyle)
+        }
         expandableCandidate.onStateUpdate = {
             when (it) {
                 ExpandableCandidate.State.Expanded -> {
