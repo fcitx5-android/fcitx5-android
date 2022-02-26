@@ -12,6 +12,7 @@ import android.view.inputmethod.InputConnection
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.sun.jna.Library
 import com.sun.jna.Native
@@ -59,3 +60,10 @@ fun View.globalLayoutListener(repeat: () -> Boolean = { true }, block: () -> Uni
 }
 
 fun View.oneShotGlobalLayoutListener(block: () -> Unit) = globalLayoutListener({ false }, block)
+
+fun <T : RecyclerView.ViewHolder> RecyclerView.Adapter<T>.onDataChanged(block: () -> Unit) =
+    registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+        override fun onChanged() {
+            block()
+        }
+    })

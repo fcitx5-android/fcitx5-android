@@ -6,7 +6,6 @@ import android.view.WindowManager
 import android.widget.PopupWindow
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.core.Fcitx
@@ -20,6 +19,7 @@ import me.rocka.fcitx5test.utils.dependency.wrapContext
 import me.rocka.fcitx5test.utils.dependency.wrapFcitx
 import me.rocka.fcitx5test.utils.dependency.wrapFcitxInputMethodService
 import me.rocka.fcitx5test.utils.inputConnection
+import me.rocka.fcitx5test.utils.onDataChanged
 import org.mechdancer.dependency.plusAssign
 import org.mechdancer.dependency.scope
 import splitties.dimensions.dp
@@ -98,18 +98,19 @@ class InputView(
                 }
             }
         }
-        expandableCandidate.adapter.registerAdapterDataObserver(object :
-            RecyclerView.AdapterDataObserver() {
-            override fun onChanged() {
-                // shrink if there's no data
-                if (expandableCandidate.adapter.itemCount == 0) {
-                    expandableCandidate.shrink()
-                    expandCandidateButton.visibility = INVISIBLE
-                } else
-                    expandCandidateButton.visibility = VISIBLE
-            }
 
-        })
+        with(expandableCandidate) {
+            adapter.onDataChanged {
+                if (adapter.itemCount == 0) {
+                    shrink()
+                    expandCandidateButton.visibility = INVISIBLE
+
+                } else {
+                    expandCandidateButton.visibility = VISIBLE
+                }
+            }
+        }
+
         service.lifecycleScope.launch {
             keyboardManager.updateCurrentIme(fcitx.currentIme())
         }

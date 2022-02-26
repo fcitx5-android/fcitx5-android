@@ -1,10 +1,10 @@
 package me.rocka.fcitx5test.keyboard.candidates
 
 import android.content.Context
-import androidx.recyclerview.widget.RecyclerView
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.utils.dependency.context
 import me.rocka.fcitx5test.utils.globalLayoutListener
+import me.rocka.fcitx5test.utils.onDataChanged
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
@@ -24,13 +24,10 @@ class HorizontalCandidate : UniqueComponent<HorizontalCandidate>(), Dependent,
 
     private var needsRefreshExpanded = AtomicBoolean(false)
     val adapter by lazy {
-        builder.newCandidateViewAdapter().also {
-            it.registerAdapterDataObserver(object :
-                RecyclerView.AdapterDataObserver() {
-                override fun onChanged() {
-                    needsRefreshExpanded.set(true)
-                }
-            })
+        builder.newCandidateViewAdapter().apply {
+            onDataChanged {
+                needsRefreshExpanded.set(true)
+            }
         }
     }
     val recyclerView by lazy {
