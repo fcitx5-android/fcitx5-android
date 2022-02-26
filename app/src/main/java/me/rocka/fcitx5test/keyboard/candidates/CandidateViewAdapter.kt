@@ -18,7 +18,6 @@ import splitties.resources.dimenPxSize
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.textView
 import splitties.views.gravityCenter
-import kotlin.properties.Delegates
 
 abstract class CandidateViewAdapter :
     RecyclerView.Adapter<CandidateViewAdapter.ViewHolder>() {
@@ -30,12 +29,19 @@ abstract class CandidateViewAdapter :
     var candidates: Array<String> = arrayOf()
         private set
 
+    private var offset = 0
+
     fun getCandidateAt(position: Int) = candidates[position]
 
     @SuppressLint("NotifyDataSetChanged")
     fun updateCandidates(data: Array<String>) {
         candidates = data
         notifyDataSetChanged()
+    }
+
+    fun updateCandidatesWithOffset(data: Array<String>, offset : Int){
+        this.offset = offset
+        updateCandidates(data.sliceArray(offset until data.size))
     }
 
     // cache measureWidth
@@ -62,7 +68,7 @@ abstract class CandidateViewAdapter :
             isSingleLine = true
         }
         return ViewHolder(view).apply {
-            itemView.setOnClickListener { onSelect(this.idx) }
+            itemView.setOnClickListener { onSelect(this.idx + offset) }
             itemView.setOnTouchListener { v, event ->
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> onTouchDown()
