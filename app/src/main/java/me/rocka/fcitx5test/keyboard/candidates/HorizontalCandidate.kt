@@ -10,8 +10,6 @@ import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
 import org.mechdancer.dependency.manager.managedHandler
 import org.mechdancer.dependency.manager.must
-import splitties.resources.styledColor
-import splitties.views.backgroundColor
 import splitties.views.dsl.recyclerview.recyclerView
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -23,21 +21,21 @@ class HorizontalCandidate : UniqueComponent<HorizontalCandidate>(), Dependent,
     private val expandableCandidate: ExpandableCandidate by manager.must()
 
     private var needsRefreshExpanded = AtomicBoolean(false)
+
     val adapter by lazy {
-        builder.gridAdapter().apply {
+        builder.simpleAdapter().apply {
             onDataChanged {
                 needsRefreshExpanded.set(true)
             }
         }
     }
+
     val recyclerView by lazy {
         context.recyclerView(R.id.candidate_view) {
             isVerticalScrollBarEnabled = false
-            backgroundColor = styledColor(android.R.attr.colorBackground)
             with(builder) {
-                autoSpanCount()
-                setupGridLayoutManager(this@HorizontalCandidate.adapter, false)
-                addGridDecoration()
+                setupFlexboxLayoutManager(this@HorizontalCandidate.adapter, false)
+                addVerticalDecoration()
             }
             globalLayoutListener {
                 if (needsRefreshExpanded.compareAndSet(true, false)) {

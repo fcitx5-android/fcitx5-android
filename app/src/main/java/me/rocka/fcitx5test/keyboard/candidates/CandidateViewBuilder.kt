@@ -23,6 +23,7 @@ import org.mechdancer.dependency.manager.ManagedHandler
 import org.mechdancer.dependency.manager.managedHandler
 import org.mechdancer.dependency.manager.must
 import splitties.resources.dimenPxSize
+import splitties.resources.styledDrawable
 
 class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
     ManagedHandler by managedHandler() {
@@ -85,19 +86,22 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
 
     fun RecyclerView.setupFlexboxLayoutManager(
         adapter: SimpleCandidateViewAdapter,
-        scrollVertically: Boolean
+        scrollVertically: Boolean,
+        init: (FlexboxLayoutManager.() -> Unit)? = null
     ) {
         layoutManager = object : FlexboxLayoutManager(context) {
-            override fun generateLayoutParams(lp: ViewGroup.LayoutParams?): RecyclerView.LayoutParams =
-                LayoutParams(lp)
+            override fun generateLayoutParams(lp: ViewGroup.LayoutParams?) =
+                LayoutParams(lp).apply {
+                    flexGrow = 1f
+                }
 
             override fun canScrollVertically(): Boolean = scrollVertically
         }.apply {
             flexDirection = FlexDirection.ROW
-
             justifyContent = JustifyContent.SPACE_AROUND
             alignItems = AlignItems.FLEX_START
             flexWrap = FlexWrap.WRAP
+            init?.invoke(this)
         }
         this.adapter = adapter
     }
@@ -107,6 +111,11 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
             context,
             DividerItemDecoration.VERTICAL
         ).also { addItemDecoration(it) }
+
+    fun RecyclerView.addVerticalDecoration() =
+        VerticalDecoration(styledDrawable(android.R.attr.listDivider)!!).also {
+            addItemDecoration(it)
+        }
 
     companion object {
         private const val INITIAL_SPAN_COUNT = 6
