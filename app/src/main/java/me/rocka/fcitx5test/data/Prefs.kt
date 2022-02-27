@@ -62,10 +62,11 @@ class Prefs(private val sharedPreferences: SharedPreferences) {
         ExpandableCandidate.Style.Grid
     ) { ExpandableCandidate.Style.valueOf(it) }
 
-    fun onPreferenceChange(block: Prefs.(key: String) -> Unit) {
-        sharedPreferences.registerOnSharedPreferenceChangeListener { _, key ->
-            block(this, key)
-        }
+
+    // WARN: no anonymous listeners should be used
+    // See https://stackoverflow.com/questions/2542938/sharedpreferences-onsharedpreferencechangelistener-not-being-called-consistently
+    fun registerOnSharedPreferenceChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) {
+        sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
     }
 
     object PreferenceKeys {
