@@ -63,7 +63,6 @@ class InputView(
         if (adapter.itemCount == 0) {
             shrink()
             expandCandidateButton.visibility = INVISIBLE
-
         } else {
             expandCandidateButton.visibility = VISIBLE
         }
@@ -73,7 +72,7 @@ class InputView(
 
     private val expandCandidateButton: ImageButton =
         themedContext.imageButton(R.id.expand_candidate_btn) {
-            elevation = dp(2f)
+            background = null
             imageResource = R.drawable.ic_baseline_expand_more_24
             setOnClickListener { expandableCandidate.expand() }
             visibility = INVISIBLE
