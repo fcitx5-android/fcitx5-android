@@ -12,6 +12,7 @@ import me.rocka.fcitx5test.keyboard.candidates.adapter.BaseCandidateViewAdapter
 import me.rocka.fcitx5test.keyboard.candidates.adapter.GridCandidateViewAdapter
 import me.rocka.fcitx5test.keyboard.candidates.adapter.SimpleCandidateViewAdapter
 import me.rocka.fcitx5test.utils.dependency.context
+import me.rocka.fcitx5test.utils.onDataChanged
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
@@ -20,14 +21,18 @@ import org.mechdancer.dependency.manager.must
 import kotlin.properties.Delegates
 
 
-class ExpandableCandidate : UniqueComponent<ExpandableCandidate>(), Dependent,
+class ExpandableCandidate(private val onDataChange: (ExpandableCandidate.() -> Unit)) :
+    UniqueComponent<ExpandableCandidate>(), Dependent,
     ManagedHandler by managedHandler() {
 
     private val builder: CandidateViewBuilder by manager.must()
     private val context: Context by manager.context()
 
-    var style: Style? = null
-        private set
+    var style: Style by Delegates.observable(Prefs.getInstance().expandableCandidateStyle) { _, old, new ->
+        if (old != new) {
+            init()
+        }
+    }
 
     enum class State {
         Expanded,
@@ -39,8 +44,9 @@ class ExpandableCandidate : UniqueComponent<ExpandableCandidate>(), Dependent,
         Flexbox
     }
 
-    var state: State by Delegates.observable(State.Shrunk) { _, _, new ->
-        onStateUpdate?.invoke(new)
+    var state: State by Delegates.observable(State.Shrunk) { _, old, new ->
+        if (old != new)
+            onStateUpdate?.invoke(new)
     }
         private set
 
@@ -53,11 +59,15 @@ class ExpandableCandidate : UniqueComponent<ExpandableCandidate>(), Dependent,
 
     private var decoration: RecyclerView.ItemDecoration? = null
 
-    fun setStyle(style: Style = this.style ?: Prefs.getInstance().expandableCandidateStyle) {
-        this.style = style
+    fun init() {
         adapter = when (style) {
             Style.Grid -> builder.gridAdapter()
             Style.Flexbox -> builder.simpleAdapter()
+        }
+        onDataChange.let {
+            adapter.onDataChanged {
+                onDataChange()
+            }
         }
         ui.recyclerView.apply {
             decoration?.let { removeItemDecoration(it) }
@@ -82,6 +92,7 @@ class ExpandableCandidate : UniqueComponent<ExpandableCandidate>(), Dependent,
 
             }
         }
+        state = State.Shrunk
     }
 
     val ui by lazy {

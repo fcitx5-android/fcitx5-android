@@ -1,8 +1,10 @@
 package me.rocka.fcitx5test.keyboard
 
 import android.annotation.SuppressLint
+import android.content.SharedPreferences
 import android.view.Gravity
 import android.view.WindowManager
+import android.widget.ImageButton
 import android.widget.PopupWindow
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
@@ -20,7 +22,6 @@ import me.rocka.fcitx5test.utils.dependency.wrapContext
 import me.rocka.fcitx5test.utils.dependency.wrapFcitx
 import me.rocka.fcitx5test.utils.dependency.wrapFcitxInputMethodService
 import me.rocka.fcitx5test.utils.inputConnection
-import me.rocka.fcitx5test.utils.onDataChanged
 import org.mechdancer.dependency.plusAssign
 import org.mechdancer.dependency.scope
 import splitties.dimensions.dp
@@ -58,16 +59,25 @@ class InputView(
     private val candidateViewBuilder: CandidateViewBuilder = CandidateViewBuilder()
 
     private val horizontalCandidate = HorizontalCandidate()
-    private val expandableCandidate = ExpandableCandidate()
+    private val expandableCandidate = ExpandableCandidate {
+        if (adapter.itemCount == 0) {
+            shrink()
+            expandCandidateButton.visibility = INVISIBLE
+
+        } else {
+            expandCandidateButton.visibility = VISIBLE
+        }
+    }
 
     private val scope = scope { }
 
-    private val expandCandidateButton = themedContext.imageButton(R.id.expand_candidate_btn) {
-        elevation = dp(2f)
-        imageResource = R.drawable.ic_baseline_expand_more_24
-        setOnClickListener { expandableCandidate.expand() }
-        visibility = INVISIBLE
-    }
+    private val expandCandidateButton: ImageButton =
+        themedContext.imageButton(R.id.expand_candidate_btn) {
+            elevation = dp(2f)
+            imageResource = R.drawable.ic_baseline_expand_more_24
+            setOnClickListener { expandableCandidate.expand() }
+            visibility = INVISIBLE
+        }
 
     private val keyActionListener = BaseKeyboard.KeyActionListener { action ->
         onAction(action)
@@ -83,39 +93,15 @@ class InputView(
         scope += horizontalCandidate
     }
 
+    private val onPreferenceStyleChangeListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == Prefs.PreferenceKeys.ExpandableCandidateStyle)
+                expandableCandidate.style = Prefs.getInstance().expandableCandidateStyle
+        }
+
     init {
         // MUST call before operation
         setupScope()
-
-        expandableCandidate.setStyle()
-        Prefs.getInstance().onPreferenceChange {
-            if (it == Prefs.PreferenceKeys.ExpandableCandidateStyle)
-                expandableCandidate.setStyle(expandableCandidateStyle)
-        }
-        expandableCandidate.onStateUpdate = {
-            when (it) {
-                ExpandableCandidate.State.Expanded -> {
-                    expandCandidateButton.setOnClickListener { expandableCandidate.shrink() }
-                    expandCandidateButton.imageResource = R.drawable.ic_baseline_expand_less_24
-                }
-                ExpandableCandidate.State.Shrunk -> {
-                    expandCandidateButton.setOnClickListener { expandableCandidate.expand() }
-                    expandCandidateButton.imageResource = R.drawable.ic_baseline_expand_more_24
-                }
-            }
-        }
-
-        with(expandableCandidate) {
-            adapter.onDataChanged {
-                if (adapter.itemCount == 0) {
-                    shrink()
-                    expandCandidateButton.visibility = INVISIBLE
-
-                } else {
-                    expandCandidateButton.visibility = VISIBLE
-                }
-            }
-        }
 
         service.lifecycleScope.launch {
             keyboardManager.updateCurrentIme(fcitx.currentIme())
@@ -143,6 +129,23 @@ class InputView(
             startOfParent()
             endOfParent()
         })
+
+        expandableCandidate.init()
+        Prefs.getInstance()
+            .registerOnSharedPreferenceChangeListener(onPreferenceStyleChangeListener)
+        expandableCandidate.onStateUpdate = {
+            when (it) {
+                ExpandableCandidate.State.Expanded -> {
+                    expandCandidateButton.setOnClickListener { expandableCandidate.shrink() }
+                    expandCandidateButton.imageResource = R.drawable.ic_baseline_expand_less_24
+                }
+                ExpandableCandidate.State.Shrunk -> {
+                    expandCandidateButton.setOnClickListener { expandableCandidate.expand() }
+                    expandCandidateButton.imageResource = R.drawable.ic_baseline_expand_more_24
+                }
+            }
+        }
+
         keyboardManager.switchLayout("qwerty", keyActionListener)
     }
 
