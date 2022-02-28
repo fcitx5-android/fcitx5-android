@@ -1,9 +1,7 @@
 package me.rocka.fcitx5test.keyboard.candidates
 
 import android.view.ViewGroup
-import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.*
@@ -59,25 +57,18 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
         }
     }
 
-    fun RecyclerView.addGridDecoration() = GridDecoration(
-        ResourcesCompat.getDrawable(
-            resources,
-            R.drawable.candidate_grid_divider,
-            context.theme
-        )!!
-    ).also { addItemDecoration(it) }
+    fun RecyclerView.addGridDecoration() =
+        GridDecoration(styledDrawable(android.R.attr.listDivider)!!).also {
+            addItemDecoration(it)
+        }
 
     fun RecyclerView.setupGridLayoutManager(
         adapter: GridCandidateViewAdapter,
         scrollVertically: Boolean
     ) {
         layoutManager =
-            object : GridLayoutManager(
-                context, INITIAL_SPAN_COUNT, VERTICAL, false
-            ) {
-                override fun canScrollVertically(): Boolean {
-                    return scrollVertically
-                }
+            object : GridLayoutManager(context, INITIAL_SPAN_COUNT, VERTICAL, false) {
+                override fun canScrollVertically() = scrollVertically
             }.apply {
                 SpanHelper(adapter, this).attach()
             }
@@ -107,10 +98,9 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
     }
 
     fun RecyclerView.addHorizontalDecoration() =
-        DividerItemDecoration(
-            context,
-            DividerItemDecoration.VERTICAL
-        ).also { addItemDecoration(it) }
+        HorizontalDecoration(styledDrawable(android.R.attr.listDivider)!!).also {
+            addItemDecoration(it)
+        }
 
     fun RecyclerView.addVerticalDecoration() =
         VerticalDecoration(styledDrawable(android.R.attr.listDivider)!!).also {
