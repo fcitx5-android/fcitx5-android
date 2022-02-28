@@ -24,8 +24,6 @@ class GridDecoration(val drawable: Drawable) : RecyclerView.ItemDecoration() {
         } else {
             outRect.set(0, 0, 0, 0)
         }
-        // always add bottom padding
-        outRect.bottom = parent.dp(10)
     }
 
     override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
@@ -44,7 +42,7 @@ class GridDecoration(val drawable: Drawable) : RecyclerView.ItemDecoration() {
             val top = view.top - lp.topMargin
             val bottom = view.bottom + lp.bottomMargin
             // make the divider shorter
-            drawable.setBounds(left, top + parent.dp(6), right, bottom - parent.dp(6))
+            drawable.setBounds(left, top + parent.dp(8), right, bottom - parent.dp(8))
             drawable.draw(c)
         }
     }
