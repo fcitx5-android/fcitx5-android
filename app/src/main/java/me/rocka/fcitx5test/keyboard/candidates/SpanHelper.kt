@@ -5,7 +5,6 @@ import androidx.core.util.containsKey
 import androidx.core.util.size
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import me.rocka.fcitx5test.keyboard.candidates.adapter.BaseCandidateViewAdapter
 import me.rocka.fcitx5test.keyboard.candidates.adapter.GridCandidateViewAdapter
 import kotlin.math.ceil
 import kotlin.math.min
@@ -21,7 +20,7 @@ class SpanHelper(
 
     private fun getMinSpanSize(position: Int) = min(
         // approximately four characters or two Chinese characters per span
-        ceil(adapter.measureWidth(position) / 2).toInt(), manager.spanCount
+        ceil(adapter.measureWidth(position) / 1.5).toInt(), manager.spanCount
     )
 
     // clear calculated layout
@@ -67,7 +66,7 @@ class SpanHelper(
                 size = manager.spanCount - span
             }
             // save calculated layout
-            layout[i] = ItemLayout(span, size, group)
+            layout.put(i, ItemLayout(span, size, group))
             // accumulate span size
             span += size
             // bump group index

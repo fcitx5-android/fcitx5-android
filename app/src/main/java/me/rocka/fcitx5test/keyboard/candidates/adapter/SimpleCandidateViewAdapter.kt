@@ -18,7 +18,7 @@ abstract class SimpleCandidateViewAdapter : BaseCandidateViewAdapter() {
             layoutParams = ViewGroup.LayoutParams(wrapContent, dp(40))
             gravity = gravityCenter
             setTextSize(TypedValue.COMPLEX_UNIT_PX, dimen(R.dimen.candidate_font_size))
-            horizontalPadding = dp(8)
+            horizontalPadding = dimenPxSize(R.dimen.candidate_padding)
             minWidth = dimenPxSize(R.dimen.candidate_min_width)
             isSingleLine = true
         }

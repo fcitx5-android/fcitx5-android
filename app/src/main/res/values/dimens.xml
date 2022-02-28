@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="candidate_padding">8dp</dimen>
-    <dimen name="candidate_min_width">50dp</dimen>
+    <dimen name="candidate_min_width">40dp</dimen>
     <dimen name="candidate_font_size">20sp</dimen>
 </resources>
