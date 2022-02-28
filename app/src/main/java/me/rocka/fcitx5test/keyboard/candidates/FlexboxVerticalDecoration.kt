@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexboxLayoutManager
 import splitties.dimensions.dp
 
-class VerticalDecoration(val drawable: Drawable) : RecyclerView.ItemDecoration() {
+class FlexboxVerticalDecoration(val drawable: Drawable) : RecyclerView.ItemDecoration() {
     override fun getItemOffsets(
         outRect: Rect,
         view: View,

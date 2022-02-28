@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pref_first_run" translatable="false">first_run</string>
+    <string name="pref_ignore_system_cursor" translatable="false">ignore_system_cursor</string>
+    <string name="pref_hide_key_config" translatable="false">hide_key_config</string>
+    <string name="pref_button_haptic_feedback" translatable="false">button_haptic_feedback</string>
+    <string name="pref_clipboard_enable" translatable="false">clipboard_enable</string>
+    <string name="pref_clipboard_limit" translatable="false">clipboard_limit</string>
+    <string name="pref_expandable_candidate_style" translatable="false">expandable_candidate_style</string>
+</resources>

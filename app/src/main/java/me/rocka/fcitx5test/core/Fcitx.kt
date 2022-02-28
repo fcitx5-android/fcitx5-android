@@ -227,6 +227,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         @JvmStatic
         external fun scheduleEmpty()
 
+        private var firstRun by Prefs.getInstance().firstRun
         /**
          * Called from native-lib
          */
@@ -236,7 +237,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
             val event = FcitxEvent.create(type, params)
             Timber.d("Handling $event")
             if (event is FcitxEvent.ReadyEvent) {
-                if (Prefs.getInstance().firstRun) {
+                if (firstRun) {
                     // this method runs in same thread with `startupFcitx`
                     // block it will also block fcitx
                     onFirstRun()
@@ -258,7 +259,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
                 get("PreeditCursorPositionAtBeginning").value = "False"
                 setFcitxAddonConfig("pinyin", this)
             }
-            Prefs.getInstance().firstRun = false
+            firstRun = false
         }
 
         // will be called in fcitx main thread

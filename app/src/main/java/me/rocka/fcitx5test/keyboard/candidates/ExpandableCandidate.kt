@@ -28,10 +28,10 @@ class ExpandableCandidate(private val onDataChange: (ExpandableCandidate.() -> U
     private val builder: CandidateViewBuilder by manager.must()
     private val context: Context by manager.context()
 
-    var style: Style by Delegates.observable(Prefs.getInstance().expandableCandidateStyle) { _, old, new ->
-        if (old != new) {
-            init()
-        }
+    private val onStyleChange = Prefs.OnChangeListener<Style> { init() }
+
+    val style: Style by Prefs.getInstance().expandableCandidateStyle.also {
+        it.registerOnChangeListener(onStyleChange)
     }
 
     enum class State {
@@ -41,7 +41,12 @@ class ExpandableCandidate(private val onDataChange: (ExpandableCandidate.() -> U
 
     enum class Style {
         Grid,
-        Flexbox
+        Flexbox;
+
+        companion object : Prefs.StringLikeCodec<Style> {
+            override fun decode(raw: String): Style? =
+                runCatching { valueOf(raw) }.getOrNull()
+        }
     }
 
     var state: State by Delegates.observable(State.Shrunk) { _, old, new ->
@@ -86,7 +91,7 @@ class ExpandableCandidate(private val onDataChange: (ExpandableCandidate.() -> U
                             this@ExpandableCandidate.adapter as SimpleCandidateViewAdapter,
                             true
                         )
-                        decoration = addHorizontalDecoration()
+                        decoration = addFlexboxHorizontalDecoration()
                     }
                 }
 

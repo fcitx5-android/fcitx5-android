@@ -35,7 +35,7 @@ class HorizontalCandidate : UniqueComponent<HorizontalCandidate>(), Dependent,
             isVerticalScrollBarEnabled = false
             with(builder) {
                 setupFlexboxLayoutManager(this@HorizontalCandidate.adapter, false)
-                addVerticalDecoration()
+                addFlexboxVerticalDecoration()
             }
             globalLayoutListener {
                 if (needsRefreshExpanded.compareAndSet(true, false)) {

@@ -31,11 +31,9 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
         onUpdateListeners.remove(listener)
     }
 
-    private val enabled
-        get() = Prefs.getInstance().clipboard
+    private val enabled by Prefs.getInstance().clipboard
 
-    private val limit
-        get() = Prefs.getInstance().clipboardHistoryLimit
+    private val limit by Prefs.getInstance().clipboardHistoryLimit
 
     fun init(context: Context) {
         clipboardManager.addPrimaryClipChangedListener(this)

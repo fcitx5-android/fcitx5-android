@@ -8,8 +8,8 @@ import androidx.preference.*
 import cn.berberman.girls.utils.either.otherwise
 import cn.berberman.girls.utils.either.then
 import me.rocka.fcitx5test.R
-import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.core.RawConfig
+import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.ui.common.DialogSeekBarPreference
 import me.rocka.fcitx5test.ui.main.settings.addon.AddonConfigFragment
 import me.rocka.fcitx5test.ui.main.settings.im.InputMethodConfigFragment
@@ -17,6 +17,8 @@ import me.rocka.fcitx5test.utils.config.ConfigDescriptor
 import me.rocka.fcitx5test.utils.config.ConfigType
 
 object PreferenceScreenFactory {
+
+    private val hideKeyConfig by Prefs.getInstance().hideKeyConfig
 
     fun create(
         preferenceManager: PreferenceManager,
@@ -52,7 +54,7 @@ object PreferenceScreenFactory {
     ) {
 
         // Hide key related configs
-        if (Prefs.getInstance().hideKeyConfig && ConfigType.pretty(descriptor.type)
+        if (hideKeyConfig && ConfigType.pretty(descriptor.type)
                 .contains("Key")
         )
             return

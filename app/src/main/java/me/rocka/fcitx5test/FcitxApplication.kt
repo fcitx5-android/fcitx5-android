@@ -15,7 +15,10 @@ class FcitxApplication : Application() {
                 super.log(priority, "[${Thread.currentThread().name}] $tag", message, t)
             }
         })
-        Prefs.init(PreferenceManager.getDefaultSharedPreferences(applicationContext))
+        Prefs.init(
+            PreferenceManager.getDefaultSharedPreferences(applicationContext),
+            applicationContext.resources
+        )
         ClipboardManager.init(applicationContext)
     }
 

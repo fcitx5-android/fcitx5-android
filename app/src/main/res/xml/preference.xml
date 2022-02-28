@@ -6,31 +6,31 @@
         app:iconSpaceReserved="false">
         <SwitchPreference
             android:defaultValue="true"
-            android:key="ignore_system_cursor"
+            android:key="@string/pref_ignore_system_cursor"
             android:title="@string/ignore_sys_cursor"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
         <SwitchPreference
             android:defaultValue="true"
-            android:key="hide_key_config"
+            android:key="@string/pref_hide_key_config"
             android:title="@string/hide_key_config"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
         <SwitchPreference
             android:defaultValue="true"
-            android:key="button_haptic_feedback"
+            android:key="@string/pref_button_haptic_feedback"
             android:title="@string/button_haptic_feedback"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
         <SwitchPreference
             android:defaultValue="true"
-            android:key="clipboard_enable"
+            android:key="@string/pref_clipboard_enable"
             android:title="@string/clipboard_enable"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
         <me.rocka.fcitx5test.ui.common.DialogSeekBarPreference
             android:defaultValue="5"
-            android:key="clipboard_limit"
+            android:key="@string/pref_clipboard_limit"
             android:title="@string/clipboard_limit"
             app:iconSpaceReserved="false"
             app:max="50"
@@ -40,7 +40,7 @@
             android:defaultValue="Grid"
             android:entries="@array/expandable_candidate_style"
             android:entryValues="@array/expandable_candidate_style"
-            android:key="expandable_candidate_style"
+            android:key="@string/pref_expandable_candidate_style"
             android:summary="%s"
             android:title="@string/expandable_candidate_style"
             app:iconSpaceReserved="false"
