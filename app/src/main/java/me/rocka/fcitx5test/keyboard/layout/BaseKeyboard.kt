@@ -35,6 +35,8 @@ abstract class BaseKeyboard(
 
     var keyActionListener: KeyActionListener? = null
 
+    private val buttonHapticFeedback by Prefs.getInstance().buttonHapticFeedback
+
     init {
         with(context) {
             val keyRows = keyLayout.map { row ->
@@ -154,7 +156,7 @@ abstract class BaseKeyboard(
     }
 
     fun haptic() {
-        if (Prefs.getInstance().buttonHapticFeedback)
+        if (buttonHapticFeedback)
             performHapticFeedback(
                 KEYBOARD_TAP,
                 FLAG_IGNORE_GLOBAL_SETTING or FLAG_IGNORE_VIEW_SETTING

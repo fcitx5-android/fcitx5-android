@@ -39,6 +39,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private var composingText = ""
     private var fcitxCursor = -1
 
+    private val ignoreSystemCursor by Prefs.getInstance().ignoreSystemCursor
+
     override fun onCreate() {
         FcitxDaemonManager.bindFcitxDaemon(javaClass.name, this) {
             fcitx = getFcitxDaemon().fcitx
@@ -158,7 +160,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         if ((composingTextStart <= selectionStart) &&
             (selectionStart <= composingTextStart + composing.length)
         ) {
-            if (!Prefs.getInstance().ignoreSystemCursor) {
+            if (!ignoreSystemCursor) {
                 val position = selectionStart - composingTextStart
                 // move fcitx cursor when:
                 // - cursor position changed
@@ -202,7 +204,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     break
                 }
             }
-            if (Prefs.getInstance().ignoreSystemCursor || (cursor < 0)) break
+            if (ignoreSystemCursor || (cursor < 0)) break
             // when user starts typing and there is no composing text, composingTextStart would be -1
             val p = cursor + composingTextStart
             Timber.d("TextWithCursor: p=$p composingStart=$composingTextStart")

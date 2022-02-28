@@ -7,7 +7,7 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexboxLayoutManager
 
-class HorizontalDecoration(val drawable: Drawable) : RecyclerView.ItemDecoration() {
+class FlexboxHorizontalDecoration(val drawable: Drawable) : RecyclerView.ItemDecoration() {
     override fun getItemOffsets(
         outRect: Rect,
         view: View,

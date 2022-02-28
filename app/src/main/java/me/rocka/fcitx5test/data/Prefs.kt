@@ -1,83 +1,128 @@
 package me.rocka.fcitx5test.data
 
 import android.content.SharedPreferences
+import android.content.res.Resources
 import androidx.core.content.edit
-import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.ButtonHapticFeedback
-import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.Clipboard
-import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.ClipboardHistoryLimit
-import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.ExpandableCandidateStyle
-import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.FirstRun
-import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.HideKeyConfig
-import me.rocka.fcitx5test.data.Prefs.PreferenceKeys.IgnoreSystemCursor
+import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.keyboard.candidates.ExpandableCandidate
+import me.rocka.fcitx5test.utils.WeakHashSet
 import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
+import kotlin.reflect.cast
 
-class Prefs(private val sharedPreferences: SharedPreferences) {
+class Prefs(private val sharedPreferences: SharedPreferences, resources: Resources) {
 
-    private inline fun <reified T> preference(key: String, defaultValue: T) =
-        object : ReadWriteProperty<Prefs, T> {
-            override fun getValue(thisRef: Prefs, property: KProperty<*>): T {
-                return (thisRef.sharedPreferences.all[key] ?: defaultValue) as T
-            }
+    private val managedPreferences = mutableMapOf<String, ManagedPreference<*>>()
 
-            override fun setValue(thisRef: Prefs, property: KProperty<*>, value: T) {
+    private val onSharedPreferenceChangeListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            managedPreferences[key]?.fireChange()
+        }
+
+    open inner class ManagedPreference<T : Any>(
+        val key: String,
+        val defaultValue: T,
+        val type: KClass<T>
+    ) : ReadWriteProperty<Any?, T> {
+        private val listeners by lazy { WeakHashSet<OnChangeListener<T>>() }
+        open var value: T
+            get() = type.cast(sharedPreferences.all[key] ?: defaultValue)
+            set(value) {
                 when (value) {
-                    is Boolean -> thisRef.sharedPreferences.edit { putBoolean(key, value) }
-                    is Long -> thisRef.sharedPreferences.edit { putLong(key, value) }
-                    is Float -> thisRef.sharedPreferences.edit { putFloat(key, value) }
-                    is Int -> thisRef.sharedPreferences.edit { putInt(key, value) }
-                    is String -> thisRef.sharedPreferences.edit { putString(key, value) }
+                    is Boolean -> sharedPreferences.edit { putBoolean(key, value) }
+                    is Long -> sharedPreferences.edit { putLong(key, value) }
+                    is Float -> sharedPreferences.edit { putFloat(key, value) }
+                    is Int -> sharedPreferences.edit { putInt(key, value) }
+                    is String -> sharedPreferences.edit { putString(key, value) }
                 }
             }
 
+        // WARN: no anonymous listeners, please keep the reference!
+        fun registerOnChangeListener(listener: OnChangeListener<T>) {
+            listeners.add(listener)
         }
 
-    private inline fun <reified T> stringLikePreference(
+        fun unregisterOnChangeListener(listener: OnChangeListener<T>) {
+            listeners.remove(listener)
+        }
+
+        fun fireChange() {
+            listeners.forEach { with(it) { onChange() } }
+        }
+
+        override fun getValue(thisRef: Any?, property: KProperty<*>): T = value
+
+        override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
+            this.value = value
+        }
+
+        override fun toString(): String = "ManagedPreference[$key]($value:$type)"
+    }
+
+    interface StringLikeCodec<T : Any> {
+        fun encode(x: T): String = x.toString()
+        fun decode(raw: String): T?
+    }
+
+
+    inner class StringLikePreference<T : Any>(
         key: String,
         defaultValue: T,
-        crossinline encode: (T) -> String = { toString() },
-        crossinline decode: (String) -> T?
-    ) = object : ReadWriteProperty<Prefs, T> {
-        override fun getValue(thisRef: Prefs, property: KProperty<*>): T {
-            val raw = thisRef.sharedPreferences.all[key] ?: return defaultValue
-            return (raw as? String)?.let(decode) ?: throw RuntimeException("Failed to decode $raw")
+        type: KClass<T>,
+        val codec: StringLikeCodec<T>
+    ) :
+        ManagedPreference<T>(key, defaultValue, type) {
+        override var value: T
+            get() {
+                val raw = sharedPreferences.all[key] ?: return defaultValue
+                return (raw as? String)?.let { codec.decode(it) }
+                    ?: throw RuntimeException("Failed to decode $raw")
+            }
+            set(value) {
+                val encoded = codec.encode(value)
+                sharedPreferences.edit { putString(key, encoded) }
+            }
+
+    }
+
+    fun interface OnChangeListener<T : Any> {
+        fun ManagedPreference<T>.onChange()
+    }
+
+    private inline fun <reified T : Any> preference(key: String, defaultValue: T) =
+        if (key in managedPreferences)
+            throw IllegalArgumentException("Preference with key $key is already defined: ${managedPreferences[key]}")
+        else
+            ManagedPreference(key, defaultValue, T::class).also {
+                managedPreferences[key] = it
+            }
+
+
+    private inline fun <reified T : Any> stringLikePreference(
+        key: String,
+        defaultValue: T,
+        codec: StringLikeCodec<T>
+    ) = if (key in managedPreferences)
+        throw IllegalArgumentException("Preference with key $key is already defined: ${managedPreferences[key]}")
+    else
+        StringLikePreference(key, defaultValue, T::class, codec).also {
+            managedPreferences[key] = it
         }
 
-        override fun setValue(thisRef: Prefs, property: KProperty<*>, value: T) {
-            val encoded = encode(value)
-            thisRef.sharedPreferences.edit { putString(key, encoded) }
-        }
-
-    }
-
-    var firstRun by preference(FirstRun, true)
-    var ignoreSystemCursor by preference(IgnoreSystemCursor, true)
-    var hideKeyConfig by preference(HideKeyConfig, true)
-    var buttonHapticFeedback by preference(ButtonHapticFeedback, true)
-    var clipboard by preference(Clipboard, true)
-    var clipboardHistoryLimit by preference(ClipboardHistoryLimit, 5)
-    var expandableCandidateStyle by stringLikePreference(
-        ExpandableCandidateStyle,
-        ExpandableCandidate.Style.Grid
-    ) { ExpandableCandidate.Style.valueOf(it) }
-
-
-    // WARN: no anonymous listeners should be used
-    // See https://stackoverflow.com/questions/2542938/sharedpreferences-onsharedpreferencechangelistener-not-being-called-consistently
-    fun registerOnSharedPreferenceChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) {
-        sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
-    }
-
-    object PreferenceKeys {
-        const val FirstRun = "first_run"
-        const val IgnoreSystemCursor = "ignore_system_cursor"
-        const val HideKeyConfig = "hide_key_config"
-        const val ButtonHapticFeedback = "button_haptic_feedback"
-        const val Clipboard = "clipboard_enable"
-        const val ClipboardHistoryLimit = "clipboard_limit"
-        const val ExpandableCandidateStyle = "expandable_candidate_style"
-    }
+    var firstRun = preference(resources.getString(R.string.pref_first_run), true)
+    var ignoreSystemCursor =
+        preference(resources.getString(R.string.pref_ignore_system_cursor), true)
+    var hideKeyConfig = preference(resources.getString(R.string.pref_hide_key_config), true)
+    var buttonHapticFeedback =
+        preference(resources.getString(R.string.pref_button_haptic_feedback), true)
+    var clipboard = preference(resources.getString(R.string.pref_clipboard_enable), true)
+    var clipboardHistoryLimit = preference(resources.getString(R.string.pref_clipboard_limit), 5)
+    var expandableCandidateStyle = stringLikePreference(
+        resources.getString(R.string.pref_expandable_candidate_style),
+        ExpandableCandidate.Style.Grid,
+        ExpandableCandidate.Style
+    )
 
     companion object {
         private var instance: Prefs? = null
@@ -86,10 +131,11 @@ class Prefs(private val sharedPreferences: SharedPreferences) {
          * MUST call before use
          */
         @Synchronized
-        fun init(sharedPreferences: SharedPreferences) {
+        fun init(sharedPreferences: SharedPreferences, resources: Resources) {
             if (instance != null)
                 return
-            instance = Prefs(sharedPreferences)
+            instance = Prefs(sharedPreferences, resources)
+            sharedPreferences.registerOnSharedPreferenceChangeListener(getInstance().onSharedPreferenceChangeListener)
         }
 
         @Synchronized

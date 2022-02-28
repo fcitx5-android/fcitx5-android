@@ -92,11 +92,6 @@ class InputView(
         scope += horizontalCandidate
     }
 
-    private val onPreferenceStyleChangeListener =
-        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == Prefs.PreferenceKeys.ExpandableCandidateStyle)
-                expandableCandidate.style = Prefs.getInstance().expandableCandidateStyle
-        }
 
     init {
         // MUST call before operation
@@ -130,8 +125,6 @@ class InputView(
         })
 
         expandableCandidate.init()
-        Prefs.getInstance()
-            .registerOnSharedPreferenceChangeListener(onPreferenceStyleChangeListener)
         expandableCandidate.onStateUpdate = {
             when (it) {
                 ExpandableCandidate.State.Expanded -> {

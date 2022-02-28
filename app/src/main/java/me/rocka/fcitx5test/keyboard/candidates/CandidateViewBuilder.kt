@@ -97,13 +97,13 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
         this.adapter = adapter
     }
 
-    fun RecyclerView.addHorizontalDecoration() =
-        HorizontalDecoration(styledDrawable(android.R.attr.listDivider)!!).also {
+    fun RecyclerView.addFlexboxHorizontalDecoration() =
+        FlexboxHorizontalDecoration(styledDrawable(android.R.attr.listDivider)!!).also {
             addItemDecoration(it)
         }
 
-    fun RecyclerView.addVerticalDecoration() =
-        VerticalDecoration(styledDrawable(android.R.attr.listDivider)!!).also {
+    fun RecyclerView.addFlexboxVerticalDecoration() =
+        FlexboxVerticalDecoration(styledDrawable(android.R.attr.listDivider)!!).also {
             addItemDecoration(it)
         }
 
