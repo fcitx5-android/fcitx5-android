@@ -115,14 +115,13 @@ object PreferenceScreenFactory {
                 entries = (descriptor.entriesI18n ?: descriptor.entries).toTypedArray()
                 entryValues = descriptor.entries.toTypedArray()
                 dialogTitle = descriptor.description ?: descriptor.name
-                summaryProvider = Preference.SummaryProvider { pref: ListPreference ->
-                    entries[entryValues.indexOf(pref.value)]
-                }
+                summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
                 setDefaultValue(descriptor.defaultValue)
             }
             is ConfigDescriptor.ConfigEnumList -> listPreference()
             is ConfigDescriptor.ConfigExternal -> if (descriptor.name == "DictManager") pinyinDictionary() else stubPreference()
             is ConfigDescriptor.ConfigInt -> DialogSeekBarPreference(context).apply {
+                summaryProvider = DialogSeekBarPreference.SimpleSummaryProvider
                 descriptor.defaultValue?.let { defaultValue = it }
                 descriptor.intMin?.let { min = it }
                 descriptor.intMax?.let { max = it }
@@ -134,9 +133,7 @@ object PreferenceScreenFactory {
                 stubPreference()
             is ConfigDescriptor.ConfigString -> EditTextPreference(context).apply {
                 dialogTitle = descriptor.description ?: descriptor.name
-                summaryProvider = Preference.SummaryProvider { pref: EditTextPreference ->
-                    pref.text
-                }
+                summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
                 setDefaultValue(descriptor.defaultValue)
             }
             is ConfigDescriptor.ConfigCustom -> throw IllegalAccessException("Impossible!")

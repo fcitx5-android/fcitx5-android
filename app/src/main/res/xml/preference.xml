@@ -44,6 +44,7 @@
             android:summary="%s"
             android:title="@string/expandable_candidate_style"
             app:iconSpaceReserved="false"
-            app:singleLineTitle="false" />
+            app:singleLineTitle="false"
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 </PreferenceScreen>

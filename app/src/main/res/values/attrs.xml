@@ -6,5 +6,6 @@
         <attr name="max" format="integer" />
         <attr name="step" format="integer" />
         <attr name="unit" format="string" />
+        <attr name="useSimpleSummaryProvider" format="boolean" />
     </declare-styleable>
 </resources>

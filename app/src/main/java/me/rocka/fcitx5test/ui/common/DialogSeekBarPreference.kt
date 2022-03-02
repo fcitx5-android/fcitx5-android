@@ -5,7 +5,6 @@ import android.util.AttributeSet
 import android.widget.SeekBar
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
-import androidx.preference.PreferenceManager
 import me.rocka.fcitx5test.R
 import splitties.dimensions.dp
 import splitties.views.dsl.core.*
@@ -42,6 +41,9 @@ class DialogSeekBarPreference : Preference {
                 max = getInteger(R.styleable.DialogSeekBarPreference_max, 100)
                 step = getInteger(R.styleable.DialogSeekBarPreference_step, 1)
                 unit = getString(R.styleable.DialogSeekBarPreference_unit) ?: ""
+                if (getBoolean(R.styleable.DialogSeekBarPreference_useSimpleSummaryProvider, false)) {
+                    summaryProvider = SimpleSummaryProvider
+                }
             } finally {
                 recycle()
             }
@@ -49,15 +51,10 @@ class DialogSeekBarPreference : Preference {
     }
 
     private val currentValue: Int
-        get() = preferenceDataStore?.getInt(key, defaultValue) ?: defaultValue
+        get() = getPersistedInt(defaultValue)
 
     override fun onClick() {
         showSeekBarDialog()
-    }
-
-    override fun onAttachedToHierarchy(preferenceManager: PreferenceManager) {
-        super.onAttachedToHierarchy(preferenceManager)
-        summary = textForValue(currentValue)
     }
 
     /**
@@ -96,8 +93,8 @@ class DialogSeekBarPreference : Preference {
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 val value = valueForProgress(seekBar.progress)
                 if (callChangeListener(value)) {
-                    preferenceDataStore?.putInt(key, value)
-                    summary = textForValue(currentValue)
+                    persistInt(value)
+                    notifyChanged()
                 }
             }
             .setNegativeButton(android.R.string.cancel, null)
@@ -122,4 +119,10 @@ class DialogSeekBarPreference : Preference {
     private fun valueForProgress(progress: Int) = (progress * step) + min
 
     private fun textForValue(value: Int) = "$value$unit"
+
+    object SimpleSummaryProvider : SummaryProvider<DialogSeekBarPreference> {
+        override fun provideSummary(preference: DialogSeekBarPreference): CharSequence {
+            return preference.textForValue(preference.currentValue)
+        }
+    }
 }
