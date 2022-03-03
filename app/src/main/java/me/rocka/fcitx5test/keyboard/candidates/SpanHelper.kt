@@ -3,6 +3,7 @@ package me.rocka.fcitx5test.keyboard.candidates
 import android.util.SparseArray
 import androidx.core.util.containsKey
 import androidx.core.util.size
+import androidx.core.util.valueIterator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.rocka.fcitx5test.keyboard.candidates.adapter.GridCandidateViewAdapter
@@ -18,8 +19,16 @@ class SpanHelper(
 
     private val layout = SparseArray<ItemLayout>()
 
+    val lines: List<List<ItemLayout>>
+        get() = layout.valueIterator()
+            .asSequence()
+            .groupBy { it.groupIndex }
+            .map { it.value }
+
+    fun getItemLayout(position: Int): ItemLayout? = layout.get(position)
+
     private fun getMinSpanSize(position: Int) = min(
-        // approximately four characters or two Chinese characters per span
+        // approximately three characters or one Chinese characters per span
         ceil(adapter.measureWidth(position) / 1.5).toInt(), manager.spanCount
     )
 
