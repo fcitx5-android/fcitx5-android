@@ -1,6 +1,8 @@
 package me.rocka.fcitx5test.keyboard
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.view.Gravity
 import android.view.WindowManager
 import android.widget.ImageButton
@@ -16,6 +18,7 @@ import me.rocka.fcitx5test.keyboard.candidates.ExpandableCandidate
 import me.rocka.fcitx5test.keyboard.candidates.HorizontalCandidate
 import me.rocka.fcitx5test.keyboard.layout.BaseKeyboard
 import me.rocka.fcitx5test.keyboard.layout.KeyAction
+import me.rocka.fcitx5test.ui.main.MainActivity
 import me.rocka.fcitx5test.utils.dependency.wrapContext
 import me.rocka.fcitx5test.utils.dependency.wrapFcitx
 import me.rocka.fcitx5test.utils.dependency.wrapFcitxInputMethodService
@@ -188,6 +191,12 @@ class InputView(
                 is KeyAction.LayoutSwitchAction -> keyboardManager.switchLayout(
                     action.act,
                     keyActionListener
+                )
+                is KeyAction.StartSettingsActivityAction -> context.startActivity(
+                    Intent(
+                        context,
+                        MainActivity::class.java
+                    ).apply { addFlags(FLAG_ACTIVITY_NEW_TASK) }
                 )
                 is KeyAction.CustomAction -> customEvent(action.act)
                 else -> {

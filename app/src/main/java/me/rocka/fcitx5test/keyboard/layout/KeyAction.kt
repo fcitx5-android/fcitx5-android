@@ -48,6 +48,11 @@ sealed class KeyAction<T> {
 
     data class LayoutSwitchAction(override val act: String = "") : KeyAction<String>()
 
+    object StartSettingsActivityAction : KeyAction<Unit>() {
+        override val act: Unit
+            get() = Unit
+    }
+
     data class CustomAction(override val act: (Fcitx) -> Unit) : KeyAction<(Fcitx) -> Unit>()
 
 }

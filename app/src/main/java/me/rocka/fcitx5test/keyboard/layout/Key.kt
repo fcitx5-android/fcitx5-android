@@ -135,6 +135,7 @@ open class MiniSpaceKey(
 open class LayoutSwitchKey(
     override val src: Int = R.drawable.ic_baseline_keyboard_24,
     override val id: Int = R.id.button_layout_switch
-) : BaseKey(0.15f), IImageKey, IPressKey, IKeyId {
+) : BaseKey(0.15f), IImageKey, IPressKey, IKeyId, ILongPressKey {
     override fun onPress() = KeyAction.LayoutSwitchAction()
+    override fun onLongPress(): KeyAction<*> = KeyAction.StartSettingsActivityAction
 }
