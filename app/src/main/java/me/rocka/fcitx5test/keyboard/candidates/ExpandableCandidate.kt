@@ -58,7 +58,7 @@ class ExpandableCandidate(private val onDataChange: (ExpandableCandidate.() -> U
     var onStateUpdate: ((State) -> Unit)? = null
 
     private val parentConstraintLayout
-        get() = ui.root.parent as ConstraintLayout
+        get() = layout.parent as ConstraintLayout
 
     lateinit var adapter: BaseCandidateViewAdapter
 
@@ -74,7 +74,7 @@ class ExpandableCandidate(private val onDataChange: (ExpandableCandidate.() -> U
                 onDataChange()
             }
         }
-        ui.recyclerView.apply {
+        layout.recyclerView.apply {
             decoration?.let { removeItemDecoration(it) }
             with(builder) {
                 when (style) {
@@ -100,8 +100,8 @@ class ExpandableCandidate(private val onDataChange: (ExpandableCandidate.() -> U
         state = State.Shrunk
     }
 
-    val ui by lazy {
-        ExpandedCandidateUi(context)
+    val layout by lazy {
+        ExpandableCandidateLayout(context)
     }
 
     private val shrunkConstraintSet by lazy {
@@ -137,7 +137,7 @@ class ExpandableCandidate(private val onDataChange: (ExpandableCandidate.() -> U
         if (animation)
             prepareAnimation()
         expandedConstraintSet.applyTo(parentConstraintLayout)
-        ui.resetPosition()
+        layout.resetPosition()
         state = State.Expanded
     }
 
@@ -147,7 +147,7 @@ class ExpandableCandidate(private val onDataChange: (ExpandableCandidate.() -> U
         if (animation)
             prepareAnimation()
         shrunkConstraintSet.applyTo(parentConstraintLayout)
-        ui.resetPosition()
+        layout.resetPosition()
         state = State.Shrunk
     }
 }
