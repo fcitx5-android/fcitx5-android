@@ -1,25 +1,31 @@
 package me.rocka.fcitx5test.keyboard.candidates
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
+import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.widget.ImageButton
 import androidx.recyclerview.widget.RecyclerView
 import me.rocka.fcitx5test.R
+import me.rocka.fcitx5test.keyboard.PreeditContent
+import me.rocka.fcitx5test.keyboard.layout.BackspaceKey
+import me.rocka.fcitx5test.keyboard.layout.BaseKeyboard
+import me.rocka.fcitx5test.keyboard.layout.ReturnKey
 import splitties.dimensions.dp
 import splitties.resources.styledColor
-import splitties.resources.styledColorSL
 import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.imageButton
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.imageResource
 
-class ExpandedCandidateUi(
-    override val ctx: Context,
+// TODO: Refactor, this shouldn't depend on BaseKeyboard
+@SuppressLint("ViewConstructor")
+class ExpandableCandidateLayout(
+    context: Context,
     initRecyclerView: RecyclerView.() -> Unit = {}
-) : Ui {
+) : BaseKeyboard(context, emptyList()) {
 
     val recyclerView = recyclerView {
         isVerticalScrollBarEnabled = false
@@ -27,29 +33,24 @@ class ExpandedCandidateUi(
 
     private val pageUpBtn = imageButton {
         elevation = dp(2f)
+        // TODO: page
+        background = null
         imageResource = R.drawable.ic_baseline_arrow_upward_24
     }
 
     private val pageDnBtn = imageButton {
         elevation = dp(2f)
+        // TODO: page
+        background = null
         imageResource = R.drawable.ic_baseline_arrow_downward_24
     }
 
-    private val backspaceBtn = imageButton {
-        elevation = dp(2f)
-        imageResource = R.drawable.ic_baseline_backspace_24
-    }
+    private val backspaceBtn = createButton(BackspaceKey())
 
-    private val returnBtn = imageButton {
-        elevation = dp(2f)
-        imageResource = R.drawable.ic_baseline_keyboard_return_24
-        backgroundTintList = styledColorSL(android.R.attr.colorAccent)
-        colorFilter = PorterDuffColorFilter(
-            styledColor(android.R.attr.colorForegroundInverse), PorterDuff.Mode.SRC_IN
-        )
-    }
+    private val returnBtn: ImageButton = createButton(ReturnKey()) as ImageButton
 
-    override val root = constraintLayout(R.id.expanded_candidate_view) {
+    init {
+        id = R.id.expanded_candidate_view
         backgroundColor = styledColor(android.R.attr.colorBackground)
 
         add(pageUpBtn, lParams(matchConstraints, dp(60)) {
@@ -92,5 +93,9 @@ class ExpandedCandidateUi(
 
     fun resetPosition() {
         recyclerView.scrollToPosition(0)
+    }
+
+    override fun onPreeditChange(info: EditorInfo?, content: PreeditContent) {
+        updateReturnButton(returnBtn, info, content)
     }
 }

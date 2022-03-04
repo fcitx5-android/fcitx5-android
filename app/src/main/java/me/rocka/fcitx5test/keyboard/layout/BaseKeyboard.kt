@@ -7,6 +7,7 @@ import android.view.HapticFeedbackConstants.*
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.widget.ImageButton
 import androidx.annotation.CallSuper
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -41,60 +42,7 @@ abstract class BaseKeyboard(
         with(context) {
             val keyRows = keyLayout.map { row ->
                 val keyButtons = row.map { key ->
-                    createButton(context, key).apply Button@{
-                        setOnClickListener {
-                            if (key is IPressKey)
-                                onAction(key.onPress())
-                        }
-                        setOnLongClickListener {
-                            when (key) {
-                                is ILongPressKey -> {
-                                    onAction(key.onLongPress())
-                                    true
-                                }
-                                is IRepeatKey -> {
-                                    onAction(key.onHold())
-                                    true
-                                }
-                                else -> false
-                            }
-                        }
-                        setupOnGestureListener(object : MyOnGestureListener() {
-                            override fun onDown(e: MotionEvent?): Boolean {
-                                haptic()
-                                return false
-                            }
-
-                            override fun onDoubleTap() = when (key) {
-                                is IDoublePressKey -> {
-                                    haptic()
-                                    onAction(key.onDoublePress())
-                                    true
-                                }
-                                else -> false
-                            }
-
-                            override fun onSwipeDown() = when (key) {
-                                is ILongPressKey -> {
-                                    onAction(key.onLongPress())
-                                    true
-                                }
-                                else -> false
-                            }
-
-                            override fun onRawTouchEvent(motionEvent: MotionEvent): Boolean {
-                                when (key) {
-                                    is IRepeatKey -> {
-                                        when (motionEvent.action) {
-                                            MotionEvent.ACTION_BUTTON_PRESS -> this@Button.performClick()
-                                            MotionEvent.ACTION_UP -> onAction(key.onRelease())
-                                        }
-                                    }
-                                }
-                                return false
-                            }
-                        })
-                    }
+                    createButton(key)
                 }
                 constraintLayout Row@{
                     keyButtons.forEachIndexed { index, button ->
@@ -127,7 +75,7 @@ abstract class BaseKeyboard(
         }
     }
 
-    private fun createButton(context: Context, btn: BaseKey): View = with(context) {
+    protected fun createButton(btn: BaseKey, initView: View.() -> Unit = {}): View = with(context) {
         when (btn) {
             is IImageKey -> imageButton {
                 imageResource = btn.src
@@ -152,6 +100,59 @@ abstract class BaseKeyboard(
             padding = 0
             elevation = dp(2f)
             isHapticFeedbackEnabled = false
+            setOnClickListener {
+                if (btn is IPressKey)
+                    onAction(btn.onPress())
+            }
+            setOnLongClickListener {
+                when (btn) {
+                    is ILongPressKey -> {
+                        onAction(btn.onLongPress())
+                        true
+                    }
+                    is IRepeatKey -> {
+                        onAction(btn.onHold())
+                        true
+                    }
+                    else -> false
+                }
+            }
+            setupOnGestureListener(object : MyOnGestureListener() {
+                override fun onDown(e: MotionEvent?): Boolean {
+                    haptic()
+                    return false
+                }
+
+                override fun onDoubleTap() = when (btn) {
+                    is IDoublePressKey -> {
+                        haptic()
+                        onAction(btn.onDoublePress())
+                        true
+                    }
+                    else -> false
+                }
+
+                override fun onSwipeDown() = when (btn) {
+                    is ILongPressKey -> {
+                        onAction(btn.onLongPress())
+                        true
+                    }
+                    else -> false
+                }
+
+                override fun onRawTouchEvent(motionEvent: MotionEvent): Boolean {
+                    when (btn) {
+                        is IRepeatKey -> {
+                            when (motionEvent.action) {
+                                MotionEvent.ACTION_BUTTON_PRESS -> performClick()
+                                MotionEvent.ACTION_UP -> onAction(btn.onRelease())
+                            }
+                        }
+                    }
+                    return false
+                }
+            })
+            initView()
         }
     }
 
@@ -164,7 +165,7 @@ abstract class BaseKeyboard(
     }
 
     @DrawableRes
-    fun drawableForReturn(info: EditorInfo?): Int {
+    protected fun drawableForReturn(info: EditorInfo?): Int {
         if (info?.imeOptions?.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION) == true) {
             return R.drawable.ic_baseline_keyboard_return_24
         }
@@ -176,6 +177,22 @@ abstract class BaseKeyboard(
             EditorInfo.IME_ACTION_DONE -> R.drawable.ic_baseline_done_24
             EditorInfo.IME_ACTION_PREVIOUS -> R.drawable.ic_baseline_keyboard_tab_reverse_24
             else -> R.drawable.ic_baseline_keyboard_return_24
+        }
+    }
+
+    // FIXME: need some new API to know exactly whether next enter would be captured by fcitx
+    protected fun updateReturnButton(
+        `return`: ImageButton,
+        info: EditorInfo?,
+        content: PreeditContent
+    ) {
+        val hasPreedit = content.preedit.preedit.isNotEmpty()
+        // `auxUp` is not empty when switching input methods, ignore it to reduce flicker
+        //        || content.aux.auxUp.isNotEmpty()
+        `return`.imageResource = if (hasPreedit) {
+            R.drawable.ic_baseline_keyboard_return_24
+        } else {
+            drawableForReturn(info)
         }
     }
 

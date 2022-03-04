@@ -1,7 +1,6 @@
 package me.rocka.fcitx5test.keyboard
 
 import android.annotation.SuppressLint
-import android.content.SharedPreferences
 import android.view.Gravity
 import android.view.WindowManager
 import android.widget.ImageButton
@@ -12,7 +11,6 @@ import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.core.Fcitx
 import me.rocka.fcitx5test.core.FcitxEvent
-import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.keyboard.candidates.CandidateViewBuilder
 import me.rocka.fcitx5test.keyboard.candidates.ExpandableCandidate
 import me.rocka.fcitx5test.keyboard.candidates.HorizontalCandidate
@@ -118,13 +116,14 @@ class InputView(
             startOfParent()
             before(expandCandidateButton)
         })
-        add(expandableCandidate.ui.root, lParams(matchConstraints, 0) {
+        add(expandableCandidate.layout, lParams(matchConstraints, 0) {
             below(horizontalCandidate.recyclerView)
             startOfParent()
             endOfParent()
         })
 
         expandableCandidate.init()
+        expandableCandidate.layout.keyActionListener = keyActionListener
         expandableCandidate.onStateUpdate = {
             when (it) {
                 ExpandableCandidate.State.Expanded -> {
@@ -199,6 +198,7 @@ class InputView(
 
     fun updatePreedit(content: PreeditContent) {
         keyboardManager.updatePreedit(content)
+        expandableCandidate.layout.onPreeditChange(null, content)
         preeditUi.update(content)
         preeditPopup.run {
             if (!preeditUi.visible) {
@@ -220,7 +220,7 @@ class InputView(
 
     private fun updateCandidates(data: Array<String>) {
         horizontalCandidate.adapter.updateCandidates(data)
-        expandableCandidate.ui.resetPosition()
+        expandableCandidate.layout.resetPosition()
     }
 
     private suspend fun quickPhrase() {

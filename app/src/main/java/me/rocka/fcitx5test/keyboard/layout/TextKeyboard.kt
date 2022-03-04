@@ -115,16 +115,8 @@ class TextKeyboard(
         `return`.imageResource = drawableForReturn(info)
     }
 
-    // FIXME: need some new API to know exactly whether next enter would be captured by fcitx
     override fun onPreeditChange(info: EditorInfo?, content: PreeditContent) {
-        val hasPreedit = content.preedit.preedit.isNotEmpty()
-        // `auxUp` is not empty when switching input methods, ignore it to reduce flicker
-        //        || content.aux.auxUp.isNotEmpty()
-        `return`.imageResource = if (hasPreedit) {
-            R.drawable.ic_baseline_keyboard_return_24
-        } else {
-            drawableForReturn(info)
-        }
+        updateReturnButton(`return`, info, content)
     }
 
     override fun onInputMethodChange(ime: InputMethodEntry) {
