@@ -242,7 +242,13 @@ class InputView(
     }
 
     private suspend fun switchLang() {
-        fcitx.enumerateIme()
+        if (fcitx.enabledIme().size < 2) {
+            context.startActivity(Intent(context, MainActivity::class.java).apply {
+                addFlags(FLAG_ACTIVITY_NEW_TASK)
+                putExtra(MainActivity.INTENT_DATA_ADD_IM, 0)
+            })
+        } else
+            fcitx.enumerateIme()
     }
 
     private inline fun customEvent(fn: (Fcitx) -> Unit) {

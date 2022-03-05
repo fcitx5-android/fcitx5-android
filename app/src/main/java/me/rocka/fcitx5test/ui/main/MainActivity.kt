@@ -46,15 +46,22 @@ class MainActivity : AppCompatActivity() {
         }
         if (SetupActivity.shouldShowUp() && intent.action == Intent.ACTION_MAIN)
             startActivity(Intent(this, SetupActivity::class.java))
-        processAddDictIntent(intent)
+        processIntent(intent)
     }
 
     override fun onNewIntent(intent: Intent?) {
-        processAddDictIntent(intent)
+        processIntent(intent)
         super.onNewIntent(intent)
     }
 
-    private fun processAddDictIntent(intent: Intent?) {
+    private fun processIntent(intent: Intent?) {
+        listOf(
+            ::processAddDictIntent,
+            ::processAddInputMethodIntent
+        ).firstOrNull { it(intent) }
+    }
+
+    private fun processAddDictIntent(intent: Intent?): Boolean {
         if (intent != null && intent.action == Intent.ACTION_VIEW) {
             intent.data?.let {
                 AlertDialog.Builder(this)
@@ -72,7 +79,29 @@ class MainActivity : AppCompatActivity() {
                     }
                     .show()
             }
+            return true
         }
+        return false
+    }
+
+    private fun processAddInputMethodIntent(intent: Intent?): Boolean {
+        if (intent != null && intent.hasExtra(INTENT_DATA_ADD_IM)) {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.no_more_input_methods)
+                .setMessage(R.string.add_more_input_methods)
+                .setPositiveButton(R.string.add) { _, _ ->
+                    // ensure we are at top level
+                    navHostFragment.navController.popBackStack(R.id.mainFragment, false)
+                    // navigate to input method list
+                    navHostFragment.navController.navigate(
+                        R.id.action_mainFragment_to_imListFragment,
+                    )
+                }
+                .setNegativeButton(android.R.string.cancel) { _, _ -> }
+                .show()
+            return true
+        }
+        return false
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -88,5 +117,9 @@ class MainActivity : AppCompatActivity() {
                 viewModel.fcitx.save()
             }
         super.onStop()
+    }
+
+    companion object {
+        const val INTENT_DATA_ADD_IM = "im"
     }
 }

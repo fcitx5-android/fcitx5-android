@@ -43,4 +43,6 @@
     <string name="expandable_candidate_style">Expandable Candidate Style</string>
     <string name="expandable_candidate_style_grid">Grid</string>
     <string name="expandable_candidate_style_flexbox">Flexbox</string>
+    <string name="no_more_input_methods">No more input methods to switch</string>
+    <string name="add_more_input_methods">Do you want to add more input methods?</string>
 </resources>
