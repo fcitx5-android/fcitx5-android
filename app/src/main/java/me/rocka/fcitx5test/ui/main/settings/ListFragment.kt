@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import me.rocka.fcitx5test.core.RawConfig
 import me.rocka.fcitx5test.ui.common.BaseDynamicListUi
+import me.rocka.fcitx5test.ui.common.DynamicListUi
 import me.rocka.fcitx5test.ui.main.MainViewModel
 import me.rocka.fcitx5test.utils.config.ConfigDescriptor
 import me.rocka.fcitx5test.utils.config.ConfigType
@@ -30,13 +31,11 @@ class ListFragment : Fragment() {
 
             is ConfigDescriptor.ConfigEnumList -> {
                 val d = descriptor as ConfigDescriptor.ConfigEnumList
-                object : BaseDynamicListUi<String>(
-                    requireContext(),
-                    Mode.ChooseOne { d.entries.toTypedArray() },
+                requireContext().DynamicListUi(
+                    BaseDynamicListUi.Mode.ChooseOne { d.entries.toTypedArray() },
                     cfg.subItems?.map { it.value } ?: listOf()
                 ) {
-                    override fun showEntry(x: String): String =
-                        d.entriesI18n?.get(d.entries.indexOf(x)) ?: x
+                    d.entriesI18n?.get(d.entries.indexOf(it)) ?: it
                 }
             }
 
@@ -45,31 +44,26 @@ class ListFragment : Fragment() {
                 when (ty.subtype) {
                     // does a list of booleans make sense?
                     ConfigType.TyBool -> {
-                        object : BaseDynamicListUi<Boolean>(
-                            requireContext(),
-                            Mode.ChooseOne { arrayOf(true, false) },
-                            (cfg.subItems?.map { it.value.toBoolean() } ?: listOf())
-                        ) {
-                            override fun showEntry(x: Boolean): String = x.toString()
-                        }
+                        requireContext().DynamicListUi(
+                            BaseDynamicListUi.Mode.ChooseOne { arrayOf(true, false) },
+                            (cfg.subItems?.map { it.value.toBoolean() } ?: listOf()),
+                        ) { it.toString() }
                     }
                     ConfigType.TyInt -> {
-                        object : BaseDynamicListUi<Int>(
-                            requireContext(),
-                            Mode.FreeAdd("integer", { it.toInt() }, { it.toIntOrNull() != null }),
-                            (cfg.subItems?.map { it.value.toInt() } ?: listOf())
-                        ) {
-                            override fun showEntry(x: Int): String = x.toString()
-                        }
+                        requireContext().DynamicListUi(
+                            BaseDynamicListUi.Mode.FreeAdd(
+                                "integer",
+                                { it.toInt() },
+                                { it.toIntOrNull() != null }),
+                            (cfg.subItems?.map { it.value.toInt() } ?: listOf()),
+
+                            ) { it.toString() }
                     }
                     ConfigType.TyString -> {
-                        object : BaseDynamicListUi<String>(
-                            requireContext(),
-                            Mode.FreeAddString(),
+                        requireContext().DynamicListUi(
+                            BaseDynamicListUi.Mode.FreeAddString(),
                             (cfg.subItems?.map { it.value } ?: listOf())
-                        ) {
-                            override fun showEntry(x: String): String = x
-                        }
+                        ) { it }
                     }
                     ConfigType.TyEnum -> throw IllegalAccessException("Impossible!")
                     else -> throw IllegalArgumentException("List of ${ConfigType.pretty(ty.subtype)} is unsupported")

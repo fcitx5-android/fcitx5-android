@@ -4,7 +4,7 @@ import android.graphics.Canvas
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 
-class DynamicListTouchCallback<T>(private val adapter: DynamicListAdapter<T>) :
+open class DynamicListTouchCallback<T>(private val adapter: DynamicListAdapter<T>) :
     ItemTouchHelper.SimpleCallback(
         if (adapter.enableOrder)
             ItemTouchHelper.UP or ItemTouchHelper.DOWN

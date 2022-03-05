@@ -4,10 +4,13 @@ import android.view.View
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.core.InputMethodEntry
 import me.rocka.fcitx5test.ui.common.BaseDynamicListUi
+import me.rocka.fcitx5test.ui.common.DynamicListTouchCallback
 import me.rocka.fcitx5test.ui.common.DynamicListUi
 import me.rocka.fcitx5test.ui.common.OnItemChangedListener
 import me.rocka.fcitx5test.ui.main.settings.ProgressFragment
@@ -48,9 +51,23 @@ class InputMethodListFragment : ProgressFragment(), OnItemChangedListener<InputM
                     )
                 }
             },
+            useCustomTouchCallback = true,
             show = { it.displayName }
         )
         ui.addOnItemChangedListener(this@InputMethodListFragment)
+        ui.addTouchCallback(object : DynamicListTouchCallback<InputMethodEntry>(ui) {
+
+            override fun getSwipeDirs(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder
+            ): Int {
+                // English keyboard shouldn't be removed
+                if (ui.entries[viewHolder.bindingAdapterPosition].uniqueName == "keyboard-us")
+                    return if (ui.enableOrder) ItemTouchHelper.UP or ItemTouchHelper.DOWN
+                    else ItemTouchHelper.ACTION_STATE_IDLE
+                return super.getSwipeDirs(recyclerView, viewHolder)
+            }
+        })
         return ui.root
     }
 

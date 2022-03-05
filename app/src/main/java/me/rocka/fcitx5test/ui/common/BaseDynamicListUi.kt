@@ -9,6 +9,7 @@ import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import cn.berberman.girls.utils.identity
 import com.google.android.material.snackbar.Snackbar
 import me.rocka.fcitx5test.R
@@ -215,14 +216,22 @@ abstract class BaseDynamicListUi<T>(
 
     }
 
+    protected val recyclerView: RecyclerView
+
+    fun addTouchCallback(
+        touchCallback: DynamicListTouchCallback<T> =
+            DynamicListTouchCallback(this@BaseDynamicListUi)
+    ) {
+        ItemTouchHelper(touchCallback)
+            .attachToRecyclerView(recyclerView)
+    }
+
     override val root: View = coordinatorLayout {
         add(recyclerView {
             adapter = this@BaseDynamicListUi
             layoutManager = verticalLayoutManager()
-            ItemTouchHelper(DynamicListTouchCallback(this@BaseDynamicListUi))
-                .attachToRecyclerView(this)
 
-        }, defaultLParams {
+        }.also { recyclerView = it }, defaultLParams {
             height = matchParent
             width = matchParent
         })
