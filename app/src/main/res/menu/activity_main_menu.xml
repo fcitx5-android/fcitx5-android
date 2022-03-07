@@ -6,5 +6,10 @@
         android:icon="@drawable/ic_baseline_save_24"
         android:title="@string/save"
         android:visible="false"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/activity_main_menu_about"
+        android:title="@string/about"
+        android:visible="false"
+        app:showAsAction="never|withText" />
 </menu>

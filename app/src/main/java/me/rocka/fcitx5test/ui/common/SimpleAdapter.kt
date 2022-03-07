@@ -1,4 +1,4 @@
-package me.rocka.fcitx5test.ui.main
+package me.rocka.fcitx5test.ui.common
 
 import android.view.View
 import android.view.ViewGroup
@@ -11,9 +11,9 @@ import splitties.resources.styledDrawable
 import splitties.views.dsl.core.*
 import splitties.views.textAppearance
 
-class SettingItemRecyclerViewAdapter(
-    private vararg val settingItems: Pair<String, () -> Unit>
-) : RecyclerView.Adapter<SettingItemRecyclerViewAdapter.ViewHolder>() {
+class SimpleAdapter(
+    private vararg val items: Pair<String, (() -> Unit)?>
+) : RecyclerView.Adapter<SimpleAdapter.ViewHolder>() {
 
     inner class ViewHolder(val rootView: View, val textView: TextView) :
         RecyclerView.ViewHolder(rootView)
@@ -35,13 +35,21 @@ class SettingItemRecyclerViewAdapter(
         }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val (string, action) = settingItems[position]
-        holder.run {
+        val (string, action) = items[position]
+        holder.apply {
             textView.text = string
-            rootView.setOnClickListener { action() }
+            with(rootView) {
+                if (action != null) {
+                    background =
+                        styledDrawable(android.R.attr.selectableItemBackground)
+                    setOnClickListener { action() }
+                } else
+                    background = styledDrawable(android.R.attr.itemBackground)
+            }
+
         }
     }
 
-    override fun getItemCount(): Int = settingItems.size
+    override fun getItemCount(): Int = items.size
 
 }

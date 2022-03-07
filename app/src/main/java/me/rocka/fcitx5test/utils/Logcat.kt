@@ -4,7 +4,6 @@ import android.os.Process
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
-@Suppress("BlockingMethodInNonBlockingContext")
 class Logcat : CoroutineScope by CoroutineScope(Dispatchers.IO) {
 
     private var process: java.lang.Process? = null
@@ -21,12 +20,14 @@ class Logcat : CoroutineScope by CoroutineScope(Dispatchers.IO) {
     /**
      * Get a snapshot of logcat
      */
-    fun getLogAsync(): Deferred<List<String>> = async {
-        Runtime.getRuntime()
-            .exec(arrayOf("logcat", "--pid=${Process.myPid()}", "-d"))
-            .inputStream
-            .bufferedReader()
-            .readLines()
+    fun getLogAsync(): Deferred<Result<List<String>>> = async {
+        runCatching {
+            Runtime.getRuntime()
+                .exec(arrayOf("logcat", "--pid=${Process.myPid()}", "-d"))
+                .inputStream
+                .bufferedReader()
+                .readLines()
+        }
     }
 
     /**
@@ -34,7 +35,7 @@ class Logcat : CoroutineScope by CoroutineScope(Dispatchers.IO) {
      */
     fun clearLog(): Job =
         launch {
-            Runtime.getRuntime().exec(arrayOf("logcat", "-c"))
+            runCatching { Runtime.getRuntime().exec(arrayOf("logcat", "-c")) }
         }
 
     /**
@@ -44,17 +45,19 @@ class Logcat : CoroutineScope by CoroutineScope(Dispatchers.IO) {
         if (process != null)
             throw IllegalStateException("Logcat process already created!")
         else launch {
-            Runtime
-                .getRuntime()
-                .exec(arrayOf("logcat", "--pid=${Process.myPid()}"))
-                .also { process = it }
-                .inputStream
-                .bufferedReader()
-                .lineSequence()
-                .asFlow()
-                .flowOn(Dispatchers.IO)
-                .cancellable()
-                .collect { flow.emit(it) }
+            runCatching {
+                Runtime
+                    .getRuntime()
+                    .exec(arrayOf("logcat", "--pid=${Process.myPid()}", "-v", "brief"))
+                    .also { process = it }
+                    .inputStream
+                    .bufferedReader()
+                    .lineSequence()
+                    .asFlow()
+                    .flowOn(Dispatchers.IO)
+                    .cancellable()
+                    .collect { flow.emit(it) }
+            }
         }.also { emittingJob = it }
 
     /**

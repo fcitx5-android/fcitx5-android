@@ -45,4 +45,9 @@
     <string name="expandable_candidate_style_flexbox">Flexbox</string>
     <string name="no_more_input_methods">No more input methods to switch</string>
     <string name="add_more_input_methods">Do you want to add more input methods?</string>
+    <string name="about">About</string>
+    <string name="os_licenses">Open source licenses</string>
+    <string name="current_version">Current version</string>
+    <string name="real_time_logs">Real-time logs</string>
+    <string name="developer">Developer</string>
 </resources>

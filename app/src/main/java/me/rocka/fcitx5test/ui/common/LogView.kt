@@ -2,8 +2,13 @@ package me.rocka.fcitx5test.ui.common
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
 import android.util.AttributeSet
-import android.widget.ScrollView
+import android.widget.HorizontalScrollView
+import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.launchIn
@@ -15,17 +20,43 @@ import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.textView
 
 class LogView @JvmOverloads constructor(context: Context, attributeSet: AttributeSet? = null) :
-    ScrollView(context, attributeSet) {
+    NestedScrollView(context, attributeSet) {
 
-    private val textView = textView().also { add(it, lParams(matchParent, matchParent)) }
+    private val textView = textView {
+        setTextIsSelectable(true)
+        setTextColor(Color.WHITE)
+    }
     private val logcat = Logcat()
+
+    init {
+        add(HorizontalScrollView(context).also {
+            it.add(textView, lParams(matchParent, matchParent))
+        }, lParams(matchParent, matchParent))
+    }
 
     @SuppressLint("SetTextI18n")
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         logcat.initLogFlow()
         logcat.logFlow.onEach {
-            textView.text = textView.text.toString() + "\n" + it
+            val colored = SpannableString(it)
+            fun setColor(color: Int) {
+                colored.setSpan(
+                    ForegroundColorSpan(color),
+                    0,
+                    it.length,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+            when (it.first()) {
+                'D' -> setColor(Color.MAGENTA)
+                'I' -> setColor(Color.GREEN)
+                'W' -> setColor(Color.YELLOW)
+                'E' -> setColor(Color.RED)
+                else -> {}
+            }
+            textView.append(colored)
+            textView.append("\n")
         }.launchIn(findViewTreeLifecycleOwner()!!.lifecycleScope)
     }
 

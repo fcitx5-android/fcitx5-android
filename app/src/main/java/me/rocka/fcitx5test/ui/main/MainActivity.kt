@@ -39,9 +39,21 @@ class MainActivity : AppCompatActivity() {
             binding.toolbar.title = it
         }
         viewModel.toolbarSaveButtonOnClickListener.observe(this) {
-            binding.toolbar.menu.findItem(R.id.activity_main_menu_save).run {
+            binding.toolbar.menu.findItem(R.id.activity_main_menu_save).apply {
                 isVisible = it != null
-                setOnMenuItemClickListener { _ -> it?.invoke(); true }
+                setOnMenuItemClickListener { _ ->
+                    it?.invoke()
+                    true
+                }
+            }
+        }
+        viewModel.aboutButton.observe(this) {
+            binding.toolbar.menu.findItem(R.id.activity_main_menu_about).apply {
+                isVisible = it
+                setOnMenuItemClickListener {
+                    navHostFragment.navController.navigate(R.id.action_mainFragment_to_aboutFragment)
+                    true
+                }
             }
         }
         if (SetupActivity.shouldShowUp() && intent.action == Intent.ACTION_MAIN)

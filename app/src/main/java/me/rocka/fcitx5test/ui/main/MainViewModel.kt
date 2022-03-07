@@ -15,6 +15,8 @@ class MainViewModel : ViewModel() {
 
     val toolbarSaveButtonOnClickListener = MutableLiveData<(() -> Unit)?>()
 
+    val aboutButton = MutableLiveData<Boolean>()
+
     lateinit var fcitx: Fcitx
 
     fun setToolbarTitle(title: String) {
@@ -27,6 +29,14 @@ class MainViewModel : ViewModel() {
 
     fun disableToolbarSaveButton() {
         toolbarSaveButtonOnClickListener.value = null
+    }
+
+    fun enableAboutButton() {
+        aboutButton.value = true
+    }
+
+    fun disableAboutButton() {
+        aboutButton.value = false
     }
 
     init {
