@@ -4,12 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.ui.common.LogView
-import splitties.dimensions.dp
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
@@ -24,11 +22,7 @@ class LogFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View = requireContext().verticalLayout {
-        add(LogView(requireContext()), lParams {
-            height = matchParent
-            width = matchParent
-            setPadding(dp(10))
-        })
+        add(LogView(requireContext()), lParams(matchParent, matchParent) )
     }
 
     override fun onResume() {

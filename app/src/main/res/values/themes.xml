@@ -1,2 +1,10 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.FcitxAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorLogFatal" type="color">@color/red_A700</item>
+        <item name="colorLogError" type="color">@color/red_400</item>
+        <item name="colorLogWarning" type="color">@color/yellow_800</item>
+        <item name="colorLogInfo" type="color">@color/blue_500</item>
+        <item name="colorLogDebug" type="color">@color/grey_700</item>
+    </style>
 </resources>

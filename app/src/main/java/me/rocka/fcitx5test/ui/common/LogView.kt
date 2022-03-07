@@ -2,7 +2,7 @@ package me.rocka.fcitx5test.ui.common
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Build
 import android.text.Spannable
 import android.text.SpannableString
@@ -15,28 +15,34 @@ import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.utils.Logcat
-import splitties.views.dsl.core.add
-import splitties.views.dsl.core.lParams
-import splitties.views.dsl.core.matchParent
-import splitties.views.dsl.core.textView
+import splitties.dimensions.dp
+import splitties.resources.styledColor
+import splitties.views.dsl.core.*
+import splitties.views.padding
 
 class LogView @JvmOverloads constructor(context: Context, attributeSet: AttributeSet? = null) :
     NestedScrollView(context, attributeSet) {
 
+    private val logcat = Logcat()
+
     private val textView = textView {
+        padding = dp(4)
+        textSize = 12f
+        typeface = Typeface.MONOSPACE
         setTextIsSelectable(true)
-        setTextColor(Color.WHITE)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             setTextClassifier(object : TextClassifier {})
         }
     }
-    private val logcat = Logcat()
+
+    private val scrollView = view(::HorizontalScrollView) {
+        add(textView, lParams(matchParent, matchParent))
+    }
 
     init {
-        add(HorizontalScrollView(context).also {
-            it.add(textView, lParams(matchParent, matchParent))
-        }, lParams(matchParent, matchParent))
+        add(scrollView, lParams(matchParent, matchParent))
     }
 
     @SuppressLint("SetTextI18n")
@@ -44,21 +50,23 @@ class LogView @JvmOverloads constructor(context: Context, attributeSet: Attribut
         super.onAttachedToWindow()
         logcat.initLogFlow()
         logcat.logFlow.onEach {
-            val colored = SpannableString(it)
-            fun setColor(color: Int) {
-                colored.setSpan(
+            val color = styledColor(
+                when (it.first()) {
+                    'D' -> R.attr.colorLogDebug
+                    'I' -> R.attr.colorLogInfo
+                    'W' -> R.attr.colorLogWarning
+                    'E' -> R.attr.colorLogError
+                    'F' -> R.attr.colorLogFatal
+                    else -> android.R.attr.colorForeground
+                }
+            )
+            val colored = SpannableString(it).apply {
+                setSpan(
                     ForegroundColorSpan(color),
                     0,
                     it.length,
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
-            }
-            when (it.first()) {
-                'D' -> setColor(Color.MAGENTA)
-                'I' -> setColor(Color.GREEN)
-                'W' -> setColor(Color.YELLOW)
-                'E' -> setColor(Color.RED)
-                else -> {}
             }
             textView.append(colored)
             textView.append("\n")

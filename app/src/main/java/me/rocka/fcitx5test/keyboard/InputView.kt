@@ -40,7 +40,7 @@ class InputView(
     val fcitx: Fcitx
 ) : ConstraintLayout(service) {
 
-    private val themedContext = context.withTheme(R.style.Theme_AppCompat_DayNight)
+    private val themedContext = context.withTheme(R.style.Theme_FcitxAppTheme)
 
     private val cachedPreedit = PreeditContent(
         FcitxEvent.PreeditEvent.Data("", "", 0),

@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <attr name="colorLogFatal" format="color" />
+    <attr name="colorLogError" format="color" />
+    <attr name="colorLogWarning" format="color" />
+    <attr name="colorLogInfo" format="color" />
+    <attr name="colorLogDebug" format="color" />
+
     <declare-styleable name="DialogSeekBarPreference">
         <attr name="android:defaultValue" format="integer" />
         <attr name="min" format="integer" />
