@@ -53,6 +53,12 @@ android {
             useSupportLibrary = true
         }
 
+        kapt {
+            arguments {
+                arg("room.schemaLocation", "$projectDir/schemas")
+            }
+        }
+
         if (targetABI == null)
             ndk {
                 abiFilters.add(defaultABI)
