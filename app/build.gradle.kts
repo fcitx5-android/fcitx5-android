@@ -215,7 +215,7 @@ installFcitxComponent("translation-file", "translation", file("src/main/assets")
 dependencies {
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("org.mechdancer:dependency:0.1.1")
-    val roomVersion = "2.4.1"
+    val roomVersion = "2.4.2"
     implementation("androidx.room:room-runtime:$roomVersion")
     annotationProcessor("androidx.room:room-compiler:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
@@ -226,13 +226,13 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.4.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
     implementation("androidx.lifecycle", "lifecycle-runtime-ktx", "2.3.1")
-    implementation("androidx.lifecycle:lifecycle-service:2.4.0")
-    implementation("androidx.lifecycle:lifecycle-common-java8:2.4.0")
+    implementation("androidx.lifecycle:lifecycle-service:2.4.1")
+    implementation("androidx.lifecycle:lifecycle-common-java8:2.4.1")
     implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-android", "1.4.2")
     implementation("androidx.preference:preference-ktx:1.2.0")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("androidx.viewpager2:viewpager2:1.0.0")
-    val navVersion = "2.4.0"
+    val navVersion = "2.4.1"
     implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
     implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
     implementation("cn.berberman:girls-self-use:0.1.2")
@@ -247,7 +247,7 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.4.0")
     androidTestImplementation("androidx.test:rules:1.4.0")
-    androidTestImplementation("androidx.lifecycle:lifecycle-runtime-testing:2.4.0")
+    androidTestImplementation("androidx.lifecycle:lifecycle-runtime-testing:2.4.1")
     androidTestImplementation("junit:junit:4.13.2")
 }
 
