@@ -6,5 +6,6 @@
         <item name="colorLogWarning" type="color">@color/yellow_500</item>
         <item name="colorLogInfo" type="color">@color/blue_500</item>
         <item name="colorLogDebug" type="color">@color/grey_400</item>
+        <item name="colorLogVerbose" type="color">@color/grey_400</item>
     </style>
 </resources>

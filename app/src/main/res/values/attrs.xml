@@ -5,6 +5,7 @@
     <attr name="colorLogWarning" format="color" />
     <attr name="colorLogInfo" format="color" />
     <attr name="colorLogDebug" format="color" />
+    <attr name="colorLogVerbose" format="color" />
 
     <declare-styleable name="DialogSeekBarPreference">
         <attr name="android:defaultValue" format="integer" />

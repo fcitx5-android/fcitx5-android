@@ -52,6 +52,7 @@ class LogView @JvmOverloads constructor(context: Context, attributeSet: Attribut
         logcat.logFlow.onEach {
             val color = styledColor(
                 when (it.first()) {
+                    'V' -> R.attr.colorLogVerbose
                     'D' -> R.attr.colorLogDebug
                     'I' -> R.attr.colorLogInfo
                     'W' -> R.attr.colorLogWarning
