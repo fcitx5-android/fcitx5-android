@@ -110,15 +110,15 @@ class Prefs(private val sharedPreferences: SharedPreferences, resources: Resourc
             managedPreferences[key] = it
         }
 
-    var firstRun = preference(resources.getString(R.string.pref_first_run), true)
-    var ignoreSystemCursor =
+    val firstRun = preference(resources.getString(R.string.pref_first_run), true)
+    val ignoreSystemCursor =
         preference(resources.getString(R.string.pref_ignore_system_cursor), true)
-    var hideKeyConfig = preference(resources.getString(R.string.pref_hide_key_config), true)
-    var buttonHapticFeedback =
+    val hideKeyConfig = preference(resources.getString(R.string.pref_hide_key_config), true)
+    val buttonHapticFeedback =
         preference(resources.getString(R.string.pref_button_haptic_feedback), true)
-    var clipboard = preference(resources.getString(R.string.pref_clipboard_enable), true)
-    var clipboardHistoryLimit = preference(resources.getString(R.string.pref_clipboard_limit), 5)
-    var expandableCandidateStyle = stringLikePreference(
+    val clipboard = preference(resources.getString(R.string.pref_clipboard_enable), true)
+    val clipboardHistoryLimit = preference(resources.getString(R.string.pref_clipboard_limit), 5)
+    val expandableCandidateStyle = stringLikePreference(
         resources.getString(R.string.pref_expandable_candidate_style),
         ExpandableCandidate.Style.Grid,
         ExpandableCandidate.Style
