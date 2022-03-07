@@ -3,10 +3,12 @@ package me.rocka.fcitx5test.ui.common
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
+import android.os.Build
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.util.AttributeSet
+import android.view.textclassifier.TextClassifier
 import android.widget.HorizontalScrollView
 import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.findViewTreeLifecycleOwner
@@ -25,6 +27,9 @@ class LogView @JvmOverloads constructor(context: Context, attributeSet: Attribut
     private val textView = textView {
         setTextIsSelectable(true)
         setTextColor(Color.WHITE)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            setTextClassifier(object : TextClassifier {})
+        }
     }
     private val logcat = Logcat()
 
