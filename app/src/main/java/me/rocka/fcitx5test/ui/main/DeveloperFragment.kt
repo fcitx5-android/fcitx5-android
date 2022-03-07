@@ -56,7 +56,7 @@ class DeveloperFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.setToolbarTitle(getString(R.string.about))
+        viewModel.setToolbarTitle(getString(R.string.developer))
         viewModel.disableToolbarSaveButton()
     }
 }
