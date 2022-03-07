@@ -33,7 +33,7 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
     // this is fcitx main thread
     private val internalDispatcher = Executors.newSingleThreadExecutor {
         Thread(it).apply {
-            name = "FcitxMain"
+            name = "fcitx-main"
         }
     }.asCoroutineDispatcher()
 
@@ -51,7 +51,7 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
         private var installed: Job? = null
         private val dispatcher = Executors.newSingleThreadExecutor {
             Thread(it).apply {
-                name = "AliveChecker"
+                name = "alive-checker"
             }
         }.asCoroutineDispatcher()
 
