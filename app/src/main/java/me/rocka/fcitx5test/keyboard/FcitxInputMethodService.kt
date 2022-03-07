@@ -118,6 +118,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onCreateInputView(): View {
+        super.onCreateInputView()
         if (eventHandlerJob == null)
             eventHandlerJob = fcitx
                 .eventFlow

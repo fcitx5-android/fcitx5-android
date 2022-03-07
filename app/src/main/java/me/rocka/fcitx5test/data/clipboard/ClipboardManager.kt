@@ -3,7 +3,10 @@ package me.rocka.fcitx5test.data.clipboard
 import android.content.ClipboardManager
 import android.content.Context
 import androidx.room.Room
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.data.clipboard.db.ClipboardDao
 import me.rocka.fcitx5test.data.clipboard.db.ClipboardDatabase
@@ -13,7 +16,7 @@ import splitties.systemservices.clipboardManager
 import java.util.concurrent.ConcurrentLinkedQueue
 
 object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
-    CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.IO) {
+    CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
     private lateinit var clbDb: ClipboardDatabase
     private lateinit var clbDao: ClipboardDao
 
@@ -43,15 +46,15 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
         clbDao = clbDb.clipboardDao()
     }
 
-    suspend fun getAll() = withContext(coroutineContext) { clbDao.getAll() }
+    suspend fun getAll() = clbDao.getAll()
 
-    fun pin(id: Int) {
-        launch { clbDao.updatePinStatus(id, true) }
-    }
+    suspend fun pin(id: Int) = clbDao.updatePinStatus(id, true)
 
-    fun unpin(id: Int) {
-        launch { clbDao.updatePinStatus(id, false) }
-    }
+    suspend fun unpin(id: Int) = clbDao.updatePinStatus(id, false)
+
+    suspend fun delete(id: Int) = clbDao.delete(id)
+
+    suspend fun deleteAll() = clbDao.deleteAll()
 
     override fun onPrimaryClipChanged() {
         if (!(enabled && this::clbDao.isInitialized))
