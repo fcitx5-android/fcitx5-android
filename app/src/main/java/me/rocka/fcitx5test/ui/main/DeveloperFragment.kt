@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.data.DataManager
+import me.rocka.fcitx5test.data.clipboard.ClipboardManager
 import me.rocka.fcitx5test.ui.common.SimpleAdapter
 import splitties.views.dsl.recyclerview.recyclerView
 
@@ -50,6 +51,12 @@ class DeveloperFragment : Fragment() {
                     }
                     .setNegativeButton(android.R.string.cancel) { _, _ -> }
                     .show()
+            },
+            getString(R.string.clear_clb_db) to {
+                lifecycleScope.launch {
+                    ClipboardManager.deleteAll()
+                    Toast.makeText(context, getString(R.string.done), Toast.LENGTH_SHORT).show()
+                }
             }
         )
     }

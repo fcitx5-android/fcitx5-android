@@ -50,4 +50,8 @@
     <string name="current_version">Current version</string>
     <string name="real_time_logs">Real-time logs</string>
     <string name="developer">Developer</string>
+    <string name="clear_clb_db">Clear clipboard database</string>
+    <string name="pin">Pin</string>
+    <string name="unpin">Unpin</string>
+    <string name="delete">Delete</string>
 </resources>
