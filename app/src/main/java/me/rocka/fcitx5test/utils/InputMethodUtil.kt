@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import android.view.inputmethod.InputMethodManager
-import me.rocka.fcitx5test.keyboard.FcitxInputMethodService
+import me.rocka.fcitx5test.input.FcitxInputMethodService
 
 object InputMethodUtil {
     private val serviceName =

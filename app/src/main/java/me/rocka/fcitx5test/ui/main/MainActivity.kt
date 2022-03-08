@@ -13,7 +13,7 @@ import androidx.navigation.ui.setupWithNavController
 import kotlinx.coroutines.runBlocking
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.databinding.ActivityMainBinding
-import me.rocka.fcitx5test.keyboard.FcitxInputMethodService
+import me.rocka.fcitx5test.input.FcitxInputMethodService
 import me.rocka.fcitx5test.ui.setup.SetupActivity
 import timber.log.Timber
 
