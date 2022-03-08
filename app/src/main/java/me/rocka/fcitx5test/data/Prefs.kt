@@ -4,7 +4,7 @@ import android.content.SharedPreferences
 import android.content.res.Resources
 import androidx.core.content.edit
 import me.rocka.fcitx5test.R
-import me.rocka.fcitx5test.keyboard.candidates.ExpandableCandidate
+import me.rocka.fcitx5test.input.candidates.ExpandableCandidateComponent
 import me.rocka.fcitx5test.utils.WeakHashSet
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
@@ -120,8 +120,8 @@ class Prefs(private val sharedPreferences: SharedPreferences, resources: Resourc
     val clipboardHistoryLimit = preference(resources.getString(R.string.pref_clipboard_limit), 5)
     val expandableCandidateStyle = stringLikePreference(
         resources.getString(R.string.pref_expandable_candidate_style),
-        ExpandableCandidate.Style.Grid,
-        ExpandableCandidate.Style
+        ExpandableCandidateComponent.Style.Grid,
+        ExpandableCandidateComponent.Style
     )
 
     companion object {
