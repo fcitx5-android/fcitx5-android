@@ -21,7 +21,7 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     private lateinit var clbDao: ClipboardDao
 
     fun interface OnClipboardUpdateListener {
-        suspend fun onUpdate(entry: ClipboardEntry)
+        suspend fun onUpdate(text: String)
     }
 
     private val onUpdateListeners = ConcurrentLinkedQueue<OnClipboardUpdateListener>()
@@ -63,11 +63,19 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
             .primaryClip
             ?.let { ClipboardEntry.fromClipData(it) }
             ?.takeIf { UTF8Utils.instance.validateUTF8(it.text) }
-            ?.let {
+            ?.let { e ->
                 launch {
-                    clbDao.insertAll(it)
+                    val all = clbDao.getAll()
+                    var pinned = false
+                    all.find { e.text == it.text }?.let {
+                        clbDao.delete(it.id)
+                        pinned = it.pinned
+                    }
+                    clbDao.insertAll(e.copy(pinned = pinned))
                     removeOutdated()
-                    onUpdateListeners.forEach { listener -> listener.onUpdate(it) }
+                    onUpdateListeners.forEach { listener ->
+                        listener.onUpdate(e.text)
+                    }
                 }
             }
 
