@@ -317,7 +317,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
     })
 
     private val onClipboardUpdate =
-        ClipboardManager.OnClipboardUpdateListener { setClipboard(it.text) }
+        ClipboardManager.OnClipboardUpdateListener { setClipboard(it) }
 
     fun start() {
         if (lifecycle.currentState != FcitxLifecycle.State.STOPPED) {
