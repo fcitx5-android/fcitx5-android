@@ -11,6 +11,7 @@ import me.rocka.fcitx5test.keyboard.FcitxInputMethodService
 import me.rocka.fcitx5test.utils.dependency.context
 import me.rocka.fcitx5test.utils.dependency.service
 import me.rocka.fcitx5test.utils.inputConnection
+import me.rocka.fcitx5test.utils.onDataChanged
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
@@ -39,6 +40,9 @@ class ClipboardManagement : UniqueComponent<ClipboardManagement>(), Dependent,
                     service.lifecycleScope.launch {
                         updateEntries(ClipboardManager.getAll())
                     }
+                }
+                onDataChanged {
+                    layoutManager.invalidateSpanAssignments()
                 }
             }
 
