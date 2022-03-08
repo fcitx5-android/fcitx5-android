@@ -1,13 +1,11 @@
 package me.rocka.fcitx5test.keyboard.clipboard
 
-import android.graphics.Rect
-import android.view.View
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.data.clipboard.ClipboardManager
 import me.rocka.fcitx5test.keyboard.FcitxInputMethodService
 import me.rocka.fcitx5test.utils.dependency.context
@@ -19,8 +17,11 @@ import org.mechdancer.dependency.manager.ManagedHandler
 import org.mechdancer.dependency.manager.managedHandler
 import splitties.dimensions.dp
 import splitties.resources.styledColor
+import splitties.resources.styledDrawable
 import splitties.views.backgroundColor
+import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
+import splitties.views.imageResource
 
 class ClipboardManagement : UniqueComponent<ClipboardManagement>(), Dependent,
     ManagedHandler by managedHandler() {
@@ -59,7 +60,20 @@ class ClipboardManagement : UniqueComponent<ClipboardManagement>(), Dependent,
 
         }
 
-    val layout: RecyclerView by lazy {
+    val deleteAllButton by lazy {
+        context.imageButton {
+            background = styledDrawable(android.R.attr.selectableItemBackground)
+            imageResource = R.drawable.ic_baseline_delete_sweep_24
+            setOnClickListener {
+                service.lifecycleScope.launch {
+                    ClipboardManager.deleteAll()
+                    adapter.updateEntries(emptyList())
+                }
+            }
+        }
+    }
+
+    val recyclerView: RecyclerView by lazy {
         context.recyclerView {
             backgroundColor = styledColor(android.R.attr.colorBackground)
             layoutManager = this@ClipboardManagement.layoutManager
@@ -68,18 +82,13 @@ class ClipboardManagement : UniqueComponent<ClipboardManagement>(), Dependent,
         }
     }
 
-    class SpacesItemDecoration(val space: Int) : ItemDecoration() {
-        override fun getItemOffsets(
-            outRect: Rect,
-            view: View,
-            parent: RecyclerView,
-            state: RecyclerView.State
-        ) = outRect.run {
-            top = space
-            bottom = space
-            left = space
-            right = space
+    val layout by lazy {
+        // TODO: Fix layout
+        context.verticalLayout {
+            add(horizontalLayout {
+                add(deleteAllButton, lParams(wrapContent, wrapContent))
+            }, lParams(matchParent, wrapContent))
+            add(recyclerView, lParams(matchParent, matchParent))
         }
     }
-
 }
