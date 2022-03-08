@@ -68,7 +68,7 @@ class ClipboardManagement : UniqueComponent<ClipboardManagement>(), Dependent,
         }
     }
 
-    inner class SpacesItemDecoration(val space: Int) : ItemDecoration() {
+    class SpacesItemDecoration(val space: Int) : ItemDecoration() {
         override fun getItemOffsets(
             outRect: Rect,
             view: View,
