@@ -84,8 +84,8 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
                     else it
                 }
                 .sortedBy { it.id }[all.size - limit]
-            // delete all before that
-            clbDao.deleteIdLessThan(last.id)
+            // delete all unpinned before that
+            clbDao.deleteUnpinnedIdLessThan(last.id)
         }
     }
 
