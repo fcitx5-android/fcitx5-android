@@ -1,12 +1,12 @@
 package me.rocka.fcitx5test.keyboard.clipboard
 
-import android.annotation.SuppressLint
 import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
@@ -106,17 +106,27 @@ abstract class ClipboardAdapter(initEntries: List<ClipboardEntry>) :
         val position = _entriesId.getValue(id)
         _entries[position] = _entries[position].copy(pinned = pinned)
         notifyItemChanged(position)
+        // pin will cause a change of order
+        updateEntries(_entries)
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     fun updateEntries(entries: List<ClipboardEntry>) {
+        val sorted = entries.sortedWith { o1, o2 ->
+            when {
+                o1.pinned && !o2.pinned -> -1
+                !o1.pinned && o2.pinned -> 1
+                else -> o2.id.compareTo(o1.id)
+            }
+        }
+        val callback = ClipboardEntryDiffCallback(_entries, sorted)
+        val diff = DiffUtil.calculateDiff(callback)
         _entries.clear()
-        _entries.addAll(entries)
+        _entries.addAll(sorted)
         _entriesId.clear()
         _entries.forEachIndexed { index, clipboardEntry ->
             _entriesId[clipboardEntry.id] = index
         }
-        notifyDataSetChanged()
+        diff.dispatchUpdatesTo(this)
     }
 
     override fun getItemCount(): Int = _entries.size
