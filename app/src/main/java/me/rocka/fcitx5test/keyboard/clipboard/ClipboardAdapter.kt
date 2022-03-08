@@ -42,7 +42,6 @@ abstract class ClipboardAdapter(initEntries: List<ClipboardEntry>) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         with(holder.entryUi) {
             val entry = _entries[position]
-            root.isChecked = entry.pinned
             text.text = entry.text
             pin.visibility = if (entry.pinned) View.VISIBLE else View.INVISIBLE
             root.setOnClickListener {
