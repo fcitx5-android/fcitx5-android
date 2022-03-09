@@ -8,9 +8,11 @@ import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.data.Prefs
+import me.rocka.fcitx5test.input.InputBroadcastReceiver
 import me.rocka.fcitx5test.input.candidates.adapter.BaseCandidateViewAdapter
 import me.rocka.fcitx5test.input.candidates.adapter.GridCandidateViewAdapter
 import me.rocka.fcitx5test.input.candidates.adapter.SimpleCandidateViewAdapter
+import me.rocka.fcitx5test.input.preedit.PreeditContent
 import me.rocka.fcitx5test.utils.dependency.UniqueViewComponent
 import me.rocka.fcitx5test.utils.dependency.context
 import me.rocka.fcitx5test.utils.onDataChanged
@@ -19,7 +21,8 @@ import kotlin.properties.Delegates
 
 
 class ExpandableCandidateComponent(private val onDataChange: (ExpandableCandidateComponent.() -> Unit)) :
-    UniqueViewComponent<ExpandableCandidateComponent, ExpandableCandidateLayout>() {
+    UniqueViewComponent<ExpandableCandidateComponent, ExpandableCandidateLayout>(),
+    InputBroadcastReceiver {
 
     private val builder: CandidateViewBuilder by manager.must()
     private val context: Context by manager.context()
@@ -143,6 +146,14 @@ class ExpandableCandidateComponent(private val onDataChange: (ExpandableCandidat
         shrunkConstraintSet.applyTo(parentConstraintLayout)
         view.resetPosition()
         state = State.Shrunk
+    }
+
+    override fun onPreeditUpdate(content: PreeditContent) {
+        view.onPreeditChange(null, content)
+    }
+
+    override fun onCandidateUpdates(data: Array<String>) {
+        view.resetPosition()
     }
 }
 

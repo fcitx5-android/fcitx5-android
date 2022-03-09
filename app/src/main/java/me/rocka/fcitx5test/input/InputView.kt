@@ -1,10 +1,7 @@
 package me.rocka.fcitx5test.input
 
 import android.annotation.SuppressLint
-import android.view.Gravity
-import android.view.WindowManager
 import android.widget.ImageButton
-import android.widget.PopupWindow
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -15,21 +12,16 @@ import me.rocka.fcitx5test.input.candidates.CandidateViewBuilder
 import me.rocka.fcitx5test.input.candidates.ExpandableCandidateComponent
 import me.rocka.fcitx5test.input.candidates.HorizontalCandidateComponent
 import me.rocka.fcitx5test.input.clipboard.ClipboardComponent
-import me.rocka.fcitx5test.input.keyboard.BaseKeyboard
-import me.rocka.fcitx5test.input.keyboard.KeyAction
 import me.rocka.fcitx5test.input.keyboard.KeyboardComponent
-import me.rocka.fcitx5test.input.preedit.PreeditContent
-import me.rocka.fcitx5test.input.preedit.PreeditUi
-import me.rocka.fcitx5test.utils.AppUtil
+import me.rocka.fcitx5test.input.preedit.PreeditComponent
 import me.rocka.fcitx5test.utils.dependency.wrapContext
 import me.rocka.fcitx5test.utils.dependency.wrapFcitx
 import me.rocka.fcitx5test.utils.dependency.wrapFcitxInputMethodService
-import me.rocka.fcitx5test.utils.inputConnection
+import me.rocka.fcitx5test.utils.dependency.wrapInputView
 import org.mechdancer.dependency.plusAssign
 import org.mechdancer.dependency.scope
 import splitties.dimensions.dp
 import splitties.resources.styledColor
-import splitties.systemservices.inputMethodManager
 import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
@@ -44,20 +36,11 @@ class InputView(
 
     private val themedContext = context.withTheme(R.style.Theme_FcitxAppTheme)
 
-    private val cachedPreedit = PreeditContent(
-        FcitxEvent.PreeditEvent.Data("", "", 0),
-        FcitxEvent.InputPanelAuxEvent.Data("", "")
-    )
-    private val preeditUi = PreeditUi(themedContext)
-    private val preeditPopup = PopupWindow(
-        preeditUi.root,
-        WindowManager.LayoutParams.MATCH_PARENT,
-        WindowManager.LayoutParams.WRAP_CONTENT
-    ).apply {
-        isTouchable = false
-        isClippingEnabled = false
-    }
-    private val keyboardManager = KeyboardComponent()
+    private val broadcaster = InputBroadcaster()
+
+    private val preedit = PreeditComponent()
+
+    private val keyboard = KeyboardComponent()
 
     private val candidateViewBuilder: CandidateViewBuilder = CandidateViewBuilder()
 
@@ -81,36 +64,34 @@ class InputView(
             visibility = INVISIBLE
         }
 
-    private val keyActionListener = BaseKeyboard.KeyActionListener { action ->
-        onAction(action)
-    }
-
     private fun setupScope() {
         scope += wrapFcitxInputMethodService(service)
         scope += wrapContext(themedContext)
         scope += wrapFcitx(fcitx)
         scope += candidateViewBuilder
-        scope += keyboardManager
+        scope += keyboard
         scope += expandableCandidate
         scope += horizontalCandidate
+        scope += preedit
+        scope += broadcaster
+        scope += wrapInputView(this)
     }
 
 
     init {
-        // MUST call before operation
+        // MUST call before any operation
         setupScope()
 
         service.lifecycleScope.launch {
-            keyboardManager.updateCurrentIme(fcitx.currentIme())
+            broadcaster.broadcastImeUpdate(fcitx.currentIme())
         }
-        preeditPopup.width = resources.displayMetrics.widthPixels
         backgroundColor = themedContext.styledColor(android.R.attr.colorBackground)
         add(expandCandidateButton, lParams(matchConstraints, dp(40)) {
             matchConstraintPercentWidth = 0.1f
             topOfParent()
             endOfParent()
         })
-        add(keyboardManager.view, lParams(matchParent, wrapContent) {
+        add(keyboard.view, lParams(matchParent, wrapContent) {
             below(expandCandidateButton)
             startOfParent()
             endOfParent()
@@ -128,7 +109,7 @@ class InputView(
         })
 
         expandableCandidate.init()
-        expandableCandidate.view.keyActionListener = keyActionListener
+        expandableCandidate.view.keyActionListener = keyboard.listener
         expandableCandidate.onStateUpdate = {
             when (it) {
                 ExpandableCandidateComponent.State.Expanded -> {
@@ -142,110 +123,35 @@ class InputView(
             }
         }
 
-        keyboardManager.switchLayout("qwerty", keyActionListener)
+        keyboard.switchLayout("qwerty")
     }
 
     override fun onDetachedFromWindow() {
-        preeditPopup.dismiss()
+        preedit.dismiss()
         super.onDetachedFromWindow()
     }
 
     fun onShow() {
-        keyboardManager.showKeyboard()
+        keyboard.showKeyboard()
     }
 
     fun handleFcitxEvent(it: FcitxEvent<*>) {
         when (it) {
             is FcitxEvent.CandidateListEvent -> {
-                updateCandidates(it.data)
+                broadcaster.broadcastCandidatesUpdate(it.data)
             }
-            is FcitxEvent.PreeditEvent -> it.data.let {
-                cachedPreedit.preedit = it
-                updatePreedit(cachedPreedit)
+            is FcitxEvent.PreeditEvent -> {
+                preedit.updatePreedit(it)
             }
             is FcitxEvent.InputPanelAuxEvent -> {
-                cachedPreedit.aux = it.data
-                updatePreedit(cachedPreedit)
+                preedit.updatePreedit(it)
             }
             is FcitxEvent.IMChangeEvent -> {
-                keyboardManager.updateCurrentIme(it.data.status)
+                broadcaster.broadcastImeUpdate(it.data.status)
             }
             else -> {
             }
         }
-    }
-
-    private fun onAction(action: KeyAction<*>) {
-        service.lifecycleScope.launch {
-            when (action) {
-                is KeyAction.FcitxKeyAction -> fcitx.sendKey(action.act)
-                is KeyAction.CommitAction -> {
-                    // TODO: this should be handled more gracefully; or CommitAction should be removed?
-                    fcitx.reset()
-                    service.inputConnection?.commitText(action.act, 1)
-                }
-                is KeyAction.RepeatStartAction -> service.startRepeating(action.act)
-                is KeyAction.RepeatEndAction -> service.cancelRepeating(action.act)
-                is KeyAction.QuickPhraseAction -> quickPhrase()
-                is KeyAction.UnicodeAction -> unicode()
-                is KeyAction.LangSwitchAction -> switchLang()
-                is KeyAction.InputMethodSwitchAction -> inputMethodManager.showInputMethodPicker()
-                is KeyAction.LayoutSwitchAction -> keyboardManager.switchLayout(
-                    action.act,
-                    keyActionListener
-                )
-                is KeyAction.CustomAction -> customEvent(action.act)
-                else -> {
-                }
-            }
-        }
-    }
-
-    fun updatePreedit(content: PreeditContent) {
-        keyboardManager.updatePreedit(content)
-        expandableCandidate.view.onPreeditChange(null, content)
-        preeditUi.update(content)
-        preeditPopup.run {
-            if (!preeditUi.visible) {
-                dismiss()
-                return
-            }
-            val height = preeditUi.measureHeight(width)
-            if (isShowing) {
-                update(
-                    0, -height,
-                    WindowManager.LayoutParams.MATCH_PARENT,
-                    WindowManager.LayoutParams.WRAP_CONTENT
-                )
-            } else {
-                showAtLocation(this@InputView, Gravity.NO_GRAVITY, 0, -height)
-            }
-        }
-    }
-
-    private fun updateCandidates(data: Array<String>) {
-        horizontalCandidate.adapter.updateCandidates(data)
-        expandableCandidate.view.resetPosition()
-    }
-
-    private suspend fun quickPhrase() {
-        fcitx.reset()
-        fcitx.triggerQuickPhrase()
-    }
-
-    private suspend fun unicode() {
-        fcitx.triggerUnicode()
-    }
-
-    private suspend fun switchLang() {
-        if (fcitx.enabledIme().size < 2) {
-            AppUtil.launchMainToAddInputMethods(context)
-        } else
-            fcitx.enumerateIme()
-    }
-
-    private inline fun customEvent(fn: (Fcitx) -> Unit) {
-        fn(fcitx)
     }
 
 }
