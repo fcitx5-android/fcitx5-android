@@ -3,6 +3,7 @@ package me.rocka.fcitx5test.input.candidates
 import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
 import me.rocka.fcitx5test.R
+import me.rocka.fcitx5test.input.InputBroadcastReceiver
 import me.rocka.fcitx5test.utils.dependency.UniqueViewComponent
 import me.rocka.fcitx5test.utils.dependency.context
 import me.rocka.fcitx5test.utils.dependency.uniqueView
@@ -12,11 +13,12 @@ import org.mechdancer.dependency.manager.must
 import splitties.views.dsl.recyclerview.recyclerView
 import java.util.concurrent.atomic.AtomicBoolean
 
-class HorizontalCandidateComponent : UniqueViewComponent<HorizontalCandidateComponent, RecyclerView>() {
+class HorizontalCandidateComponent :
+    UniqueViewComponent<HorizontalCandidateComponent, RecyclerView>(), InputBroadcastReceiver {
 
     private val builder: CandidateViewBuilder by manager.must()
     private val context: Context by manager.context()
-    private val expandableCandidateComponent: ExpandableCandidateComponent by manager.uniqueView()
+    private val expandableCandidate: ExpandableCandidateComponent by manager.uniqueView()
 
     private var needsRefreshExpanded = AtomicBoolean(false)
 
@@ -38,9 +40,13 @@ class HorizontalCandidateComponent : UniqueViewComponent<HorizontalCandidateComp
             globalLayoutListener {
                 if (needsRefreshExpanded.compareAndSet(true, false)) {
                     val candidates = this@HorizontalCandidateComponent.adapter.candidates
-                    expandableCandidateComponent.adapter.updateCandidatesWithOffset(candidates, childCount)
+                    expandableCandidate.adapter.updateCandidatesWithOffset(candidates, childCount)
                 }
             }
         }
+    }
+
+    override fun onCandidateUpdates(data: Array<String>) {
+        adapter.updateCandidates(data)
     }
 }
