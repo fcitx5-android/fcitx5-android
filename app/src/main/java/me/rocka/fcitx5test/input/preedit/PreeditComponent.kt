@@ -4,9 +4,9 @@ import android.view.Gravity
 import android.view.WindowManager
 import android.widget.PopupWindow
 import me.rocka.fcitx5test.core.FcitxEvent
-import me.rocka.fcitx5test.input.InputBroadcaster
-import me.rocka.fcitx5test.utils.dependency.context
-import me.rocka.fcitx5test.utils.dependency.inputView
+import me.rocka.fcitx5test.input.broadcast.InputBroadcaster
+import me.rocka.fcitx5test.input.dependency.context
+import me.rocka.fcitx5test.input.dependency.inputView
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler

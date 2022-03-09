@@ -9,9 +9,9 @@ import kotlinx.coroutines.runBlocking
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.data.clipboard.ClipboardManager
 import me.rocka.fcitx5test.input.FcitxInputMethodService
-import me.rocka.fcitx5test.utils.dependency.UniqueViewComponent
-import me.rocka.fcitx5test.utils.dependency.context
-import me.rocka.fcitx5test.utils.dependency.inputMethodService
+import me.rocka.fcitx5test.input.dependency.UniqueViewComponent
+import me.rocka.fcitx5test.input.dependency.context
+import me.rocka.fcitx5test.input.dependency.inputMethodService
 import me.rocka.fcitx5test.utils.inputConnection
 import me.rocka.fcitx5test.utils.onDataChanged
 import splitties.dimensions.dp

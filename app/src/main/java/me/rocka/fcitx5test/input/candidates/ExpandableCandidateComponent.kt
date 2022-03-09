@@ -8,13 +8,13 @@ import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.data.Prefs
-import me.rocka.fcitx5test.input.InputBroadcastReceiver
+import me.rocka.fcitx5test.input.broadcast.InputBroadcastReceiver
 import me.rocka.fcitx5test.input.candidates.adapter.BaseCandidateViewAdapter
 import me.rocka.fcitx5test.input.candidates.adapter.GridCandidateViewAdapter
 import me.rocka.fcitx5test.input.candidates.adapter.SimpleCandidateViewAdapter
+import me.rocka.fcitx5test.input.dependency.UniqueViewComponent
+import me.rocka.fcitx5test.input.dependency.context
 import me.rocka.fcitx5test.input.preedit.PreeditContent
-import me.rocka.fcitx5test.utils.dependency.UniqueViewComponent
-import me.rocka.fcitx5test.utils.dependency.context
 import me.rocka.fcitx5test.utils.onDataChanged
 import org.mechdancer.dependency.manager.must
 import kotlin.properties.Delegates

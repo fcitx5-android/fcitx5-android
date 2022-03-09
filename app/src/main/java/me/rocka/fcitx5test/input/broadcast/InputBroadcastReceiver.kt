@@ -1,4 +1,4 @@
-package me.rocka.fcitx5test.input
+package me.rocka.fcitx5test.input.broadcast
 
 import me.rocka.fcitx5test.core.InputMethodEntry
 import me.rocka.fcitx5test.input.preedit.PreeditContent

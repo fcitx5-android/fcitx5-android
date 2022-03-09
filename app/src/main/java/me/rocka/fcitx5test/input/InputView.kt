@@ -8,16 +8,15 @@ import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.core.Fcitx
 import me.rocka.fcitx5test.core.FcitxEvent
+import me.rocka.fcitx5test.input.broadcast.InputBroadcaster
 import me.rocka.fcitx5test.input.candidates.CandidateViewBuilder
 import me.rocka.fcitx5test.input.candidates.ExpandableCandidateComponent
 import me.rocka.fcitx5test.input.candidates.HorizontalCandidateComponent
 import me.rocka.fcitx5test.input.clipboard.ClipboardComponent
 import me.rocka.fcitx5test.input.keyboard.KeyboardComponent
 import me.rocka.fcitx5test.input.preedit.PreeditComponent
-import me.rocka.fcitx5test.utils.dependency.wrapContext
-import me.rocka.fcitx5test.utils.dependency.wrapFcitx
-import me.rocka.fcitx5test.utils.dependency.wrapFcitxInputMethodService
-import me.rocka.fcitx5test.utils.dependency.wrapInputView
+import org.mechdancer.dependency.UniqueComponentWrapper
+import org.mechdancer.dependency.manager.wrapToUniqueComponent
 import org.mechdancer.dependency.plusAssign
 import org.mechdancer.dependency.scope
 import splitties.dimensions.dp
@@ -26,6 +25,7 @@ import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.imageResource
+import timber.log.Timber
 
 
 @SuppressLint("ViewConstructor")
@@ -54,7 +54,7 @@ class InputView(
         }
     }
 
-    private val scope = scope { }
+    val scope = scope { }
 
     private val expandCandidateButton: ImageButton =
         themedContext.imageButton(R.id.expand_candidate_btn) {
@@ -65,16 +65,17 @@ class InputView(
         }
 
     private fun setupScope() {
-        scope += wrapFcitxInputMethodService(service)
-        scope += wrapContext(themedContext)
-        scope += wrapFcitx(fcitx)
+        scope += UniqueComponentWrapper(service)
+        scope += UniqueComponentWrapper(themedContext)
+        scope += UniqueComponentWrapper(fcitx)
         scope += candidateViewBuilder
         scope += keyboard
         scope += expandableCandidate
         scope += horizontalCandidate
         scope += preedit
         scope += broadcaster
-        scope += wrapInputView(this)
+        scope += UniqueComponentWrapper(this)
+        scope.also { Timber.d(it.viewComponents().joinToString()) }
     }
 
 
