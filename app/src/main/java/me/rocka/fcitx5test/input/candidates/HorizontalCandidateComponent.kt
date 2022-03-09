@@ -3,10 +3,9 @@ package me.rocka.fcitx5test.input.candidates
 import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
 import me.rocka.fcitx5test.R
-import me.rocka.fcitx5test.input.InputBroadcastReceiver
-import me.rocka.fcitx5test.utils.dependency.UniqueViewComponent
-import me.rocka.fcitx5test.utils.dependency.context
-import me.rocka.fcitx5test.utils.dependency.uniqueView
+import me.rocka.fcitx5test.input.broadcast.InputBroadcastReceiver
+import me.rocka.fcitx5test.input.dependency.UniqueViewComponent
+import me.rocka.fcitx5test.input.dependency.context
 import me.rocka.fcitx5test.utils.globalLayoutListener
 import me.rocka.fcitx5test.utils.onDataChanged
 import org.mechdancer.dependency.manager.must
@@ -18,7 +17,7 @@ class HorizontalCandidateComponent :
 
     private val builder: CandidateViewBuilder by manager.must()
     private val context: Context by manager.context()
-    private val expandableCandidate: ExpandableCandidateComponent by manager.uniqueView()
+    private val expandableCandidate: ExpandableCandidateComponent by manager.must()
 
     private var needsRefreshExpanded = AtomicBoolean(false)
 

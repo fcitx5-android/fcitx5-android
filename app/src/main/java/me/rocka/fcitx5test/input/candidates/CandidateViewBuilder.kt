@@ -11,15 +11,15 @@ import me.rocka.fcitx5test.core.Fcitx
 import me.rocka.fcitx5test.input.FcitxInputMethodService
 import me.rocka.fcitx5test.input.candidates.adapter.GridCandidateViewAdapter
 import me.rocka.fcitx5test.input.candidates.adapter.SimpleCandidateViewAdapter
+import me.rocka.fcitx5test.input.dependency.fcitx
+import me.rocka.fcitx5test.input.dependency.inputMethodService
 import me.rocka.fcitx5test.input.keyboard.KeyboardComponent
-import me.rocka.fcitx5test.utils.dependency.fcitx
-import me.rocka.fcitx5test.utils.dependency.inputMethodService
-import me.rocka.fcitx5test.utils.dependency.uniqueView
 import me.rocka.fcitx5test.utils.oneShotGlobalLayoutListener
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
 import org.mechdancer.dependency.manager.managedHandler
+import org.mechdancer.dependency.manager.must
 import splitties.resources.dimenPxSize
 import splitties.resources.styledDrawable
 
@@ -28,7 +28,7 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
 
     private val service: FcitxInputMethodService by manager.inputMethodService()
     private val fcitx: Fcitx by manager.fcitx()
-    private val keyboard: KeyboardComponent by manager.uniqueView()
+    private val keyboard: KeyboardComponent by manager.must()
 
     fun gridAdapter() = object : GridCandidateViewAdapter() {
         override fun onTouchDown() = keyboard.currentKeyboard.haptic()
