@@ -1,17 +1,15 @@
 package me.rocka.fcitx5test.input
 
 import android.annotation.SuppressLint
-import android.widget.ImageButton
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.core.Fcitx
 import me.rocka.fcitx5test.core.FcitxEvent
+import me.rocka.fcitx5test.input.bar.KawaiiBarComponent
 import me.rocka.fcitx5test.input.broadcast.InputBroadcaster
 import me.rocka.fcitx5test.input.candidates.CandidateViewBuilder
-import me.rocka.fcitx5test.input.candidates.ExpandableCandidateComponent
-import me.rocka.fcitx5test.input.candidates.HorizontalCandidateComponent
 import me.rocka.fcitx5test.input.keyboard.CommonKeyActionListener
 import me.rocka.fcitx5test.input.keyboard.KeyboardWindow
 import me.rocka.fcitx5test.input.preedit.PreeditComponent
@@ -23,8 +21,10 @@ import splitties.dimensions.dp
 import splitties.resources.styledColor
 import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.*
-import splitties.views.imageResource
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.withTheme
+import splitties.views.dsl.core.wrapContent
 
 
 @SuppressLint("ViewConstructor")
@@ -39,6 +39,8 @@ class InputView(
 
     private val preedit = PreeditComponent()
 
+    private val kawaiiBar = KawaiiBarComponent()
+
     private val keyboardWindow = KeyboardWindow()
 
     private val windowManager = InputWindowManager()
@@ -47,34 +49,15 @@ class InputView(
 
     private val commonKeyActionListener = CommonKeyActionListener()
 
-    private val horizontalCandidate = HorizontalCandidateComponent()
-    private val expandableCandidate = ExpandableCandidateComponent {
-        if (adapter.itemCount == 0) {
-            shrink()
-            expandCandidateButton.visibility = INVISIBLE
-        } else {
-            expandCandidateButton.visibility = VISIBLE
-        }
-    }
-
     val scope = scope { }
-
-    private val expandCandidateButton: ImageButton =
-        themedContext.imageButton(R.id.expand_candidate_btn) {
-            background = null
-            imageResource = R.drawable.ic_baseline_expand_more_24
-            setOnClickListener { expandableCandidate.expand() }
-            visibility = INVISIBLE
-        }
 
     private fun setupScope() {
         scope += UniqueComponentWrapper(service)
         scope += UniqueComponentWrapper(themedContext)
         scope += UniqueComponentWrapper(fcitx)
         scope += candidateViewBuilder
-        scope += expandableCandidate
-        scope += horizontalCandidate
         scope += preedit
+        scope += kawaiiBar
         scope += broadcaster
         scope += UniqueComponentWrapper(this)
         scope += windowManager
@@ -92,44 +75,17 @@ class InputView(
             broadcaster.onImeUpdate(fcitx.currentIme())
         }
         backgroundColor = themedContext.styledColor(android.R.attr.colorBackground)
-        // TODO move everything about candidate to bar and add the bar here
-        add(expandCandidateButton, lParams(matchConstraints, dp(40)) {
-            matchConstraintPercentWidth = 0.1f
+        add(kawaiiBar.view, lParams(matchParent, dp(40)) {
             topOfParent()
+            startOfParent()
             endOfParent()
         })
         add(windowManager.view, lParams(matchParent, wrapContent) {
-            below(expandCandidateButton)
+            below(kawaiiBar.view)
             startOfParent()
             endOfParent()
             bottomOfParent()
         })
-        add(horizontalCandidate.view, lParams(matchConstraints, dp(40)) {
-            topOfParent()
-            startOfParent()
-            before(expandCandidateButton)
-        })
-        add(expandableCandidate.view, lParams(matchConstraints, 0) {
-            below(horizontalCandidate.view)
-            startOfParent()
-            endOfParent()
-        })
-
-        //TODO: move the initialization to bar
-        expandableCandidate.init()
-        expandableCandidate.onStateUpdate = {
-            when (it) {
-                ExpandableCandidateComponent.State.Expanded -> {
-                    expandCandidateButton.setOnClickListener { expandableCandidate.shrink() }
-                    expandCandidateButton.imageResource = R.drawable.ic_baseline_expand_less_24
-                }
-                ExpandableCandidateComponent.State.Shrunk -> {
-                    expandCandidateButton.setOnClickListener { expandableCandidate.expand() }
-                    expandCandidateButton.imageResource = R.drawable.ic_baseline_expand_more_24
-                }
-            }
-        }
-
     }
 
     override fun onDetachedFromWindow() {
