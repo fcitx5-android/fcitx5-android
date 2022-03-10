@@ -7,11 +7,10 @@ import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.core.InputMethodEntry
 import me.rocka.fcitx5test.input.FcitxInputMethodService
 import me.rocka.fcitx5test.input.broadcast.InputBroadcastReceiver
-import me.rocka.fcitx5test.input.dependency.UniqueViewComponent
-import me.rocka.fcitx5test.input.dependency.context
 import me.rocka.fcitx5test.input.dependency.fcitx
 import me.rocka.fcitx5test.input.dependency.inputMethodService
 import me.rocka.fcitx5test.input.preedit.PreeditContent
+import me.rocka.fcitx5test.input.wm.InputWindow
 import me.rocka.fcitx5test.utils.AppUtil
 import me.rocka.fcitx5test.utils.inputConnection
 import splitties.resources.str
@@ -21,10 +20,9 @@ import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.wrapContent
 
-class KeyboardComponent : UniqueViewComponent<KeyboardComponent, FrameLayout>(),
+class KeyboardWindow : InputWindow<KeyboardWindow>(),
     InputBroadcastReceiver {
 
-    private val context by manager.context()
     private val service: FcitxInputMethodService by manager.inputMethodService()
     private val fcitx by manager.fcitx()
 
@@ -77,9 +75,14 @@ class KeyboardComponent : UniqueViewComponent<KeyboardComponent, FrameLayout>(),
     }
 
 
-    fun showKeyboard() {
+    override fun onShow() {
         currentKeyboard.onAttach(service.editorInfo)
         currentKeyboard.onInputMethodChange(currentIme)
+    }
+
+    override fun onWindowAttached(window: InputWindow<*>) {
+        if(window == this)
+            switchLayout("qwerty")
     }
 
     // TODO: We expose this listener share with expandable candidate.

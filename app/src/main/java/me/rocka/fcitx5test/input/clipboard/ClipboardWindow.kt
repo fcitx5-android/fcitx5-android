@@ -1,6 +1,6 @@
 package me.rocka.fcitx5test.input.clipboard
 
-import android.widget.LinearLayout
+import android.view.View
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -9,9 +9,8 @@ import kotlinx.coroutines.runBlocking
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.data.clipboard.ClipboardManager
 import me.rocka.fcitx5test.input.FcitxInputMethodService
-import me.rocka.fcitx5test.input.dependency.UniqueViewComponent
-import me.rocka.fcitx5test.input.dependency.context
 import me.rocka.fcitx5test.input.dependency.inputMethodService
+import me.rocka.fcitx5test.input.wm.InputWindow
 import me.rocka.fcitx5test.utils.inputConnection
 import me.rocka.fcitx5test.utils.onDataChanged
 import splitties.dimensions.dp
@@ -22,9 +21,8 @@ import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.imageResource
 
-class ClipboardComponent : UniqueViewComponent<ClipboardComponent, LinearLayout>() {
+class ClipboardWindow : InputWindow<ClipboardWindow>() {
 
-    private val context by manager.context()
     private val service: FcitxInputMethodService by manager.inputMethodService()
 
     val layoutManager by lazy {
@@ -77,8 +75,8 @@ class ClipboardComponent : UniqueViewComponent<ClipboardComponent, LinearLayout>
     val recyclerView: RecyclerView by lazy {
         context.recyclerView {
             backgroundColor = styledColor(android.R.attr.colorBackground)
-            layoutManager = this@ClipboardComponent.layoutManager
-            adapter = this@ClipboardComponent.adapter
+            layoutManager = this@ClipboardWindow.layoutManager
+            adapter = this@ClipboardWindow.adapter
             addItemDecoration(SpacesItemDecoration(dp(2)))
         }
     }
@@ -86,10 +84,12 @@ class ClipboardComponent : UniqueViewComponent<ClipboardComponent, LinearLayout>
     override val view by lazy {
         // TODO: Fix layout
         context.verticalLayout {
-            add(horizontalLayout {
-                add(deleteAllButton, lParams(wrapContent, wrapContent))
-            }, lParams(matchParent, wrapContent))
             add(recyclerView, lParams(matchParent, matchParent))
         }
+    }
+    override val title: String = context.getString(R.string.clipboard)
+
+    override val barExtension: View by lazy {
+        TODO("Add delete all button here")
     }
 }

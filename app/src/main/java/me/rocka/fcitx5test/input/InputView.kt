@@ -12,11 +12,10 @@ import me.rocka.fcitx5test.input.broadcast.InputBroadcaster
 import me.rocka.fcitx5test.input.candidates.CandidateViewBuilder
 import me.rocka.fcitx5test.input.candidates.ExpandableCandidateComponent
 import me.rocka.fcitx5test.input.candidates.HorizontalCandidateComponent
-import me.rocka.fcitx5test.input.clipboard.ClipboardComponent
-import me.rocka.fcitx5test.input.keyboard.KeyboardComponent
+import me.rocka.fcitx5test.input.keyboard.KeyboardWindow
 import me.rocka.fcitx5test.input.preedit.PreeditComponent
+import me.rocka.fcitx5test.input.wm.InputWindowManager
 import org.mechdancer.dependency.UniqueComponentWrapper
-import org.mechdancer.dependency.manager.wrapToUniqueComponent
 import org.mechdancer.dependency.plusAssign
 import org.mechdancer.dependency.scope
 import splitties.dimensions.dp
@@ -25,7 +24,6 @@ import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.imageResource
-import timber.log.Timber
 
 
 @SuppressLint("ViewConstructor")
@@ -40,7 +38,9 @@ class InputView(
 
     private val preedit = PreeditComponent()
 
-    private val keyboard = KeyboardComponent()
+    private val keyboardWindow = KeyboardWindow()
+
+    private val windowManager = InputWindowManager()
 
     private val candidateViewBuilder: CandidateViewBuilder = CandidateViewBuilder()
 
@@ -69,13 +69,14 @@ class InputView(
         scope += UniqueComponentWrapper(themedContext)
         scope += UniqueComponentWrapper(fcitx)
         scope += candidateViewBuilder
-        scope += keyboard
         scope += expandableCandidate
         scope += horizontalCandidate
         scope += preedit
         scope += broadcaster
         scope += UniqueComponentWrapper(this)
-        scope.also { Timber.d(it.viewComponents().joinToString()) }
+        scope += windowManager
+        scope += keyboardWindow
+        broadcaster.onScopeSetupFinished(scope)
     }
 
 
@@ -84,15 +85,16 @@ class InputView(
         setupScope()
 
         service.lifecycleScope.launch {
-            broadcaster.broadcastImeUpdate(fcitx.currentIme())
+            broadcaster.onImeUpdate(fcitx.currentIme())
         }
         backgroundColor = themedContext.styledColor(android.R.attr.colorBackground)
+        // TODO move everything about candidate to bar and add the bar here
         add(expandCandidateButton, lParams(matchConstraints, dp(40)) {
             matchConstraintPercentWidth = 0.1f
             topOfParent()
             endOfParent()
         })
-        add(keyboard.view, lParams(matchParent, wrapContent) {
+        add(windowManager.view, lParams(matchParent, wrapContent) {
             below(expandCandidateButton)
             startOfParent()
             endOfParent()
@@ -109,8 +111,8 @@ class InputView(
             endOfParent()
         })
 
+        //TODO: move the initialization to bar
         expandableCandidate.init()
-        expandableCandidate.view.keyActionListener = keyboard.listener
         expandableCandidate.onStateUpdate = {
             when (it) {
                 ExpandableCandidateComponent.State.Expanded -> {
@@ -124,7 +126,6 @@ class InputView(
             }
         }
 
-        keyboard.switchLayout("qwerty")
     }
 
     override fun onDetachedFromWindow() {
@@ -133,13 +134,13 @@ class InputView(
     }
 
     fun onShow() {
-        keyboard.showKeyboard()
+        windowManager.showWindow()
     }
 
     fun handleFcitxEvent(it: FcitxEvent<*>) {
         when (it) {
             is FcitxEvent.CandidateListEvent -> {
-                broadcaster.broadcastCandidatesUpdate(it.data)
+                broadcaster.onCandidateUpdates(it.data)
             }
             is FcitxEvent.PreeditEvent -> {
                 preedit.updatePreedit(it)
@@ -148,7 +149,7 @@ class InputView(
                 preedit.updatePreedit(it)
             }
             is FcitxEvent.IMChangeEvent -> {
-                broadcaster.broadcastImeUpdate(it.data.status)
+                broadcaster.onImeUpdate(it.data.status)
             }
             else -> {
             }
