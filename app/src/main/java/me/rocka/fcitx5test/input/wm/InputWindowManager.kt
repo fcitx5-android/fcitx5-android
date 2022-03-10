@@ -33,38 +33,44 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
         TransitionManager.beginDelayedTransition(view, slide)
     }
 
+    /**
+     * Attach a new window, removing the old one
+     */
     fun attachWindow(window: InputWindow<*>, animation: Boolean = true) {
         if (window.isAttached)
             throw IllegalArgumentException("$window is already attached")
-        currentWindow = window
+        // add the new window to scope
         scope += window
-        val windowView = window.view
         if (animation) {
             prepareAnimation()
         }
+        // remove the old window from scope only if it's not keyboard window,
+        // because keyboard window is always in scope
+        currentWindow?.takeIf { it !is KeyboardWindow }?.let { scope -= it }
+        // remove the old window from layout
+        view.removeAllViews()
+        // broadcast the old window was removed from layout
+        currentWindow?.let { broadcaster.onWindowDetached(it) }
+        // add the new window to layout
         view.add(
-            windowView,
+            window.view,
             ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
         )
+        currentWindow = window
+        // broadcast the new window was added to layout
         broadcaster.onWindowAttached(window)
     }
 
+    /**
+     * Remove current window and attach keyboard window
+     */
     fun switchToKeyboardWindow(animation: Boolean = true) {
         if (currentWindow is KeyboardWindow)
             return
-        currentWindow?.let {
-            scope -= it
-            currentWindow = null
-            if (animation) {
-                prepareAnimation()
-            }
-            view.removeAllViews()
-            broadcaster.onWindowDetached(it)
-            attachWindow(keyboardWindow, false)
-        }
+        attachWindow(keyboardWindow, animation)
     }
 
     fun showWindow() {
