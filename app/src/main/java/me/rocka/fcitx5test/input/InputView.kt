@@ -12,6 +12,7 @@ import me.rocka.fcitx5test.input.broadcast.InputBroadcaster
 import me.rocka.fcitx5test.input.candidates.CandidateViewBuilder
 import me.rocka.fcitx5test.input.candidates.ExpandableCandidateComponent
 import me.rocka.fcitx5test.input.candidates.HorizontalCandidateComponent
+import me.rocka.fcitx5test.input.keyboard.CommonKeyActionListener
 import me.rocka.fcitx5test.input.keyboard.KeyboardWindow
 import me.rocka.fcitx5test.input.preedit.PreeditComponent
 import me.rocka.fcitx5test.input.wm.InputWindowManager
@@ -43,6 +44,8 @@ class InputView(
     private val windowManager = InputWindowManager()
 
     private val candidateViewBuilder: CandidateViewBuilder = CandidateViewBuilder()
+
+    private val commonKeyActionListener = CommonKeyActionListener()
 
     private val horizontalCandidate = HorizontalCandidateComponent()
     private val expandableCandidate = ExpandableCandidateComponent {
@@ -76,6 +79,7 @@ class InputView(
         scope += UniqueComponentWrapper(this)
         scope += windowManager
         scope += keyboardWindow
+        scope += commonKeyActionListener
         broadcaster.onScopeSetupFinished(scope)
     }
 
