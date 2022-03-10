@@ -14,9 +14,8 @@ import me.rocka.fcitx5test.input.candidates.adapter.GridCandidateViewAdapter
 import me.rocka.fcitx5test.input.candidates.adapter.SimpleCandidateViewAdapter
 import me.rocka.fcitx5test.input.dependency.UniqueViewComponent
 import me.rocka.fcitx5test.input.dependency.context
-import me.rocka.fcitx5test.input.keyboard.KeyboardWindow
+import me.rocka.fcitx5test.input.keyboard.CommonKeyActionListener
 import me.rocka.fcitx5test.input.preedit.PreeditContent
-import me.rocka.fcitx5test.input.wm.InputWindow
 import me.rocka.fcitx5test.utils.onDataChanged
 import org.mechdancer.dependency.manager.must
 import kotlin.properties.Delegates
@@ -28,6 +27,7 @@ class ExpandableCandidateComponent(private val onDataChange: (ExpandableCandidat
 
     private val builder: CandidateViewBuilder by manager.must()
     private val context: Context by manager.context()
+    private val commonKeyActionListener: CommonKeyActionListener by manager.must()
 
     private val onStyleChange = Prefs.OnChangeListener<Style> { init() }
 
@@ -96,6 +96,7 @@ class ExpandableCandidateComponent(private val onDataChange: (ExpandableCandidat
 
             }
         }
+        view.keyActionListener = commonKeyActionListener.listener
         state = State.Shrunk
     }
 
@@ -158,15 +159,5 @@ class ExpandableCandidateComponent(private val onDataChange: (ExpandableCandidat
         view.resetPosition()
     }
 
-    // TODO: remove the listener
-    override fun onWindowAttached(window: InputWindow<*>) {
-        if (window is KeyboardWindow)
-            view.keyActionListener = window.listener
-    }
-
-    override fun onWindowDetached(window: InputWindow<*>) {
-        if (window is KeyboardWindow)
-            view.keyActionListener = null
-    }
 }
 
