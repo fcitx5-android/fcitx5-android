@@ -69,7 +69,7 @@ class PreeditComponent : UniqueComponent<PreeditComponent>(), Dependent,
                 showAtLocation(inputView, Gravity.NO_GRAVITY, 0, -height)
             }
         }
-        broadcaster.broadcastPreeditUpdate(cachedPreedit)
+        broadcaster.onPreeditUpdate(cachedPreedit)
     }
 
 }
