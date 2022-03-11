@@ -8,6 +8,8 @@ import android.widget.FrameLayout
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
 import me.rocka.fcitx5test.R
+import me.rocka.fcitx5test.input.bar.ExpandButtonState.*
+import me.rocka.fcitx5test.input.bar.ExpandButtonTransitionEvent.*
 import me.rocka.fcitx5test.input.bar.KawaiiBarState.*
 import me.rocka.fcitx5test.input.bar.KawaiiBarTransitionEvent.*
 import me.rocka.fcitx5test.input.broadcast.InputBroadcastReceiver
@@ -79,7 +81,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     lateinit var currentUi: KawaiiBarUi
         private set
 
-    private val stateMachine =
+    val barStateMachine =
         eventStateMachine<KawaiiBarState, KawaiiBarTransitionEvent>(Idle) {
 
             from(Idle) transitTo Title on ExtendedWindowAttached
@@ -96,6 +98,32 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             }
         }
 
+    val expandButtonStateMachine =
+        eventStateMachine<ExpandButtonState, ExpandButtonTransitionEvent>(Hidden) {
+            from(Hidden) transitTo ClickToAttachWindow on ExpandedCandidatesUpdatedNonEmpty
+            from(ClickToAttachWindow) transitTo Hidden on ExpandedCandidatesUpdatedEmpty
+            from(ClickToAttachWindow) transitTo ClickToDetachWindow on ExpandedCandidatesAttached
+            from(ClickToDetachWindow) transitTo ClickToAttachWindow on ExpandedCandidatesDetachedWithNonEmpty
+            from(ClickToDetachWindow) transitTo Hidden on ExpandedCandidatesDetachedWithEmpty
+
+            onNewState {
+                when (it) {
+                    ClickToAttachWindow -> {
+                        setExpandButtonToAttach()
+                        setExpandButtonEnabled(true)
+                    }
+                    ClickToDetachWindow -> {
+                        setExpandButtonToDetach()
+                        setExpandButtonEnabled(true)
+                    }
+                    Hidden -> {
+                        setExpandButtonEnabled(false)
+                    }
+                }
+            }
+
+        }
+
     private fun prepareAnimation() {
         val transition = AutoTransition()
         transition.duration = 50
@@ -104,7 +132,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
 
     // set expand candidate button to create expand candidate
-    fun setExpandButtonToAttach() {
+    private fun setExpandButtonToAttach() {
         candidateUi.expandButton.setOnClickListener {
             windowManager.attachWindow(ExpandedCandidateWindow())
         }
@@ -113,7 +141,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     }
 
     // set expand candidate button to close expand candidate
-    fun setExpandButtonToDetach() {
+    private fun setExpandButtonToDetach() {
         candidateUi.expandButton.setOnClickListener {
             windowManager.switchToKeyboardWindow()
         }
@@ -122,7 +150,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     }
 
     // should be used with setExpandButtonToAttach or setExpandButtonToDetach
-    fun setExpandButtonEnabled(enabled: Boolean) {
+    private fun setExpandButtonEnabled(enabled: Boolean) {
         if (enabled)
             candidateUi.expandButton.visibility = View.VISIBLE
         else
@@ -169,7 +197,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     }
 
     override fun onCandidateUpdates(data: Array<String>) {
-        stateMachine.push(
+        barStateMachine.push(
             if (data.isEmpty())
                 CandidatesUpdatedEmpty
             else
@@ -185,7 +213,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                 titleUi.setReturnButtonOnClickListener {
                     windowManager.switchToKeyboardWindow()
                 }
-                stateMachine.push(ExtendedWindowAttached)
+                barStateMachine.push(ExtendedWindowAttached)
             }
             is InputWindow.SimpleInputWindow<*> -> {
             }
@@ -193,7 +221,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     }
 
     override fun onWindowDetached(window: InputWindow) {
-        stateMachine.push(WindowDetached)
+        barStateMachine.push(WindowDetached)
     }
 
     private fun <T : Component> lazyComponent(block: () -> T) = lazy {
