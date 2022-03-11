@@ -13,7 +13,7 @@ import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.data.clipboard.db.ClipboardEntry
 import kotlin.collections.set
 
-abstract class ClipboardAdapter(initEntries: List<ClipboardEntry>) :
+abstract class ClipboardAdapter() :
     RecyclerView.Adapter<ClipboardAdapter.ViewHolder>() {
     private val _entries = mutableListOf<ClipboardEntry>()
 
@@ -23,10 +23,6 @@ abstract class ClipboardAdapter(initEntries: List<ClipboardEntry>) :
 
     val entries: List<ClipboardEntry>
         get() = _entries
-
-    init {
-        updateEntries(initEntries)
-    }
 
     fun getPositionById(id: Int) = _entriesId.getValue(id)
 

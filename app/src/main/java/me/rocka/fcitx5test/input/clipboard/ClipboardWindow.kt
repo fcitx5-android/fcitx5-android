@@ -4,7 +4,6 @@ import android.view.View
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.data.clipboard.ClipboardManager
 import me.rocka.fcitx5test.input.FcitxInputMethodService
@@ -36,14 +35,10 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     }
 
     val adapter: ClipboardAdapter by lazy {
-        object : ClipboardAdapter(runBlocking { ClipboardManager.getAll() }) {
+        object : ClipboardAdapter() {
             init {
                 onDataChanged {
-                    layoutManager.invalidateSpanAssignments()
-                    if (itemCount > 0)
-                        deleteAllButton.visibility = View.VISIBLE
-                    else
-                        deleteAllButton.visibility = View.INVISIBLE
+                    updateDeleteButton(adapter.itemCount)
                 }
             }
 
@@ -79,6 +74,10 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         }
     }
 
+    private fun updateDeleteButton(itemCount: Int) {
+        deleteAllButton.visibility = if (itemCount > 0) View.VISIBLE else View.INVISIBLE
+    }
+
     override val view by lazy {
         context.recyclerView {
             backgroundColor = styledColor(android.R.attr.colorBackground)
@@ -89,6 +88,9 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     }
 
     override fun onAttached() {
+        service.lifecycleScope.launch {
+            adapter.updateEntries(ClipboardManager.getAll())
+        }
         ClipboardManager.addOnUpdateListener(onClipboardUpdateListener)
     }
 
