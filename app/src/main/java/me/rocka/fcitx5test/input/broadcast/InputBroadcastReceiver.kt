@@ -15,8 +15,8 @@ interface InputBroadcastReceiver {
 
     fun onCandidateUpdates(data: Array<String>) {}
 
-    fun onWindowAttached(window: InputWindow<*>) {}
+    fun onWindowAttached(window: InputWindow) {}
 
-    fun onWindowDetached(window: InputWindow<*>) {}
+    fun onWindowDetached(window: InputWindow) {}
 
 }

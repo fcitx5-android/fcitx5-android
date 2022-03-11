@@ -21,7 +21,7 @@ import splitties.views.imageResource
 
 // TODO: Refactor, this shouldn't depend on BaseKeyboard
 @SuppressLint("ViewConstructor")
-class ExpandableCandidateLayout(
+class ExpandedCandidateLayout(
     context: Context,
     initRecyclerView: RecyclerView.() -> Unit = {}
 ) : BaseKeyboard(context, emptyList()) {
