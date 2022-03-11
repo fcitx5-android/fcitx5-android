@@ -11,6 +11,7 @@ import me.rocka.fcitx5test.input.candidates.ExpandedCandidateWindow
 import me.rocka.fcitx5test.input.candidates.HorizontalCandidateComponent
 import me.rocka.fcitx5test.input.dependency.UniqueViewComponent
 import me.rocka.fcitx5test.input.dependency.context
+import me.rocka.fcitx5test.input.dependency.inputMethodService
 import me.rocka.fcitx5test.input.wm.InputWindow
 import me.rocka.fcitx5test.input.wm.InputWindowManager
 import org.mechdancer.dependency.Component
@@ -29,8 +30,8 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     InputBroadcastReceiver {
 
     private val context by manager.context()
-
     private val windowManager: InputWindowManager by manager.must()
+    private val service by manager.inputMethodService()
 
     private lateinit var scope: DynamicScope
 
@@ -38,7 +39,13 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         HorizontalCandidateComponent()
     }
 
-    private val idleUi by lazy { KawaiiBarUi.Idle(context) }
+    private val idleUi by lazy {
+        KawaiiBarUi.Idle(context).also {
+            it.hideKeyboardButton.setOnClickListener {
+                service.requestHideSelf(0)
+            }
+        }
+    }
 
     private val candidateUi by lazy {
         KawaiiBarUi.Candidate(context, horizontalCandidate.view)
