@@ -8,7 +8,7 @@ import org.mechdancer.dependency.ScopeEvent
 import org.mechdancer.dependency.manager.DependencyManager
 import kotlin.reflect.KClass
 
-abstract class InputWindow<T : InputWindow<T>> : IUniqueComponent<T>, Dependent {
+sealed class InputWindow : Dependent {
 
     protected val manager: DependencyManager = DependencyManager()
 
@@ -16,22 +16,43 @@ abstract class InputWindow<T : InputWindow<T>> : IUniqueComponent<T>, Dependent 
 
     abstract val view: View
 
-    open val title: String?
-        get() = null
+    abstract fun onAttached()
+
+    abstract fun onDetached()
+
+    var isAttached = false
+        private set
 
     open fun onShow() {}
 
-    open val barExtension: View? = null
+    final override fun handle(scopeEvent: ScopeEvent) = manager.handle(scopeEvent)
 
-    val isAttached
-        get() = view.isAttachedToWindow
+    abstract class SimpleInputWindow<T : SimpleInputWindow<T>> : IUniqueComponent<T>,
+        InputWindow() {
 
-    override val type: KClass<out IUniqueComponent<*>> by lazy { defaultType() }
+        override val type: KClass<out IUniqueComponent<*>> by lazy { defaultType() }
 
-    override fun equals(other: Any?): Boolean = defaultEquals(other)
+        override fun equals(other: Any?): Boolean = defaultEquals(other)
 
-    override fun hashCode(): Int = defaultHashCode()
+        override fun hashCode(): Int = defaultHashCode()
 
-    override fun handle(scopeEvent: ScopeEvent) = manager.handle(scopeEvent)
+        override fun toString(): String = javaClass.name
+    }
 
+    abstract class ExtendedInputWindow<T : ExtendedInputWindow<T>> : IUniqueComponent<T>,
+        InputWindow() {
+
+        abstract val title: String
+
+        open val barExtension: View? = null
+
+        override val type: KClass<out IUniqueComponent<*>> by lazy { defaultType() }
+
+        override fun equals(other: Any?): Boolean = defaultEquals(other)
+
+        override fun hashCode(): Int = defaultHashCode()
+
+        override fun toString(): String = javaClass.name
+
+    }
 }

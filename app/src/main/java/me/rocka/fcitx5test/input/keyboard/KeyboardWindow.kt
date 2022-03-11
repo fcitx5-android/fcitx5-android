@@ -15,7 +15,7 @@ import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.wrapContent
 
-class KeyboardWindow : InputWindow<KeyboardWindow>(),
+class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
     InputBroadcastReceiver {
 
     private val service: FcitxInputMethodService by manager.inputMethodService()
@@ -80,9 +80,12 @@ class KeyboardWindow : InputWindow<KeyboardWindow>(),
         currentKeyboard.onInputMethodChange(currentIme)
     }
 
-    override fun onWindowAttached(window: InputWindow<*>) {
-        if (window == this)
-            switchLayout("qwerty")
+    override fun onAttached() {
+        switchLayout("qwerty")
+    }
+
+    override fun onDetached() {
+        currentKeyboard.keyActionListener = null
     }
 
 }

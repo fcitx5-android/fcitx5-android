@@ -40,12 +40,12 @@ class InputBroadcaster : UniqueComponent<InputBroadcaster>(), Dependent, InputBr
 
     }
 
-    override fun onWindowAttached(window: InputWindow<*>) {
+    override fun onWindowAttached(window: InputWindow) {
         receivers.forEach { it.onWindowAttached(window) }
 
     }
 
-    override fun onWindowDetached(window: InputWindow<*>) {
+    override fun onWindowDetached(window: InputWindow) {
         receivers.forEach { it.onWindowDetached(window) }
 
     }

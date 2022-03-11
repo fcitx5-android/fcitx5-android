@@ -1,7 +1,7 @@
 package me.rocka.fcitx5test.input.wm
 
-import android.transition.Slide
-import android.transition.TransitionManager
+import androidx.transition.Slide
+import androidx.transition.TransitionManager
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import me.rocka.fcitx5test.R
@@ -16,6 +16,7 @@ import org.mechdancer.dependency.minusAssign
 import org.mechdancer.dependency.plusAssign
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.frameLayout
+import timber.log.Timber
 
 class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(),
     InputBroadcastReceiver {
@@ -25,18 +26,19 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
     private val keyboardWindow: KeyboardWindow by manager.must()
     private lateinit var scope: DynamicScope
 
-    var currentWindow: InputWindow<*>? = null
+    var currentWindow: InputWindow? = null
         private set
 
     private fun prepareAnimation() {
         val slide = Slide()
+        slide.duration = 100
         TransitionManager.beginDelayedTransition(view, slide)
     }
 
     /**
      * Attach a new window, removing the old one
      */
-    fun attachWindow(window: InputWindow<*>, animation: Boolean = true) {
+    fun attachWindow(window: InputWindow, animation: Boolean = true) {
         if (window.isAttached)
             throw IllegalArgumentException("$window is already attached")
         // add the new window to scope
@@ -44,13 +46,19 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
         if (animation) {
             prepareAnimation()
         }
-        // remove the old window from scope only if it's not keyboard window,
-        // because keyboard window is always in scope
-        currentWindow?.takeIf { it !is KeyboardWindow }?.let { scope -= it }
-        // remove the old window from layout
-        view.removeAllViews()
-        // broadcast the old window was removed from layout
-        currentWindow?.let { broadcaster.onWindowDetached(it) }
+        currentWindow?.let {
+            // notify the window that it will be detached
+            currentWindow?.onDetached()
+            // remove the old window from layout
+            view.removeAllViews()
+            // broadcast the old window was removed from layout
+            broadcaster.onWindowDetached(it)
+            Timber.i("Detach $it")
+            // finally remove the old window from scope only if it's not keyboard window,
+            // because keyboard window is always in scope
+            if (it !is KeyboardWindow)
+                scope -= it
+        }
         // add the new window to layout
         view.add(
             window.view,
@@ -59,6 +67,9 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
         )
+        Timber.i("Attach $window")
+        // notify the window it was attached
+        window.onAttached()
         currentWindow = window
         // broadcast the new window was added to layout
         broadcaster.onWindowAttached(window)
