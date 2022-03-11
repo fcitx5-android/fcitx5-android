@@ -86,6 +86,9 @@ value class CapabilityFlags constructor(val flags: ULong) {
                 if (it.hasFlag(EditorInfo.IME_FLAG_FORCE_ASCII)) {
                     flags += CapabilityFlag.Alpha
                 }
+                if (it.hasFlag(EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING)) {
+                    flags += CapabilityFlag.Sensitive
+                }
             }
             info?.inputType?.let {
                 if (it == InputType.TYPE_NULL) {

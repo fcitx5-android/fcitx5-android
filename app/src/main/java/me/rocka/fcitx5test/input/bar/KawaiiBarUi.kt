@@ -42,6 +42,11 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
 
     class Idle(ctx: Context) : KawaiiBarUi(ctx) {
 
+        val privateModeIcon = imageView {
+            imageResource = R.drawable.ic_view_private
+            scaleType = ImageView.ScaleType.CENTER_INSIDE
+        }
+
         private fun toolButton(@DrawableRes icon: Int) = imageButton {
             imageResource = icon
             background = styledDrawable(android.R.attr.actionBarItemBackground)
@@ -75,12 +80,17 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
         }
 
         override val root = ctx.constraintLayout {
-            addButton(undoButton) { startOfParent(); before(redoButton) }
+            addButton(privateModeIcon) { startOfParent() }
+            addButton(undoButton) { after(privateModeIcon); before(redoButton) }
             addButton(redoButton) { after(undoButton); before(pasteButton) }
             addButton(pasteButton) { after(redoButton); before(clipboardButton) }
             addButton(clipboardButton) { after(pasteButton); before(settingsButton) }
             addButton(settingsButton) { after(clipboardButton); before(hideKeyboardButton) }
             addButton(hideKeyboardButton) { endOfParent() }
+        }
+
+        fun privateMode(activate: Boolean = true) {
+            privateModeIcon.visibility = if (activate) View.VISIBLE else View.INVISIBLE
         }
     }
 
