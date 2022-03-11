@@ -16,7 +16,6 @@ import me.rocka.fcitx5test.core.FcitxEvent
 import me.rocka.fcitx5test.keyboard.candidates.CandidateViewBuilder
 import me.rocka.fcitx5test.keyboard.candidates.ExpandableCandidate
 import me.rocka.fcitx5test.keyboard.candidates.HorizontalCandidate
-import me.rocka.fcitx5test.keyboard.clipboard.ClipboardManagement
 import me.rocka.fcitx5test.keyboard.layout.BaseKeyboard
 import me.rocka.fcitx5test.keyboard.layout.KeyAction
 import me.rocka.fcitx5test.ui.main.MainActivity
@@ -69,7 +68,6 @@ class InputView(
             expandCandidateButton.visibility = VISIBLE
         }
     }
-    private val clipboardManagement = ClipboardManagement()
 
     private val scope = scope { }
 
@@ -93,7 +91,6 @@ class InputView(
         scope += keyboardManager
         scope += expandableCandidate
         scope += horizontalCandidate
-        scope += clipboardManagement
     }
 
 
@@ -126,12 +123,6 @@ class InputView(
             below(horizontalCandidate.recyclerView)
             startOfParent()
             endOfParent()
-        })
-        add(clipboardManagement.layout, lParams(matchConstraints, matchConstraints) {
-            below(horizontalCandidate.recyclerView)
-            startOfParent()
-            endOfParent()
-            bottomOfParent()
         })
 
         expandableCandidate.init()
