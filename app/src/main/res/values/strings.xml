@@ -55,4 +55,5 @@
     <string name="unpin">Unpin</string>
     <string name="delete">Delete</string>
     <string name="clipboard">Clipboard</string>
+    <string name="input_window_height">Input window height</string>
 </resources>

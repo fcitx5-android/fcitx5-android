@@ -2,11 +2,13 @@ package me.rocka.fcitx5test.input
 
 import android.annotation.SuppressLint
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.core.Fcitx
 import me.rocka.fcitx5test.core.FcitxEvent
+import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.input.bar.KawaiiBarComponent
 import me.rocka.fcitx5test.input.broadcast.InputBroadcaster
 import me.rocka.fcitx5test.input.candidates.CandidateViewBuilder
@@ -24,7 +26,6 @@ import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.withTheme
-import splitties.views.dsl.core.wrapContent
 
 
 @SuppressLint("ViewConstructor")
@@ -66,10 +67,24 @@ class InputView(
         broadcaster.onScopeSetupFinished(scope)
     }
 
+    private val windowHeightPercent: Int by Prefs.getInstance().inputWindowHeightPercent
+
+    private val windowHeightPx: Int
+        get() = resources.displayMetrics.heightPixels * windowHeightPercent / 100
+
+    private val onWindowHeightChangeListener = Prefs.OnChangeListener<Int> {
+        windowManager.view.updateLayoutParams {
+            height = windowHeightPx
+        }
+    }
 
     init {
         // MUST call before any operation
         setupScope()
+
+        Prefs.getInstance().inputWindowHeightPercent.registerOnChangeListener(
+            onWindowHeightChangeListener
+        )
 
         service.lifecycleScope.launch {
             broadcaster.onImeUpdate(fcitx.currentIme())
@@ -80,7 +95,7 @@ class InputView(
             startOfParent()
             endOfParent()
         })
-        add(windowManager.view, lParams(matchParent, wrapContent) {
+        add(windowManager.view, lParams(matchParent, windowHeightPx) {
             below(kawaiiBar.view)
             startOfParent()
             endOfParent()
@@ -90,6 +105,9 @@ class InputView(
 
     override fun onDetachedFromWindow() {
         preedit.dismiss()
+        Prefs.getInstance().inputWindowHeightPercent.unregisterOnChangeListener(
+            onWindowHeightChangeListener
+        )
         super.onDetachedFromWindow()
     }
 

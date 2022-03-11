@@ -1,9 +1,9 @@
 package me.rocka.fcitx5test.input.wm
 
-import androidx.transition.Slide
-import androidx.transition.TransitionManager
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.transition.Slide
+import androidx.transition.TransitionManager
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.input.broadcast.InputBroadcastReceiver
 import me.rocka.fcitx5test.input.broadcast.InputBroadcaster
