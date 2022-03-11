@@ -1,5 +1,6 @@
 package me.rocka.fcitx5test.input.bar
 
+import android.view.KeyEvent
 import android.view.View
 import android.widget.FrameLayout
 import androidx.transition.AutoTransition
@@ -8,11 +9,14 @@ import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.input.broadcast.InputBroadcastReceiver
 import me.rocka.fcitx5test.input.candidates.ExpandedCandidateWindow
 import me.rocka.fcitx5test.input.candidates.HorizontalCandidateComponent
+import me.rocka.fcitx5test.input.clipboard.ClipboardWindow
 import me.rocka.fcitx5test.input.dependency.UniqueViewComponent
 import me.rocka.fcitx5test.input.dependency.context
 import me.rocka.fcitx5test.input.dependency.inputMethodService
 import me.rocka.fcitx5test.input.wm.InputWindow
 import me.rocka.fcitx5test.input.wm.InputWindowManager
+import me.rocka.fcitx5test.utils.AppUtil
+import me.rocka.fcitx5test.utils.inputConnection
 import org.mechdancer.dependency.Component
 import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.must
@@ -40,6 +44,21 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     private val idleUi by lazy {
         KawaiiBarUi.Idle(context).also {
+            it.undoButton.setOnClickListener {
+                service.sendCombinationKeyEvents(KeyEvent.KEYCODE_Z, ctrl = true)
+            }
+            it.redoButton.setOnClickListener {
+                service.sendCombinationKeyEvents(KeyEvent.KEYCODE_Z, ctrl = true, shift = true)
+            }
+            it.pasteButton.setOnClickListener {
+                service.inputConnection?.performContextMenuAction(android.R.id.paste)
+            }
+            it.clipboardButton.setOnClickListener {
+                windowManager.attachWindow(ClipboardWindow())
+            }
+            it.settingsButton.setOnClickListener {
+                AppUtil.launchMain(context)
+            }
             it.hideKeyboardButton.setOnClickListener {
                 service.requestHideSelf(0)
             }
