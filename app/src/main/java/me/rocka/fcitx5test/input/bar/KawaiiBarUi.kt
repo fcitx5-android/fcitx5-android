@@ -16,7 +16,12 @@ import splitties.views.imageResource
 
 sealed class KawaiiBarUi(override val ctx: Context) : Ui {
 
+    abstract val state: KawaiiBarState
+
     class Candidate(ctx: Context, private val horizontalView: View) : KawaiiBarUi(ctx) {
+
+        override val state: KawaiiBarState
+            get() = KawaiiBarState.Candidate
 
         val expandButton = imageButton(R.id.expand_candidate_btn) {
             background = null
@@ -46,6 +51,9 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
             imageResource = R.drawable.ic_view_private
             scaleType = ImageView.ScaleType.CENTER_INSIDE
         }
+
+        override val state: KawaiiBarState
+            get() = KawaiiBarState.Idle
 
         private fun toolButton(@DrawableRes icon: Int) = imageButton {
             imageResource = icon
@@ -95,6 +103,9 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
     }
 
     class Title(ctx: Context) : KawaiiBarUi(ctx) {
+
+        override val state: KawaiiBarState
+            get() = KawaiiBarState.Title
 
         private val backButton = imageButton {
             imageResource = R.drawable.ic_baseline_arrow_back_24

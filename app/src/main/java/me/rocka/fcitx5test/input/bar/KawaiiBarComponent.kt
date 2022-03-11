@@ -8,6 +8,8 @@ import android.widget.FrameLayout
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
 import me.rocka.fcitx5test.R
+import me.rocka.fcitx5test.input.bar.KawaiiBarState.*
+import me.rocka.fcitx5test.input.bar.KawaiiBarTransitionEvent.*
 import me.rocka.fcitx5test.input.broadcast.InputBroadcastReceiver
 import me.rocka.fcitx5test.input.candidates.ExpandedCandidateWindow
 import me.rocka.fcitx5test.input.candidates.HorizontalCandidateComponent
@@ -18,7 +20,10 @@ import me.rocka.fcitx5test.input.dependency.inputMethodService
 import me.rocka.fcitx5test.input.wm.InputWindow
 import me.rocka.fcitx5test.input.wm.InputWindowManager
 import me.rocka.fcitx5test.utils.AppUtil
+import me.rocka.fcitx5test.utils.EventStateMachine
 import me.rocka.fcitx5test.utils.inputConnection
+import me.rocka.fcitx5test.utils.on
+import me.rocka.fcitx5test.utils.transitTo
 import org.mechdancer.dependency.Component
 import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.must
@@ -30,7 +35,6 @@ import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import splitties.views.imageResource
 import timber.log.Timber
-import kotlin.reflect.KClass
 
 class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(),
     InputBroadcastReceiver {
@@ -77,20 +81,35 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     lateinit var currentUi: KawaiiBarUi
         private set
 
+    private val stateMachine: EventStateMachine<KawaiiBarState, KawaiiBarTransitionEvent> =
+        EventStateMachine(
+            Idle,
+            // from idle
+            Idle on CandidatesUpdatedEmpty transitTo Idle,
+            Idle on SimpleWindowAttached transitTo Idle,
+            Idle on ExtendedWindowAttached transitTo Title,
+            Idle on CandidatesUpdatedNonEmpty transitTo Candidate,
+            // from title
+            Title on WindowDetached transitTo Idle,
+            // from candidate
+            Candidate on CandidatesUpdatedNonEmpty transitTo Candidate,
+            Candidate on CandidatesUpdatedEmpty transitTo Idle
+        ).apply {
+            onNewStateListener = {
+                when (it) {
+                    Idle -> switchUi(idleUi)
+                    Candidate -> switchUi(candidateUi)
+                    Title -> switchUi(titleUi)
+                }
+            }
+        }
+
     private fun prepareAnimation() {
         val transition = AutoTransition()
         transition.duration = 50
         TransitionManager.beginDelayedTransition(view, transition)
     }
 
-    fun switchUi(uiClass: KClass<out KawaiiBarUi>, animation: Boolean = true) {
-        when (uiClass.java) {
-            idleUi.javaClass -> switchUi(idleUi, animation)
-            candidateUi.javaClass -> switchUi(candidateUi, animation)
-            titleUi.javaClass -> switchUi(titleUi, animation)
-            else -> throw IllegalArgumentException("Can not switch to $uiClass")
-        }
-    }
 
     // set expand candidate button to create expand candidate
     fun setExpandButtonToAttach() {
@@ -158,12 +177,12 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     }
 
     override fun onCandidateUpdates(data: Array<String>) {
-        // go back to idle ui if there's no candidate
-        // this is the only way candidate bar can be replaced
-        if (data.isEmpty() && currentUi is KawaiiBarUi.Candidate)
-            switchUi(idleUi)
-        if (data.isNotEmpty())
-            switchUi(candidateUi)
+        stateMachine.post(
+            if (data.isEmpty())
+                CandidatesUpdatedEmpty
+            else
+                CandidatesUpdatedNonEmpty
+        )
     }
 
     override fun onWindowAttached(window: InputWindow) {
@@ -174,25 +193,16 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                 titleUi.setReturnButtonOnClickListener {
                     windowManager.switchToKeyboardWindow()
                 }
-                // no window can replace the candidate bar
-                if (currentUi is KawaiiBarUi.Candidate)
-                    throw IllegalStateException("The title on extended $window is conflict with candidate bar")
-                else
-                    switchUi(titleUi)
+                stateMachine.post(ExtendedWindowAttached)
             }
             is InputWindow.SimpleInputWindow<*> -> {
-                // no window can replace the candidate bar
-                if (currentUi !is KawaiiBarUi.Candidate)
-                    switchUi(idleUi)
+                stateMachine.post(SimpleWindowAttached)
             }
         }
     }
 
     override fun onWindowDetached(window: InputWindow) {
-        // no window can replace the candidate bar
-        if (currentUi !is KawaiiBarUi.Candidate) {
-            switchUi(idleUi)
-        }
+        stateMachine.post(WindowDetached)
     }
 
     private fun <T : Component> lazyComponent(block: () -> T) = lazy {
