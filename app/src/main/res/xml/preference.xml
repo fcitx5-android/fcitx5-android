@@ -35,7 +35,8 @@
             app:iconSpaceReserved="false"
             app:max="50"
             app:min="1"
-            app:singleLineTitle="false" />
+            app:singleLineTitle="false"
+            app:useSimpleSummaryProvider="true" />
         <ListPreference
             android:defaultValue="Grid"
             android:entries="@array/expandable_candidate_style"
