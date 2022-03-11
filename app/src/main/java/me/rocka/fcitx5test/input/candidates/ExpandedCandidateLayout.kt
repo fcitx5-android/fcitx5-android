@@ -6,10 +6,10 @@ import android.view.inputmethod.EditorInfo
 import android.widget.ImageButton
 import androidx.recyclerview.widget.RecyclerView
 import me.rocka.fcitx5test.R
-import me.rocka.fcitx5test.input.preedit.PreeditContent
 import me.rocka.fcitx5test.input.keyboard.BackspaceKey
 import me.rocka.fcitx5test.input.keyboard.BaseKeyboard
 import me.rocka.fcitx5test.input.keyboard.ReturnKey
+import me.rocka.fcitx5test.input.preedit.PreeditContent
 import splitties.dimensions.dp
 import splitties.resources.styledColor
 import splitties.views.backgroundColor
@@ -52,28 +52,28 @@ class ExpandedCandidateLayout(
         id = R.id.expanded_candidate_view
         backgroundColor = styledColor(android.R.attr.colorBackground)
 
-        add(pageUpBtn, lParams(matchConstraints, dp(60)) {
+        add(pageUpBtn, lParams(matchConstraints, matchConstraints) {
             matchConstraintPercentWidth = 0.15f
             topOfParent()
             endOfParent()
             above(pageDnBtn)
         })
 
-        add(pageDnBtn, lParams(matchConstraints, dp(60)) {
+        add(pageDnBtn, lParams(matchConstraints, matchConstraints) {
             matchConstraintPercentWidth = 0.15f
             below(pageUpBtn)
             endOfParent()
             above(backspaceBtn)
         })
 
-        add(backspaceBtn, lParams(matchConstraints, dp(60)) {
+        add(backspaceBtn, lParams(matchConstraints, matchConstraints) {
             matchConstraintPercentWidth = 0.15f
             below(pageDnBtn)
             endOfParent()
             above(returnBtn)
         })
 
-        add(returnBtn, lParams(matchConstraints, dp(60)) {
+        add(returnBtn, lParams(matchConstraints, matchConstraints) {
             matchConstraintPercentWidth = 0.15f
             below(backspaceBtn)
             endOfParent()

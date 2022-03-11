@@ -1,6 +1,5 @@
 package me.rocka.fcitx5test.input.keyboard
 
-import android.widget.FrameLayout
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.core.InputMethodEntry
 import me.rocka.fcitx5test.input.FcitxInputMethodService
@@ -12,8 +11,8 @@ import org.mechdancer.dependency.manager.must
 import splitties.resources.str
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.frameLayout
+import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
-import splitties.views.dsl.core.wrapContent
 
 class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
     InputBroadcastReceiver {
@@ -51,10 +50,9 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
                 else -> "qwerty"
             }
         }
-        view.add(
-            currentKeyboard,
-            FrameLayout.LayoutParams(currentKeyboard.matchParent, currentKeyboard.wrapContent)
-        )
+        view.run {
+            add(currentKeyboard, lParams(matchParent, matchParent))
+        }
         currentKeyboard.keyActionListener = BaseKeyboard.KeyActionListener {
             if (it is KeyAction.LayoutSwitchAction)
                 switchLayout(it.act)
