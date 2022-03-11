@@ -1,6 +1,7 @@
 package me.rocka.fcitx5test.input.clipboard
 
 import android.view.View
+import android.widget.ImageView
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import kotlinx.coroutines.launch
@@ -15,7 +16,10 @@ import splitties.dimensions.dp
 import splitties.resources.styledColor
 import splitties.resources.styledDrawable
 import splitties.views.backgroundColor
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.horizontalLayout
 import splitties.views.dsl.core.imageButton
+import splitties.views.dsl.core.lParams
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.imageResource
 
@@ -62,8 +66,9 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
 
     val deleteAllButton by lazy {
         context.imageButton {
-            background = styledDrawable(android.R.attr.selectableItemBackground)
+            background = styledDrawable(android.R.attr.actionBarItemBackground)
             imageResource = R.drawable.ic_baseline_delete_sweep_24
+            scaleType = ImageView.ScaleType.CENTER_INSIDE
             visibility = View.INVISIBLE
             setOnClickListener {
                 service.lifecycleScope.launch {
@@ -83,7 +88,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
             backgroundColor = styledColor(android.R.attr.colorBackground)
             layoutManager = this@ClipboardWindow.layoutManager
             adapter = this@ClipboardWindow.adapter
-            addItemDecoration(SpacesItemDecoration(dp(2)))
+            addItemDecoration(SpacesItemDecoration(dp(4)))
         }
     }
 
@@ -103,6 +108,8 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     }
 
     override val barExtension: View by lazy {
-        deleteAllButton
+        context.horizontalLayout {
+            add(deleteAllButton, lParams(dp(40), dp(40)))
+        }
     }
 }

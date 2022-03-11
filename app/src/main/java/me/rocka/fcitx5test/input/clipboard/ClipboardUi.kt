@@ -16,8 +16,8 @@ class ClipboardUi(override val ctx: Context) : Ui {
 
     val text = textView {
         isSingleLine = false
-        textSize = 14f
-        padding = dp(5)
+        textSize = 16f
+        padding = dp(8)
     }
 
     val pin = imageView {
