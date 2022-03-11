@@ -6,7 +6,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import me.rocka.fcitx5test.data.Prefs
-import me.rocka.fcitx5test.input.bar.KawaiiBarComponent
 import me.rocka.fcitx5test.input.broadcast.InputBroadcastReceiver
 import me.rocka.fcitx5test.input.candidates.adapter.BaseCandidateViewAdapter
 import me.rocka.fcitx5test.input.candidates.adapter.GridCandidateViewAdapter
@@ -23,7 +22,6 @@ class ExpandedCandidateWindow :
 
     private val builder: CandidateViewBuilder by manager.must()
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
-    private val bar: KawaiiBarComponent by manager.must()
     private val horizontalCandidate: HorizontalCandidateComponent by manager.must()
 
     val style: Style by Prefs.getInstance().expandableCandidateStyle
@@ -82,8 +80,7 @@ class ExpandedCandidateWindow :
 
     override fun onAttached() {
         view.keyActionListener = commonKeyActionListener.listener
-        bar.setExpandButtonToDetach()
-        horizontalCandidate.expandedCandidateOffset.onEach {
+        offsetJob = horizontalCandidate.expandedCandidateOffset.onEach {
             if (it > 0)
                 adapter.updateCandidatesWithOffset(horizontalCandidate.adapter.candidates, it)
         }.launchIn(lifecycleCoroutineScope)
@@ -93,7 +90,6 @@ class ExpandedCandidateWindow :
         offsetJob?.cancel()
         offsetJob = null
         view.keyActionListener = null
-        bar.setExpandButtonToAttach()
     }
 
     override fun onPreeditUpdate(content: PreeditContent) {

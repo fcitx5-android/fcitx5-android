@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.runBlocking
 import me.rocka.fcitx5test.R
+import me.rocka.fcitx5test.input.bar.ExpandButtonTransitionEvent.*
 import me.rocka.fcitx5test.input.bar.KawaiiBarComponent
 import me.rocka.fcitx5test.input.broadcast.InputBroadcastReceiver
 import me.rocka.fcitx5test.input.dependency.UniqueViewComponent
@@ -27,7 +28,7 @@ class HorizontalCandidateComponent :
     private val windowManager: InputWindowManager by manager.must()
 
     private var needsRefreshExpanded = false
-    private var isInputFinished = true
+    private var isExpandedCandidatesNonEmpty = false
 
     val adapter by lazy {
         builder.simpleAdapter().apply {
@@ -46,39 +47,17 @@ class HorizontalCandidateComponent :
 
     val expandedCandidateOffset = _expandedCandidateOffset.asSharedFlow()
 
-    private fun refreshExpanded(windowJustDetached: Boolean? = null) {
+    private fun refreshExpanded() {
         val candidates = this@HorizontalCandidateComponent.adapter.candidates
-        val isExpanded =
-            windowJustDetached?.not() ?: windowManager.currentWindow is ExpandedCandidateWindow
         val expandedWillBeNonEmpty = candidates.size - view.childCount > 0
-        // decide if we need to show expand candidate button or close expanded candidate
-        when {
-            expandedWillBeNonEmpty && !isExpanded -> {
-                // enable the button
-                // expand candidate will be created when the button is clicked
-                bar.setExpandButtonToAttach()
-                bar.setExpandButtonEnabled(true)
-            }
+        isExpandedCandidatesNonEmpty = expandedWillBeNonEmpty
 
-            !expandedWillBeNonEmpty && !isExpanded -> {
-                // if there has not been expand candidate,
-                // don't give it the chance to show
-                bar.setExpandButtonEnabled(false)
-            }
-            candidates.isEmpty() && isExpanded -> {
-                // close expand candidate and disable the button
-                // when there is no candidate at all
-                // MUST detach the window before setting expand button enabled to false
-                windowManager.switchToKeyboardWindow()
-                bar.setExpandButtonEnabled(false)
-                isInputFinished = true
-            }
+        if (candidates.isEmpty())
+            windowManager.switchToKeyboardWindow()
+
+        runBlocking {
+            _expandedCandidateOffset.emit(view.childCount)
         }
-
-        if (needsRefreshExpanded)
-            runBlocking {
-                _expandedCandidateOffset.emit(view.childCount)
-            }
     }
 
     override val view by lazy {
@@ -90,17 +69,32 @@ class HorizontalCandidateComponent :
             }
             globalLayoutListener {
                 if (needsRefreshExpanded) {
-                    isInputFinished = false
                     refreshExpanded()
+                    bar.expandButtonStateMachine.push(
+                        if (isExpandedCandidatesNonEmpty)
+                            ExpandedCandidatesUpdatedNonEmpty
+                        else
+                            ExpandedCandidatesUpdatedEmpty
+                    )
                     needsRefreshExpanded = false
                 }
             }
         }
     }
 
+    override fun onWindowAttached(window: InputWindow) {
+        if (window is ExpandedCandidateWindow)
+            bar.expandButtonStateMachine.push(ExpandedCandidatesAttached)
+    }
+
     override fun onWindowDetached(window: InputWindow) {
-        if (!isInputFinished && window is ExpandedCandidateWindow)
-            refreshExpanded(true)
+        if (window is ExpandedCandidateWindow)
+            bar.expandButtonStateMachine.push(
+                if (isExpandedCandidatesNonEmpty)
+                    ExpandedCandidatesDetachedWithNonEmpty
+                else
+                    ExpandedCandidatesDetachedWithEmpty
+            )
     }
 
     override fun onCandidateUpdates(data: Array<String>) {
