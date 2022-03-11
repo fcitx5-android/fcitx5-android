@@ -2,6 +2,8 @@ package me.rocka.fcitx5test.input
 
 import android.content.Intent
 import android.content.res.Configuration
+import android.os.SystemClock
+import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.CursorAnchorInfo
@@ -108,6 +110,53 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     private fun cancelRepeatingAll() {
         keyRepeatingJobs.forEach { cancelRepeating(it.key) }
+    }
+
+    private fun sendDownKeyEvent(eventTime: Long, keyEventCode: Int, metaState: Int) {
+        inputConnection?.sendKeyEvent(
+            KeyEvent(
+                eventTime,
+                eventTime,
+                KeyEvent.ACTION_DOWN,
+                keyEventCode,
+                0,
+                metaState,
+                KeyCharacterMap.VIRTUAL_KEYBOARD,
+                0,
+                KeyEvent.FLAG_SOFT_KEYBOARD or KeyEvent.FLAG_KEEP_TOUCH_MODE
+            )
+        )
+    }
+
+    private fun sendUpKeyEvent(eventTime: Long, keyEventCode: Int, metaState: Int) {
+        inputConnection?.sendKeyEvent(
+            KeyEvent(
+                eventTime,
+                eventTime,
+                KeyEvent.ACTION_UP,
+                keyEventCode,
+                0,
+                metaState,
+                KeyCharacterMap.VIRTUAL_KEYBOARD,
+                0,
+                KeyEvent.FLAG_SOFT_KEYBOARD or KeyEvent.FLAG_KEEP_TOUCH_MODE
+            )
+        )
+    }
+
+    fun sendCombinationKeyEvents(
+        keyEventCode: Int,
+        alt: Boolean = false,
+        ctrl: Boolean = false,
+        shift: Boolean = false
+    ) {
+        var metaState = 0
+        if (alt) metaState = KeyEvent.META_ALT_ON or KeyEvent.META_ALT_LEFT_ON
+        if (ctrl) metaState = metaState or KeyEvent.META_CTRL_ON or KeyEvent.META_CTRL_LEFT_ON
+        if (shift) metaState = metaState or KeyEvent.META_SHIFT_ON or KeyEvent.META_SHIFT_LEFT_ON
+        val eventTime = SystemClock.uptimeMillis()
+        sendDownKeyEvent(eventTime, keyEventCode, metaState)
+        sendUpKeyEvent(eventTime, keyEventCode, metaState)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
