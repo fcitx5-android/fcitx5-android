@@ -7,4 +7,5 @@
     <string name="pref_clipboard_enable" translatable="false">clipboard_enable</string>
     <string name="pref_clipboard_limit" translatable="false">clipboard_limit</string>
     <string name="pref_expandable_candidate_style" translatable="false">expandable_candidate_style</string>
+    <string name="pref_input_window_height_percent" translatable="false">input_window_height_percent</string>
 </resources>

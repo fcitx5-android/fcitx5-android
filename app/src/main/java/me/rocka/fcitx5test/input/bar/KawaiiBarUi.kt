@@ -64,16 +64,16 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
 
     class Title(ctx: Context) : KawaiiBarUi(ctx) {
 
-        val backButton = imageButton {
+        private val backButton = imageButton {
             imageResource = R.drawable.ic_baseline_arrow_back_24
             background = null
         }
 
-        val titleText = textView {
+        private val titleText = textView {
             textSize = 16f
         }
 
-        var extension: View? = null
+        private var extension: View? = null
 
         override val root = constraintLayout {
             add(backButton, lParams(dp(40), dp(40)) {
@@ -106,7 +106,7 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
             root.run {
                 add(view, lParams(wrapContent, dp(40)) {
                     topOfParent()
-                    endOfParent()
+                    endOfParent(dp(5))
                     bottomOfParent()
                 })
             }

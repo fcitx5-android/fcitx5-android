@@ -47,5 +47,15 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false"
             app:useSimpleSummaryProvider="true" />
+        <me.rocka.fcitx5test.ui.common.DialogSeekBarPreference
+            android:defaultValue="30"
+            android:key="@string/pref_input_window_height_percent"
+            android:title="@string/input_window_height"
+            app:iconSpaceReserved="false"
+            app:max="70"
+            app:min="30"
+            app:singleLineTitle="false"
+            app:unit="%"
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 </PreferenceScreen>
