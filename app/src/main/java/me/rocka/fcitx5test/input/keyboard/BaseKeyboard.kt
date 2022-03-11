@@ -63,7 +63,6 @@ abstract class BaseKeyboard(
             }
             keyRows.forEachIndexed { index, row ->
                 addView(row, lParams {
-                    height = dp(60)
                     if (index == 0) topOfParent()
                     else below(keyRows[index - 1])
                     if (index == keyRows.size - 1) bottomOfParent()
