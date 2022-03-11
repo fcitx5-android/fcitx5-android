@@ -1,7 +1,7 @@
 package me.rocka.fcitx5test.input.bar
 
+import android.view.View
 import android.widget.FrameLayout
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
 import me.rocka.fcitx5test.R
@@ -88,12 +88,12 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             R.drawable.ic_baseline_expand_less_24
     }
 
+    // should be used with setExpandButtonToAttach or setExpandButtonToDetach
     fun setExpandButtonEnabled(enabled: Boolean) {
-        setExpandButtonToAttach()
         if (enabled)
-            candidateUi.expandButton.visibility = ConstraintLayout.VISIBLE
+            candidateUi.expandButton.visibility = View.VISIBLE
         else
-            candidateUi.expandButton.visibility = ConstraintLayout.INVISIBLE
+            candidateUi.expandButton.visibility = View.INVISIBLE
     }
 
     private fun switchUi(ui: KawaiiBarUi, animation: Boolean = true) {
