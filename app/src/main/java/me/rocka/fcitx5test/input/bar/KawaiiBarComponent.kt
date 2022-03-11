@@ -20,10 +20,8 @@ import me.rocka.fcitx5test.input.dependency.inputMethodService
 import me.rocka.fcitx5test.input.wm.InputWindow
 import me.rocka.fcitx5test.input.wm.InputWindowManager
 import me.rocka.fcitx5test.utils.AppUtil
-import me.rocka.fcitx5test.utils.EventStateMachine
+import me.rocka.fcitx5test.utils.eventStateMachine
 import me.rocka.fcitx5test.utils.inputConnection
-import me.rocka.fcitx5test.utils.on
-import me.rocka.fcitx5test.utils.transitTo
 import org.mechdancer.dependency.Component
 import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.must
@@ -81,21 +79,15 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     lateinit var currentUi: KawaiiBarUi
         private set
 
-    private val stateMachine: EventStateMachine<KawaiiBarState, KawaiiBarTransitionEvent> =
-        EventStateMachine(
-            Idle,
-            // from idle
-            Idle on CandidatesUpdatedEmpty transitTo Idle,
-            Idle on SimpleWindowAttached transitTo Idle,
-            Idle on ExtendedWindowAttached transitTo Title,
-            Idle on CandidatesUpdatedNonEmpty transitTo Candidate,
-            // from title
-            Title on WindowDetached transitTo Idle,
-            // from candidate
-            Candidate on CandidatesUpdatedNonEmpty transitTo Candidate,
-            Candidate on CandidatesUpdatedEmpty transitTo Idle
-        ).apply {
-            onNewStateListener = {
+    private val stateMachine =
+        eventStateMachine<KawaiiBarState, KawaiiBarTransitionEvent>(Idle) {
+
+            from(Idle) transitTo Title on ExtendedWindowAttached
+            from(Idle) transitTo Candidate on CandidatesUpdatedNonEmpty
+            from(Title) transitTo Idle on WindowDetached
+            from(Candidate) transitTo Idle on CandidatesUpdatedEmpty
+
+            onNewState {
                 when (it) {
                     Idle -> switchUi(idleUi)
                     Candidate -> switchUi(candidateUi)
@@ -177,7 +169,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     }
 
     override fun onCandidateUpdates(data: Array<String>) {
-        stateMachine.post(
+        stateMachine.push(
             if (data.isEmpty())
                 CandidatesUpdatedEmpty
             else
@@ -193,16 +185,15 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                 titleUi.setReturnButtonOnClickListener {
                     windowManager.switchToKeyboardWindow()
                 }
-                stateMachine.post(ExtendedWindowAttached)
+                stateMachine.push(ExtendedWindowAttached)
             }
             is InputWindow.SimpleInputWindow<*> -> {
-                stateMachine.post(SimpleWindowAttached)
             }
         }
     }
 
     override fun onWindowDetached(window: InputWindow) {
-        stateMachine.post(WindowDetached)
+        stateMachine.push(WindowDetached)
     }
 
     private fun <T : Component> lazyComponent(block: () -> T) = lazy {

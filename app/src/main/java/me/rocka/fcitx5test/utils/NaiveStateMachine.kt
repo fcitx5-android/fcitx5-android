@@ -2,22 +2,19 @@ package me.rocka.fcitx5test.utils
 
 open class NaiveStateMachine<V : NaiveStateMachine.State, L>(
     initialState: V,
-    // `state1` to `event` to `state2`
-    vararg transitions: Pair<Pair<V, L>, V>
+    protected val edges: List<Edge<V, L>>
 ) {
 
     interface State
 
-    protected val edges = transitions
-        .map { Triple(it.first.first, it.second, it.first.second) }
-        .distinct()
+    data class Edge<V, L>(val vertex1: V, val vertex2: V, val label: L)
 
     protected val vertices = edges
-        .flatMap { listOf(it.first, it.second) }
+        .flatMap { listOf(it.vertex1, it.vertex2) }
         .distinct()
 
     protected val labels = edges
-        .map { it.third }
+        .map { it.label }
         .distinct()
 
     protected val graph = Array(vertices.size) {
@@ -70,31 +67,28 @@ open class NaiveStateMachine<V : NaiveStateMachine.State, L>(
 fun <V : NaiveStateMachine.State> NaiveStateMachine<V, () -> Boolean>.transitTo(state: V) =
     transitTo(state) { it() }
 
-class EventStateMachine<V : NaiveStateMachine.State, Event : EventStateMachine.StateTransitionEvent>(
-    initialState: V,
-    vararg transitions: Pair<Pair<V, Event>, V>
-) : NaiveStateMachine<V, Event>(initialState, *transitions) {
+class EventStateMachine<State : NaiveStateMachine.State, Event : EventStateMachine.StateTransitionEvent>(
+    initialState: State,
+    edges: List<Edge<State, List<Event>>>
+) : NaiveStateMachine<State, List<Event>>(initialState, edges) {
 
     interface StateTransitionEvent
 
     /**
-     * Post an event that may trigger transition of state
-     *
-     * @return if transition happens
+     * Push an event that may trigger a transition of state
      */
-    fun post(event: Event): Boolean {
-        if (event !in labels)
+    fun push(event: Event) {
+        if (event !in labels.flatten())
             throw IllegalArgumentException("$event is an unknown event")
         val transitions = edgesOfCurrentState()
-        val filtered = transitions.filter { it.second.second == event }
-        return when (filtered.size) {
+        val filtered = transitions.filter { event in it.second.second }
+        when (filtered.size) {
             0 -> {
-                false
+                // do nothing
             }
             1 -> {
                 currentStateIx = filtered.first().first.first
                 onNewStateListener?.invoke(filtered.first().first.second)
-                true
             }
             else -> throw IllegalStateException("More than one transitions are found given $event on $currentState")
         }
@@ -103,24 +97,47 @@ class EventStateMachine<V : NaiveStateMachine.State, Event : EventStateMachine.S
 
 // DSL
 
-infix fun <State : NaiveStateMachine.State, Event : EventStateMachine.StateTransitionEvent> State.on(
-    event: Event
+fun <State : NaiveStateMachine.State, Event : EventStateMachine.StateTransitionEvent> eventStateMachine(
+    initialState: State,
+    builder: EventStateMachineBuilder<State, Event>.() -> Unit
 ) =
-    EventTransitionBuilder(this, event)
+    EventStateMachineBuilder<State, Event>(initialState).apply(builder).build()
 
-infix fun <State : NaiveStateMachine.State, Event : EventStateMachine.StateTransitionEvent>
-        EventTransitionBuilder<State, Event>.transitTo(
-    endState: State
-) = run {
-    this.endState = endState
-    build()
-}
-
-class EventTransitionBuilder<State : NaiveStateMachine.State, Event : EventStateMachine.StateTransitionEvent>(
-    private val startState: State,
-    private val event: Event
+class EventStateMachineBuilder<State : NaiveStateMachine.State, Event : EventStateMachine.StateTransitionEvent>(
+    private val initialState: State
 ) {
-    lateinit var endState: State
-    fun build() = startState to event to endState
+    private val map = mutableMapOf<Pair<State, State>, MutableList<Event>>()
 
+    private var listener: ((State) -> Unit)? = null
+
+    inner class EventTransitionBuilder(val startState: State) {
+        lateinit var endState: State
+        lateinit var event: Event
+
+    }
+
+    infix fun EventTransitionBuilder.transitTo(state: State) = this.apply {
+        endState = state
+    }
+
+    infix fun EventTransitionBuilder.on(event: Event) = this.run {
+        this.event = event
+        if (startState to endState !in map)
+            map[startState to endState] = mutableListOf(event)
+        else
+            map.getValue(startState to endState) += event
+    }
+
+    fun from(state: State) = EventTransitionBuilder(state)
+
+    fun onNewState(block: (State) -> Unit) {
+        listener = block
+    }
+
+
+    fun build() = EventStateMachine(
+        initialState,
+        map.map { (k, v) -> NaiveStateMachine.Edge(k.first, k.second, v) }).apply {
+        listener?.let { onNewStateListener = it }
+    }
 }

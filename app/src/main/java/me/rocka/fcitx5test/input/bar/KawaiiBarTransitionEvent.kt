@@ -6,6 +6,5 @@ enum class KawaiiBarTransitionEvent : EventStateMachine.StateTransitionEvent {
     CandidatesUpdatedEmpty,
     CandidatesUpdatedNonEmpty,
     ExtendedWindowAttached,
-    SimpleWindowAttached,
     WindowDetached
 }
