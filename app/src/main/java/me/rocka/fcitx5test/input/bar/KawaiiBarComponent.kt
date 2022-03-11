@@ -1,6 +1,5 @@
 package me.rocka.fcitx5test.input.bar
 
-import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.transition.AutoTransition
@@ -109,14 +108,10 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         if (animation) {
             prepareAnimation()
         }
-        view.removeAllViews()
-        view.add(
-            ui.root,
-            ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        )
+        view.run {
+            removeAllViews()
+            add(ui.root, lParams(matchParent, matchParent))
+        }
         currentUi = ui
     }
 
