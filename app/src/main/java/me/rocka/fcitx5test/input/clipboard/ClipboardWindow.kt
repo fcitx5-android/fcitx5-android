@@ -27,17 +27,23 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     val layoutManager by lazy {
         StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
     }
-    private val onClipboardUpdateListener = ClipboardManager.OnClipboardUpdateListener {
-        service.lifecycleScope.launch {
-            adapter.updateEntries(ClipboardManager.getAll())
+    private val onClipboardUpdateListener by lazy {
+        ClipboardManager.OnClipboardUpdateListener {
+            service.lifecycleScope.launch {
+                adapter.updateEntries(ClipboardManager.getAll())
+            }
         }
     }
 
-    val adapter =
+    val adapter: ClipboardAdapter by lazy {
         object : ClipboardAdapter(runBlocking { ClipboardManager.getAll() }) {
             init {
                 onDataChanged {
                     layoutManager.invalidateSpanAssignments()
+                    if (itemCount > 0)
+                        deleteAllButton.visibility = View.VISIBLE
+                    else
+                        deleteAllButton.visibility = View.INVISIBLE
                 }
             }
 
@@ -56,13 +62,14 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
             override suspend fun onDelete(id: Int) {
                 ClipboardManager.delete(id)
             }
-
         }
+    }
 
     val deleteAllButton by lazy {
         context.imageButton {
             background = styledDrawable(android.R.attr.selectableItemBackground)
             imageResource = R.drawable.ic_baseline_delete_sweep_24
+            visibility = View.INVISIBLE
             setOnClickListener {
                 service.lifecycleScope.launch {
                     ClipboardManager.deleteAll()
@@ -89,7 +96,9 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         ClipboardManager.removeOnUpdateListener(onClipboardUpdateListener)
     }
 
-    override val title: String = context.getString(R.string.clipboard)
+    override val title: String by lazy {
+        context.getString(R.string.clipboard)
+    }
 
     override val barExtension: View by lazy {
         deleteAllButton

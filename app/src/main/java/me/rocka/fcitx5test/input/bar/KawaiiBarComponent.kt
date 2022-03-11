@@ -1,10 +1,10 @@
 package me.rocka.fcitx5test.input.bar
 
-import androidx.transition.AutoTransition
-import androidx.transition.TransitionManager
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.transition.AutoTransition
+import androidx.transition.TransitionManager
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.input.broadcast.InputBroadcastReceiver
 import me.rocka.fcitx5test.input.candidates.ExpandedCandidateWindow
@@ -128,9 +128,9 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     override fun onCandidateUpdates(data: Array<String>) {
         // go back to idle ui if there's no candidate
         // this is the only way candidate bar can be replaced
-        if (data.isEmpty())
+        if (data.isEmpty() && currentUi is KawaiiBarUi.Candidate)
             switchUi(idleUi)
-        else
+        if (data.isNotEmpty())
             switchUi(candidateUi)
     }
 
@@ -139,6 +139,9 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             is InputWindow.ExtendedInputWindow<*> -> {
                 titleUi.setTitle(window.title)
                 window.barExtension?.let { titleUi.addExtension(it) }
+                titleUi.setReturnButtonOnClickListener {
+                    windowManager.switchToKeyboardWindow()
+                }
                 // no window can replace the candidate bar
                 if (currentUi is KawaiiBarUi.Candidate)
                     throw IllegalStateException("The title on extended $window is conflict with candidate bar")
