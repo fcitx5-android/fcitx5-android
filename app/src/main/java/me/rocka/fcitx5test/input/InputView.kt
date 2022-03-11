@@ -105,13 +105,13 @@ class InputView(
 
     override fun onDetachedFromWindow() {
         preedit.dismiss()
-        Prefs.getInstance().inputWindowHeightPercent.unregisterOnChangeListener(
-            onWindowHeightChangeListener
-        )
+        Prefs.getInstance()
+            .inputWindowHeightPercent.unregisterOnChangeListener(onWindowHeightChangeListener)
         super.onDetachedFromWindow()
     }
 
     fun onShow() {
+        kawaiiBar.updatePrivateModeIcon(service.editorInfo)
         windowManager.showWindow()
     }
 

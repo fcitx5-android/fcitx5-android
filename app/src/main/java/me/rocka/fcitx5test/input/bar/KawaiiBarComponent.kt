@@ -1,7 +1,9 @@
 package me.rocka.fcitx5test.input.bar
 
+import android.os.Build
 import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
@@ -21,6 +23,7 @@ import org.mechdancer.dependency.Component
 import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.must
 import org.mechdancer.dependency.plusAssign
+import splitties.bitflags.hasFlag
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.lParams
@@ -113,6 +116,14 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             candidateUi.expandButton.visibility = View.VISIBLE
         else
             candidateUi.expandButton.visibility = View.INVISIBLE
+    }
+
+    fun updatePrivateModeIcon(editorInfo: EditorInfo?) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            idleUi.privateMode(
+                editorInfo?.imeOptions?.hasFlag(EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING) == true
+            )
+        }
     }
 
     private fun switchUi(ui: KawaiiBarUi, animation: Boolean = true) {
