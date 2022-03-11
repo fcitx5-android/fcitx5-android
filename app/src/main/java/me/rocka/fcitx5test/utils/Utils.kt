@@ -5,7 +5,6 @@ import android.content.Context
 import android.inputmethodservice.InputMethodService
 import android.net.Uri
 import android.provider.OpenableColumns
-import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
@@ -18,12 +17,6 @@ import androidx.viewpager2.widget.ViewPager2
 import com.sun.jna.Library
 import com.sun.jna.Native
 import me.rocka.fcitx5test.FcitxApplication
-import me.rocka.fcitx5test.core.Fcitx
-import me.rocka.fcitx5test.input.FcitxInputMethodService
-import me.rocka.fcitx5test.input.InputView
-import org.mechdancer.dependency.UniqueComponentWrapper
-import org.mechdancer.dependency.manager.DependencyManager
-import org.mechdancer.dependency.manager.mustWrapped
 
 fun View.allChildren(): List<View> {
     if (this !is ViewGroup)
@@ -71,6 +64,12 @@ fun View.oneShotGlobalLayoutListener(block: () -> Unit) = globalLayoutListener({
 fun <T : RecyclerView.ViewHolder> RecyclerView.Adapter<T>.onDataChanged(block: () -> Unit) =
     registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
         override fun onChanged() {
+            block()
+        }
+        override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+            block()
+        }
+        override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
             block()
         }
     })
