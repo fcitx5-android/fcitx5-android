@@ -20,14 +20,6 @@ import com.sun.jna.Native
 import me.rocka.fcitx5test.FcitxApplication
 import me.rocka.fcitx5test.data.Prefs
 
-fun View.allChildren(): List<View> {
-    if (this !is ViewGroup)
-        return listOf(this)
-    val result = mutableListOf<View>()
-    children.forEach { result.addAll(it.allChildren()) }
-    return result.toList()
-}
-
 val InputMethodService.inputConnection: InputConnection?
     get() = currentInputConnection
 

@@ -12,15 +12,4 @@
         android:layout_height="match_parent"
         app:layoutManager="LinearLayoutManager" />
 
-    <TextView
-        android:id="@+id/version_info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
-        android:text=""
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        tools:text="Build Git Hash: 000000\nBuild Date: 2021-11-23T00:12:34.567" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>
