@@ -1,6 +1,5 @@
 package me.rocka.fcitx5test.input.wm
 
-import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
@@ -16,6 +15,8 @@ import org.mechdancer.dependency.minusAssign
 import org.mechdancer.dependency.plusAssign
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.frameLayout
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
 import timber.log.Timber
 
 class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(),
@@ -60,13 +61,7 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
                 scope -= it
         }
         // add the new window to layout
-        view.add(
-            window.view,
-            ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        )
+        view.apply { add(window.view, lParams(matchParent, matchParent)) }
         Timber.i("Attach $window")
         // notify the window it was attached
         window.onAttached()

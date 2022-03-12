@@ -1,5 +1,6 @@
 package me.rocka.fcitx5test.input.keyboard
 
+import android.text.InputType
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.core.InputMethodEntry
 import me.rocka.fcitx5test.data.Prefs
@@ -76,6 +77,13 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
     }
 
     override fun onShow() {
+        switchLayout(service.editorInfo?.inputType?.let {
+            when (it and InputType.TYPE_MASK_CLASS) {
+                InputType.TYPE_CLASS_NUMBER -> NumberKeyboard.Name
+                InputType.TYPE_CLASS_PHONE -> NumberKeyboard.Name
+                else -> TextKeyboard.Name
+            }
+        } ?: TextKeyboard.Name)
         currentKeyboard.onAttach(service.editorInfo)
         currentKeyboard.onInputMethodChange(currentIme)
     }
