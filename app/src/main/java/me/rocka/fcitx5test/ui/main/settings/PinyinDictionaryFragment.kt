@@ -78,6 +78,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
             }
         ) {
             init {
+                addTouchCallback()
                 fab.setOnClickListener {
                     launcher.launch("*/*")
                 }
