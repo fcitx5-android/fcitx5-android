@@ -3,21 +3,26 @@ package me.rocka.fcitx5test.input.clipboard
 import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.text.TextUtils
 import me.rocka.fcitx5test.R
 import splitties.dimensions.dp
 import splitties.resources.styledColor
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.dsl.material.materialCardView
+import splitties.views.horizontalPadding
 import splitties.views.imageResource
-import splitties.views.padding
+import splitties.views.verticalPadding
 
 class ClipboardUi(override val ctx: Context) : Ui {
 
     val text = textView {
-        isSingleLine = false
-        textSize = 16f
-        padding = dp(8)
+        maxLines = 4
+        textSize = 14f
+        verticalPadding = dp(4)
+        horizontalPadding = dp(8)
+        ellipsize = TextUtils.TruncateAt.END
+        setTextColor(styledColor(android.R.attr.colorForeground))
     }
 
     val pin = imageView {
