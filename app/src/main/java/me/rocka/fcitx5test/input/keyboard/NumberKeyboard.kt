@@ -12,6 +12,8 @@ class NumberKeyboard(
 ) : BaseKeyboard(context, Layout) {
 
     companion object {
+        const val Name = "Number"
+
         val Layout: List<List<BaseKey>> = listOf(
             listOf(
                 KPKey("Add", "+", 0.15F),
@@ -35,17 +37,18 @@ class NumberKeyboard(
                 BackspaceKey()
             ),
             listOf(
-                LayoutSwitchKey(),
-                TextKey("#", 0F),
-                KPKey("0", 0F),
-                AltTextKey(".", "=", 0F),
+                LayoutSwitchKey("ABC", TextKeyboard.Name),
+                TextKey("#"),
+                LayoutSwitchKey("?123", NumSymKeyboard.Name, 0.13333F),
+                KPKey("0", 0.23334F),
+                TextKey("=", 0.13333F),
+                TextKey("."),
                 ReturnKey()
             ),
         )
     }
 
     val backspace: ImageButton by lazy { findViewById(R.id.button_backspace) }
-    val layoutSwitch: ImageButton by lazy { findViewById(R.id.button_layout_switch) }
     val space: Button by lazy { findViewById(R.id.button_mini_space) }
     val `return`: ImageButton by lazy { findViewById(R.id.button_return) }
 

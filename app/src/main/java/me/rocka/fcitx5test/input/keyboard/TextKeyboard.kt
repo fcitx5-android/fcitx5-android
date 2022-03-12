@@ -16,6 +16,8 @@ class TextKeyboard(
     enum class CapsState { None, Once, Lock }
 
     companion object {
+        const val Name = "Text"
+
         val Layout: List<List<BaseKey>> = listOf(
             listOf(
                 AltTextKey("Q", "1"),
@@ -52,7 +54,7 @@ class TextKeyboard(
                 BackspaceKey()
             ),
             listOf(
-                LayoutSwitchKey(),
+                LayoutSwitchKey("?123", ""),
                 QuickPhraseKey(),
                 LangSwitchKey(),
                 SpaceKey(),
@@ -64,7 +66,6 @@ class TextKeyboard(
 
     val caps: ImageButton by lazy { findViewById(R.id.button_caps) }
     val backspace: ImageButton by lazy { findViewById(R.id.button_backspace) }
-    val layoutSwitch: ImageButton by lazy { findViewById(R.id.button_layout_switch) }
     val quickphrase: ImageButton by lazy { findViewById(R.id.button_quickphrase) }
     val lang: ImageButton by lazy { findViewById(R.id.button_lang) }
     val space: Button by lazy { findViewById(R.id.button_space) }

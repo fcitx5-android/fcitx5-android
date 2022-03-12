@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="pref_first_run" translatable="false">first_run</string>
+    <string name="pref_last_symbol_layout" translatable="false">last_symbol_layout</string>
     <string name="pref_ignore_system_cursor" translatable="false">ignore_system_cursor</string>
     <string name="pref_hide_key_config" translatable="false">hide_key_config</string>
     <string name="pref_button_haptic_feedback" translatable="false">button_haptic_feedback</string>

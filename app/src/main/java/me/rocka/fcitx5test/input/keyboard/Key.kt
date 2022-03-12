@@ -133,8 +133,17 @@ open class MiniSpaceKey(
 }
 
 open class LayoutSwitchKey(
-    override val src: Int = R.drawable.ic_baseline_keyboard_24,
-    override val id: Int = R.id.button_layout_switch
-) : BaseKey(0.15f), IImageKey, IPressKey, IKeyId {
-    override fun onPress() = KeyAction.LayoutSwitchAction()
+    override val displayText: String,
+    val to: String,
+    override val percentWidth: Float = 0.15f,
+) : BaseKey(percentWidth), ITextKey, IPressKey {
+    override fun onPress() = KeyAction.LayoutSwitchAction(to)
+}
+
+open class ImageLayoutSwitchKey(
+    override val src: Int,
+    val to: String,
+    override val percentWidth: Float,
+) : BaseKey(percentWidth), IImageKey, IPressKey {
+    override fun onPress() = KeyAction.LayoutSwitchAction(to)
 }

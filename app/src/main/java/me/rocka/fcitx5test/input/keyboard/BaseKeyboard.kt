@@ -12,7 +12,6 @@ import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.core.InputMethodEntry
-import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.input.preedit.PreeditContent
 import me.rocka.fcitx5test.utils.hapticIfEnabled
 import splitties.bitflags.hasFlag
@@ -35,8 +34,6 @@ abstract class BaseKeyboard(
     }
 
     var keyActionListener: KeyActionListener? = null
-
-    private val buttonHapticFeedback by Prefs.getInstance().buttonHapticFeedback
 
     init {
         with(context) {

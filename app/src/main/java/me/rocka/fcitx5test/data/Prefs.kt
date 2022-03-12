@@ -111,6 +111,7 @@ class Prefs(private val sharedPreferences: SharedPreferences, resources: Resourc
         }
 
     val firstRun = preference(resources.getString(R.string.pref_first_run), true)
+    val lastSymbolLayout = preference(resources.getString(R.string.pref_last_symbol_layout), "NumSym")
     val ignoreSystemCursor =
         preference(resources.getString(R.string.pref_ignore_system_cursor), true)
     val hideKeyConfig = preference(resources.getString(R.string.pref_hide_key_config), true)

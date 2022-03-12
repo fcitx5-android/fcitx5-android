@@ -7,5 +7,4 @@
     <item name="button_space" type="id"/>
     <item name="button_punctuation" type="id"/>
     <item name="button_return" type="id"/>
-    <item name="button_layout_switch" type="id"/>
 </resources>

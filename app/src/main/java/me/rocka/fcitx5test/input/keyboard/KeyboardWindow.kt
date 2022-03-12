@@ -2,6 +2,7 @@ package me.rocka.fcitx5test.input.keyboard
 
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.core.InputMethodEntry
+import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.input.FcitxInputMethodService
 import me.rocka.fcitx5test.input.broadcast.InputBroadcastReceiver
 import me.rocka.fcitx5test.input.dependency.inputMethodService
@@ -20,7 +21,6 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
     private val service: FcitxInputMethodService by manager.inputMethodService()
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
 
-
     private var _currentIme: InputMethodEntry? = null
 
     val currentIme
@@ -30,13 +30,16 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
 
     private val keyboards: HashMap<String, BaseKeyboard> by lazy {
         hashMapOf(
-            "qwerty" to TextKeyboard(context),
-            "number" to NumberKeyboard(context)
+            TextKeyboard.Name to TextKeyboard(context),
+            NumberKeyboard.Name to NumberKeyboard(context),
+            NumSymKeyboard.Name to NumSymKeyboard(context),
+            SymbolKeyboard.Name to SymbolKeyboard(context)
         )
     }
-    private var currentKeyboardName = ""
+    private var currentKeyboardName = TextKeyboard.Name
+    private var lastSymbolType: String by Prefs.getInstance().lastSymbolLayout
 
-    val currentKeyboard: BaseKeyboard get() = keyboards.getValue(currentKeyboardName)
+    private val currentKeyboard: BaseKeyboard get() = keyboards.getValue(currentKeyboardName)
 
     fun switchLayout(to: String) {
         keyboards[currentKeyboardName]?.let {
@@ -44,15 +47,15 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
             it.onDetach()
             view.removeView(it)
         }
-        currentKeyboardName = to.ifEmpty {
-            when (currentKeyboardName) {
-                "qwerty" -> "number"
-                else -> "qwerty"
+        if (to.isEmpty()) {
+            currentKeyboardName = lastSymbolType
+        } else {
+            currentKeyboardName = to
+            if (to != TextKeyboard.Name && to != lastSymbolType) {
+                lastSymbolType = to
             }
         }
-        view.run {
-            add(currentKeyboard, lParams(matchParent, matchParent))
-        }
+        view.apply { add(currentKeyboard, lParams(matchParent, matchParent)) }
         currentKeyboard.keyActionListener = BaseKeyboard.KeyActionListener {
             if (it is KeyAction.LayoutSwitchAction)
                 switchLayout(it.act)
@@ -72,14 +75,13 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
         currentKeyboard.onPreeditChange(service.editorInfo, content)
     }
 
-
     override fun onShow() {
         currentKeyboard.onAttach(service.editorInfo)
         currentKeyboard.onInputMethodChange(currentIme)
     }
 
     override fun onAttached() {
-        switchLayout("qwerty")
+        switchLayout(currentKeyboardName)
     }
 
     override fun onDetached() {
