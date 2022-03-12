@@ -62,7 +62,7 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
         clipboardManager
             .primaryClip
             ?.let { ClipboardEntry.fromClipData(it) }
-            ?.takeIf { UTF8Utils.instance.validateUTF8(it.text) }
+            ?.takeIf { it.text.isNotBlank() && UTF8Utils.instance.validateUTF8(it.text) }
             ?.let { e ->
                 launch {
                     val all = clbDao.getAll()
