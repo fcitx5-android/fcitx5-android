@@ -3,7 +3,6 @@ package me.rocka.fcitx5test.input.keyboard
 import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
-import android.view.HapticFeedbackConstants.*
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -15,6 +14,7 @@ import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.core.InputMethodEntry
 import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.input.preedit.PreeditContent
+import me.rocka.fcitx5test.utils.hapticIfEnabled
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
 import splitties.resources.styledColor
@@ -118,13 +118,13 @@ abstract class BaseKeyboard(
             }
             setupOnGestureListener(object : MyOnGestureListener() {
                 override fun onDown(e: MotionEvent?): Boolean {
-                    haptic()
+                    hapticIfEnabled()
                     return false
                 }
 
                 override fun onDoubleTap() = when (btn) {
                     is IDoublePressKey -> {
-                        haptic()
+                        hapticIfEnabled()
                         onAction(btn.onDoublePress())
                         true
                     }
@@ -155,13 +155,6 @@ abstract class BaseKeyboard(
         }
     }
 
-    fun haptic() {
-        if (buttonHapticFeedback)
-            performHapticFeedback(
-                KEYBOARD_TAP,
-                FLAG_IGNORE_GLOBAL_SETTING or FLAG_IGNORE_VIEW_SETTING
-            )
-    }
 
     @DrawableRes
     protected fun drawableForReturn(info: EditorInfo?): Int {
