@@ -38,7 +38,7 @@ abstract class BaseCandidateViewAdapter :
             itemView.setOnClickListener { onSelect(this.idx + offset) }
             itemView.setOnTouchListener { v, event ->
                 when (event.action) {
-                    MotionEvent.ACTION_DOWN -> onTouchDown()
+                    MotionEvent.ACTION_DOWN -> onTouchDown(v)
                     MotionEvent.ACTION_BUTTON_PRESS -> v.performClick()
                 }
                 false
@@ -55,7 +55,7 @@ abstract class BaseCandidateViewAdapter :
 
     abstract fun createTextView(parent: ViewGroup): TextView
 
-    abstract fun onTouchDown()
+    abstract fun onTouchDown(view: View)
 
     abstract fun onSelect(idx: Int)
 }

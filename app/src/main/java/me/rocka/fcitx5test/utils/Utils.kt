@@ -5,6 +5,7 @@ import android.content.Context
 import android.inputmethodservice.InputMethodService
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
@@ -17,6 +18,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.sun.jna.Library
 import com.sun.jna.Native
 import me.rocka.fcitx5test.FcitxApplication
+import me.rocka.fcitx5test.data.Prefs
 
 fun View.allChildren(): List<View> {
     if (this !is ViewGroup)
@@ -66,10 +68,20 @@ fun <T : RecyclerView.ViewHolder> RecyclerView.Adapter<T>.onDataChanged(block: (
         override fun onChanged() {
             block()
         }
+
         override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
             block()
         }
+
         override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
             block()
         }
     })
+
+fun View.hapticIfEnabled() {
+    if (Prefs.getInstance().buttonHapticFeedback.value)
+        performHapticFeedback(
+            HapticFeedbackConstants.KEYBOARD_TAP,
+            HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING or HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
+        )
+}
