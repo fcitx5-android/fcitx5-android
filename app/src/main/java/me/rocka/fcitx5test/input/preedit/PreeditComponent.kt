@@ -41,7 +41,7 @@ class PreeditComponent : UniqueComponent<PreeditComponent>(), Dependent,
         preeditPopup.dismiss()
     }
 
-    fun updatePreedit(aux: FcitxEvent.InputPanelAuxEvent) {
+    fun updateAux(aux: FcitxEvent.InputPanelAuxEvent) {
         cachedPreedit.aux = aux.data
         updatePreedit()
     }
@@ -53,6 +53,7 @@ class PreeditComponent : UniqueComponent<PreeditComponent>(), Dependent,
 
     private fun updatePreedit() {
         preeditUi.update(cachedPreedit)
+        broadcaster.onPreeditUpdate(cachedPreedit)
         preeditPopup.run {
             if (!preeditUi.visible) {
                 dismiss()
@@ -69,7 +70,6 @@ class PreeditComponent : UniqueComponent<PreeditComponent>(), Dependent,
                 showAtLocation(inputView, Gravity.NO_GRAVITY, 0, -height)
             }
         }
-        broadcaster.onPreeditUpdate(cachedPreedit)
     }
 
 }

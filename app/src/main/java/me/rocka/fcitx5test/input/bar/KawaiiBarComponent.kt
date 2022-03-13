@@ -19,6 +19,7 @@ import me.rocka.fcitx5test.input.clipboard.ClipboardWindow
 import me.rocka.fcitx5test.input.dependency.UniqueViewComponent
 import me.rocka.fcitx5test.input.dependency.context
 import me.rocka.fcitx5test.input.dependency.inputMethodService
+import me.rocka.fcitx5test.input.preedit.PreeditContent
 import me.rocka.fcitx5test.input.wm.InputWindow
 import me.rocka.fcitx5test.input.wm.InputWindowManager
 import me.rocka.fcitx5test.utils.AppUtil
@@ -85,9 +86,9 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         eventStateMachine<KawaiiBarState, KawaiiBarTransitionEvent>(Idle) {
 
             from(Idle) transitTo Title on ExtendedWindowAttached
-            from(Idle) transitTo Candidate on CandidatesUpdatedNonEmpty
+            from(Idle) transitTo Candidate on PreeditUpdatedNonEmpty
             from(Title) transitTo Idle on WindowDetached
-            from(Candidate) transitTo Idle on CandidatesUpdatedEmpty
+            from(Candidate) transitTo Idle on PreeditUpdatedEmpty
 
             onNewState {
                 when (it) {
@@ -196,13 +197,18 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         this.scope = scope
     }
 
-    override fun onCandidateUpdates(data: Array<String>) {
+
+    override fun onPreeditUpdate(content: PreeditContent) {
         barStateMachine.push(
-            if (data.isEmpty())
-                CandidatesUpdatedEmpty
+            if (content.preedit.preedit.isEmpty() && content.preedit.clientPreedit.isEmpty())
+                PreeditUpdatedEmpty
             else
-                CandidatesUpdatedNonEmpty
+                PreeditUpdatedNonEmpty
         )
+    }
+
+    override fun onCandidateUpdates(data: Array<String>) {
+
     }
 
     override fun onWindowAttached(window: InputWindow) {
