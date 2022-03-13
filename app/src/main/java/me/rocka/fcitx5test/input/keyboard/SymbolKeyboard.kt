@@ -23,8 +23,8 @@ class SymbolKeyboard(
                 TextKey("π"),
                 TextKey("÷"),
                 TextKey("×"),
-                TextKey("9"),
-                TextKey("0")
+                TextKey("¶"),
+                TextKey("∆")
             ),
             listOf(
                 TextKey("¥"),
