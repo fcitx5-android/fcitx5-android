@@ -125,7 +125,7 @@ class Prefs(private val sharedPreferences: SharedPreferences, resources: Resourc
         ExpandedCandidateWindow.Style
     )
     val inputWindowHeightPercent =
-        preference(resources.getString(R.string.pref_input_window_height_percent), 30)
+        preference(resources.getString(R.string.pref_keyboard_height_percent), 30)
 
     companion object {
         private var instance: Prefs? = null

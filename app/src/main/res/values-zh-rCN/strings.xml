@@ -38,7 +38,7 @@
     <string name="synced">已同步！</string>
     <string name="reloading">重新加载中</string>
     <string name="loading">加载中</string>
-    <string name="input_window_height">输入窗口高度</string>
+    <string name="keyboard_height">键盘高度</string>
     <string name="clipboard">剪切板</string>
     <string name="delete">删除</string>
     <string name="unpin">取消置顶</string>
@@ -53,7 +53,7 @@
     <string name="expanded_candidate_style_flexbox">弹性盒</string>
     <string name="expanded_candidate_style_grid">表格</string>
     <string name="expanded_candidate_style">展开候选词样式</string>
-    <string name="clipboard_enable">启用剪切板监听</string>
+    <string name="clipboard_enable">剪切板监听</string>
     <string name="clipboard_limit">剪切板历史限制</string>
-    <string name="input_window">输入窗口</string>
+    <string name="keyboard">键盘</string>
 </resources>

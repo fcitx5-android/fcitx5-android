@@ -16,46 +16,54 @@
             android:title="@string/hide_key_config"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
-        <SwitchPreference
-            android:defaultValue="true"
-            android:key="@string/pref_button_haptic_feedback"
-            android:title="@string/button_haptic_feedback"
-            app:iconSpaceReserved="false"
-            app:singleLineTitle="false" />
-        <SwitchPreference
-            android:defaultValue="true"
-            android:key="@string/pref_clipboard_enable"
-            android:title="@string/clipboard_enable"
-            app:iconSpaceReserved="false"
-            app:singleLineTitle="false" />
-        <me.rocka.fcitx5test.ui.common.DialogSeekBarPreference
-            android:defaultValue="5"
-            android:key="@string/pref_clipboard_limit"
-            android:title="@string/clipboard_limit"
-            app:iconSpaceReserved="false"
-            app:max="50"
-            app:min="1"
-            app:singleLineTitle="false"
-            app:useSimpleSummaryProvider="true" />
-        <ListPreference
-            android:defaultValue="Grid"
-            android:entries="@array/expandable_candidate_style"
-            android:entryValues="@array/expandable_candidate_style_values"
-            android:key="@string/pref_expanded_candidate_style"
-            android:summary="%s"
-            android:title="@string/expanded_candidate_style"
-            app:iconSpaceReserved="false"
-            app:singleLineTitle="false"
-            app:useSimpleSummaryProvider="true" />
-        <me.rocka.fcitx5test.ui.common.DialogSeekBarPreference
-            android:defaultValue="30"
-            android:key="@string/pref_input_window_height_percent"
-            android:title="@string/input_window_height"
-            app:iconSpaceReserved="false"
-            app:max="70"
-            app:min="30"
-            app:singleLineTitle="false"
-            app:unit="%"
-            app:useSimpleSummaryProvider="true" />
+        <PreferenceCategory
+            android:title="@string/keyboard"
+            app:iconSpaceReserved="false">
+            <SwitchPreference
+                android:defaultValue="true"
+                android:key="@string/pref_button_haptic_feedback"
+                android:title="@string/button_haptic_feedback"
+                app:iconSpaceReserved="false"
+                app:singleLineTitle="false" />
+            <ListPreference
+                android:defaultValue="Grid"
+                android:entries="@array/expandable_candidate_style"
+                android:entryValues="@array/expandable_candidate_style_values"
+                android:key="@string/pref_expanded_candidate_style"
+                android:summary="%s"
+                android:title="@string/expanded_candidate_style"
+                app:iconSpaceReserved="false"
+                app:singleLineTitle="false"
+                app:useSimpleSummaryProvider="true" />
+            <me.rocka.fcitx5test.ui.common.DialogSeekBarPreference
+                android:defaultValue="30"
+                android:key="@string/pref_keyboard_height_percent"
+                android:title="@string/keyboard_height"
+                app:iconSpaceReserved="false"
+                app:max="70"
+                app:min="30"
+                app:singleLineTitle="false"
+                app:unit="%"
+                app:useSimpleSummaryProvider="true" />
+        </PreferenceCategory>
+        <PreferenceCategory
+            android:title="@string/clipboard"
+            app:iconSpaceReserved="false">
+            <SwitchPreference
+                android:defaultValue="true"
+                android:key="@string/pref_clipboard_enable"
+                android:title="@string/clipboard_enable"
+                app:iconSpaceReserved="false"
+                app:singleLineTitle="false" />
+            <me.rocka.fcitx5test.ui.common.DialogSeekBarPreference
+                android:defaultValue="5"
+                android:key="@string/pref_clipboard_limit"
+                android:title="@string/clipboard_limit"
+                app:iconSpaceReserved="false"
+                app:max="50"
+                app:min="1"
+                app:singleLineTitle="false"
+                app:useSimpleSummaryProvider="true" />
+        </PreferenceCategory>
     </PreferenceCategory>
 </PreferenceScreen>

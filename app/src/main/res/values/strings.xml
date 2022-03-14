@@ -38,7 +38,7 @@
     <string name="import_">Import</string>
     <string name="synced">Synced!</string>
     <string name="loading">Loading</string>
-    <string name="clipboard_enable">Enable Clipboard Listening</string>
+    <string name="clipboard_enable">Clipboard Listening</string>
     <string name="clipboard_limit">Clipboard History Limit</string>
     <string name="expanded_candidate_style">Expanded Candidate Style</string>
     <string name="expanded_candidate_style_grid">Grid</string>
@@ -54,6 +54,6 @@
     <string name="unpin">Unpin</string>
     <string name="delete">Delete</string>
     <string name="clipboard">Clipboard</string>
-    <string name="input_window_height">Input window height</string>
-    <string name="input_window">Input window</string>
+    <string name="keyboard_height">Keyboard height</string>
+    <string name="keyboard">Keyboard</string>
 </resources>
