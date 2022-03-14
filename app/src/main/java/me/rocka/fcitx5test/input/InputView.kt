@@ -111,7 +111,7 @@ class InputView(
     }
 
     fun onShow() {
-        kawaiiBar.updatePrivateModeIcon(service.editorInfo)
+        kawaiiBar.onShow()
         windowManager.switchToKeyboardWindow()
     }
 

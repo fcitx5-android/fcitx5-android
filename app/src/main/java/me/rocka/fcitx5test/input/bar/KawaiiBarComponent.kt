@@ -5,9 +5,12 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
+import androidx.lifecycle.lifecycleScope
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
+import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
+import me.rocka.fcitx5test.data.clipboard.ClipboardManager
 import me.rocka.fcitx5test.input.bar.ExpandButtonState.*
 import me.rocka.fcitx5test.input.bar.ExpandButtonTransitionEvent.*
 import me.rocka.fcitx5test.input.bar.KawaiiBarState.*
@@ -50,22 +53,39 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         HorizontalCandidateComponent()
     }
 
-    private val idleUi by lazy {
+    private val onClipboardUpdateListener by lazy {
+        ClipboardManager.OnClipboardUpdateListener {
+            service.lifecycleScope.launch {
+                idleUi.updateClipboard(it)
+            }
+        }
+    }
+
+    init {
+        ClipboardManager.addOnUpdateListener(onClipboardUpdateListener)
+    }
+
+    private val idleUi: KawaiiBarUi.Idle by lazy {
         KawaiiBarUi.Idle(context).also {
+            it.expandButton.setOnClickListener { _ ->
+                it.switchMode()
+            }
             it.undoButton.setOnClickListener {
                 service.sendCombinationKeyEvents(KeyEvent.KEYCODE_Z, ctrl = true)
             }
             it.redoButton.setOnClickListener {
                 service.sendCombinationKeyEvents(KeyEvent.KEYCODE_Z, ctrl = true, shift = true)
             }
-            it.pasteButton.setOnClickListener {
-                service.inputConnection?.performContextMenuAction(android.R.id.paste)
-            }
+            it.cursorMoveButton.setOnClickListener { }
             it.clipboardButton.setOnClickListener {
                 windowManager.attachWindow(ClipboardWindow())
             }
             it.settingsButton.setOnClickListener {
                 AppUtil.launchMain(context)
+            }
+            it.clipboardItem.setOnClickListener {
+                service.inputConnection?.performContextMenuAction(android.R.id.paste)
+                idleUi.updateClipboard("")
             }
             it.hideKeyboardButton.setOnClickListener {
                 service.requestHideSelf(0)
@@ -84,7 +104,6 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     val barStateMachine =
         eventStateMachine<KawaiiBarState, KawaiiBarTransitionEvent>(Idle) {
-
             from(Idle) transitTo Title on ExtendedWindowAttached
             from(Idle) transitTo Candidate on PreeditUpdatedNonEmpty
             from(Title) transitTo Idle on WindowDetached
@@ -131,7 +150,6 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         TransitionManager.beginDelayedTransition(view, transition)
     }
 
-
     // set expand candidate button to create expand candidate
     private fun setExpandButtonToAttach() {
         candidateUi.expandButton.setOnClickListener {
@@ -146,8 +164,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         candidateUi.expandButton.setOnClickListener {
             windowManager.switchToKeyboardWindow()
         }
-        candidateUi.expandButton.imageResource =
-            R.drawable.ic_baseline_expand_less_24
+        candidateUi.expandButton.imageResource = R.drawable.ic_baseline_expand_less_24
     }
 
     // should be used with setExpandButtonToAttach or setExpandButtonToDetach
@@ -158,10 +175,10 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             candidateUi.expandButton.visibility = View.INVISIBLE
     }
 
-    fun updatePrivateModeIcon(editorInfo: EditorInfo?) {
+    fun onShow() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             idleUi.privateMode(
-                editorInfo?.imeOptions?.hasFlag(EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING) == true
+                service.editorInfo?.imeOptions?.hasFlag(EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING) == true
             )
         }
     }
@@ -179,7 +196,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             prepareAnimation()
         }
         view.run {
-            removeAllViews()
+            removeView(currentUi.root)
             add(ui.root, lParams(matchParent, matchParent))
         }
         currentUi = ui
@@ -192,11 +209,9 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         }
     }
 
-
     override fun onScopeSetupFinished(scope: DynamicScope) {
         this.scope = scope
     }
-
 
     override fun onPreeditUpdate(content: PreeditContent) {
         barStateMachine.push(

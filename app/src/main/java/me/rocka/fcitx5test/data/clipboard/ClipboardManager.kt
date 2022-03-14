@@ -12,8 +12,8 @@ import me.rocka.fcitx5test.data.clipboard.db.ClipboardDao
 import me.rocka.fcitx5test.data.clipboard.db.ClipboardDatabase
 import me.rocka.fcitx5test.data.clipboard.db.ClipboardEntry
 import me.rocka.fcitx5test.utils.UTF8Utils
+import me.rocka.fcitx5test.utils.WeakHashSet
 import splitties.systemservices.clipboardManager
-import java.util.concurrent.ConcurrentLinkedQueue
 
 object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
@@ -24,7 +24,7 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
         suspend fun onUpdate(text: String)
     }
 
-    private val onUpdateListeners = ConcurrentLinkedQueue<OnClipboardUpdateListener>()
+    private val onUpdateListeners = WeakHashSet<OnClipboardUpdateListener>()
 
     fun addOnUpdateListener(listener: OnClipboardUpdateListener) {
         onUpdateListeners.add(listener)
