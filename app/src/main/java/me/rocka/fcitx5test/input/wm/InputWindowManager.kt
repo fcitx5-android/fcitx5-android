@@ -2,8 +2,10 @@ package me.rocka.fcitx5test.input.wm
 
 import android.view.View
 import android.widget.FrameLayout
+import androidx.transition.Fade
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
+import androidx.transition.TransitionSet
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.input.broadcast.InputBroadcastReceiver
 import me.rocka.fcitx5test.input.broadcast.InputBroadcaster
@@ -31,13 +33,18 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
     var currentWindow: InputWindow? = null
         private set
 
-    private fun prepareAnimation(remove: View?, add: View) {
+    private fun prepareAnimation(remove: View, add: View) {
         val slide = Slide().apply {
             addTarget(add)
-            remove?.let { removeTarget(it) }
-            duration = 100
         }
-        TransitionManager.beginDelayedTransition(view, slide)
+        val fade = Fade().apply {
+            addTarget(remove)
+        }
+        TransitionManager.beginDelayedTransition(view, TransitionSet().apply {
+            addTransition(slide)
+            addTransition(fade)
+            duration = 100
+        })
     }
 
     /**
@@ -48,8 +55,8 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
             throw IllegalArgumentException("$window is already attached")
         // add the new window to scope
         scope += window
-        prepareAnimation(currentWindow?.view, window.view)
         currentWindow?.let {
+            prepareAnimation(it.view, window.view)
             // notify the window that it will be detached
             it.onDetached()
             // remove the old window from layout
