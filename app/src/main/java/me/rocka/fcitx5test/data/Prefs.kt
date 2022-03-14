@@ -120,7 +120,7 @@ class Prefs(private val sharedPreferences: SharedPreferences, resources: Resourc
     val clipboard = preference(resources.getString(R.string.pref_clipboard_enable), true)
     val clipboardHistoryLimit = preference(resources.getString(R.string.pref_clipboard_limit), 5)
     val expandableCandidateStyle = stringLikePreference(
-        resources.getString(R.string.pref_expandable_candidate_style),
+        resources.getString(R.string.pref_expanded_candidate_style),
         ExpandedCandidateWindow.Style.Grid,
         ExpandedCandidateWindow.Style
     )

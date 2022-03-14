@@ -34,19 +34,18 @@
     <string name="import_error">Import Error</string>
     <string name="dict_already_exists">Dictionary already exists</string>
     <string name="invalid_dict">Invalid type of dictionary</string>
-    <string name="whether_import_dict">Do you want to import this dictionary?</string>
+    <string name="whether_import_dict">Would you like to import this dictionary?</string>
     <string name="import_">Import</string>
     <string name="synced">Synced!</string>
     <string name="loading">Loading</string>
     <string name="clipboard_enable">Enable Clipboard Listening</string>
     <string name="clipboard_limit">Clipboard History Limit</string>
-    <string name="expandable_candidate_style">Expandable Candidate Style</string>
-    <string name="expandable_candidate_style_grid">Grid</string>
-    <string name="expandable_candidate_style_flexbox">Flexbox</string>
+    <string name="expanded_candidate_style">Expanded Candidate Style</string>
+    <string name="expanded_candidate_style_grid">Grid</string>
+    <string name="expanded_candidate_style_flexbox">Flexbox</string>
     <string name="no_more_input_methods">No more input methods to switch</string>
-    <string name="add_more_input_methods">Do you want to add more input methods?</string>
+    <string name="add_more_input_methods">Would you like to add more input methods?</string>
     <string name="about">About</string>
-    <string name="os_licenses">Open source licenses</string>
     <string name="current_version">Current version</string>
     <string name="real_time_logs">Real-time logs</string>
     <string name="developer">Developer</string>
@@ -56,4 +55,5 @@
     <string name="delete">Delete</string>
     <string name="clipboard">Clipboard</string>
     <string name="input_window_height">Input window height</string>
+    <string name="input_window">Input window</string>
 </resources>

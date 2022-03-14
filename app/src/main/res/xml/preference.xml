@@ -40,10 +40,10 @@
         <ListPreference
             android:defaultValue="Grid"
             android:entries="@array/expandable_candidate_style"
-            android:entryValues="@array/expandable_candidate_style"
-            android:key="@string/pref_expandable_candidate_style"
+            android:entryValues="@array/expandable_candidate_style_values"
+            android:key="@string/pref_expanded_candidate_style"
             android:summary="%s"
-            android:title="@string/expandable_candidate_style"
+            android:title="@string/expanded_candidate_style"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false"
             app:useSimpleSummaryProvider="true" />
