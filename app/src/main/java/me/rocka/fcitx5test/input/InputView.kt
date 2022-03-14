@@ -112,7 +112,7 @@ class InputView(
 
     fun onShow() {
         kawaiiBar.updatePrivateModeIcon(service.editorInfo)
-        windowManager.showWindow()
+        windowManager.switchToKeyboardWindow()
     }
 
     fun handleFcitxEvent(it: FcitxEvent<*>) {

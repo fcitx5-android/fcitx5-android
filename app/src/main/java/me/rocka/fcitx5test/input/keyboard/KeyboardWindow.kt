@@ -76,7 +76,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
         currentKeyboard.onPreeditChange(service.editorInfo, content)
     }
 
-    override fun onShow() {
+    override fun onAttached() {
         switchLayout(service.editorInfo?.inputType?.let {
             when (it and InputType.TYPE_MASK_CLASS) {
                 InputType.TYPE_CLASS_NUMBER -> NumberKeyboard.Name
@@ -84,12 +84,6 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
                 else -> TextKeyboard.Name
             }
         } ?: TextKeyboard.Name)
-        currentKeyboard.onAttach(service.editorInfo)
-        currentKeyboard.onInputMethodChange(currentIme)
-    }
-
-    override fun onAttached() {
-        switchLayout(currentKeyboardName)
     }
 
     override fun onDetached() {

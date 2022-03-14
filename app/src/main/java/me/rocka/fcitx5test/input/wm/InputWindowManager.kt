@@ -1,5 +1,6 @@
 package me.rocka.fcitx5test.input.wm
 
+import android.view.View
 import android.widget.FrameLayout
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
@@ -30,28 +31,29 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
     var currentWindow: InputWindow? = null
         private set
 
-    private fun prepareAnimation() {
-        val slide = Slide()
-        slide.duration = 100
+    private fun prepareAnimation(remove: View?, add: View) {
+        val slide = Slide().apply {
+            addTarget(add)
+            remove?.let { removeTarget(it) }
+            duration = 100
+        }
         TransitionManager.beginDelayedTransition(view, slide)
     }
 
     /**
      * Attach a new window, removing the old one
      */
-    fun attachWindow(window: InputWindow, animation: Boolean = true) {
-        if (window.isAttached)
+    fun attachWindow(window: InputWindow) {
+        if (window == currentWindow)
             throw IllegalArgumentException("$window is already attached")
         // add the new window to scope
         scope += window
-        if (animation) {
-            prepareAnimation()
-        }
+        prepareAnimation(currentWindow?.view, window.view)
         currentWindow?.let {
             // notify the window that it will be detached
-            currentWindow?.onDetached()
+            it.onDetached()
             // remove the old window from layout
-            view.removeAllViews()
+            view.removeView(it.view)
             // broadcast the old window was removed from layout
             broadcaster.onWindowDetached(it)
             Timber.i("Detach $it")
@@ -73,17 +75,12 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
     /**
      * Remove current window and attach keyboard window
      */
-    fun switchToKeyboardWindow(animation: Boolean = true) {
+    fun switchToKeyboardWindow() {
         if (currentWindow is KeyboardWindow)
             return
-        attachWindow(keyboardWindow, animation)
+        attachWindow(keyboardWindow)
     }
 
-    fun showWindow() {
-        if (currentWindow == null)
-            attachWindow(keyboardWindow, false)
-        currentWindow?.onShow()
-    }
 
     override val view: FrameLayout by lazy { context.frameLayout(R.id.input_window) }
 

@@ -20,11 +20,6 @@ sealed class InputWindow : Dependent {
 
     abstract fun onDetached()
 
-    var isAttached = false
-        private set
-
-    open fun onShow() {}
-
     final override fun handle(scopeEvent: ScopeEvent) = manager.handle(scopeEvent)
 
     abstract class SimpleInputWindow<T : SimpleInputWindow<T>> : IUniqueComponent<T>,
