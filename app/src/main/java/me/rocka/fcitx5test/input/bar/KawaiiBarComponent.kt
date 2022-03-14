@@ -7,7 +7,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import android.widget.ViewAnimator
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
@@ -51,18 +50,17 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     private val clipboardItemTimeout by Prefs.getInstance().clipboardItemTimeout
 
-    private var clipboardItemTimeoutJob: Job? = null
-
     private val onClipboardUpdateListener by lazy {
         ClipboardManager.OnClipboardUpdateListener {
             service.lifecycleScope.launch {
                 idleUi.setClipboardItemText(it)
                 idleUiStateMachine.push(ClipboardUpdatedNonEmpty)
-                if (clipboardItemTimeoutJob == null)
-                    clipboardItemTimeoutJob = launch {
-                        delay(clipboardItemTimeout.seconds)
+                launch {
+                    val current = ++timeoutJobId
+                    delay(clipboardItemTimeout.seconds)
+                    if (timeoutJobId == current)
                         idleUiStateMachine.push(Timeout)
-                    }
+                }
             }
         }
     }
@@ -161,10 +159,6 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
             onNewState {
                 idleUi.switchUiByState(it)
-                if (it != Clipboard) {
-                    clipboardItemTimeoutJob?.cancel()
-                    clipboardItemTimeoutJob = null
-                }
             }
         }
 
@@ -252,4 +246,8 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         barStateMachine.push(WindowDetached)
     }
 
+    companion object {
+        @Volatile
+        private var timeoutJobId = 0
+    }
 }
