@@ -13,7 +13,7 @@ import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.data.clipboard.db.ClipboardEntry
 import kotlin.collections.set
 
-abstract class ClipboardAdapter() :
+abstract class ClipboardAdapter :
     RecyclerView.Adapter<ClipboardAdapter.ViewHolder>() {
     private val _entries = mutableListOf<ClipboardEntry>()
 

@@ -2,6 +2,7 @@ package me.rocka.fcitx5test.data
 
 import android.content.SharedPreferences
 import android.content.res.Resources
+import androidx.annotation.StringRes
 import androidx.core.content.edit
 import me.rocka.fcitx5test.R
 import me.rocka.fcitx5test.input.candidates.ExpandedCandidateWindow
@@ -11,7 +12,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.cast
 
-class Prefs(private val sharedPreferences: SharedPreferences, resources: Resources) {
+class Prefs(private val sharedPreferences: SharedPreferences, private val resources: Resources) {
 
     private val managedPreferences = mutableMapOf<String, ManagedPreference<*>>()
 
@@ -98,6 +99,9 @@ class Prefs(private val sharedPreferences: SharedPreferences, resources: Resourc
                 managedPreferences[key] = it
             }
 
+    private inline fun <reified T : Any> preference(@StringRes key: Int, defaultValue: T) =
+        preference(resources.getString(key), defaultValue)
+
 
     private inline fun <reified T : Any> stringLikePreference(
         key: String,
@@ -110,22 +114,26 @@ class Prefs(private val sharedPreferences: SharedPreferences, resources: Resourc
             managedPreferences[key] = it
         }
 
+    private inline fun <reified T : Any> stringLikePreference(
+        @StringRes key: Int, defaultValue: T,
+        codec: StringLikeCodec<T>
+    ) = stringLikePreference(resources.getString(key), defaultValue, codec)
+
+
     val firstRun = preference(resources.getString(R.string.pref_first_run), true)
-    val lastSymbolLayout = preference(resources.getString(R.string.pref_last_symbol_layout), "NumSym")
-    val ignoreSystemCursor =
-        preference(resources.getString(R.string.pref_ignore_system_cursor), true)
-    val hideKeyConfig = preference(resources.getString(R.string.pref_hide_key_config), true)
-    val buttonHapticFeedback =
-        preference(resources.getString(R.string.pref_button_haptic_feedback), true)
-    val clipboard = preference(resources.getString(R.string.pref_clipboard_enable), true)
-    val clipboardHistoryLimit = preference(resources.getString(R.string.pref_clipboard_limit), 5)
+    val lastSymbolLayout = preference(R.string.pref_last_symbol_layout, "NumSym")
+    val ignoreSystemCursor = preference(R.string.pref_ignore_system_cursor, true)
+    val hideKeyConfig = preference(R.string.pref_hide_key_config, true)
+    val buttonHapticFeedback = preference(R.string.pref_button_haptic_feedback, true)
+    val clipboardListening = preference(R.string.pref_clipboard_enable, true)
+    val clipboardHistoryLimit = preference(R.string.pref_clipboard_limit, 5)
     val expandableCandidateStyle = stringLikePreference(
-        resources.getString(R.string.pref_expanded_candidate_style),
+        R.string.pref_expanded_candidate_style,
         ExpandedCandidateWindow.Style.Grid,
         ExpandedCandidateWindow.Style
     )
-    val inputWindowHeightPercent =
-        preference(resources.getString(R.string.pref_keyboard_height_percent), 30)
+    val keyboardHeightPercent = preference(R.string.pref_keyboard_height_percent, 30)
+    val clipboardItemTimeout = preference(R.string.pref_clipboard_item_timeout, 10)
 
     companion object {
         private var instance: Prefs? = null

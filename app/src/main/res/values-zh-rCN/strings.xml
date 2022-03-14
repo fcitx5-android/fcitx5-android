@@ -56,4 +56,5 @@
     <string name="clipboard_enable">剪切板监听</string>
     <string name="clipboard_limit">剪切板历史限制</string>
     <string name="keyboard">键盘</string>
+    <string name="clipboard_item_timeout">剪切板项超时时间</string>
 </resources>

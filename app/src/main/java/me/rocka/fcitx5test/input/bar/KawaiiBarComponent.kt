@@ -5,14 +5,18 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
+import android.widget.ViewAnimator
 import androidx.lifecycle.lifecycleScope
-import androidx.transition.AutoTransition
-import androidx.transition.TransitionManager
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.rocka.fcitx5test.R
+import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.data.clipboard.ClipboardManager
 import me.rocka.fcitx5test.input.bar.ExpandButtonState.*
 import me.rocka.fcitx5test.input.bar.ExpandButtonTransitionEvent.*
+import me.rocka.fcitx5test.input.bar.IdleUiState.*
+import me.rocka.fcitx5test.input.bar.IdleUiTransitionEvent.*
 import me.rocka.fcitx5test.input.bar.KawaiiBarState.*
 import me.rocka.fcitx5test.input.bar.KawaiiBarTransitionEvent.*
 import me.rocka.fcitx5test.input.broadcast.InputBroadcastReceiver
@@ -34,11 +38,11 @@ import org.mechdancer.dependency.manager.must
 import org.mechdancer.dependency.plusAssign
 import splitties.bitflags.hasFlag
 import splitties.views.dsl.core.add
-import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import splitties.views.imageResource
 import timber.log.Timber
+import kotlin.time.Duration.Companion.seconds
 
 class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(),
     InputBroadcastReceiver {
@@ -49,14 +53,24 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     private lateinit var scope: DynamicScope
 
+    private val clipboardItemTimeout by Prefs.getInstance().clipboardItemTimeout
+
     private val horizontalCandidate: HorizontalCandidateComponent by lazyComponent {
         HorizontalCandidateComponent()
     }
 
+    private var clipboardItemTimeoutJob: Job? = null
+
     private val onClipboardUpdateListener by lazy {
         ClipboardManager.OnClipboardUpdateListener {
             service.lifecycleScope.launch {
-                idleUi.updateClipboard(it)
+                idleUi.setClipboardItemText(it)
+                idleUiStateMachine.push(ClipboardUpdatedNonEmpty)
+                if (clipboardItemTimeoutJob == null)
+                    clipboardItemTimeoutJob = launch {
+                        delay(clipboardItemTimeout.seconds)
+                        idleUiStateMachine.push(Timeout)
+                    }
             }
         }
     }
@@ -66,9 +80,14 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     }
 
     private val idleUi: KawaiiBarUi.Idle by lazy {
-        KawaiiBarUi.Idle(context).also {
-            it.expandButton.setOnClickListener { _ ->
-                it.switchMode()
+        KawaiiBarUi.Idle(context) { idleUiStateMachine.currentState }.also {
+            it.menuButton.setOnClickListener {
+                idleUiStateMachine.push(
+                    if (idleUi.getClipboardItemText().isEmpty())
+                        MenuButtonClickedWithClipboardEmpty
+                    else
+                        MenuButtonClickedWithClipboardNonEmpty
+                )
             }
             it.undoButton.setOnClickListener {
                 service.sendCombinationKeyEvents(KeyEvent.KEYCODE_Z, ctrl = true)
@@ -85,7 +104,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             }
             it.clipboardItem.setOnClickListener {
                 service.inputConnection?.performContextMenuAction(android.R.id.paste)
-                idleUi.updateClipboard("")
+                idleUiStateMachine.push(Pasted)
             }
             it.hideKeyboardButton.setOnClickListener {
                 service.requestHideSelf(0)
@@ -99,9 +118,6 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     private val titleUi by lazy { KawaiiBarUi.Title(context) }
 
-    lateinit var currentUi: KawaiiBarUi
-        private set
-
     val barStateMachine =
         eventStateMachine<KawaiiBarState, KawaiiBarTransitionEvent>(Idle) {
             from(Idle) transitTo Title on ExtendedWindowAttached
@@ -110,11 +126,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             from(Candidate) transitTo Idle on PreeditUpdatedEmpty
 
             onNewState {
-                when (it) {
-                    Idle -> switchUi(idleUi)
-                    Candidate -> switchUi(candidateUi)
-                    Title -> switchUi(titleUi)
-                }
+                switchUiByState(it)
             }
         }
 
@@ -144,11 +156,25 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
         }
 
-    private fun prepareAnimation() {
-        val transition = AutoTransition()
-        transition.duration = 50
-        TransitionManager.beginDelayedTransition(view, transition)
-    }
+    val idleUiStateMachine =
+        eventStateMachine<IdleUiState, IdleUiTransitionEvent>(Empty) {
+            from(Toolbar) transitTo Clipboard on ClipboardUpdatedNonEmpty
+            from(Toolbar) transitTo Clipboard on MenuButtonClickedWithClipboardNonEmpty
+            from(Toolbar) transitTo Empty on MenuButtonClickedWithClipboardEmpty
+            from(Clipboard) transitTo Toolbar on MenuButtonClickedWithClipboardNonEmpty
+            from(Clipboard) transitTo Empty on Timeout
+            from(Clipboard) transitTo Empty on Pasted
+            from(Empty) transitTo Toolbar on MenuButtonClickedWithClipboardEmpty
+            from(Empty) transitTo Clipboard on ClipboardUpdatedNonEmpty
+
+            onNewState {
+                idleUi.switchUiByState(it)
+                if (it != Clipboard) {
+                    clipboardItemTimeoutJob?.cancel()
+                    clipboardItemTimeoutJob = null
+                }
+            }
+        }
 
     // set expand candidate button to create expand candidate
     private fun setExpandButtonToAttach() {
@@ -183,29 +209,24 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         }
     }
 
-    private fun switchUi(ui: KawaiiBarUi, animation: Boolean = true) {
-        if (currentUi == ui)
+    private fun switchUiByState(state: KawaiiBarState) {
+        val index = state.ordinal
+        if (view.displayedChild == index)
             return
-        Timber.i("Switch bar to ${ui.javaClass.simpleName}")
-        if (ui !is KawaiiBarUi.Title) {
+        Timber.i("Switch bar to $state")
+        if (view.getChildAt(index) != titleUi.root) {
             titleUi.setReturnButtonOnClickListener { }
             titleUi.setTitle("")
             titleUi.removeExtension()
         }
-        if (animation) {
-            prepareAnimation()
-        }
-        view.run {
-            removeView(currentUi.root)
-            add(ui.root, lParams(matchParent, matchParent))
-        }
-        currentUi = ui
+        view.displayedChild = index
     }
 
     override val view by lazy {
-        context.frameLayout {
-            currentUi = idleUi
+        ViewAnimator(context).apply {
             add(idleUi.root, lParams(matchParent, matchParent))
+            add(candidateUi.root, lParams(matchParent, matchParent))
+            add(titleUi.root, lParams(matchParent, matchParent))
         }
     }
 
@@ -222,9 +243,6 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         )
     }
 
-    override fun onCandidateUpdates(data: Array<String>) {
-
-    }
 
     override fun onWindowAttached(window: InputWindow) {
         when (window) {

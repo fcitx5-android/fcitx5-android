@@ -9,10 +9,11 @@ import android.view.animation.AnimationSet
 import android.view.animation.ScaleAnimation
 import android.view.animation.TranslateAnimation
 import android.widget.ImageView
-import android.widget.ViewFlipper
+import android.widget.ViewAnimator
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import me.rocka.fcitx5test.R
+import me.rocka.fcitx5test.input.bar.IdleUiState.*
 import splitties.dimensions.dp
 import splitties.resources.styledDrawable
 import splitties.views.dsl.constraintlayout.*
@@ -21,15 +22,11 @@ import splitties.views.gravityCenter
 import splitties.views.gravityVerticalCenter
 import splitties.views.imageResource
 import splitties.views.padding
+import timber.log.Timber
 
 sealed class KawaiiBarUi(override val ctx: Context) : Ui {
 
-    abstract val state: KawaiiBarState
-
     class Candidate(ctx: Context, private val horizontalView: View) : KawaiiBarUi(ctx) {
-
-        override val state: KawaiiBarState
-            get() = KawaiiBarState.Candidate
 
         val expandButton = imageButton(R.id.expand_candidate_btn) {
             background = null
@@ -53,34 +50,20 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
         }
     }
 
-    class Idle(ctx: Context, defaultMode: Mode = Mode.Clipboard) : KawaiiBarUi(ctx) {
+    class Idle(
+        ctx: Context,
+        private val getCurrentState: () -> IdleUiState,
+    ) : KawaiiBarUi(ctx) {
 
-        enum class Mode {
-            Toolbar, Clipboard;
 
-            val other: Mode
-                get() = when (this) {
-                    Clipboard -> Toolbar
-                    Toolbar -> Clipboard
-                }
-
-            val flipperIndex: Int
-                get() = when (this) {
-                    Clipboard -> 0
-                    Toolbar -> 1
-                }
-
-            val expandButtonRotation: Float
-                get() = when (this) {
+        private val IdleUiState.menuButtonRotation
+            get() =
+                if (inPrivate) 0f
+                else when (this) {
+                    Empty -> -90f
                     Clipboard -> -90f
                     Toolbar -> 90f
                 }
-        }
-
-        override val state: KawaiiBarState
-            get() = KawaiiBarState.Idle
-
-        private var mode = defaultMode
 
         private var inPrivate = false
 
@@ -90,8 +73,8 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
             scaleType = ImageView.ScaleType.CENTER_INSIDE
         }
 
-        val expandButton = toolButton(R.drawable.ic_baseline_expand_more_24).apply {
-            rotation = mode.expandButtonRotation
+        val menuButton = toolButton(R.drawable.ic_baseline_expand_more_24).apply {
+            rotation = getCurrentState().menuButtonRotation
         }
 
         val undoButton = toolButton(R.drawable.ic_baseline_undo_24)
@@ -128,7 +111,7 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
             addButton(settingsButton) { after(clipboardButton); endOfParent() }
         }
 
-        val clipboardText = textView {
+        private val clipboardText = textView {
             isSingleLine = true
             ellipsize = TextUtils.TruncateAt.END
             typeface = Typeface.defaultFromStyle(Typeface.BOLD)
@@ -156,7 +139,7 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
             })
         }
 
-        private val flipper = view(::ViewFlipper) {
+        private val animator = ViewAnimator(ctx).apply {
             inAnimation = AnimationSet(true).apply {
                 duration = 200L
                 addAnimation(AlphaAnimation(0f, 1f))
@@ -174,9 +157,9 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
         }
 
         override val root = constraintLayout {
-            addButton(expandButton) { startOfParent() }
-            add(flipper, lParams(matchConstraints, dp(40)) {
-                after(expandButton)
+            addButton(menuButton) { startOfParent() }
+            add(animator, lParams(matchConstraints, dp(40)) {
+                after(menuButton)
                 before(hideKeyboardButton)
             })
             addButton(hideKeyboardButton) { endOfParent() }
@@ -184,44 +167,55 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
 
         fun privateMode(activate: Boolean = true) {
             inPrivate = activate
-            expandButton.apply {
-                when (inPrivate) {
-                    true -> {
-                        imageResource = R.drawable.ic_view_private
-                        rotation = 0f
-                    }
-                    false -> {
-                        imageResource = R.drawable.ic_baseline_expand_more_24
-                        rotation = mode.expandButtonRotation
-                    }
+            menuButton.apply {
+                imageResource = if (inPrivate)
+                    R.drawable.ic_view_private
+                else
+                    R.drawable.ic_baseline_expand_more_24
+                rotation = getCurrentState().menuButtonRotation
+            }
+        }
+
+        fun switchUiByState(state: IdleUiState) {
+            Timber.i("Switch idle ui to $state")
+            when (state) {
+                Clipboard -> {
+                    val index = state.ordinal
+                    animator.displayedChild = index
+                    enableClipboardItem()
+                }
+                Toolbar -> {
+                    val index = state.ordinal
+                    animator.displayedChild = index
+                    disableClipboardItem()
+                }
+                Empty -> {
+                    // empty and clipboard share the same view
+                    val index = Clipboard.ordinal
+                    animator.displayedChild = index
+                    disableClipboardItem()
+                    setClipboardItemText("")
                 }
             }
+            menuButton.animate().setDuration(200L).rotation(state.menuButtonRotation)
         }
 
-        fun switchMode(to: Mode? = null) {
-            val next = to ?: mode.other
-            if (mode == next) return
-            mode = next
-            flipper.displayedChild = next.flipperIndex
-            if (inPrivate) return
-            expandButton.animate().setDuration(200L).rotation(next.expandButtonRotation)
+        private fun enableClipboardItem() {
+            clipboardItem.visibility = View.VISIBLE
         }
 
-        fun updateClipboard(text: String) {
-            if (text.isEmpty()) {
-                clipboardItem.visibility = View.INVISIBLE
-            } else {
-                clipboardText.text = text
-                clipboardItem.visibility = View.VISIBLE
-                switchMode(Mode.Clipboard)
-            }
+        private fun disableClipboardItem() {
+            clipboardItem.visibility = View.INVISIBLE
+        }
+
+        fun getClipboardItemText() = clipboardText.text.toString()
+
+        fun setClipboardItemText(text: String) {
+            clipboardText.text = text
         }
     }
 
     class Title(ctx: Context) : KawaiiBarUi(ctx) {
-
-        override val state: KawaiiBarState
-            get() = KawaiiBarState.Title
 
         private val backButton = imageButton {
             imageResource = R.drawable.ic_baseline_arrow_back_24

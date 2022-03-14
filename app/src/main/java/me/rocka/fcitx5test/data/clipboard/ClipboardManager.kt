@@ -34,7 +34,7 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
         onUpdateListeners.remove(listener)
     }
 
-    private val enabled by Prefs.getInstance().clipboard
+    private val enabled by Prefs.getInstance().clipboardListening
 
     private val limit by Prefs.getInstance().clipboardHistoryLimit
 

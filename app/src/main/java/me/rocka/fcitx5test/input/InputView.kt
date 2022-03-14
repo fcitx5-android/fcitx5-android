@@ -67,7 +67,7 @@ class InputView(
         broadcaster.onScopeSetupFinished(scope)
     }
 
-    private val windowHeightPercent: Int by Prefs.getInstance().inputWindowHeightPercent
+    private val windowHeightPercent: Int by Prefs.getInstance().keyboardHeightPercent
 
     private val windowHeightPx: Int
         get() = resources.displayMetrics.heightPixels * windowHeightPercent / 100
@@ -82,7 +82,7 @@ class InputView(
         // MUST call before any operation
         setupScope()
 
-        Prefs.getInstance().inputWindowHeightPercent.registerOnChangeListener(
+        Prefs.getInstance().keyboardHeightPercent.registerOnChangeListener(
             onWindowHeightChangeListener
         )
 
@@ -105,8 +105,9 @@ class InputView(
 
     override fun onDetachedFromWindow() {
         preedit.dismiss()
-        Prefs.getInstance()
-            .inputWindowHeightPercent.unregisterOnChangeListener(onWindowHeightChangeListener)
+        Prefs.getInstance().keyboardHeightPercent.unregisterOnChangeListener(
+            onWindowHeightChangeListener
+        )
         super.onDetachedFromWindow()
     }
 

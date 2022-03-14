@@ -56,4 +56,5 @@
     <string name="clipboard">Clipboard</string>
     <string name="keyboard_height">Keyboard height</string>
     <string name="keyboard">Keyboard</string>
+    <string name="clipboard_item_timeout">Clipboard item timeout</string>
 </resources>
