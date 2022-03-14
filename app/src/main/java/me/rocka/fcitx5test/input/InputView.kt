@@ -12,6 +12,7 @@ import me.rocka.fcitx5test.data.Prefs
 import me.rocka.fcitx5test.input.bar.KawaiiBarComponent
 import me.rocka.fcitx5test.input.broadcast.InputBroadcaster
 import me.rocka.fcitx5test.input.candidates.CandidateViewBuilder
+import me.rocka.fcitx5test.input.candidates.HorizontalCandidateComponent
 import me.rocka.fcitx5test.input.keyboard.CommonKeyActionListener
 import me.rocka.fcitx5test.input.keyboard.KeyboardWindow
 import me.rocka.fcitx5test.input.preedit.PreeditComponent
@@ -42,6 +43,8 @@ class InputView(
 
     private val kawaiiBar = KawaiiBarComponent()
 
+    private val horizontalCandidate = HorizontalCandidateComponent()
+
     private val keyboardWindow = KeyboardWindow()
 
     private val windowManager = InputWindowManager()
@@ -64,6 +67,7 @@ class InputView(
         scope += windowManager
         scope += keyboardWindow
         scope += commonKeyActionListener
+        scope += horizontalCandidate
         broadcaster.onScopeSetupFinished(scope)
     }
 

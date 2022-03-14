@@ -32,10 +32,7 @@ import me.rocka.fcitx5test.input.wm.InputWindowManager
 import me.rocka.fcitx5test.utils.AppUtil
 import me.rocka.fcitx5test.utils.eventStateMachine
 import me.rocka.fcitx5test.utils.inputConnection
-import org.mechdancer.dependency.Component
-import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.must
-import org.mechdancer.dependency.plusAssign
 import splitties.bitflags.hasFlag
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
@@ -50,14 +47,9 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     private val context by manager.context()
     private val windowManager: InputWindowManager by manager.must()
     private val service by manager.inputMethodService()
-
-    private lateinit var scope: DynamicScope
+    private val horizontalCandidate: HorizontalCandidateComponent by manager.must()
 
     private val clipboardItemTimeout by Prefs.getInstance().clipboardItemTimeout
-
-    private val horizontalCandidate: HorizontalCandidateComponent by lazyComponent {
-        HorizontalCandidateComponent()
-    }
 
     private var clipboardItemTimeoutJob: Job? = null
 
@@ -230,9 +222,6 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         }
     }
 
-    override fun onScopeSetupFinished(scope: DynamicScope) {
-        this.scope = scope
-    }
 
     override fun onPreeditUpdate(content: PreeditContent) {
         barStateMachine.push(
@@ -263,7 +252,4 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         barStateMachine.push(WindowDetached)
     }
 
-    private fun <T : Component> lazyComponent(block: () -> T) = lazy {
-        block().also { scope += it }
-    }
 }
