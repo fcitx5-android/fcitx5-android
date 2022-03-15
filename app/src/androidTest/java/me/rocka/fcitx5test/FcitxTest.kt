@@ -1,4 +1,4 @@
-package me.rocka.fcitx5test
+package org.fcitx.fcitx5.android
 
 import android.util.Log
 import androidx.lifecycle.Lifecycle
@@ -9,9 +9,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
-import me.rocka.fcitx5test.core.Fcitx
-import me.rocka.fcitx5test.core.FcitxEvent
-import me.rocka.fcitx5test.core.RawConfig
+import org.fcitx.fcitx5.android.core.Fcitx
+import org.fcitx.fcitx5.android.core.FcitxEvent
+import org.fcitx.fcitx5.android.core.RawConfig
 import org.junit.*
 
 class FcitxTest {
