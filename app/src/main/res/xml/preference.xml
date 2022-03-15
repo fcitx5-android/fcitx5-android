@@ -45,6 +45,16 @@
                 app:singleLineTitle="false"
                 app:unit="%"
                 app:useSimpleSummaryProvider="true" />
+            <me.rocka.fcitx5test.ui.common.DialogSeekBarPreference
+                android:defaultValue="30"
+                android:key="@string/pref_clipboard_item_timeout"
+                android:title="@string/clipboard_item_timeout"
+                app:iconSpaceReserved="false"
+                app:max="300"
+                app:min="30"
+                app:singleLineTitle="false"
+                app:unit="s"
+                app:useSimpleSummaryProvider="true" />
         </PreferenceCategory>
         <PreferenceCategory
             android:title="@string/clipboard"

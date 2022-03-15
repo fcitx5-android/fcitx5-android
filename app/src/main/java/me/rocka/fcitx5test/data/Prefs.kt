@@ -133,7 +133,7 @@ class Prefs(private val sharedPreferences: SharedPreferences, private val resour
         ExpandedCandidateWindow.Style
     )
     val keyboardHeightPercent = preference(R.string.pref_keyboard_height_percent, 30)
-    val clipboardItemTimeout = preference(R.string.pref_clipboard_item_timeout, 10)
+    val clipboardItemTimeout = preference(R.string.pref_clipboard_item_timeout, 30)
 
     companion object {
         private var instance: Prefs? = null

@@ -56,7 +56,7 @@
     <string name="clipboard_enable">剪切板监听</string>
     <string name="clipboard_limit">剪切板历史限制</string>
     <string name="keyboard">键盘</string>
-    <string name="clipboard_item_timeout">剪切板项超时时间</string>
+    <string name="clipboard_item_timeout">剪切板项时间限制</string>
     <string name="version">版本</string>
     <string name="build_time">构建时间</string>
     <string name="build_git_hash">构建 Git 哈希</string>
