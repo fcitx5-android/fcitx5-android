@@ -1,4 +1,4 @@
-package me.rocka.fcitx5test
+package org.fcitx.fcitx5.android
 
 import org.junit.Test
 

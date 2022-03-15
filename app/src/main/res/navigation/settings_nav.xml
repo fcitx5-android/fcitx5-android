@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/mainFragment"
-        android:name="me.rocka.fcitx5test.ui.main.MainFragment"
+        android:name="org.fcitx.fcitx5.android.ui.main.MainFragment"
         tools:layout="@layout/fragment_main">
         <action
             android:id="@+id/action_mainFragment_to_globalConfigFragment"
@@ -62,11 +62,11 @@
 
     <fragment
         android:id="@+id/globalConfigFragment"
-        android:name="me.rocka.fcitx5test.ui.main.settings.global.GlobalConfigFragment" />
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.global.GlobalConfigFragment" />
 
     <fragment
         android:id="@+id/imListFragment"
-        android:name="me.rocka.fcitx5test.ui.main.settings.im.InputMethodListFragment">
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodListFragment">
         <action
             android:id="@+id/action_imListFragment_to_imConfigFragment"
             app:destination="@id/imConfigFragment"
@@ -77,7 +77,7 @@
     </fragment>
     <fragment
         android:id="@+id/imConfigFragment"
-        android:name="me.rocka.fcitx5test.ui.main.settings.im.InputMethodConfigFragment">
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment">
         <action
             android:id="@+id/action_imConfigFragment_to_listFragment"
             app:destination="@id/listFragment"
@@ -96,7 +96,7 @@
 
     <fragment
         android:id="@+id/addonListFragment"
-        android:name="me.rocka.fcitx5test.ui.main.settings.addon.AddonListFragment">
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.addon.AddonListFragment">
         <action
             android:id="@+id/action_addonListFragment_to_addonConfigFragment"
             app:destination="@id/addonConfigFragment"
@@ -107,7 +107,7 @@
     </fragment>
     <fragment
         android:id="@+id/addonConfigFragment"
-        android:name="me.rocka.fcitx5test.ui.main.settings.addon.AddonConfigFragment">
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.addon.AddonConfigFragment">
         <action
             android:id="@+id/action_addonConfigFragment_to_listFragment"
             app:destination="@id/listFragment"
@@ -126,17 +126,17 @@
 
     <fragment
         android:id="@+id/behaviorSettingsFragment"
-        android:name="me.rocka.fcitx5test.ui.main.settings.behavior.BehaviorSettingsFragment" />
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.behavior.BehaviorSettingsFragment" />
 
     <fragment
         android:id="@+id/listFragment"
-        android:name="me.rocka.fcitx5test.ui.main.settings.ListFragment" />
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.ListFragment" />
     <fragment
         android:id="@+id/pinyinDictionaryFragment"
-        android:name="me.rocka.fcitx5test.ui.main.settings.PinyinDictionaryFragment" />
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.PinyinDictionaryFragment" />
     <fragment
         android:id="@+id/developerFragment"
-        android:name="me.rocka.fcitx5test.ui.main.DeveloperFragment"
+        android:name="org.fcitx.fcitx5.android.ui.main.DeveloperFragment"
         android:label="DeveloperFragment">
         <action
             android:id="@+id/action_developerFragment_to_logFragment"
@@ -148,7 +148,7 @@
     </fragment>
     <fragment
         android:id="@+id/aboutFragment"
-        android:name="me.rocka.fcitx5test.ui.main.AboutFragment"
+        android:name="org.fcitx.fcitx5.android.ui.main.AboutFragment"
         android:label="AboutFragment">
         <action
             android:id="@+id/action_aboutFragment_to_licensesFragment"
@@ -160,11 +160,11 @@
     </fragment>
     <fragment
         android:id="@+id/logFragment"
-        android:name="me.rocka.fcitx5test.ui.main.LogFragment"
+        android:name="org.fcitx.fcitx5.android.ui.main.LogFragment"
         android:label="LogFragment" />
     <fragment
         android:id="@+id/licensesFragment"
-        android:name="me.rocka.fcitx5test.ui.main.LicensesFragment"
+        android:name="org.fcitx.fcitx5.android.ui.main.LicensesFragment"
         android:label="LicensesFragment" />
 
 </navigation>

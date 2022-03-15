@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <input-method xmlns:android="http://schemas.android.com/apk/res/android"
-    android:settingsActivity="me.rocka.fcitx5test.ui.main.MainActivity"
+    android:settingsActivity="org.fcitx.fcitx5.android.ui.main.MainActivity"
     android:supportsSwitchingToNextInputMethod="true">
     <subtype
         android:icon="@drawable/ic_baseline_input_24"

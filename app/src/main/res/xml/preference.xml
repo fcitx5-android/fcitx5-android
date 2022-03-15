@@ -35,7 +35,7 @@
                 app:iconSpaceReserved="false"
                 app:singleLineTitle="false"
                 app:useSimpleSummaryProvider="true" />
-            <me.rocka.fcitx5test.ui.common.DialogSeekBarPreference
+            <org.fcitx.fcitx5.android.ui.common.DialogSeekBarPreference
                 android:defaultValue="30"
                 android:key="@string/pref_keyboard_height_percent"
                 android:title="@string/keyboard_height"
@@ -45,7 +45,7 @@
                 app:singleLineTitle="false"
                 app:unit="%"
                 app:useSimpleSummaryProvider="true" />
-            <me.rocka.fcitx5test.ui.common.DialogSeekBarPreference
+            <org.fcitx.fcitx5.android.ui.common.DialogSeekBarPreference
                 android:defaultValue="30"
                 android:key="@string/pref_clipboard_item_timeout"
                 android:title="@string/clipboard_item_timeout"
@@ -65,7 +65,7 @@
                 android:title="@string/clipboard_enable"
                 app:iconSpaceReserved="false"
                 app:singleLineTitle="false" />
-            <me.rocka.fcitx5test.ui.common.DialogSeekBarPreference
+            <org.fcitx.fcitx5.android.ui.common.DialogSeekBarPreference
                 android:defaultValue="5"
                 android:key="@string/pref_clipboard_limit"
                 android:title="@string/clipboard_limit"

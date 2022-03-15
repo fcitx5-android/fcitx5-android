@@ -39,7 +39,7 @@ android {
     ndkVersion = System.getenv("NDK_VERSION") ?: "23.1.7779620"
 
     defaultConfig {
-        applicationId = "me.rocka.fcitx5test"
+        applicationId = "org.fcitx.fcitx5.android"
         minSdk = 23
         targetSdk = 31
         versionCode = 1
