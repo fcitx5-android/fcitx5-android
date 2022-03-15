@@ -14,8 +14,10 @@ import splitties.views.gravityCenterVertical
 import splitties.views.textAppearance
 
 class SimpleAdapter(
-    private vararg val items: Pair<String, (() -> Unit)?>
+    vararg items: Pair<String, (() -> Unit)?>
 ) : RecyclerView.Adapter<SimpleAdapter.ViewHolder>() {
+
+    private val items = items.toMutableList()
 
     inner class ViewHolder(val rootView: View, val textView: TextView) :
         RecyclerView.ViewHolder(rootView)
@@ -45,14 +47,18 @@ class SimpleAdapter(
         holder.apply {
             textView.text = string
             with(rootView) {
-                if (action != null) {
-                    background = styledDrawable(android.R.attr.selectableItemBackground)
+                background = styledDrawable(android.R.attr.selectableItemBackground)
+                if (action != null)
                     setOnClickListener { action() }
-                } else
-                    background = styledDrawable(android.R.attr.itemBackground)
             }
-
         }
+    }
+
+    fun updateItems(items: List<Pair<String, (() -> Unit)?>>) {
+        this.items.clear()
+        notifyItemRangeRemoved(0, itemCount)
+        this.items.addAll(items)
+        notifyItemRangeInserted(0, itemCount)
     }
 
     override fun getItemCount(): Int = items.size

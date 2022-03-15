@@ -57,4 +57,13 @@
     <string name="keyboard_height">Keyboard height</string>
     <string name="keyboard">Keyboard</string>
     <string name="clipboard_item_timeout">Clipboard item timeout</string>
+    <string name="version">Version</string>
+    <string name="build_time">Build time</string>
+    <string name="build_git_hash">Build Git hash</string>
+    <string name="source_code">Source code</string>
+    <string name="privacy_policy">Privacy policy</string>
+    <string name="license">License</string>
+    <string name="open_source_licenses">Open source licenses</string>
+    <string name="licenses_of_third_party_libraries">Licenses of third-party libraries</string>
+    <string name="github_repo">GitHub repository</string>
 </resources>

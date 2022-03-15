@@ -10,6 +10,6 @@
     <item
         android:id="@+id/activity_main_menu_about"
         android:title="@string/about"
-        android:visible="false"
+        android:visible="true"
         app:showAsAction="never|withText" />
 </menu>

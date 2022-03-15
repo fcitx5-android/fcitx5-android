@@ -22,6 +22,7 @@ plugins {
     kotlin("android")
     id("kotlin-android")
     kotlin("kapt")
+    id("com.cookpad.android.plugin.license-tools") version "1.2.0"
 }
 
 val dataDescriptorName = "descriptor.json"
@@ -134,6 +135,7 @@ val generateDataDescriptor by tasks.register<DataDescriptorTask>("generateDataDe
     inputDir.set(file("src/main/assets"))
     outputFile.set(file("src/main/assets/${dataDescriptorName}"))
     dependsOn(installFcitxComponent)
+    dependsOn(tasks.findByName("generateLicenseJson"))
 }
 /**
  * Note *Graph*

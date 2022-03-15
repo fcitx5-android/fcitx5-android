@@ -149,10 +149,22 @@
     <fragment
         android:id="@+id/aboutFragment"
         android:name="me.rocka.fcitx5test.ui.main.AboutFragment"
-        android:label="AboutFragment" />
+        android:label="AboutFragment">
+        <action
+            android:id="@+id/action_aboutFragment_to_licensesFragment"
+            app:destination="@id/licensesFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
     <fragment
         android:id="@+id/logFragment"
         android:name="me.rocka.fcitx5test.ui.main.LogFragment"
         android:label="LogFragment" />
+    <fragment
+        android:id="@+id/licensesFragment"
+        android:name="me.rocka.fcitx5test.ui.main.LicensesFragment"
+        android:label="LicensesFragment" />
 
 </navigation>

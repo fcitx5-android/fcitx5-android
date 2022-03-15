@@ -57,4 +57,13 @@
     <string name="clipboard_limit">剪切板历史限制</string>
     <string name="keyboard">键盘</string>
     <string name="clipboard_item_timeout">剪切板项超时时间</string>
+    <string name="version">版本</string>
+    <string name="build_time">构建时间</string>
+    <string name="build_git_hash">构建 Git 哈希</string>
+    <string name="source_code">源代码</string>
+    <string name="privacy_policy">隐私权政策</string>
+    <string name="open_source_licenses">开源软件许可</string>
+    <string name="license">许可</string>
+    <string name="licenses_of_third_party_libraries">第三方库许可证</string>
+    <string name="github_repo">GitHub 仓库</string>
 </resources>

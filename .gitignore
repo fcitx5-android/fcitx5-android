@@ -10,6 +10,8 @@
 /app/src/main/assets/usr/share/locale
 # Generated asset descriptor
 /app/src/main/assets/descriptor.json
+# Generated license json
+/app/src/main/assets/licenses.json
 
 # Intellij
 .idea/*
