@@ -36,6 +36,7 @@ class DeveloperFragment : Fragment() {
             context.getString(R.string.delete_and_sync_data) to {
                 AlertDialog.Builder(context)
                     .setTitle(R.string.delete_and_sync_data)
+                    .setMessage(R.string.delete_and_sync_data_message)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
                         lifecycleScope.launch(Dispatchers.IO) {
                             DataManager.deleteAndSync()

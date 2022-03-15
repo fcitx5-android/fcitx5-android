@@ -14,6 +14,7 @@ import me.rocka.fcitx5test.data.clipboard.db.ClipboardEntry
 import me.rocka.fcitx5test.utils.UTF8Utils
 import me.rocka.fcitx5test.utils.WeakHashSet
 import splitties.systemservices.clipboardManager
+import timber.log.Timber
 
 object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
@@ -64,6 +65,7 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
             ?.let { ClipboardEntry.fromClipData(it) }
             ?.takeIf { it.text.isNotBlank() && UTF8Utils.instance.validateUTF8(it.text) }
             ?.let { e ->
+                Timber.d("Accept $e")
                 launch {
                     val all = clbDao.getAll()
                     var pinned = false
