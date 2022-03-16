@@ -1,8 +1,10 @@
 package org.fcitx.fcitx5.android.utils
 
+import cn.berberman.girls.utils.either.Either
+
 class EventStateMachine<State : EventStateMachine.State, Event : EventStateMachine.StateTransitionEvent>(
     initialState: State,
-    private val stateGraph: ImmutableGraph<State, List<Event>>
+    private val stateGraph: ImmutableGraph<State, List<Either<Event, CombinedEvents<Event>>>>
 ) {
 
     interface State
@@ -18,7 +20,7 @@ class EventStateMachine<State : EventStateMachine.State, Event : EventStateMachi
     /**
      * Push an event that may trigger a transition of state
      */
-    fun push(event: Event) {
+    fun push(event: Either<Event, CombinedEvents<Event>>) {
         if (event !in stateGraph.labels.flatten())
             throw IllegalArgumentException("$event is an unknown event")
         val transitions = stateGraph.getEdgesOfVertexWithIndex(currentState)
@@ -34,7 +36,17 @@ class EventStateMachine<State : EventStateMachine.State, Event : EventStateMachi
             else -> throw IllegalStateException("More than one transitions are found given $event on $currentState")
         }
     }
+
+    fun push(event: Event) = push(Either.left(event))
+    fun push(event: CombinedEvents<Event>) = push(Either.right(event))
 }
+
+data class CombinedEvents<T : EventStateMachine.StateTransitionEvent>(private val children: MutableSet<T>) :
+    MutableSet<T> by children
+
+infix operator fun <T : EventStateMachine.StateTransitionEvent> T.times(new: T) =
+    CombinedEvents(mutableSetOf(this, new))
+
 
 // DSL
 
@@ -47,13 +59,14 @@ fun <State : EventStateMachine.State, Event : EventStateMachine.StateTransitionE
 class EventStateMachineBuilder<State : EventStateMachine.State, Event : EventStateMachine.StateTransitionEvent>(
     private val initialState: State
 ) {
-    private val map = mutableMapOf<Pair<State, State>, MutableList<Event>>()
+    private val map =
+        mutableMapOf<Pair<State, State>, MutableList<Either<Event, CombinedEvents<Event>>>>()
 
     private var listener: ((State) -> Unit)? = null
 
     inner class EventTransitionBuilder(val startState: State) {
         lateinit var endState: State
-        lateinit var event: Event
+        lateinit var event: Either<Event, CombinedEvents<Event>>
 
     }
 
@@ -61,13 +74,16 @@ class EventStateMachineBuilder<State : EventStateMachine.State, Event : EventSta
         endState = state
     }
 
-    infix fun EventTransitionBuilder.on(event: Event) = this.run {
+    infix fun EventTransitionBuilder.on(event: Either<Event, CombinedEvents<Event>>) = this.run {
         this.event = event
         if (startState to endState !in map)
             map[startState to endState] = mutableListOf(event)
         else
             map.getValue(startState to endState) += event
     }
+
+    infix fun EventTransitionBuilder.on(event: Event) = on(Either.left(event))
+    infix fun EventTransitionBuilder.on(event: CombinedEvents<Event>) = on(Either.right(event))
 
     fun from(state: State) = EventTransitionBuilder(state)
 
