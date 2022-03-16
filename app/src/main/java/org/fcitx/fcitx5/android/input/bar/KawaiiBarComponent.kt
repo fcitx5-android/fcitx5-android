@@ -27,6 +27,7 @@ import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.inputConnection
+import org.fcitx.fcitx5.android.utils.times
 import org.mechdancer.dependency.manager.must
 import splitties.bitflags.hasFlag
 import splitties.views.dsl.core.add
@@ -70,9 +71,9 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             it.menuButton.setOnClickListener {
                 idleUiStateMachine.push(
                     if (idleUi.getClipboardItemText().isEmpty())
-                        MenuButtonClickedWithClipboardEmpty
+                        MenuButtonClicked * ClipboardUpdatedEmpty
                     else
-                        MenuButtonClickedWithClipboardNonEmpty
+                        MenuButtonClicked * ClipboardUpdatedNonEmpty
                 )
             }
             it.undoButton.setOnClickListener {
