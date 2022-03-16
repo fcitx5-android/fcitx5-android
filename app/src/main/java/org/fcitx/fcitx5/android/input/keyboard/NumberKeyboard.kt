@@ -42,7 +42,7 @@ class NumberKeyboard(
                 LayoutSwitchKey("?123", NumSymKeyboard.Name, 0.13333F),
                 KPKey("0", 0.23334F),
                 TextKey("=", 0.13333F),
-                TextKey("."),
+                KPKey("Decimal", "."),
                 ReturnKey()
             ),
         )
