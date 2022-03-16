@@ -4,8 +4,11 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.isEmpty
 import kotlinx.coroutines.launch
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Fcitx
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
@@ -30,8 +33,17 @@ abstract class FcitxPreferenceFragment : PreferenceFragmentCompat() {
     final override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         lifecycleScope.withLoadingDialog(requireContext()) {
             raw = obtainConfig(fcitx)
-            preferenceScreen =
+            val screen =
                 PreferenceScreenFactory.create(preferenceManager, parentFragmentManager, raw)
+            if (screen.isEmpty())
+                screen.addPreference(
+                    Preference(requireContext())
+                        .apply {
+                            setTitle(R.string.no_config_options)
+                            isIconSpaceReserved = false
+                            isSingleLineTitle = true
+                        })
+            preferenceScreen = screen
             viewModel.enableToolbarSaveButton {
                 lifecycleScope.launch {
                     saveConfig(fcitx, raw["cfg"])

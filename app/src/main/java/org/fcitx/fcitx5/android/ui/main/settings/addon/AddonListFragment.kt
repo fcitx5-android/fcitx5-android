@@ -44,7 +44,11 @@ class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
             },
             initSettingsButton = { idx ->
                 visibility =
-                    if (entries[idx].isConfigurable && entries[idx].enabled) View.VISIBLE else View.INVISIBLE
+                    if (entries[idx].isConfigurable
+                        && entries[idx].enabled
+                        // we disable clipboard addon config since we take over the control
+                        && entries[idx].uniqueName != "clipboard"
+                    ) View.VISIBLE else View.INVISIBLE
                 setOnClickListener {
                     it.findNavController().navigate(
                         R.id.action_addonListFragment_to_addonConfigFragment,

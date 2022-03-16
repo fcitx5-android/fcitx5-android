@@ -69,4 +69,6 @@
     <string name="delete_and_sync_data_message">删除当前的数据文件夹并从应用附带的资源中同步</string>
     <string name="expanded_candidate_grid_span_count_portrait">表格样式展开候选词列数（竖屏）</string>
     <string name="expanded_candidate_grid_span_count_landscape">表格样式展开候选词列数（横屏）</string>
+    <string name="no_config_options">目前没有可用的配置选项</string>
+    <string name="unimplemented_type">⛔ 未实现类型</string>
 </resources>

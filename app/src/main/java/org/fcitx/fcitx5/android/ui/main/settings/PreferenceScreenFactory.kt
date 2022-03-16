@@ -65,7 +65,8 @@ object PreferenceScreenFactory {
         }
 
         fun stubPreference() = Preference(context).apply {
-            summary = "⛔ Unimplemented type '${ConfigType.pretty(descriptor.type)}'"
+            summary =
+                "${context.getString(R.string.unimplemented_type)} '${ConfigType.pretty(descriptor.type)}'"
         }
 
         fun pinyinDictionary() = Preference(context).apply {

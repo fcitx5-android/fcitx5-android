@@ -69,4 +69,6 @@
     <string name="github_repo">GitHub repository</string>
     <string name="expanded_candidate_grid_span_count_landscape">Grid style expanded candidate span count (Landscape)</string>
     <string name="expanded_candidate_grid_span_count_portrait">Grid style expanded candidate span count (Portrait)</string>
+    <string name="no_config_options">Currently no configuration options are available</string>
+    <string name="unimplemented_type">⛔ Unimplemented type</string>
 </resources>
