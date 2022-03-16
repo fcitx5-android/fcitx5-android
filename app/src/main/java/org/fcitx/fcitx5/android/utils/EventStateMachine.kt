@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.utils
 
 import cn.berberman.girls.utils.either.Either
+import timber.log.Timber
 
 class EventStateMachine<State : EventStateMachine.State, Event : EventStateMachine.StateTransitionEvent>(
     initialState: State,
@@ -17,6 +18,8 @@ class EventStateMachine<State : EventStateMachine.State, Event : EventStateMachi
     val currentState
         get() = stateGraph.vertices[currentStateIx]
 
+    var enableDebugLog = false
+
     /**
      * Push an event that may trigger a transition of state
      */
@@ -28,8 +31,12 @@ class EventStateMachine<State : EventStateMachine.State, Event : EventStateMachi
         when (filtered.size) {
             0 -> {
                 // do nothing
+                if (enableDebugLog)
+                    Timber.d("At $currentState ignored $event. All transitions ${transitions.map { it.second.label.joinToString() }} did not match")
             }
             1 -> {
+                if (enableDebugLog)
+                    Timber.d("At $currentState transited to ${filtered.first().second.vertex2}. Transition $event was matched")
                 currentStateIx = filtered.first().first.first
                 onNewStateListener?.invoke(filtered.first().second.vertex2)
             }

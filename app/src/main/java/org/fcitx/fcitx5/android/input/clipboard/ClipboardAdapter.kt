@@ -28,12 +28,12 @@ abstract class ClipboardAdapter :
 
     fun getEntryById(id: Int) = entries[getPositionById(id)]
 
-    inner class ViewHolder(val entryUi: ClipboardUi) :
+    inner class ViewHolder(val entryUi: ClipboardEntryUi) :
         RecyclerView.ViewHolder(entryUi.root)
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(ClipboardUi(parent.context))
+        ViewHolder(ClipboardEntryUi(parent.context))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         with(holder.entryUi) {
