@@ -73,4 +73,6 @@
     <string name="unimplemented_type">⛔ Unimplemented type</string>
     <string name="select">Select</string>
     <string name="text_editing">Text Editing</string>
+    <string name="instruction_enable_clipboard_listening">To use clipboard management, please enable clipboard listening in settings</string>
+    <string name="instruction_copy">Try copying something</string>
 </resources>

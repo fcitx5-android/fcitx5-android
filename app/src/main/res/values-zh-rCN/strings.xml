@@ -73,4 +73,6 @@
     <string name="unimplemented_type">⛔ 未实现类型</string>
     <string name="select">选择</string>
     <string name="text_editing">文本编辑</string>
+    <string name="instruction_enable_clipboard_listening">要使用剪贴板管理，请在设置中启用剪贴板监听</string>
+    <string name="instruction_copy">尝试复制一些东西</string>
 </resources>

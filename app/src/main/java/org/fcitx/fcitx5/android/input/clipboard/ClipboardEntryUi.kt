@@ -15,7 +15,7 @@ import splitties.views.horizontalPadding
 import splitties.views.imageResource
 import splitties.views.verticalPadding
 
-class ClipboardUi(override val ctx: Context) : Ui {
+class ClipboardEntryUi(override val ctx: Context) : Ui {
 
     val text = textView {
         maxLines = 4
