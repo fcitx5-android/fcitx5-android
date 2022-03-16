@@ -12,12 +12,9 @@ import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.Prefs
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
-import org.fcitx.fcitx5.android.input.bar.ExpandButtonState.*
-import org.fcitx.fcitx5.android.input.bar.ExpandButtonTransitionEvent.*
-import org.fcitx.fcitx5.android.input.bar.IdleUiState.*
-import org.fcitx.fcitx5.android.input.bar.IdleUiTransitionEvent.*
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarState.*
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarTransitionEvent.*
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.*
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.*
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.*
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.candidates.ExpandedCandidateWindow
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
@@ -29,7 +26,6 @@ import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.AppUtil
-import org.fcitx.fcitx5.android.utils.eventStateMachine
 import org.fcitx.fcitx5.android.utils.inputConnection
 import org.mechdancer.dependency.manager.must
 import splitties.bitflags.hasFlag
@@ -108,59 +104,30 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     private val titleUi by lazy { KawaiiBarUi.Title(context) }
 
-    val barStateMachine =
-        eventStateMachine<KawaiiBarState, KawaiiBarTransitionEvent>(Idle) {
-            from(Idle) transitTo Title on ExtendedWindowAttached
-            from(Idle) transitTo Candidate on PreeditUpdatedNonEmpty
-            from(Title) transitTo Idle on WindowDetached
-            from(Candidate) transitTo Idle on PreeditUpdatedEmpty
+    val barStateMachine = KawaiiBarStateMachine.new {
+        switchUiByState(it)
+    }
 
-            onNewState {
-                switchUiByState(it)
+    val expandButtonStateMachine = ExpandButtonStateMachine.new {
+        when (it) {
+            ClickToAttachWindow -> {
+                setExpandButtonToAttach()
+                setExpandButtonEnabled(true)
+            }
+            ClickToDetachWindow -> {
+                setExpandButtonToDetach()
+                setExpandButtonEnabled(true)
+            }
+            Hidden -> {
+                setExpandButtonEnabled(false)
             }
         }
+    }
 
-    val expandButtonStateMachine =
-        eventStateMachine<ExpandButtonState, ExpandButtonTransitionEvent>(Hidden) {
-            from(Hidden) transitTo ClickToAttachWindow on ExpandedCandidatesUpdatedNonEmpty
-            from(ClickToAttachWindow) transitTo Hidden on ExpandedCandidatesUpdatedEmpty
-            from(ClickToAttachWindow) transitTo ClickToDetachWindow on ExpandedCandidatesAttached
-            from(ClickToDetachWindow) transitTo ClickToAttachWindow on ExpandedCandidatesDetachedWithNonEmpty
-            from(ClickToDetachWindow) transitTo Hidden on ExpandedCandidatesDetachedWithEmpty
+    val idleUiStateMachine = IdleUiStateMachine.new {
+        idleUi.switchUiByState(it)
+    }
 
-            onNewState {
-                when (it) {
-                    ClickToAttachWindow -> {
-                        setExpandButtonToAttach()
-                        setExpandButtonEnabled(true)
-                    }
-                    ClickToDetachWindow -> {
-                        setExpandButtonToDetach()
-                        setExpandButtonEnabled(true)
-                    }
-                    Hidden -> {
-                        setExpandButtonEnabled(false)
-                    }
-                }
-            }
-
-        }
-
-    val idleUiStateMachine =
-        eventStateMachine<IdleUiState, IdleUiTransitionEvent>(Empty) {
-            from(Toolbar) transitTo Clipboard on ClipboardUpdatedNonEmpty
-            from(Toolbar) transitTo Clipboard on MenuButtonClickedWithClipboardNonEmpty
-            from(Toolbar) transitTo Empty on MenuButtonClickedWithClipboardEmpty
-            from(Clipboard) transitTo Toolbar on MenuButtonClickedWithClipboardNonEmpty
-            from(Clipboard) transitTo Empty on Timeout
-            from(Clipboard) transitTo Empty on Pasted
-            from(Empty) transitTo Toolbar on MenuButtonClickedWithClipboardEmpty
-            from(Empty) transitTo Clipboard on ClipboardUpdatedNonEmpty
-
-            onNewState {
-                idleUi.switchUiByState(it)
-            }
-        }
 
     // set expand candidate button to create expand candidate
     private fun setExpandButtonToAttach() {
@@ -195,7 +162,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         }
     }
 
-    private fun switchUiByState(state: KawaiiBarState) {
+    private fun switchUiByState(state: KawaiiBarStateMachine.State) {
         val index = state.ordinal
         if (view.displayedChild == index)
             return

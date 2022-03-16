@@ -13,7 +13,7 @@ import android.widget.ViewAnimator
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.input.bar.IdleUiState.*
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.State.*
 import splitties.dimensions.dp
 import splitties.resources.styledDrawable
 import splitties.views.dsl.constraintlayout.*
@@ -52,11 +52,11 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
 
     class Idle(
         ctx: Context,
-        private val getCurrentState: () -> IdleUiState,
+        private val getCurrentState: () -> IdleUiStateMachine.State,
     ) : KawaiiBarUi(ctx) {
 
 
-        private val IdleUiState.menuButtonRotation
+        private val IdleUiStateMachine.State.menuButtonRotation
             get() =
                 if (inPrivate) 0f
                 else when (this) {
@@ -176,7 +176,7 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
             }
         }
 
-        fun switchUiByState(state: IdleUiState) {
+        fun switchUiByState(state: IdleUiStateMachine.State) {
             Timber.i("Switch idle ui to $state")
             when (state) {
                 Clipboard -> {

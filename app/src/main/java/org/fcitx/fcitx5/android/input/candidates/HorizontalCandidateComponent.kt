@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.runBlocking
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.input.bar.ExpandButtonTransitionEvent.*
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.*
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
