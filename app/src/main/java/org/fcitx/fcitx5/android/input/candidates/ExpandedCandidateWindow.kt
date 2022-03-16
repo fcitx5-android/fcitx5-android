@@ -1,7 +1,9 @@
 package org.fcitx.fcitx5.android.input.candidates
 
+import android.content.res.Configuration
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -25,6 +27,20 @@ class ExpandedCandidateWindow :
     private val horizontalCandidate: HorizontalCandidateComponent by manager.must()
 
     val style: Style by Prefs.getInstance().expandableCandidateStyle
+
+    private val gridSpanCountListener: Prefs.OnChangeListener<Int> by lazy {
+        Prefs.OnChangeListener {
+            (view.recyclerView.layoutManager as GridLayoutManager).spanCount = value
+        }
+    }
+
+    private val gridSpanCountPref by lazy {
+        (if (context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+            Prefs.getInstance().expandedCandidateGridSpanCountPortrait
+        else
+            Prefs.getInstance().expandedCandidateGridSpanCountLandscape)
+            .also { it.registerOnChangeListener(gridSpanCountListener) }
+    }
 
     private val lifecycleCoroutineScope by lazy {
         view.findViewTreeLifecycleOwner()!!.lifecycleScope
@@ -57,12 +73,12 @@ class ExpandedCandidateWindow :
                 with(builder) {
                     when (style) {
                         Style.Grid -> {
-                            autoSpanCount()
                             setupGridLayoutManager(
                                 this@ExpandedCandidateWindow.adapter as GridCandidateViewAdapter,
                                 true
                             )
                             addGridDecoration()
+                            (layoutManager as GridLayoutManager).spanCount = gridSpanCountPref.value
                         }
                         Style.Flexbox -> {
                             setupFlexboxLayoutManager(

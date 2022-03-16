@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.*
 import kotlinx.coroutines.launch
-import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Fcitx
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.candidates.adapter.GridCandidateViewAdapter
@@ -15,12 +14,10 @@ import org.fcitx.fcitx5.android.input.candidates.adapter.SimpleCandidateViewAdap
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.utils.hapticIfEnabled
-import org.fcitx.fcitx5.android.utils.oneShotGlobalLayoutListener
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
 import org.mechdancer.dependency.manager.managedHandler
-import splitties.resources.dimenPxSize
 import splitties.resources.styledDrawable
 
 class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
@@ -48,19 +45,18 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
             service.lifecycleScope.launch { fcitx.select(idx) }
         }
     }
-
-    // setup a listener that sets the span count of gird layout according to recycler view's width
-    fun RecyclerView.autoSpanCount() {
-        oneShotGlobalLayoutListener {
-            (layoutManager as GridLayoutManager).apply {
-                // set columns according to the width of recycler view
-                // last item doesn't need padding, so we assume recycler view is wider
-                spanCount = (measuredWidth + dimenPxSize(R.dimen.candidate_padding)) /
-                        (dimenPxSize(R.dimen.candidate_min_width) + dimenPxSize(R.dimen.candidate_padding))
-                requestLayout()
-            }
-        }
-    }
+//
+//    // setup a listener that sets the span count of gird layout according to recycler view's width
+//    fun RecyclerView.autoSpanCount() {
+//        oneShotGlobalLayoutListener {
+//            (layoutManager as GridLayoutManager).apply {
+//                // set columns according to the width of recycler view
+//                // last item doesn't need padding, so we assume recycler view is wider
+//                spanCount = (measuredWidth + dimenPxSize(R.dimen.candidate_padding)) /
+//                        (dimenPxSize(R.dimen.candidate_min_width) + dimenPxSize(R.dimen.candidate_padding))
+//            }
+//        }
+//    }
 
     fun RecyclerView.addGridDecoration() =
         GridDecoration(styledDrawable(android.R.attr.listDivider)!!).also {

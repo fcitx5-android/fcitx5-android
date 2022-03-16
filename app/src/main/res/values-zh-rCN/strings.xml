@@ -67,4 +67,6 @@
     <string name="licenses_of_third_party_libraries">第三方库许可证</string>
     <string name="github_repo">GitHub 仓库</string>
     <string name="delete_and_sync_data_message">删除当前的数据文件夹并从应用附带的资源中同步</string>
+    <string name="expanded_candidate_grid_span_count_portrait">表格样式展开候选词列数（竖屏）</string>
+    <string name="expanded_candidate_grid_span_count_landscape">表格样式展开候选词列数（横屏）</string>
 </resources>

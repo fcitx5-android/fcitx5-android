@@ -11,10 +11,10 @@
     <string name="conf">Configuration</string>
     <string name="global_options">Global Options</string>
     <string name="behavior">Behavior</string>
-    <string name="ignore_sys_cursor">Ignore System Cursor Position</string>
-    <string name="hide_key_config">Hide Hotkey Configurations</string>
+    <string name="ignore_sys_cursor">Ignore system cursor position</string>
+    <string name="hide_key_config">Hide hotkey configurations</string>
     <string name="_not_available_">(Not Available)</string>
-    <string name="button_haptic_feedback">Haptic Feedback on Button Press</string>
+    <string name="button_haptic_feedback">Haptic feedback on key pressed</string>
     <string name="add">Add</string>
     <string name="edit">Edit</string>
     <string name="undo">Undo</string>
@@ -39,9 +39,9 @@
     <string name="import_">Import</string>
     <string name="synced">Synced!</string>
     <string name="loading">Loading</string>
-    <string name="clipboard_enable">Clipboard Listening</string>
-    <string name="clipboard_limit">Clipboard History Limit</string>
-    <string name="expanded_candidate_style">Expanded Candidate Style</string>
+    <string name="clipboard_enable">Clipboard listening</string>
+    <string name="clipboard_limit">Clipboard history limit</string>
+    <string name="expanded_candidate_style">Expanded candidate style</string>
     <string name="expanded_candidate_style_grid">Grid</string>
     <string name="expanded_candidate_style_flexbox">Flexbox</string>
     <string name="no_more_input_methods">No more input methods to switch</string>
@@ -67,4 +67,6 @@
     <string name="open_source_licenses">Open source licenses</string>
     <string name="licenses_of_third_party_libraries">Licenses of third-party libraries</string>
     <string name="github_repo">GitHub repository</string>
+    <string name="expanded_candidate_grid_span_count_landscape">Grid style expanded candidate span count (Landscape)</string>
+    <string name="expanded_candidate_grid_span_count_portrait">Grid style expanded candidate span count (Portrait)</string>
 </resources>

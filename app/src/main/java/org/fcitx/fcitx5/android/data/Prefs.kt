@@ -134,6 +134,10 @@ class Prefs(private val sharedPreferences: SharedPreferences, private val resour
     )
     val keyboardHeightPercent = preference(R.string.pref_keyboard_height_percent, 30)
     val clipboardItemTimeout = preference(R.string.pref_clipboard_item_timeout, 30)
+    val expandedCandidateGridSpanCountLandscape =
+        preference(R.string.pref_expanded_candidate_grid_span_count_landscape, 8)
+    val expandedCandidateGridSpanCountPortrait =
+        preference(R.string.pref_expanded_candidate_grid_span_count_portrait, 6)
 
     companion object {
         private var instance: Prefs? = null

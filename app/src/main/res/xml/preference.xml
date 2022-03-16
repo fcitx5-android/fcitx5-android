@@ -35,6 +35,25 @@
                 app:iconSpaceReserved="false"
                 app:singleLineTitle="false"
                 app:useSimpleSummaryProvider="true" />
+
+            <org.fcitx.fcitx5.android.ui.common.DialogSeekBarPreference
+                android:defaultValue="6"
+                android:key="@string/pref_expanded_candidate_grid_span_count_portrait"
+                android:title="@string/expanded_candidate_grid_span_count_portrait"
+                app:iconSpaceReserved="false"
+                app:max="10"
+                app:min="4"
+                app:singleLineTitle="false"
+                app:useSimpleSummaryProvider="true" />
+            <org.fcitx.fcitx5.android.ui.common.DialogSeekBarPreference
+                android:defaultValue="8"
+                android:key="@string/pref_expanded_candidate_grid_span_count_landscape"
+                android:title="@string/expanded_candidate_grid_span_count_landscape"
+                app:iconSpaceReserved="false"
+                app:max="12"
+                app:min="6"
+                app:singleLineTitle="false"
+                app:useSimpleSummaryProvider="true" />
             <org.fcitx.fcitx5.android.ui.common.DialogSeekBarPreference
                 android:defaultValue="30"
                 android:key="@string/pref_keyboard_height_percent"
