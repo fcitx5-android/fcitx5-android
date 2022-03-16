@@ -1,4 +1,4 @@
-# fcitx5-android-poc
+# fcitx5-android
 
 An attempt to run fcitx5 on Android.
 
@@ -20,7 +20,7 @@ It can build, run, print to logcat, and dispatch event to JVM side. Also there i
 First, clone this repository and fetch all submodules:
 
 ```sh
-git clone git@github.com:rocka/fcitx5-android-poc.git
+git clone git@github.com:fcitx5-android/fcitx5-android.git
 git submodule update --init --recursive
 ```
 
@@ -54,9 +54,7 @@ Install Android SDK Platform, Android SDK Build-Tools, Android NDK and cmake via
 
 No patching needed! We can run mainline fcitx5 on Android! Yay!
 
-## PoC
-
-### Screenshots
+## Screenshots
 
 |light|dark|
 |:-:|:-:|
