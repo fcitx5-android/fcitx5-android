@@ -33,7 +33,7 @@ class SpanHelper(
     )
 
     // clear calculated layout
-    private fun invalidate() {
+    fun invalidate() {
         layout.clear()
     }
 

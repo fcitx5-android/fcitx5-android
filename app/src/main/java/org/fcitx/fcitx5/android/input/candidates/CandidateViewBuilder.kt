@@ -74,6 +74,10 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
         layoutManager =
             object : GridLayoutManager(context, INITIAL_SPAN_COUNT, VERTICAL, false) {
                 override fun canScrollVertically() = scrollVertically
+                override fun setSpanCount(spanCount: Int) {
+                    super.setSpanCount(spanCount)
+                    (spanSizeLookup as? SpanHelper)?.invalidate()
+                }
             }.apply {
                 SpanHelper(adapter, this).attach()
             }
