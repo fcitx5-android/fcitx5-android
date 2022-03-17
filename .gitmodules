@@ -9,7 +9,7 @@
 	url = git@github.com:fcitx/libime.git
 [submodule "app/src/main/cpp/prebuilt"]
 	path = app/src/main/cpp/prebuilt
-	url = git@github.com:rocka/fcitx5-android-prebuilt-libs
+	url = git@github.com:fcitx5-android/fcitx5-android-prebuilt-libs
 [submodule "app/src/main/cpp/fcitx5-lua"]
 	path = app/src/main/cpp/fcitx5-lua
 	url = git@github.com:fcitx/fcitx5-lua.git
