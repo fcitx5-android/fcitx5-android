@@ -52,12 +52,12 @@ class NumberKeyboard(
         )
     }
 
-    val backspace: ImageButton by lazy { findViewById(R.id.button_backspace) }
-    val space: Button by lazy { findViewById(R.id.button_mini_space) }
-    val `return`: ImageButton by lazy { findViewById(R.id.button_return) }
+    val backspace: ImageKeyView by lazy { findViewById(R.id.button_backspace) }
+    val space: TextKeyView by lazy { findViewById(R.id.button_mini_space) }
+    val `return`: ImageKeyView by lazy { findViewById(R.id.button_return) }
 
     override fun onAttach(info: EditorInfo?) {
-        `return`.imageResource = drawableForReturn(info)
+        `return`.button.imageResource = drawableForReturn(info)
     }
 
 }
