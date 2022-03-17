@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.input.candidates.adapter.GridCandidateViewAdapter
 import kotlin.math.ceil
+import kotlin.math.max
 import kotlin.math.min
 
 class SpanHelper(
@@ -29,7 +30,8 @@ class SpanHelper(
 
     private fun getMinSpanSize(position: Int) = min(
         // approximately three characters or one Chinese characters per span
-        ceil(adapter.measureWidth(position) / 1.5).toInt(), manager.spanCount
+        // at least one span for each word, in case measureWidth got zero due to whatever font issues
+        max(1, ceil(adapter.measureWidth(position) / 1.5).toInt()), manager.spanCount
     )
 
     // clear calculated layout
