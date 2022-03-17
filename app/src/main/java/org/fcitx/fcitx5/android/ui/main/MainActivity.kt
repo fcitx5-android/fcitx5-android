@@ -23,14 +23,26 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var navHostFragment: NavHostFragment
 
+    private fun onNavigateUpListener(): Boolean {
+        val navController = navHostFragment.navController
+        return when (navController.currentDestination?.id) {
+            R.id.mainFragment -> {
+                // "minimize" the app, don't exit activity
+                moveTaskToBack(false)
+                true
+            }
+            else -> onSupportNavigateUp()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         val appBarConfiguration = AppBarConfiguration(
-            topLevelDestinationIds = setOf(R.id.mainFragment),
-            fallbackOnNavigateUpListener = ::onSupportNavigateUp
+            topLevelDestinationIds = setOf(),
+            fallbackOnNavigateUpListener = ::onNavigateUpListener
         )
         navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment

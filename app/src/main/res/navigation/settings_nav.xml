@@ -137,7 +137,7 @@
     <fragment
         android:id="@+id/developerFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.DeveloperFragment"
-        android:label="DeveloperFragment">
+        android:label="">
         <action
             android:id="@+id/action_developerFragment_to_logFragment"
             app:destination="@id/logFragment"
@@ -149,7 +149,7 @@
     <fragment
         android:id="@+id/aboutFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.AboutFragment"
-        android:label="AboutFragment">
+        android:label="">
         <action
             android:id="@+id/action_aboutFragment_to_licensesFragment"
             app:destination="@id/licensesFragment"
@@ -161,10 +161,10 @@
     <fragment
         android:id="@+id/logFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.LogFragment"
-        android:label="LogFragment" />
+        android:label="" />
     <fragment
         android:id="@+id/licensesFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.LicensesFragment"
-        android:label="LicensesFragment" />
+        android:label="" />
 
 </navigation>

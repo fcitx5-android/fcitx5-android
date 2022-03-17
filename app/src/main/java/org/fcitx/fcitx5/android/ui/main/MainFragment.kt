@@ -20,7 +20,6 @@ class MainFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         return requireContext().recyclerView {
             layoutManager = LinearLayoutManager(context)
             adapter = SimpleAdapter(
