@@ -64,12 +64,12 @@ class TextKeyboard(
         )
     }
 
-    val caps: ImageButton by lazy { findViewById(R.id.button_caps) }
-    val backspace: ImageButton by lazy { findViewById(R.id.button_backspace) }
-    val quickphrase: ImageButton by lazy { findViewById(R.id.button_quickphrase) }
-    val lang: ImageButton by lazy { findViewById(R.id.button_lang) }
-    val space: Button by lazy { findViewById(R.id.button_space) }
-    val `return`: ImageButton by lazy { findViewById(R.id.button_return) }
+    val caps: ImageKeyView by lazy { findViewById(R.id.button_caps) }
+    val backspace: ImageKeyView by lazy { findViewById(R.id.button_backspace) }
+    val quickphrase: ImageKeyView by lazy { findViewById(R.id.button_quickphrase) }
+    val lang: ImageKeyView by lazy { findViewById(R.id.button_lang) }
+    val space: TextKeyView by lazy { findViewById(R.id.button_space) }
+    val `return`: ImageKeyView by lazy { findViewById(R.id.button_return) }
 
     var capsState: CapsState = CapsState.None
         private set(value) {
@@ -113,7 +113,7 @@ class TextKeyboard(
     }
 
     override fun onAttach(info: EditorInfo?) {
-        `return`.imageResource = drawableForReturn(info)
+        `return`.button.imageResource = drawableForReturn(info)
     }
 
     override fun onEditorInfoChange(info: EditorInfo?) {
@@ -135,7 +135,7 @@ class TextKeyboard(
                 s.append(" ($it)")
             }
         }
-        space.text = s
+        space.button.text = s
     }
 
     private fun switchCapsState() {
@@ -147,7 +147,7 @@ class TextKeyboard(
     }
 
     private fun updateCapsButtonIcon() {
-        caps.setImageResource(
+        caps.button.setImageResource(
             when (capsState) {
                 CapsState.None -> R.drawable.ic_baseline_keyboard_capslock0_24
                 CapsState.Once -> R.drawable.ic_baseline_keyboard_capslock1_24

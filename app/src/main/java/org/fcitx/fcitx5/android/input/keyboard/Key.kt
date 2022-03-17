@@ -72,7 +72,7 @@ open class TextKey(
 
 open class AltTextKey(
     override val text: String = "",
-    private val altText: String = "",
+    val altText: String = "",
     percentWidth: Float = 0.1f
 ) : TextKey(text, percentWidth), ILongPressKey {
     override val displayText: String get() = "$text\n$altText"

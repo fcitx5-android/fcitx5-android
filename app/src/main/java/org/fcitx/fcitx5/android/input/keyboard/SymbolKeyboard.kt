@@ -60,9 +60,9 @@ class SymbolKeyboard(
         )
     }
 
-    val `return`: ImageButton by lazy { findViewById(R.id.button_return) }
+    val `return`: ImageKeyView by lazy { findViewById(R.id.button_return) }
 
     override fun onAttach(info: EditorInfo?) {
-        `return`.imageResource = drawableForReturn(info)
+        `return`.button.imageResource = drawableForReturn(info)
     }
 }

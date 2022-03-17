@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.input.keyboard.BackspaceKey
 import org.fcitx.fcitx5.android.input.keyboard.BaseKeyboard
+import org.fcitx.fcitx5.android.input.keyboard.ImageKeyView
 import org.fcitx.fcitx5.android.input.keyboard.ReturnKey
 import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import splitties.dimensions.dp
@@ -40,9 +41,9 @@ class ExpandedCandidateLayout(
         imageResource = R.drawable.ic_baseline_arrow_downward_24
     }
 
-    private val backspaceBtn = createButton(BackspaceKey())
+    private val backspaceBtn = createKey(BackspaceKey())
 
-    private val returnBtn: ImageButton = createButton(ReturnKey()) as ImageButton
+    private val returnBtn: ImageKeyView = createKey(ReturnKey()) as ImageKeyView
 
     init {
         id = R.id.expanded_candidate_view

@@ -1,28 +1,26 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
 import android.content.Context
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.view.MotionEvent
-import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import androidx.annotation.CallSuper
 import androidx.annotation.DrawableRes
+import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.get
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import org.fcitx.fcitx5.android.utils.hapticIfEnabled
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
-import splitties.resources.styledColor
-import splitties.resources.styledColorSL
+import splitties.resources.styledDrawable
 import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.button
-import splitties.views.dsl.core.imageButton
 import splitties.views.imageResource
 import splitties.views.padding
+import timber.log.Timber
 
 abstract class BaseKeyboard(
     context: Context,
@@ -39,7 +37,7 @@ abstract class BaseKeyboard(
         with(context) {
             val keyRows = keyLayout.map { row ->
                 val keyButtons = row.map { key ->
-                    createButton(key)
+                    createKey(key)
                 }
                 constraintLayout Row@{
                     keyButtons.forEachIndexed { index, button ->
@@ -71,43 +69,26 @@ abstract class BaseKeyboard(
         }
     }
 
-    protected fun createButton(btn: BaseKey, initView: View.() -> Unit = {}): View = with(context) {
-        when (btn) {
-            is IImageKey -> imageButton {
-                imageResource = btn.src
-                if (btn is ITintKey) {
-                    backgroundTintList = styledColorSL(btn.background)
-                    colorFilter =
-                        PorterDuffColorFilter(styledColor(btn.foreground), PorterDuff.Mode.SRC_IN)
-                }
-            }
-            is ITextKey -> button {
-                text = btn.displayText
-                textSize = 16f // sp
-                isAllCaps = false
-            }
-            else -> button {}
+
+    protected fun createKey(key: BaseKey): BaseKeyView =
+        when (key) {
+            is IImageKey -> ImageKeyView(context)
+            is AltTextKey -> AltTextKeyView(context)
+            else -> TextKeyView(context)
         }.apply {
-            when (btn) {
-                is IKeyId -> {
-                    id = btn.id
-                }
-            }
-            padding = 0
-            elevation = dp(2f)
-            isHapticFeedbackEnabled = false
+            applyKey(key)
             setOnClickListener {
-                if (btn is IPressKey)
-                    onAction(btn.onPress())
+                if (key is IPressKey)
+                    onAction(key.onPress())
             }
             setOnLongClickListener {
-                when (btn) {
+                when (key) {
                     is ILongPressKey -> {
-                        onAction(btn.onLongPress())
+                        onAction(key.onLongPress())
                         true
                     }
                     is IRepeatKey -> {
-                        onAction(btn.onHold())
+                        onAction(key.onHold())
                         true
                     }
                     else -> false
@@ -119,38 +100,36 @@ abstract class BaseKeyboard(
                     return false
                 }
 
-                override fun onDoubleTap() = when (btn) {
+                override fun onDoubleTap() = when (key) {
                     is IDoublePressKey -> {
                         hapticIfEnabled()
-                        onAction(btn.onDoublePress())
+                        onAction(key.onDoublePress())
                         true
                     }
                     else -> false
                 }
 
-                override fun onSwipeDown() = when (btn) {
+                override fun onSwipeDown() = when (key) {
                     is ILongPressKey -> {
-                        onAction(btn.onLongPress())
+                        onAction(key.onLongPress())
                         true
                     }
                     else -> false
                 }
 
                 override fun onRawTouchEvent(motionEvent: MotionEvent): Boolean {
-                    when (btn) {
+                    when (key) {
                         is IRepeatKey -> {
                             when (motionEvent.actionMasked) {
                                 MotionEvent.ACTION_BUTTON_PRESS -> performClick()
-                                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> onAction(btn.onRelease())
+                                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> onAction(key.onRelease())
                             }
                         }
                     }
                     return false
                 }
             })
-            initView()
         }
-    }
 
 
     @DrawableRes
@@ -171,14 +150,14 @@ abstract class BaseKeyboard(
 
     // FIXME: need some new API to know exactly whether next enter would be captured by fcitx
     protected fun updateReturnButton(
-        `return`: ImageButton,
+        `return`: ImageKeyView,
         info: EditorInfo?,
         content: PreeditContent
     ) {
         val hasPreedit = content.preedit.preedit.isNotEmpty()
         // `auxUp` is not empty when switching input methods, ignore it to reduce flicker
         //        || content.aux.auxUp.isNotEmpty()
-        `return`.imageResource = if (hasPreedit) {
+        `return`.button.imageResource = if (hasPreedit) {
             R.drawable.ic_baseline_keyboard_return_24
         } else {
             drawableForReturn(info)
