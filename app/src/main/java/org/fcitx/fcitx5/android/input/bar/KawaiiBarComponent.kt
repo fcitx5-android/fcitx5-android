@@ -22,6 +22,7 @@ import org.fcitx.fcitx5.android.input.clipboard.ClipboardWindow
 import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
+import org.fcitx.fcitx5.android.input.editing.TextEditingWindow
 import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
@@ -82,7 +83,9 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             it.redoButton.setOnClickListener {
                 service.sendCombinationKeyEvents(KeyEvent.KEYCODE_Z, ctrl = true, shift = true)
             }
-            it.cursorMoveButton.setOnClickListener { }
+            it.cursorMoveButton.setOnClickListener {
+                windowManager.attachWindow(TextEditingWindow())
+            }
             it.clipboardButton.setOnClickListener {
                 windowManager.attachWindow(ClipboardWindow())
             }
@@ -105,7 +108,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     private val titleUi by lazy { KawaiiBarUi.Title(context) }
 
-    val barStateMachine = KawaiiBarStateMachine.new {
+    private val barStateMachine = KawaiiBarStateMachine.new {
         switchUiByState(it)
     }
 
@@ -125,18 +128,16 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         }
     }
 
-    val idleUiStateMachine = IdleUiStateMachine.new {
+    private val idleUiStateMachine = IdleUiStateMachine.new {
         idleUi.switchUiByState(it)
     }
-
 
     // set expand candidate button to create expand candidate
     private fun setExpandButtonToAttach() {
         candidateUi.expandButton.setOnClickListener {
             windowManager.attachWindow(ExpandedCandidateWindow())
         }
-        candidateUi.expandButton.imageResource =
-            R.drawable.ic_baseline_expand_more_24
+        candidateUi.expandButton.imageResource = R.drawable.ic_baseline_expand_more_24
     }
 
     // set expand candidate button to close expand candidate
@@ -184,7 +185,6 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         }
     }
 
-
     override fun onPreeditUpdate(content: PreeditContent) {
         barStateMachine.push(
             if (content.preedit.preedit.isEmpty() && content.preedit.clientPreedit.isEmpty())
@@ -193,7 +193,6 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                 PreeditUpdatedNonEmpty
         )
     }
-
 
     override fun onWindowAttached(window: InputWindow) {
         when (window) {

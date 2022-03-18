@@ -71,4 +71,6 @@
     <string name="expanded_candidate_grid_span_count_landscape">表格样式展开候选词列数（横屏）</string>
     <string name="no_config_options">目前没有可用的配置选项</string>
     <string name="unimplemented_type">⛔ 未实现类型</string>
+    <string name="select">选择</string>
+    <string name="text_editing">文本编辑</string>
 </resources>
