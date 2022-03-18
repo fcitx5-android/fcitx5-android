@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!DOCTYPE resources [<!ENTITY appname "小企鹅输入法5">]>
+<?xml version="1.0" encoding="utf-8"?><!DOCTYPE resources [<!ENTITY appname "Fcitx5 for Android">]>
 <resources>
     <string name="app_name_release">&appname;</string>
     <string name="app_name_debug">&appname; (调试)</string>
@@ -19,6 +19,7 @@
     <string name="edit">修改</string>
     <string name="undo">撤销</string>
     <string name="delete_and_sync_data">删除并同步运行数据</string>
+    <string name="delete_and_sync_data_message">删除当前的数据文件夹并从应用附带的资源中同步</string>
     <string name="enable_ime">启用输入法</string>
     <string name="enable_ime_hint">在“语言和输入法设置”中启用<b>&appname;</b></string>
     <string name="select_ime">选择输入法</string>
@@ -29,6 +30,7 @@
     <string name="setup_keyboard">请完成键盘设置</string>
     <string name="setup_channel">设置向导</string>
     <string name="pinyin_dict">拼音词典</string>
+    <string name="reloading">重新加载中</string>
     <string name="importing">导入中</string>
     <string name="import_error">导入错误</string>
     <string name="dict_already_exists">词典已存在</string>
@@ -36,25 +38,24 @@
     <string name="whether_import_dict">您想导入这本词典吗？</string>
     <string name="import_">导入</string>
     <string name="synced">已同步！</string>
-    <string name="reloading">重新加载中</string>
     <string name="loading">加载中</string>
-    <string name="keyboard_height">键盘高度</string>
-    <string name="clipboard">剪切板</string>
-    <string name="delete">删除</string>
-    <string name="unpin">取消置顶</string>
-    <string name="pin">置顶</string>
-    <string name="clear_clb_db">清空剪切板数据库</string>
-    <string name="developer">开发者</string>
-    <string name="real_time_logs">实时日志</string>
-    <string name="current_version">当前版本</string>
-    <string name="about">关于</string>
-    <string name="add_more_input_methods">您想添加更多输入法吗？</string>
-    <string name="no_more_input_methods">没有更多的输入法可以切换</string>
-    <string name="expanded_candidate_style_flexbox">弹性盒</string>
-    <string name="expanded_candidate_style_grid">表格</string>
-    <string name="expanded_candidate_style">展开候选词样式</string>
     <string name="clipboard_enable">剪切板监听</string>
     <string name="clipboard_limit">剪切板历史限制</string>
+    <string name="expanded_candidate_style">展开候选词样式</string>
+    <string name="expanded_candidate_style_grid">表格</string>
+    <string name="expanded_candidate_style_flexbox">弹性盒</string>
+    <string name="no_more_input_methods">没有更多的输入法可以切换</string>
+    <string name="add_more_input_methods">您想添加更多输入法吗？</string>
+    <string name="about">关于</string>
+    <string name="current_version">当前版本</string>
+    <string name="real_time_logs">实时日志</string>
+    <string name="developer">开发者</string>
+    <string name="clear_clb_db">清空剪切板数据库</string>
+    <string name="pin">置顶</string>
+    <string name="unpin">取消置顶</string>
+    <string name="delete">删除</string>
+    <string name="clipboard">剪切板</string>
+    <string name="keyboard_height">键盘高度</string>
     <string name="keyboard">键盘</string>
     <string name="clipboard_item_timeout">剪切板项时间限制</string>
     <string name="version">版本</string>
@@ -62,13 +63,12 @@
     <string name="build_git_hash">构建 Git 哈希</string>
     <string name="source_code">源代码</string>
     <string name="privacy_policy">隐私权政策</string>
-    <string name="open_source_licenses">开源软件许可</string>
     <string name="license">许可</string>
+    <string name="open_source_licenses">开源软件许可</string>
     <string name="licenses_of_third_party_libraries">第三方库许可证</string>
     <string name="github_repo">GitHub 仓库</string>
-    <string name="delete_and_sync_data_message">删除当前的数据文件夹并从应用附带的资源中同步</string>
-    <string name="expanded_candidate_grid_span_count_portrait">表格样式展开候选词列数（竖屏）</string>
     <string name="expanded_candidate_grid_span_count_landscape">表格样式展开候选词列数（横屏）</string>
+    <string name="expanded_candidate_grid_span_count_portrait">表格样式展开候选词列数（竖屏）</string>
     <string name="no_config_options">目前没有可用的配置选项</string>
     <string name="unimplemented_type">⛔ 未实现类型</string>
     <string name="select">选择</string>
