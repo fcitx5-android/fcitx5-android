@@ -15,6 +15,8 @@ interface InputBroadcastReceiver {
 
     fun onCandidateUpdates(data: Array<String>) {}
 
+    fun onSelectionUpdate(start: Int, end: Int) {}
+
     fun onWindowAttached(window: InputWindow) {}
 
     fun onWindowDetached(window: InputWindow) {}

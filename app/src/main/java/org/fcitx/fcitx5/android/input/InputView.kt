@@ -86,9 +86,8 @@ class InputView(
         // MUST call before any operation
         setupScope()
 
-        Prefs.getInstance().keyboardHeightPercent.registerOnChangeListener(
-            onWindowHeightChangeListener
-        )
+        Prefs.getInstance().keyboardHeightPercent
+            .registerOnChangeListener(onWindowHeightChangeListener)
 
         service.lifecycleScope.launch {
             broadcaster.onImeUpdate(fcitx.currentIme())
@@ -109,9 +108,8 @@ class InputView(
 
     override fun onDetachedFromWindow() {
         preedit.dismiss()
-        Prefs.getInstance().keyboardHeightPercent.unregisterOnChangeListener(
-            onWindowHeightChangeListener
-        )
+        Prefs.getInstance().keyboardHeightPercent
+            .unregisterOnChangeListener(onWindowHeightChangeListener)
         super.onDetachedFromWindow()
     }
 
@@ -137,6 +135,10 @@ class InputView(
             else -> {
             }
         }
+    }
+
+    fun onSelectionUpdate(start: Int, end: Int) {
+        broadcaster.onSelectionUpdate(start, end)
     }
 
 }

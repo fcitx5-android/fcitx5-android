@@ -15,39 +15,41 @@ class InputBroadcaster : UniqueComponent<InputBroadcaster>(), Dependent, InputBr
 
     override fun handle(scopeEvent: ScopeEvent) {
         when (scopeEvent) {
-            is ScopeEvent.DependencyArrivedEvent ->
-                if (scopeEvent.dependency is InputBroadcastReceiver && scopeEvent.dependency !is InputBroadcaster)
+            is ScopeEvent.DependencyArrivedEvent -> {
+                if (scopeEvent.dependency is InputBroadcastReceiver && scopeEvent.dependency !is InputBroadcaster) {
                     receivers.add(scopeEvent.dependency as InputBroadcastReceiver)
-            is ScopeEvent.DependencyLeftEvent -> if (scopeEvent.dependency is InputBroadcastReceiver
-                && scopeEvent.dependency !is InputBroadcaster
-            )
-                receivers.remove(scopeEvent.dependency as InputBroadcastReceiver)
+                }
+            }
+            is ScopeEvent.DependencyLeftEvent -> {
+                if (scopeEvent.dependency is InputBroadcastReceiver && scopeEvent.dependency !is InputBroadcaster) {
+                    receivers.remove(scopeEvent.dependency as InputBroadcastReceiver)
+                }
+            }
         }
     }
 
     override fun onPreeditUpdate(content: PreeditContent) {
         receivers.forEach { it.onPreeditUpdate(content) }
-
     }
 
     override fun onImeUpdate(ime: InputMethodEntry) {
         receivers.forEach { it.onImeUpdate(ime) }
-
     }
 
     override fun onCandidateUpdates(data: Array<String>) {
         receivers.forEach { it.onCandidateUpdates(data) }
+    }
 
+    override fun onSelectionUpdate(start: Int, end: Int) {
+        receivers.forEach { it.onSelectionUpdate(start, end) }
     }
 
     override fun onWindowAttached(window: InputWindow) {
         receivers.forEach { it.onWindowAttached(window) }
-
     }
 
     override fun onWindowDetached(window: InputWindow) {
         receivers.forEach { it.onWindowDetached(window) }
-
     }
 
     override fun onScopeSetupFinished(scope: DynamicScope) {

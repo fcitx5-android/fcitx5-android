@@ -27,11 +27,14 @@ import timber.log.Timber
 
 class FcitxInputMethodService : LifecycleInputMethodService() {
 
+    data class SelectionInfo(val start: Int, val end: Int)
+
     private lateinit var inputView: InputView
     private lateinit var fcitx: Fcitx
     private var eventHandlerJob: Job? = null
 
     var editorInfo: EditorInfo? = null
+    var selectionInfo = SelectionInfo(-1, -1)
 
     private var keyRepeatingJobs = hashMapOf<String, Job>()
 
@@ -196,6 +199,26 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             fcitx.focus()
         }
         inputView.onShow()
+    }
+
+    override fun onUpdateSelection(
+        oldSelStart: Int,
+        oldSelEnd: Int,
+        newSelStart: Int,
+        newSelEnd: Int,
+        candidatesStart: Int,
+        candidatesEnd: Int
+    ) {
+        super.onUpdateSelection(
+            oldSelStart,
+            oldSelEnd,
+            newSelStart,
+            newSelEnd,
+            candidatesStart,
+            candidatesEnd
+        )
+        selectionInfo = SelectionInfo(newSelStart, newSelEnd)
+        inputView.onSelectionUpdate(newSelStart, newSelEnd)
     }
 
     override fun onUpdateCursorAnchorInfo(info: CursorAnchorInfo?) {
