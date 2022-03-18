@@ -5,7 +5,7 @@ git:
       source_language: en
       source_file: app/src/main/res/values/strings.xml
       translation_files_expression: app/src/main/res/values-<lang>/strings.xml
-   -  filter_type: file
+    - filter_type: file
       file_format: po
       source_language: en
       source_file: app/src/main/cpp/po/fcitx5-android.pot
