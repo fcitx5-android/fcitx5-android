@@ -1,15 +1,20 @@
+# 
+# Translators:
+# Potato Hatsue, 2022
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: fcitx5-android\n"
 "Report-Msgid-Bugs-To: https://github.com/fcitx5-android/fcitx5-android/issues\n"
 "POT-Creation-Date: 2022-02-14 18:51+0800\n"
-"PO-Revision-Date: 2022-02-14 19:31+0800\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: LANG\n"
+"PO-Revision-Date: 2022-03-18 22:18+0000\n"
+"Last-Translator: Potato Hatsue, 2022\n"
+"Language-Team: Russian (https://www.transifex.com/fcitx/teams/12005/ru/)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: ru\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 
 msgid "Android Frontend"
 msgstr "Интерфейс Android"
