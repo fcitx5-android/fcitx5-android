@@ -226,7 +226,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             candidatesEnd
         )
         selectionInfo = SelectionInfo(newSelStart, newSelEnd)
-        inputView.onSelectionUpdate(newSelStart, newSelEnd)
+        if (::inputView.isInitialized)
+            inputView.onSelectionUpdate(newSelStart, newSelEnd)
+        else
+            Timber.w("Ignore onSelectionUpdate: inputView is not initialized")
     }
 
     override fun onUpdateCursorAnchorInfo(info: CursorAnchorInfo?) {
