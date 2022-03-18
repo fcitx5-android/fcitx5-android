@@ -115,7 +115,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         keyRepeatingJobs.forEach { cancelRepeating(it.key) }
     }
 
-    private fun sendDownKeyEvent(eventTime: Long, keyEventCode: Int, metaState: Int) {
+    private fun sendDownKeyEvent(eventTime: Long, keyEventCode: Int, metaState: Int = 0) {
         inputConnection?.sendKeyEvent(
             KeyEvent(
                 eventTime,
@@ -131,7 +131,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         )
     }
 
-    private fun sendUpKeyEvent(eventTime: Long, keyEventCode: Int, metaState: Int) {
+    private fun sendUpKeyEvent(eventTime: Long, keyEventCode: Int, metaState: Int = 0) {
         inputConnection?.sendKeyEvent(
             KeyEvent(
                 eventTime,
@@ -153,13 +153,21 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         ctrl: Boolean = false,
         shift: Boolean = false
     ) {
+        inputConnection?.beginBatchEdit() ?: return
         var metaState = 0
         if (alt) metaState = KeyEvent.META_ALT_ON or KeyEvent.META_ALT_LEFT_ON
         if (ctrl) metaState = metaState or KeyEvent.META_CTRL_ON or KeyEvent.META_CTRL_LEFT_ON
         if (shift) metaState = metaState or KeyEvent.META_SHIFT_ON or KeyEvent.META_SHIFT_LEFT_ON
         val eventTime = SystemClock.uptimeMillis()
+        if (alt) sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_ALT_LEFT)
+        if (ctrl) sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_CTRL_LEFT)
+        if (shift) sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_SHIFT_LEFT)
         sendDownKeyEvent(eventTime, keyEventCode, metaState)
         sendUpKeyEvent(eventTime, keyEventCode, metaState)
+        if (shift) sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_SHIFT_LEFT)
+        if (ctrl) sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_CTRL_LEFT)
+        if (alt) sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_ALT_LEFT)
+        inputConnection?.endBatchEdit()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
