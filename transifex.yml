@@ -7,6 +7,6 @@ git:
       translation_files_expression: app/src/main/res/values-<lang>/strings.xml
   settings:
     language_mapping:
+      ca_ES: ca-rES
       zh_CN: zh-rCN
       zh_TW: zh-rTW
-      zh_HK: zh-rHK
