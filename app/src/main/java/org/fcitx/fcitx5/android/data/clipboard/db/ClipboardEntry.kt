@@ -16,7 +16,8 @@ data class ClipboardEntry(
         const val TABLE_NAME = "clipboard"
 
         fun fromClipData(clipData: ClipData): ClipboardEntry? = clipData.takeIf {
-            it.description.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)
+            it.description.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN) ||
+                    it.description.hasMimeType(ClipDescription.MIMETYPE_TEXT_HTML)
         }?.run { ClipboardEntry(text = getItemAt(0).text.toString()) }
     }
 }
