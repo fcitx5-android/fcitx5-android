@@ -12,6 +12,9 @@
 /app/src/main/assets/descriptor.json
 # Generated license json
 /app/src/main/assets/licenses.json
+# Renamed po files
+/app/src/main/cpp/po/zh_CN.po
+/app/src/main/cpp/po/zh_TW.po
 
 # Intellij
 .idea/*

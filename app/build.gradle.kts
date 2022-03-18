@@ -1,3 +1,4 @@
+import com.android.build.gradle.internal.tasks.factory.dependsOn
 import com.google.common.hash.Hashing
 import com.google.common.io.Files
 import groovy.json.JsonOutput
@@ -125,6 +126,17 @@ android {
             useLegacyPackaging = true
         }
     }
+}
+
+// reverse mapping in transifex.yml
+tasks.register<Copy>("renamePoFiles") {
+    from("src/main/cpp/po")
+    into("src/main/cpp/po")
+    include("zh-rCN.po")
+    include("zh-rTW.po")
+    rename { it.replace('-', '_').filter { char -> char != 'r' } }
+}.also {
+    tasks.preBuild.dependsOn(it)
 }
 
 
