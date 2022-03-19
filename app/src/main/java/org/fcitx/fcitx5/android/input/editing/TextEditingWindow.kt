@@ -36,7 +36,6 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
 
     override val view by lazy {
         ui.apply {
-            // TODO: long press to repeat
             leftButton.setOnClickListener { sendDirectionKey(KeyEvent.KEYCODE_DPAD_LEFT) }
             leftButton.setupPressingToRepeat()
 

@@ -49,6 +49,7 @@ class AccelerateRepeatingOnTouchListener(
                         view.performClick()
                     }
                 }
+                view.performClick()
                 view.isPressed = true
                 true
             }
