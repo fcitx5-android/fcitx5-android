@@ -40,29 +40,29 @@ class TextEditingUi(override val ctx: Context) : Ui {
         background = borderedBackground()
     }
 
-    var upButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_up_24)
+    val upButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_up_24)
 
-    var rightButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_right_24)
+    val rightButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_right_24)
 
-    var downButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_down_24)
+    val downButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_down_24)
 
-    var leftButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_left_24)
+    val leftButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_left_24)
 
-    var selectButton = textButton(ctx.getString(R.string.select))
+    val selectButton = textButton(ctx.getString(R.string.select))
 
-    var homeButton = iconButton(R.drawable.ic_baseline_first_page_24)
+    val homeButton = iconButton(R.drawable.ic_baseline_first_page_24)
 
-    var endButton = iconButton(R.drawable.ic_baseline_last_page_24)
+    val endButton = iconButton(R.drawable.ic_baseline_last_page_24)
 
-    var selectAllButton = textButton(ctx.getString(android.R.string.selectAll))
+    val selectAllButton = textButton(ctx.getString(android.R.string.selectAll))
 
-    var cutButton = textButton(ctx.getString(android.R.string.cut)).apply { visibility = View.GONE }
+    val cutButton = textButton(ctx.getString(android.R.string.cut)).apply { visibility = View.GONE }
 
-    var copyButton = textButton(ctx.getString(android.R.string.copy))
+    val copyButton = textButton(ctx.getString(android.R.string.copy))
 
-    var pasteButton = textButton(ctx.getString(android.R.string.paste))
+    val pasteButton = textButton(ctx.getString(android.R.string.paste))
 
-    var backspaceButton = iconButton(R.drawable.ic_baseline_backspace_24)
+    val backspaceButton = iconButton(R.drawable.ic_baseline_backspace_24)
 
     override val root = constraintLayout {
         add(leftButton, lParams {

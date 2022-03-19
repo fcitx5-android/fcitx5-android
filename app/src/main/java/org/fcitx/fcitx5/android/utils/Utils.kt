@@ -7,10 +7,8 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import android.view.HapticFeedbackConstants
 import android.view.View
-import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.inputmethod.InputConnection
-import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,6 +17,7 @@ import com.sun.jna.Library
 import com.sun.jna.Native
 import org.fcitx.fcitx5.android.FcitxApplication
 import org.fcitx.fcitx5.android.data.Prefs
+import org.fcitx.fcitx5.android.ui.common.AccelerateRepeatingOnTouchListener
 
 val InputMethodService.inputConnection: InputConnection?
     get() = currentInputConnection
@@ -77,3 +76,17 @@ fun View.hapticIfEnabled() {
             HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING or HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
         )
 }
+
+fun View.setupPressingToRepeat(
+    firstClickInterval: Long = 30L,
+    initialInterval: Long = 200L,
+    endInterval: Long = 30L,
+    accelerateTime: Long = 1000L
+) = setOnTouchListener(
+    AccelerateRepeatingOnTouchListener(
+        firstClickInterval,
+        initialInterval,
+        endInterval,
+        accelerateTime
+    )
+)

@@ -13,6 +13,7 @@ import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.inputConnection
+import org.fcitx.fcitx5.android.utils.setupPressingToRepeat
 import org.mechdancer.dependency.manager.must
 
 class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
@@ -37,9 +38,17 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
         ui.apply {
             // TODO: long press to repeat
             leftButton.setOnClickListener { sendDirectionKey(KeyEvent.KEYCODE_DPAD_LEFT) }
+            leftButton.setupPressingToRepeat()
+
             upButton.setOnClickListener { sendDirectionKey(KeyEvent.KEYCODE_DPAD_UP) }
+            upButton.setupPressingToRepeat()
+
             downButton.setOnClickListener { sendDirectionKey(KeyEvent.KEYCODE_DPAD_DOWN) }
+            downButton.setupPressingToRepeat()
+
             rightButton.setOnClickListener { sendDirectionKey(KeyEvent.KEYCODE_DPAD_RIGHT) }
+            rightButton.setupPressingToRepeat()
+
             homeButton.setOnClickListener { sendDirectionKey(KeyEvent.KEYCODE_MOVE_HOME) }
             endButton.setOnClickListener { sendDirectionKey(KeyEvent.KEYCODE_MOVE_END) }
             selectButton.setOnClickListener {
@@ -67,6 +76,7 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
             backspaceButton.setOnClickListener {
                 service.lifecycleScope.launch { fcitx.sendKey("BackSpace") }
             }
+            backspaceButton.setupPressingToRepeat()
             clipboardButton.setOnClickListener {
                 windowManager.attachWindow(ClipboardWindow())
             }
