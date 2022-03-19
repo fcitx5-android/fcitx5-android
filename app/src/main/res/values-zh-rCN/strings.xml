@@ -39,8 +39,9 @@
     <string name="import_">导入</string>
     <string name="synced">已同步！</string>
     <string name="loading">加载中</string>
-    <string name="clipboard_listening">剪切板监听</string>
-    <string name="clipboard_limit">剪切板历史限制</string>
+    <string name="clipboard_listening">剪贴板监听</string>
+    <string name="clipboard_limit">剪贴板历史限制</string>
+    <string name="clipboard_enable">启用剪贴板</string>
     <string name="expanded_candidate_style">展开候选词样式</string>
     <string name="expanded_candidate_style_grid">表格</string>
     <string name="expanded_candidate_style_flexbox">弹性盒</string>
@@ -73,6 +74,6 @@
     <string name="unimplemented_type">⛔ 未实现类型</string>
     <string name="select">选择</string>
     <string name="text_editing">文本编辑</string>
-    <string name="instruction_enable_clipboard_listening">要使用剪贴板管理，请在设置中启用剪贴板监听</string>
-    <string name="instruction_copy">尝试复制一些东西</string>
+    <string name="instruction_enable_clipboard_listening">要启用剪贴板管理，请在设置中启用剪贴板监听。</string>
+    <string name="instruction_copy">试着复制些东西</string>
 </resources>
