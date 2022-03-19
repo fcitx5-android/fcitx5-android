@@ -81,7 +81,7 @@
             <SwitchPreference
                 android:defaultValue="true"
                 android:key="@string/pref_clipboard_enable"
-                android:title="@string/clipboard_enable"
+                android:title="@string/clipboard_listening"
                 app:iconSpaceReserved="false"
                 app:singleLineTitle="false" />
             <org.fcitx.fcitx5.android.ui.common.DialogSeekBarPreference

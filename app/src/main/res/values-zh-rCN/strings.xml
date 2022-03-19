@@ -39,7 +39,7 @@
     <string name="import_">导入</string>
     <string name="synced">已同步！</string>
     <string name="loading">加载中</string>
-    <string name="clipboard_enable">剪切板监听</string>
+    <string name="clipboard_listening">剪切板监听</string>
     <string name="clipboard_limit">剪切板历史限制</string>
     <string name="expanded_candidate_style">展开候选词样式</string>
     <string name="expanded_candidate_style_grid">表格</string>

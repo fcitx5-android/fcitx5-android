@@ -39,8 +39,9 @@
     <string name="import_">Import</string>
     <string name="synced">Synced!</string>
     <string name="loading">Loading</string>
-    <string name="clipboard_enable">Clipboard listening</string>
+    <string name="clipboard_listening">Clipboard listening</string>
     <string name="clipboard_limit">Clipboard history limit</string>
+    <string name="clipboard_enable">Enable Clipboard</string>
     <string name="expanded_candidate_style">Expanded candidate style</string>
     <string name="expanded_candidate_style_grid">Grid</string>
     <string name="expanded_candidate_style_flexbox">Flexbox</string>
