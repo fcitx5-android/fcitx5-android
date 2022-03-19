@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name_release">小企鹅输入法5</string>
-    <string name="app_name_debug">小企鹅输入法5 (调试)</string>
+    <string name="app_name_debug">小企鹅输入法5（调试）</string>
     <string name="save">保存</string>
     <string name="input_methods">输入法</string>
     <string name="add_input_method">添加输入法</string>
