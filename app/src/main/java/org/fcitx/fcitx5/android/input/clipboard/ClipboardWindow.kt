@@ -4,6 +4,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.ViewAnimator
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
@@ -122,10 +123,19 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         }
     }
 
-    private val instructionText by lazy {
-        context.textView {
-            textSize = 30f
+    private val enableUi by lazy {
+        ClipboardInstructionUi.Enable(context).apply {
+            enableButton.setOnClickListener {
+                with(PreferenceManager.getDefaultSharedPreferences(context).edit()) {
+                    putBoolean(context.getString(R.string.pref_clipboard_enable), true)
+                    apply()
+                }
+            }
         }
+    }
+
+    private val emptyUi by lazy {
+        ClipboardInstructionUi.Empty(context)
     }
 
     private lateinit var stateMachine: EventStateMachine<ClipboardStateMachine.State, ClipboardStateMachine.TransitionEvent>
@@ -139,17 +149,14 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         when (state) {
             Normal -> {
                 view.displayedChild = 0
-                instructionText.text = ""
                 setDeleteButtonEnabled(true)
             }
             AddMore -> {
                 view.displayedChild = 1
-                instructionText.setText(R.string.instruction_copy)
                 setDeleteButtonEnabled(false)
             }
             EnableListening -> {
-                view.displayedChild = 1
-                instructionText.setText(R.string.instruction_enable_clipboard_listening)
+                view.displayedChild = 2
                 setDeleteButtonEnabled(false)
             }
         }
@@ -158,7 +165,8 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     override val view by lazy {
         ViewAnimator(context).apply {
             add(recyclerView, lParams(matchParent, matchParent))
-            add(instructionText, lParams(matchParent, wrapContent))
+            add(emptyUi.root, lParams(matchParent, matchParent))
+            add(enableUi.root, lParams(matchParent, matchParent))
         }
     }
 
