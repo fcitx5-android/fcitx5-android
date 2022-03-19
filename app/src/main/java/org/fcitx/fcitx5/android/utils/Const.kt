@@ -10,7 +10,7 @@ object Const {
         Locale.ROOT
     ).format(Date(BuildConfig.BUILD_TIME))
     const val buildGitHash = BuildConfig.BUILD_GIT_HASH
-    const val versionName = BuildConfig.VERSION_NAME
+    const val versionName = "${BuildConfig.VERSION_NAME}-${BuildConfig.BUILD_TYPE}"
     const val dataDescriptorName = BuildConfig.DATA_DESCRIPTOR_NAME
     const val githubRepo = "https://github.com/fcitx5-android/fcitx5-android"
     const val lgpl = "LGPL-2.1-or-later"
