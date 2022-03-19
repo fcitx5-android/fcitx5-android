@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?><!DOCTYPE resources [<!ENTITY appname "Fcitx5 for Android">]>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name_release">&appname;</string>
-    <string name="app_name_debug">&appname; (Debug)</string>
+    <string name="app_name_release">Fcitx5 for Android</string>
+    <string name="app_name_debug">Fcitx5 for Android (Debug)</string>
     <string name="save">Save</string>
     <string name="input_methods">Input Methods</string>
     <string name="add_input_method">Add Input Method</string>
@@ -21,9 +21,9 @@
     <string name="delete_and_sync_data">Delete and sync runtime data</string>
     <string name="delete_and_sync_data_message">Delete current data directory and synchronize from assets bundled in app</string>
     <string name="enable_ime">Enable Input Method</string>
-    <string name="enable_ime_hint">Enable <b>&appname;</b> in Language and input settings</string>
+    <string name="enable_ime_hint">Enable &lt;b>%1$s&lt;/b> in Language and input settings</string>
     <string name="select_ime">Select Input Method</string>
-    <string name="select_ime_hint">Select <b>&appname;</b> as your default input method</string>
+    <string name="select_ime_hint">Select &lt;b>%1$s&lt;/b> as your default input method</string>
     <string name="next">Next</string>
     <string name="prev">Prev</string>
     <string name="done">Done</string>

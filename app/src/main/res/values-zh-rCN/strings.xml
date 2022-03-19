@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?><!DOCTYPE resources [<!ENTITY appname "Fcitx5 for Android">]>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name_release">&appname;</string>
-    <string name="app_name_debug">&appname; (调试)</string>
+    <string name="app_name_release">小企鹅输入法5</string>
+    <string name="app_name_debug">小企鹅输入法5 (调试)</string>
     <string name="save">保存</string>
     <string name="input_methods">输入法</string>
     <string name="add_input_method">添加输入法</string>
@@ -21,9 +21,9 @@
     <string name="delete_and_sync_data">删除并同步运行数据</string>
     <string name="delete_and_sync_data_message">删除当前的数据文件夹并从应用附带的资源中同步</string>
     <string name="enable_ime">启用输入法</string>
-    <string name="enable_ime_hint">在“语言和输入法设置”中启用<b>&appname;</b></string>
+    <string name="enable_ime_hint">在“语言和输入法设置”中启用&lt;b>%1$s&lt;/b></string>
     <string name="select_ime">选择输入法</string>
-    <string name="select_ime_hint">选择<b>&appname;</b>作为默认输入法</string>
+    <string name="select_ime_hint">选择&lt;b>%1$s&lt;/b>作为默认输入法</string>
     <string name="next">下一步</string>
     <string name="prev">上一步</string>
     <string name="done">完成</string>

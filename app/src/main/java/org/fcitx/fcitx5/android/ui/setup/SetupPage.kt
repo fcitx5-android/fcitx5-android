@@ -1,18 +1,19 @@
 package org.fcitx.fcitx5.android.ui.setup
 
 import android.content.Context
+import androidx.core.text.HtmlCompat
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.utils.InputMethodUtil
 
 enum class SetupPage {
     Enable, Select;
 
-    fun getHintText(context: Context) = context.getText(
+    fun getHintText(context: Context) = context.getString(
         when (this) {
             Enable -> R.string.enable_ime_hint
             Select -> R.string.select_ime_hint
-        }
-    )
+        }, context.getString(R.string.app_name)
+    ).let { HtmlCompat.fromHtml(it, HtmlCompat.FROM_HTML_MODE_LEGACY) }
 
     fun getButtonText(context: Context) = context.getText(
         when (this) {
