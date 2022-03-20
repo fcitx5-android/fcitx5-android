@@ -76,4 +76,6 @@
     <string name="text_editing">Text Editing</string>
     <string name="instruction_enable_clipboard_listening">To use clipboard management, please enable clipboard listening in settings</string>
     <string name="instruction_copy">Try copying something</string>
+    <string name="clear">Clear</string>
+    <string name="export">Export</string>
 </resources>

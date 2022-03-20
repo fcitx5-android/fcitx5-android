@@ -18,7 +18,9 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import cn.berberman.girls.utils.maybe.Maybe
 import cn.berberman.girls.utils.maybe.fx
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.pinyin.PinyinDictManager
 import org.fcitx.fcitx5.android.data.pinyin.dict.Dictionary
@@ -153,15 +155,18 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                         .setProgress(100, 0, true)
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                 builder.build().let { notificationManager.notify(id, it) }
-                @Suppress("BlockingMethodInNonBlockingContext")
-                val inputStream = contentResolver.openInputStream(uri).bindNullable()
+                val inputStream = runCatching { contentResolver.openInputStream(uri) }
+                    .getOrNull()
+                    .bindNullable()
                 runCatching {
                     val result: LibIMEDictionary
                     measureTimeMillis {
-                        result = PinyinDictManager.importFromInputStream(
-                            inputStream,
-                            file.name
-                        )
+                        inputStream.use { i ->
+                            result = PinyinDictManager.importFromInputStream(
+                                i,
+                                file.name
+                            )
+                        }
                     }.also { Timber.d("Took $it to import $result") }
                     result
                 }

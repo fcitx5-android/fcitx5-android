@@ -137,15 +137,7 @@
     <fragment
         android:id="@+id/developerFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.DeveloperFragment"
-        android:label="">
-        <action
-            android:id="@+id/action_developerFragment_to_logFragment"
-            app:destination="@id/logFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-    </fragment>
+        android:label=""></fragment>
     <fragment
         android:id="@+id/aboutFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.AboutFragment"
@@ -158,10 +150,6 @@
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
-    <fragment
-        android:id="@+id/logFragment"
-        android:name="org.fcitx.fcitx5.android.ui.main.LogFragment"
-        android:label="" />
     <fragment
         android:id="@+id/licensesFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.LicensesFragment"

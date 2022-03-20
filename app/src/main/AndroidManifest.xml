@@ -16,6 +16,10 @@
             android:exported="false"
             android:launchMode="singleTask" />
         <activity
+            android:name=".ui.main.LogActivity"
+            android:exported="false"
+            android:launchMode="singleTask"/>
+        <activity
             android:name=".ui.main.MainActivity"
             android:exported="true"
             android:launchMode="singleTask">

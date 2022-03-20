@@ -80,7 +80,6 @@ class LogView @JvmOverloads constructor(context: Context, attributeSet: Attribut
     }
 
     fun clear() {
-        logcat.shutdownLogFlow()
         textView.text = ""
     }
 }

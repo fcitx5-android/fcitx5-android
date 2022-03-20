@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.ui.main
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +10,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,7 +31,7 @@ class DeveloperFragment : Fragment() {
         layoutManager = LinearLayoutManager(context)
         adapter = SimpleAdapter(
             getString(R.string.real_time_logs) to {
-                findNavController().navigate(R.id.action_developerFragment_to_logFragment)
+                startActivity(Intent(requireContext(), LogActivity::class.java))
             },
             context.getString(R.string.delete_and_sync_data) to {
                 AlertDialog.Builder(context)

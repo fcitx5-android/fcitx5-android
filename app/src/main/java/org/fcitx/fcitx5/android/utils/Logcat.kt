@@ -67,4 +67,8 @@ class Logcat : CoroutineScope by CoroutineScope(Dispatchers.IO) {
         process?.destroy()
         emittingJob?.cancel()
     }
+
+    companion object {
+        val default by lazy { Logcat() }
+    }
 }
