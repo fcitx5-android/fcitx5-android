@@ -1,6 +1,5 @@
 package org.fcitx.fcitx5.android.ui.common
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Typeface
 import android.os.Build
@@ -25,7 +24,7 @@ import splitties.views.padding
 class LogView @JvmOverloads constructor(context: Context, attributeSet: AttributeSet? = null) :
     NestedScrollView(context, attributeSet) {
 
-    private val logcat = Logcat()
+    private var logcat: Logcat? = null
 
     private val textView = textView {
         padding = dp(4)
@@ -45,9 +44,14 @@ class LogView @JvmOverloads constructor(context: Context, attributeSet: Attribut
         add(scrollView, lParams(matchParent, matchParent))
     }
 
-    @SuppressLint("SetTextI18n")
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
+
+    override fun onDetachedFromWindow() {
+        logcat?.shutdownLogFlow()
+        super.onDetachedFromWindow()
+    }
+
+    fun setLogcat(logcat: Logcat) {
+        this.logcat = logcat
         logcat.initLogFlow()
         logcat.logFlow.onEach {
             val color = styledColor(
@@ -74,10 +78,8 @@ class LogView @JvmOverloads constructor(context: Context, attributeSet: Attribut
         }.launchIn(findViewTreeLifecycleOwner()!!.lifecycleScope)
     }
 
-    override fun onDetachedFromWindow() {
-        logcat.shutdownLogFlow()
-        super.onDetachedFromWindow()
-    }
+    val currentLog: CharSequence
+        get() = textView.text ?: ""
 
     fun clear() {
         textView.text = ""

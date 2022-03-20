@@ -4,7 +4,7 @@ import android.os.Process
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
-class Logcat : CoroutineScope by CoroutineScope(Dispatchers.IO) {
+class Logcat(val pid: Int? = Process.myPid()) : CoroutineScope by CoroutineScope(Dispatchers.IO) {
 
     private var process: java.lang.Process? = null
     private var emittingJob: Job? = null
@@ -23,7 +23,7 @@ class Logcat : CoroutineScope by CoroutineScope(Dispatchers.IO) {
     fun getLogAsync(): Deferred<Result<List<String>>> = async {
         runCatching {
             Runtime.getRuntime()
-                .exec(arrayOf("logcat", "--pid=${Process.myPid()}", "-d"))
+                .exec(arrayOf("logcat", pid?.let { "--pid=$it" } ?: "", "-d"))
                 .inputStream
                 .bufferedReader()
                 .readLines()
@@ -48,7 +48,7 @@ class Logcat : CoroutineScope by CoroutineScope(Dispatchers.IO) {
             runCatching {
                 Runtime
                     .getRuntime()
-                    .exec(arrayOf("logcat", "--pid=${Process.myPid()}", "-v", "brief"))
+                    .exec(arrayOf("logcat", pid?.let { "--pid=$it" } ?: "", "-v", "brief"))
                     .also { process = it }
                     .inputStream
                     .bufferedReader()

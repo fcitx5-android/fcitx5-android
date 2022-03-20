@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.utils
 
 import android.content.Context
 import android.content.Intent
+import org.fcitx.fcitx5.android.ui.main.LogActivity
 import org.fcitx.fcitx5.android.ui.main.MainActivity
 
 object AppUtil {
@@ -11,6 +12,16 @@ object AppUtil {
                 context,
                 MainActivity::class.java
             ).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) })
+    }
+
+    fun launchLog(context: Context) {
+        context.startActivity(
+            Intent(
+                context,
+                LogActivity::class.java
+            ).apply {
+                putExtra(LogActivity.NOT_CRASH, 0)
+            })
     }
 
     fun launchMainToAddInputMethods(context: Context) {

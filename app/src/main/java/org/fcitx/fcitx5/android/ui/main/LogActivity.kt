@@ -2,17 +2,21 @@ package org.fcitx.fcitx5.android.ui.main
 
 import android.os.Bundle
 import android.text.format.DateFormat
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.fcitx.fcitx5.android.FcitxApplication
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.databinding.ActivityLogBinding
+import org.fcitx.fcitx5.android.ui.common.LogView
 import org.fcitx.fcitx5.android.utils.Logcat
 import java.io.OutputStreamWriter
 import java.util.*
@@ -20,6 +24,7 @@ import java.util.*
 class LogActivity : AppCompatActivity() {
 
     private lateinit var launcher: ActivityResultLauncher<String>
+    private lateinit var logView: LogView
 
     private fun registerLauncher() {
         launcher = registerForActivityResult(ActivityResultContracts.CreateDocument()) {
@@ -28,21 +33,30 @@ class LogActivity : AppCompatActivity() {
                     contentResolver.openOutputStream(it)
                         ?.let { OutputStreamWriter(it) }
                 }.getOrNull()?.use {
-                    Logcat.default
-                        .getLogAsync()
-                        .await()
-                        .onSuccess { lines ->
-                            lines.forEach(it::write)
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(this@LogActivity, R.string.done, Toast.LENGTH_SHORT)
-                                    .show()
-                            }
-                        }
-                        .onFailure {
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(this@LogActivity, it.message, Toast.LENGTH_SHORT)
-                                    .show()
-                            }
+                    logView
+                        .currentLog
+                        .let { log ->
+                            runCatching { it.write(log.toString()) }
+                                .onSuccess {
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(
+                                            this@LogActivity,
+                                            R.string.done,
+                                            Toast.LENGTH_SHORT
+                                        )
+                                            .show()
+                                    }
+                                }.onFailure {
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(
+                                            this@LogActivity,
+                                            it.message,
+                                            Toast.LENGTH_SHORT
+                                        )
+                                            .show()
+                                    }
+
+                                }
                         }
                 }
             }
@@ -55,6 +69,22 @@ class LogActivity : AppCompatActivity() {
         setContentView(binding.root)
         with(binding) {
             setSupportActionBar(toolbar)
+            this@LogActivity.logView = logView
+            logView.setLogcat(
+                if (intent.hasExtra("not_crash")) {
+                    supportActionBar!!.setTitle(R.string.real_time_logs)
+                    Logcat()
+                } else {
+                    supportActionBar!!.setTitle(R.string.crash_logs)
+                    clearButton.visibility = View.GONE
+                    AlertDialog.Builder(this@LogActivity)
+                        .setTitle(R.string.app_crash)
+                        .setMessage(R.string.app_crash_message)
+                        .setPositiveButton(android.R.string.ok) { _, _ -> }
+                        .show()
+                    Logcat(FcitxApplication.getLastPid())
+                }
+            )
             clearButton.setOnClickListener {
                 logView.clear()
             }
@@ -62,8 +92,10 @@ class LogActivity : AppCompatActivity() {
                 launcher.launch("${DateFormat.format("yyyy-MM-dd-HH:mm:ss", Date())}.txt")
             }
         }
-        supportActionBar!!.setTitle(R.string.real_time_logs)
         registerLauncher()
     }
 
+    companion object {
+        const val NOT_CRASH = "not_crash"
+    }
 }

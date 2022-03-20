@@ -1,6 +1,5 @@
 package org.fcitx.fcitx5.android.ui.main
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +16,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.DataManager
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.ui.common.SimpleAdapter
+import org.fcitx.fcitx5.android.utils.AppUtil
 import splitties.views.dsl.recyclerview.recyclerView
 
 class DeveloperFragment : Fragment() {
@@ -31,7 +31,7 @@ class DeveloperFragment : Fragment() {
         layoutManager = LinearLayoutManager(context)
         adapter = SimpleAdapter(
             getString(R.string.real_time_logs) to {
-                startActivity(Intent(requireContext(), LogActivity::class.java))
+                AppUtil.launchLog(context)
             },
             context.getString(R.string.delete_and_sync_data) to {
                 AlertDialog.Builder(context)
