@@ -76,4 +76,9 @@
     <string name="text_editing">Редактирование текста</string>
     <string name="instruction_enable_clipboard_listening">Чтобы использовать управление буфером обмена, включите прослушивание буфера обмена в настройках.</string>
     <string name="instruction_copy">Попробуйте скопировать что-нибудь</string>
+    <string name="clear">Очистить</string>
+    <string name="export">Экспорт</string>
+    <string name="app_crash">В работе приложения произошёл сбой</string>
+    <string name="app_crash_message">Извините, но мы предоставляем вам несколько журналов для изучения.</string>
+    <string name="crash_logs">Журналы сбоев</string>
 </resources>
