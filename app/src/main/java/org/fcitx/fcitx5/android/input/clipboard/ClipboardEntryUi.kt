@@ -49,7 +49,7 @@ class ClipboardEntryUi(override val ctx: Context) : Ui {
         })
     }
 
-    override val root = CardView(ctx).apply {
+    override val root = view(::CardView) {
         minimumWidth = dp(40)
         minimumHeight = dp(30)
         isClickable = true
