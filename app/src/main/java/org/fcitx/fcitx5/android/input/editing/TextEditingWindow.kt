@@ -61,15 +61,21 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
                 }
             }
             selectAllButton.setOnClickListener {
+                // activate select button after operation
+                userSelection = true
                 service.inputConnection?.performContextMenuAction(android.R.id.selectAll)
             }
             cutButton.setOnClickListener {
+                // deactivate select button after operation
+                userSelection = false
                 service.inputConnection?.performContextMenuAction(android.R.id.cut)
             }
             copyButton.setOnClickListener {
+                userSelection = false
                 service.inputConnection?.performContextMenuAction(android.R.id.copy)
             }
             pasteButton.setOnClickListener {
+                userSelection = false
                 service.inputConnection?.performContextMenuAction(android.R.id.paste)
             }
             backspaceButton.setOnClickListener {
