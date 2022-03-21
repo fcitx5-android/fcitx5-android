@@ -6,6 +6,8 @@ import android.widget.ViewAnimator
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import androidx.transition.Fade
+import androidx.transition.TransitionManager
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.Prefs
@@ -146,6 +148,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
 
     private fun switchUiByState(state: ClipboardStateMachine.State) {
         Timber.d("Switch clipboard to $state")
+        TransitionManager.beginDelayedTransition(view, Fade().apply { duration = 100L })
         when (state) {
             Normal -> {
                 view.displayedChild = 0
