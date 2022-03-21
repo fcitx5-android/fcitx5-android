@@ -4,7 +4,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.ViewAnimator
 import androidx.lifecycle.lifecycleScope
-import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
@@ -128,10 +127,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     private val enableUi by lazy {
         ClipboardInstructionUi.Enable(context).apply {
             enableButton.setOnClickListener {
-                with(PreferenceManager.getDefaultSharedPreferences(context).edit()) {
-                    putBoolean(context.getString(R.string.pref_clipboard_enable), true)
-                    apply()
-                }
+                enableClipboardListeningPref.value = true
             }
         }
     }
