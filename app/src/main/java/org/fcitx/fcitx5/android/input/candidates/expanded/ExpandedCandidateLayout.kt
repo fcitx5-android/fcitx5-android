@@ -1,4 +1,4 @@
-package org.fcitx.fcitx5.android.input.candidates
+package org.fcitx.fcitx5.android.input.candidates.expanded
 
 import android.annotation.SuppressLint
 import android.content.Context

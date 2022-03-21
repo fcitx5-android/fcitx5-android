@@ -16,7 +16,9 @@ import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.*
 import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.*
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.*
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
-import org.fcitx.fcitx5.android.input.candidates.ExpandedCandidateWindow
+import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
+import org.fcitx.fcitx5.android.input.candidates.expanded.window.FlexboxExpandedCandidateWindow
+import org.fcitx.fcitx5.android.input.candidates.expanded.window.GridExpandedCandidateWindow
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.clipboard.ClipboardWindow
 import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
@@ -47,6 +49,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     private val horizontalCandidate: HorizontalCandidateComponent by manager.must()
 
     private val clipboardItemTimeout by Prefs.getInstance().clipboardItemTimeout
+    private val expandedCandidateStyle by Prefs.getInstance().expandedCandidateStyle
 
     private val onClipboardUpdateListener by lazy {
         ClipboardManager.OnClipboardUpdateListener {
@@ -135,7 +138,12 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     // set expand candidate button to create expand candidate
     private fun setExpandButtonToAttach() {
         candidateUi.expandButton.setOnClickListener {
-            windowManager.attachWindow(ExpandedCandidateWindow())
+            windowManager.attachWindow(
+                when (expandedCandidateStyle) {
+                    ExpandedCandidateStyle.Grid -> GridExpandedCandidateWindow()
+                    ExpandedCandidateStyle.Flexbox -> FlexboxExpandedCandidateWindow()
+                }
+            )
         }
         candidateUi.expandButton.imageResource = R.drawable.ic_baseline_expand_more_24
     }

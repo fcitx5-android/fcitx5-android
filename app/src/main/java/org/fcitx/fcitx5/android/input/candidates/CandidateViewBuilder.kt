@@ -11,6 +11,10 @@ import org.fcitx.fcitx5.android.core.Fcitx
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.candidates.adapter.GridCandidateViewAdapter
 import org.fcitx.fcitx5.android.input.candidates.adapter.SimpleCandidateViewAdapter
+import org.fcitx.fcitx5.android.input.candidates.expanded.decoration.FlexboxHorizontalDecoration
+import org.fcitx.fcitx5.android.input.candidates.expanded.decoration.FlexboxVerticalDecoration
+import org.fcitx.fcitx5.android.input.candidates.expanded.decoration.GridDecoration
+import org.fcitx.fcitx5.android.input.candidates.expanded.SpanHelper
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.utils.hapticIfEnabled

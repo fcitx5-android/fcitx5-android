@@ -5,7 +5,7 @@ import android.content.res.Resources
 import androidx.annotation.StringRes
 import androidx.core.content.edit
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.input.candidates.ExpandedCandidateWindow
+import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
 import org.fcitx.fcitx5.android.utils.WeakHashSet
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
@@ -127,10 +127,10 @@ class Prefs(private val sharedPreferences: SharedPreferences, private val resour
     val buttonHapticFeedback = preference(R.string.pref_button_haptic_feedback, true)
     val clipboardListening = preference(R.string.pref_clipboard_enable, true)
     val clipboardHistoryLimit = preference(R.string.pref_clipboard_limit, 5)
-    val expandableCandidateStyle = stringLikePreference(
+    val expandedCandidateStyle = stringLikePreference(
         R.string.pref_expanded_candidate_style,
-        ExpandedCandidateWindow.Style.Grid,
-        ExpandedCandidateWindow.Style
+        ExpandedCandidateStyle.Grid,
+        ExpandedCandidateStyle
     )
     val keyboardHeightPercent = preference(R.string.pref_keyboard_height_percent, 30)
     val clipboardItemTimeout = preference(R.string.pref_clipboard_item_timeout, 30)

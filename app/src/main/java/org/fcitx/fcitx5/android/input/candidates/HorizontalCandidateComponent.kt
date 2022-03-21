@@ -10,6 +10,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.*
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
+import org.fcitx.fcitx5.android.input.candidates.expanded.window.BaseExpandedCandidateWindow
 import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.wm.InputWindow
@@ -84,12 +85,12 @@ class HorizontalCandidateComponent :
     }
 
     override fun onWindowAttached(window: InputWindow) {
-        if (window is ExpandedCandidateWindow)
+        if (window is BaseExpandedCandidateWindow<*>)
             bar.expandButtonStateMachine.push(ExpandedCandidatesAttached)
     }
 
     override fun onWindowDetached(window: InputWindow) {
-        if (window is ExpandedCandidateWindow)
+        if (window is BaseExpandedCandidateWindow<*>)
             bar.expandButtonStateMachine.push(
                 if (isExpandedCandidatesNonEmpty)
                     ExpandedCandidatesDetached * ExpandedCandidatesUpdatedNonEmpty

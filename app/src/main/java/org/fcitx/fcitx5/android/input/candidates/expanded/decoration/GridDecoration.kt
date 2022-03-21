@@ -1,4 +1,4 @@
-package org.fcitx.fcitx5.android.input.candidates
+package org.fcitx.fcitx5.android.input.candidates.expanded.decoration
 
 import android.graphics.Canvas
 import android.graphics.Rect
