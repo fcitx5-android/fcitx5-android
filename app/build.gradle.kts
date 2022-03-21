@@ -189,6 +189,7 @@ fun installFcitxComponent(targetName: String, componentName: String, destDir: Fi
             } catch (e: Exception) {
                 logger.log(LogLevel.ERROR, "Failed to build target $targetName: ${e.message}")
                 logger.log(LogLevel.ERROR, "Did you run this task independently?")
+                throw e
             }
         }
 
@@ -216,6 +217,7 @@ fun installFcitxComponent(targetName: String, componentName: String, destDir: Fi
                     "Failed to install component $componentName: ${e.message}"
                 )
                 logger.log(LogLevel.ERROR, "Did you run this task independently?")
+                throw e
             }
         }
 
