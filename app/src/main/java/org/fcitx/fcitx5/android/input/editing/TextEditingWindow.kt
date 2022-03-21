@@ -79,6 +79,7 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
                 service.inputConnection?.performContextMenuAction(android.R.id.paste)
             }
             backspaceButton.setOnClickListener {
+                userSelection = false
                 service.lifecycleScope.launch { fcitx.sendKey("BackSpace") }
             }
             backspaceButton.setupPressingToRepeat()

@@ -44,12 +44,11 @@ class AccelerateRepeatingOnTouchListener(
                     delay(firstClickInterval)
                     val t0 = System.currentTimeMillis()
                     while (isActive && view.isEnabled) {
+                        view.performClick()
                         val t = System.currentTimeMillis() - t0
                         delay(calculateInterval(t))
-                        view.performClick()
                     }
                 }
-                view.performClick()
                 view.isPressed = true
                 true
             }

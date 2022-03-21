@@ -9,7 +9,6 @@ import androidx.annotation.DrawableRes
 import org.fcitx.fcitx5.android.R
 import splitties.dimensions.dp
 import splitties.resources.styledColor
-import splitties.resources.styledColorSL
 import splitties.resources.styledDrawable
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
@@ -20,12 +19,12 @@ class TextEditingUi(override val ctx: Context) : Ui {
     private fun View.borderedBackground() = StateListDrawable().apply {
         setExitFadeDuration(resources.getInteger(android.R.integer.config_shortAnimTime))
         addState(intArrayOf(android.R.attr.state_pressed), GradientDrawable().apply {
-            color = styledColorSL(android.R.attr.colorButtonNormal)
-            setStroke(dp(1) / 2, styledColorSL(android.R.attr.colorButtonNormal))
+            setColor(styledColor(android.R.attr.colorButtonNormal))
+            setStroke(dp(1) / 2, styledColor(android.R.attr.colorButtonNormal))
         })
         addState(intArrayOf(android.R.attr.state_enabled), GradientDrawable().apply {
-            color = styledColorSL(android.R.attr.colorBackground)
-            setStroke(dp(1) / 2, styledColorSL(android.R.attr.colorButtonNormal))
+            setColor(styledColor(android.R.attr.colorBackground))
+            setStroke(dp(1) / 2, styledColor(android.R.attr.colorButtonNormal))
         })
     }
 
