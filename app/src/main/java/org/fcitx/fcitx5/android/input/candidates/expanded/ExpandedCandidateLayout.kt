@@ -30,17 +30,13 @@ class ExpandedCandidateLayout(
         isVerticalScrollBarEnabled = false
     }
 
-    private val pageUpBtn = imageButton {
+    val pageUpBtn = imageButton {
         elevation = dp(2f)
-        // TODO: page
-        background = null
         imageResource = R.drawable.ic_baseline_arrow_upward_24
     }
 
-    private val pageDnBtn = imageButton {
+    val pageDnBtn = imageButton {
         elevation = dp(2f)
-        // TODO: page
-        background = null
         imageResource = R.drawable.ic_baseline_arrow_downward_24
     }
 
