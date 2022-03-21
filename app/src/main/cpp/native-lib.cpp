@@ -458,12 +458,13 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 1, vararg);
         env->DeleteLocalRef(vararg);
     };
-    auto preeditCallback = [](const std::string &preedit, const std::string &clientPreedit, const int cursor) {
+    auto preeditCallback = [](const std::string &preedit, const int cursor, const std::string &clientPreedit, const int clientCursor) {
         auto env = GlobalRef->AttachEnv();
-        jobjectArray vararg = env->NewObjectArray(3, GlobalRef->Object, nullptr);
+        jobjectArray vararg = env->NewObjectArray(4, GlobalRef->Object, nullptr);
         env->SetObjectArrayElement(vararg, 0, JString(env, preedit));
-        env->SetObjectArrayElement(vararg, 1, JString(env, clientPreedit));
-        env->SetObjectArrayElement(vararg, 2, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, cursor));
+        env->SetObjectArrayElement(vararg, 1, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, cursor));
+        env->SetObjectArrayElement(vararg, 2, JString(env, clientPreedit));
+        env->SetObjectArrayElement(vararg, 3, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, clientCursor));
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 2, vararg);
         env->DeleteLocalRef(vararg);
     };

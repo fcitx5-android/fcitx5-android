@@ -5,7 +5,7 @@
 
 typedef std::function<void(const std::vector<std::string> &)> CandidateListCallback;
 typedef std::function<void(const std::string &)> CommitStringCallback;
-typedef std::function<void(const std::string &, const std::string &, const int)> PreeditCallback;
+typedef std::function<void(const std::string &, const int, const std::string &, const int)> PreeditCallback;
 typedef std::function<void(const std::string &, const std::string &)> InputPanelAuxCallback;
 typedef std::function<void(const uint32_t, const std::string &)> KeyEventCallback;
 typedef std::function<void()> InputMethodChangeCallback;

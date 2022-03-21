@@ -41,9 +41,9 @@ public:
 
     void updateClientSideUIImpl() override {
         InputPanel &ip = inputPanel();
-        auto preedit = ip.preedit().toString();
+        const auto &preedit = ip.preedit();
         const auto &clientPreedit = ip.clientPreedit();
-        frontend_->updatePreedit(preedit, clientPreedit.toString(), clientPreedit.cursor());
+        frontend_->updatePreedit(preedit, clientPreedit);
         auto auxUp = ip.auxUp().toString();
         auto auxDown = ip.auxDown().toString();
         frontend_->updateInputPanelAux(auxUp, auxDown);
@@ -140,8 +140,8 @@ void AndroidFrontend::updateCandidateList(const std::vector<std::string> &candid
     candidateListCallback(candidates);
 }
 
-void AndroidFrontend::updatePreedit(const std::string &preedit, const std::string &clientPreedit, const int cursor) {
-    preeditCallback(preedit, clientPreedit, cursor);
+void AndroidFrontend::updatePreedit(const fcitx::Text &preedit, const fcitx::Text &clientPreedit) {
+    preeditCallback(preedit.toString(), preedit.cursor(), clientPreedit.toString(), clientPreedit.cursor());
 }
 
 void AndroidFrontend::updateInputPanelAux(const std::string &auxUp, const std::string &auxDown) {

@@ -21,7 +21,7 @@ class PreeditComponent : UniqueComponent<PreeditComponent>(), Dependent,
     private val inputView by manager.inputView()
 
     private val cachedPreedit = PreeditContent(
-        FcitxEvent.PreeditEvent.Data("", "", 0),
+        FcitxEvent.PreeditEvent.Data("", 0, "", 0),
         FcitxEvent.InputPanelAuxEvent.Data("", "")
     )
     private val preeditUi by lazy { PreeditUi(context) }

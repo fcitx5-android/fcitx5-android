@@ -70,7 +70,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 }
             }
             is FcitxEvent.PreeditEvent -> event.data.let {
-                updateComposingTextWithCursor(it.clientPreedit, it.cursor)
+                updateComposingTextWithCursor(it.clientPreedit, it.clientCursor)
             }
             else -> {
             }

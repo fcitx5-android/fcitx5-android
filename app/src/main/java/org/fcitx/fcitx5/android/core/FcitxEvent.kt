@@ -40,7 +40,7 @@ sealed class FcitxEvent<T>(open val data: T) {
         override val eventType: EventType
             get() = EventType.Preedit
 
-        data class Data(val preedit: String, val clientPreedit: String, val cursor: Int)
+        data class Data(val preedit: String, val cursor: Int, val clientPreedit: String, val clientCursor: Int)
     }
 
     data class InputPanelAuxEvent(override val data: Data) :
@@ -115,7 +115,7 @@ sealed class FcitxEvent<T>(open val data: T) {
                 EventType.Candidate -> CandidateListEvent(params as Array<String>)
                 EventType.Commit -> CommitStringEvent(params[0] as String)
                 EventType.Preedit -> PreeditEvent(
-                    PreeditEvent.Data(params[0] as String, params[1] as String, params[2] as Int)
+                    PreeditEvent.Data(params[0] as String, params[1] as Int, params[2] as String, params[3] as Int)
                 )
                 EventType.Aux -> InputPanelAuxEvent(
                     InputPanelAuxEvent.Data(params[0] as String, params[1] as String)

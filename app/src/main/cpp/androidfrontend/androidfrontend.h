@@ -16,7 +16,7 @@ public:
 
     void updateCandidateList(const std::vector<std::string> &candidates);
     void commitString(const std::string &str);
-    void updatePreedit(const std::string &preedit, const std::string &clientPreedit, const int cursor);
+    void updatePreedit(const fcitx::Text &preedit, const fcitx::Text &clientPreedit);
     void updateInputPanelAux(const std::string &auxUp, const std::string &auxDown);
 
     ICUUID createInputContext(const std::string &program);
@@ -57,7 +57,7 @@ private:
 
     CandidateListCallback candidateListCallback = [](const std::vector<std::string> &) {};
     CommitStringCallback commitStringCallback = [](const std::string &) {};
-    PreeditCallback preeditCallback = [](const std::string &, const std::string &, const int) {};
+    PreeditCallback preeditCallback = [](const std::string &, const int, const std::string &, const int) {};
     InputPanelAuxCallback inputPanelAuxCallback = [](const std::string &, const std::string &) {};
     KeyEventCallback keyEventCallback = [](int, const std::string &) {};
     InputMethodChangeCallback imChangeCallback = [] {};
