@@ -25,7 +25,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
     suspend fun save() = dispatcher.dispatch { saveFcitxState() }
     suspend fun sendKey(key: String) = dispatcher.dispatch { sendKeyToFcitxString(key) }
     suspend fun sendKey(c: Char) = dispatcher.dispatch { sendKeyToFcitxChar(c) }
-    suspend fun sendKey(i: Int) = dispatcher.dispatch { sendKeyToFcitxInt(i) }
+    suspend fun sendKey(sym: UInt, state: UInt = 0u, up: Boolean = false) =
+        dispatcher.dispatch { sendKeySymToFcitx(sym.toInt(), state.toInt(), up) }
+
     suspend fun select(idx: Int) = dispatcher.dispatch { selectCandidate(idx) }
     suspend fun isEmpty() = dispatcher.dispatch { isInputPanelEmpty() }
     suspend fun reset() = dispatcher.dispatch { resetInputContext() }
@@ -144,7 +146,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         external fun sendKeyToFcitxChar(c: Char)
 
         @JvmStatic
-        external fun sendKeyToFcitxInt(i: Int)
+        external fun sendKeySymToFcitx(sym: Int, state: Int, up: Boolean)
 
         @JvmStatic
         external fun selectCandidate(idx: Int)
@@ -228,6 +230,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         external fun scheduleEmpty()
 
         private var firstRun by Prefs.getInstance().firstRun
+
         /**
          * Called from native-lib
          */

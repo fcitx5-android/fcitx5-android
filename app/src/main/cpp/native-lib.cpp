@@ -67,8 +67,8 @@ public:
         setupCallback(p_frontend);
     }
 
-    void sendKey(fcitx::Key key) {
-        p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, key, false);
+    void sendKey(fcitx::Key key, bool up = false) {
+        p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, key, up);
     }
 
     void select(int idx) {
@@ -550,10 +550,14 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxChar(JNIEnv *env, jclass 
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxInt(JNIEnv *env, jclass clazz, jint i) {
+Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeySymToFcitx(JNIEnv *env, jclass clazz, jint sym, jint state, jboolean up) {
     RETURN_IF_NOT_RUNNING
-    auto key = fcitx::Key::fromKeyCode(i);
-    Fcitx::Instance().sendKey(key);
+    uint32_t keySym;
+    std::memcpy(&keySym, &sym, sizeof(uint32_t));
+    uint32_t keyState;
+    std::memcpy(&keyState, &state, sizeof(uint32_t));
+    fcitx::Key key{fcitx::KeySym(keySym), fcitx::KeyState(keyState)};
+    Fcitx::Instance().sendKey(key, up);
 }
 
 extern "C"
