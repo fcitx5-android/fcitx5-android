@@ -1,6 +1,10 @@
 package org.fcitx.fcitx5.android
 
 import android.app.Application
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Process
 import androidx.preference.PreferenceManager
 import cat.ereza.customactivityoncrash.config.CaocConfig
@@ -9,6 +13,7 @@ import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.ui.main.LogActivity
 import org.fcitx.fcitx5.android.utils.DeviceInfo
 import timber.log.Timber
+import kotlin.system.exitProcess
 
 class FcitxApplication : Application() {
     override fun onCreate() {
@@ -29,6 +34,14 @@ class FcitxApplication : Application() {
             Timber.d(it)
         }
         Timber.d("=========================Device Info=========================")
+
+        registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                Timber.i("Detected a locale change, process will exit now")
+                exitProcess(0)
+            }
+
+        }, IntentFilter(Intent.ACTION_LOCALE_CHANGED))
 
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
 

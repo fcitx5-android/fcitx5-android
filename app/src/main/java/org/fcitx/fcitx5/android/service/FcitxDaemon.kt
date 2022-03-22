@@ -53,11 +53,6 @@ class FcitxDaemon : LifecycleService(), FcitxLifecycleObserver {
         }
     }
 
-    suspend fun restartFcitx() = withContext(Dispatchers.IO) {
-        fcitx.stop()
-        fcitx.start()
-    }
-
     override fun onBind(intent: Intent): IBinder {
         super.onBind(intent)
         Timber.d("onBind")
