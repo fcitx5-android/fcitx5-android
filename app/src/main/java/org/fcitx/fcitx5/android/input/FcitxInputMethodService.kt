@@ -16,9 +16,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.fcitx.fcitx5.android.core.CapabilityFlags
-import org.fcitx.fcitx5.android.core.Fcitx
-import org.fcitx.fcitx5.android.core.FcitxEvent
+import org.fcitx.fcitx5.android.core.*
 import org.fcitx.fcitx5.android.data.Prefs
 import org.fcitx.fcitx5.android.service.FcitxDaemonManager
 import org.fcitx.fcitx5.android.utils.inputConnection
@@ -59,15 +57,29 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 inputConnection?.commitText(event.data, 1)
             }
             is FcitxEvent.KeyEvent -> event.data.let {
-                if (Character.isISOControl(it.code)) {
-                    when (it.code) {
-                        '\b'.code -> sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
-                        '\r'.code -> handleReturnKey()
-                        else -> Timber.w("Handled unknown ISO Control key event: $it")
+                it.sym.keyCode?.let { k ->
+                    if (it.states.virtual) {
+                        if (k == KeyEvent.KEYCODE_ENTER) {
+                            // virtual return key should be able to perform editor actions
+                            handleReturnKey()
+                        } else {
+                            sendDownUpKeyEvents(k)
+                        }
+                        return
                     }
-                } else {
-                    sendKeyChar(Char(it.code))
+                    val eventTime = SystemClock.uptimeMillis()
+                    if (it.up) {
+                        sendUpKeyEvent(eventTime, k, it.states.metaState)
+                    } else {
+                        sendDownKeyEvent(eventTime, k, it.states.metaState)
+                    }
+                    return
                 }
+                if (!it.up && it.unicode > 0) {
+                    inputConnection?.commitText(Char(it.unicode).toString(), 1)
+                    return
+                }
+                Timber.w("Unhandled Fcitx KeyEvent: $it")
             }
             is FcitxEvent.PreeditEvent -> event.data.let {
                 updateComposingTextWithCursor(it.clientPreedit, it.clientCursor)
@@ -189,6 +201,39 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onEvaluateFullscreenMode() = false
+
+    private fun forwardKeyEvent(event: KeyEvent, up: Boolean = false): Boolean {
+        val states = KeyStates.fromKeyEvent(event)
+        KeySym.fromKeyEvent(event).let {
+            if (it.recognized) {
+                lifecycleScope.launch { fcitx.sendKey(it, states, up) }
+                return true
+            }
+        }
+        // character key
+        if (event.displayLabel.code > 0) {
+            val sym = event.displayLabel.lowercaseChar().code.toUInt()
+            lifecycleScope.launch { fcitx.sendKey(sym, states.states, up) }
+            return true
+        } else {
+            Timber.w("Unknown KeyEvent: $event")
+        }
+        return false
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            return super.onKeyDown(keyCode, event)
+        }
+        return forwardKeyEvent(event, false)
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            return super.onKeyUp(keyCode, event)
+        }
+        return forwardKeyEvent(event, true)
+    }
 
     override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
         inputConnection?.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
