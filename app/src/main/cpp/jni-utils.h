@@ -71,6 +71,9 @@ public:
     jclass Integer;
     jmethodID IntegerInit;
 
+    jclass Boolean;
+    jmethodID BooleanInit;
+
     jclass Fcitx;
     jmethodID HandleFcitxEvent;
 
@@ -98,6 +101,9 @@ public:
 
         Integer = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("java/lang/Integer")));
         IntegerInit = env->GetMethodID(Integer, "<init>", "(I)V");
+
+        Boolean = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("java/lang/Boolean")));
+        BooleanInit = env->GetMethodID(Boolean, "<init>", "(Z)V");
 
         Fcitx = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("org/fcitx/fcitx5/android/core/Fcitx")));
         HandleFcitxEvent = env->GetStaticMethodID(Fcitx, "handleFcitxEvent", "(I[Ljava/lang/Object;)V");

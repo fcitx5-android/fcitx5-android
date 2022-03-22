@@ -482,15 +482,15 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 4, vararg);
         env->DeleteLocalRef(vararg);
     };
-    auto keyEventCallback = [](const int code, const std::string &sym) {
+    auto keyEventCallback = [](const uint32_t sym, const uint32_t states, const uint32_t unicode, const bool up) {
         auto env = GlobalRef->AttachEnv();
-        jobjectArray vararg = env->NewObjectArray(2, GlobalRef->Object, nullptr);
-        auto integer = env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, code);
-        env->SetObjectArrayElement(vararg, 0, integer);
-        env->SetObjectArrayElement(vararg, 1, JString(env, sym));
+        jobjectArray vararg = env->NewObjectArray(4, GlobalRef->Object, nullptr);
+        env->SetObjectArrayElement(vararg, 0, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, sym));
+        env->SetObjectArrayElement(vararg, 1, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, states));
+        env->SetObjectArrayElement(vararg, 2, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, unicode));
+        env->SetObjectArrayElement(vararg, 3, env->NewObject(GlobalRef->Boolean, GlobalRef->BooleanInit, up));
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 5, vararg);
         env->DeleteLocalRef(vararg);
-        env->DeleteLocalRef(integer);
     };
     auto imChangeCallback = []() {
         auto env = GlobalRef->AttachEnv();

@@ -59,7 +59,7 @@ private:
     CommitStringCallback commitStringCallback = [](const std::string &) {};
     PreeditCallback preeditCallback = [](const std::string &, const int, const std::string &, const int) {};
     InputPanelAuxCallback inputPanelAuxCallback = [](const std::string &, const std::string &) {};
-    KeyEventCallback keyEventCallback = [](int, const std::string &) {};
+    KeyEventCallback keyEventCallback = [](const uint32_t, const uint32_t, const uint32_t, const bool) {};
     InputMethodChangeCallback imChangeCallback = [] {};
 };
 } // namespace fcitx
