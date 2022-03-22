@@ -28,6 +28,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
     suspend fun sendKey(sym: UInt, state: UInt = 0u, up: Boolean = false) =
         dispatcher.dispatch { sendKeySymToFcitx(sym.toInt(), state.toInt(), up) }
 
+    suspend fun sendKey(sym: KeySym, states: KeyStates? = null, up: Boolean = false) =
+        dispatcher.dispatch { sendKeySymToFcitx(sym.toInt(), states?.toInt() ?: 0, up) }
+
     suspend fun select(idx: Int) = dispatcher.dispatch { selectCandidate(idx) }
     suspend fun isEmpty() = dispatcher.dispatch { isInputPanelEmpty() }
     suspend fun reset() = dispatcher.dispatch { resetInputContext() }
