@@ -12,4 +12,5 @@
     <string name="pref_clipboard_item_timeout" translatable="false">clipboard_item_timeout</string>
     <string name="pref_expanded_candidate_grid_span_count_landscape" translatable="false">expanded_candidate_grid_span_count_landscape</string>
     <string name="pref_expanded_candidate_grid_span_count_portrait" translatable="false">expanded_candidate_grid_span_count_portrait</string>
+    <string name="pref_verbose_log" translatable="false">verbose_log</string>
 </resources>

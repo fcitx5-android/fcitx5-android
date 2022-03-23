@@ -10,7 +10,7 @@ interface NativeLib : Library {
         operator fun invoke(log: String)
     }
 
-    fun setup_log_stream(callback: log_callback_t)
+    fun setup_log_stream(verbose: Boolean, callback: log_callback_t)
 
     companion object {
         val instance: NativeLib by nativeLib("native-lib")

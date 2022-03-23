@@ -81,4 +81,6 @@
     <string name="app_crash">Application crashed</string>
     <string name="app_crash_message">Sorry, but we bring you some logs to investigate.</string>
     <string name="crash_logs">Crash logs</string>
+    <string name="verbose_log">Verbose logging</string>
+    <string name="verbose_log_summary">Effective after restart</string>
 </resources>

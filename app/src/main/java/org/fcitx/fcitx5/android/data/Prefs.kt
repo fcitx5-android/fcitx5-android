@@ -138,6 +138,7 @@ class Prefs(private val sharedPreferences: SharedPreferences, private val resour
         preference(R.string.pref_expanded_candidate_grid_span_count_landscape, 8)
     val expandedCandidateGridSpanCountPortrait =
         preference(R.string.pref_expanded_candidate_grid_span_count_portrait, 6)
+    val verboseLog = preference(R.string.pref_verbose_log, false)
 
     companion object {
         private var instance: Prefs? = null

@@ -390,12 +390,15 @@ JNI_OnLoad(JavaVM *jvm, void * /* reserved */) {
 
 typedef void (*log_callback_t)(const char *);
 
-extern "C" void setup_log_stream(log_callback_t callback) {
+extern "C" void setup_log_stream(bool verbose, log_callback_t callback) {
     static native_streambuf log_streambuf;
     log_streambuf.set_callback(callback);
     static std::ostream stream(&log_streambuf);
     fcitx::Log::setLogStream(stream);
-    fcitx::Log::setLogRule("notimedate");
+    if (verbose)
+        fcitx::Log::setLogRule("*=5,notimedate");
+    else
+        fcitx::Log::setLogRule("notimedate");
 }
 
 jobject fcitxInputMethodEntryWithSubModeToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry, const std::vector<std::string> &subMode);
