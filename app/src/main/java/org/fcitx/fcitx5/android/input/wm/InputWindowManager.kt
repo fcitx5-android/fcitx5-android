@@ -83,11 +83,13 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
      * Remove current window and attach keyboard window
      */
     fun switchToKeyboardWindow() {
-        if (currentWindow is KeyboardWindow)
+        if (currentWindow is KeyboardWindow) {
+            // change keyboard layout and return key shape based on editorInfo
+            keyboardWindow.onAttached()
             return
+        }
         attachWindow(keyboardWindow)
     }
-
 
     override val view: FrameLayout by lazy { context.frameLayout(R.id.input_window) }
 
