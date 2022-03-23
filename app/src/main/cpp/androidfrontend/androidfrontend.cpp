@@ -27,7 +27,7 @@ public:
     }
 
     void forwardKeyImpl(const ForwardKeyEvent &key) override {
-        FCITX_INFO() << "ForwardKey: " << key.key();
+        frontend_->forwardKey(key.rawKey(), key.isRelease());
     }
 
     void deleteSurroundingTextImpl(int offset, unsigned int size) override {
@@ -130,6 +130,11 @@ void AndroidFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
         auto sym = key.sym();
         keyEventCallback(sym, key.states(), fcitx::Key::keySymToUnicode(sym), isRelease);
     }
+}
+
+void AndroidFrontend::forwardKey(const Key &key, bool isRelease) {
+    auto sym = key.sym();
+    keyEventCallback(sym, key.states(), fcitx::Key::keySymToUnicode(sym), isRelease);
 }
 
 void AndroidFrontend::commitString(const std::string &str) {

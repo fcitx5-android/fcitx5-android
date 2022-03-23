@@ -22,6 +22,7 @@ public:
     ICUUID createInputContext(const std::string &program);
     void destroyInputContext(ICUUID uuid);
     void keyEvent(ICUUID uuid, const Key &key, bool isRelease);
+    void forwardKey(const Key &key, bool isRelease);
     void selectCandidate(ICUUID uuid, int idx);
     bool isInputPanelEmpty(ICUUID uuid);
     void resetInputContext(ICUUID uuid);
