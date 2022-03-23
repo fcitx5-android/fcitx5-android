@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import org.fcitx.fcitx5.android.core.Fcitx
 import org.fcitx.fcitx5.android.service.FcitxDaemonManager
-import timber.log.Timber
 
 class MainViewModel : ViewModel() {
 
@@ -40,14 +39,12 @@ class MainViewModel : ViewModel() {
     }
 
     init {
-        Timber.d("init")
         FcitxDaemonManager.bindFcitxDaemon(javaClass.name) {
             fcitx = getFcitxDaemon().fcitx
         }
     }
 
     override fun onCleared() {
-        Timber.d("onCleared")
         FcitxDaemonManager.unbind(javaClass.name)
     }
 }

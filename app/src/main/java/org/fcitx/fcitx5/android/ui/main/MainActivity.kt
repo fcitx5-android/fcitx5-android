@@ -3,6 +3,7 @@ package org.fcitx.fcitx5.android.ui.main
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -15,7 +16,6 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.databinding.ActivityMainBinding
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.ui.setup.SetupActivity
-import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
 
@@ -51,22 +51,10 @@ class MainActivity : AppCompatActivity() {
             binding.toolbar.title = it
         }
         viewModel.toolbarSaveButtonOnClickListener.observe(this) {
-            binding.toolbar.menu.findItem(R.id.activity_main_menu_save).apply {
-                isVisible = it != null
-                setOnMenuItemClickListener { _ ->
-                    it?.invoke()
-                    true
-                }
-            }
+            binding.toolbar.menu.findItem(R.id.activity_main_menu_save).isVisible = it != null
         }
         viewModel.aboutButton.observe(this) {
-            binding.toolbar.menu.findItem(R.id.activity_main_menu_about).apply {
-                isVisible = it
-                setOnMenuItemClickListener {
-                    navHostFragment.navController.navigate(R.id.action_mainFragment_to_aboutFragment)
-                    true
-                }
-            }
+            binding.toolbar.menu.findItem(R.id.activity_main_menu_about).isVisible = it
         }
         if (SetupActivity.shouldShowUp() && intent.action == Intent.ACTION_MAIN)
             startActivity(Intent(this, SetupActivity::class.java))
@@ -128,13 +116,29 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.activity_main_menu, menu)
+        menu.apply {
+            findItem(R.id.activity_main_menu_about).isVisible = viewModel.aboutButton.value ?: true
+            findItem(R.id.activity_main_menu_save).isVisible =
+                viewModel.toolbarSaveButtonOnClickListener.value != null
+        }
         return true
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
+        R.id.activity_main_menu_about -> {
+            navHostFragment.navController.navigate(R.id.action_mainFragment_to_aboutFragment)
+            true
+        }
+        R.id.activity_main_menu_save -> {
+            viewModel.toolbarSaveButtonOnClickListener.value?.invoke()
+            true
+        }
+        else -> super.onOptionsItemSelected(item)
+    }
+
     override fun onStop() {
-        Timber.d("onStop")
         // nothing needs to be saved if keyboard is not running
         if (FcitxInputMethodService.isBoundToFcitxDaemon && viewModel.isFcitxReady)
             runBlocking {
