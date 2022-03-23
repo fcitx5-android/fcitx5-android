@@ -1,6 +1,8 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
 import org.fcitx.fcitx5.android.core.Fcitx
+import org.fcitx.fcitx5.android.core.KeyStates
+import org.fcitx.fcitx5.android.core.KeySym
 
 sealed class KeyAction<T> {
 
@@ -14,6 +16,12 @@ sealed class KeyAction<T> {
         fun lower() {
             act = act.lowercase()
         }
+    }
+
+    data class SymAction(override var act: Act) : KeyAction<SymAction.Act>() {
+        constructor(sym: KeySym, states: KeyStates = KeyStates()) : this(Act(sym, states))
+
+        data class Act(val sym: KeySym, val states: KeyStates)
     }
 
     data class CommitAction(override val act: String) : KeyAction<String>()

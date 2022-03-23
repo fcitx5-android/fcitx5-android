@@ -58,16 +58,17 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             }
             is FcitxEvent.KeyEvent -> event.data.let {
                 it.sym.keyCode?.let { k ->
+                    val eventTime = SystemClock.uptimeMillis()
                     if (it.states.virtual) {
                         if (k == KeyEvent.KEYCODE_ENTER) {
                             // virtual return key should be able to perform editor actions
                             handleReturnKey()
                         } else {
-                            sendDownUpKeyEvents(k)
+                            sendDownKeyEvent(eventTime, k, it.states.metaState)
+                            sendUpKeyEvent(eventTime, k, it.states.metaState)
                         }
                         return
                     }
-                    val eventTime = SystemClock.uptimeMillis()
                     if (it.up) {
                         sendUpKeyEvent(eventTime, k, it.states.metaState)
                     } else {
@@ -147,7 +148,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         inputConnection?.sendKeyEvent(
             KeyEvent(
                 eventTime,
-                eventTime,
+                SystemClock.uptimeMillis(),
                 KeyEvent.ACTION_UP,
                 keyEventCode,
                 0,

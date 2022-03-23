@@ -13,13 +13,12 @@ import org.mechdancer.dependency.manager.ManagedHandler
 import org.mechdancer.dependency.manager.managedHandler
 import splitties.systemservices.inputMethodManager
 
-class CommonKeyActionListener : UniqueComponent<CommonKeyActionListener>(), Dependent,
-    ManagedHandler by managedHandler() {
+class CommonKeyActionListener :
+    UniqueComponent<CommonKeyActionListener>(), Dependent, ManagedHandler by managedHandler() {
 
     private val context by manager.context()
     private val fcitx by manager.fcitx()
     private val service by manager.inputMethodService()
-
 
     // TODO: We expose this listener share with expandable candidate.
     //  However, expandable candidate shouldn't have been a keyboard.
@@ -29,6 +28,7 @@ class CommonKeyActionListener : UniqueComponent<CommonKeyActionListener>(), Depe
             service.lifecycleScope.launch {
                 when (action) {
                     is KeyAction.FcitxKeyAction -> fcitx.sendKey(action.act)
+                    is KeyAction.SymAction -> fcitx.sendKey(action.act.sym, action.act.states)
                     is KeyAction.CommitAction -> {
                         // TODO: this should be handled more gracefully; or CommitAction should be removed?
                         fcitx.reset()
@@ -46,8 +46,9 @@ class CommonKeyActionListener : UniqueComponent<CommonKeyActionListener>(), Depe
                     is KeyAction.LangSwitchAction -> {
                         if (fcitx.enabledIme().size < 2) {
                             AppUtil.launchMainToAddInputMethods(context)
-                        } else
+                        } else {
                             fcitx.enumerateIme()
+                        }
                     }
                     is KeyAction.InputMethodSwitchAction -> inputMethodManager.showInputMethodPicker()
                     is KeyAction.CustomAction -> {

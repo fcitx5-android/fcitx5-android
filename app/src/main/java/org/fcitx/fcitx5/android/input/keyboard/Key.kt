@@ -3,6 +3,8 @@ package org.fcitx.fcitx5.android.input.keyboard
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.KeyStates
+import org.fcitx.fcitx5.android.core.KeySym
 
 interface IKeyBehavior
 
@@ -51,22 +53,21 @@ interface IKeyId : IKeyProps {
 abstract class BaseKey(override val percentWidth: Float = 0.1f) :
     IKeyBehavior, IKeyAppearance, IKeyProps
 
+open class SymKey(
+    override val displayText: String,
+    open val sym: UInt,
+    open val states: KeyStates = KeyStates(),
+    percentWidth: Float = 0.1f
+) : BaseKey(percentWidth), ITextKey, IPressKey {
+    override fun onPress() = KeyAction.SymAction(KeySym(sym), states)
+}
+
 open class TextKey(
     open val text: String,
     percentWidth: Float = 0.1f
 ) : BaseKey(percentWidth), ITextKey, IPressKey {
     override val displayText: String get() = text
     override fun onPress(): KeyAction<*> = KeyAction.FcitxKeyAction(text)
-}
-
-open class KPKey(
-    open val key: String,
-    override val displayText: String,
-    percentWidth: Float = 0.1f
-) : BaseKey(percentWidth), ITextKey, IPressKey {
-    constructor(key: String, percentWidth: Float) : this(key, key, percentWidth)
-
-    override fun onPress(): KeyAction<*> = KeyAction.FcitxKeyAction("KP_$key")
 }
 
 open class AltTextKey(
