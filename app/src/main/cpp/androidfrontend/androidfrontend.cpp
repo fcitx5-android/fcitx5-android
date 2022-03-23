@@ -75,19 +75,14 @@ public:
             return;
         }
         const auto &bulk = list->toBulk();
-        if (bulk) {
-            try {
+        try {
+            if (bulk) {
                 bulk->candidateFromAll(idx).select(this);
-            } catch (const std::invalid_argument &e) {
-                FCITX_WARN() << "BulkCandidateList index out of range";
-            }
-        } else {
-            const int size = list->size();
-            if (idx >= 0 && idx < size) {
-                list->candidate(idx).select(this);
             } else {
-                FCITX_WARN() << "CandidateList index out of range";
+                list->candidate(idx).select(this);
             }
+        } catch (const std::invalid_argument &e) {
+            FCITX_WARN() << "selectCandidate index out of range";
         }
     }
 
@@ -223,4 +218,4 @@ public:
 
 } // namespace fcitx
 
-FCITX_ADDON_FACTORY(fcitx::AndroidFrontendFactory);
+FCITX_ADDON_FACTORY(fcitx::AndroidFrontendFactory)
