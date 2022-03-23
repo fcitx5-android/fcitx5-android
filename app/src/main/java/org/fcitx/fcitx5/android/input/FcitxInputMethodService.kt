@@ -212,8 +212,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             }
         }
         // character key
-        if (event.displayLabel.code > 0) {
-            val sym = event.displayLabel.lowercaseChar().code.toUInt()
+        if (event.unicodeChar > 0) {
+            val sym = event.unicodeChar.toUInt()
             lifecycleScope.launch { fcitx.sendKey(sym, states.states, up) }
             return true
         } else {
