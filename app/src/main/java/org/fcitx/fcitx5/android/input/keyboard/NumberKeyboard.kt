@@ -15,8 +15,8 @@ class NumberKeyboard(
 
     companion object {
         const val Name = "Number"
-        
-        private val NumLockState = KeyStates(KeyState.NumLock)
+
+        private val NumLockState = KeyStates(KeyState.NumLock, KeyState.Virtual)
 
         val Layout: List<List<BaseKey>> = listOf(
             listOf(

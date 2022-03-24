@@ -56,31 +56,34 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             is FcitxEvent.CommitStringEvent -> {
                 inputConnection?.commitText(event.data, 1)
             }
-            is FcitxEvent.KeyEvent -> event.data.let {
-                it.sym.keyCode?.let { k ->
-                    val eventTime = SystemClock.uptimeMillis()
-                    if (it.states.virtual) {
-                        if (k == KeyEvent.KEYCODE_ENTER) {
-                            // virtual return key should be able to perform editor actions
-                            handleReturnKey()
+            is FcitxEvent.KeyEvent -> event.data.also {
+                if (it.states.virtual) {
+                    // KeyEvent from virtual keyboard
+                    when (it.unicode) {
+                        '\b'.code -> sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
+                        '\r'.code -> handleReturnKey()
+                        else -> inputConnection?.commitText(Char(it.unicode).toString(), 1)
+                    }
+                } else {
+                    // KeyEvent from hardware keyboard (or input method engine forwardKey)
+                    val keyCode = it.sym.keyCode
+                    if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
+                        // recognized keyCode
+                        val eventTime = SystemClock.uptimeMillis()
+                        if (it.up) {
+                            sendUpKeyEvent(eventTime, keyCode, it.states.metaState)
                         } else {
-                            sendDownKeyEvent(eventTime, k, it.states.metaState)
-                            sendUpKeyEvent(eventTime, k, it.states.metaState)
+                            sendDownKeyEvent(eventTime, keyCode, it.states.metaState)
                         }
-                        return
-                    }
-                    if (it.up) {
-                        sendUpKeyEvent(eventTime, k, it.states.metaState)
                     } else {
-                        sendDownKeyEvent(eventTime, k, it.states.metaState)
+                        // no matching keyCode, commit character once on key down
+                        if (!it.up && it.unicode > 0) {
+                            inputConnection?.commitText(Char(it.unicode).toString(), 1)
+                        } else {
+                            Timber.w("Unhandled Fcitx KeyEvent: $it")
+                        }
                     }
-                    return
                 }
-                if (!it.up && it.unicode > 0) {
-                    inputConnection?.commitText(Char(it.unicode).toString(), 1)
-                    return
-                }
-                Timber.w("Unhandled Fcitx KeyEvent: $it")
             }
             is FcitxEvent.PreeditEvent -> event.data.let {
                 updateComposingTextWithCursor(it.clientPreedit, it.clientCursor)

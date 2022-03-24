@@ -535,19 +535,21 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_saveFcitxState(JNIEnv *env, jclass claz
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxString(JNIEnv *env, jclass clazz, jstring key) {
+Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxString(JNIEnv *env, jclass clazz, jstring key, jint state, jboolean up) {
     RETURN_IF_NOT_RUNNING
     const char *k = env->GetStringUTFChars(key, nullptr);
-    fcitx::Key parsedKey(k);
+    fcitx::Key parsedKey{fcitx::Key::keySymFromString(k),
+                         fcitx::KeyState(static_cast<uint32_t>(state))};
     env->ReleaseStringUTFChars(key, k);
     Fcitx::Instance().sendKey(parsedKey);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxChar(JNIEnv *env, jclass clazz, jchar c) {
+Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxChar(JNIEnv *env, jclass clazz, jchar c, jint state, jboolean up) {
     RETURN_IF_NOT_RUNNING
-    fcitx::Key parsedKey((const char *) &c);
+    fcitx::Key parsedKey{fcitx::Key::keySymFromString((const char *) &c),
+                         fcitx::KeyState(static_cast<uint32_t>(state))};
     Fcitx::Instance().sendKey(parsedKey);
 }
 
@@ -555,11 +557,8 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeySymToFcitx(JNIEnv *env, jclass clazz, jint sym, jint state, jboolean up) {
     RETURN_IF_NOT_RUNNING
-    uint32_t keySym;
-    std::memcpy(&keySym, &sym, sizeof(uint32_t));
-    uint32_t keyState;
-    std::memcpy(&keyState, &state, sizeof(uint32_t));
-    fcitx::Key key{fcitx::KeySym(keySym), fcitx::KeyState(keyState)};
+    fcitx::Key key{fcitx::KeySym(static_cast<uint32_t>(sym)),
+                   fcitx::KeyState(static_cast<uint32_t>(state))};
     Fcitx::Instance().sendKey(key, up);
 }
 

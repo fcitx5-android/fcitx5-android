@@ -23,8 +23,12 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         get() = lifecycle.currentState == FcitxLifecycle.State.READY
 
     suspend fun save() = dispatcher.dispatch { saveFcitxState() }
-    suspend fun sendKey(key: String) = dispatcher.dispatch { sendKeyToFcitxString(key) }
-    suspend fun sendKey(c: Char) = dispatcher.dispatch { sendKeyToFcitxChar(c) }
+    suspend fun sendKey(key: String, state: UInt = 0u, up: Boolean = false) =
+        dispatcher.dispatch { sendKeyToFcitxString(key, state.toInt(), up) }
+
+    suspend fun sendKey(c: Char, state: UInt = 0u, up: Boolean = false) =
+        dispatcher.dispatch { sendKeyToFcitxChar(c, state.toInt(), up) }
+
     suspend fun sendKey(sym: UInt, state: UInt = 0u, up: Boolean = false) =
         dispatcher.dispatch { sendKeySymToFcitx(sym.toInt(), state.toInt(), up) }
 
@@ -143,10 +147,10 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         external fun saveFcitxState()
 
         @JvmStatic
-        external fun sendKeyToFcitxString(key: String)
+        external fun sendKeyToFcitxString(key: String, state: Int, up: Boolean)
 
         @JvmStatic
-        external fun sendKeyToFcitxChar(c: Char)
+        external fun sendKeyToFcitxChar(c: Char, state: Int, up: Boolean)
 
         @JvmStatic
         external fun sendKeySymToFcitx(sym: Int, state: Int, up: Boolean)

@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.input.keyboard
 
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
@@ -27,7 +28,7 @@ class CommonKeyActionListener :
         BaseKeyboard.KeyActionListener { action ->
             service.lifecycleScope.launch {
                 when (action) {
-                    is KeyAction.FcitxKeyAction -> fcitx.sendKey(action.act)
+                    is KeyAction.FcitxKeyAction -> fcitx.sendKey(action.act, KeyState.Virtual.state)
                     is KeyAction.SymAction -> fcitx.sendKey(action.act.sym, action.act.states)
                     is KeyAction.CommitAction -> {
                         // TODO: this should be handled more gracefully; or CommitAction should be removed?

@@ -3,7 +3,6 @@ package org.fcitx.fcitx5.android.input.keyboard
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
 
@@ -124,7 +123,7 @@ open class ReturnKey(
     override val background: Int = android.R.attr.colorAccent,
     override val id: Int = R.id.button_return
 ) : BaseKey(0.15f), IImageKey, IPressKey, ITintKey, IKeyId {
-    override fun onPress() = KeyAction.SymAction(KeySym(0xff0du), KeyStates(KeyState.Virtual))
+    override fun onPress() = KeyAction.FcitxKeyAction("Return")
 }
 
 open class MiniSpaceKey(
