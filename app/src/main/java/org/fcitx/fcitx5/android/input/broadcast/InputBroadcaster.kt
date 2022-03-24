@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.input.broadcast
 
+import android.view.inputmethod.EditorInfo
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import org.fcitx.fcitx5.android.input.wm.InputWindow
@@ -30,6 +31,10 @@ class InputBroadcaster : UniqueComponent<InputBroadcaster>(), Dependent, InputBr
 
     override fun onPreeditUpdate(content: PreeditContent) {
         receivers.forEach { it.onPreeditUpdate(content) }
+    }
+
+    override fun onEditorInfoUpdate(info: EditorInfo?) {
+        receivers.forEach { it.onEditorInfoUpdate(info) }
     }
 
     override fun onImeUpdate(ime: InputMethodEntry) {

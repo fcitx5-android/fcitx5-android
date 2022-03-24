@@ -194,6 +194,10 @@ abstract class BaseKeyboard(
         // do nothing by default
     }
 
+    open fun onEditorInfoChange(info: EditorInfo?) {
+        // do nothing by default
+    }
+
     open fun onPreeditChange(info: EditorInfo?, content: PreeditContent) {
         // do nothing by default
     }

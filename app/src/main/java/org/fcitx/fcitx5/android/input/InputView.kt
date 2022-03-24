@@ -116,6 +116,7 @@ class InputView(
     fun onShow() {
         kawaiiBar.onShow()
         windowManager.switchToKeyboardWindow()
+        broadcaster.onEditorInfoUpdate(service.editorInfo)
     }
 
     fun handleFcitxEvent(it: FcitxEvent<*>) {

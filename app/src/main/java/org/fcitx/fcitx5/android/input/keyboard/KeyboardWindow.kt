@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
 import android.text.InputType
+import android.view.inputmethod.EditorInfo
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.Prefs
@@ -37,12 +38,13 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
             SymbolKeyboard.Name to SymbolKeyboard(context)
         )
     }
-    private var currentKeyboardName = TextKeyboard.Name
+    private var currentKeyboardName = ""
     private var lastSymbolType: String by Prefs.getInstance().lastSymbolLayout
 
     private val currentKeyboard: BaseKeyboard get() = keyboards.getValue(currentKeyboardName)
 
     fun switchLayout(to: String) {
+        if (to == currentKeyboardName) return
         keyboards[currentKeyboardName]?.let {
             it.keyActionListener = null
             it.onDetach()
@@ -65,6 +67,10 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
         }
         currentKeyboard.onAttach(service.editorInfo)
         currentKeyboard.onInputMethodChange(currentIme)
+    }
+
+    override fun onEditorInfoUpdate(info: EditorInfo?) {
+        currentKeyboard.onEditorInfoChange(info)
     }
 
     override fun onImeUpdate(ime: InputMethodEntry) {

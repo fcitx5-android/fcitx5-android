@@ -116,6 +116,10 @@ class TextKeyboard(
         `return`.imageResource = drawableForReturn(info)
     }
 
+    override fun onEditorInfoChange(info: EditorInfo?) {
+        `return`.imageResource = drawableForReturn(info)
+    }
+
     override fun onPreeditChange(info: EditorInfo?, content: PreeditContent) {
         updateReturnButton(`return`, info, content)
     }
