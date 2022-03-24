@@ -208,20 +208,19 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     private fun forwardKeyEvent(event: KeyEvent, up: Boolean = false): Boolean {
         val states = KeyStates.fromKeyEvent(event)
-        KeySym.fromKeyEvent(event).let {
-            if (it.recognized) {
-                lifecycleScope.launch { fcitx.sendKey(it, states, up) }
-                return true
-            }
-        }
-        // character key
-        if (event.unicodeChar > 0) {
-            val sym = event.unicodeChar.toUInt()
-            lifecycleScope.launch { fcitx.sendKey(sym, states.states, up) }
+        val charCode = event.unicodeChar
+        // try send charCode first, allow upper case and lower case character
+        // generating different KeySym
+        if (charCode > 0) {
+            lifecycleScope.launch { fcitx.sendKey(charCode.toUInt(), states.states, up) }
             return true
-        } else {
-            Timber.w("Unknown KeyEvent: $event")
         }
+        val keySym = KeySym.fromKeyEvent(event)
+        if (keySym != null) {
+            lifecycleScope.launch { fcitx.sendKey(keySym, states, up) }
+            return true
+        }
+        Timber.d("Skipped KeyEvent: $event")
         return false
     }
 

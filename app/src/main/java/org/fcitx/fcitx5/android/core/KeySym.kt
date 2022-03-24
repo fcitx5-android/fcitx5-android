@@ -4,85 +4,22 @@ import android.view.KeyEvent
 
 data class KeySym(val sym: UInt) {
 
-    val recognized get() = sym > 0u
-
-    val keyCode get() = KeyCode[sym.toInt()]
+    val keyCode get() = KeyCode[sym.toInt()] ?: KeyEvent.KEYCODE_UNKNOWN
 
     fun toInt() = sym.toInt()
 
-    override fun toString() = sym.toString(16)
+    override fun toString() = "0x" + sym.toString(16).padStart(4, '0')
 
     companion object {
         fun of(v: Int) = KeySym(v.toUInt())
 
-        fun fromKeyEvent(event: KeyEvent): KeySym {
-            return KeySym(Sym[event.keyCode] ?: 0u)
-        }
+        fun fromKeyEvent(event: KeyEvent) = Sym[event.keyCode]?.let { KeySym(it.toUInt()) }
 
-        private val Sym = hashMapOf(
-            KeyEvent.KEYCODE_F1 to 0xffbeu,
-            KeyEvent.KEYCODE_F2 to 0xffbfu,
-            KeyEvent.KEYCODE_F3 to 0xffc0u,
-            KeyEvent.KEYCODE_F4 to 0xffc1u,
-            KeyEvent.KEYCODE_F5 to 0xffc2u,
-            KeyEvent.KEYCODE_F6 to 0xffc3u,
-            KeyEvent.KEYCODE_F7 to 0xffc4u,
-            KeyEvent.KEYCODE_F8 to 0xffc5u,
-            KeyEvent.KEYCODE_F9 to 0xffc6u,
-            KeyEvent.KEYCODE_F10 to 0xffc7u,
-            KeyEvent.KEYCODE_F11 to 0xffc8u,
-            KeyEvent.KEYCODE_F12 to 0xffc9u,
-
-            KeyEvent.KEYCODE_SHIFT_LEFT to 0xffe1u,
-            KeyEvent.KEYCODE_SHIFT_RIGHT to 0xffe2u,
-            KeyEvent.KEYCODE_CTRL_LEFT to 0xffe3u,
-            KeyEvent.KEYCODE_CTRL_RIGHT to 0xffe4u,
-            KeyEvent.KEYCODE_CAPS_LOCK to 0xffe5u,
-            KeyEvent.KEYCODE_META_LEFT to 0xffe7u,
-            KeyEvent.KEYCODE_META_RIGHT to 0xffe8u,
-            KeyEvent.KEYCODE_ALT_LEFT to 0xffe9u,
-            KeyEvent.KEYCODE_ALT_RIGHT to 0xffeau,
-
-            KeyEvent.KEYCODE_INSERT to 0xff63u,
-            KeyEvent.KEYCODE_FORWARD_DEL to 0xffffu, // Delete
-            KeyEvent.KEYCODE_MOVE_HOME to 0xff50u,
-            KeyEvent.KEYCODE_MOVE_END to 0xff57u,
-            KeyEvent.KEYCODE_PAGE_DOWN to 0xff56u,
-            KeyEvent.KEYCODE_PAGE_UP to 0xff55u,
-            KeyEvent.KEYCODE_TAB to 0xff09u,
-            KeyEvent.KEYCODE_SPACE to 0x0020u,
-            KeyEvent.KEYCODE_DEL to 0xff08u, // BackSpace
-            KeyEvent.KEYCODE_ENTER to 0xff0du,
-            KeyEvent.KEYCODE_ESCAPE to 0xff1bu,
-
-            KeyEvent.KEYCODE_DPAD_UP to 0xff52u,
-            KeyEvent.KEYCODE_DPAD_DOWN to 0xff54u,
-            KeyEvent.KEYCODE_DPAD_LEFT to 0xff51u,
-            KeyEvent.KEYCODE_DPAD_RIGHT to 0xff53u,
-
-            KeyEvent.KEYCODE_NUMPAD_DIVIDE to 0xffafu,
-            KeyEvent.KEYCODE_NUMPAD_MULTIPLY to 0xffaau,
-            KeyEvent.KEYCODE_NUMPAD_SUBTRACT to 0xffadu,
-            KeyEvent.KEYCODE_NUMPAD_7 to 0xffb7u,
-            KeyEvent.KEYCODE_NUMPAD_8 to 0xffb8u,
-            KeyEvent.KEYCODE_NUMPAD_9 to 0xffb9u,
-            KeyEvent.KEYCODE_NUMPAD_ADD to 0xffabu,
-            KeyEvent.KEYCODE_NUMPAD_4 to 0xffb4u,
-            KeyEvent.KEYCODE_NUMPAD_5 to 0xffb5u,
-            KeyEvent.KEYCODE_NUMPAD_6 to 0xffb6u,
-            KeyEvent.KEYCODE_NUMPAD_1 to 0xffb1u,
-            KeyEvent.KEYCODE_NUMPAD_2 to 0xffb2u,
-            KeyEvent.KEYCODE_NUMPAD_3 to 0xffb3u,
-            KeyEvent.KEYCODE_NUMPAD_ENTER to 0xff8du,
-            KeyEvent.KEYCODE_NUMPAD_0 to 0xffb0u,
-            KeyEvent.KEYCODE_NUMPAD_DOT to 0xffaeu,
-        )
-
-        val KeyCode = hashMapOf(
+        val KeyCode: HashMap<Int, Int> = hashMapOf(
             0x0020 to KeyEvent.KEYCODE_SPACE, /* U+0020 SPACE */
 //            0x0021 to KeyEvent.KEYCODE_EXCLAM, /* U+0021 EXCLAMATION MARK */
 //            0x0022 to KeyEvent.KEYCODE_QUOTEDBL, /* U+0022 QUOTATION MARK */
-//            0x0023 to KeyEvent.KEYCODE_NUMBERSIGN, /* U+0023 NUMBER SIGN */
+            0x0023 to KeyEvent.KEYCODE_POUND, /* U+0023 NUMBER SIGN */
 //            0x0024 to KeyEvent.KEYCODE_DOLLAR, /* U+0024 DOLLAR SIGN */
 //            0x0025 to KeyEvent.KEYCODE_PERCENT, /* U+0025 PERCENT SIGN */
 //            0x0026 to KeyEvent.KEYCODE_AMPERSAND, /* U+0026 AMPERSAND */
@@ -90,7 +27,7 @@ data class KeySym(val sym: UInt) {
 //            0x0027 to KeyEvent.KEYCODE_QUOTERIGHT, /* deprecated */
 //            0x0028 to KeyEvent.KEYCODE_PARENLEFT, /* U+0028 LEFT PARENTHESIS */
 //            0x0029 to KeyEvent.KEYCODE_PARENRIGHT, /* U+0029 RIGHT PARENTHESIS */
-//            0x002a to KeyEvent.KEYCODE_ASTERISK, /* U+002A ASTERISK */
+            0x002a to KeyEvent.KEYCODE_STAR, /* U+002A ASTERISK */
             0x002b to KeyEvent.KEYCODE_PLUS, /* U+002B PLUS SIGN */
             0x002c to KeyEvent.KEYCODE_COMMA, /* U+002C COMMA */
             0x002d to KeyEvent.KEYCODE_MINUS, /* U+002D HYPHEN-MINUS */
@@ -233,6 +170,22 @@ data class KeySym(val sym: UInt) {
             0xff8d to KeyEvent.KEYCODE_NUMPAD_ENTER,
             0xffb0 to KeyEvent.KEYCODE_NUMPAD_0,
             0xffae to KeyEvent.KEYCODE_NUMPAD_DOT,
+
+            0xff30 to KeyEvent.KEYCODE_EISU, // FcitxKey_Eisu_toggle
+            0xff2d to KeyEvent.KEYCODE_KANA, // FcitxKey_Kana_Lock
+            0xff27 to KeyEvent.KEYCODE_KATAKANA_HIRAGANA, // FcitxKey_Hiragana_Katakana
+            0xff2a to KeyEvent.KEYCODE_ZENKAKU_HANKAKU, // FcitxKey_Zenkaku_Hankaku
         )
+
+        private val Sym = HashMap<Int, Int>().also {
+            KeyCode.forEach { (k, v) ->
+                // exclude uppercase latin letter range because:
+                // - there is not separate KeyCode for upper and lower case characters
+                // - ASCII printable characters have same KeySym value as their char code
+                // - they should produce different KeySym when hold Shift
+                // TODO: map (keyCode with metaState) to (KeySym with KeyStates) at once
+                if (0x0041 > k || k > 0x005a) it[v] = k
+            }
+        }
     }
 }
