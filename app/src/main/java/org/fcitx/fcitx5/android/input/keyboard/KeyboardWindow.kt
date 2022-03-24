@@ -43,6 +43,13 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
 
     private val currentKeyboard: BaseKeyboard get() = keyboards.getValue(currentKeyboardName)
 
+    private val keyActionListener = BaseKeyboard.KeyActionListener {
+        if (it is KeyAction.LayoutSwitchAction)
+            switchLayout(it.act)
+        else
+            commonKeyActionListener.listener.onKeyAction(it)
+    }
+
     fun switchLayout(to: String) {
         if (to == currentKeyboardName) return
         keyboards[currentKeyboardName]?.let {
@@ -59,17 +66,19 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
             }
         }
         view.apply { add(currentKeyboard, lParams(matchParent, matchParent)) }
-        currentKeyboard.keyActionListener = BaseKeyboard.KeyActionListener {
-            if (it is KeyAction.LayoutSwitchAction)
-                switchLayout(it.act)
-            else
-                commonKeyActionListener.listener.onKeyAction(it)
-        }
+        currentKeyboard.keyActionListener = keyActionListener
         currentKeyboard.onAttach(service.editorInfo)
         currentKeyboard.onInputMethodChange(currentIme)
     }
 
     override fun onEditorInfoUpdate(info: EditorInfo?) {
+        switchLayout(service.editorInfo?.inputType?.let {
+            when (it and InputType.TYPE_MASK_CLASS) {
+                InputType.TYPE_CLASS_NUMBER -> NumberKeyboard.Name
+                InputType.TYPE_CLASS_PHONE -> NumberKeyboard.Name
+                else -> TextKeyboard.Name
+            }
+        } ?: TextKeyboard.Name)
         currentKeyboard.onEditorInfoChange(info)
     }
 
@@ -83,13 +92,9 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
     }
 
     override fun onAttached() {
-        switchLayout(service.editorInfo?.inputType?.let {
-            when (it and InputType.TYPE_MASK_CLASS) {
-                InputType.TYPE_CLASS_NUMBER -> NumberKeyboard.Name
-                InputType.TYPE_CLASS_PHONE -> NumberKeyboard.Name
-                else -> TextKeyboard.Name
-            }
-        } ?: TextKeyboard.Name)
+        if (currentKeyboardName.isNotEmpty()) {
+            currentKeyboard.keyActionListener = keyActionListener
+        }
     }
 
     override fun onDetached() {
