@@ -60,7 +60,7 @@ data class InputMethodEntry(
     constructor(name: String) : this("", name, "", "", "×", "", false)
 
     val displayName: String
-        get() = if (name.isNotEmpty()) name else uniqueName
+        get() = name.ifEmpty { uniqueName }
 }
 
 data class RawConfig(
@@ -73,6 +73,7 @@ data class RawConfig(
     constructor(name: String, v: Boolean) : this(name, "", if (v) "True" else "False", null)
     constructor(subItems: Array<RawConfig>) : this("", "", "", subItems)
     constructor(name: String, subItems: Array<RawConfig>) : this(name, "", "", subItems)
+    constructor() : this("", "", "", arrayOf())
 
     operator fun get(name: String) = findByName(name)!!
 

@@ -65,13 +65,20 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         setFcitxGlobalConfig(config)
     }
 
-    suspend fun getAddonConfig(key: String) = dispatcher.dispatch {
-        getFcitxAddonConfig(key) ?: RawConfig(arrayOf())
+    suspend fun getAddonConfig(addon: String) = dispatcher.dispatch {
+        getFcitxAddonConfig(addon) ?: RawConfig(arrayOf())
     }
 
-    suspend fun setAddonConfig(key: String, config: RawConfig) = dispatcher.dispatch {
-        setFcitxAddonConfig(key, config)
+    suspend fun setAddonConfig(addon: String, config: RawConfig) = dispatcher.dispatch {
+        setFcitxAddonConfig(addon, config)
     }
+
+    suspend fun getAddonSubConfig(addon: String, path: String) = dispatcher.dispatch {
+        getFcitxAddonSubConfig(addon, path) ?: RawConfig(arrayOf())
+    }
+
+    suspend fun setAddonSubConfig(addon: String, path: String, config: RawConfig = RawConfig()) =
+        dispatcher.dispatch { setFcitxAddonSubConfig(addon, path, config) }
 
     suspend fun getImConfig(key: String) = dispatcher.dispatch {
         getFcitxInputMethodConfig(key) ?: RawConfig(arrayOf())
@@ -98,9 +105,6 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
     suspend fun focus(focus: Boolean = true) = dispatcher.dispatch { focusInputContext(focus) }
     suspend fun setCapFlags(flags: CapabilityFlags) =
         dispatcher.dispatch { setCapabilityFlags(flags.toLong()) }
-
-    suspend fun reloadPinyinDict() =
-        dispatcher.dispatch { setAddonSubConfig("pinyin", "dictmanager", RawConfig(arrayOf())) }
 
     init {
         if (lifecycle.currentState != FcitxLifecycle.State.STOPPED)
@@ -192,6 +196,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         external fun getFcitxAddonConfig(addon: String): RawConfig?
 
         @JvmStatic
+        external fun getFcitxAddonSubConfig(addon: String, path: String): RawConfig?
+
+        @JvmStatic
         external fun getFcitxInputMethodConfig(im: String): RawConfig?
 
         @JvmStatic
@@ -199,6 +206,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
         @JvmStatic
         external fun setFcitxAddonConfig(addon: String, config: RawConfig)
+
+        @JvmStatic
+        external fun setFcitxAddonSubConfig(addon: String, path: String, config: RawConfig)
 
         @JvmStatic
         external fun setFcitxInputMethodConfig(im: String, config: RawConfig)
@@ -226,9 +236,6 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
         @JvmStatic
         external fun setCapabilityFlags(flags: Long)
-
-        @JvmStatic
-        external fun setAddonSubConfig(addon: String, path: String, config: RawConfig)
 
         @JvmStatic
         external fun loopOnce()
