@@ -153,9 +153,9 @@ public:
         return topLevel;
     }
 
-    fcitx::RawConfig getGlobalConfig() {
+    std::unique_ptr<fcitx::RawConfig> getGlobalConfig() {
         const auto &configuration = p_instance->globalConfig().config();
-        return mergeConfigDesc(&configuration);
+        return std::make_unique<fcitx::RawConfig>(mergeConfigDesc(&configuration));
     }
 
     void setGlobalConfig(const fcitx::RawConfig &config) {
@@ -191,6 +191,18 @@ public:
             return;
         }
         addonInstance->setConfig(config);
+    }
+
+    std::unique_ptr<fcitx::RawConfig> getAddonSubConfig(const std::string &addonName, const std::string &path) {
+        const auto addonInstance = getAddonInstance(addonName);
+        if (!addonInstance) {
+            return nullptr;
+        }
+        const auto configuration = addonInstance->getSubConfig(path);
+        if (!configuration) {
+            return nullptr;
+        }
+        return std::make_unique<fcitx::RawConfig>(mergeConfigDesc(configuration));
     }
 
     void setAddonSubConfig(const std::string &addonName, const std::string &path, const fcitx::RawConfig &config) {
@@ -709,15 +721,26 @@ JNIEXPORT jobject JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_getFcitxGlobalConfig(JNIEnv *env, jclass clazz) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     auto cfg = Fcitx::Instance().getGlobalConfig();
-    return fcitxRawConfigToJObject(env, cfg);
+    return fcitxRawConfigToJObject(env, *cfg);
 }
-
 
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_getFcitxAddonConfig(JNIEnv *env, jclass clazz, jstring addon) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     auto result = Fcitx::Instance().getAddonConfig(jstringToString(env, addon));
+    return result ? fcitxRawConfigToJObject(env, *result) : nullptr;
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_getFcitxAddonSubConfig(JNIEnv *env, jclass clazz, jstring addon, jstring path) {
+    RETURN_VALUE_IF_NOT_RUNNING(nullptr)
+    const char * addonName = env->GetStringUTFChars(addon, nullptr);
+    const char * configPath = env->GetStringUTFChars(path, nullptr);
+    auto result = Fcitx::Instance().getAddonSubConfig(addonName, configPath);
+    env->ReleaseStringUTFChars(path, configPath);
+    env->ReleaseStringUTFChars(addon, addonName);
     return result ? fcitxRawConfigToJObject(env, *result) : nullptr;
 }
 
@@ -770,6 +793,14 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_setFcitxAddonConfig(JNIEnv *env, jclass
     RETURN_IF_NOT_RUNNING
     auto rawConfig = jobjectToRawConfig(env, config);
     Fcitx::Instance().setAddonConfig(jstringToString(env, addon), rawConfig);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_setFcitxAddonSubConfig(JNIEnv *env, jclass clazz, jstring addon, jstring path, jobject config) {
+    RETURN_IF_NOT_RUNNING
+    auto rawConfig = jobjectToRawConfig(env, config);
+    Fcitx::Instance().setAddonSubConfig(jstringToString(env, addon), jstringToString(env, path), rawConfig);
 }
 
 extern "C"
@@ -870,14 +901,6 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_setCapabilityFlags(JNIEnv *env, jclass 
     uint64_t u;
     std::memcpy(&u, &flags, sizeof(uint64_t));
     Fcitx::Instance().setCapabilityFlags(u);
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_setAddonSubConfig(JNIEnv *env, jclass clazz, jstring addon, jstring path, jobject config) {
-    RETURN_IF_NOT_RUNNING
-    auto rawConfig = jobjectToRawConfig(env, config);
-    Fcitx::Instance().setAddonSubConfig(jstringToString(env, addon), jstringToString(env, path), rawConfig);
 }
 
 extern "C"
