@@ -92,6 +92,13 @@
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_imConfigFragment_to_punctuationEditorFragment"
+            app:destination="@id/punctuationEditorFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
 
     <fragment
@@ -122,6 +129,13 @@
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_addonConfigFragment_to_punctuationEditorFragment"
+            app:destination="@id/punctuationEditorFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
 
     <fragment
@@ -135,9 +149,12 @@
         android:id="@+id/pinyinDictionaryFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.settings.PinyinDictionaryFragment" />
     <fragment
+        android:id="@+id/punctuationEditorFragment"
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.PunctuationEditorFragment" />
+    <fragment
         android:id="@+id/developerFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.DeveloperFragment"
-        android:label=""></fragment>
+        android:label="" />
     <fragment
         android:id="@+id/aboutFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.AboutFragment"
