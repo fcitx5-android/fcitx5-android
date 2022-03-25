@@ -9,6 +9,7 @@ import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.ViewTreeObserver
 import android.view.inputmethod.InputConnection
+import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
@@ -90,3 +91,5 @@ fun View.setupPressingToRepeat(
         accelerateTime
     )
 )
+
+val EditText.str: String get() = editableText.toString()

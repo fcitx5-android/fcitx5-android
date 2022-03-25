@@ -2,9 +2,9 @@ package org.fcitx.fcitx5.android.ui.common
 
 import android.content.Context
 import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.view.View
 import android.widget.CheckBox
-import android.widget.EditText
 import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.addTextChangedListener
@@ -22,6 +22,7 @@ import splitties.views.dsl.core.*
 import splitties.views.dsl.material.floatingActionButton
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.gravityEndBottom
+import splitties.views.imageResource
 import splitties.views.recyclerview.verticalLayoutManager
 
 abstract class BaseDynamicListUi<T>(
@@ -42,8 +43,10 @@ abstract class BaseDynamicListUi<T>(
     ) {
 
     protected val fab = floatingActionButton {
-        setImageResource(R.drawable.ic_baseline_plus_24)
-        setColorFilter(styledColor(android.R.attr.colorForegroundInverse), PorterDuff.Mode.SRC_IN)
+        imageResource = R.drawable.ic_baseline_plus_24
+        colorFilter = PorterDuffColorFilter(
+            styledColor(android.R.attr.colorForegroundInverse), PorterDuff.Mode.SRC_IN
+        )
     }
 
     sealed class Mode<T> {
@@ -81,13 +84,9 @@ abstract class BaseDynamicListUi<T>(
             is Mode.FreeAdd -> { idx ->
                 visibility = View.VISIBLE
                 setOnClickListener {
-                    createTextAlertDialog(
-                        context.getString(R.string.edit),
-                        { setText(showEntry(entries[idx])) },
-                        mode.validator
-                    ) {
-                        if (it != entries[idx])
-                            updateItem(idx, mode.converter(it))
+                    val entry = entries[idx]
+                    showEditDialog(entry) {
+                        if (it != entry) updateItem(idx, it)
                     }
                 }
             }
@@ -95,44 +94,31 @@ abstract class BaseDynamicListUi<T>(
             is Mode.Custom -> { _ -> visibility = View.GONE }
         }
         addOnItemChangedListener(object : OnItemChangedListener<T> {
-            override fun onItemSwapped(fromIdx: Int, toIdx: Int, item: T) {
-                updateFAB()
-                Snackbar.make(
-                    fab,
-                    "${showEntry(entries[toIdx])} <-> ${showEntry(entries[fromIdx])}",
-                    Snackbar.LENGTH_SHORT
-                )
-                    .setAction(R.string.undo) { swapItem(toIdx, fromIdx) }
-                    .show()
-            }
-
             override fun onItemAdded(idx: Int, item: T) {
                 updateFAB()
-                Snackbar.make(fab, "${showEntry(item)} added", Snackbar.LENGTH_SHORT)
-                    .setAction(R.string.undo) { removeItem(idx) }
-                    .show()
+                showUndoSnackbar("${showEntry(item)} added") { removeItem(idx) }
             }
 
             override fun onItemRemoved(idx: Int, item: T) {
                 updateFAB()
-                Snackbar.make(fab, "${showEntry(item)} removed", Snackbar.LENGTH_SHORT)
-                    .setAction(R.string.undo) { addItem(idx, item) }
-                    .show()
+                showUndoSnackbar("${showEntry(item)} removed") { addItem(idx, item) }
             }
 
             override fun onItemUpdated(idx: Int, old: T, new: T) {
                 updateFAB()
-                if (mode !is Mode.Immutable)
-                    Snackbar.make(
-                        fab,
-                        "${showEntry(old)} -> ${showEntry(new)}",
-                        Snackbar.LENGTH_SHORT
-                    )
-                        .setAction(R.string.undo) { updateItem(idx, old) }
-                        .show()
+                if (mode !is Mode.Immutable) {
+                    showUndoSnackbar("${showEntry(old)} -> ${showEntry(new)}") {
+                        updateItem(idx, old)
+                    }
+                }
             }
-
         })
+    }
+
+    private fun showUndoSnackbar(text: String, action: View.OnClickListener) {
+        Snackbar.make(fab, text, Snackbar.LENGTH_SHORT)
+            .setAction(R.string.undo, action)
+            .show()
     }
 
     open fun updateFAB() {
@@ -147,9 +133,7 @@ abstract class BaseDynamicListUi<T>(
                         val items = candidatesSource.map { showEntry(it) }.toTypedArray()
                         AlertDialog.Builder(ctx)
                             .setTitle(R.string.add)
-                            .setItems(items) { _, which ->
-                                addItem(item = candidatesSource[which])
-                            }
+                            .setItems(items) { _, which -> addItem(item = candidatesSource[which]) }
                             .show()
                     }
                 }
@@ -157,30 +141,27 @@ abstract class BaseDynamicListUi<T>(
             is Mode.FreeAdd -> {
                 fab.show()
                 fab.setOnClickListener {
-                    createTextAlertDialog(
-                        fab.context.getString(R.string.add),
-                        { hint = mode.hint },
-                        mode.validator
-                    ) {
-                        addItem(item = mode.converter(it))
-                    }
-
+                    showEditDialog { addItem(item = it) }
                 }
             }
             is Mode.Immutable -> fab.hide()
             is Mode.Custom -> {
             }
         }
-
     }
 
-    private fun createTextAlertDialog(
-        title: String,
-        initEditText: EditText.() -> Unit = {},
-        validator: (String) -> Boolean = { true },
-        block: EditText.(String) -> Unit
+    open fun showEditDialog(
+        entry: T? = null,
+        block: (T) -> Unit
     ) {
-        val editText = editText(initView = initEditText)
+        if (mode !is Mode.FreeAdd) return
+        val editText = editText {
+            hint = mode.hint
+            if (entry != null) {
+                setText(showEntry(entry))
+            }
+            addTextChangedListener { error = null }
+        }
         val layout = constraintLayout {
             add(editText, lParams {
                 height = wrapContent
@@ -192,7 +173,7 @@ abstract class BaseDynamicListUi<T>(
             })
         }
         val dialog = AlertDialog.Builder(ctx)
-            .setTitle(title)
+            .setTitle(ctx.getString(R.string.edit))
             .setView(layout)
             .setPositiveButton(android.R.string.ok) { _, _ ->
             }
@@ -203,17 +184,13 @@ abstract class BaseDynamicListUi<T>(
         editText.requestFocus()
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             val t = editText.editableText.toString()
-            if (validator(t)) {
-                block(editText, t)
+            if (mode.validator(t)) {
+                block(mode.converter(t))
                 dialog.dismiss()
-            } else
+            } else {
                 editText.error = "Invalid text!"
+            }
         }
-
-        editText.addTextChangedListener {
-            editText.error = null
-        }
-
     }
 
     protected val recyclerView: RecyclerView
@@ -222,8 +199,7 @@ abstract class BaseDynamicListUi<T>(
         touchCallback: DynamicListTouchCallback<T> =
             DynamicListTouchCallback(this@BaseDynamicListUi)
     ) {
-        ItemTouchHelper(touchCallback)
-            .attachToRecyclerView(recyclerView)
+        ItemTouchHelper(touchCallback).attachToRecyclerView(recyclerView)
     }
 
     override val root: View = coordinatorLayout {

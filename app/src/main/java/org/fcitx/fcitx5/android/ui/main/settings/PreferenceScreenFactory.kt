@@ -54,9 +54,7 @@ object PreferenceScreenFactory {
     ) {
 
         // Hide key related configs
-        if (hideKeyConfig && ConfigType.pretty(descriptor.type)
-                .contains("Key")
-        )
+        if (hideKeyConfig && ConfigType.pretty(descriptor.type).contains("Key"))
             return
 
         if (descriptor is ConfigDescriptor.ConfigCustom) {
@@ -79,6 +77,21 @@ object PreferenceScreenFactory {
                     else -> throw IllegalStateException("Can not navigate to pinyin dictionary from current fragment")
                 }
                 currentFragment.findNavController().navigate(action)
+                true
+            }
+        }
+
+        fun punctuationEditor(title: String) = Preference(context).apply {
+            setOnPreferenceClickListener {
+                val currentFragment =
+                    fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
+                val action = when (currentFragment) {
+                    is AddonConfigFragment -> R.id.action_addonConfigFragment_to_punctuationEditorFragment
+                    is InputMethodConfigFragment -> R.id.action_imConfigFragment_to_punctuationEditorFragment
+                    else -> throw IllegalStateException("Can not navigate to punctuation editor from current fragment")
+                }
+                currentFragment.findNavController()
+                    .navigate(action, bundleOf(PunctuationEditorFragment.TITLE to title))
                 true
             }
         }
@@ -120,7 +133,11 @@ object PreferenceScreenFactory {
                 setDefaultValue(descriptor.defaultValue)
             }
             is ConfigDescriptor.ConfigEnumList -> listPreference()
-            is ConfigDescriptor.ConfigExternal -> if (descriptor.name == "DictManager") pinyinDictionary() else stubPreference()
+            is ConfigDescriptor.ConfigExternal -> when (descriptor.name) {
+                "DictManager" -> pinyinDictionary()
+                "Punctuation" -> punctuationEditor(descriptor.description ?: descriptor.name)
+                else -> stubPreference()
+            }
             is ConfigDescriptor.ConfigInt -> DialogSeekBarPreference(context).apply {
                 summaryProvider = DialogSeekBarPreference.SimpleSummaryProvider
                 descriptor.defaultValue?.let { defaultValue = it }
