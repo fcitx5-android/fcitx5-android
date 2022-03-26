@@ -83,4 +83,8 @@
     <string name="crash_logs">Crash logs</string>
     <string name="verbose_log">Verbose logging</string>
     <string name="verbose_log_summary">Effective after restart</string>
+    <string name="removed_x">Removed %1$s</string>
+    <string name="added_x">Added %1$s</string>
+    <string name="edited_x">Edited %1$s</string>
+    <string name="invalid_value">Invalid value</string>
 </resources>
