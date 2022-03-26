@@ -21,6 +21,7 @@ class FcitxApplication : Application() {
         CaocConfig.Builder
             .create()
             .errorActivity(LogActivity::class.java)
+            .enabled(!BuildConfig.DEBUG)
             .apply()
         instance = this
         Timber.plant(object : Timber.DebugTree() {
