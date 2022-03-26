@@ -1,11 +1,11 @@
 package org.fcitx.fcitx5.android.ui.main.settings
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.forEach
 import androidx.preference.isEmpty
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
@@ -30,11 +30,25 @@ abstract class FcitxPreferenceFragment : PreferenceFragmentCompat() {
         requireArguments().getString(key)
             ?: throw IllegalStateException("No $key found in bundle")
 
+    private fun save() {
+        lifecycleScope.launch {
+            saveConfig(fcitx, raw["cfg"])
+        }
+    }
+
+    private val onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, _ ->
+        save()
+        true
+    }
+
     final override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         lifecycleScope.withLoadingDialog(requireContext()) {
             raw = obtainConfig(fcitx)
             val screen =
                 PreferenceScreenFactory.create(preferenceManager, parentFragmentManager, raw)
+            screen.forEach {
+                it.onPreferenceChangeListener = onPreferenceChangeListener
+            }
             if (screen.isEmpty())
                 screen.addPreference(
                     Preference(requireContext())
@@ -44,26 +58,13 @@ abstract class FcitxPreferenceFragment : PreferenceFragmentCompat() {
                             isSingleLineTitle = true
                         })
             preferenceScreen = screen
-            viewModel.enableToolbarSaveButton {
-                lifecycleScope.launch {
-                    saveConfig(fcitx, raw["cfg"])
-                    Toast.makeText(requireContext(), "Saved", Toast.LENGTH_SHORT).show()
-                }
-            }
+            viewModel.disableAboutButton()
         }
     }
 
     override fun onResume() {
         super.onResume()
         viewModel.setToolbarTitle(getPageTitle())
-    }
-
-    override fun onPause() {
-        if (this::raw.isInitialized)
-            lifecycleScope.launch {
-                saveConfig(fcitx, raw["cfg"])
-            }
-        super.onPause()
     }
 
 }
