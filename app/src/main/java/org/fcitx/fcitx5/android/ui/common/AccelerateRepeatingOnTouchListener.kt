@@ -37,7 +37,7 @@ class AccelerateRepeatingOnTouchListener(
             (initialInterval * exp(-ln(initialInterval.toDouble() / endInterval) / accelerateTime * t)).toLong()
 
     override fun onTouch(view: View, event: MotionEvent): Boolean =
-        when (event.action) {
+        when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 job?.cancel()
                 job = (view.findViewTreeLifecycleOwner()?.lifecycleScope!!).launch {

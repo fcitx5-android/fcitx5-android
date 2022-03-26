@@ -139,7 +139,7 @@ abstract class BaseKeyboard(
                 override fun onRawTouchEvent(motionEvent: MotionEvent): Boolean {
                     when (btn) {
                         is IRepeatKey -> {
-                            when (motionEvent.action) {
+                            when (motionEvent.actionMasked) {
                                 MotionEvent.ACTION_BUTTON_PRESS -> performClick()
                                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> onAction(btn.onRelease())
                             }
