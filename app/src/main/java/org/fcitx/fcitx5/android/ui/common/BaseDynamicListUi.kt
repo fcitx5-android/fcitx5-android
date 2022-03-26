@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.CheckBox
 import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -193,7 +194,25 @@ abstract class BaseDynamicListUi<T>(
         }
     }
 
-    protected val recyclerView: RecyclerView
+    protected val recyclerView = recyclerView {
+        adapter = this@BaseDynamicListUi
+        layoutManager = verticalLayoutManager()
+        var fabShown = true
+        addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (dy > 0 && fabShown) {
+                    fabShown = false
+                    val offset = fab.run {
+                        height + (layoutParams as CoordinatorLayout.LayoutParams).bottomMargin
+                    }.toFloat()
+                    fab.animate().setDuration(150L).translationY(offset)
+                } else if (dy < 0 && !fabShown) {
+                    fabShown = true
+                    fab.animate().setDuration(150L).translationY(0f)
+                }
+            }
+        })
+    }
 
     fun addTouchCallback(
         touchCallback: DynamicListTouchCallback<T> =
@@ -203,19 +222,15 @@ abstract class BaseDynamicListUi<T>(
     }
 
     override val root: View = coordinatorLayout {
-        add(recyclerView {
-            adapter = this@BaseDynamicListUi
-            layoutManager = verticalLayoutManager()
-
-        }.also { recyclerView = it }, defaultLParams {
+        add(recyclerView, defaultLParams {
             height = matchParent
             width = matchParent
         })
-
         add(fab, defaultLParams {
             gravity = gravityEndBottom
             margin = dp(16)
         })
-    }.also { updateFAB() }
+        updateFAB()
+    }
 
 }
