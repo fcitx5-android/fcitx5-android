@@ -6,14 +6,12 @@ import androidx.lifecycle.lifecycleScope
 import cn.berberman.girls.utils.either.otherwise
 import cn.berberman.girls.utils.either.then
 import kotlinx.coroutines.launch
-import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor
 import org.fcitx.fcitx5.android.utils.str
 import splitties.dimensions.dp
-import splitties.resources.str
 import splitties.views.dsl.core.*
 import splitties.views.horizontalPadding
 import splitties.views.topPadding
@@ -107,6 +105,7 @@ class PunctuationEditorFragment : ProgressFragment(),
             }
 
             override fun showEditDialog(
+                title: String,
                 entry: PunctuationMapEntry?,
                 block: (PunctuationMapEntry) -> Unit
             ) {
@@ -132,7 +131,7 @@ class PunctuationEditorFragment : ProgressFragment(),
                     add(altMappingInput, lParams(matchParent))
                 }
                 AlertDialog.Builder(context)
-                    .setTitle(str(R.string.edit))
+                    .setTitle(title)
                     .setView(layout)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
                         block(

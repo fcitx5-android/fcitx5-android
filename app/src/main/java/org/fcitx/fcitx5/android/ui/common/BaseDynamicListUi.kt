@@ -86,7 +86,7 @@ abstract class BaseDynamicListUi<T>(
                 visibility = View.VISIBLE
                 setOnClickListener {
                     val entry = entries[idx]
-                    showEditDialog(entry) {
+                    showEditDialog(ctx.getString(R.string.edit), entry) {
                         if (it != entry) updateItem(idx, it)
                     }
                 }
@@ -97,18 +97,18 @@ abstract class BaseDynamicListUi<T>(
         addOnItemChangedListener(object : OnItemChangedListener<T> {
             override fun onItemAdded(idx: Int, item: T) {
                 updateFAB()
-                showUndoSnackbar("${showEntry(item)} added") { removeItem(idx) }
+                showUndoSnackbar(ctx.getString(R.string.added_x, showEntry(item))) { removeItem(idx) }
             }
 
             override fun onItemRemoved(idx: Int, item: T) {
                 updateFAB()
-                showUndoSnackbar("${showEntry(item)} removed") { addItem(idx, item) }
+                showUndoSnackbar(ctx.getString(R.string.removed_x, showEntry(item))) { addItem(idx, item) }
             }
 
             override fun onItemUpdated(idx: Int, old: T, new: T) {
                 updateFAB()
                 if (mode !is Mode.Immutable) {
-                    showUndoSnackbar("${showEntry(old)} -> ${showEntry(new)}") {
+                    showUndoSnackbar(ctx.getString(R.string.edited_x, showEntry(new))) {
                         updateItem(idx, old)
                     }
                 }
@@ -142,7 +142,7 @@ abstract class BaseDynamicListUi<T>(
             is Mode.FreeAdd -> {
                 fab.show()
                 fab.setOnClickListener {
-                    showEditDialog { addItem(item = it) }
+                    showEditDialog(ctx.getString(R.string.add)) { addItem(item = it) }
                 }
             }
             is Mode.Immutable -> fab.hide()
@@ -152,6 +152,7 @@ abstract class BaseDynamicListUi<T>(
     }
 
     open fun showEditDialog(
+        title: String,
         entry: T? = null,
         block: (T) -> Unit
     ) {
@@ -174,7 +175,7 @@ abstract class BaseDynamicListUi<T>(
             })
         }
         val dialog = AlertDialog.Builder(ctx)
-            .setTitle(ctx.getString(R.string.edit))
+            .setTitle(title)
             .setView(layout)
             .setPositiveButton(android.R.string.ok) { _, _ ->
             }
@@ -189,7 +190,7 @@ abstract class BaseDynamicListUi<T>(
                 block(mode.converter(t))
                 dialog.dismiss()
             } else {
-                editText.error = "Invalid text!"
+                editText.error = ctx.getString(R.string.invalid_value)
             }
         }
     }
