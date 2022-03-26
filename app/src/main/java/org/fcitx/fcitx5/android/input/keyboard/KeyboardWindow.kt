@@ -53,9 +53,9 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
     fun switchLayout(to: String) {
         if (to == currentKeyboardName) return
         keyboards[currentKeyboardName]?.let {
-            it.keyActionListener = null
             it.onDetach()
             view.removeView(it)
+            it.keyActionListener = null
         }
         if (to.isEmpty()) {
             currentKeyboardName = lastSymbolType

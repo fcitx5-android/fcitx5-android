@@ -141,7 +141,7 @@ abstract class BaseKeyboard(
                         is IRepeatKey -> {
                             when (motionEvent.action) {
                                 MotionEvent.ACTION_BUTTON_PRESS -> performClick()
-                                MotionEvent.ACTION_UP -> onAction(btn.onRelease())
+                                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> onAction(btn.onRelease())
                             }
                         }
                     }
