@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.reloadPinyinDict
 import org.fcitx.fcitx5.android.data.pinyin.PinyinDictManager
 import org.fcitx.fcitx5.android.data.pinyin.dict.Dictionary
 import org.fcitx.fcitx5.android.data.pinyin.dict.LibIMEDictionary
@@ -209,7 +210,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                 val id = RELOAD_ID++
                 builder.build().let { notificationManager.notify(id, it) }
                 measureTimeMillis {
-                    viewModel.fcitx.setAddonSubConfig("pinyin", "dictmanager")
+                    viewModel.fcitx.reloadPinyinDict()
                 }.let { Timber.d("Took $it to reload dict") }
                 notificationManager.cancel(id)
                 busy.set(false)

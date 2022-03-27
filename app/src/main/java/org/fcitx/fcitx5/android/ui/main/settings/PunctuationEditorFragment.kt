@@ -5,8 +5,12 @@ import android.view.View
 import androidx.lifecycle.lifecycleScope
 import cn.berberman.girls.utils.either.otherwise
 import cn.berberman.girls.utils.either.then
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.RawConfig
+import org.fcitx.fcitx5.android.core.getPunctuationConfig
+import org.fcitx.fcitx5.android.core.savePunctuationConfig
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor
@@ -16,6 +20,7 @@ import splitties.views.dsl.core.*
 import splitties.views.horizontalPadding
 import splitties.views.topPadding
 import kotlin.properties.Delegates
+import org.fcitx.fcitx5.android.R
 
 class PunctuationEditorFragment : ProgressFragment(),
     OnItemChangedListener<PunctuationEditorFragment.PunctuationMapEntry> {
@@ -50,9 +55,10 @@ class PunctuationEditorFragment : ProgressFragment(),
     }
 
     private suspend fun loadEntries(lang: String = "zh_CN"): List<PunctuationMapEntry> {
-        val raw = viewModel.fcitx.getAddonSubConfig("punctuation", "punctuationmap/$lang")
+        val raw = viewModel.fcitx.getPunctuationConfig(lang)
         val cfg = raw["cfg"]
         val desc = raw["desc"]
+        // parse config desc to get description text of the options
         ConfigDescriptor.parseTopLevel(desc)
             .otherwise { throw it }
             .then {
@@ -77,7 +83,7 @@ class PunctuationEditorFragment : ProgressFragment(),
             )
         )
         lifecycleScope.launch {
-            viewModel.fcitx.setAddonSubConfig("punctuation", "punctuationmap/$lang", cfg)
+            viewModel.fcitx.savePunctuationConfig(lang, cfg)
         }
     }
 
@@ -109,33 +115,48 @@ class PunctuationEditorFragment : ProgressFragment(),
                 entry: PunctuationMapEntry?,
                 block: (PunctuationMapEntry) -> Unit
             ) {
-                val keyLabel = textView { text = keyDesc }
-                val keyInput = editText { }
-                val mappingLabel = textView { text = mappingDesc }
-                val mappingInput = editText { }
-                val altMappingLabel = textView { text = altMappingDesc }
-                val altMappingInput = editText { }
+                val keyLayout = TextInputLayout(requireContext(),null,R.style.Widget_MaterialComponents_TextInputLayout_FilledBox).apply {
+                    hint = keyDesc
+                }
+                val keyField = TextInputEditText(keyLayout.context).also {
+                    keyLayout.apply {
+                        add(it, lParams(matchParent))
+                    }
+                }
+                val mappingLayout = TextInputLayout(requireContext(),null,R.style.Widget_MaterialComponents_TextInputLayout_FilledBox).apply {
+                    hint = mappingDesc
+                }
+                val mappingField = TextInputEditText(mappingLayout.context).also {
+                    mappingLayout.apply {
+                        add(it, lParams(matchParent))
+                    }
+                }
+                val altMappingLayout = TextInputLayout(requireContext(),null,R.style.Widget_MaterialComponents_TextInputLayout_FilledBox).apply {
+                    hint = altMappingDesc
+                }
+                val altMappingField = TextInputEditText(altMappingLayout.context).also {
+                    altMappingLayout.apply {
+                        add(it, lParams(matchParent))
+                    }
+                }
                 entry?.apply {
-                    keyInput.setText(key)
-                    mappingInput.setText(mapping)
-                    altMappingInput.setText(altMapping)
+                    keyField.setText(key)
+                    mappingField.setText(mapping)
+                    altMappingField.setText(altMapping)
                 }
                 val layout = verticalLayout {
                     topPadding = dp(10)
                     horizontalPadding = dp(20)
-                    add(keyLabel, lParams { horizontalMargin = dp(4) })
-                    add(keyInput, lParams(matchParent))
-                    add(mappingLabel, lParams { horizontalMargin = dp(4) })
-                    add(mappingInput, lParams(matchParent))
-                    add(altMappingLabel, lParams { horizontalMargin = dp(4) })
-                    add(altMappingInput, lParams(matchParent))
+                    add(keyLayout, lParams(matchParent))
+                    add(mappingLayout, lParams(matchParent))
+                    add(altMappingLayout, lParams(matchParent))
                 }
                 AlertDialog.Builder(context)
                     .setTitle(title)
                     .setView(layout)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
                         block(
-                            PunctuationMapEntry(keyInput.str, mappingInput.str, altMappingInput.str)
+                            PunctuationMapEntry(keyField.str, mappingField.str, altMappingField.str)
                         )
                     }
                     .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.cancel() }
