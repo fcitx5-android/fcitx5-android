@@ -41,18 +41,11 @@ class FcitxApplication : Application() {
             })
         }
 
-        Timber.d("=========================Device Info=========================")
-        DeviceInfo.get(applicationContext).forEach {
-            Timber.d(it)
-        }
-        Timber.d("=========================Device Info=========================")
-
         registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 Timber.i("Detected a locale change, process will exit now")
                 exitProcess(0)
             }
-
         }, IntentFilter(Intent.ACTION_LOCALE_CHANGED))
 
         // record last pid for crash logs

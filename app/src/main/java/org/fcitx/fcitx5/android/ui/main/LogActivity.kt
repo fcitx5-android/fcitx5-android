@@ -17,6 +17,7 @@ import org.fcitx.fcitx5.android.FcitxApplication
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.databinding.ActivityLogBinding
 import org.fcitx.fcitx5.android.ui.common.LogView
+import org.fcitx.fcitx5.android.utils.DeviceInfo
 import org.fcitx.fcitx5.android.utils.Logcat
 import java.io.OutputStreamWriter
 import java.util.*
@@ -36,7 +37,11 @@ class LogActivity : AppCompatActivity() {
                     logView
                         .currentLog
                         .let { log ->
-                            runCatching { it.write(log.toString()) }
+                            runCatching {
+                                it.write("--------- Device Info\n")
+                                it.write(DeviceInfo.get(this@LogActivity))
+                                it.write(log.toString())
+                            }
                                 .onSuccess {
                                     withContext(Dispatchers.Main) {
                                         Toast.makeText(
@@ -71,8 +76,11 @@ class LogActivity : AppCompatActivity() {
             setSupportActionBar(toolbar)
             this@LogActivity.logView = logView
             logView.setLogcat(
-                if (intent.hasExtra("not_crash")) {
-                    supportActionBar!!.setTitle(R.string.real_time_logs)
+                if (intent.hasExtra(NOT_CRASH)) {
+                    supportActionBar!!.apply {
+                        setDisplayHomeAsUpEnabled(true)
+                        setTitle(R.string.real_time_logs)
+                    }
                     Logcat()
                 } else {
                     supportActionBar!!.setTitle(R.string.crash_logs)
@@ -89,7 +97,7 @@ class LogActivity : AppCompatActivity() {
                 logView.clear()
             }
             exportButton.setOnClickListener {
-                launcher.launch("${DateFormat.format("yyyy-MM-dd-HH:mm:ss", Date())}.txt")
+                launcher.launch("$packageName-${DateFormat.format("yyyyMMdd_HHmmss", Date())}.txt")
             }
         }
         registerLauncher()

@@ -31,6 +31,5 @@ object DeviceInfo {
                     }
                 }"
             )
-        }.lines()
-
+        }
 }

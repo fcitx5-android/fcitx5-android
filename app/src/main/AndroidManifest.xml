@@ -18,7 +18,8 @@
         <activity
             android:name=".ui.main.LogActivity"
             android:exported="false"
-            android:launchMode="singleTask"/>
+            android:launchMode="singleTask"
+            android:parentActivityName=".ui.main.MainActivity" />
         <activity
             android:name=".ui.main.MainActivity"
             android:exported="true"
