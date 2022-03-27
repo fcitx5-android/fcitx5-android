@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.core
 
+import android.os.Debug
 import kotlinx.coroutines.*
 import timber.log.Timber
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -59,6 +60,10 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
             if (installed != null)
                 throw IllegalStateException("AliveChecker has been installed!")
             installed = launch {
+                if (Debug.isDebuggerConnected()) {
+                    Timber.w("Since debugger is connected, alive checker won't run anymore")
+                    return@launch
+                }
                 // delay at first
                 delay(10000L)
                 while (isActive) {
