@@ -3,24 +3,16 @@ package org.fcitx.fcitx5.android.input.keyboard
 import android.content.Context
 import android.view.MotionEvent
 import android.view.inputmethod.EditorInfo
-import android.widget.ImageButton
-import android.widget.LinearLayout
 import androidx.annotation.CallSuper
 import androidx.annotation.DrawableRes
-import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.get
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import org.fcitx.fcitx5.android.utils.hapticIfEnabled
 import splitties.bitflags.hasFlag
-import splitties.dimensions.dp
-import splitties.resources.styledDrawable
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.imageResource
-import splitties.views.padding
-import timber.log.Timber
 
 abstract class BaseKeyboard(
     context: Context,
@@ -157,7 +149,7 @@ abstract class BaseKeyboard(
         val hasPreedit = content.preedit.preedit.isNotEmpty()
         // `auxUp` is not empty when switching input methods, ignore it to reduce flicker
         //        || content.aux.auxUp.isNotEmpty()
-        `return`.button.imageResource = if (hasPreedit) {
+        `return`.img.imageResource = if (hasPreedit) {
             R.drawable.ic_baseline_keyboard_return_24
         } else {
             drawableForReturn(info)
