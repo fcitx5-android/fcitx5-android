@@ -2,7 +2,6 @@ package org.fcitx.fcitx5.android.input.keyboard
 
 import android.content.Context
 import android.view.inputmethod.EditorInfo
-import android.widget.ImageButton
 import org.fcitx.fcitx5.android.R
 import splitties.views.imageResource
 
@@ -62,6 +61,6 @@ class NumSymKeyboard(
     val `return`: ImageKeyView by lazy { findViewById(R.id.button_return) }
 
     override fun onAttach(info: EditorInfo?) {
-        `return`.button.imageResource = drawableForReturn(info)
+        `return`.img.imageResource = drawableForReturn(info)
     }
 }

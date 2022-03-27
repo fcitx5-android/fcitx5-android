@@ -2,8 +2,6 @@ package org.fcitx.fcitx5.android.input.keyboard
 
 import android.content.Context
 import android.view.inputmethod.EditorInfo
-import android.widget.Button
-import android.widget.ImageButton
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.input.preedit.PreeditContent
@@ -113,11 +111,11 @@ class TextKeyboard(
     }
 
     override fun onAttach(info: EditorInfo?) {
-        `return`.button.imageResource = drawableForReturn(info)
+        `return`.img.imageResource = drawableForReturn(info)
     }
 
     override fun onEditorInfoChange(info: EditorInfo?) {
-        `return`.imageResource = drawableForReturn(info)
+        `return`.img.imageResource = drawableForReturn(info)
     }
 
     override fun onPreeditChange(info: EditorInfo?, content: PreeditContent) {
@@ -135,7 +133,7 @@ class TextKeyboard(
                 s.append(" ($it)")
             }
         }
-        space.button.text = s
+        space.mainText.text = s
     }
 
     private fun switchCapsState() {
@@ -147,7 +145,7 @@ class TextKeyboard(
     }
 
     private fun updateCapsButtonIcon() {
-        caps.button.setImageResource(
+        caps.img.setImageResource(
             when (capsState) {
                 CapsState.None -> R.drawable.ic_baseline_keyboard_capslock0_24
                 CapsState.Once -> R.drawable.ic_baseline_keyboard_capslock1_24
