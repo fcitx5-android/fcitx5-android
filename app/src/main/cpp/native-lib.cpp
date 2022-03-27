@@ -898,9 +898,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_setCapabilityFlags(JNIEnv *env, jclass clazz, jlong flags) {
     RETURN_IF_NOT_RUNNING
-    uint64_t u;
-    std::memcpy(&u, &flags, sizeof(uint64_t));
-    Fcitx::Instance().setCapabilityFlags(u);
+    Fcitx::Instance().setCapabilityFlags(static_cast<uint64_t>(flags));
 }
 
 extern "C"
