@@ -8,6 +8,7 @@ import cn.berberman.girls.utils.either.then
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.core.getPunctuationConfig
 import org.fcitx.fcitx5.android.core.savePunctuationConfig
@@ -16,11 +17,13 @@ import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor
 import org.fcitx.fcitx5.android.utils.str
 import splitties.dimensions.dp
-import splitties.views.dsl.core.*
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.verticalLayout
 import splitties.views.horizontalPadding
 import splitties.views.topPadding
 import kotlin.properties.Delegates
-import org.fcitx.fcitx5.android.R
 
 class PunctuationEditorFragment : ProgressFragment(),
     OnItemChangedListener<PunctuationEditorFragment.PunctuationMapEntry> {
@@ -115,7 +118,11 @@ class PunctuationEditorFragment : ProgressFragment(),
                 entry: PunctuationMapEntry?,
                 block: (PunctuationMapEntry) -> Unit
             ) {
-                val keyLayout = TextInputLayout(requireContext(),null,R.style.Widget_MaterialComponents_TextInputLayout_FilledBox).apply {
+                val keyLayout = TextInputLayout(
+                    requireContext(),
+                    null,
+                    R.style.Widget_MaterialComponents_TextInputLayout_FilledBox
+                ).apply {
                     hint = keyDesc
                 }
                 val keyField = TextInputEditText(keyLayout.context).also {
@@ -123,7 +130,11 @@ class PunctuationEditorFragment : ProgressFragment(),
                         add(it, lParams(matchParent))
                     }
                 }
-                val mappingLayout = TextInputLayout(requireContext(),null,R.style.Widget_MaterialComponents_TextInputLayout_FilledBox).apply {
+                val mappingLayout = TextInputLayout(
+                    requireContext(),
+                    null,
+                    R.style.Widget_MaterialComponents_TextInputLayout_FilledBox
+                ).apply {
                     hint = mappingDesc
                 }
                 val mappingField = TextInputEditText(mappingLayout.context).also {
@@ -131,7 +142,11 @@ class PunctuationEditorFragment : ProgressFragment(),
                         add(it, lParams(matchParent))
                     }
                 }
-                val altMappingLayout = TextInputLayout(requireContext(),null,R.style.Widget_MaterialComponents_TextInputLayout_FilledBox).apply {
+                val altMappingLayout = TextInputLayout(
+                    requireContext(),
+                    null,
+                    R.style.Widget_MaterialComponents_TextInputLayout_FilledBox
+                ).apply {
                     hint = altMappingDesc
                 }
                 val altMappingField = TextInputEditText(altMappingLayout.context).also {
@@ -180,6 +195,11 @@ class PunctuationEditorFragment : ProgressFragment(),
 
     override fun onItemUpdated(idx: Int, old: PunctuationMapEntry, new: PunctuationMapEntry) {
         updateDirty()
+    }
+
+    override fun onDestroy() {
+        saveConfig()
+        super.onDestroy()
     }
 
     companion object {
