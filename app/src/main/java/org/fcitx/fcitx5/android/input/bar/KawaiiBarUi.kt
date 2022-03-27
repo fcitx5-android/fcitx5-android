@@ -55,7 +55,6 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
         private val getCurrentState: () -> IdleUiStateMachine.State,
     ) : KawaiiBarUi(ctx) {
 
-
         private val IdleUiStateMachine.State.menuButtonRotation
             get() =
                 if (inPrivate) 0f
@@ -63,6 +62,8 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
                     Empty -> -90f
                     Clipboard -> -90f
                     Toolbar -> 90f
+                    ToolbarWithClip -> 90f
+                    ClipboardTimedOut -> -90f
                 }
 
         private var inPrivate = false
@@ -176,25 +177,36 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
             }
         }
 
+        private fun transitionToClipboardBar() {
+            animator.displayedChild = 0
+        }
+
+        private fun transitionToButtonsBar() {
+            animator.displayedChild = 1
+        }
+
         fun switchUiByState(state: IdleUiStateMachine.State) {
             Timber.d("Switch idle ui to $state")
             when (state) {
                 Clipboard -> {
-                    val index = state.ordinal
-                    animator.displayedChild = index
+                    transitionToClipboardBar()
                     enableClipboardItem()
                 }
                 Toolbar -> {
-                    val index = state.ordinal
-                    animator.displayedChild = index
+                    transitionToButtonsBar()
                     disableClipboardItem()
                 }
                 Empty -> {
                     // empty and clipboard share the same view
-                    val index = Clipboard.ordinal
-                    animator.displayedChild = index
+                    transitionToClipboardBar()
                     disableClipboardItem()
                     setClipboardItemText("")
+                }
+                ToolbarWithClip -> {
+                    transitionToButtonsBar()
+                }
+                ClipboardTimedOut -> {
+                    transitionToClipboardBar()
                 }
             }
             menuButton.animate().setDuration(200L).rotation(state.menuButtonRotation)

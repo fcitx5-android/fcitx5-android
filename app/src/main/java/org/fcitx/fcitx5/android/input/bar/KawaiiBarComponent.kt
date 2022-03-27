@@ -7,6 +7,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import android.widget.ViewAnimator
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
@@ -16,10 +17,10 @@ import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.*
 import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.*
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.*
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
+import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
 import org.fcitx.fcitx5.android.input.candidates.expanded.window.FlexboxExpandedCandidateWindow
 import org.fcitx.fcitx5.android.input.candidates.expanded.window.GridExpandedCandidateWindow
-import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.clipboard.ClipboardWindow
 import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
 import org.fcitx.fcitx5.android.input.dependency.context
@@ -30,7 +31,6 @@ import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.inputConnection
-import org.fcitx.fcitx5.android.utils.times
 import org.mechdancer.dependency.manager.must
 import splitties.bitflags.hasFlag
 import splitties.views.dsl.core.add
@@ -51,16 +51,17 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     private val clipboardItemTimeout by Prefs.getInstance().clipboardItemTimeout
     private val expandedCandidateStyle by Prefs.getInstance().expandedCandidateStyle
 
+    private var clipboardTimeoutJob: Job? = null
+
     private val onClipboardUpdateListener by lazy {
         ClipboardManager.OnClipboardUpdateListener {
             service.lifecycleScope.launch {
-                idleUi.setClipboardItemText(it)
-                idleUiStateMachine.push(ClipboardUpdatedNonEmpty)
-                launch {
-                    val current = ++timeoutJobId
-                    delay(clipboardItemTimeout.seconds)
-                    if (timeoutJobId == current)
-                        idleUiStateMachine.push(Timeout)
+                if (it.isEmpty()) {
+                    idleUiStateMachine.push(ClipboardUpdatedEmpty)
+                } else {
+                    idleUi.setClipboardItemText(it)
+                    idleUiStateMachine.push(ClipboardUpdatedNonEmpty)
+                    launchClipboardTimeoutJob()
                 }
             }
         }
@@ -70,15 +71,23 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         ClipboardManager.addOnUpdateListener(onClipboardUpdateListener)
     }
 
+    private fun launchClipboardTimeoutJob() {
+        clipboardTimeoutJob?.cancel()
+        clipboardTimeoutJob = service.lifecycleScope.launch {
+            delay(clipboardItemTimeout.seconds)
+            idleUiStateMachine.push(Timeout)
+            clipboardTimeoutJob = null
+        }
+    }
+
     private val idleUi: KawaiiBarUi.Idle by lazy {
         KawaiiBarUi.Idle(context) { idleUiStateMachine.currentState }.also {
             it.menuButton.setOnClickListener {
-                idleUiStateMachine.push(
-                    if (idleUi.getClipboardItemText().isEmpty())
-                        MenuButtonClicked * ClipboardUpdatedEmpty
-                    else
-                        MenuButtonClicked * ClipboardUpdatedNonEmpty
-                )
+                idleUiStateMachine.push(MenuButtonClicked)
+                // reset timeout timer (if present) when user switch layout
+                if (clipboardTimeoutJob != null) {
+                    launchClipboardTimeoutJob()
+                }
             }
             it.undoButton.setOnClickListener {
                 service.sendCombinationKeyEvents(KeyEvent.KEYCODE_Z, ctrl = true)
@@ -97,6 +106,8 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             }
             it.clipboardItem.setOnClickListener {
                 service.inputConnection?.performContextMenuAction(android.R.id.paste)
+                clipboardTimeoutJob?.cancel()
+                clipboardTimeoutJob = null
                 idleUiStateMachine.push(Pasted)
             }
             it.hideKeyboardButton.setOnClickListener {
@@ -165,6 +176,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     }
 
     fun onShow() {
+        idleUiStateMachine.push(KawaiiBarShown)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             idleUi.privateMode(
                 service.editorInfo?.imeOptions?.hasFlag(EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING) == true
@@ -219,10 +231,5 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     override fun onWindowDetached(window: InputWindow) {
         barStateMachine.push(WindowDetached)
-    }
-
-    companion object {
-        @Volatile
-        private var timeoutJobId = 0
     }
 }
