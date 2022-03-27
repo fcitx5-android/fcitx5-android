@@ -12,7 +12,6 @@ import cat.ereza.customactivityoncrash.config.CaocConfig
 import org.fcitx.fcitx5.android.data.Prefs
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.ui.main.LogActivity
-import org.fcitx.fcitx5.android.utils.DeviceInfo
 import timber.log.Timber
 import kotlin.system.exitProcess
 
@@ -36,7 +35,7 @@ class FcitxApplication : Application() {
             Timber.plant(object : Timber.Tree() {
                 override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
                     if (priority == Log.VERBOSE || priority == Log.DEBUG) return
-                    super.log(priority, "[${Thread.currentThread().name}] $tag", message, t)
+                    Log.println(priority, "[${Thread.currentThread().name}]", message)
                 }
             })
         }
