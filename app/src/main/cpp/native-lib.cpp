@@ -419,7 +419,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, jstring locale, jstring appData, jstring appLib, jstring extData) {
     if (Fcitx::Instance().isRunning()) {
-        FCITX_WARN() << "Fcitx is already running!";
+        FCITX_ERROR() << "Fcitx is already running!";
         return;
     }
     FCITX_INFO() << "Starting...";
@@ -578,7 +578,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_selectCandidate(JNIEnv *env, jclass clazz, jint idx) {
     RETURN_IF_NOT_RUNNING
-    FCITX_INFO() << "selectCandidate: #" << idx;
+    FCITX_DEBUG() << "selectCandidate: #" << idx;
     Fcitx::Instance().select(idx);
 }
 
@@ -599,7 +599,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_resetInputContext(JNIEnv *env, jclass c
 extern "C"
 JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_repositionCursor(JNIEnv *env, jclass clazz, jint position) {
-    FCITX_INFO() << "repositionCursor: to " << position;
+    FCITX_DEBUG() << "repositionCursor: to " << position;
     Fcitx::Instance().repositionCursor(position);
 }
 

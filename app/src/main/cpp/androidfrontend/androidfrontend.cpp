@@ -118,9 +118,6 @@ void AndroidFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
     }
     KeyEvent keyEvent(ic, key, isRelease);
     ic->keyEvent(keyEvent);
-    FCITX_INFO() << "KeyEvent(key=" << key
-                 << ", isRelease=" << isRelease
-                 << ", accepted=" << keyEvent.accepted() << ")";
     if (!keyEvent.accepted()) {
         auto sym = key.sym();
         keyEventCallback(sym, key.states(), fcitx::Key::keySymToUnicode(sym), isRelease);

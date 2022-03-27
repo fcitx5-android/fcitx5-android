@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.utils
 
 import cn.berberman.girls.utils.either.Either
+import org.fcitx.fcitx5.android.data.Prefs
 import timber.log.Timber
 
 class EventStateMachine<State : EventStateMachine.State, Event : EventStateMachine.StateTransitionEvent>(
@@ -18,7 +19,7 @@ class EventStateMachine<State : EventStateMachine.State, Event : EventStateMachi
     val currentState
         get() = stateGraph.vertices[currentStateIx]
 
-    var enableDebugLog = false
+    private val enableDebugLog : Boolean by Prefs.getInstance().verboseLog
 
     /**
      * Push an event that may trigger a transition of state

@@ -63,7 +63,7 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
             view.removeView(it.view)
             // broadcast the old window was removed from layout
             broadcaster.onWindowDetached(it)
-            Timber.i("Detach $it")
+            Timber.d("Detach $it")
             // finally remove the old window from scope only if it's not keyboard window,
             // because keyboard window is always in scope
             if (it !is KeyboardWindow)
@@ -71,7 +71,7 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
         }
         // add the new window to layout
         view.apply { add(window.view, lParams(matchParent, matchParent)) }
-        Timber.i("Attach $window")
+        Timber.d("Attach $window")
         // notify the window it was attached
         window.onAttached()
         currentWindow = window

@@ -371,7 +371,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             runBlocking {
                 fcitx.save()
             }
-        return super.onUnbind(intent)
+        return false
     }
 
     override fun onDestroy() {

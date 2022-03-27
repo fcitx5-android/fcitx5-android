@@ -177,7 +177,7 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
         }
 
         fun switchUiByState(state: IdleUiStateMachine.State) {
-            Timber.i("Switch idle ui to $state")
+            Timber.d("Switch idle ui to $state")
             when (state) {
                 Clipboard -> {
                     val index = state.ordinal

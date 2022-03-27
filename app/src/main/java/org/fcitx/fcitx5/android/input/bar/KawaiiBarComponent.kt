@@ -176,7 +176,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         val index = state.ordinal
         if (view.displayedChild == index)
             return
-        Timber.i("Switch bar to $state")
+        Timber.d("Switch bar to $state")
         if (view.getChildAt(index) != titleUi.root) {
             titleUi.setReturnButtonOnClickListener { }
             titleUi.setTitle("")
