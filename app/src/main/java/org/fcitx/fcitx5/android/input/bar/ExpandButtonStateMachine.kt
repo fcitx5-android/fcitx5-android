@@ -4,21 +4,21 @@ import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.*
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.*
 import org.fcitx.fcitx5.android.utils.EventStateMachine
 import org.fcitx.fcitx5.android.utils.eventStateMachine
-import org.fcitx.fcitx5.android.utils.times
 
 
 object ExpandButtonStateMachine {
-    enum class State : EventStateMachine.State {
+    enum class State {
         ClickToAttachWindow,
         ClickToDetachWindow,
         Hidden
     }
 
-    enum class TransitionEvent : EventStateMachine.StateTransitionEvent {
+    enum class TransitionEvent {
         ExpandedCandidatesUpdatedEmpty,
         ExpandedCandidatesUpdatedNonEmpty,
         ExpandedCandidatesAttached,
-        ExpandedCandidatesDetached,
+        ExpandedCandidatesDetachedWithCandidatesEmpty,
+        ExpandedCandidatesDetachedWithCandidatesNonEmpty,
     }
 
     fun new(block: (State) -> Unit): EventStateMachine<State, TransitionEvent> =
@@ -28,8 +28,8 @@ object ExpandButtonStateMachine {
             from(Hidden) transitTo ClickToAttachWindow on ExpandedCandidatesUpdatedNonEmpty
             from(ClickToAttachWindow) transitTo Hidden on ExpandedCandidatesUpdatedEmpty
             from(ClickToAttachWindow) transitTo ClickToDetachWindow on ExpandedCandidatesAttached
-            from(ClickToDetachWindow) transitTo ClickToAttachWindow on ExpandedCandidatesDetached * ExpandedCandidatesUpdatedNonEmpty
-            from(ClickToDetachWindow) transitTo Hidden on ExpandedCandidatesDetached * ExpandedCandidatesUpdatedEmpty
+            from(ClickToDetachWindow) transitTo ClickToAttachWindow on ExpandedCandidatesDetachedWithCandidatesNonEmpty
+            from(ClickToDetachWindow) transitTo Hidden on ExpandedCandidatesDetachedWithCandidatesEmpty
             onNewState(block)
         }
 }

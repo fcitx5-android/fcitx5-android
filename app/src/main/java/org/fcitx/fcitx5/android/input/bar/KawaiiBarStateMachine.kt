@@ -2,15 +2,14 @@ package org.fcitx.fcitx5.android.input.bar
 
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.State.*
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.*
-import org.fcitx.fcitx5.android.utils.EventStateMachine
 import org.fcitx.fcitx5.android.utils.eventStateMachine
 
 object KawaiiBarStateMachine {
-    enum class State : EventStateMachine.State {
+    enum class State {
         Idle, Candidate, Title
     }
 
-    enum class TransitionEvent : EventStateMachine.StateTransitionEvent {
+    enum class TransitionEvent {
         PreeditUpdatedEmpty,
         PreeditUpdatedNonEmpty,
         ExtendedWindowAttached,

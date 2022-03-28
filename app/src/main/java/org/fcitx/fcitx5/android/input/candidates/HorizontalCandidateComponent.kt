@@ -17,7 +17,6 @@ import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.globalLayoutListener
 import org.fcitx.fcitx5.android.utils.onDataChanged
-import org.fcitx.fcitx5.android.utils.times
 import org.mechdancer.dependency.manager.must
 import splitties.views.dsl.recyclerview.recyclerView
 
@@ -93,9 +92,9 @@ class HorizontalCandidateComponent :
         if (window is BaseExpandedCandidateWindow<*>)
             bar.expandButtonStateMachine.push(
                 if (isExpandedCandidatesNonEmpty)
-                    ExpandedCandidatesDetached * ExpandedCandidatesUpdatedNonEmpty
+                    ExpandedCandidatesDetachedWithCandidatesNonEmpty
                 else
-                    ExpandedCandidatesDetached * ExpandedCandidatesUpdatedEmpty
+                    ExpandedCandidatesDetachedWithCandidatesEmpty
             )
     }
 

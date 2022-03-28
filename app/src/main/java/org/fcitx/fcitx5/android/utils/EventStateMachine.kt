@@ -1,16 +1,12 @@
 package org.fcitx.fcitx5.android.utils
 
-import cn.berberman.girls.utils.either.Either
 import org.fcitx.fcitx5.android.data.Prefs
 import timber.log.Timber
 
-class EventStateMachine<State : EventStateMachine.State, Event : EventStateMachine.StateTransitionEvent>(
+class EventStateMachine<State : Any, Event : Any>(
     initialState: State,
-    private val stateGraph: ImmutableGraph<State, List<Either<Event, CombinedEvents<Event>>>>
+    private val stateGraph: ImmutableGraph<State, List<Event>>
 ) {
-
-    interface State
-    interface StateTransitionEvent
 
     private var currentStateIx = stateGraph.vertices.indexOf(initialState)
 
@@ -19,13 +15,15 @@ class EventStateMachine<State : EventStateMachine.State, Event : EventStateMachi
     val currentState
         get() = stateGraph.vertices[currentStateIx]
 
-    private val enableDebugLog : Boolean by Prefs.getInstance().verboseLog
+    private val enableDebugLog: Boolean by Prefs.getInstance().verboseLog
+
+    private val knownEvents by lazy { stateGraph.labels.flatten() }
 
     /**
      * Push an event that may trigger a transition of state
      */
-    fun push(event: Either<Event, CombinedEvents<Event>>) {
-        if (event !in stateGraph.labels.flatten())
+    fun push(event: Event) {
+        if (event !in knownEvents)
             throw IllegalArgumentException("$event is an unknown event")
         val transitions = stateGraph.getEdgesOfVertexWithIndex(currentState)
         val filtered = transitions.filter { event in it.second.label }
@@ -45,53 +43,41 @@ class EventStateMachine<State : EventStateMachine.State, Event : EventStateMachi
         }
     }
 
-    fun push(event: Event) = push(Either.left(event))
-    fun push(event: CombinedEvents<Event>) = push(Either.right(event))
 }
-
-data class CombinedEvents<T : EventStateMachine.StateTransitionEvent>(private val children: MutableSet<T>) :
-    MutableSet<T> by children
-
-infix operator fun <T : EventStateMachine.StateTransitionEvent> T.times(new: T) =
-    CombinedEvents(mutableSetOf(this, new))
 
 
 // DSL
 
-fun <State : EventStateMachine.State, Event : EventStateMachine.StateTransitionEvent> eventStateMachine(
+fun <State : Any, Event : Any> eventStateMachine(
     initialState: State,
     builder: EventStateMachineBuilder<State, Event>.() -> Unit
 ) =
     EventStateMachineBuilder<State, Event>(initialState).apply(builder).build()
 
-class EventStateMachineBuilder<State : EventStateMachine.State, Event : EventStateMachine.StateTransitionEvent>(
+class EventStateMachineBuilder<State : Any, Event : Any>(
     private val initialState: State
 ) {
-    private val map =
-        mutableMapOf<Pair<State, State>, MutableList<Either<Event, CombinedEvents<Event>>>>()
+    private val map = mutableMapOf<Pair<State, State>, MutableList<Event>>()
 
     private var listener: ((State) -> Unit)? = null
 
     inner class EventTransitionBuilder(val startState: State) {
         lateinit var endState: State
-        lateinit var event: Either<Event, CombinedEvents<Event>>
+        lateinit var event: Event
 
     }
 
-    infix fun EventTransitionBuilder.transitTo(state: State) = this.apply {
+    infix fun EventTransitionBuilder.transitTo(state: State) = apply {
         endState = state
     }
 
-    infix fun EventTransitionBuilder.on(event: Either<Event, CombinedEvents<Event>>) = this.run {
+    infix fun EventTransitionBuilder.on(event: Event) = run {
         this.event = event
         if (startState to endState !in map)
             map[startState to endState] = mutableListOf(event)
         else
             map.getValue(startState to endState) += event
     }
-
-    infix fun EventTransitionBuilder.on(event: Event) = on(Either.left(event))
-    infix fun EventTransitionBuilder.on(event: CombinedEvents<Event>) = on(Either.right(event))
 
     fun from(state: State) = EventTransitionBuilder(state)
 

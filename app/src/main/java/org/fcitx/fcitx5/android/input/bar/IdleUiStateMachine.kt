@@ -6,11 +6,11 @@ import org.fcitx.fcitx5.android.utils.EventStateMachine
 import org.fcitx.fcitx5.android.utils.eventStateMachine
 
 object IdleUiStateMachine {
-    enum class State : EventStateMachine.State {
+    enum class State {
         Clipboard, Toolbar, Empty, ToolbarWithClip, ClipboardTimedOut
     }
 
-    enum class TransitionEvent : EventStateMachine.StateTransitionEvent {
+    enum class TransitionEvent {
         Timeout,
         Pasted,
         MenuButtonClicked,

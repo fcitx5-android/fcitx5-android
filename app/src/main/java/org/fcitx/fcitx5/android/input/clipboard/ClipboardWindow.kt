@@ -14,7 +14,6 @@ import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.utils.EventStateMachine
 import org.fcitx.fcitx5.android.utils.inputConnection
-import org.fcitx.fcitx5.android.utils.times
 import kotlin.properties.Delegates
 
 class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
@@ -39,11 +38,10 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     private fun pushClipboardListening(enabled: Boolean) {
         if (enabled)
             stateMachine.push(
-                ClipboardListeningEnabled * (
-                        if (isClipboardDbEmpty)
-                            ClipboardDbUpdatedEmpty
-                        else
-                            ClipboardDbUpdatedNonEmpty)
+                if (isClipboardDbEmpty)
+                    ClipboardListeningEnabledWithDbEmpty
+                else
+                    ClipboardListeningEnabledWithDbNonEmpty
             )
         else
             stateMachine.push(ClipboardListeningDisabled)
