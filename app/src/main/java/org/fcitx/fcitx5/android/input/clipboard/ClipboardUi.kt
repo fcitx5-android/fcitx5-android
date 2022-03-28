@@ -4,6 +4,8 @@ import android.content.Context
 import android.view.View
 import android.widget.ImageView
 import android.widget.ViewAnimator
+import androidx.transition.Fade
+import androidx.transition.TransitionManager
 import org.fcitx.fcitx5.android.R
 import splitties.dimensions.dp
 import splitties.resources.styledColor
@@ -48,6 +50,7 @@ class ClipboardUi(override val ctx: Context) : Ui {
 
     fun switchUiByState(state: ClipboardStateMachine.State) {
         Timber.d("Switch clipboard to $state")
+        TransitionManager.beginDelayedTransition(root, Fade().apply { duration = 100L })
         when (state) {
             ClipboardStateMachine.State.Normal -> {
                 root.displayedChild = 0
