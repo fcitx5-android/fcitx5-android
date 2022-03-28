@@ -50,7 +50,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
             commonKeyActionListener.listener.onKeyAction(it)
     }
 
-    fun switchLayout(to: String) {
+    private fun switchLayout(to: String) {
         if (to == currentKeyboardName) return
         keyboards[currentKeyboardName]?.let {
             it.onDetach()
@@ -92,9 +92,11 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
     }
 
     override fun onAttached() {
-        if (currentKeyboardName.isNotEmpty()) {
-            currentKeyboard.keyActionListener = keyActionListener
+        if (currentKeyboardName.isEmpty()) {
+            currentKeyboardName = TextKeyboard.Name
+            view.apply { add(currentKeyboard, lParams(matchParent, matchParent)) }
         }
+        currentKeyboard.keyActionListener = keyActionListener
     }
 
     override fun onDetached() {
