@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="Theme.FcitxAppTheme" parent="Theme.MaterialComponents.NoActionBar.Bridge">
@@ -7,5 +8,7 @@
         <item name="colorLogInfo" type="color">@color/blue_500</item>
         <item name="colorLogDebug" type="color">@color/grey_400</item>
         <item name="colorLogVerbose" type="color">@color/grey_400</item>
+
+        <item name="android:navigationBarColor" type="color">@color/background_material_dark</item>
     </style>
 </resources>

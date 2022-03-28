@@ -2,6 +2,8 @@ package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.graphics.ColorUtils
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -21,6 +23,7 @@ import org.mechdancer.dependency.UniqueComponentWrapper
 import org.mechdancer.dependency.plusAssign
 import org.mechdancer.dependency.scope
 import splitties.dimensions.dp
+import splitties.resources.color
 import splitties.resources.styledColor
 import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.*
@@ -114,6 +117,12 @@ class InputView(
     }
 
     fun onShow() {
+        service.window.window?.also {
+            val bkgColor = themedContext.styledColor(android.R.attr.colorBackground)
+            it.navigationBarColor = bkgColor
+            WindowInsetsControllerCompat(it, it.decorView).isAppearanceLightNavigationBars =
+                ColorUtils.calculateContrast(color(android.R.color.white), bkgColor) < 1.5f
+        }
         kawaiiBar.onShow()
         windowManager.switchToKeyboardWindow()
         broadcaster.onEditorInfoUpdate(service.editorInfo)
