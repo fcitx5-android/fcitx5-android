@@ -39,7 +39,9 @@ class Prefs(private val sharedPreferences: SharedPreferences, private val resour
                 }
             }
 
-        // WARN: no anonymous listeners, please keep the reference!
+        /**
+         * **WARN:** No anonymous listeners, please **KEEP** the reference!
+         */
         fun registerOnChangeListener(listener: OnChangeListener<T>) {
             listeners.add(listener)
         }

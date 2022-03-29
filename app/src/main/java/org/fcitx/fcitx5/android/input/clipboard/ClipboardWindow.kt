@@ -22,43 +22,35 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
 
     private lateinit var stateMachine: EventStateMachine<ClipboardStateMachine.State, ClipboardStateMachine.TransitionEvent>
 
-    private var isClipboardDbEmpty by Delegates.observable(true) { _, _, new ->
+    private var isClipboardDbEmpty by Delegates.observable(ClipboardManager.itemCount == 0) { _, _, new ->
         stateMachine.push(
             if (new) ClipboardDbUpdatedEmpty
             else ClipboardDbUpdatedNonEmpty
         )
     }
 
-    private val clipboardListeningListener: Prefs.OnChangeListener<Boolean> by lazy {
-        Prefs.OnChangeListener {
-            pushClipboardListening(value)
-        }
+    private val clipboardEnabledListener = Prefs.OnChangeListener<Boolean> {
+        stateMachine.push(
+            if (value)
+                if (isClipboardDbEmpty) ClipboardListeningEnabledWithDbEmpty
+                else ClipboardListeningEnabledWithDbNonEmpty
+            else ClipboardListeningDisabled
+        )
     }
 
-    private fun pushClipboardListening(enabled: Boolean) {
-        if (enabled)
-            stateMachine.push(
-                if (isClipboardDbEmpty)
-                    ClipboardListeningEnabledWithDbEmpty
-                else
-                    ClipboardListeningEnabledWithDbNonEmpty
-            )
-        else
-            stateMachine.push(ClipboardListeningDisabled)
-    }
+    private val clipboardEnabledPref = Prefs.getInstance().clipboardListening
 
-    private val clipboardListeningPref by lazy {
-        Prefs.getInstance().clipboardListening
-    }
-
-    private val onClipboardUpdateListener by lazy {
-        ClipboardManager.OnClipboardUpdateListener {
-            service.lifecycleScope.launch {
-                adapter.updateEntries(ClipboardManager.getAll().also {
-                    isClipboardDbEmpty = it.isEmpty()
-                })
+    private fun updateClipboardEntries() {
+        service.lifecycleScope.launch {
+            ClipboardManager.getAll().also {
+                isClipboardDbEmpty = it.isEmpty()
+                adapter.updateEntries(it)
             }
         }
+    }
+
+    private val onClipboardUpdateListener = ClipboardManager.OnClipboardUpdateListener {
+        updateClipboardEntries()
     }
 
     private val adapter: ClipboardAdapter by lazy {
@@ -79,7 +71,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
                 adapter = this@ClipboardWindow.adapter
             }
             enableUi.enableButton.setOnClickListener {
-                clipboardListeningPref.value = true
+                clipboardEnabledPref.value = true
             }
             deleteAllButton.setOnClickListener {
                 service.lifecycleScope.launch {
@@ -96,26 +88,24 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     }
 
     override fun onAttached() {
-        service.lifecycleScope.launch {
-            val entries = ClipboardManager.getAll()
-            val initialState = when {
-                !clipboardListeningPref.value -> EnableListening
-                entries.isEmpty() -> AddMore
-                else -> Normal
-            }
-            stateMachine = ClipboardStateMachine.new(initialState) {
-                ui.switchUiByState(it)
-            }
-            adapter.updateEntries(entries)
-            clipboardListeningPref.registerOnChangeListener(clipboardListeningListener)
-            pushClipboardListening(clipboardListeningPref.value)
-            ClipboardManager.addOnUpdateListener(onClipboardUpdateListener)
-            // manually switch to initial ui
-            ui.switchUiByState(initialState)
+        val initialState = when {
+            !clipboardEnabledPref.value -> EnableListening
+            isClipboardDbEmpty -> AddMore
+            else -> Normal
         }
+        stateMachine = ClipboardStateMachine.new(initialState) {
+            ui.switchUiByState(it)
+        }
+        // manually switch to initial ui
+        ui.switchUiByState(initialState)
+        // manually sync clipboard entries form db
+        updateClipboardEntries()
+        clipboardEnabledPref.registerOnChangeListener(clipboardEnabledListener)
+        ClipboardManager.addOnUpdateListener(onClipboardUpdateListener)
     }
 
     override fun onDetached() {
+        clipboardEnabledPref.unregisterOnChangeListener(clipboardEnabledListener)
         ClipboardManager.removeOnUpdateListener(onClipboardUpdateListener)
     }
 
