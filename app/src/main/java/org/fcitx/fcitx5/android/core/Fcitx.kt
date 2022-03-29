@@ -5,6 +5,7 @@ import android.os.Build
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.DataManager
 import org.fcitx.fcitx5.android.data.Prefs
@@ -333,8 +334,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
     })
 
-    private val onClipboardUpdate =
-        ClipboardManager.OnClipboardUpdateListener { setClipboard(it) }
+    private val onClipboardUpdate = ClipboardManager.OnClipboardUpdateListener {
+        lifecycle.lifecycleScope.launch { setClipboard(it) }
+    }
 
     fun start() {
         if (lifecycle.currentState != FcitxLifecycle.State.STOPPED) {

@@ -7,6 +7,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.fcitx.fcitx5.android.data.Prefs
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardDao
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardDatabase
@@ -22,7 +24,16 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     private lateinit var clbDao: ClipboardDao
 
     fun interface OnClipboardUpdateListener {
-        suspend fun onUpdate(text: String)
+        fun onUpdate(text: String)
+    }
+
+    private val mutex = Mutex()
+
+    var itemCount: Int = 0
+        private set
+
+    private suspend fun updateItemCount() {
+        itemCount = clbDao.itemCount()
     }
 
     private val onUpdateListeners = WeakHashSet<OnClipboardUpdateListener>()
@@ -45,6 +56,7 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
             .databaseBuilder(context, ClipboardDatabase::class.java, "clbdb")
             .build()
         clbDao = clbDb.clipboardDao()
+        launch { updateItemCount() }
     }
 
     suspend fun getAll() = clbDao.getAll()
@@ -53,9 +65,15 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
 
     suspend fun unpin(id: Int) = clbDao.updatePinStatus(id, false)
 
-    suspend fun delete(id: Int) = clbDao.delete(id)
+    suspend fun delete(id: Int) {
+        clbDao.delete(id)
+        updateItemCount()
+    }
 
-    suspend fun deleteAll() = clbDao.deleteAll()
+    suspend fun deleteAll() {
+        clbDao.deleteAll()
+        updateItemCount()
+    }
 
     override fun onPrimaryClipChanged() {
         if (!(enabled && this::clbDao.isInitialized))
@@ -67,16 +85,19 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
             ?.let { e ->
                 Timber.d("Accept $e")
                 launch {
-                    val all = clbDao.getAll()
-                    var pinned = false
-                    all.find { e.text == it.text }?.let {
-                        clbDao.delete(it.id)
-                        pinned = it.pinned
-                    }
-                    clbDao.insertAll(e.copy(pinned = pinned))
-                    removeOutdated()
-                    onUpdateListeners.forEach { listener ->
-                        listener.onUpdate(e.text)
+                    mutex.withLock {
+                        val all = clbDao.getAll()
+                        var pinned = false
+                        all.find { e.text == it.text }?.let {
+                            clbDao.delete(it.id)
+                            pinned = it.pinned
+                        }
+                        clbDao.insertAll(e.copy(pinned = pinned))
+                        removeOutdated()
+                        updateItemCount()
+                        onUpdateListeners.forEach { listener ->
+                            listener.onUpdate(e.text)
+                        }
                     }
                 }
             }

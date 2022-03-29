@@ -12,6 +12,9 @@ interface ClipboardDao {
     @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET pinned=:pinned WHERE id=:id")
     suspend fun updatePinStatus(id: Int, pinned: Boolean)
 
+    @Query("SELECT COUNT(*) FROM ${ClipboardEntry.TABLE_NAME}")
+    suspend fun itemCount(): Int
+
     @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME}")
     suspend fun getAll(): List<ClipboardEntry>
 
