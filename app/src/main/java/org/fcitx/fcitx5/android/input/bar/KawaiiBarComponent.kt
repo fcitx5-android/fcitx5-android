@@ -214,6 +214,11 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         )
     }
 
+    override fun onCandidateUpdate(data: Array<String>) {
+        if (data.isNotEmpty())
+            barStateMachine.push(CandidateUpdateNonEmpty)
+    }
+
     override fun onWindowAttached(window: InputWindow) {
         when (window) {
             is InputWindow.ExtendedInputWindow<*> -> {
