@@ -41,8 +41,8 @@ class InputBroadcaster : UniqueComponent<InputBroadcaster>(), Dependent, InputBr
         receivers.forEach { it.onImeUpdate(ime) }
     }
 
-    override fun onCandidateUpdates(data: Array<String>) {
-        receivers.forEach { it.onCandidateUpdates(data) }
+    override fun onCandidateUpdate(data: Array<String>) {
+        receivers.forEach { it.onCandidateUpdate(data) }
     }
 
     override fun onSelectionUpdate(start: Int, end: Int) {

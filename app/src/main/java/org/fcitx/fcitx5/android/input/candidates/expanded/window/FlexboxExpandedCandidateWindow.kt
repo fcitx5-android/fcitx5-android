@@ -36,7 +36,7 @@ class FlexboxExpandedCandidateWindow :
         }
     }
 
-    override fun onCandidateUpdates(data: Array<String>) {
+    override fun onCandidateUpdate(data: Array<String>) {
         view.resetPosition()
     }
 

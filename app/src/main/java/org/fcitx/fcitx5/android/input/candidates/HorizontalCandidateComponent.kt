@@ -98,7 +98,7 @@ class HorizontalCandidateComponent :
             )
     }
 
-    override fun onCandidateUpdates(data: Array<String>) {
+    override fun onCandidateUpdate(data: Array<String>) {
         adapter.updateCandidates(data)
     }
 }

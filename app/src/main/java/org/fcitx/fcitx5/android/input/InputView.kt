@@ -131,7 +131,7 @@ class InputView(
     fun handleFcitxEvent(it: FcitxEvent<*>) {
         when (it) {
             is FcitxEvent.CandidateListEvent -> {
-                broadcaster.onCandidateUpdates(it.data)
+                broadcaster.onCandidateUpdate(it.data)
             }
             is FcitxEvent.PreeditEvent -> {
                 preedit.updatePreedit(it)

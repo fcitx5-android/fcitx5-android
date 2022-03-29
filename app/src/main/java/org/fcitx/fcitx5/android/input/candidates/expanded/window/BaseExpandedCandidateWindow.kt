@@ -52,7 +52,7 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
         view.onPreeditChange(null, content)
     }
 
-    override fun onCandidateUpdates(data: Array<String>) {
+    override fun onCandidateUpdate(data: Array<String>) {
 //        view.resetPosition()
     }
 }

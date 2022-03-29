@@ -16,7 +16,7 @@ interface InputBroadcastReceiver {
 
     fun onImeUpdate(ime: InputMethodEntry) {}
 
-    fun onCandidateUpdates(data: Array<String>) {}
+    fun onCandidateUpdate(data: Array<String>) {}
 
     fun onSelectionUpdate(start: Int, end: Int) {}
 
