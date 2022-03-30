@@ -3,10 +3,7 @@ package org.fcitx.fcitx5.android.data.clipboard
 import android.content.ClipboardManager
 import android.content.Context
 import androidx.room.Room
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.fcitx.fcitx5.android.data.Prefs
@@ -70,9 +67,19 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
         updateItemCount()
     }
 
-    suspend fun deleteAll() {
-        clbDao.deleteAll()
+    suspend fun deleteAll(skipPinned: Boolean = true) {
+        if (skipPinned)
+            clbDao.deleteAllUnpinned()
+        else
+            clbDao.deleteAll()
         updateItemCount()
+    }
+
+    suspend fun nukeTable() {
+        withContext(coroutineContext) {
+            clbDb.clearAllTables()
+            updateItemCount()
+        }
     }
 
     override fun onPrimaryClipChanged() {

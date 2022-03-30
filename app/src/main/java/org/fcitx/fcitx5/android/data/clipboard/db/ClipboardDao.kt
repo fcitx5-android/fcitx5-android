@@ -24,6 +24,9 @@ interface ClipboardDao {
     @Query("DELETE FROM ${ClipboardEntry.TABLE_NAME} WHERE id=:id")
     suspend fun delete(id: Int)
 
+    @Query("DELETE FROM ${ClipboardEntry.TABLE_NAME} WHERE NOT pinned")
+    suspend fun deleteAllUnpinned()
+
     @Query("DELETE FROM ${ClipboardEntry.TABLE_NAME}")
     suspend fun deleteAll()
 }

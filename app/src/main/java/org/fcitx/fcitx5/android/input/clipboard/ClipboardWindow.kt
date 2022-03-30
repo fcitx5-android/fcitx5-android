@@ -75,9 +75,18 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
             }
             deleteAllButton.setOnClickListener {
                 service.lifecycleScope.launch {
-                    ClipboardManager.deleteAll()
-                    adapter.updateEntries(emptyList())
-                    isClipboardDbEmpty = true
+                    // the button is visible iff entries list is non-empty
+                    if (adapter.entries.all { it.pinned }) {
+                        // delete all pinned if we don't have unpinned
+                        ClipboardManager.deleteAll(false)
+                        // manually update entries to empty
+                        adapter.updateEntries(emptyList())
+                        isClipboardDbEmpty = true
+                    } else {
+                        // delete all unpinned if we have pinned
+                        ClipboardManager.deleteAll()
+                        updateClipboardEntries()
+                    }
                 }
             }
         }

@@ -72,7 +72,7 @@ class DeveloperFragment : PreferenceFragmentCompat() {
             isSingleLineTitle = false
             setOnPreferenceClickListener {
                 lifecycleScope.launch {
-                    ClipboardManager.deleteAll()
+                    ClipboardManager.nukeTable()
                     Toast.makeText(context, getString(R.string.done), Toast.LENGTH_SHORT).show()
                 }
                 true
