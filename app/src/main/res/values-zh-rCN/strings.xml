@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name_release">小企鹅输入法5</string>
-    <string name="app_name_debug">小企鹅输入法5（调试）</string>
+    <string name="app_name_debug">小企鹅输入法5 (调试)</string>
     <string name="save">保存</string>
     <string name="input_methods">输入法</string>
     <string name="add_input_method">添加输入法</string>
@@ -76,4 +76,15 @@
     <string name="text_editing">文本编辑</string>
     <string name="instruction_enable_clipboard_listening">要启用剪贴板管理，请在设置中启用剪贴板监听。</string>
     <string name="instruction_copy">试着复制些东西</string>
+    <string name="clear">清空</string>
+    <string name="export">导出</string>
+    <string name="app_crash">应用崩溃</string>
+    <string name="app_crash_message">抱歉，但我们提供了日志以供调查。</string>
+    <string name="crash_logs">崩溃日志</string>
+    <string name="verbose_log">详细记录日志</string>
+    <string name="verbose_log_summary">重启后生效</string>
+    <string name="removed_x">已移除 %1$s</string>
+    <string name="added_x">已添加 %1$s</string>
+    <string name="edited_x">已编辑 %1$s</string>
+    <string name="invalid_value">无效的值</string>
 </resources>
