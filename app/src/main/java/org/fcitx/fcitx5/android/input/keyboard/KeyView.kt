@@ -3,6 +3,8 @@ package org.fcitx.fcitx5.android.input.keyboard
 import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.StateListDrawable
 import android.widget.FrameLayout
 import androidx.annotation.CallSuper
 import androidx.cardview.widget.CardView
@@ -28,6 +30,14 @@ abstract class BaseKeyView(context: Context) : FrameLayout(context) {
     val card = view(::CardView) {
         radius = dp(4f)
         cardElevation = dp(2f)
+        // sync pressed state from parent
+        isDuplicateParentStateEnabled = true
+        // pressed highlight
+        foreground = StateListDrawable().apply {
+            addState(intArrayOf(android.R.attr.state_pressed), GradientDrawable().apply {
+                setColor(styledColor(android.R.attr.colorControlHighlight))
+            })
+        }
         add(layout, lParams(matchParent, matchParent))
     }
 
