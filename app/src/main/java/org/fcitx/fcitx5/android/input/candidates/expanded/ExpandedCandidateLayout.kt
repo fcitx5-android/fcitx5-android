@@ -3,7 +3,6 @@ package org.fcitx.fcitx5.android.input.candidates.expanded
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.inputmethod.EditorInfo
-import android.widget.ImageButton
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.input.keyboard.BackspaceKey
@@ -41,9 +40,9 @@ class ExpandedCandidateLayout(
         imageResource = R.drawable.ic_baseline_arrow_downward_24
     }
 
-    private val backspaceBtn = createKey(BackspaceKey())
+    private val backspaceBtn = createKeyView(BackspaceKey()) as ImageKeyView
 
-    private val returnBtn: ImageKeyView = createKey(ReturnKey()) as ImageKeyView
+    private val returnBtn = createKeyView(ReturnKey()) as ImageKeyView
 
     init {
         id = R.id.expanded_candidate_view

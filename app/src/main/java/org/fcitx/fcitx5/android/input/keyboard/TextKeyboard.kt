@@ -16,47 +16,47 @@ class TextKeyboard(
     companion object {
         const val Name = "Text"
 
-        val Layout: List<List<BaseKey>> = listOf(
+        val Layout: List<List<KeyDef>> = listOf(
             listOf(
-                AltTextKey("Q", "1"),
-                AltTextKey("W", "2"),
-                AltTextKey("E", "3"),
-                AltTextKey("R", "4"),
-                AltTextKey("T", "5"),
-                AltTextKey("Y", "6"),
-                AltTextKey("U", "7"),
-                AltTextKey("I", "8"),
-                AltTextKey("O", "9"),
-                AltTextKey("P", "0")
+                AlphaBetKey("Q", "1"),
+                AlphaBetKey("W", "2"),
+                AlphaBetKey("E", "3"),
+                AlphaBetKey("R", "4"),
+                AlphaBetKey("T", "5"),
+                AlphaBetKey("Y", "6"),
+                AlphaBetKey("U", "7"),
+                AlphaBetKey("I", "8"),
+                AlphaBetKey("O", "9"),
+                AlphaBetKey("P", "0")
             ),
             listOf(
-                AltTextKey("A", "@"),
-                AltTextKey("S", "`"),
-                AltTextKey("D", "$"),
-                AltTextKey("F", "_"),
-                AltTextKey("G", "&"),
-                AltTextKey("H", "/"),
-                AltTextKey("J", ";"),
-                AltTextKey("K", "("),
-                AltTextKey("L", ")")
+                AlphaBetKey("A", "@"),
+                AlphaBetKey("S", "`"),
+                AlphaBetKey("D", "$"),
+                AlphaBetKey("F", "_"),
+                AlphaBetKey("G", "&"),
+                AlphaBetKey("H", "/"),
+                AlphaBetKey("J", ";"),
+                AlphaBetKey("K", "("),
+                AlphaBetKey("L", ")")
             ),
             listOf(
                 CapsKey(),
-                AltTextKey("Z", "'"),
-                AltTextKey("X", ":"),
-                AltTextKey("C", "\""),
-                AltTextKey("V", "?"),
-                AltTextKey("B", "!"),
-                AltTextKey("N", "~"),
-                AltTextKey("M", "\\"),
+                AlphaBetKey("Z", "'"),
+                AlphaBetKey("X", ":"),
+                AlphaBetKey("C", "\""),
+                AlphaBetKey("V", "?"),
+                AlphaBetKey("B", "!"),
+                AlphaBetKey("N", "~"),
+                AlphaBetKey("M", "\\"),
                 BackspaceKey()
             ),
             listOf(
                 LayoutSwitchKey("?123", ""),
                 QuickPhraseKey(),
-                LangSwitchKey(),
-                SpaceKey(),
-                AltTextKey(",", "."),
+                LanguageKey(),
+                SpaceKeyDef(),
+                AlphaBetKey(",", "."),
                 ReturnKey()
             ),
         )

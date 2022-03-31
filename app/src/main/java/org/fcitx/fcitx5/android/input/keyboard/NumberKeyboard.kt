@@ -1,10 +1,12 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
 import android.content.Context
+import android.graphics.Typeface
 import android.view.inputmethod.EditorInfo
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.core.KeyStates
+import org.fcitx.fcitx5.android.core.KeySym
 import splitties.views.imageResource
 
 class NumberKeyboard(
@@ -16,35 +18,51 @@ class NumberKeyboard(
 
         private val NumLockState = KeyStates(KeyState.NumLock, KeyState.Virtual)
 
-        val Layout: List<List<BaseKey>> = listOf(
+        class NumPadKey(
+            displayText: String,
+            val sym: UInt,
+            percentWidth: Float = 0.1f
+        ) : KeyDef(
+            Appearance.Text(
+                displayText,
+                textSize = 16f,
+                typeface = Typeface.NORMAL,
+                percentWidth
+            ),
+            Behavior.Press(
+                action = KeyAction.SymAction(KeySym(sym), NumLockState)
+            )
+        )
+
+        val Layout: List<List<KeyDef>> = listOf(
             listOf(
-                SymKey("+", 0xffabu, NumLockState, 0.15f),
-                SymKey("1", 0xffb1u, NumLockState, 0f),
-                SymKey("2", 0xffb2u, NumLockState, 0f),
-                SymKey("3", 0xffb3u, NumLockState, 0f),
-                SymKey("/", 0xffafu, NumLockState, 0.15f),
+                NumPadKey("+", 0xffabu, 0.15f),
+                NumPadKey("1", 0xffb1u, 0f),
+                NumPadKey("2", 0xffb2u, 0f),
+                NumPadKey("3", 0xffb3u, 0f),
+                NumPadKey("/", 0xffafu, 0.15f),
             ),
             listOf(
-                SymKey("-", 0xffadu, NumLockState, 0.15f),
-                SymKey("4", 0xffb4u, NumLockState, 0f),
-                SymKey("5", 0xffb5u, NumLockState, 0f),
-                SymKey("6", 0xffb6u, NumLockState, 0f),
+                NumPadKey("-", 0xffadu, 0.15f),
+                NumPadKey("4", 0xffb4u, 0f),
+                NumPadKey("5", 0xffb5u, 0f),
+                NumPadKey("6", 0xffb6u, 0f),
                 MiniSpaceKey()
             ),
             listOf(
-                SymKey("*", 0xffaau, NumLockState, 0.15f),
-                SymKey("7", 0xffb7u, NumLockState, 0f),
-                SymKey("8", 0xffb8u, NumLockState, 0f),
-                SymKey("9", 0xffb9u, NumLockState, 0f),
+                NumPadKey("*", 0xffaau, 0.15f),
+                NumPadKey("7", 0xffb7u, 0f),
+                NumPadKey("8", 0xffb8u, 0f),
+                NumPadKey("9", 0xffb9u, 0f),
                 BackspaceKey()
             ),
             listOf(
                 LayoutSwitchKey("ABC", TextKeyboard.Name),
-                TextKey("#"),
+                SymbolKey("#"),
                 LayoutSwitchKey("?123", NumSymKeyboard.Name, 0.13333f),
-                SymKey("0", 0xffb0u, NumLockState, 0.23334f),
-                TextKey("=", 0.13333f),
-                SymKey(".", 0xffaeu, NumLockState),
+                NumPadKey("0", 0xffb0u, 0.23334f),
+                SymbolKey("=", 0.13333f),
+                NumPadKey(".", 0xffaeu),
                 ReturnKey()
             ),
         )
