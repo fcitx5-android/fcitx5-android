@@ -144,7 +144,6 @@ data class KeySym(val sym: UInt) {
             0xff56 to KeyEvent.KEYCODE_PAGE_DOWN,
             0xff55 to KeyEvent.KEYCODE_PAGE_UP,
             0xff09 to KeyEvent.KEYCODE_TAB,
-            0x0020 to KeyEvent.KEYCODE_SPACE,
             0xff08 to KeyEvent.KEYCODE_DEL, // BackSpace
             0xff0d to KeyEvent.KEYCODE_ENTER,
             0xff1b to KeyEvent.KEYCODE_ESCAPE,

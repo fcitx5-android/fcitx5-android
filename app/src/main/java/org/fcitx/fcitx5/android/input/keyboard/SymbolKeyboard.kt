@@ -12,48 +12,48 @@ class SymbolKeyboard(
     companion object {
         const val Name = "Symbol"
 
-        val Layout: List<List<BaseKey>> = listOf(
+        val Layout: List<List<KeyDef>> = listOf(
             listOf(
-                TextKey("~"),
-                TextKey("`"),
-                TextKey("|"),
-                TextKey("·"),
-                TextKey("√"),
-                TextKey("π"),
-                TextKey("÷"),
-                TextKey("×"),
-                TextKey("¶"),
-                TextKey("∆")
+                SymbolKey("~"),
+                SymbolKey("`"),
+                SymbolKey("|"),
+                SymbolKey("·"),
+                SymbolKey("√"),
+                SymbolKey("π"),
+                SymbolKey("÷"),
+                SymbolKey("×"),
+                SymbolKey("¶"),
+                SymbolKey("∆")
             ),
             listOf(
-                TextKey("¥"),
-                TextKey("£"),
-                TextKey("€"),
-                TextKey("¢"),
-                TextKey("^"),
-                TextKey("°"),
-                TextKey("="),
-                TextKey("{"),
-                TextKey("}"),
-                TextKey("\\"),
+                SymbolKey("¥"),
+                SymbolKey("£"),
+                SymbolKey("€"),
+                SymbolKey("¢"),
+                SymbolKey("^"),
+                SymbolKey("°"),
+                SymbolKey("="),
+                SymbolKey("{"),
+                SymbolKey("}"),
+                SymbolKey("\\"),
             ),
             listOf(
                 LayoutSwitchKey("?123", NumSymKeyboard.Name),
-                TextKey("_"),
-                TextKey("©"),
-                TextKey("®"),
-                TextKey("™"),
-                TextKey("✓"),
-                TextKey("["),
-                TextKey("]"),
+                SymbolKey("_"),
+                SymbolKey("©"),
+                SymbolKey("®"),
+                SymbolKey("™"),
+                SymbolKey("✓"),
+                SymbolKey("["),
+                SymbolKey("]"),
                 BackspaceKey()
             ),
             listOf(
                 LayoutSwitchKey("ABC", TextKeyboard.Name),
-                TextKey("<"),
+                SymbolKey("<"),
                 ImageLayoutSwitchKey(R.drawable.ic_number_pad, NumberKeyboard.Name, 0.1f),
-                SpaceKey(),
-                TextKey(">"),
+                SpaceKeyDef(),
+                SymbolKey(">"),
                 ReturnKey()
             )
         )

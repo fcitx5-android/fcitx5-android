@@ -1,7 +1,6 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
 import android.content.Context
-import android.view.MotionEvent
 import android.view.inputmethod.EditorInfo
 import androidx.annotation.CallSuper
 import androidx.annotation.DrawableRes
@@ -10,13 +9,15 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import org.fcitx.fcitx5.android.utils.hapticIfEnabled
+import org.fcitx.fcitx5.android.utils.setupPressingToRepeat
 import splitties.bitflags.hasFlag
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.imageResource
+import timber.log.Timber
 
 abstract class BaseKeyboard(
     context: Context,
-    private val keyLayout: List<List<BaseKey>>
+    private val keyLayout: List<List<KeyDef>>
 ) : ConstraintLayout(context) {
 
     fun interface KeyActionListener {
@@ -28,22 +29,22 @@ abstract class BaseKeyboard(
     init {
         with(context) {
             val keyRows = keyLayout.map { row ->
-                val keyButtons = row.map { key ->
-                    createKey(key)
+                val keyViews = row.map { def ->
+                    createKeyView(def)
                 }
                 constraintLayout Row@{
-                    keyButtons.forEachIndexed { index, button ->
-                        addView(button, lParams {
+                    keyViews.forEachIndexed { index, view ->
+                        addView(view, lParams {
                             topOfParent()
                             bottomOfParent()
                             if (index == 0) {
                                 startOfParent()
                                 horizontalChainStyle = LayoutParams.CHAIN_PACKED
-                            } else after(keyButtons[index - 1])
-                            if (index == keyButtons.size - 1) endOfParent()
-                            else before(keyButtons[index + 1])
-                            val buttonDef = row[index]
-                            matchConstraintPercentWidth = buttonDef.percentWidth
+                            } else after(keyViews[index - 1])
+                            if (index == keyViews.size - 1) endOfParent()
+                            else before(keyViews[index + 1])
+                            val def = row[index]
+                            matchConstraintPercentWidth = def.appearance.percentWidth
                         })
                     }
                 }
@@ -61,68 +62,30 @@ abstract class BaseKeyboard(
         }
     }
 
-
-    protected fun createKey(key: BaseKey): BaseKeyView =
-        when (key) {
-            is IImageKey -> ImageKeyView(context)
-            is AltTextKey -> AltTextKeyView(context)
-            else -> TextKeyView(context)
+    protected fun createKeyView(def: KeyDef): KeyView {
+        Timber.d(def.toString())
+        return when (def.appearance) {
+            is KeyDef.Appearance.AltText -> AltTextKeyView(context, def.appearance)
+            is KeyDef.Appearance.Text -> TextKeyView(context, def.appearance)
+            is KeyDef.Appearance.Image -> ImageKeyView(context, def.appearance)
         }.apply {
-            applyKey(key)
-            setOnClickListener {
-                if (key is IPressKey)
-                    onAction(key.onPress())
-            }
-            setOnLongClickListener {
-                when (key) {
-                    is ILongPressKey -> {
-                        onAction(key.onLongPress())
-                        true
-                    }
-                    is IRepeatKey -> {
-                        onAction(key.onHold())
-                        true
-                    }
-                    else -> false
-                }
-            }
-            setupOnGestureListener(object : MyOnGestureListener() {
-                override fun onDown(e: MotionEvent?): Boolean {
+            if (def.behavior is KeyDef.Behavior.Press) {
+                setOnClickListener {
                     hapticIfEnabled()
-                    return false
+                    onAction(def.behavior.action)
                 }
-
-                override fun onDoubleTap() = when (key) {
-                    is IDoublePressKey -> {
-                        hapticIfEnabled()
-                        onAction(key.onDoublePress())
-                        true
-                    }
-                    else -> false
+            }
+            if (def.behavior is KeyDef.Behavior.LongPress) {
+                setOnLongClickListener {
+                    onAction(def.behavior.longPressAction)
+                    true
                 }
-
-                override fun onSwipeDown() = when (key) {
-                    is ILongPressKey -> {
-                        onAction(key.onLongPress())
-                        true
-                    }
-                    else -> false
-                }
-
-                override fun onRawTouchEvent(motionEvent: MotionEvent): Boolean {
-                    when (key) {
-                        is IRepeatKey -> {
-                            when (motionEvent.actionMasked) {
-                                MotionEvent.ACTION_BUTTON_PRESS -> performClick()
-                                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> onAction(key.onRelease())
-                            }
-                        }
-                    }
-                    return false
-                }
-            })
+            }
+            if (def.behavior is KeyDef.Behavior.Repeat) {
+                setupPressingToRepeat()
+            }
         }
-
+    }
 
     @DrawableRes
     protected fun drawableForReturn(info: EditorInfo?): Int {
