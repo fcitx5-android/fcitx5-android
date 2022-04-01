@@ -13,7 +13,6 @@ import org.fcitx.fcitx5.android.utils.setupPressingToRepeat
 import splitties.bitflags.hasFlag
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.imageResource
-import timber.log.Timber
 
 abstract class BaseKeyboard(
     context: Context,
@@ -63,7 +62,6 @@ abstract class BaseKeyboard(
     }
 
     protected fun createKeyView(def: KeyDef): KeyView {
-        Timber.d(def.toString())
         return when (def.appearance) {
             is KeyDef.Appearance.AltText -> AltTextKeyView(context, def.appearance)
             is KeyDef.Appearance.Text -> TextKeyView(context, def.appearance)

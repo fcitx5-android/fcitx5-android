@@ -12,8 +12,9 @@ import org.fcitx.fcitx5.android.input.candidates.CandidateViewBuilder
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.candidates.adapter.BaseCandidateViewAdapter
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateLayout
+import org.fcitx.fcitx5.android.input.keyboard.BaseKeyboard
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
-import org.fcitx.fcitx5.android.input.preedit.PreeditContent
+import org.fcitx.fcitx5.android.input.keyboard.KeyAction
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.mechdancer.dependency.manager.must
@@ -31,16 +32,30 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
         view.findViewTreeLifecycleOwner()!!.lifecycleScope
     }
 
-    // TODO: Refactor, this shouldn't depend on BaseKeyboard
     abstract override val view: ExpandedCandidateLayout
+
+    private val keyActionListener = BaseKeyboard.KeyActionListener {
+        if (it is KeyAction.LayoutSwitchAction) {
+            when (it.act) {
+                ExpandedCandidateLayout.Keyboard.UpBtnLabel -> prevPage()
+                ExpandedCandidateLayout.Keyboard.DownBtnLabel -> nextPage()
+            }
+        } else {
+            commonKeyActionListener.listener.onKeyAction(it)
+        }
+    }
 
     abstract val adapter: BaseCandidateViewAdapter
 
     private var offsetJob: Job? = null
 
+    abstract fun prevPage()
+
+    abstract fun nextPage()
+
     override fun onAttached() {
-        view.keyActionListener = commonKeyActionListener.listener
         bar.expandButtonStateMachine.push(ExpandedCandidatesAttached)
+        view.embeddedKeyboard.keyActionListener = keyActionListener
         offsetJob = horizontalCandidate.expandedCandidateOffset.onEach {
             adapter.updateCandidatesWithOffset(horizontalCandidate.adapter.candidates, it)
         }.launchIn(lifecycleCoroutineScope)
@@ -55,18 +70,6 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
         )
         offsetJob?.cancel()
         offsetJob = null
-        view.keyActionListener = null
-    }
-
-    override fun onPreeditUpdate(content: PreeditContent) {
-        view.onPreeditChange(null, content)
-    }
-
-    override fun onCandidateUpdate(data: Array<String>) {
-        if (data.isEmpty()) {
-            windowManager.switchToKeyboardWindow()
-            return
-        }
-        view.resetPosition()
+        view.embeddedKeyboard.keyActionListener = null
     }
 }

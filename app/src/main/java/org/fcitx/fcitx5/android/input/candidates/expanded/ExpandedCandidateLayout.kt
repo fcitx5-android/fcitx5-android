@@ -2,95 +2,83 @@ package org.fcitx.fcitx5.android.input.candidates.expanded
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.view.inputmethod.EditorInfo
+import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.input.keyboard.BackspaceKey
-import org.fcitx.fcitx5.android.input.keyboard.BaseKeyboard
-import org.fcitx.fcitx5.android.input.keyboard.ImageKeyView
-import org.fcitx.fcitx5.android.input.keyboard.ReturnKey
-import org.fcitx.fcitx5.android.input.preedit.PreeditContent
-import splitties.dimensions.dp
+import org.fcitx.fcitx5.android.input.keyboard.*
 import splitties.resources.styledColor
 import splitties.views.backgroundColor
-import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.add
-import splitties.views.dsl.core.imageButton
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.recyclerview.recyclerView
-import splitties.views.imageResource
 
-// TODO: Refactor, this shouldn't depend on BaseKeyboard
 @SuppressLint("ViewConstructor")
 class ExpandedCandidateLayout(
     context: Context,
     initRecyclerView: RecyclerView.() -> Unit = {}
-) : BaseKeyboard(context, emptyList()) {
+) : LinearLayout(context) {
+
+    class Keyboard(context: Context) : BaseKeyboard(context, Layout) {
+        companion object {
+            const val UpBtnLabel = "U"
+            const val DownBtnLabel = "D"
+
+            const val UpBtnId = 0xff55
+            const val DownBtnId = 0xff56
+
+            val Layout: List<List<KeyDef>> = listOf(
+                listOf(
+                    ImageLayoutSwitchKey(
+                        R.drawable.ic_baseline_arrow_upward_24,
+                        to = UpBtnLabel,
+                        percentWidth = 1f,
+                        viewId = UpBtnId
+                    )
+                ),
+                listOf(
+                    ImageLayoutSwitchKey(
+                        R.drawable.ic_baseline_arrow_downward_24,
+                        to = DownBtnLabel,
+                        percentWidth = 1f,
+                        viewId = DownBtnId
+                    )
+                ),
+                listOf(BackspaceKey(percentWidth = 1f)),
+                listOf(ReturnKey(percentWidth = 1f))
+            )
+        }
+
+        val backspace: ImageKeyView by lazy { findViewById(R.id.button_backspace) }
+        val `return`: ImageKeyView by lazy { findViewById(R.id.button_return) }
+    }
 
     val recyclerView = recyclerView {
         isVerticalScrollBarEnabled = false
     }
 
-    val pageUpBtn = imageButton {
-        elevation = dp(2f)
-        imageResource = R.drawable.ic_baseline_arrow_upward_24
+    var pageUpBtn: ImageKeyView
+
+    var pageDnBtn: ImageKeyView
+
+    val embeddedKeyboard = Keyboard(context).apply {
+        pageUpBtn = findViewById(Keyboard.UpBtnId)
+        pageDnBtn = findViewById(Keyboard.DownBtnId)
     }
-
-    val pageDnBtn = imageButton {
-        elevation = dp(2f)
-        imageResource = R.drawable.ic_baseline_arrow_downward_24
-    }
-
-    private val backspaceBtn = createKeyView(BackspaceKey()) as ImageKeyView
-
-    private val returnBtn = createKeyView(ReturnKey()) as ImageKeyView
 
     init {
         id = R.id.expanded_candidate_view
+        weightSum = 1f
+        orientation = HORIZONTAL
         backgroundColor = styledColor(android.R.attr.colorBackground)
 
-        add(pageUpBtn, lParams(matchConstraints, matchConstraints) {
-            matchConstraintPercentWidth = 0.15f
-            topOfParent()
-            endOfParent()
-            above(pageDnBtn)
-        })
-
-        add(pageDnBtn, lParams(matchConstraints, matchConstraints) {
-            matchConstraintPercentWidth = 0.15f
-            below(pageUpBtn)
-            endOfParent()
-            above(backspaceBtn)
-        })
-
-        add(backspaceBtn, lParams(matchConstraints, matchConstraints) {
-            matchConstraintPercentWidth = 0.15f
-            below(pageDnBtn)
-            endOfParent()
-            above(returnBtn)
-        })
-
-        add(returnBtn, lParams(matchConstraints, matchConstraints) {
-            matchConstraintPercentWidth = 0.15f
-            below(backspaceBtn)
-            endOfParent()
-            bottomOfParent()
-        })
-
-        add(recyclerView, lParams {
-            topOfParent()
-            startOfParent()
-            before(pageUpBtn)
-            bottomOfParent()
-        })
+        add(recyclerView, lParams(0, matchParent) { weight = 0.85f })
+        add(embeddedKeyboard, lParams(0, matchParent) { weight = 0.15f })
 
         initRecyclerView(recyclerView)
     }
 
     fun resetPosition() {
         recyclerView.scrollToPosition(0)
-    }
-
-    override fun onPreeditChange(info: EditorInfo?, content: PreeditContent) {
-        updateReturnButton(returnBtn, info, content)
     }
 }
