@@ -45,16 +45,16 @@ open class KeyDef(
 
     sealed class Behavior {
         open class Press(
-            val action: KeyAction<*>
+            val action: KeyAction
         ) : Behavior()
 
         class Repeat(
-            action: KeyAction<*>
+            action: KeyAction
         ) : Press(action)
 
         class LongPress(
-            action: KeyAction<*>,
-            val longPressAction: KeyAction<*>
+            action: KeyAction,
+            val longPressAction: KeyAction
         ) : Press(action)
     }
 }

@@ -21,7 +21,7 @@ abstract class BaseKeyboard(
 ) : ConstraintLayout(context) {
 
     fun interface KeyActionListener {
-        fun onKeyAction(action: KeyAction<*>)
+        fun onKeyAction(action: KeyAction)
     }
 
     var keyActionListener: KeyActionListener? = null
@@ -120,7 +120,7 @@ abstract class BaseKeyboard(
     }
 
     @CallSuper
-    open fun onAction(action: KeyAction<*>) {
+    open fun onAction(action: KeyAction) {
         keyActionListener?.onKeyAction(action)
     }
 
