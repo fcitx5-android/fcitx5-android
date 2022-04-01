@@ -20,7 +20,7 @@ abstract class BaseCandidateViewAdapter :
     var offset = 0
         private set
 
-    fun getCandidateAt(position: Int) = candidates[position]
+    fun getCandidateAt(position: Int) = candidates[offset + position]
 
     @SuppressLint("NotifyDataSetChanged")
     fun updateCandidates(data: Array<String>) {
@@ -30,7 +30,7 @@ abstract class BaseCandidateViewAdapter :
 
     fun updateCandidatesWithOffset(data: Array<String>, offset: Int) {
         this.offset = offset
-        updateCandidates(data.sliceArray(offset until data.size))
+        updateCandidates(data)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -52,7 +52,7 @@ abstract class BaseCandidateViewAdapter :
         holder.idx = position
     }
 
-    override fun getItemCount() = candidates.size
+    override fun getItemCount() = candidates.size - offset
 
     abstract fun createTextView(parent: ViewGroup): TextView
 
