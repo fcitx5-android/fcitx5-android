@@ -6,7 +6,6 @@ import android.view.inputmethod.EditorInfo
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.core.KeyStates
-import org.fcitx.fcitx5.android.core.KeySym
 import splitties.views.imageResource
 
 class NumberKeyboard(
@@ -30,7 +29,7 @@ class NumberKeyboard(
                 percentWidth
             ),
             Behavior.Press(
-                action = KeyAction.SymAction(KeySym(sym), NumLockState)
+                action = KeyAction.SymAction(sym, NumLockState)
             )
         )
 

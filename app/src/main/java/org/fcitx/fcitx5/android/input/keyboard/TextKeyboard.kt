@@ -55,7 +55,7 @@ class TextKeyboard(
                 LayoutSwitchKey("?123", ""),
                 QuickPhraseKey(),
                 LanguageKey(),
-                SpaceKeyDef(),
+                SpaceKey(),
                 AlphaBetKey(",", "."),
                 ReturnKey()
             ),
