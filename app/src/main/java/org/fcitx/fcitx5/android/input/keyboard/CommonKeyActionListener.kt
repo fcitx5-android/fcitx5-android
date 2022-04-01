@@ -7,7 +7,6 @@ import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.utils.AppUtil
-import org.fcitx.fcitx5.android.utils.inputConnection
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
@@ -29,14 +28,7 @@ class CommonKeyActionListener :
             service.lifecycleScope.launch {
                 when (action) {
                     is KeyAction.FcitxKeyAction -> fcitx.sendKey(action.act, KeyState.Virtual.state)
-                    is KeyAction.SymAction -> fcitx.sendKey(action.act.sym, action.act.states)
-                    is KeyAction.CommitAction -> {
-                        // TODO: this should be handled more gracefully; or CommitAction should be removed?
-                        fcitx.reset()
-                        service.inputConnection?.commitText(action.act, 1)
-                    }
-                    is KeyAction.RepeatStartAction -> service.startRepeating(action.act)
-                    is KeyAction.RepeatEndAction -> service.cancelRepeating(action.act)
+                    is KeyAction.SymAction -> fcitx.sendKey(action.sym, action.states)
                     is KeyAction.QuickPhraseAction -> {
                         fcitx.reset()
                         fcitx.triggerQuickPhrase()
@@ -52,10 +44,8 @@ class CommonKeyActionListener :
                         }
                     }
                     is KeyAction.InputMethodSwitchAction -> inputMethodManager.showInputMethodPicker()
-                    is KeyAction.CustomAction -> {
-                        action.act(fcitx)
-                    }
                     else -> {
+
                     }
                 }
             }
