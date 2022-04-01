@@ -63,11 +63,11 @@ class LayoutSwitchKey(
     )
 )
 
-class BackspaceKey : KeyDef(
+class BackspaceKey(percentWidth: Float = 0.15f) : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_backspace_24,
         tint = android.R.attr.colorControlNormal,
-        percentWidth = 0.15f,
+        percentWidth,
         viewId = R.id.button_backspace
     ),
     Behavior.Repeat(
@@ -112,11 +112,11 @@ class SpaceKey : KeyDef(
     )
 )
 
-class ReturnKey : KeyDef(
+class ReturnKey(percentWidth: Float = 0.15f) : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_keyboard_return_24,
         tint = android.R.attr.colorForegroundInverse,
-        percentWidth = 0.15f,
+        percentWidth,
         background = android.R.attr.colorAccent,
         viewId = R.id.button_return
     ),
@@ -129,12 +129,14 @@ class ImageLayoutSwitchKey(
     @DrawableRes
     icon: Int,
     to: String,
-    percentWidth: Float = 0.1f
+    percentWidth: Float = 0.1f,
+    viewId: Int = -1
 ) : KeyDef(
     Appearance.Image(
         src = icon,
         tint = android.R.attr.colorControlNormal,
-        percentWidth
+        percentWidth,
+        viewId = viewId
     ),
     Behavior.Press(
         action = KeyAction.LayoutSwitchAction(to)

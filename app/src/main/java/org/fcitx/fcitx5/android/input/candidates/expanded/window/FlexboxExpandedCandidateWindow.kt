@@ -30,13 +30,15 @@ class FlexboxExpandedCandidateWindow :
                         }
                     }
                 })
-                pageUpBtn.setOnClickListener { prevPage() }
-                pageDnBtn.setOnClickListener { nextPage() }
             }
         }
     }
 
-    fun prevPage() {
+    override fun onCandidateUpdate(data: Array<String>) {
+        view.resetPosition()
+    }
+
+    override fun prevPage() {
         layoutManager.apply {
             var prev = findFirstCompletelyVisibleItemPosition() - 1
             if (prev < 0) prev = 0
@@ -46,7 +48,7 @@ class FlexboxExpandedCandidateWindow :
         }
     }
 
-    fun nextPage() {
+    override fun nextPage() {
         layoutManager.apply {
             var next = findLastCompletelyVisibleItemPosition() + 1
             if (next >= itemCount) next = itemCount - 1
