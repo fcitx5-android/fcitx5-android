@@ -52,7 +52,7 @@ class SymbolKeyboard(
                 LayoutSwitchKey("ABC", TextKeyboard.Name),
                 SymbolKey("<"),
                 ImageLayoutSwitchKey(R.drawable.ic_number_pad, NumberKeyboard.Name, 0.1f),
-                SpaceKeyDef(),
+                SpaceKey(),
                 SymbolKey(">"),
                 ReturnKey()
             )

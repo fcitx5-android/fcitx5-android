@@ -3,7 +3,6 @@ package org.fcitx.fcitx5.android.input.keyboard
 import android.graphics.Typeface
 import androidx.annotation.DrawableRes
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.core.KeySym
 
 class SymbolKey(
     val symbol: String,
@@ -72,7 +71,7 @@ class BackspaceKey : KeyDef(
         viewId = R.id.button_backspace
     ),
     Behavior.Repeat(
-        action = KeyAction.SymAction(KeySym(0xff08u))
+        action = KeyAction.SymAction(0xff08u)
     )
 )
 
@@ -100,7 +99,7 @@ class LanguageKey : KeyDef(
     )
 )
 
-class SpaceKeyDef : KeyDef(
+class SpaceKey : KeyDef(
     Appearance.Text(
         displayText = " ",
         textSize = 13f,
@@ -109,7 +108,7 @@ class SpaceKeyDef : KeyDef(
         viewId = R.id.button_space
     ),
     Behavior.Press(
-        action = KeyAction.SymAction(KeySym(0x0020u))
+        action = KeyAction.SymAction(0x0020u)
     )
 )
 
@@ -122,7 +121,7 @@ class ReturnKey : KeyDef(
         viewId = R.id.button_return
     ),
     Behavior.Press(
-        action = KeyAction.SymAction(KeySym(0xff0du))
+        action = KeyAction.SymAction(0xff0du)
     )
 )
 
@@ -149,7 +148,7 @@ class MiniSpaceKey : KeyDef(
         percentWidth = 0.15f,
         viewId = R.id.button_mini_space
     ),
-    Behavior.Repeat(
-        action = KeyAction.SymAction(KeySym(0x0020u))
+    Behavior.Press(
+        action = KeyAction.SymAction(0x0020u)
     )
 )

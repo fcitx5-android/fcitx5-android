@@ -52,7 +52,7 @@ class NumSymKeyboard(
                 LayoutSwitchKey("ABC", TextKeyboard.Name),
                 SymbolKey(","),
                 ImageLayoutSwitchKey(R.drawable.ic_number_pad, NumberKeyboard.Name),
-                SpaceKeyDef(),
+                SpaceKey(),
                 SymbolKey("."),
                 ReturnKey()
             )

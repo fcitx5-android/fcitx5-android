@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
 import org.fcitx.fcitx5.android.core.Fcitx
+import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
 
@@ -19,7 +20,11 @@ sealed class KeyAction<T> {
     }
 
     data class SymAction(override var act: Act) : KeyAction<SymAction.Act>() {
-        constructor(sym: KeySym, states: KeyStates = KeyStates()) : this(Act(sym, states))
+        companion object {
+            val VirtualState = KeyStates(KeyState.Virtual)
+        }
+
+        constructor(sym: UInt, states: KeyStates = VirtualState) : this(Act(KeySym(sym), states))
 
         data class Act(val sym: KeySym, val states: KeyStates)
     }
