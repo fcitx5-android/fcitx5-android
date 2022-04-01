@@ -6,6 +6,7 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.DataManager
 import org.fcitx.fcitx5.android.data.Prefs
@@ -23,89 +24,89 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
     val isReady
         get() = lifecycle.currentState == FcitxLifecycle.State.READY
 
-    suspend fun save() = dispatcher.dispatch { saveFcitxState() }
+    suspend fun save() = withFcitxContext { saveFcitxState() }
     suspend fun sendKey(key: String, state: UInt = 0u, up: Boolean = false) =
-        dispatcher.dispatch { sendKeyToFcitxString(key, state.toInt(), up) }
+        withFcitxContext { sendKeyToFcitxString(key, state.toInt(), up) }
 
     suspend fun sendKey(c: Char, state: UInt = 0u, up: Boolean = false) =
-        dispatcher.dispatch { sendKeyToFcitxChar(c, state.toInt(), up) }
+        withFcitxContext { sendKeyToFcitxChar(c, state.toInt(), up) }
 
     suspend fun sendKey(sym: UInt, state: UInt = 0u, up: Boolean = false) =
-        dispatcher.dispatch { sendKeySymToFcitx(sym.toInt(), state.toInt(), up) }
+        withFcitxContext { sendKeySymToFcitx(sym.toInt(), state.toInt(), up) }
 
     suspend fun sendKey(sym: KeySym, states: KeyStates? = null, up: Boolean = false) =
-        dispatcher.dispatch { sendKeySymToFcitx(sym.toInt(), states?.toInt() ?: 0, up) }
+        withFcitxContext { sendKeySymToFcitx(sym.toInt(), states?.toInt() ?: 0, up) }
 
-    suspend fun select(idx: Int) = dispatcher.dispatch { selectCandidate(idx) }
-    suspend fun isEmpty() = dispatcher.dispatch { isInputPanelEmpty() }
-    suspend fun reset() = dispatcher.dispatch { resetInputContext() }
-    suspend fun moveCursor(position: Int) = dispatcher.dispatch { repositionCursor(position) }
+    suspend fun select(idx: Int) = withFcitxContext { selectCandidate(idx) }
+    suspend fun isEmpty() = withFcitxContext { isInputPanelEmpty() }
+    suspend fun reset() = withFcitxContext { resetInputContext() }
+    suspend fun moveCursor(position: Int) = withFcitxContext { repositionCursor(position) }
     suspend fun availableIme() =
-        dispatcher.dispatch { availableInputMethods() ?: arrayOf() }
+        withFcitxContext { availableInputMethods() ?: arrayOf() }
 
     suspend fun enabledIme() =
-        dispatcher.dispatch { listInputMethods() ?: arrayOf() }
+        withFcitxContext { listInputMethods() ?: arrayOf() }
 
     suspend fun setEnabledIme(array: Array<String>) =
-        dispatcher.dispatch { setEnabledInputMethods(array) }
+        withFcitxContext { setEnabledInputMethods(array) }
 
-    suspend fun activateIme(ime: String) = dispatcher.dispatch { setInputMethod(ime) }
+    suspend fun activateIme(ime: String) = withFcitxContext { setInputMethod(ime) }
     suspend fun enumerateIme(forward: Boolean = true) =
-        dispatcher.dispatch { nextInputMethod(forward) }
+        withFcitxContext { nextInputMethod(forward) }
 
     suspend fun currentIme() =
-        dispatcher.dispatch {
+        withFcitxContext {
             inputMethodStatus() ?: InputMethodEntry(context.str(R.string._not_available_))
         }
 
-    suspend fun getGlobalConfig() = dispatcher.dispatch {
+    suspend fun getGlobalConfig() = withFcitxContext {
         getFcitxGlobalConfig() ?: RawConfig(arrayOf())
     }
 
-    suspend fun setGlobalConfig(config: RawConfig) = dispatcher.dispatch {
+    suspend fun setGlobalConfig(config: RawConfig) = withFcitxContext {
         setFcitxGlobalConfig(config)
     }
 
-    suspend fun getAddonConfig(addon: String) = dispatcher.dispatch {
+    suspend fun getAddonConfig(addon: String) = withFcitxContext {
         getFcitxAddonConfig(addon) ?: RawConfig(arrayOf())
     }
 
-    suspend fun setAddonConfig(addon: String, config: RawConfig) = dispatcher.dispatch {
+    suspend fun setAddonConfig(addon: String, config: RawConfig) = withFcitxContext {
         setFcitxAddonConfig(addon, config)
     }
 
-    suspend fun getAddonSubConfig(addon: String, path: String) = dispatcher.dispatch {
+    suspend fun getAddonSubConfig(addon: String, path: String) = withFcitxContext {
         getFcitxAddonSubConfig(addon, path) ?: RawConfig(arrayOf())
     }
 
     suspend fun setAddonSubConfig(addon: String, path: String, config: RawConfig = RawConfig()) =
-        dispatcher.dispatch { setFcitxAddonSubConfig(addon, path, config) }
+        withFcitxContext { setFcitxAddonSubConfig(addon, path, config) }
 
-    suspend fun getImConfig(key: String) = dispatcher.dispatch {
+    suspend fun getImConfig(key: String) = withFcitxContext {
         getFcitxInputMethodConfig(key) ?: RawConfig(arrayOf())
     }
 
-    suspend fun setImConfig(key: String, config: RawConfig) = dispatcher.dispatch {
+    suspend fun setImConfig(key: String, config: RawConfig) = withFcitxContext {
         setFcitxInputMethodConfig(key, config)
     }
 
-    suspend fun addons() = dispatcher.dispatch { getFcitxAddons() ?: arrayOf() }
+    suspend fun addons() = withFcitxContext { getFcitxAddons() ?: arrayOf() }
     suspend fun setAddonState(name: Array<String>, state: BooleanArray) =
-        dispatcher.dispatch { setFcitxAddonState(name, state) }
+        withFcitxContext { setFcitxAddonState(name, state) }
 
-    suspend fun triggerQuickPhrase() = dispatcher.dispatch { triggerQuickPhraseInput() }
+    suspend fun triggerQuickPhrase() = withFcitxContext { triggerQuickPhraseInput() }
     suspend fun punctuation(c: Char, language: String = "zh_CN"): Pair<String, String> =
-        dispatcher.dispatch {
+        withFcitxContext {
             queryPunctuation(c, language)?.let { it[0] to it[1] } ?: "$c".let { it to it }
         }
 
-    suspend fun triggerUnicode() = dispatcher.dispatch { triggerUnicodeInput() }
+    suspend fun triggerUnicode() = withFcitxContext { triggerUnicodeInput() }
     private suspend fun setClipboard(string: String) =
-        dispatcher.dispatch { setFcitxClipboard(string) }
+        withFcitxContext { setFcitxClipboard(string) }
 
-    suspend fun focus(focus: Boolean = true) = dispatcher.dispatch { focusInputContext(focus) }
+    suspend fun focus(focus: Boolean = true) = withFcitxContext { focusInputContext(focus) }
     suspend fun setCapFlags(flags: CapabilityFlags) =
-        dispatcher.dispatch { setCapabilityFlags(flags.toLong()) }
+        withFcitxContext { setCapabilityFlags(flags.toLong()) }
 
     init {
         if (lifecycle.currentState != FcitxLifecycle.State.STOPPED)
@@ -290,7 +291,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
             get() = lifecycleRegistry
     }
 
-    val dispatcher = FcitxDispatcher(object : FcitxDispatcher.FcitxController {
+    private val dispatcher = FcitxDispatcher(object : FcitxDispatcher.FcitxController {
         override fun nativeStartup() {
             with(context) {
                 DataManager.sync()
@@ -333,6 +334,11 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         }
 
     })
+
+    private suspend fun <T> withFcitxContext(block: suspend () -> T): T =
+        withContext(dispatcher) {
+            block()
+        }
 
     private val onClipboardUpdate = ClipboardManager.OnClipboardUpdateListener {
         lifecycle.lifecycleScope.launch { setClipboard(it) }

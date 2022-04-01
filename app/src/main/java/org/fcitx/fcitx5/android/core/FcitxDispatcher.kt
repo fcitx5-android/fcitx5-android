@@ -2,12 +2,12 @@ package org.fcitx.fcitx5.android.core
 
 import android.os.Debug
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import timber.log.Timber
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
 import kotlin.coroutines.CoroutineContext
 
 class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispatcher() {
@@ -84,9 +84,8 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
         override val coroutineContext: CoroutineContext = dispatcher
     }
 
-    private val nativeLoopLock = ReentrantLock()
-    private val exitingLock = ReentrantLock()
-    private val exitingCondition = exitingLock.newCondition()
+    private val nativeLoopLock = Mutex()
+    private val runningLock = Mutex()
 
     private val queue = ConcurrentLinkedQueue<WrappedRunnable>()
 
@@ -94,28 +93,29 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
 
     private val aliveChecker = AliveChecker(ALIVE_CHECKER_PERIOD)
 
-    fun start() = internalScope.launch {
-        Timber.i("Start")
-        if (isRunning.compareAndSet(false, true)) {
-            Timber.d("Calling native startup")
-            controller.nativeStartup()
-            aliveChecker.install()
-            while (isActive && isRunning.get()) {
-                // blocking...
-                nativeLoopLock.withLock {
-                    controller.nativeLoopOnce()
+    fun start() {
+        internalScope.launch {
+            runningLock.withLock {
+                Timber.i("Start")
+                if (isRunning.compareAndSet(false, true)) {
+                    Timber.d("Calling native startup")
+                    controller.nativeStartup()
+                    aliveChecker.install()
+                    while (isActive && isRunning.get()) {
+                        // blocking...
+                        nativeLoopLock.withLock {
+                            controller.nativeLoopOnce()
+                        }
+                        // do scheduled jobs
+                        while (true) {
+                            val block = queue.poll() ?: break
+                            block.run()
+                        }
+                    }
+                    Timber.i("Calling native exit")
+                    aliveChecker.teardown()
+                    controller.nativeExit()
                 }
-                // do scheduled jobs
-                while (true) {
-                    val block = queue.poll() ?: break
-                    block.run()
-                }
-            }
-            exitingLock.withLock {
-                Timber.i("Calling native exit")
-                aliveChecker.teardown()
-                controller.nativeExit()
-                exitingCondition.signal()
             }
         }
     }
@@ -124,17 +124,20 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
     fun stop(): List<Runnable> {
         Timber.i("Stop")
         return if (isRunning.compareAndSet(true, false)) {
-            exitingLock.withLock {
-                bypass()
-                exitingCondition.await()
-                val rest = queue.toList()
-                queue.clear()
-                rest
+            runBlocking {
+                runningLock.withLock {
+                    bypass()
+                    val rest = queue.toList()
+                    queue.clear()
+                    rest
+                }
             }
         } else emptyList()
     }
 
     private fun dispatchInternal(block: Runnable, name: String? = null): WrappedRunnable {
+        if (!isRunning.get())
+            throw IllegalStateException("Dispatcher is not in running state!")
         val wrapped = WrappedRunnable(block, name)
         queue.offer(wrapped)
         bypass()
@@ -146,8 +149,6 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
         if (nativeLoopLock.isLocked)
             controller.nativeScheduleEmpty()
     }
-
-    suspend fun <T> dispatch(block: () -> T): T = withContext(this) { block() }
 
     override fun dispatch(context: CoroutineContext, block: Runnable) {
         this@FcitxDispatcher.dispatchInternal(block)
