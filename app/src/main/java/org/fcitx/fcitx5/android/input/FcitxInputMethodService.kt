@@ -11,7 +11,6 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -44,8 +43,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private var eventHandlerJob: Job? = null
 
     var editorInfo: EditorInfo? = null
-
-    private var keyRepeatingJobs = hashMapOf<String, Job>()
 
     var selection = CursorRange()
     var composing = CursorRange()
@@ -116,29 +113,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 imeOptions and EditorInfo.IME_MASK_ACTION
             }.let { inputConnection?.performEditorAction(it) }
         }
-    }
-
-    fun startRepeating(key: String) {
-        if (keyRepeatingJobs.containsKey(key)) {
-            return
-        }
-        keyRepeatingJobs[key] = lifecycleScope.launch {
-            while (true) {
-                fcitx.sendKey(key)
-                delay(60L)
-            }
-        }
-    }
-
-    fun cancelRepeating(key: String) {
-        keyRepeatingJobs.run {
-            get(key)?.cancel()
-            remove(key)
-        }
-    }
-
-    private fun cancelRepeatingAll() {
-        keyRepeatingJobs.forEach { cancelRepeating(it.key) }
     }
 
     private fun sendDownKeyEvent(eventTime: Long, keyEventCode: Int, metaState: Int = 0) {
@@ -358,7 +332,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
-        cancelRepeatingAll()
         inputConnection?.finishComposingText()
         lifecycleScope.launch {
             fcitx.focus(false)
