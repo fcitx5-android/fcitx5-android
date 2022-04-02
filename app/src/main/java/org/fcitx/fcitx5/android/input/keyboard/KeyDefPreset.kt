@@ -37,7 +37,7 @@ class AlphaBetKey(
 
 class CapsKey : KeyDef(
     Appearance.Image(
-        src = R.drawable.ic_baseline_keyboard_capslock0_24,
+        src = R.drawable.ic_baseline_keyboard_capslock_24,
         tint = android.R.attr.colorControlNormal,
         viewId = R.id.button_caps,
         percentWidth = 0.15f
