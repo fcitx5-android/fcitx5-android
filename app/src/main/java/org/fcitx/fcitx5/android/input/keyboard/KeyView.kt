@@ -9,21 +9,24 @@ import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
 import android.widget.FrameLayout
 import androidx.cardview.widget.CardView
+import org.fcitx.fcitx5.android.utils.styledFloat
 import splitties.dimensions.dp
+import splitties.resources.drawable
 import splitties.resources.styledColor
 import splitties.resources.styledColorSL
 import splitties.views.dsl.core.*
 import splitties.views.gravityCenter
-import splitties.views.imageResource
+import splitties.views.imageDrawable
 
 abstract class KeyView(ctx: Context, val def: KeyDef.Appearance) : FrameLayout(ctx) {
     val layout = verticalLayout(matchParent) {
         gravity = gravityCenter
+        // sync any state from parent
+        isDuplicateParentStateEnabled = true
     }
 
     val card = view(::CardView) {
         radius = dp(4f)
-        cardElevation = dp(2f)
         setCardBackgroundColor(styledColorSL(def.background))
         // sync pressed state from parent
         isDuplicateParentStateEnabled = true
@@ -37,6 +40,8 @@ abstract class KeyView(ctx: Context, val def: KeyDef.Appearance) : FrameLayout(c
     }
 
     init {
+        // trigger setEnabled(true)
+        isEnabled = true
         isClickable = true
         isHapticFeedbackEnabled = false
         if (def.viewId > 0) {
@@ -46,6 +51,12 @@ abstract class KeyView(ctx: Context, val def: KeyDef.Appearance) : FrameLayout(c
             horizontalMargin = dp(2)
             verticalMargin = dp(5)
         })
+    }
+
+    override fun setEnabled(enabled: Boolean) {
+        super.setEnabled(enabled)
+        card.cardElevation = if (enabled) dp(2f) else 0f
+        layout.alpha = if (enabled) 1f else styledFloat(android.R.attr.disabledAlpha)
     }
 }
 
@@ -68,8 +79,7 @@ open class TextKeyView(ctx: Context, def: KeyDef.Appearance.Text) :
 }
 
 @SuppressLint("ViewConstructor")
-class AltTextKeyView(ctx: Context, def: KeyDef.Appearance.AltText) :
-    TextKeyView(ctx, def) {
+class AltTextKeyView(ctx: Context, def: KeyDef.Appearance.AltText) : TextKeyView(ctx, def) {
     val altText = textView {
         isClickable = false
         isFocusable = false
@@ -88,7 +98,7 @@ class ImageKeyView(ctx: Context, def: KeyDef.Appearance.Image) : KeyView(ctx, de
     val img = imageView {
         isClickable = false
         isFocusable = false
-        imageResource = def.src
+        imageDrawable = drawable(def.src)
         colorFilter = PorterDuffColorFilter(styledColor(def.tint), PorterDuff.Mode.SRC_IN)
     }
 

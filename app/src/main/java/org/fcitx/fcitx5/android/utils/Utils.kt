@@ -5,11 +5,13 @@ import android.content.Context
 import android.inputmethodservice.InputMethodService
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.util.TypedValue
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.ViewTreeObserver
 import android.view.inputmethod.InputConnection
 import android.widget.EditText
+import androidx.annotation.AttrRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,6 +21,8 @@ import com.sun.jna.Native
 import org.fcitx.fcitx5.android.FcitxApplication
 import org.fcitx.fcitx5.android.data.Prefs
 import org.fcitx.fcitx5.android.ui.common.AccelerateRepeatingOnTouchListener
+import splitties.experimental.InternalSplittiesApi
+import splitties.resources.withResolvedThemeAttribute
 
 val InputMethodService.inputConnection: InputConnection?
     get() = currentInputConnection
@@ -93,3 +97,14 @@ fun View.setupPressingToRepeat(
 )
 
 val EditText.str: String get() = editableText.toString()
+
+@OptIn(InternalSplittiesApi::class)
+fun Context.styledFloat(@AttrRes attrRes: Int) = withResolvedThemeAttribute(attrRes) {
+    when (type) {
+        TypedValue.TYPE_FLOAT -> float
+        else -> throw IllegalArgumentException("float attribute expected")
+    }
+}
+
+inline fun View.styledFloat(@AttrRes attrRes: Int) = context.styledFloat(attrRes)
+inline fun Fragment.styledFloat(@AttrRes attrRes: Int) = context!!.styledFloat(attrRes)
