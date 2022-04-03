@@ -65,6 +65,16 @@
                 app:unit="%"
                 app:useSimpleSummaryProvider="true" />
             <org.fcitx.fcitx5.android.ui.common.DialogSeekBarPreference
+                android:defaultValue="49"
+                android:key="@string/pref_keyboard_height_percent_landscape"
+                android:title="@string/keyboard_height_landscape"
+                app:iconSpaceReserved="false"
+                app:max="70"
+                app:min="30"
+                app:singleLineTitle="false"
+                app:unit="%"
+                app:useSimpleSummaryProvider="true" />
+            <org.fcitx.fcitx5.android.ui.common.DialogSeekBarPreference
                 android:defaultValue="30"
                 android:key="@string/pref_clipboard_item_timeout"
                 android:title="@string/clipboard_item_timeout"

@@ -1,6 +1,8 @@
 package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
+import android.view.OrientationEventListener
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowInsetsControllerCompat
@@ -75,14 +77,23 @@ class InputView(
     }
 
     private val windowHeightPercent: Int by Prefs.getInstance().keyboardHeightPercent
+    private val windowHeightPercentLandscape: Int by Prefs.getInstance().keyboardHeightPercentLandscape
 
     private val windowHeightPx: Int
-        get() = resources.displayMetrics.heightPixels * windowHeightPercent / 100
+        get() {
+            val percent = when (resources.configuration.orientation) {
+                Configuration.ORIENTATION_LANDSCAPE -> windowHeightPercentLandscape
+                else -> windowHeightPercent
+            }
+            return resources.displayMetrics.heightPixels * percent / 100
+        }
 
     private val onWindowHeightChangeListener = Prefs.OnChangeListener<Int> {
-        windowManager.view.updateLayoutParams {
-            height = windowHeightPx
-        }
+        updateKeyboardHeight()
+    }
+
+    private val orientationListener = object : OrientationEventListener(context) {
+        override fun onOrientationChanged(o: Int) = updateKeyboardHeight()
     }
 
     init {
@@ -91,6 +102,7 @@ class InputView(
 
         Prefs.getInstance().keyboardHeightPercent
             .registerOnChangeListener(onWindowHeightChangeListener)
+        orientationListener.enable()
 
         service.lifecycleScope.launch {
             broadcaster.onImeUpdate(fcitx.currentIme())
@@ -109,10 +121,17 @@ class InputView(
         })
     }
 
+    fun updateKeyboardHeight() {
+        windowManager.view.updateLayoutParams {
+            height = windowHeightPx
+        }
+    }
+
     override fun onDetachedFromWindow() {
         preedit.dismiss()
         Prefs.getInstance().keyboardHeightPercent
             .unregisterOnChangeListener(onWindowHeightChangeListener)
+        orientationListener.disable()
         super.onDetachedFromWindow()
     }
 

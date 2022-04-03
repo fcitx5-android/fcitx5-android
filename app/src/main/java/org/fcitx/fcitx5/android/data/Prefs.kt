@@ -135,6 +135,8 @@ class Prefs(private val sharedPreferences: SharedPreferences, private val resour
         ExpandedCandidateStyle
     )
     val keyboardHeightPercent = preference(R.string.pref_keyboard_height_percent, 30)
+    val keyboardHeightPercentLandscape =
+        preference(R.string.pref_keyboard_height_percent_landscape, 49)
     val clipboardItemTimeout = preference(R.string.pref_clipboard_item_timeout, 30)
     val expandedCandidateGridSpanCountLandscape =
         preference(R.string.pref_expanded_candidate_grid_span_count_landscape, 8)
