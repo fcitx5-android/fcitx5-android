@@ -128,6 +128,10 @@ android {
     }
 }
 
+kotlin.sourceSets.all {
+    languageSettings.optIn("kotlin.RequiresOptIn")
+}
+
 // reverse mapping in transifex.yml
 tasks.register<Copy>("renamePoFiles") {
     from("src/main/cpp/po")
