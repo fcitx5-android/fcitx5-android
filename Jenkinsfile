@@ -90,6 +90,7 @@ node("android") {
                     sh "git rev-parse HEAD > .git/current-commit"
                     commitSha = readFile(".git/current-commit").trim()
                     setBuildStatus("...", "pending", "Jenkins Build", commitSha)
+                    sh 'rm -rf out'
                     sh 'mkdir out'
                 }
 
