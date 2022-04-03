@@ -2,8 +2,6 @@ name: Build
 
 on:
   pull_request:
-  push:
-    branches: [ master ]
 
 jobs:
   Release:
@@ -40,60 +38,3 @@ jobs:
         with:
           arguments: assembleRelease
           gradle-version: wrapper
-
-      - name: Sign APK
-        if: ${{ github.event_name == 'push' }}
-        uses: rpavlik/sign-android-release@master
-        # ID used to access action output
-        id: sign_apk
-        with:
-          releaseDirectory: app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          alias: ${{ secrets.KEY_ALIAS }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
-          trimUnsigned: true
-        env:
-          BUILD_TOOLS_VERSION: "31.0.0"
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.abi }}
-          path: ${{ github.event_name == 'push' && steps.sign_apk.outputs.signedReleaseFile || 'app/build/outputs/apk/release/*.apk' }}
-
-      - name: Send build failure to Telegram Group
-        if: ${{ failure() && github.event_name == 'push' }}
-        run: |
-          export ESCAPED_ABI=$(echo $ABI | sed -r 's/-/\\\\-/g')
-          curl -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
-            -H "content-type: application/json" \
-            -d @- << EOF
-          {
-          "chat_id": ${{ secrets.TELEGRAM_TO }},
-          "text": "Job [${{ github.workflow }} / ${{ github.job }} \\\(${{ github.event_name }}\\\) \\\#${{ github.run_number }}]\
-          (https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) \
-          for *$ESCAPED_ABI* \
-          by [${{ github.actor }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) failed ✘",
-          "parse_mode": "MarkdownV2",
-          "disable_web_page_preview": true
-          }
-          EOF
-  Notify:
-    runs-on: ubuntu-latest
-    needs: Release
-    steps:
-      - run: |
-          curl -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
-            -H "content-type: application/json" \
-            -d @- << EOF
-          {
-          "chat_id": ${{ secrets.TELEGRAM_TO }},
-          "text": "Job [${{ github.workflow }} \\\(${{ github.event_name }}\\\) \\\#${{ github.run_number }}]\
-          (https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) \
-          by [${{ github.actor }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) *ALL* succeed ✔ \
-          [Download APK](https://nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }})",
-          "parse_mode": "MarkdownV2",
-          "disable_web_page_preview": true
-          }
-          EOF
