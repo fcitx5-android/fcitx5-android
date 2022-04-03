@@ -130,15 +130,9 @@ class TextKeyboard(
 
     override fun onInputMethodChange(ime: InputMethodEntry) {
         val s = StringBuilder(ime.displayName)
-        ime.subMode.run {
-            when {
-                label.isNotEmpty() -> label
-                name.isNotEmpty() -> name
-                else -> null
-            }?.let {
-                s.append(" ($it)")
-            }
-        }
+        ime.subMode
+            .run { label.ifEmpty { name.ifEmpty { null } } }
+            ?.let { s.append(" ($it)") }
         space.mainText.text = s
     }
 
