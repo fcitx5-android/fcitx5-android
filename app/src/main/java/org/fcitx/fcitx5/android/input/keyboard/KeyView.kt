@@ -71,6 +71,7 @@ open class TextKeyView(ctx: Context, def: KeyDef.Appearance.Text) :
         text = def.displayText
         textSize = def.textSize
         typeface = Typeface.defaultFromStyle(def.typeface)
+        setTextColor(styledColor(def.textColor))
     }
 
     init {
