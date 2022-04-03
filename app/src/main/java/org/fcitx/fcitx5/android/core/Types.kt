@@ -60,7 +60,7 @@ data class InputMethodEntry(
     constructor(name: String) : this("", name, "", "", "×", "", false)
 
     val displayName: String
-        get() = name.ifEmpty { uniqueName }
+        get() = nativeName.ifEmpty { name.ifEmpty { uniqueName } }
 }
 
 data class RawConfig(
