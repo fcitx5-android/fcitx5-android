@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.input.keyboard
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
@@ -9,18 +10,19 @@ import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
 import android.widget.FrameLayout
 import androidx.cardview.widget.CardView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.updateLayoutParams
 import org.fcitx.fcitx5.android.utils.styledFloat
 import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.resources.styledColor
 import splitties.resources.styledColorSL
+import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
-import splitties.views.gravityCenter
 import splitties.views.imageDrawable
 
 abstract class KeyView(ctx: Context, val def: KeyDef.Appearance) : FrameLayout(ctx) {
-    val layout = verticalLayout(matchParent) {
-        gravity = gravityCenter
+    val layout = constraintLayout {
         // sync any state from parent
         isDuplicateParentStateEnabled = true
     }
@@ -75,7 +77,12 @@ open class TextKeyView(ctx: Context, def: KeyDef.Appearance.Text) :
     }
 
     init {
-        layout.add(mainText, lParams())
+        layout.apply {
+            add(mainText, lParams(wrapContent, wrapContent) {
+                centerInParent()
+                verticalChainStyle = ConstraintLayout.LayoutParams.CHAIN_PACKED
+            })
+        }
     }
 }
 
@@ -90,7 +97,33 @@ class AltTextKeyView(ctx: Context, def: KeyDef.Appearance.AltText) : TextKeyView
     }
 
     init {
-        layout.add(altText, lParams())
+        layout.apply { add(altText, lParams(wrapContent, wrapContent)) }
+        applyLayout(resources.configuration.orientation)
+    }
+
+    private fun applyLayout(orientation: Int) = when (orientation) {
+        Configuration.ORIENTATION_LANDSCAPE -> {
+            mainText.updateLayoutParams<ConstraintLayout.LayoutParams> { endOfParent() }
+            altText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                topOfParent()
+                bottomToBottom = ConstraintLayout.LayoutParams.UNSET
+                startToStart = ConstraintLayout.LayoutParams.UNSET
+                endOfParent(dp(4))
+            }
+        }
+        else -> {
+            mainText.updateLayoutParams<ConstraintLayout.LayoutParams> { above(altText) }
+            altText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                below(mainText)
+                bottomOfParent()
+                startOfParent()
+                endOfParent()
+            }
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        applyLayout(newConfig.orientation)
     }
 }
 
@@ -104,6 +137,6 @@ class ImageKeyView(ctx: Context, def: KeyDef.Appearance.Image) : KeyView(ctx, de
     }
 
     init {
-        layout.add(img, lParams())
+        layout.apply { add(img, lParams(wrapContent, wrapContent) { centerInParent() }) }
     }
 }
