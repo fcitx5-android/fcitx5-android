@@ -360,7 +360,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
             return
         }
         lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_STOP)
-        Timber.i("stop")
+        Timber.i("Fcitx stop()")
         ClipboardManager.removeOnUpdateListener(onClipboardUpdate)
         dispatcher.stop().let {
             if (it.isNotEmpty())

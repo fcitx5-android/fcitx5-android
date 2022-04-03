@@ -122,11 +122,11 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
 
     // blocking until stopped
     fun stop(): List<Runnable> {
-        Timber.i("Stop")
+        Timber.i("FcitxDispatcher stop()")
         return if (isRunning.compareAndSet(true, false)) {
             runBlocking {
+                bypass()
                 runningLock.withLock {
-                    bypass()
                     val rest = queue.toList()
                     queue.clear()
                     rest
