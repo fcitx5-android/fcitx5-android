@@ -49,10 +49,10 @@ def withBuildStatus(String name, Closure closure) {
     stage(name) {
         try {
             setBuildStatus("...", "pending", ctx, commitSha)
-            def start = System.currentTimeSeconds()
+            def start = System.currentTimeMillis()
             closure()
-            def end = System.currentTimeSeconds()
-            setBuildStatus("Successful in ${end - start} seconds", "success", ctx, commitSha)
+            def end = System.currentTimeMillis()
+            setBuildStatus("Successful in ${(end - start) / 1000} seconds", "success", ctx, commitSha)
         } catch (Exception e) {
             setBuildStatus("Failed", "failure", ctx, commitSha)
             throw e
