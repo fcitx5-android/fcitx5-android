@@ -32,13 +32,15 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
 
     private val keyboards: HashMap<String, BaseKeyboard> by lazy {
         hashMapOf(
+            // a placeholder layout to avoid crash
+            EMPTY to (object : BaseKeyboard(context, listOf(listOf())) {}),
             TextKeyboard.Name to TextKeyboard(context),
             NumberKeyboard.Name to NumberKeyboard(context),
             NumSymKeyboard.Name to NumSymKeyboard(context),
             SymbolKeyboard.Name to SymbolKeyboard(context)
         )
     }
-    private var currentKeyboardName = ""
+    private var currentKeyboardName = EMPTY
     private var lastSymbolType: String by Prefs.getInstance().lastSymbolLayout
 
     private val currentKeyboard: BaseKeyboard get() = keyboards.getValue(currentKeyboardName)
@@ -97,8 +99,9 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
     }
 
     override fun onAttached() {
-        if (currentKeyboardName.isEmpty()) {
+        if (currentKeyboardName === EMPTY) {
             attachLayout(TextKeyboard.Name)
+            keyboards.remove(EMPTY)
         } else {
             currentKeyboard.keyActionListener = keyActionListener
         }
@@ -106,6 +109,10 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
 
     override fun onDetached() {
         currentKeyboard.keyActionListener = null
+    }
+
+    companion object {
+        const val EMPTY = ""
     }
 
 }
