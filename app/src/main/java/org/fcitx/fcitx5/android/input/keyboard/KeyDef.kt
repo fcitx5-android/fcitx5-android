@@ -18,6 +18,8 @@ open class KeyDef(
             val textSize: Float,
             val typeface: Int,
             percentWidth: Float = 0.1f,
+            @AttrRes
+            val textColor: Int = android.R.attr.colorForeground,
             background: Int = android.R.attr.colorButtonNormal,
             viewId: Int = -1
         ) : Appearance(percentWidth, background, viewId)
@@ -28,9 +30,10 @@ open class KeyDef(
             textSize: Float,
             typeface: Int,
             percentWidth: Float = 0.1f,
+            textColor: Int = android.R.attr.colorForeground,
             background: Int = android.R.attr.colorButtonNormal,
             viewId: Int = -1
-        ) : Text(displayText, textSize, typeface, percentWidth, background, viewId)
+        ) : Text(displayText, textSize, typeface, percentWidth, textColor, background, viewId)
 
         class Image(
             @DrawableRes

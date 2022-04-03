@@ -56,7 +56,8 @@ class LayoutSwitchKey(
         displayText,
         textSize = 16f,
         typeface = Typeface.BOLD,
-        percentWidth
+        percentWidth,
+        textColor = android.R.attr.colorControlNormal,
     ),
     Behavior.Press(
         action = KeyAction.LayoutSwitchAction(to)
