@@ -8,8 +8,10 @@ import kotlin.math.absoluteValue
 
 abstract class MyOnGestureListener : GestureDetector.SimpleOnGestureListener() {
     open fun onDoubleTap(): Boolean = false
-    open fun onSwipeUp(): Boolean = false
-    open fun onSwipeDown(): Boolean = false
+    open fun onSwipeUp(displacement: Float, velocity: Float): Boolean = false
+    open fun onSwipeDown(displacement: Float, velocity: Float): Boolean = false
+    open fun onSwipeLeft(displacement: Float, velocity: Float): Boolean = false
+    open fun onSwipeRight(displacement: Float, velocity: Float): Boolean = false
     open fun onRawTouchEvent(motionEvent: MotionEvent) = false
     override fun onDoubleTap(e: MotionEvent?): Boolean = onDoubleTap()
     override fun onFling(
@@ -19,11 +21,17 @@ abstract class MyOnGestureListener : GestureDetector.SimpleOnGestureListener() {
         velocityY: Float
     ): Boolean {
         if (e1 == null || e2 == null) return false
+        val deltaX = e2.x - e1.x
         val deltaY = e2.y - e1.y
+        if (deltaX.absoluteValue > THRESHOLD && velocityX > THRESHOLD)
+            when {
+                deltaX > 0 -> return onSwipeRight(deltaX, velocityX)
+                deltaX < 0 -> return onSwipeLeft(-deltaX, -velocityX)
+            }
         if (deltaY.absoluteValue > THRESHOLD && velocityY > THRESHOLD)
             when {
-                deltaY > 0 -> return onSwipeDown()
-                deltaY < 0 -> return onSwipeUp()
+                deltaY > 0 -> return onSwipeDown(deltaX, velocityX)
+                deltaY < 0 -> return onSwipeUp(-deltaX, -velocityX)
             }
         return false
     }

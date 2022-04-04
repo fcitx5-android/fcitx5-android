@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.input.editing
 
 import android.view.KeyEvent
+import android.view.View
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
@@ -36,17 +37,18 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
 
     override val view by lazy {
         ui.apply {
-            leftButton.setOnClickListener { sendDirectionKey(KeyEvent.KEYCODE_DPAD_LEFT) }
-            leftButton.setupPressingToRepeat()
+            fun View.onClickWithRepeating(block: () -> Unit) {
+                setOnClickListener { block() }
+                setupPressingToRepeat { block() }
+            }
 
-            upButton.setOnClickListener { sendDirectionKey(KeyEvent.KEYCODE_DPAD_UP) }
-            upButton.setupPressingToRepeat()
+            leftButton.onClickWithRepeating { sendDirectionKey(KeyEvent.KEYCODE_DPAD_LEFT) }
 
-            downButton.setOnClickListener { sendDirectionKey(KeyEvent.KEYCODE_DPAD_DOWN) }
-            downButton.setupPressingToRepeat()
+            upButton.onClickWithRepeating { sendDirectionKey(KeyEvent.KEYCODE_DPAD_UP) }
 
-            rightButton.setOnClickListener { sendDirectionKey(KeyEvent.KEYCODE_DPAD_RIGHT) }
-            rightButton.setupPressingToRepeat()
+            downButton.onClickWithRepeating { sendDirectionKey(KeyEvent.KEYCODE_DPAD_DOWN) }
+
+            rightButton.onClickWithRepeating { sendDirectionKey(KeyEvent.KEYCODE_DPAD_RIGHT) }
 
             homeButton.setOnClickListener { sendDirectionKey(KeyEvent.KEYCODE_MOVE_HOME) }
             endButton.setOnClickListener { sendDirectionKey(KeyEvent.KEYCODE_MOVE_END) }
@@ -78,11 +80,10 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
                 userSelection = false
                 service.inputConnection?.performContextMenuAction(android.R.id.paste)
             }
-            backspaceButton.setOnClickListener {
+            backspaceButton.setupPressingToRepeat {
                 userSelection = false
                 service.lifecycleScope.launch { fcitx.sendKey("BackSpace") }
             }
-            backspaceButton.setupPressingToRepeat()
             clipboardButton.setOnClickListener {
                 windowManager.attachWindow(ClipboardWindow())
             }

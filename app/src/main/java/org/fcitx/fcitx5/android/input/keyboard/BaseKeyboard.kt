@@ -67,20 +67,26 @@ abstract class BaseKeyboard(
             is KeyDef.Appearance.Text -> TextKeyView(context, def.appearance)
             is KeyDef.Appearance.Image -> ImageKeyView(context, def.appearance)
         }.apply {
-            if (def.behavior is KeyDef.Behavior.Press) {
-                setOnClickListener {
-                    hapticIfEnabled()
-                    onAction(def.behavior.action)
+            def.behaviors.forEach {
+                when (it) {
+                    is KeyDef.Behavior.LongPress -> {
+                        setOnLongClickListener { _ ->
+                            onAction(it.action)
+                            true
+                        }
+                    }
+                    is KeyDef.Behavior.Press -> {
+                        setOnClickListener { _ ->
+                            hapticIfEnabled()
+                            onAction(it.action)
+                        }
+                    }
+                    is KeyDef.Behavior.Repeat -> {
+                        setupPressingToRepeat { _ ->
+                            onAction(it.action)
+                        }
+                    }
                 }
-            }
-            if (def.behavior is KeyDef.Behavior.LongPress) {
-                setOnLongClickListener {
-                    onAction(def.behavior.longPressAction)
-                    true
-                }
-            }
-            if (def.behavior is KeyDef.Behavior.Repeat) {
-                setupPressingToRepeat()
             }
         }
     }

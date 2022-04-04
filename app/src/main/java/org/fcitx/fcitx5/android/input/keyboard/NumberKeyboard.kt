@@ -1,11 +1,8 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
 import android.content.Context
-import android.graphics.Typeface
 import android.view.inputmethod.EditorInfo
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.core.KeyState
-import org.fcitx.fcitx5.android.core.KeyStates
 import splitties.views.imageResource
 
 class NumberKeyboard(
@@ -14,24 +11,6 @@ class NumberKeyboard(
 
     companion object {
         const val Name = "Number"
-
-        private val NumLockState = KeyStates(KeyState.NumLock, KeyState.Virtual)
-
-        class NumPadKey(
-            displayText: String,
-            val sym: UInt,
-            percentWidth: Float = 0.1f
-        ) : KeyDef(
-            Appearance.Text(
-                displayText,
-                textSize = 16f,
-                typeface = Typeface.NORMAL,
-                percentWidth
-            ),
-            Behavior.Press(
-                action = KeyAction.SymAction(sym, NumLockState)
-            )
-        )
 
         val Layout: List<List<KeyDef>> = listOf(
             listOf(
