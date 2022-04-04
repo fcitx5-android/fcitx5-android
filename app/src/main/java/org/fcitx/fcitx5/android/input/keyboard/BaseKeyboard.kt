@@ -1,18 +1,23 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
 import android.content.Context
+import android.view.MotionEvent
 import android.view.inputmethod.EditorInfo
 import androidx.annotation.CallSuper
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
+import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import org.fcitx.fcitx5.android.utils.hapticIfEnabled
 import org.fcitx.fcitx5.android.utils.setupPressingToRepeat
 import splitties.bitflags.hasFlag
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.imageResource
+import timber.log.Timber
+import kotlin.math.roundToInt
+import kotlin.math.sign
 
 abstract class BaseKeyboard(
     context: Context,
@@ -67,6 +72,51 @@ abstract class BaseKeyboard(
             is KeyDef.Appearance.Text -> TextKeyView(context, def.appearance)
             is KeyDef.Appearance.Image -> ImageKeyView(context, def.appearance)
         }.apply {
+            // set gestures
+            if (def is SpaceKey) {
+                setupOnGestureListener(object : MyOnGestureListener() {
+                    var lastX = -1f
+                    var lastT = -1L
+                    override fun onRawTouchEvent(motionEvent: MotionEvent): Boolean {
+                        if (motionEvent.action == MotionEvent.ACTION_MOVE) {
+                            if (lastX == -1f) {
+                                lastX = motionEvent.x
+                                lastT = System.currentTimeMillis()
+                            }
+                            val v =
+                                (motionEvent.x - lastX) / ((System.currentTimeMillis() - lastT)
+                                    .takeIf { it != 0L }
+                                    ?: 1)
+                            lastX = motionEvent.x
+                            lastT = System.currentTimeMillis()
+                            val times = (v * 5).roundToInt()
+                            if (times != 0) {
+                                val direction = times.sign
+                                Timber.d("Do $times for ${if (direction > 0) "Right" else "Left"}")
+                                repeat(times / direction) {
+                                    onAction(
+                                        if (direction > 0)
+                                            KeyAction.SymAction(KeySym.of(0xff53))
+                                        else
+                                            KeyAction.SymAction(KeySym.of(0xff51))
+                                    )
+                                }
+                            }
+                        }
+                        return super.onRawTouchEvent(motionEvent)
+                    }
+                })
+            }
+            if (def.appearance is KeyDef.Appearance.AltText) {
+                setupOnGestureListener(object : MyOnGestureListener() {
+                    override fun onSwipeDown(displacement: Float, velocity: Float): Boolean {
+                        // TODO make alt string a behavior
+                        hapticIfEnabled()
+                        onAction(KeyAction.FcitxKeyAction(def.appearance.altText))
+                        return true
+                    }
+                })
+            }
             def.behaviors.forEach {
                 when (it) {
                     is KeyDef.Behavior.LongPress -> {
