@@ -9,9 +9,8 @@ JNI_OnLoad(JavaVM * /* jvm */, void * /* reserved */) {
     return JNI_VERSION_1_6;
 }
 
-
 void throwJavaException(JNIEnv *env, const char *msg) {
-    jclass c = env->FindClass("java/io/IOException");
+    jclass c = env->FindClass("java/lang/Exception");
     env->ThrowNew(c, msg);
 }
 
@@ -30,7 +29,7 @@ Java_org_fcitx_fcitx5_android_data_pinyin_PinyinDictManager_pinyinDictConv(JNIEn
         out.open(dest_file, std::ios::out | std::ios::binary);
         dict.save(PinyinDictionary::SystemDict, out,
                   mode == JNI_TRUE ? PinyinDictFormat::Text : PinyinDictFormat::Binary);
-    } catch (const std::ios_base::failure &e) {
+    } catch (const std::exception &e) {
         throwJavaException(env, e.what());
     }
 }
