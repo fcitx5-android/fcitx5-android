@@ -5,7 +5,7 @@ import androidx.annotation.DrawableRes
 
 open class KeyDef(
     val appearance: Appearance,
-    val behavior: Behavior
+    val behaviors: Set<Behavior>
 ) {
     sealed class Appearance(
         val percentWidth: Float,
@@ -47,17 +47,17 @@ open class KeyDef(
     }
 
     sealed class Behavior {
-        open class Press(
+        class Press(
+            val action: KeyAction
+        ) : Behavior()
+
+        class LongPress(
             val action: KeyAction
         ) : Behavior()
 
         class Repeat(
-            action: KeyAction
-        ) : Press(action)
+            val action: KeyAction
+        ) : Behavior()
 
-        class LongPress(
-            action: KeyAction,
-            val longPressAction: KeyAction
-        ) : Press(action)
     }
 }

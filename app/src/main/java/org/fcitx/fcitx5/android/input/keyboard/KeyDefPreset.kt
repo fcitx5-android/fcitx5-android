@@ -3,6 +3,8 @@ package org.fcitx.fcitx5.android.input.keyboard
 import android.graphics.Typeface
 import androidx.annotation.DrawableRes
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.KeyState
+import org.fcitx.fcitx5.android.core.KeyStates
 
 class SymbolKey(
     val symbol: String,
@@ -14,8 +16,8 @@ class SymbolKey(
         typeface = Typeface.NORMAL,
         percentWidth
     ),
-    Behavior.Press(
-        action = KeyAction.FcitxKeyAction(symbol)
+    setOf(
+        Behavior.Press(action = KeyAction.FcitxKeyAction(symbol))
     )
 )
 
@@ -29,9 +31,9 @@ class AlphaBetKey(
         textSize = 20f,
         typeface = Typeface.NORMAL
     ),
-    Behavior.LongPress(
-        action = KeyAction.FcitxKeyAction(character),
-        longPressAction = KeyAction.FcitxKeyAction(punctuation)
+    setOf(
+        Behavior.Press(KeyAction.FcitxKeyAction(character)),
+        Behavior.LongPress(KeyAction.FcitxKeyAction(punctuation))
     )
 )
 
@@ -42,8 +44,8 @@ class CapsKey : KeyDef(
         viewId = R.id.button_caps,
         percentWidth = 0.15f
     ),
-    Behavior.Press(
-        action = KeyAction.CapsAction(false)
+    setOf(
+        Behavior.Press(action = KeyAction.CapsAction(false))
     )
 )
 
@@ -59,8 +61,8 @@ class LayoutSwitchKey(
         percentWidth,
         textColor = android.R.attr.colorControlNormal,
     ),
-    Behavior.Press(
-        action = KeyAction.LayoutSwitchAction(to)
+    setOf(
+        Behavior.Press(action = KeyAction.LayoutSwitchAction(to))
     )
 )
 
@@ -71,8 +73,9 @@ class BackspaceKey(percentWidth: Float = 0.15f) : KeyDef(
         percentWidth,
         viewId = R.id.button_backspace
     ),
-    Behavior.Repeat(
-        action = KeyAction.SymAction(0xff08u)
+    setOf(
+        Behavior.Press(action = KeyAction.SymAction(0xff08u)),
+        Behavior.Repeat(action = KeyAction.SymAction(0xff08u))
     )
 )
 
@@ -82,9 +85,9 @@ class QuickPhraseKey : KeyDef(
         tint = android.R.attr.colorControlNormal,
         viewId = R.id.button_quickphrase
     ),
-    Behavior.LongPress(
-        action = KeyAction.QuickPhraseAction,
-        longPressAction = KeyAction.UnicodeAction
+    setOf(
+        Behavior.Press(KeyAction.QuickPhraseAction),
+        Behavior.LongPress(KeyAction.UnicodeAction)
     )
 )
 
@@ -94,9 +97,9 @@ class LanguageKey : KeyDef(
         tint = android.R.attr.colorControlNormal,
         viewId = R.id.button_lang
     ),
-    Behavior.LongPress(
-        action = KeyAction.LangSwitchAction,
-        longPressAction = KeyAction.InputMethodSwitchAction
+    setOf(
+        Behavior.Press(KeyAction.LangSwitchAction),
+        Behavior.LongPress(KeyAction.InputMethodSwitchAction)
     )
 )
 
@@ -108,8 +111,8 @@ class SpaceKey : KeyDef(
         percentWidth = 0f,
         viewId = R.id.button_space
     ),
-    Behavior.Press(
-        action = KeyAction.SymAction(0x0020u)
+    setOf(
+        Behavior.Press(action = KeyAction.SymAction(0x0020u))
     )
 )
 
@@ -121,8 +124,8 @@ class ReturnKey(percentWidth: Float = 0.15f) : KeyDef(
         background = android.R.attr.colorAccent,
         viewId = R.id.button_return
     ),
-    Behavior.Press(
-        action = KeyAction.SymAction(0xff0du)
+    setOf(
+        Behavior.Press(action = KeyAction.SymAction(0xff0du))
     )
 )
 
@@ -139,8 +142,8 @@ class ImageLayoutSwitchKey(
         percentWidth,
         viewId = viewId
     ),
-    Behavior.Press(
-        action = KeyAction.LayoutSwitchAction(to)
+    setOf(
+        Behavior.Press(action = KeyAction.LayoutSwitchAction(to))
     )
 )
 
@@ -151,7 +154,27 @@ class MiniSpaceKey : KeyDef(
         percentWidth = 0.15f,
         viewId = R.id.button_mini_space
     ),
-    Behavior.Press(
-        action = KeyAction.SymAction(0x0020u)
+    setOf(
+        Behavior.Press(action = KeyAction.SymAction(0x0020u))
     )
 )
+
+class NumPadKey(
+    displayText: String,
+    val sym: UInt,
+    percentWidth: Float = 0.1f
+) : KeyDef(
+    Appearance.Text(
+        displayText,
+        textSize = 16f,
+        typeface = Typeface.NORMAL,
+        percentWidth
+    ),
+    setOf(
+        Behavior.Press(action = KeyAction.SymAction(sym, NumLockState))
+    )
+) {
+    companion object {
+        private val NumLockState = KeyStates(KeyState.NumLock, KeyState.Virtual)
+    }
+}

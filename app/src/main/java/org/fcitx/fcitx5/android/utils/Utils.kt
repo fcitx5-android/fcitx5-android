@@ -86,13 +86,15 @@ fun View.setupPressingToRepeat(
     firstClickInterval: Long = 30L,
     initialInterval: Long = 200L,
     endInterval: Long = 30L,
-    accelerateTime: Long = 1000L
+    accelerateTime: Long = 1000L,
+    block: (View) -> Unit
 ) = setOnTouchListener(
     AccelerateRepeatingOnTouchListener(
         firstClickInterval,
         initialInterval,
         endInterval,
-        accelerateTime
+        accelerateTime,
+        block
     )
 )
 

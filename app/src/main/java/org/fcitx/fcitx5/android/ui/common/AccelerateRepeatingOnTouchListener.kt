@@ -15,7 +15,8 @@ class AccelerateRepeatingOnTouchListener(
     private val firstClickInterval: Long,
     private val initialInterval: Long,
     private val endInterval: Long,
-    private val accelerateTime: Long
+    private val accelerateTime: Long,
+    private val block: (View) -> Unit
 ) : View.OnTouchListener {
 
     init {
@@ -43,8 +44,13 @@ class AccelerateRepeatingOnTouchListener(
                 job = (view.findViewTreeLifecycleOwner()?.lifecycleScope!!).launch {
                     delay(firstClickInterval)
                     val t0 = System.currentTimeMillis()
+                    var firstClick = true
                     while (isActive && view.isEnabled) {
-                        view.performClick()
+                        if (firstClick) {
+                            view.performClick()
+                            firstClick = false
+                        } else
+                            block(view)
                         val t = System.currentTimeMillis() - t0
                         delay(calculateInterval(t))
                     }
