@@ -8,6 +8,7 @@ import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
+import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import org.fcitx.fcitx5.android.utils.hapticIfEnabled
@@ -15,7 +16,6 @@ import org.fcitx.fcitx5.android.utils.setupPressingToRepeat
 import splitties.bitflags.hasFlag
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.imageResource
-import timber.log.Timber
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
@@ -92,13 +92,12 @@ abstract class BaseKeyboard(
                             val times = (v * 5).roundToInt()
                             if (times != 0) {
                                 val direction = times.sign
-                                Timber.d("Do $times for ${if (direction > 0) "Right" else "Left"}")
                                 repeat(times / direction) {
                                     onAction(
                                         if (direction > 0)
-                                            KeyAction.SymAction(KeySym.of(0xff53))
+                                            KeyAction.SymAction(KeySym.of(0xff53), KeyStates())
                                         else
-                                            KeyAction.SymAction(KeySym.of(0xff51))
+                                            KeyAction.SymAction(KeySym.of(0xff51), KeyStates())
                                     )
                                 }
                             }
