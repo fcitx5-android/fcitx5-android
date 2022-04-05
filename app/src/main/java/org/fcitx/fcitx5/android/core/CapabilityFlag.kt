@@ -91,11 +91,11 @@ value class CapabilityFlags constructor(val flags: ULong) {
                 }
             }
             info?.inputType?.let {
-                if (it == InputType.TYPE_NULL) {
-                    flags += CapabilityFlag.NoSpellCheck
-                    return@let
-                }
                 when (it and InputType.TYPE_MASK_CLASS) {
+                    InputType.TYPE_NULL -> {
+                        flags -= CapabilityFlag.Preedit
+                        flags += CapabilityFlag.NoSpellCheck
+                    }
                     InputType.TYPE_CLASS_TEXT -> {
                         (it and InputType.TYPE_MASK_FLAGS).run {
                             if (hasFlag(InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE) ||
