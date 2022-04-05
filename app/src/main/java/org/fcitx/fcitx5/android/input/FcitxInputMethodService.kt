@@ -25,20 +25,23 @@ import timber.log.Timber
 
 class FcitxInputMethodService : LifecycleInputMethodService() {
 
-    data class SelectionInfo(val start: Int, val end: Int)
+    // `-1` means invalid, or don't know yet
+    data class CursorRange(val start: Int = -1, val end: Int = -1) {
+        fun contains(other: CursorRange): Boolean {
+            return start <= other.start && other.end <= end
+        }
+    }
 
     private lateinit var inputView: InputView
     private lateinit var fcitx: Fcitx
     private var eventHandlerJob: Job? = null
 
     var editorInfo: EditorInfo? = null
-    var selectionInfo = SelectionInfo(-1, -1)
 
     private var keyRepeatingJobs = hashMapOf<String, Job>()
 
-    // `-1` means invalid, or don't know yet
-    private var selectionStart = -1
-    private var composingTextStart = -1
+    var selection = CursorRange()
+    var composing = CursorRange()
     private var composingText = ""
     private var fcitxCursor = -1
 
@@ -239,15 +242,16 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         return forwardKeyEvent(event, true)
     }
 
-    override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
+    override fun onStartInput(attribute: EditorInfo, restarting: Boolean) {
         inputConnection?.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
         editorInfo = attribute
+        selection = CursorRange(attribute.initialSelStart, attribute.initialSelEnd)
         lifecycleScope.launch {
             fcitx.setCapFlags(CapabilityFlags.fromEditorInfo(editorInfo))
         }
     }
 
-    override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
+    override fun onStartInputView(info: EditorInfo, restarting: Boolean) {
         lifecycleScope.launch {
             if (restarting) {
                 // when input restarts in the same editor, unfocus it to clear previous state
@@ -266,43 +270,34 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         candidatesStart: Int,
         candidatesEnd: Int
     ) {
-        super.onUpdateSelection(
-            oldSelStart,
-            oldSelEnd,
-            newSelStart,
-            newSelEnd,
-            candidatesStart,
-            candidatesEnd
-        )
-        selectionInfo = SelectionInfo(newSelStart, newSelEnd)
+        selection = CursorRange(newSelStart, newSelEnd)
+        Timber.d("onUpdateSelection: $selection")
         if (::inputView.isInitialized)
             inputView.onSelectionUpdate(newSelStart, newSelEnd)
         else
             Timber.w("Ignore onSelectionUpdate: inputView is not initialized")
     }
 
-    override fun onUpdateCursorAnchorInfo(info: CursorAnchorInfo?) {
-        if (info == null) return
-        selectionStart = info.selectionStart
-        composingTextStart = info.composingTextStart
-        Timber.d("AnchorInfo: selStart=$selectionStart cmpStart=$composingTextStart")
-        val composing = info.composingText ?: return
+    override fun onUpdateCursorAnchorInfo(info: CursorAnchorInfo) {
+        selection = CursorRange(info.selectionStart, info.selectionEnd)
+        composing = info.composingText?.let {
+            CursorRange(info.composingTextStart, info.composingTextStart + it.length)
+        } ?: CursorRange()
+        Timber.d("AnchorInfo: selection=$selection composing=$composing")
         // workaround some misbehaved editors: report composingText but wrong selectionStart
-        if (selectionStart < 0) return
+        if (selection.start < 0 && composing.start >= 0) return
         // check if cursor inside composing text
-        if ((composingTextStart <= selectionStart) &&
-            (selectionStart <= composingTextStart + composing.length)
-        ) {
-            if (!ignoreSystemCursor) {
-                val position = selectionStart - composingTextStart
-                // move fcitx cursor when:
-                // - cursor position changed
-                // - cursor position in composing text range; when user long press backspace key,
-                //   onUpdateCursorAnchorInfo can be left behind, thus position is invalid.
-                if ((position != fcitxCursor) && (position <= composingText.length)) {
-                    lifecycleScope.launch {
-                        fcitx.moveCursor(position)
-                    }
+        if (composing.contains(selection)) {
+            if (ignoreSystemCursor) return
+            // fcitx cursor position is relative to client preedit (composing text)
+            val position = selection.start - composing.start
+            // move fcitx cursor when:
+            // - cursor position changed
+            // - cursor position in composing text range; when user long press backspace key,
+            //   onUpdateCursorAnchorInfo can be left behind, thus position is invalid.
+            if ((position != fcitxCursor) && (position <= composingText.length)) {
+                lifecycleScope.launch {
+                    fcitx.moveCursor(position)
                 }
             }
         } else {
@@ -337,13 +332,16 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     break
                 }
             }
-            if (ignoreSystemCursor || (cursor < 0)) break
-            // when user starts typing and there is no composing text, composingTextStart would be -1
-            val p = cursor + composingTextStart
-            Timber.d("TextWithCursor: p=$p composingStart=$composingTextStart")
-            if (p != selectionStart) {
+            // skip cursor reposition when:
+            // - user chose to ignore system cursor
+            // - fcitx cursor position is invalid
+            // - current and incoming composing text are both empty
+            if (ignoreSystemCursor || (cursor < 0) || text.isEmpty()) break
+            // fcitx cursor position is relative to client preedit (composing text)
+            val p = cursor + composing.start
+            Timber.d("TextWithCursor: p=$p composing=$composing")
+            if (p != selection.start) {
                 Timber.d("TextWithCursor: move cursor $p")
-                selectionStart = p
                 ic.setSelection(p, p)
             }
         } while (false)
@@ -367,7 +365,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
-        Timber.d("onUnbind")
         if (this::fcitx.isInitialized && fcitx.isReady)
             runBlocking {
                 fcitx.save()

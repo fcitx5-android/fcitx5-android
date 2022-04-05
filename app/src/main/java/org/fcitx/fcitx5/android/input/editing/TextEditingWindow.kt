@@ -53,7 +53,7 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
             selectButton.setOnClickListener {
                 if (hasSelection) {
                     userSelection = false
-                    val end = service.selectionInfo.end
+                    val end = service.selection.end
                     service.inputConnection?.setSelection(end, end)
                 } else {
                     userSelection = !userSelection
@@ -90,7 +90,7 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
     }
 
     override fun onAttached() {
-        val info = service.selectionInfo
+        val info = service.selection
         onSelectionUpdate(info.start, info.end)
     }
 
