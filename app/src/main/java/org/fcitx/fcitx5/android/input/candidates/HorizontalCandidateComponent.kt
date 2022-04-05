@@ -1,22 +1,20 @@
 package org.fcitx.fcitx5.android.input.candidates
 
 import android.content.Context
+import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.flexbox.FlexboxLayoutManager
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.runBlocking
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.*
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesUpdatedEmpty
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesUpdatedNonEmpty
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
-import org.fcitx.fcitx5.android.input.candidates.expanded.window.BaseExpandedCandidateWindow
 import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
 import org.fcitx.fcitx5.android.input.dependency.context
-import org.fcitx.fcitx5.android.input.wm.InputWindow
-import org.fcitx.fcitx5.android.input.wm.InputWindowManager
-import org.fcitx.fcitx5.android.utils.globalLayoutListener
-import org.fcitx.fcitx5.android.utils.onDataChanged
 import org.mechdancer.dependency.manager.must
 import splitties.views.dsl.recyclerview.recyclerView
 
@@ -26,17 +24,9 @@ class HorizontalCandidateComponent :
     private val builder: CandidateViewBuilder by manager.must()
     private val context: Context by manager.context()
     private val bar: KawaiiBarComponent by manager.must()
-    private val windowManager: InputWindowManager by manager.must()
-
-    private var needsRefreshExpanded = false
-    private var isExpandedCandidatesNonEmpty = false
 
     val adapter by lazy {
-        builder.simpleAdapter().apply {
-            onDataChanged {
-                needsRefreshExpanded = true
-            }
-        }
+        builder.simpleAdapter()
     }
 
     // Since expanded candidate window is created once the expand button was clicked,
@@ -49,13 +39,6 @@ class HorizontalCandidateComponent :
     val expandedCandidateOffset = _expandedCandidateOffset.asSharedFlow()
 
     private fun refreshExpanded() {
-        val candidates = this@HorizontalCandidateComponent.adapter.candidates
-        val expandedWillBeNonEmpty = candidates.size - view.childCount > 0
-        isExpandedCandidatesNonEmpty = expandedWillBeNonEmpty
-
-        if (candidates.isEmpty())
-            windowManager.switchToKeyboardWindow()
-
         runBlocking {
             _expandedCandidateOffset.emit(view.childCount)
         }
@@ -63,39 +46,28 @@ class HorizontalCandidateComponent :
 
     override val view by lazy {
         context.recyclerView(R.id.candidate_view) {
-            isVerticalScrollBarEnabled = false
-            with(builder) {
-                setupFlexboxLayoutManager(this@HorizontalCandidateComponent.adapter, false)
-                addFlexboxVerticalDecoration()
-            }
-            globalLayoutListener {
-                if (needsRefreshExpanded) {
+            adapter = this@HorizontalCandidateComponent.adapter
+            layoutManager = object : FlexboxLayoutManager(context) {
+                override fun canScrollVertically(): Boolean = false
+                override fun canScrollHorizontally(): Boolean = false
+                override fun generateLayoutParams(lp: ViewGroup.LayoutParams?) =
+                    LayoutParams(lp).apply { flexGrow = 1f }
+
+                override fun onLayoutCompleted(state: RecyclerView.State?) {
+                    super.onLayoutCompleted(state)
                     refreshExpanded()
                     bar.expandButtonStateMachine.push(
-                        if (isExpandedCandidatesNonEmpty)
+                        if (adapter!!.itemCount - childCount > 0)
                             ExpandedCandidatesUpdatedNonEmpty
                         else
                             ExpandedCandidatesUpdatedEmpty
                     )
-                    needsRefreshExpanded = false
                 }
             }
+            with(builder) {
+                addFlexboxVerticalDecoration()
+            }
         }
-    }
-
-    override fun onWindowAttached(window: InputWindow) {
-        if (window is BaseExpandedCandidateWindow<*>)
-            bar.expandButtonStateMachine.push(ExpandedCandidatesAttached)
-    }
-
-    override fun onWindowDetached(window: InputWindow) {
-        if (window is BaseExpandedCandidateWindow<*>)
-            bar.expandButtonStateMachine.push(
-                if (isExpandedCandidatesNonEmpty)
-                    ExpandedCandidatesDetachedWithCandidatesNonEmpty
-                else
-                    ExpandedCandidatesDetachedWithCandidatesEmpty
-            )
     }
 
     override fun onCandidateUpdate(data: Array<String>) {

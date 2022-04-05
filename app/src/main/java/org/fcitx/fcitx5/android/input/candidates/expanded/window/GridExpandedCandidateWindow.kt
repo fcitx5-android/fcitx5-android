@@ -53,10 +53,6 @@ class GridExpandedCandidateWindow :
         }
     }
 
-    override fun onCandidateUpdate(data: Array<String>) {
-        view.resetPosition()
-    }
-
     fun prevPage() {
         layoutManager.apply {
             var prev = findFirstCompletelyVisibleItemPosition() - 1

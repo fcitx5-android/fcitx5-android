@@ -5,44 +5,54 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.*
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.candidates.CandidateViewBuilder
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.candidates.adapter.BaseCandidateViewAdapter
-import org.fcitx.fcitx5.android.input.keyboard.BaseKeyboard
+import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateLayout
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import org.fcitx.fcitx5.android.input.wm.InputWindow
+import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.mechdancer.dependency.manager.must
 
-abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> : InputWindow.SimpleInputWindow<T>(),
-    InputBroadcastReceiver {
+abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
+    InputWindow.SimpleInputWindow<T>(), InputBroadcastReceiver {
 
     protected val builder: CandidateViewBuilder by manager.must()
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
+    private val bar: KawaiiBarComponent by manager.must()
     private val horizontalCandidate: HorizontalCandidateComponent by manager.must()
+    private val windowManager: InputWindowManager by manager.must()
 
     private val lifecycleCoroutineScope by lazy {
         view.findViewTreeLifecycleOwner()!!.lifecycleScope
     }
 
     // TODO: Refactor, this shouldn't depend on BaseKeyboard
-    abstract override val view: BaseKeyboard
+    abstract override val view: ExpandedCandidateLayout
 
     abstract val adapter: BaseCandidateViewAdapter
 
     private var offsetJob: Job? = null
 
-
     override fun onAttached() {
         view.keyActionListener = commonKeyActionListener.listener
+        bar.expandButtonStateMachine.push(ExpandedCandidatesAttached)
         offsetJob = horizontalCandidate.expandedCandidateOffset.onEach {
-            if (it > 0)
-                adapter.updateCandidatesWithOffset(horizontalCandidate.adapter.candidates, it)
+            adapter.updateCandidatesWithOffset(horizontalCandidate.adapter.candidates, it)
         }.launchIn(lifecycleCoroutineScope)
     }
 
     override fun onDetached() {
+        bar.expandButtonStateMachine.push(
+            if (adapter.candidates.size > adapter.offset)
+                ExpandedCandidatesDetachedWithCandidatesNonEmpty
+            else
+                ExpandedCandidatesDetachedWithCandidatesEmpty
+        )
         offsetJob?.cancel()
         offsetJob = null
         view.keyActionListener = null
@@ -53,6 +63,10 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
     }
 
     override fun onCandidateUpdate(data: Array<String>) {
-//        view.resetPosition()
+        if (data.isEmpty()) {
+            windowManager.switchToKeyboardWindow()
+            return
+        }
+        view.resetPosition()
     }
 }

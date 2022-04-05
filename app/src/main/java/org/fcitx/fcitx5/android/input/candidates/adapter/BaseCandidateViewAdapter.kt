@@ -17,7 +17,8 @@ abstract class BaseCandidateViewAdapter :
     var candidates: Array<String> = arrayOf()
         private set
 
-    private var offset = 0
+    var offset = 0
+        private set
 
     fun getCandidateAt(position: Int) = candidates[position]
 
