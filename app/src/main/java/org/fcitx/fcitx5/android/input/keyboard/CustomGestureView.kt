@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.input.keyboard
 
 import android.content.Context
 import android.view.MotionEvent
+import android.view.View
 import android.widget.FrameLayout
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -10,7 +11,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.utils.hapticIfEnabled
-import timber.log.Timber
 import kotlin.math.absoluteValue
 import kotlin.math.exp
 import kotlin.math.ln
@@ -24,29 +24,35 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
 
     var longPressEnabled = false
     private var longPressJob: Job? = null
+
+    @Volatile
     private var longPressTriggered = false
 
     var repeatEnabled = false
     private var repeatJob: Job? = null
+
+    @Volatile
     private var repeatStarted = false
 
     var swipeEnabled = false
     var swipeRepeatEnabled = false
-    var swipeThreshold = 24f
+    var swipeThresholdX = 24f
+    var swipeThresholdY = 24f
+
+    @Volatile
     private var swipeTriggered = false
     private var swipeLastX = -1f
     private var swipeLastY = -1f
     private var swipeXUnconsumed = 0f
     private var swipeYUnconsumed = 0f
 
-    fun interface OnSwipeListener {
-        fun onSwipe()
-    }
 
-    var onSwipeUpListener : OnSwipeListener? = null
-    var onSwipeRightListener : OnSwipeListener? = null
-    var onSwipeDownListener : OnSwipeListener? = null
-    var onSwipeLeftListener : OnSwipeListener? = null
+    var onSwipeUpListener: ((View) -> Unit)? = null
+    var onSwipeRightListener: ((View) -> Unit)? = null
+    var onSwipeDownListener: ((View) -> Unit)? = null
+    var onSwipeLeftListener: ((View) -> Unit)? = null
+    var onDoubleTapListener: ((View) -> Unit)? = null
+    var onRepeatListener: ((View) -> Unit)? = null
 
     private fun calculateInterval(t: Long) =
         if (t > accelerateTime) endInterval
@@ -62,8 +68,10 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                     longPressJob?.cancel()
                     longPressJob = lifecycleScope.launch {
                         delay(LONG_PRESS_DELAY)
-                        longPressTriggered = true
-                        performLongClick()
+                        if (!swipeTriggered) {
+                            longPressTriggered = true
+                            performLongClick()
+                        }
                     }
                 }
                 if (repeatEnabled) {
@@ -73,7 +81,7 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                         repeatStarted = true
                         val t0 = System.currentTimeMillis()
                         while (isActive && isEnabled) {
-                            performClick()
+                            onRepeatListener?.invoke(this@CustomGestureView)
                             val t = System.currentTimeMillis() - t0
                             delay(calculateInterval(t))
                         }
@@ -86,34 +94,27 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
             }
             MotionEvent.ACTION_UP -> {
                 isPressed = false
+
+                val shouldPerformClick = !(longPressTriggered || swipeTriggered || repeatStarted)
+
                 if (longPressEnabled) {
                     longPressTriggered = false
                     longPressJob?.cancel()
                     longPressJob = null
-                    if (event.eventTime - event.downTime < LONG_PRESS_DELAY) {
-                        performClick()
-                    }
-                    return true
                 }
                 if (repeatEnabled) {
                     repeatJob?.cancel()
                     repeatJob = null
-                    if (repeatStarted) {
-                        repeatStarted = false
-                    } else {
-                        performClick()
-                    }
-                    return true
+                    repeatStarted = false
                 }
                 if (swipeEnabled) {
                     swipeXUnconsumed = 0f
                     swipeYUnconsumed = 0f
-                    if (!swipeTriggered) {
-                        performClick()
-                    }
-                    return true
+                    swipeTriggered = false
                 }
-                performClick()
+
+                if (shouldPerformClick)
+                    performClick()
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
@@ -122,26 +123,26 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                     swipeYUnconsumed += event.y - swipeLastY
                     swipeLastX = event.x
                     swipeLastY = event.y
-                    while (swipeXUnconsumed.absoluteValue > swipeThreshold) {
+                    while (swipeXUnconsumed.absoluteValue > swipeThresholdX) {
+                        if ((longPressTriggered || swipeTriggered) && !swipeRepeatEnabled) return true
                         swipeTriggered = true
-                        if (!swipeRepeatEnabled) return true
                         val direction = swipeXUnconsumed.sign
-                        swipeXUnconsumed -= direction * swipeThreshold
+                        swipeXUnconsumed -= direction * swipeThresholdX
                         if (direction > 0) {
-                            onSwipeRightListener?.onSwipe()
+                            onSwipeRightListener?.invoke(this)
                         } else {
-                            onSwipeLeftListener?.onSwipe()
+                            onSwipeLeftListener?.invoke(this)
                         }
                     }
-                    while (swipeYUnconsumed.absoluteValue > swipeThreshold){
+                    while (swipeYUnconsumed.absoluteValue > swipeThresholdY) {
+                        if ((longPressTriggered || swipeTriggered) && !swipeRepeatEnabled) return true
                         swipeTriggered = true
-                        if (!swipeRepeatEnabled) return true
                         val direction = swipeYUnconsumed.sign
-                        swipeYUnconsumed -= direction * swipeThreshold
+                        swipeYUnconsumed -= direction * swipeThresholdX
                         if (direction > 0) {
-                            onSwipeDownListener?.onSwipe()
+                            onSwipeDownListener?.invoke(this)
                         } else {
-                            onSwipeUpListener?.onSwipe()
+                            onSwipeUpListener?.invoke(this)
                         }
                     }
                     return true
