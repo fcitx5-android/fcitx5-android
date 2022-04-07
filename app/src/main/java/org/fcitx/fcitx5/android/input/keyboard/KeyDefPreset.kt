@@ -33,7 +33,8 @@ class AlphaBetKey(
     ),
     setOf(
         Behavior.Press(KeyAction.FcitxKeyAction(character)),
-        Behavior.LongPress(KeyAction.FcitxKeyAction(punctuation))
+        Behavior.LongPress(KeyAction.FcitxKeyAction(punctuation)),
+        Behavior.SwipeDown(KeyAction.FcitxKeyAction(punctuation))
     )
 )
 

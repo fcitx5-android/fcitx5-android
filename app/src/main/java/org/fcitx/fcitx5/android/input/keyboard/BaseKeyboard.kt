@@ -70,11 +70,11 @@ abstract class BaseKeyboard(
             if (def is SpaceKey) {
                 swipeEnabled = true
                 swipeRepeatEnabled = true
-                swipeThreshold = 20f
-                onSwipeLeftListener = CustomGestureView.OnSwipeListener {
+                swipeThresholdX = 20f
+                onSwipeLeftListener = {
                     onAction(KeyAction.SymAction(KeySym(0xff51u), KeyStates()))
                 }
-                onSwipeRightListener = CustomGestureView.OnSwipeListener {
+                onSwipeRightListener = {
                     onAction(KeyAction.SymAction(KeySym(0xff53u), KeyStates()))
                 }
             }
@@ -85,8 +85,10 @@ abstract class BaseKeyboard(
                             onAction(it.action)
                             true
                         }
+                    }
+                    is KeyDef.Behavior.SwipeDown -> {
                         swipeEnabled = true
-                        onSwipeDownListener = CustomGestureView.OnSwipeListener {
+                        onSwipeDownListener = { _ ->
                             onAction(it.action)
                         }
                     }
@@ -97,6 +99,9 @@ abstract class BaseKeyboard(
                     }
                     is KeyDef.Behavior.Repeat -> {
                         repeatEnabled = true
+                        onRepeatListener = { _ ->
+                            onAction(it.action)
+                        }
                     }
                 }
             }

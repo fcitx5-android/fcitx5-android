@@ -59,5 +59,8 @@ open class KeyDef(
             val action: KeyAction
         ) : Behavior()
 
+        class SwipeDown(
+            val action: KeyAction
+        ) : Behavior()
     }
 }
