@@ -8,7 +8,6 @@ import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
-import android.widget.FrameLayout
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.updateLayoutParams
@@ -21,7 +20,7 @@ import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.imageDrawable
 
-abstract class KeyView(ctx: Context, val def: KeyDef.Appearance) : FrameLayout(ctx) {
+abstract class KeyView(ctx: Context, val def: KeyDef.Appearance) : CustomGestureView(ctx) {
     val layout = constraintLayout {
         // sync any state from parent
         isDuplicateParentStateEnabled = true
@@ -63,8 +62,7 @@ abstract class KeyView(ctx: Context, val def: KeyDef.Appearance) : FrameLayout(c
 }
 
 @SuppressLint("ViewConstructor")
-open class TextKeyView(ctx: Context, def: KeyDef.Appearance.Text) :
-    KeyView(ctx, def) {
+open class TextKeyView(ctx: Context, def: KeyDef.Appearance.Text) : KeyView(ctx, def) {
     val mainText = textView {
         isClickable = false
         isFocusable = false
