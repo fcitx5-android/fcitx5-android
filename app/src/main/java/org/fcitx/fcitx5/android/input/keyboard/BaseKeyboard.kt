@@ -92,6 +92,12 @@ abstract class BaseKeyboard(
                             onAction(it.action)
                         }
                     }
+                    is KeyDef.Behavior.DoubleTap -> {
+                        doubleTapEnabled = true
+                        onDoubleTapListener = { _ ->
+                            onAction(it.action)
+                        }
+                    }
                     is KeyDef.Behavior.Press -> {
                         setOnClickListener { _ ->
                             onAction(it.action)

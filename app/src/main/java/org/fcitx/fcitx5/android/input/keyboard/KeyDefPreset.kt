@@ -46,7 +46,8 @@ class CapsKey : KeyDef(
         percentWidth = 0.15f
     ),
     setOf(
-        Behavior.Press(action = KeyAction.CapsAction(false))
+        Behavior.Press(action = KeyAction.CapsAction(false)),
+        Behavior.DoubleTap(action = KeyAction.CapsAction(true))
     )
 )
 
