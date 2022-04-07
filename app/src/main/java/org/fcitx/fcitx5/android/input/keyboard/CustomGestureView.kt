@@ -3,6 +3,7 @@ package org.fcitx.fcitx5.android.input.keyboard
 import android.content.Context
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.widget.FrameLayout
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -47,6 +48,10 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
     private var swipeYUnconsumed = 0f
 
 
+    var doubleTapEnabled = false
+    private var lastClickTime = 0L
+    private var firstClick = false
+
     var onSwipeUpListener: ((View) -> Unit)? = null
     var onSwipeRightListener: ((View) -> Unit)? = null
     var onSwipeDownListener: ((View) -> Unit)? = null
@@ -67,7 +72,7 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                 if (longPressEnabled) {
                     longPressJob?.cancel()
                     longPressJob = lifecycleScope.launch {
-                        delay(LONG_PRESS_DELAY)
+                        delay(ViewConfiguration.getLongPressTimeout().toLong())
                         if (!swipeTriggered) {
                             longPressTriggered = true
                             performLongClick()
@@ -77,7 +82,7 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                 if (repeatEnabled) {
                     repeatJob?.cancel()
                     repeatJob = lifecycleScope.launch {
-                        delay(firstClickInterval)
+                        delay(ViewConfiguration.getKeyRepeatTimeout().toLong())
                         repeatStarted = true
                         val t0 = System.currentTimeMillis()
                         while (isActive && isEnabled) {
@@ -113,8 +118,18 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                     swipeTriggered = false
                 }
 
-                if (shouldPerformClick)
-                    performClick()
+                if (shouldPerformClick) {
+                    if (doubleTapEnabled) {
+                        if (firstClick && System.currentTimeMillis() - lastClickTime <= ViewConfiguration.getDoubleTapTimeout()) {
+                            onDoubleTapListener?.invoke(this)
+                            firstClick = false
+                        } else {
+                            firstClick = true
+                            lastClickTime = System.currentTimeMillis()
+                            performClick()
+                        }
+                    } else performClick()
+                }
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
@@ -176,9 +191,6 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
     }
 
     companion object {
-        const val LONG_PRESS_DELAY = 300L
-
-        const val firstClickInterval: Long = LONG_PRESS_DELAY
         const val initialInterval: Long = 200L
         const val endInterval: Long = 30L
         const val accelerateTime: Long = 1000L
