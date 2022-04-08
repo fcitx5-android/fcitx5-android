@@ -88,4 +88,5 @@
     <string name="added_x">Added %1$s</string>
     <string name="edited_x">Edited %1$s</string>
     <string name="invalid_value">Invalid value</string>
+    <string name="keyboard_long_press_delay">Key long press delay</string>
 </resources>

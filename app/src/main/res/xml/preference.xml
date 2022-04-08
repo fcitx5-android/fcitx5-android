@@ -75,14 +75,14 @@
                 app:unit="%"
                 app:useSimpleSummaryProvider="true" />
             <org.fcitx.fcitx5.android.ui.common.DialogSeekBarPreference
-                android:defaultValue="30"
-                android:key="@string/pref_clipboard_item_timeout"
-                android:title="@string/clipboard_item_timeout"
+                android:defaultValue="300"
+                android:key="@string/pref_keyboard_long_press_delay"
+                android:title="@string/keyboard_long_press_delay"
                 app:iconSpaceReserved="false"
-                app:max="300"
-                app:min="30"
+                app:max="700"
+                app:min="100"
                 app:singleLineTitle="false"
-                app:unit="s"
+                app:unit="ms"
                 app:useSimpleSummaryProvider="true" />
         </PreferenceCategory>
         <PreferenceCategory
@@ -102,6 +102,16 @@
                 app:max="50"
                 app:min="1"
                 app:singleLineTitle="false"
+                app:useSimpleSummaryProvider="true" />
+            <org.fcitx.fcitx5.android.ui.common.DialogSeekBarPreference
+                android:defaultValue="30"
+                android:key="@string/pref_clipboard_item_timeout"
+                android:title="@string/clipboard_item_timeout"
+                app:iconSpaceReserved="false"
+                app:max="300"
+                app:min="30"
+                app:singleLineTitle="false"
+                app:unit="s"
                 app:useSimpleSummaryProvider="true" />
         </PreferenceCategory>
     </PreferenceCategory>
