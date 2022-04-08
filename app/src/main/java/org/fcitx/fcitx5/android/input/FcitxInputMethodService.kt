@@ -25,8 +25,15 @@ import timber.log.Timber
 
 class FcitxInputMethodService : LifecycleInputMethodService() {
 
-    // `-1` means invalid, or don't know yet
-    data class CursorRange(val start: Int = -1, val end: Int = -1) {
+    @JvmInline
+    value class CursorRange private constructor(val data: IntArray) {
+        constructor(start: Int = -1, end: Int = -1) : this(intArrayOf(start, end))
+
+        val start: Int get() = data[0]
+        val end: Int get() = data[1]
+
+        fun isEmpty() = data[0] == data[1]
+
         fun contains(other: CursorRange): Boolean {
             return start <= other.start && other.end <= end
         }
@@ -284,6 +291,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             CursorRange(info.composingTextStart, info.composingTextStart + it.length)
         } ?: CursorRange()
         Timber.d("AnchorInfo: selection=$selection composing=$composing")
+        // skip fcitx cursor move when composing empty
+        if (composing.isEmpty()) return
         // workaround some misbehaved editors: report composingText but wrong selectionStart
         if (selection.start < 0 && composing.start >= 0) return
         // check if cursor inside composing text
