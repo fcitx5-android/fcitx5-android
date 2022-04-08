@@ -108,6 +108,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
     suspend fun setCapFlags(flags: CapabilityFlags) =
         withFcitxContext { setCapabilityFlags(flags.toLong()) }
 
+    suspend fun activateAction(id: Int) =
+        withFcitxContext { activateUserInterfaceAction(id) }
+
     init {
         if (lifecycle.currentState != FcitxLifecycle.State.STOPPED)
             throw IllegalAccessException("Fcitx5 is already created!")
@@ -238,6 +241,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
         @JvmStatic
         external fun setCapabilityFlags(flags: Long)
+
+        @JvmStatic
+        external fun activateUserInterfaceAction(id: Int)
 
         @JvmStatic
         external fun loopOnce()

@@ -357,6 +357,13 @@ public:
         return res;
     }
 
+    void activateAction(int id) {
+        auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
+        auto action = p_instance->userInterfaceManager().lookupActionById(id);
+        if (!action) return;
+        action->activate(ic);
+    }
+
     void save() {
         p_instance->save();
     }
@@ -943,6 +950,13 @@ JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_setCapabilityFlags(JNIEnv *env, jclass clazz, jlong flags) {
     RETURN_IF_NOT_RUNNING
     Fcitx::Instance().setCapabilityFlags(static_cast<uint64_t>(flags));
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_activateUserInterfaceAction(JNIEnv *env, jclass clazz, jint id) {
+    RETURN_IF_NOT_RUNNING
+    Fcitx::Instance().activateAction(static_cast<int>(id));
 }
 
 extern "C"
