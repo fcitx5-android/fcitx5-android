@@ -260,6 +260,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onUpdateCursorAnchorInfo(info: CursorAnchorInfo) {
+        // onUpdateCursorAnchorInfo often left behind when user types quickly enough,
+        // especially in browsers. drop the event if `info.composingText` is not up to date.
+        if (info.composingText?.contentEquals(composingText) != true) return
         selection = CursorRange(info.selectionStart, info.selectionEnd)
         composing = info.composingText?.let {
             CursorRange(info.composingTextStart, info.composingTextStart + it.length)
@@ -274,11 +277,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             if (ignoreSystemCursor) return
             // fcitx cursor position is relative to client preedit (composing text)
             val position = selection.start - composing.start
-            // move fcitx cursor when:
-            // - cursor position changed
-            // - cursor position in composing text range; when user long press backspace key,
-            //   onUpdateCursorAnchorInfo can be left behind, thus position is invalid.
-            if ((position != fcitxCursor) && (position <= composingText.length)) {
+            // move fcitx cursor when cursor position changed
+            if (position != fcitxCursor) {
                 lifecycleScope.launch {
                     fcitx.moveCursor(position)
                 }
