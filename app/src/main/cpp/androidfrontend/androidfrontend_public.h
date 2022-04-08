@@ -9,6 +9,7 @@ typedef std::function<void(const std::string &, const int, const std::string &, 
 typedef std::function<void(const std::string &, const std::string &)> InputPanelAuxCallback;
 typedef std::function<void(const uint32_t, const uint32_t, const uint32_t, const bool)> KeyEventCallback;
 typedef std::function<void()> InputMethodChangeCallback;
+typedef std::function<void()> StatusAreaUpdateCallback;
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, createInputContext,
                              ICUUID(const std::string &))
@@ -53,5 +54,8 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setKeyEventCallback,
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setInputMethodChangeCallback,
                              void(const InputMethodChangeCallback &))
+
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setStatusAreaUpdateCallback,
+                             void(const StatusAreaUpdateCallback &))
 
 #endif // _FCITX_FRONTEND_ANDROIDFRONTEND_ANDROIDFRONTEND_PUBLIC_H_

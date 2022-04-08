@@ -74,6 +74,29 @@ sealed class FcitxEvent<T>(open val data: T) {
         data class Data(val status: InputMethodEntry)
     }
 
+    data class StatusAreaEvent(override val data: Data) :
+        FcitxEvent<StatusAreaEvent.Data>(data) {
+        data class Data(val actions: Array<Action>) {
+            override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (javaClass != other?.javaClass) return false
+
+                other as Data
+
+                if (!actions.contentEquals(other.actions)) return false
+
+                return true
+            }
+
+            override fun hashCode(): Int {
+                return actions.contentHashCode()
+            }
+        }
+
+        override val eventType: EventType
+            get() = EventType.StatusArea
+    }
+
     data class UnknownEvent(override val data: Array<Any>) : FcitxEvent<Array<Any>>(data) {
         override val eventType: EventType
             get() = EventType.Unknown
@@ -102,6 +125,7 @@ sealed class FcitxEvent<T>(open val data: T) {
         Ready,
         Key,
         Change,
+        StatusArea,
         Unknown
     }
 
@@ -125,6 +149,9 @@ sealed class FcitxEvent<T>(open val data: T) {
                     KeyEvent.Data(KeySym.of(params[0] as Int), KeyStates.of(params[1] as Int), params[2] as Int, params[3] as Boolean)
                 )
                 EventType.Change -> IMChangeEvent(IMChangeEvent.Data(params[0] as InputMethodEntry))
+                EventType.StatusArea -> StatusAreaEvent(
+                    StatusAreaEvent.Data(Array(params.size) { params[it] as Action })
+                )
                 else -> UnknownEvent(params)
             }
     }

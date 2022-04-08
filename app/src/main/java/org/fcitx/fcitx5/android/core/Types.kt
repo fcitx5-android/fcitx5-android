@@ -150,5 +150,17 @@ data class AddonInfo(
     )
 
     val displayName: String
-        get() = if (name.isNotEmpty()) name else uniqueName
+        get() = name.ifEmpty { uniqueName }
 }
+
+data class Action(
+    val id: Int,
+    val isSeparator: Boolean,
+    val isCheckable: Boolean,
+    val isChecked: Boolean,
+    val name: String,
+    val icon: String,
+    val shortText: String,
+    val longText: String,
+    // TODO: support menu (nested actions)
+)
