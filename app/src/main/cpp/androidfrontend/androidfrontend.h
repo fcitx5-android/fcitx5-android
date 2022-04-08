@@ -36,6 +36,7 @@ public:
     void setInputPanelAuxCallback(const InputPanelAuxCallback &callback);
     void setKeyEventCallback(const KeyEventCallback &callback);
     void setInputMethodChangeCallback(const InputMethodChangeCallback &callback);
+    void setStatusAreaUpdateCallback(const StatusAreaUpdateCallback &callback);
 
 private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, createInputContext);
@@ -53,6 +54,7 @@ private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setInputPanelAuxCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setKeyEventCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setInputMethodChangeCallback);
+    FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setStatusAreaUpdateCallback);
 
     Instance *instance_;
     std::vector<std::unique_ptr<fcitx::HandlerTableEntry<fcitx::EventHandler>>> eventHandlers_;
@@ -63,6 +65,7 @@ private:
     InputPanelAuxCallback inputPanelAuxCallback = [](const std::string &, const std::string &) {};
     KeyEventCallback keyEventCallback = [](const uint32_t, const uint32_t, const uint32_t, const bool) {};
     InputMethodChangeCallback imChangeCallback = [] {};
+    StatusAreaUpdateCallback statusAreaUpdateCallback = [] {};
 };
 } // namespace fcitx
 

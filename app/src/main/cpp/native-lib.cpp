@@ -10,6 +10,9 @@
 #include <fcitx/inputmethodentry.h>
 #include <fcitx/inputmethodengine.h>
 #include <fcitx/inputmethodmanager.h>
+#include <fcitx/userinterfacemanager.h>
+#include <fcitx/action.h>
+#include <fcitx/statusarea.h>
 #include <fcitx-utils/i18n.h>
 #include <fcitx-utils/event.h>
 #include <fcitx-utils/eventdispatcher.h>
@@ -23,6 +26,7 @@
 #include "androidfrontend/androidfrontend_public.h"
 #include "jni-utils.h"
 #include "nativestreambuf.h"
+#include "helper-types.h"
 
 
 class Fcitx {
@@ -340,6 +344,19 @@ public:
         p_frontend->call<fcitx::IAndroidFrontend::setCapabilityFlags>(p_uuid, flags);
     }
 
+    std::vector<ActionEntity> statusAreaActions() {
+        std::vector<ActionEntity> res{};
+        auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
+        for (auto group :{fcitx::StatusGroup::BeforeInputMethod,
+                          fcitx::StatusGroup::InputMethod,
+                          fcitx::StatusGroup::AfterInputMethod}) {
+            for (auto act : ic->statusArea().actions(group)) {
+                res.emplace_back(ActionEntity(act, ic));
+            }
+        }
+        return res;
+    }
+
     void save() {
         p_instance->save();
     }
@@ -414,6 +431,20 @@ extern "C" void setup_log_stream(bool verbose, log_callback_t callback) {
 }
 
 jobject fcitxInputMethodEntryWithSubModeToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry, const std::vector<std::string> &subMode);
+
+jobject fcitxActionToJObject(JNIEnv *env, const ActionEntity &act) {
+    auto obj = env->NewObject(GlobalRef->Action, GlobalRef->ActionInit,
+                              act.id,
+                              act.isSeparator,
+                              act.isCheckable,
+                              act.isChecked,
+                              *JString(env, act.name),
+                              *JString(env, act.icon),
+                              *JString(env, act.shortText),
+                              *JString(env, act.longText)
+    );
+    return obj;
+}
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -517,6 +548,18 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
         env->DeleteLocalRef(vararg);
         env->DeleteLocalRef(obj);
     };
+    auto statusAreaUpdateCallback = []() {
+        auto env = GlobalRef->AttachEnv();
+        const auto actions = Fcitx::Instance().statusAreaActions();
+        jobjectArray vararg = env->NewObjectArray(static_cast<int>(actions.size()), GlobalRef->Object, nullptr);
+        for (int i = 0; i < actions.size(); i++) {
+            auto obj = fcitxActionToJObject(env, actions[i]);
+            env->SetObjectArrayElement(vararg, i, obj);
+            env->DeleteLocalRef(obj);
+        }
+        env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 7, vararg);
+        env->DeleteLocalRef(vararg);
+    };
 
     Fcitx::Instance().startup([&](auto *androidfrontend) {
         FCITX_INFO() << "Setting up callback";
@@ -527,6 +570,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
         androidfrontend->template call<fcitx::IAndroidFrontend::setInputPanelAuxCallback>(inputPanelAuxCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setKeyEventCallback>(keyEventCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setInputMethodChangeCallback>(imChangeCallback);
+        androidfrontend->template call<fcitx::IAndroidFrontend::setStatusAreaUpdateCallback>(statusAreaUpdateCallback);
     });
     FCITX_INFO() << "Finishing startup";
 }
@@ -736,8 +780,8 @@ extern "C"
 JNIEXPORT jobject JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_getFcitxAddonSubConfig(JNIEnv *env, jclass clazz, jstring addon, jstring path) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
-    const char * addonName = env->GetStringUTFChars(addon, nullptr);
-    const char * configPath = env->GetStringUTFChars(path, nullptr);
+    const char *addonName = env->GetStringUTFChars(addon, nullptr);
+    const char *configPath = env->GetStringUTFChars(path, nullptr);
     auto result = Fcitx::Instance().getAddonSubConfig(addonName, configPath);
     env->ReleaseStringUTFChars(path, configPath);
     env->ReleaseStringUTFChars(addon, addonName);

@@ -100,6 +100,16 @@ AndroidFrontend::AndroidFrontend(Instance *instance)
             EventWatcherPhase::Default,
             [this](Event &event) { imChangeCallback(); }
     ));
+    eventHandlers_.emplace_back(instance_->watchEvent(
+            EventType::InputContextUpdateUI,
+            EventWatcherPhase::Default,
+            [this](Event &event) {
+                auto &e = static_cast<InputContextUpdateUIEvent &>(event);
+                if (e.component() == UserInterfaceComponent::StatusArea) {
+                    statusAreaUpdateCallback();
+                }
+            }
+    ));
 }
 
 AndroidFrontend::~AndroidFrontend() = default;
@@ -208,6 +218,10 @@ void AndroidFrontend::setKeyEventCallback(const KeyEventCallback &callback) {
 
 void AndroidFrontend::setInputMethodChangeCallback(const InputMethodChangeCallback &callback) {
     imChangeCallback = callback;
+}
+
+void AndroidFrontend::setStatusAreaUpdateCallback(const StatusAreaUpdateCallback &callback) {
+    statusAreaUpdateCallback = callback;
 }
 
 class AndroidFrontendFactory : public AddonFactory {
