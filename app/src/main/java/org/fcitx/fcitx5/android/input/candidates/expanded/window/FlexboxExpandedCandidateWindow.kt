@@ -34,10 +34,6 @@ class FlexboxExpandedCandidateWindow :
         }
     }
 
-    override fun onCandidateUpdate(data: Array<String>) {
-        view.resetPosition()
-    }
-
     override fun prevPage() {
         layoutManager.apply {
             var prev = findFirstCompletelyVisibleItemPosition() - 1

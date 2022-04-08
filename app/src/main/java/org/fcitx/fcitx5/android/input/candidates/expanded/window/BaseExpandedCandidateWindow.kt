@@ -72,4 +72,12 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
         offsetJob = null
         view.embeddedKeyboard.keyActionListener = null
     }
+
+    override fun onCandidateUpdate(data: Array<String>) {
+        if (data.isEmpty()) {
+            windowManager.switchToKeyboardWindow()
+            return
+        }
+        view.resetPosition()
+    }
 }
