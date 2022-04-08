@@ -46,6 +46,7 @@ class CapsKey : KeyDef(
     ),
     setOf(
         Behavior.Press(action = KeyAction.CapsAction(false)),
+        Behavior.LongPress(action = KeyAction.CapsAction(true)),
         Behavior.DoubleTap(action = KeyAction.CapsAction(true))
     )
 )
