@@ -1,46 +1,16 @@
 package org.fcitx.fcitx5.android.ui.main
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.preference.Preference
+import androidx.preference.PreferenceCategory
+import androidx.preference.PreferenceFragmentCompat
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.ui.common.SimpleAdapter
-import splitties.views.dsl.recyclerview.recyclerView
 
-class MainFragment : Fragment() {
+class MainFragment : PreferenceFragmentCompat() {
 
     private val viewModel: MainViewModel by activityViewModels()
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return requireContext().recyclerView {
-            layoutManager = LinearLayoutManager(context)
-            adapter = SimpleAdapter(
-                getString(R.string.global_options) to {
-                    findNavController().navigate(R.id.action_mainFragment_to_globalConfigFragment)
-                },
-                getString(R.string.input_methods) to {
-                    findNavController().navigate(R.id.action_mainFragment_to_imListFragment)
-                },
-                getString(R.string.addons) to {
-                    findNavController().navigate(R.id.action_mainFragment_to_addonListFragment)
-                },
-                getString(R.string.behavior) to {
-                    findNavController().navigate(R.id.action_mainFragment_to_behaviorSettingsFragment)
-                },
-                getString(R.string.developer) to {
-                    findNavController().navigate(R.id.action_mainFragment_to_developerFragment)
-                }
-            )
-        }
-    }
 
     override fun onResume() {
         super.onResume()
@@ -52,5 +22,64 @@ class MainFragment : Fragment() {
     override fun onPause() {
         viewModel.disableAboutButton()
         super.onPause()
+    }
+
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        val context = preferenceManager.context
+        val screen = preferenceManager.createPreferenceScreen(context)
+        val fcitxCategory = PreferenceCategory(context).apply {
+            isIconSpaceReserved = false
+            title = "Fcitx"
+        }
+        screen.addPreference(fcitxCategory)
+        // TODO: add icons
+        fcitxCategory.addPreference(Preference(context).apply {
+            setTitle(R.string.global_options)
+            isIconSpaceReserved = false
+            setOnPreferenceClickListener {
+                findNavController().navigate(R.id.action_mainFragment_to_globalConfigFragment)
+                true
+            }
+        })
+        fcitxCategory.addPreference(Preference(context).apply {
+            setTitle(R.string.input_methods)
+            isIconSpaceReserved = false
+            setOnPreferenceClickListener {
+                findNavController().navigate(R.id.action_mainFragment_to_imListFragment)
+                true
+            }
+        })
+        fcitxCategory.addPreference(Preference(context).apply {
+            setTitle(R.string.addons)
+            isIconSpaceReserved = false
+            setOnPreferenceClickListener {
+                findNavController().navigate(R.id.action_mainFragment_to_addonListFragment)
+                true
+            }
+        })
+
+        val androidCategory = PreferenceCategory(context).apply {
+            isIconSpaceReserved = false
+            title = "Android"
+        }
+        screen.addPreference(androidCategory)
+        // TODO: add icons
+        androidCategory.addPreference(Preference(context).apply {
+            setTitle(R.string.behavior)
+            isIconSpaceReserved = false
+            setOnPreferenceClickListener {
+                findNavController().navigate(R.id.action_mainFragment_to_behaviorSettingsFragment)
+                true
+            }
+        })
+        androidCategory.addPreference(Preference(context).apply {
+            setTitle(R.string.developer)
+            isIconSpaceReserved = false
+            setOnPreferenceClickListener {
+                findNavController().navigate(R.id.action_mainFragment_to_developerFragment)
+                true
+            }
+        })
+        preferenceScreen = screen
     }
 }
