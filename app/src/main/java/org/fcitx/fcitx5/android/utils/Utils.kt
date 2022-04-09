@@ -19,7 +19,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.sun.jna.Library
 import com.sun.jna.Native
 import org.fcitx.fcitx5.android.FcitxApplication
-import org.fcitx.fcitx5.android.data.Prefs
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.ui.common.AccelerateRepeatingOnTouchListener
 import splitties.experimental.InternalSplittiesApi
 import splitties.resources.withResolvedThemeAttribute
@@ -75,7 +75,7 @@ fun <T : RecyclerView.ViewHolder> RecyclerView.Adapter<T>.onDataChanged(block: (
     })
 
 fun View.hapticIfEnabled() {
-    if (Prefs.getInstance().buttonHapticFeedback.value)
+    if (AppPrefs.getInstance().keyboard.buttonHapticFeedback.getValue())
         performHapticFeedback(
             HapticFeedbackConstants.KEYBOARD_TAP,
             HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING or HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
@@ -110,5 +110,6 @@ fun Context.styledFloat(@AttrRes attrRes: Int) = withResolvedThemeAttribute(attr
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun View.styledFloat(@AttrRes attrRes: Int) = context.styledFloat(attrRes)
+
 @Suppress("NOTHING_TO_INLINE")
 inline fun Fragment.styledFloat(@AttrRes attrRes: Int) = context!!.styledFloat(attrRes)

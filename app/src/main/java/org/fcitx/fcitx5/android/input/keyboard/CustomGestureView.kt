@@ -11,7 +11,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import org.fcitx.fcitx5.android.data.Prefs
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.utils.hapticIfEnabled
 import kotlin.math.absoluteValue
 import kotlin.math.exp
@@ -192,7 +192,7 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
     }
 
     companion object {
-        val longPressDelay by Prefs.getInstance().longPressDelay
+        val longPressDelay by AppPrefs.getInstance().keyboard.longPressDelay
 
         const val initialInterval: Long = 200L
         const val endInterval: Long = 30L

@@ -9,7 +9,7 @@ import cn.berberman.girls.utils.either.otherwise
 import cn.berberman.girls.utils.either.then
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.RawConfig
-import org.fcitx.fcitx5.android.data.Prefs
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.ui.common.DialogSeekBarPreference
 import org.fcitx.fcitx5.android.ui.main.settings.addon.AddonConfigFragment
 import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
@@ -18,7 +18,7 @@ import org.fcitx.fcitx5.android.utils.config.ConfigType
 
 object PreferenceScreenFactory {
 
-    private val hideKeyConfig by Prefs.getInstance().hideKeyConfig
+    private val hideKeyConfig by AppPrefs.getInstance().behavior.hideKeyConfig
 
     fun create(
         preferenceManager: PreferenceManager,

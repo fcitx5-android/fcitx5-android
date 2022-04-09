@@ -4,7 +4,7 @@ import android.text.InputType
 import android.view.inputmethod.EditorInfo
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
-import org.fcitx.fcitx5.android.data.Prefs
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
@@ -41,7 +41,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
         )
     }
     private var currentKeyboardName = EMPTY
-    private var lastSymbolType: String by Prefs.getInstance().lastSymbolLayout
+    private var lastSymbolType: String by AppPrefs.getInstance().internal.lastSymbolLayout
 
     private val currentKeyboard: BaseKeyboard get() = keyboards.getValue(currentKeyboardName)
 
