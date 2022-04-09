@@ -11,6 +11,7 @@
     <string name="conf">Configuration</string>
     <string name="global_options">Global Options</string>
     <string name="behavior">Behavior</string>
+    <string name="advanced">Advanced</string>
     <string name="ignore_sys_cursor">Ignore system cursor position</string>
     <string name="hide_key_config">Hide hotkey configurations</string>
     <string name="_not_available_">(Not Available)</string>
