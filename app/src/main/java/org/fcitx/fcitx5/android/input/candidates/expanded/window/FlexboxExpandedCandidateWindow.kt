@@ -13,9 +13,9 @@ class FlexboxExpandedCandidateWindow :
     }
 
     val layoutManager: FlexboxLayoutManager
-        get() = view.recyclerView.layoutManager as FlexboxLayoutManager
+        get() = candidateLayout.recyclerView.layoutManager as FlexboxLayoutManager
 
-    override val view by lazy {
+    override fun onCreateCandidateLayout(): ExpandedCandidateLayout =
         ExpandedCandidateLayout(context).apply {
             recyclerView.apply {
                 with(builder) {
@@ -26,13 +26,13 @@ class FlexboxExpandedCandidateWindow :
                     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                         this@FlexboxExpandedCandidateWindow.layoutManager.apply {
                             pageUpBtn.isEnabled = findFirstCompletelyVisibleItemPosition() != 0
-                            pageDnBtn.isEnabled = findLastCompletelyVisibleItemPosition() != itemCount - 1
+                            pageDnBtn.isEnabled =
+                                findLastCompletelyVisibleItemPosition() != itemCount - 1
                         }
                     }
                 })
             }
         }
-    }
 
     override fun prevPage() {
         layoutManager.apply {

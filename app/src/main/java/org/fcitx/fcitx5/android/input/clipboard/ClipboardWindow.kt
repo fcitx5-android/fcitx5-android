@@ -93,9 +93,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         }
     }
 
-    override val view by lazy {
-        ui.root
-    }
+    override fun onCreateView(): View = ui.root
 
     override fun onAttached() {
         val initialState = when {
@@ -123,7 +121,5 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         context.getString(R.string.clipboard)
     }
 
-    override val barExtension: View by lazy {
-        ui.extension
-    }
+    override fun onCreateBarExtension(): View = ui.extension
 }

@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.inputmethodservice.InputMethodService
 import android.net.Uri
+import android.os.Looper
 import android.provider.OpenableColumns
 import android.util.TypedValue
 import android.view.HapticFeedbackConstants
@@ -97,3 +98,5 @@ inline fun View.styledFloat(@AttrRes attrRes: Int) = context.styledFloat(attrRes
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Fragment.styledFloat(@AttrRes attrRes: Int) = context!!.styledFloat(attrRes)
+
+fun isUiThread() = Looper.getMainLooper().isCurrentThread

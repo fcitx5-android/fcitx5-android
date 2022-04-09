@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.input.editing
 
 import android.view.KeyEvent
+import android.view.View
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
@@ -31,11 +32,7 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
     }
 
     private val ui by lazy {
-        TextEditingUi(context)
-    }
-
-    override val view by lazy {
-        ui.apply {
+        TextEditingUi(context).apply {
             fun CustomGestureView.onClickWithRepeating(block: () -> Unit) {
                 setOnClickListener { block() }
                 repeatEnabled = true
@@ -59,7 +56,7 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
                     service.inputConnection?.setSelection(end, end)
                 } else {
                     userSelection = !userSelection
-                    ui.updateSelection(hasSelection, userSelection)
+                    updateSelection(hasSelection, userSelection)
                 }
             }
             selectAllButton.setOnClickListener {
@@ -87,8 +84,10 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
             clipboardButton.setOnClickListener {
                 windowManager.attachWindow(ClipboardWindow())
             }
-        }.root
+        }
     }
+
+    override fun onCreateView(): View = ui.root
 
     override fun onAttached() {
         val info = service.selection
@@ -106,7 +105,5 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
         context.getString(R.string.text_editing)
     }
 
-    override val barExtension by lazy {
-        ui.extension
-    }
+    override fun onCreateBarExtension(): View = ui.extension
 }

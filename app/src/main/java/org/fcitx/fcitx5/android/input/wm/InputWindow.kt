@@ -14,10 +14,19 @@ sealed class InputWindow : Dependent {
 
     protected val context by manager.context()
 
-    abstract val view: View
+    /**
+     * After the window was set up in dynamic scope
+     */
+    abstract fun onCreateView(): View
 
+    /**
+     * After the view was added to window manager's layout
+     */
     abstract fun onAttached()
 
+    /**
+     * Before the view is removed from window manager's layout
+     */
     abstract fun onDetached()
 
     final override fun handle(scopeEvent: ScopeEvent) = manager.handle(scopeEvent)
@@ -39,7 +48,9 @@ sealed class InputWindow : Dependent {
 
         abstract val title: String
 
-        open val barExtension: View? = null
+        open fun onCreateBarExtension(): View? {
+            return null
+        }
 
         override val type: KClass<out IUniqueComponent<*>> by lazy { defaultType() }
 

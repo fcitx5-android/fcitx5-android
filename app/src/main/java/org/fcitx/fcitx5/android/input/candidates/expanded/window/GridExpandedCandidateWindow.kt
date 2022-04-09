@@ -30,9 +30,9 @@ class GridExpandedCandidateWindow :
     }
 
     val layoutManager: GridLayoutManager
-        get() = view.recyclerView.layoutManager as GridLayoutManager
+        get() = candidateLayout.recyclerView.layoutManager as GridLayoutManager
 
-    override val view by lazy {
+    override fun onCreateCandidateLayout(): ExpandedCandidateLayout =
         ExpandedCandidateLayout(context).apply {
             recyclerView.apply {
                 with(builder) {
@@ -51,7 +51,6 @@ class GridExpandedCandidateWindow :
                 })
             }
         }
-    }
 
     override fun prevPage() {
         layoutManager.apply {

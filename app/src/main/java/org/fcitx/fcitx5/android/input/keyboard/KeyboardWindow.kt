@@ -1,7 +1,9 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
 import android.text.InputType
+import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.widget.FrameLayout
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
@@ -28,7 +30,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
     val currentIme
         get() = _currentIme ?: InputMethodEntry(context.str(R.string._not_available_))
 
-    override val view by lazy { context.frameLayout(R.id.keyboard_view) }
+    private lateinit var keyboardView: FrameLayout
 
     private val keyboards: HashMap<String, BaseKeyboard> by lazy {
         hashMapOf(
@@ -53,10 +55,16 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
         }
     }
 
+    // This will be called EXACTLY ONCE
+    override fun onCreateView(): View {
+        keyboardView = context.frameLayout(R.id.keyboard_view)
+        return keyboardView
+    }
+
     private fun detachCurrentLayout() {
         keyboards[currentKeyboardName]?.also {
             it.onDetach()
-            view.removeView(it)
+            keyboardView.removeView(it)
             it.keyActionListener = null
         }
     }
@@ -66,7 +74,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
         if (target != TextKeyboard.Name && target != lastSymbolType) {
             lastSymbolType = target
         }
-        view.apply { add(currentKeyboard, lParams(matchParent, matchParent)) }
+        keyboardView.apply { add(currentKeyboard, lParams(matchParent, matchParent)) }
         currentKeyboard.keyActionListener = keyActionListener
         currentKeyboard.onAttach(service.editorInfo)
         currentKeyboard.onInputMethodChange(currentIme)
