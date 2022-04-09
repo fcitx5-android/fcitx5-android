@@ -18,7 +18,7 @@ import org.fcitx.fcitx5.android.utils.config.ConfigType
 
 object PreferenceScreenFactory {
 
-    private val hideKeyConfig by AppPrefs.getInstance().behavior.hideKeyConfig
+    private val hideKeyConfig by AppPrefs.getInstance().advanced.hideKeyConfig
 
     fun create(
         preferenceManager: PreferenceManager,

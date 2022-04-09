@@ -33,7 +33,7 @@ class AppPrefs(
         val pid = ManagedPreference.RawInt(sharedPreferences, "pid", 0).add()
     }
 
-    inner class Behavior : ManagedPreferenceCategory(R.string.behavior, sharedPreferences) {
+    inner class Advanced : ManagedPreferenceCategory(R.string.advanced, sharedPreferences) {
         val ignoreSystemCursor = switch(R.string.ignore_sys_cursor, "ignore_system_cursor", true)
         val hideKeyConfig = switch(R.string.hide_key_config, "hide_key_config", true)
     }
@@ -104,14 +104,14 @@ class AppPrefs(
     }
 
     val internal = Internal()
-    val behavior = Behavior().add()
     val keyboard = Keyboard().add()
     val clipboard = Clipboard().add()
+    val advanced = Advanced().add()
 
     fun createUi(screen: PreferenceScreen) {
-        behavior.createUi(screen)
         keyboard.createUi(screen)
         clipboard.createUi(screen)
+        advanced.createUi(screen)
     }
 
     companion object {

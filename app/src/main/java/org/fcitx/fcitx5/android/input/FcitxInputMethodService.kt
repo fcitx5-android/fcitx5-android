@@ -49,7 +49,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private var composingText = ""
     private var fcitxCursor = -1
 
-    private val ignoreSystemCursor by AppPrefs.getInstance().behavior.ignoreSystemCursor
+    private val ignoreSystemCursor by AppPrefs.getInstance().advanced.ignoreSystemCursor
 
     override fun onCreate() {
         FcitxDaemonManager.bindFcitxDaemon(javaClass.name, this) {
