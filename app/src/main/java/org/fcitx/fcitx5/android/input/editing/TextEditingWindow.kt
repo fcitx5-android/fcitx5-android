@@ -1,7 +1,6 @@
 package org.fcitx.fcitx5.android.input.editing
 
 import android.view.KeyEvent
-import android.view.View
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
@@ -11,10 +10,10 @@ import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.clipboard.ClipboardWindow
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
+import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.inputConnection
-import org.fcitx.fcitx5.android.utils.setupPressingToRepeat
 import org.mechdancer.dependency.manager.must
 
 class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
@@ -37,9 +36,10 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
 
     override val view by lazy {
         ui.apply {
-            fun View.onClickWithRepeating(block: () -> Unit) {
+            fun CustomGestureView.onClickWithRepeating(block: () -> Unit) {
                 setOnClickListener { block() }
-                setupPressingToRepeat { block() }
+                repeatEnabled = true
+                onRepeatListener = { block() }
             }
 
             leftButton.onClickWithRepeating { sendDirectionKey(KeyEvent.KEYCODE_DPAD_LEFT) }
@@ -80,7 +80,7 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
                 userSelection = false
                 service.inputConnection?.performContextMenuAction(android.R.id.paste)
             }
-            backspaceButton.setupPressingToRepeat {
+            backspaceButton.onClickWithRepeating {
                 userSelection = false
                 service.lifecycleScope.launch { fcitx.sendKey("BackSpace") }
             }

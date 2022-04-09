@@ -20,7 +20,6 @@ import com.sun.jna.Library
 import com.sun.jna.Native
 import org.fcitx.fcitx5.android.FcitxApplication
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
-import org.fcitx.fcitx5.android.ui.common.AccelerateRepeatingOnTouchListener
 import splitties.experimental.InternalSplittiesApi
 import splitties.resources.withResolvedThemeAttribute
 
@@ -82,21 +81,6 @@ fun View.hapticIfEnabled() {
         )
 }
 
-fun View.setupPressingToRepeat(
-    firstClickInterval: Long = 30L,
-    initialInterval: Long = 200L,
-    endInterval: Long = 30L,
-    accelerateTime: Long = 1000L,
-    block: (View) -> Unit
-) = setOnTouchListener(
-    AccelerateRepeatingOnTouchListener(
-        firstClickInterval,
-        initialInterval,
-        endInterval,
-        accelerateTime,
-        block
-    )
-)
 
 val EditText.str: String get() = editableText.toString()
 

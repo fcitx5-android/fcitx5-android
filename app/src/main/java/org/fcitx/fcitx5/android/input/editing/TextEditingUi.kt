@@ -7,11 +7,13 @@ import android.view.View
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
 import splitties.dimensions.dp
 import splitties.resources.styledColor
 import splitties.resources.styledDrawable
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
+import splitties.views.gravityCenter
 import splitties.views.imageResource
 
 class TextEditingUi(override val ctx: Context) : Ui {
@@ -28,14 +30,38 @@ class TextEditingUi(override val ctx: Context) : Ui {
         })
     }
 
-    private fun textButton(str: String) = button {
-        text = str
+    class GTextButton(context: Context) : CustomGestureView(context) {
+        val text = textView {
+            isClickable = false
+            isFocusable = false
+            background = null
+            setTextColor(styledColor(android.R.attr.colorForeground))
+        }
+
+        init {
+            add(text, lParams(wrapContent, wrapContent, gravityCenter))
+        }
+    }
+
+    class GImageButton(context: Context) : CustomGestureView(context) {
+        val image = imageView {
+            isClickable = false
+            isFocusable = false
+        }
+
+        init {
+            add(image, lParams(wrapContent, wrapContent, gravityCenter))
+        }
+    }
+
+    private fun textButton(str: String) = GTextButton(ctx).apply {
+        text.text = str
         stateListAnimator = null
         background = borderedBackground()
     }
 
-    private fun iconButton(@DrawableRes icon: Int) = imageButton {
-        imageResource = icon
+    private fun iconButton(@DrawableRes icon: Int) = GImageButton(ctx).apply {
+        image.imageResource = icon
         background = borderedBackground()
     }
 
@@ -148,12 +174,12 @@ class TextEditingUi(override val ctx: Context) : Ui {
     fun updateSelection(hasSelection: Boolean, userSelection: Boolean) {
         if (hasSelection || userSelection) {
             selectButton.apply {
-                setTextColor(styledColor(android.R.attr.colorForegroundInverse))
+                text.setTextColor(styledColor(android.R.attr.colorForegroundInverse))
                 background = styledDrawable(android.R.attr.colorAccent)
             }
         } else {
             selectButton.apply {
-                setTextColor(styledColor(android.R.attr.colorForeground))
+                text.setTextColor(styledColor(android.R.attr.colorForeground))
                 background = borderedBackground()
             }
         }
