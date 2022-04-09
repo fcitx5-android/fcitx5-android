@@ -20,9 +20,6 @@ class CommonKeyActionListener :
     private val fcitx by manager.fcitx()
     private val service by manager.inputMethodService()
 
-    // TODO: We expose this listener share with expandable candidate.
-    //  However, expandable candidate shouldn't have been a keyboard.
-    //  See the note on ExpandableCandidateLayout for details.
     val listener by lazy {
         BaseKeyboard.KeyActionListener { action ->
             service.lifecycleScope.launch {
@@ -34,6 +31,7 @@ class CommonKeyActionListener :
                         fcitx.triggerQuickPhrase()
                     }
                     is KeyAction.UnicodeAction -> {
+                        fcitx.reset()
                         fcitx.triggerUnicode()
                     }
                     is KeyAction.LangSwitchAction -> {
