@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.fcitx.fcitx5.android.core.*
-import org.fcitx.fcitx5.android.data.Prefs
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.service.FcitxDaemonManager
 import org.fcitx.fcitx5.android.utils.inputConnection
 import splitties.bitflags.hasFlag
@@ -49,7 +49,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private var composingText = ""
     private var fcitxCursor = -1
 
-    private val ignoreSystemCursor by Prefs.getInstance().ignoreSystemCursor
+    private val ignoreSystemCursor by AppPrefs.getInstance().behavior.ignoreSystemCursor
 
     override fun onCreate() {
         FcitxDaemonManager.bindFcitxDaemon(javaClass.name, this) {

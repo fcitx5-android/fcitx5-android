@@ -1,6 +1,6 @@
 package org.fcitx.fcitx5.android.utils
 
-import org.fcitx.fcitx5.android.data.Prefs
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import timber.log.Timber
 
 class EventStateMachine<State : Any, Event : Any>(
@@ -15,7 +15,7 @@ class EventStateMachine<State : Any, Event : Any>(
     val currentState
         get() = stateGraph.vertices[currentStateIx]
 
-    private val enableDebugLog: Boolean by Prefs.getInstance().verboseLog
+    private val enableDebugLog: Boolean by AppPrefs.getInstance().internal.verboseLog
 
     private val knownEvents by lazy { stateGraph.labels.flatten() }
 

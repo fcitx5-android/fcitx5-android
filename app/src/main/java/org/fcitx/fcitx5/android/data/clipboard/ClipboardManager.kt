@@ -6,10 +6,10 @@ import androidx.room.Room
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.fcitx.fcitx5.android.data.Prefs
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardDao
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardDatabase
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardEntry
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.utils.UTF8Utils
 import org.fcitx.fcitx5.android.utils.WeakHashSet
 import splitties.systemservices.clipboardManager
@@ -43,9 +43,9 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
         onUpdateListeners.remove(listener)
     }
 
-    private val enabled by Prefs.getInstance().clipboardListening
+    private val enabled by AppPrefs.getInstance().clipboard.clipboardListening
 
-    private val limit by Prefs.getInstance().clipboardHistoryLimit
+    private val limit by AppPrefs.getInstance().clipboard.clipboardHistoryLimit
 
     fun init(context: Context) {
         clipboardManager.addPrimaryClipChangedListener(this)

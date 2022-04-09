@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.DataManager
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.utils.AppUtil
 
 class DeveloperFragment : PreferenceFragmentCompat() {
@@ -32,7 +33,7 @@ class DeveloperFragment : PreferenceFragmentCompat() {
             }
         })
         screen.addPreference(SwitchPreference(context).apply {
-            key = getString(R.string.pref_verbose_log)
+            key = AppPrefs.getInstance().internal.verboseLog.key
             setTitle(R.string.verbose_log)
             setSummary(R.string.verbose_log_summary)
             setDefaultValue(false)
