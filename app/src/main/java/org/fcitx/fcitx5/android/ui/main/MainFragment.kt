@@ -28,14 +28,12 @@ class MainFragment : PreferenceFragmentCompat() {
         val context = preferenceManager.context
         val screen = preferenceManager.createPreferenceScreen(context)
         val fcitxCategory = PreferenceCategory(context).apply {
-            isIconSpaceReserved = false
             title = "Fcitx"
         }
         screen.addPreference(fcitxCategory)
-        // TODO: add icons
         fcitxCategory.addPreference(Preference(context).apply {
             setTitle(R.string.global_options)
-            isIconSpaceReserved = false
+            setIcon(R.drawable.ic_baseline_tune_24)
             setOnPreferenceClickListener {
                 findNavController().navigate(R.id.action_mainFragment_to_globalConfigFragment)
                 true
@@ -43,7 +41,7 @@ class MainFragment : PreferenceFragmentCompat() {
         })
         fcitxCategory.addPreference(Preference(context).apply {
             setTitle(R.string.input_methods)
-            isIconSpaceReserved = false
+            setIcon(R.drawable.ic_baseline_language_24)
             setOnPreferenceClickListener {
                 findNavController().navigate(R.id.action_mainFragment_to_imListFragment)
                 true
@@ -51,7 +49,7 @@ class MainFragment : PreferenceFragmentCompat() {
         })
         fcitxCategory.addPreference(Preference(context).apply {
             setTitle(R.string.addons)
-            isIconSpaceReserved = false
+            setIcon(R.drawable.ic_baseline_extension_24)
             setOnPreferenceClickListener {
                 findNavController().navigate(R.id.action_mainFragment_to_addonListFragment)
                 true
@@ -59,14 +57,12 @@ class MainFragment : PreferenceFragmentCompat() {
         })
 
         val androidCategory = PreferenceCategory(context).apply {
-            isIconSpaceReserved = false
             title = "Android"
         }
         screen.addPreference(androidCategory)
-        // TODO: add icons
         androidCategory.addPreference(Preference(context).apply {
             setTitle(R.string.behavior)
-            isIconSpaceReserved = false
+            setIcon(R.drawable.ic_baseline_keyboard_24)
             setOnPreferenceClickListener {
                 findNavController().navigate(R.id.action_mainFragment_to_behaviorSettingsFragment)
                 true
@@ -74,7 +70,7 @@ class MainFragment : PreferenceFragmentCompat() {
         })
         androidCategory.addPreference(Preference(context).apply {
             setTitle(R.string.developer)
-            isIconSpaceReserved = false
+            setIcon(R.drawable.ic_baseline_developer_mode_24)
             setOnPreferenceClickListener {
                 findNavController().navigate(R.id.action_mainFragment_to_developerFragment)
                 true
