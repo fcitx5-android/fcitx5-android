@@ -68,6 +68,9 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
+                val x = event.x
+                val y = event.y
+                drawableHotspotChanged(x, y)
                 isPressed = true
                 hapticIfEnabled()
                 if (longPressEnabled) {
@@ -94,8 +97,8 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                     }
                 }
                 if (swipeEnabled) {
-                    swipeLastX = event.x
-                    swipeLastY = event.y
+                    swipeLastX = x
+                    swipeLastY = y
                 }
             }
             MotionEvent.ACTION_UP -> {
@@ -134,11 +137,14 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
+                val x = event.x
+                val y = event.y
+                drawableHotspotChanged(x, y)
                 if (swipeEnabled) {
-                    swipeXUnconsumed += event.x - swipeLastX
-                    swipeYUnconsumed += event.y - swipeLastY
-                    swipeLastX = event.x
-                    swipeLastY = event.y
+                    swipeXUnconsumed += x - swipeLastX
+                    swipeYUnconsumed += y - swipeLastY
+                    swipeLastX = x
+                    swipeLastY = y
                     while (swipeXUnconsumed.absoluteValue > swipeThresholdX) {
                         if ((longPressTriggered || swipeTriggered) && !swipeRepeatEnabled) return true
                         swipeTriggered = true
