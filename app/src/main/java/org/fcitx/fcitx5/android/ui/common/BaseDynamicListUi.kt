@@ -222,7 +222,7 @@ abstract class BaseDynamicListUi<T>(
         ItemTouchHelper(touchCallback).attachToRecyclerView(recyclerView)
     }
 
-    override val root: View = coordinatorLayout {
+    override val root: CoordinatorLayout = coordinatorLayout {
         add(recyclerView, defaultLParams {
             height = matchParent
             width = matchParent

@@ -21,7 +21,7 @@ object DataManager {
         data class Delete(override val key: String, val old: String) : Diff()
     }
 
-    private val dataDir = File(appContext.applicationInfo.dataDir)
+    val dataDir = File(appContext.applicationInfo.dataDir)
     private val destDescriptorFile = File(dataDir, Const.dataDescriptorName)
 
     private val lock = ReentrantLock()
@@ -69,7 +69,7 @@ object DataManager {
                 ?.getOrNull()
                 ?.let { deserialize(it) }
                 ?.getOrNull()
-                ?: "" to mapOf()
+                ?: ("" to mapOf())
 
         val bundledDescriptor =
             appContext.assets
@@ -98,14 +98,14 @@ object DataManager {
         sync()
     }
 
-    private fun deleteFileOrDir(path: String) = runCatching {
+    private fun deleteFileOrDir(path: String) {
         val file = File(dataDir, path)
         if (file.isDirectory) {
             file.deleteRecursively()
         }
-    }.getOrThrow()
+    }
 
-    private fun copyFile(filename: String) = runCatching {
+    private fun copyFile(filename: String) {
         with(appContext.assets) {
             open(filename).use { i ->
                 File(dataDir, filename)
@@ -116,6 +116,6 @@ object DataManager {
                     }
             }
         }
-    }.getOrThrow()
+    }
 
 }
