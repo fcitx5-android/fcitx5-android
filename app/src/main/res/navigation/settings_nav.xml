@@ -99,6 +99,13 @@
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_imConfigFragment_to_quickPhraseListFragment"
+            app:destination="@id/quickPhraseListFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
 
     <fragment
@@ -132,6 +139,13 @@
         <action
             android:id="@+id/action_addonConfigFragment_to_punctuationEditorFragment"
             app:destination="@id/punctuationEditorFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_addonConfigFragment_to_quickPhraseListFragment"
+            app:destination="@id/quickPhraseListFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
@@ -170,6 +184,22 @@
     <fragment
         android:id="@+id/licensesFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.LicensesFragment"
+        android:label="" />
+    <fragment
+        android:id="@+id/quickPhraseListFragment"
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.QuickPhraseListFragment"
+        android:label="">
+        <action
+            android:id="@+id/action_quickPhraseListFragment_to_quickPhraseEditFragment"
+            app:destination="@id/quickPhraseEditFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
+    <fragment
+        android:id="@+id/quickPhraseEditFragment"
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.QuickPhraseEditFragment"
         android:label="" />
 
 </navigation>

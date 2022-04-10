@@ -13,13 +13,13 @@ import org.fcitx.fcitx5.android.core.getPunctuationConfig
 import org.fcitx.fcitx5.android.core.savePunctuationConfig
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
+import org.fcitx.fcitx5.android.utils.NaiveDustman
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor
 import org.fcitx.fcitx5.android.utils.str
 import splitties.dimensions.dp
 import splitties.views.dsl.core.*
 import splitties.views.horizontalPadding
 import splitties.views.topPadding
-import kotlin.properties.Delegates
 
 class PunctuationEditorFragment : ProgressFragment(),
     OnItemChangedListener<PunctuationEditorFragment.PunctuationMapEntry> {
@@ -40,18 +40,18 @@ class PunctuationEditorFragment : ProgressFragment(),
     private lateinit var mappingDesc: String
     private lateinit var altMappingDesc: String
 
-    lateinit var initialEntries: List<PunctuationMapEntry>
+    private val dustman = NaiveDustman<PunctuationMapEntry>().apply {
+        onDirty = {
+            viewModel.enableToolbarSaveButton { saveConfig() }
 
-    private var dirty by Delegates.observable(false) { _, old, new ->
-        if (old == new) return@observable
-        lifecycleScope.launch {
-            if (new) {
-                viewModel.enableToolbarSaveButton { saveConfig() }
-            } else {
-                viewModel.disableToolbarSaveButton()
-            }
+        }
+        onClean = {
+            viewModel.disableToolbarSaveButton()
         }
     }
+
+    private val entries
+        get() = ui.entries
 
     private suspend fun loadEntries(lang: String = "zh_CN"): List<PunctuationMapEntry> {
         val raw = viewModel.fcitx.getPunctuationConfig(lang)
@@ -73,6 +73,8 @@ class PunctuationEditorFragment : ProgressFragment(),
     }
 
     private fun saveConfig(lang: String = "zh_CN") {
+        if (!dustman.dirty)
+            return
         val cfg = RawConfig(
             arrayOf(
                 RawConfig(
@@ -83,15 +85,20 @@ class PunctuationEditorFragment : ProgressFragment(),
         )
         lifecycleScope.launch {
             viewModel.fcitx.savePunctuationConfig(lang, cfg)
+            resetDustman()
         }
     }
 
     private lateinit var ui: BaseDynamicListUi<PunctuationMapEntry>
 
+    private fun resetDustman() {
+        dustman.reset((entries.associateBy { it.key }))
+    }
+
     override suspend fun initialize(): View {
         viewModel.disableToolbarSaveButton()
         viewModel.setToolbarTitle(requireArguments().getString(TITLE)!!)
-        initialEntries = loadEntries()
+        val initialEntries = loadEntries()
         ui = object : BaseDynamicListUi<PunctuationMapEntry>(
             requireContext(),
             Mode.FreeAdd(
@@ -153,28 +160,26 @@ class PunctuationEditorFragment : ProgressFragment(),
                     .show()
             }
         }
+        resetDustman()
         return ui.root
     }
 
-    private fun updateDirty() {
-        dirty = initialEntries != ui.entries
-    }
 
     override fun onItemAdded(idx: Int, item: PunctuationMapEntry) {
-        updateDirty()
+        dustman.addOrUpdate(item.key, item)
     }
 
     override fun onItemRemoved(idx: Int, item: PunctuationMapEntry) {
-        updateDirty()
+        dustman.remove(item.key)
     }
 
     override fun onItemUpdated(idx: Int, old: PunctuationMapEntry, new: PunctuationMapEntry) {
-        updateDirty()
+        dustman.addOrUpdate(new.key, new)
     }
 
-    override fun onDestroy() {
+    override fun onPause() {
         saveConfig()
-        super.onDestroy()
+        super.onPause()
     }
 
     companion object {

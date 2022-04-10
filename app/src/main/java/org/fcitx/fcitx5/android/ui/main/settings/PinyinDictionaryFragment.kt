@@ -29,12 +29,12 @@ import org.fcitx.fcitx5.android.data.pinyin.dict.LibIMEDictionary
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
+import org.fcitx.fcitx5.android.utils.NaiveDustman
 import org.fcitx.fcitx5.android.utils.queryFileName
 import splitties.systemservices.notificationManager
 import timber.log.Timber
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.properties.Delegates
 import kotlin.system.measureTimeMillis
 
 class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDictionary> {
@@ -49,15 +49,14 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
 
     private lateinit var launcher: ActivityResultLauncher<String>
 
-    private val beforeReload: MutableMap<String, Boolean> = mutableMapOf()
-    private var dirty by Delegates.observable(false) { _, old, new ->
-        if (old != new)
-            lifecycleScope.launch {
-                if (new)
-                    viewModel.enableToolbarSaveButton { reloadDict() }
-                else
-                    viewModel.disableToolbarSaveButton()
-            }
+    private val dustman = NaiveDustman<Boolean>().apply {
+        onDirty = {
+            viewModel.enableToolbarSaveButton { reloadDict() }
+
+        }
+        onClean = {
+            viewModel.disableToolbarSaveButton()
+        }
     }
     private val busy: AtomicBoolean = AtomicBoolean(false)
 
@@ -85,7 +84,6 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                 fab.setOnClickListener {
                     launcher.launch("*/*")
                 }
-                beforeReload.putAll(entries.map { it.name to it.isEnabled })
             }
 
             override fun updateFAB() {
@@ -106,6 +104,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
         viewModel.setToolbarTitle(getString(R.string.pinyin_dict))
         registerLauncher()
         ui.addOnItemChangedListener(this)
+        resetDustman()
         return ui.root
     }
 
@@ -196,7 +195,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
     }
 
     private fun reloadDict() {
-        if (!dirty)
+        if (!dustman.dirty)
             return
         lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
             if (busy.compareAndSet(false, true)) {
@@ -214,33 +213,28 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                 }.let { Timber.d("Took $it to reload dict") }
                 notificationManager.cancel(id)
                 busy.set(false)
-                dirty = false
-                updateBefore()
+                launch(Dispatchers.Main) {
+                    resetDustman()
+                }
             }
         }
     }
 
-    private fun updateDirty() {
-        dirty = beforeReload.toList() != entries.map { it.name to it.isEnabled }
+    private fun resetDustman() {
+        dustman.reset((entries.associate { it.name to it.isEnabled }))
     }
-
-    private fun updateBefore() {
-        beforeReload.clear()
-        beforeReload.putAll(entries.map { it.name to it.isEnabled })
-    }
-
 
     override fun onItemAdded(idx: Int, item: LibIMEDictionary) {
-        updateDirty()
+        dustman.addOrUpdate(item.name, item.isEnabled)
     }
 
     override fun onItemRemoved(idx: Int, item: LibIMEDictionary) {
         item.file.delete()
-        updateDirty()
+        dustman.remove(item.name)
     }
 
     override fun onItemUpdated(idx: Int, old: LibIMEDictionary, new: LibIMEDictionary) {
-        updateDirty()
+        dustman.addOrUpdate(new.name, new.isEnabled)
     }
 
     override fun onPause() {
