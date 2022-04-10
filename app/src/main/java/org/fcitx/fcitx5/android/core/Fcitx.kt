@@ -24,6 +24,8 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
     val isReady
         get() = lifecycle.currentState == FcitxLifecycle.State.READY
 
+    fun translate(str: String, domain: String = "fcitx5") = getFcitxTranslation(domain, str)
+
     suspend fun save() = withFcitxContext { saveFcitxState() }
     suspend fun sendKey(key: String, state: UInt = 0u, up: Boolean = false) =
         withFcitxContext { sendKeyToFcitxString(key, state.toInt(), up) }
@@ -145,6 +147,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
             appLib: String,
             extData: String
         )
+
+        @JvmStatic
+        external fun getFcitxTranslation(domain: String, str: String): String
 
         @JvmStatic
         external fun exitFcitx()
