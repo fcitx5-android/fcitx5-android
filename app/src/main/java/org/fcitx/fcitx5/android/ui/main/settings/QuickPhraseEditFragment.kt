@@ -2,6 +2,8 @@ package org.fcitx.fcitx5.android.ui.main.settings
 
 import android.app.AlertDialog
 import android.view.View
+import androidx.core.os.bundleOf
+import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
@@ -9,7 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.fcitx.fcitx5.android.data.quickphrase.CustomQuickPhrase
 import org.fcitx.fcitx5.android.data.quickphrase.QuickPhrase
 import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseData
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
@@ -20,7 +21,6 @@ import splitties.dimensions.dp
 import splitties.views.dsl.core.*
 import splitties.views.horizontalPadding
 import splitties.views.topPadding
-import timber.log.Timber
 
 class QuickPhraseEditFragment : ProgressFragment(),
     OnItemChangedListener<QuickPhraseEditFragment.QuickPhraseEntry> {
@@ -55,9 +55,7 @@ class QuickPhraseEditFragment : ProgressFragment(),
         }
         ui = object : BaseDynamicListUi<QuickPhraseEntry>(
             requireContext(),
-            if (quickPhrase is CustomQuickPhrase)
-                Mode.FreeAdd("", converter = { QuickPhraseEntry("", "") })
-            else Mode.Immutable(),
+            Mode.FreeAdd("", converter = { QuickPhraseEntry("", "") }),
             initialEntries,
         ) {
             override fun showEditDialog(
@@ -110,6 +108,7 @@ class QuickPhraseEditFragment : ProgressFragment(),
 
         }
         ui.addOnItemChangedListener(this)
+        ui.addTouchCallback()
         resetDustman()
         return ui.root
     }
@@ -130,12 +129,14 @@ class QuickPhraseEditFragment : ProgressFragment(),
         if (!dustman.dirty)
             return
         lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
-            (quickPhrase as CustomQuickPhrase).saveData(
+            quickPhrase.saveData(
                 QuickPhraseData(
                     entries.associate { it.keyword to it.phrase })
             )
             launch(Dispatchers.Main) {
                 resetDustman()
+                // tell parent that we need to reload
+                setFragmentResult(RESULT, bundleOf(RESULT to true))
             }
         }
     }
@@ -151,6 +152,7 @@ class QuickPhraseEditFragment : ProgressFragment(),
 
     companion object {
         const val ARG = "quickphrase"
+        const val RESULT = "dirty"
     }
 
 }

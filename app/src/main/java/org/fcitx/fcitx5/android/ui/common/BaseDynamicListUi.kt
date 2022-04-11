@@ -32,7 +32,7 @@ abstract class BaseDynamicListUi<T>(
     initialEntries: List<T>,
     enableOrder: Boolean = false,
     initCheckBox: (CheckBox.(Int) -> Unit) = { visibility = View.GONE },
-    initSettingsButton: (ImageButton.(Int) -> Unit) = { visibility = View.GONE }
+    initSettingsButton: (ImageButton.(Int) -> Unit) = { visibility = View.GONE },
 ) : Ui,
     DynamicListAdapter<T>(
         initialEntries,
@@ -79,6 +79,9 @@ abstract class BaseDynamicListUi<T>(
         }
     }
 
+
+    var enableUndo = true
+
     init {
         initEditButton = when (mode) {
             is Mode.ChooseOne -> { _ -> visibility = View.GONE }
@@ -97,12 +100,22 @@ abstract class BaseDynamicListUi<T>(
         addOnItemChangedListener(object : OnItemChangedListener<T> {
             override fun onItemAdded(idx: Int, item: T) {
                 updateFAB()
-                showUndoSnackbar(ctx.getString(R.string.added_x, showEntry(item))) { removeItem(idx) }
+                showUndoSnackbar(
+                    ctx.getString(
+                        R.string.added_x,
+                        showEntry(item)
+                    )
+                ) { removeItem(idx) }
             }
 
             override fun onItemRemoved(idx: Int, item: T) {
                 updateFAB()
-                showUndoSnackbar(ctx.getString(R.string.removed_x, showEntry(item))) { addItem(idx, item) }
+                showUndoSnackbar(ctx.getString(R.string.removed_x, showEntry(item))) {
+                    addItem(
+                        idx,
+                        item
+                    )
+                }
             }
 
             override fun onItemUpdated(idx: Int, old: T, new: T) {
@@ -118,7 +131,7 @@ abstract class BaseDynamicListUi<T>(
 
     private fun showUndoSnackbar(text: String, action: View.OnClickListener) {
         Snackbar.make(fab, text, Snackbar.LENGTH_SHORT)
-            .setAction(R.string.undo, action)
+            .apply { if (enableUndo) setAction(R.string.undo, action) }
             .show()
     }
 

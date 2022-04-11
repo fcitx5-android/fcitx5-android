@@ -12,15 +12,18 @@ object QuickPhraseManager {
     )
 
     private val customQuickPhraseDir = File(
-        appContext.getExternalFilesDir(null)!!, "data/quickphrase.d"
+        appContext.getExternalFilesDir(null)!!, "data/data/quickphrase.d"
     ).also { it.mkdirs() }
 
-    fun listQuickPhrase(): List<QuickPhrase> =
-        listDir(builtinQuickPhraseDir) { file ->
-            BuiltinQuickPhrase(file)
-        } + listDir(customQuickPhraseDir) { file ->
-            CustomQuickPhrase(file)
+    fun listQuickPhrase(): List<QuickPhrase> {
+        val builtin = listDir(builtinQuickPhraseDir) { file ->
+            BuiltinQuickPhrase(file, File(customQuickPhraseDir, file.name))
         }
+        val custom = listDir(customQuickPhraseDir) { file ->
+            CustomQuickPhrase(file).takeUnless { cq -> builtin.any { cq.name == it.name } }
+        }
+        return builtin + custom
+    }
 
     fun newEmpty(name: String): CustomQuickPhrase {
         val file = File(customQuickPhraseDir, "$name.${QuickPhrase.EXT}")
@@ -49,13 +52,15 @@ object QuickPhraseManager {
     }
 
 
-    private fun listDir(
+    private fun <T : QuickPhrase> listDir(
         dir: File,
-        block: (File) -> QuickPhrase
-    ): List<QuickPhrase> =
+        block: (File) -> T?
+    ): List<T> =
         dir.listFiles()
             ?.mapNotNull { file ->
-                file.extension.takeIf { ext -> ext == QuickPhrase.EXT }
+                file.name.takeIf { name ->
+                    name.endsWith(".${QuickPhrase.EXT}") || name.endsWith(".${QuickPhrase.EXT}.${QuickPhrase.DISABLE}")
+                }
                     ?.let { block(file) }
             } ?: listOf()
 

@@ -21,6 +21,10 @@ class NaiveDustman<T> {
     var onDirty: (() -> Unit)? = null
     var onClean: (() -> Unit)? = null
 
+    fun forceDirty() {
+        dirty = true
+    }
+
     private fun updateDirtyStatus(key: String, boolean: Boolean) {
         dirtyStatus[key] = boolean
         dirty = newKeys.isNotEmpty() || dirtyStatus.any { it.value }
@@ -43,15 +47,16 @@ class NaiveDustman<T> {
     }
 
     fun remove(key: String) {
-        initialValues.remove(key)
-        newKeys.remove(key)
-        updateDirtyStatus(key, false)
+        val a = initialValues.remove(key) != null
+        val b = newKeys.remove(key)
+        updateDirtyStatus(key, a || !b)
     }
 
 
     fun reset(initial: Map<String, T>) {
         dirty = false
         newKeys.clear()
+        dirtyStatus.clear()
         initialValues.putAll(initial)
     }
 

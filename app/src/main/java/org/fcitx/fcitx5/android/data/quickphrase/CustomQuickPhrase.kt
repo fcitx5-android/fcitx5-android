@@ -4,7 +4,7 @@ import java.io.File
 
 class CustomQuickPhrase(file: File) : QuickPhrase() {
 
-    var isEnabled = false
+    override var isEnabled = false
         private set
 
     override var file: File = file
@@ -13,6 +13,8 @@ class CustomQuickPhrase(file: File) : QuickPhrase() {
     override val name: String
         get() = if (isEnabled) super.name
         else file.name.substringBefore(".$EXT.$DISABLE")
+
+    override fun loadData(): Result<QuickPhraseData> = QuickPhraseData.fromLines(file.readLines())
 
     init {
         ensureFileExists()
@@ -27,7 +29,7 @@ class CustomQuickPhrase(file: File) : QuickPhrase() {
         }
     }
 
-    fun enable() {
+    override fun enable() {
         if (isEnabled)
             return
         val newFile = file.resolveSibling("$name.$EXT")
@@ -36,7 +38,7 @@ class CustomQuickPhrase(file: File) : QuickPhrase() {
         isEnabled = true
     }
 
-    fun disable() {
+    override fun disable() {
         if (!isEnabled)
             return
         val newFile = file.resolveSibling("$name.$EXT.$DISABLE")
@@ -45,11 +47,11 @@ class CustomQuickPhrase(file: File) : QuickPhrase() {
         isEnabled = false
     }
 
-    fun saveData(data: QuickPhraseData) =
+    override fun saveData(data: QuickPhraseData) =
         file.writeText(data.serialize())
 
-    companion object {
-        const val DISABLE = "disable"
+    override fun toString(): String {
+        return "CustomQuickPhrase(isEnabled=$isEnabled, file=$file, name='$name')"
     }
 
 }
