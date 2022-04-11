@@ -79,38 +79,76 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
             QuickPhraseManager.listQuickPhrase(),
             initCheckBox = { idx ->
                 val entry = entries[idx]
-                if (entry is BuiltinQuickPhrase) {
-                    isEnabled = false
-                    isChecked = true
-                } else if (entry is CustomQuickPhrase) {
-                    isEnabled = true
-                    isChecked = entry.isEnabled
-                    setOnClickListener {
-                        ui.updateItem(idx, entry.also {
-                            if (isChecked)
-                                it.enable()
-                            else
-                                it.disable()
-                        })
-                    }
+                isEnabled = true
+                isChecked = entry.isEnabled
+                setOnClickListener {
+                    ui.updateItem(idx, entry.also {
+                        if (isChecked)
+                            it.enable()
+                        else
+                            it.disable()
+                    })
                 }
             },
             initSettingsButton = { idx ->
                 val entry = entries[idx]
-                imageResource = if (entry is CustomQuickPhrase)
-                    R.drawable.ic_baseline_edit_24
+                visibility = if (!entry.isEnabled)
+                    View.GONE
                 else
-                    R.drawable.ic_baseline_search_24
-                setOnClickListener {
+                    View.VISIBLE
+                fun edit() {
                     findNavController().navigate(
                         R.id.action_quickPhraseListFragment_to_quickPhraseEditFragment,
                         bundleOf(QuickPhraseEditFragment.ARG to entry)
                     )
+                    parentFragmentManager.setFragmentResultListener(
+                        QuickPhraseEditFragment.RESULT,
+                        this@QuickPhraseListFragment
+                    ) { _, _ ->
+                        // editor changed file content
+                        dustman.forceDirty()
+                        ui.updateItem(idx, entry)
+                    }
                 }
+                when (entry) {
+                    is BuiltinQuickPhrase -> {
+                        if (entry.override != null) {
+                            imageResource = R.drawable.ic_baseline_expand_more_24
+                            setOnClickListener {
+                                val actions =
+                                    arrayOf(getString(R.string.edit), getString(R.string.reset))
+                                AlertDialog.Builder(requireContext())
+                                    .setItems(actions) { _, i ->
+                                        when (i) {
+                                            0 -> edit()
+                                            1 -> {
+                                                entry.deleteOverride()
+                                                ui.updateItem(idx, entry)
+                                            }
+                                        }
+                                    }
+                                    .show()
+                            }
+                        } else {
+                            imageResource = R.drawable.ic_baseline_edit_24
+                            setOnClickListener {
+                                edit()
+                            }
+                        }
+
+                    }
+                    is CustomQuickPhrase -> {
+                        imageResource = R.drawable.ic_baseline_edit_24
+                        setOnClickListener {
+                            edit()
+                        }
+                    }
+                }
+
             }
         ) {
-
             init {
+                enableUndo = false
                 fab.setOnClickListener {
                     // TODO use expandable fab instead
                     val actions = arrayOf(getString(R.string.import_), getString(R.string.add))
@@ -165,6 +203,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                     viewHolder: RecyclerView.ViewHolder
                 ): Int {
                     // Builtin quick phrase shouldn't be removed
+                    // But it can be disabled
                     if (entries[viewHolder.bindingAdapterPosition] is BuiltinQuickPhrase)
                         return if (it.enableOrder) ItemTouchHelper.UP or ItemTouchHelper.DOWN
                         else ItemTouchHelper.ACTION_STATE_IDLE
@@ -289,11 +328,9 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
 
 
     private fun resetDustman() {
-        dustman.reset(entries.mapNotNull {
-            (it as? CustomQuickPhrase)?.let { cq ->
-                cq.name to cq.isEnabled
-            }
-        }.toMap())
+        dustman.reset(entries.associate {
+            it.name to it.isEnabled
+        })
     }
 
 
@@ -312,7 +349,6 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
     }
 
     override fun onItemAdded(idx: Int, item: QuickPhrase) {
-        item as CustomQuickPhrase
         dustman.addOrUpdate(item.name, item.isEnabled)
     }
 
@@ -322,7 +358,6 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
     }
 
     override fun onItemUpdated(idx: Int, old: QuickPhrase, new: QuickPhrase) {
-        new as CustomQuickPhrase
         dustman.addOrUpdate(new.name, new.isEnabled)
     }
 

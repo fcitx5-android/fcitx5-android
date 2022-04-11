@@ -95,4 +95,5 @@
     <string name="invalid_quickphrase">Invalid type of quick phrase</string>
     <string name="_new">New</string>
     <string name="name">Name</string>
+    <string name="reset">Reset</string>
 </resources>

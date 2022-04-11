@@ -7,6 +7,8 @@ abstract class QuickPhrase : Serializable {
 
     abstract val file: File
 
+    abstract val isEnabled: Boolean
+
     open val name: String
         get() = file.nameWithoutExtension
 
@@ -15,9 +17,16 @@ abstract class QuickPhrase : Serializable {
             throw IllegalStateException("File ${file.absolutePath} does not exist")
     }
 
-    fun loadData() = QuickPhraseData.fromLines(file.readLines())
+    abstract fun loadData(): Result<QuickPhraseData>
+
+    abstract fun saveData(data: QuickPhraseData)
+
+    abstract fun enable()
+
+    abstract fun disable()
 
     companion object {
         const val EXT = "mb"
+        const val DISABLE = "disable"
     }
 }
