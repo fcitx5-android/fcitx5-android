@@ -4,6 +4,7 @@ import java.io.File
 
 class BuiltinQuickPhrase(
     override val file: File,
+    // always be .mb (not disabled)
     private val overrideFile: File
 ) : QuickPhrase() {
 
@@ -12,7 +13,15 @@ class BuiltinQuickPhrase(
     }
 
     var override: CustomQuickPhrase? =
-        overrideFile.takeIf { it.exists() }?.let { CustomQuickPhrase(it) }
+        if (overrideFile.exists())
+            CustomQuickPhrase(overrideFile)
+        else {
+            val disabledOverride = File(overrideFile.path + ".$DISABLE")
+            if (disabledOverride.exists())
+                CustomQuickPhrase(disabledOverride)
+            else
+                null
+        }
         private set
 
     override val isEnabled: Boolean
