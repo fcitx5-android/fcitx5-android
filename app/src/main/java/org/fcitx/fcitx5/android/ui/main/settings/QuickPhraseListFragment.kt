@@ -105,9 +105,9 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                         QuickPhraseEditFragment.RESULT,
                         this@QuickPhraseListFragment
                     ) { _, _ ->
+                        ui.updateItem(idx, entry)
                         // editor changed file content
                         dustman.forceDirty()
-                        ui.updateItem(idx, entry)
                     }
                 }
                 when (entry) {
@@ -124,6 +124,8 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                                             1 -> {
                                                 entry.deleteOverride()
                                                 ui.updateItem(idx, entry)
+                                                // not sure if the content changes
+                                                dustman.forceDirty()
                                             }
                                         }
                                     }
