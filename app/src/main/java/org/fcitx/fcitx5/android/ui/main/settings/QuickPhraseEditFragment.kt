@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.quickphrase.QuickPhrase
 import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseData
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
@@ -65,14 +66,12 @@ class QuickPhraseEditFragment : ProgressFragment(),
             ) {
                 val keywordField = view(::TextInputEditText)
                 val keywordLayout = view(::TextInputLayout).apply {
-                    // TODO
-                    hint = "Keyword"
+                    setHint(R.string.quickphrase_keyword)
                     add(keywordField, lParams(matchParent))
                 }
                 val phraseField = view(::TextInputEditText)
                 val phraseLayout = view(::TextInputLayout).apply {
-                    // TODO
-                    hint = "Phrase"
+                    setHint(R.string.quickphrase_phrase)
                     add(phraseField, lParams(matchParent))
                 }
                 entry?.apply {

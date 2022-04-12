@@ -96,4 +96,6 @@
     <string name="_new">New</string>
     <string name="name">Name</string>
     <string name="reset">Reset</string>
+    <string name="quickphrase_keyword">Keyword</string>
+    <string name="quickphrase_phrase">Phrase</string>
 </resources>
