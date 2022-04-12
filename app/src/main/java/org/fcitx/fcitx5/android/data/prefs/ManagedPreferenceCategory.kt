@@ -38,6 +38,7 @@ abstract class ManagedPreferenceCategory(
     ) {
         this.setTitle(title)
         this.entries = entries.map { it.first }.toTypedArray()
+        this.setDialogTitle(title)
     }.also {
         managedPreferences[key] = it
     }
@@ -56,6 +57,7 @@ abstract class ManagedPreferenceCategory(
     ) {
         this.setTitle(title)
         this.entries = entries
+        this.setDialogTitle(title)
     }.also {
         managedPreferences[key] = it
     }
