@@ -135,6 +135,26 @@ object PreferenceScreenFactory {
             }
         }
 
+        fun chttrans() = Preference(context).apply {
+            setOnPreferenceClickListener {
+                val currentFragment =
+                    fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
+                val action = when (currentFragment) {
+                    is AddonConfigFragment -> R.id.action_addonConfigFragment_self
+                    is InputMethodConfigFragment -> R.id.action_imConfigFragment_to_addonConfigFragment
+                    else -> throw IllegalStateException("Can not navigate to listFragment from current fragment")
+                }
+                currentFragment.findNavController().navigate(
+                    action,
+                    bundleOf(
+                        AddonConfigFragment.ARG_UNIQUE_NAME to "chttrans",
+                        AddonConfigFragment.ARG_NAME to (descriptor.description ?: descriptor.name)
+                    )
+                )
+                true
+            }
+        }
+
         when (descriptor) {
             is ConfigDescriptor.ConfigBool -> SwitchPreferenceCompat(context).apply {
                 setDefaultValue(descriptor.defaultValue)
@@ -152,6 +172,7 @@ object PreferenceScreenFactory {
                 "Punctuation" -> punctuationEditor(descriptor.description ?: descriptor.name)
                 "Editor" -> quickPhraseEditor()
                 "QuickPhrase" -> quickPhraseEditor()
+                "Chttrans" -> chttrans()
                 else -> stubPreference()
             }
             is ConfigDescriptor.ConfigInt -> DialogSeekBarPreference(context).apply {
