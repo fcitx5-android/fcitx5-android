@@ -131,10 +131,10 @@ sealed class ManagedPreference<T : Any, P : Preference>(
         }
 
         override fun getValue(): T =
-            sharedPreferences.getString(key, null)
-                ?.let { codec.decode(it) }
-                ?: throw RuntimeException("Failed to decode")
-
+            sharedPreferences.getString(key, null).let { raw ->
+                raw?.let { codec.decode(it) }
+                    ?: throw RuntimeException("Failed to decode preference [$key] $raw")
+            }
     }
 
     class SeekBarInt(
