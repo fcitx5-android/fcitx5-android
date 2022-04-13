@@ -1,14 +1,9 @@
 package org.fcitx.fcitx5.android.utils
 
 import org.fcitx.fcitx5.android.BuildConfig
-import java.text.SimpleDateFormat
-import java.util.*
 
 object Const {
-    val buildTime: String = SimpleDateFormat(
-        "yyyy-MM-dd'T'HH:mm:ss.ZZZZ",
-        Locale.ROOT
-    ).format(Date(BuildConfig.BUILD_TIME))
+    val buildTime: String = formatDateTime(BuildConfig.BUILD_TIME)
     const val buildGitHash = BuildConfig.BUILD_GIT_HASH
     const val versionName = "${BuildConfig.VERSION_NAME}-${BuildConfig.BUILD_TYPE}"
     const val dataDescriptorName = BuildConfig.DATA_DESCRIPTOR_NAME

@@ -23,6 +23,8 @@ import org.fcitx.fcitx5.android.FcitxApplication
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import splitties.experimental.InternalSplittiesApi
 import splitties.resources.withResolvedThemeAttribute
+import java.text.SimpleDateFormat
+import java.util.*
 
 val InputMethodService.inputConnection: InputConnection?
     get() = currentInputConnection
@@ -100,3 +102,6 @@ inline fun View.styledFloat(@AttrRes attrRes: Int) = context.styledFloat(attrRes
 inline fun Fragment.styledFloat(@AttrRes attrRes: Int) = context!!.styledFloat(attrRes)
 
 fun isUiThread() = Looper.getMainLooper().isCurrentThread
+
+fun formatDateTime(timeMillis: Long? = null): String =
+    SimpleDateFormat.getDateTimeInstance().format(timeMillis?.let { Date(it) } ?: Date())
