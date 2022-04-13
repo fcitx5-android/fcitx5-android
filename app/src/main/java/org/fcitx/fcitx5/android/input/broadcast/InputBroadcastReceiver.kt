@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.input.broadcast
 
 import android.view.inputmethod.EditorInfo
+import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import org.fcitx.fcitx5.android.input.wm.InputWindow
@@ -17,6 +18,8 @@ interface InputBroadcastReceiver {
     fun onImeUpdate(ime: InputMethodEntry) {}
 
     fun onCandidateUpdate(data: Array<String>) {}
+
+    fun onStatusAreaUpdate(actions: Array<Action>) {}
 
     fun onSelectionUpdate(start: Int, end: Int) {}
 
