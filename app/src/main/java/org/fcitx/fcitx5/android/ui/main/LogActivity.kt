@@ -18,7 +18,7 @@ import org.fcitx.fcitx5.android.databinding.ActivityLogBinding
 import org.fcitx.fcitx5.android.ui.common.LogView
 import org.fcitx.fcitx5.android.utils.DeviceInfo
 import org.fcitx.fcitx5.android.utils.Logcat
-import org.fcitx.fcitx5.android.utils.formatDateTime
+import org.fcitx.fcitx5.android.utils.iso8601UTCDateTime
 import java.io.OutputStreamWriter
 
 class LogActivity : AppCompatActivity() {
@@ -96,7 +96,7 @@ class LogActivity : AppCompatActivity() {
                 logView.clear()
             }
             exportButton.setOnClickListener {
-                launcher.launch("$packageName-${formatDateTime()}.txt")
+                launcher.launch("$packageName-${iso8601UTCDateTime()}.txt")
             }
         }
         registerLauncher()
