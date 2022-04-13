@@ -110,6 +110,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
     suspend fun setCapFlags(flags: CapabilityFlags) =
         withFcitxContext { setCapabilityFlags(flags.toLong()) }
 
+    suspend fun statusArea(): Array<Action> =
+        withFcitxContext { getFcitxStatusAreaActions() ?: arrayOf() }
+
     suspend fun activateAction(id: Int) =
         withFcitxContext { activateUserInterfaceAction(id) }
 
@@ -246,6 +249,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
         @JvmStatic
         external fun setCapabilityFlags(flags: Long)
+
+        @JvmStatic
+        external fun getFcitxStatusAreaActions(): Array<Action>?
 
         @JvmStatic
         external fun activateUserInterfaceAction(id: Int)
