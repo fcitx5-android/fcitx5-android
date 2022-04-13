@@ -27,9 +27,9 @@ import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.editing.TextEditingWindow
 import org.fcitx.fcitx5.android.input.preedit.PreeditContent
+import org.fcitx.fcitx5.android.input.status.StatusAreaWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
-import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.inputConnection
 import org.mechdancer.dependency.manager.must
 import splitties.bitflags.hasFlag
@@ -101,8 +101,8 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             it.clipboardButton.setOnClickListener {
                 windowManager.attachWindow(ClipboardWindow())
             }
-            it.settingsButton.setOnClickListener {
-                AppUtil.launchMain(context)
+            it.moreButton.setOnClickListener {
+                windowManager.attachWindow(StatusAreaWindow())
             }
             it.clipboardItem.setOnClickListener {
                 service.inputConnection?.performContextMenuAction(android.R.id.paste)
