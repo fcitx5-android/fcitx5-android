@@ -1,10 +1,12 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
 import android.text.InputType
+import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.widget.FrameLayout
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
-import org.fcitx.fcitx5.android.data.Prefs
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
@@ -28,7 +30,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
     val currentIme
         get() = _currentIme ?: InputMethodEntry(context.str(R.string._not_available_))
 
-    override val view by lazy { context.frameLayout(R.id.keyboard_view) }
+    private lateinit var keyboardView: FrameLayout
 
     private val keyboards: HashMap<String, BaseKeyboard> by lazy {
         hashMapOf(
@@ -41,7 +43,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
         )
     }
     private var currentKeyboardName = EMPTY
-    private var lastSymbolType: String by Prefs.getInstance().lastSymbolLayout
+    private var lastSymbolType: String by AppPrefs.getInstance().internal.lastSymbolLayout
 
     private val currentKeyboard: BaseKeyboard get() = keyboards.getValue(currentKeyboardName)
 
@@ -53,10 +55,16 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
         }
     }
 
+    // This will be called EXACTLY ONCE
+    override fun onCreateView(): View {
+        keyboardView = context.frameLayout(R.id.keyboard_view)
+        return keyboardView
+    }
+
     private fun detachCurrentLayout() {
         keyboards[currentKeyboardName]?.also {
             it.onDetach()
-            view.removeView(it)
+            keyboardView.removeView(it)
             it.keyActionListener = null
         }
     }
@@ -66,7 +74,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
         if (target != TextKeyboard.Name && target != lastSymbolType) {
             lastSymbolType = target
         }
-        view.apply { add(currentKeyboard, lParams(matchParent, matchParent)) }
+        keyboardView.apply { add(currentKeyboard, lParams(matchParent, matchParent)) }
         currentKeyboard.keyActionListener = keyActionListener
         currentKeyboard.onAttach(service.editorInfo)
         currentKeyboard.onInputMethodChange(currentIme)

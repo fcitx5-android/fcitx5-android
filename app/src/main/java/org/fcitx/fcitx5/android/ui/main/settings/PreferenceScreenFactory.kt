@@ -9,7 +9,7 @@ import cn.berberman.girls.utils.either.otherwise
 import cn.berberman.girls.utils.either.then
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.RawConfig
-import org.fcitx.fcitx5.android.data.Prefs
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.ui.common.DialogSeekBarPreference
 import org.fcitx.fcitx5.android.ui.main.settings.addon.AddonConfigFragment
 import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
@@ -18,7 +18,7 @@ import org.fcitx.fcitx5.android.utils.config.ConfigType
 
 object PreferenceScreenFactory {
 
-    private val hideKeyConfig by Prefs.getInstance().hideKeyConfig
+    private val hideKeyConfig by AppPrefs.getInstance().advanced.hideKeyConfig
 
     fun create(
         preferenceManager: PreferenceManager,
@@ -96,6 +96,20 @@ object PreferenceScreenFactory {
             }
         }
 
+        fun quickPhraseEditor() = Preference(context).apply {
+            setOnPreferenceClickListener {
+                val currentFragment =
+                    fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
+                val action = when (currentFragment) {
+                    is AddonConfigFragment -> R.id.action_addonConfigFragment_to_quickPhraseListFragment
+                    is InputMethodConfigFragment -> R.id.action_imConfigFragment_to_quickPhraseListFragment
+                    else -> throw IllegalStateException("Can not navigate to quick phrase editor from current fragment")
+                }
+                currentFragment.findNavController().navigate(action)
+                true
+            }
+        }
+
         fun listPreference() = Preference(context).apply {
             setOnPreferenceClickListener {
                 val currentFragment =
@@ -121,6 +135,26 @@ object PreferenceScreenFactory {
             }
         }
 
+        fun chttrans() = Preference(context).apply {
+            setOnPreferenceClickListener {
+                val currentFragment =
+                    fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
+                val action = when (currentFragment) {
+                    is AddonConfigFragment -> R.id.action_addonConfigFragment_self
+                    is InputMethodConfigFragment -> R.id.action_imConfigFragment_to_addonConfigFragment
+                    else -> throw IllegalStateException("Can not navigate to listFragment from current fragment")
+                }
+                currentFragment.findNavController().navigate(
+                    action,
+                    bundleOf(
+                        AddonConfigFragment.ARG_UNIQUE_NAME to "chttrans",
+                        AddonConfigFragment.ARG_NAME to (descriptor.description ?: descriptor.name)
+                    )
+                )
+                true
+            }
+        }
+
         when (descriptor) {
             is ConfigDescriptor.ConfigBool -> SwitchPreferenceCompat(context).apply {
                 setDefaultValue(descriptor.defaultValue)
@@ -136,6 +170,9 @@ object PreferenceScreenFactory {
             is ConfigDescriptor.ConfigExternal -> when (descriptor.name) {
                 "DictManager" -> pinyinDictionary()
                 "Punctuation" -> punctuationEditor(descriptor.description ?: descriptor.name)
+                "Editor" -> quickPhraseEditor()
+                "QuickPhrase" -> quickPhraseEditor()
+                "Chttrans" -> chttrans()
                 else -> stubPreference()
             }
             is ConfigDescriptor.ConfigInt -> DialogSeekBarPreference(context).apply {

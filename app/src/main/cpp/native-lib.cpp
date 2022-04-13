@@ -583,6 +583,17 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
 }
 
 extern "C"
+JNIEXPORT jstring JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_getFcitxTranslation(JNIEnv *env, jclass clazz, jstring domain, jstring str) {
+    const char *d = env->GetStringUTFChars(domain, nullptr);
+    const char *s = env->GetStringUTFChars(str, nullptr);
+    const char *t = fcitx::translateDomain(d, s);
+    env->ReleaseStringUTFChars(str, s);
+    env->ReleaseStringUTFChars(domain ,d);
+    return env->NewStringUTF(t);
+}
+
+extern "C"
 JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_exitFcitx(JNIEnv *env, jclass clazz) {
     RETURN_IF_NOT_RUNNING

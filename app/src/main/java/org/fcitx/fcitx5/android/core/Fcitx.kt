@@ -9,8 +9,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.DataManager
-import org.fcitx.fcitx5.android.data.Prefs
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import splitties.resources.str
 import timber.log.Timber
 
@@ -23,6 +23,8 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
     val isReady
         get() = lifecycle.currentState == FcitxLifecycle.State.READY
+
+    fun translate(str: String, domain: String = "fcitx5") = getFcitxTranslation(domain, str)
 
     suspend fun save() = withFcitxContext { saveFcitxState() }
     suspend fun sendKey(key: String, state: UInt = 0u, up: Boolean = false) =
@@ -131,7 +133,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
         init {
             System.loadLibrary("native-lib")
-            NativeLib.instance.setup_log_stream(Prefs.getInstance().verboseLog.value) {
+            NativeLib.instance.setup_log_stream(AppPrefs.getInstance().internal.verboseLog.getValue()) {
                 if (it.isEmpty()) return@setup_log_stream
                 when (it.first()) {
                     'F' -> Timber.wtf(it.drop(1))
@@ -151,6 +153,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
             appLib: String,
             extData: String
         )
+
+        @JvmStatic
+        external fun getFcitxTranslation(domain: String, str: String): String
 
         @JvmStatic
         external fun exitFcitx()
@@ -257,7 +262,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         @JvmStatic
         external fun scheduleEmpty()
 
-        private var firstRun by Prefs.getInstance().firstRun
+        private var firstRun by AppPrefs.getInstance().internal.firstRun
 
         /**
          * Called from native-lib

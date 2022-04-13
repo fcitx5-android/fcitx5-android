@@ -21,7 +21,7 @@ class SymbolKey(
     )
 )
 
-class AlphaBetKey(
+class AlphabetKey(
     val character: String,
     val punctuation: String
 ) : KeyDef(
@@ -36,6 +36,29 @@ class AlphaBetKey(
         Behavior.SwipeDown(KeyAction.FcitxKeyAction(punctuation))
     )
 )
+
+class AlphabetDigitKey(
+    val character: String,
+    private val altText: String,
+    val sym: UInt,
+) : KeyDef(
+    Appearance.AltText(
+        displayText = character,
+        altText = altText,
+        textSize = 20f,
+        typeface = Typeface.NORMAL
+    ),
+    setOf(
+        Behavior.Press(KeyAction.FcitxKeyAction(character)),
+        Behavior.SwipeDown(KeyAction.SymAction(sym, NumLockState))
+    )
+) {
+    constructor(char: String, digit: Int) : this(char, digit.toString(), (0xffb0 + digit).toUInt())
+
+    companion object {
+        private val NumLockState = KeyStates(KeyState.NumLock, KeyState.Virtual)
+    }
+}
 
 class CapsKey : KeyDef(
     Appearance.Image(

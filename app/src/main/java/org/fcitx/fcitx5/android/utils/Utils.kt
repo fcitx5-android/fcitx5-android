@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.inputmethodservice.InputMethodService
 import android.net.Uri
+import android.os.Looper
 import android.provider.OpenableColumns
 import android.util.TypedValue
 import android.view.HapticFeedbackConstants
@@ -19,10 +20,11 @@ import androidx.viewpager2.widget.ViewPager2
 import com.sun.jna.Library
 import com.sun.jna.Native
 import org.fcitx.fcitx5.android.FcitxApplication
-import org.fcitx.fcitx5.android.data.Prefs
-import org.fcitx.fcitx5.android.ui.common.AccelerateRepeatingOnTouchListener
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import splitties.experimental.InternalSplittiesApi
 import splitties.resources.withResolvedThemeAttribute
+import java.text.SimpleDateFormat
+import java.util.*
 
 val InputMethodService.inputConnection: InputConnection?
     get() = currentInputConnection
@@ -75,28 +77,13 @@ fun <T : RecyclerView.ViewHolder> RecyclerView.Adapter<T>.onDataChanged(block: (
     })
 
 fun View.hapticIfEnabled() {
-    if (Prefs.getInstance().buttonHapticFeedback.value)
+    if (AppPrefs.getInstance().keyboard.buttonHapticFeedback.getValue())
         performHapticFeedback(
             HapticFeedbackConstants.KEYBOARD_TAP,
             HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING or HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
         )
 }
 
-fun View.setupPressingToRepeat(
-    firstClickInterval: Long = 30L,
-    initialInterval: Long = 200L,
-    endInterval: Long = 30L,
-    accelerateTime: Long = 1000L,
-    block: (View) -> Unit
-) = setOnTouchListener(
-    AccelerateRepeatingOnTouchListener(
-        firstClickInterval,
-        initialInterval,
-        endInterval,
-        accelerateTime,
-        block
-    )
-)
 
 val EditText.str: String get() = editableText.toString()
 
@@ -110,5 +97,20 @@ fun Context.styledFloat(@AttrRes attrRes: Int) = withResolvedThemeAttribute(attr
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun View.styledFloat(@AttrRes attrRes: Int) = context.styledFloat(attrRes)
+
 @Suppress("NOTHING_TO_INLINE")
 inline fun Fragment.styledFloat(@AttrRes attrRes: Int) = context!!.styledFloat(attrRes)
+
+fun isUiThread() = Looper.getMainLooper().isCurrentThread
+
+fun formatDateTime(timeMillis: Long? = null): String =
+    SimpleDateFormat.getDateTimeInstance().format(timeMillis?.let { Date(it) } ?: Date())
+
+private val iso8601DateFormat by lazy {
+    SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
+        timeZone = TimeZone.getTimeZone("UTC")
+    }
+}
+
+fun iso8601UTCDateTime(timeMillis: Long? = null): String =
+    iso8601DateFormat.format(timeMillis?.let { Date(it) } ?: Date())

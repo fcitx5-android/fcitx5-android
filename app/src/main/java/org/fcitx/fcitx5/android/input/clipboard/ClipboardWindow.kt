@@ -5,8 +5,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.data.Prefs
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.State.*
 import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.TransitionEvent.*
@@ -29,16 +30,16 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         )
     }
 
-    private val clipboardEnabledListener = Prefs.OnChangeListener<Boolean> {
+    private val clipboardEnabledListener = ManagedPreference.OnChangeListener<Boolean> {
         stateMachine.push(
-            if (value)
+            if (getValue())
                 if (isClipboardDbEmpty) ClipboardListeningEnabledWithDbEmpty
                 else ClipboardListeningEnabledWithDbNonEmpty
             else ClipboardListeningDisabled
         )
     }
 
-    private val clipboardEnabledPref = Prefs.getInstance().clipboardListening
+    private val clipboardEnabledPref = AppPrefs.getInstance().clipboard.clipboardListening
 
     private fun updateClipboardEntries() {
         service.lifecycleScope.launch {
@@ -71,7 +72,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
                 adapter = this@ClipboardWindow.adapter
             }
             enableUi.enableButton.setOnClickListener {
-                clipboardEnabledPref.value = true
+                clipboardEnabledPref.setValue(true)
             }
             deleteAllButton.setOnClickListener {
                 service.lifecycleScope.launch {
@@ -92,13 +93,11 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         }
     }
 
-    override val view by lazy {
-        ui.root
-    }
+    override fun onCreateView(): View = ui.root
 
     override fun onAttached() {
         val initialState = when {
-            !clipboardEnabledPref.value -> EnableListening
+            !clipboardEnabledPref.getValue() -> EnableListening
             isClipboardDbEmpty -> AddMore
             else -> Normal
         }
@@ -122,7 +121,5 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         context.getString(R.string.clipboard)
     }
 
-    override val barExtension: View by lazy {
-        ui.extension
-    }
+    override fun onCreateBarExtension(): View = ui.extension
 }

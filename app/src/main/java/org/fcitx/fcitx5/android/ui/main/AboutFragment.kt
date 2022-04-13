@@ -29,6 +29,10 @@ class AboutFragment : PreferenceFragmentCompat() {
             setTitle(R.string.privacy_policy)
             isIconSpaceReserved = false
             isSingleLineTitle = false
+            setOnPreferenceClickListener {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Const.privacyPolicyUrl)))
+                true
+            }
         })
 
         screen.addPreference(Preference(context).apply {
@@ -76,6 +80,7 @@ class AboutFragment : PreferenceFragmentCompat() {
         val versionName = Preference(context).apply {
             setTitle(R.string.current_version)
             summary = Const.versionName
+            isCopyingEnabled = true
             isIconSpaceReserved = false
             isSingleLineTitle = false
         }
@@ -86,6 +91,7 @@ class AboutFragment : PreferenceFragmentCompat() {
             isIconSpaceReserved = false
             isSingleLineTitle = false
             summary = Const.buildGitHash
+            isCopyingEnabled = true
             setOnPreferenceClickListener {
                 startActivity(
                     Intent(
@@ -100,6 +106,7 @@ class AboutFragment : PreferenceFragmentCompat() {
             setTitle(R.string.build_time)
             isIconSpaceReserved = false
             isSingleLineTitle = false
+            isCopyingEnabled = true
             summary = Const.buildTime
         })
 

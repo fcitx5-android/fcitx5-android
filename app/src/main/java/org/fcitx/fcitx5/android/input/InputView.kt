@@ -12,7 +12,8 @@ import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Fcitx
 import org.fcitx.fcitx5.android.core.FcitxEvent
-import org.fcitx.fcitx5.android.data.Prefs
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcaster
 import org.fcitx.fcitx5.android.input.candidates.CandidateViewBuilder
@@ -76,8 +77,8 @@ class InputView(
         broadcaster.onScopeSetupFinished(scope)
     }
 
-    private val windowHeightPercent: Int by Prefs.getInstance().keyboardHeightPercent
-    private val windowHeightPercentLandscape: Int by Prefs.getInstance().keyboardHeightPercentLandscape
+    private val windowHeightPercent: Int by AppPrefs.getInstance().keyboard.keyboardHeightPercent
+    private val windowHeightPercentLandscape: Int by AppPrefs.getInstance().keyboard.keyboardHeightPercentLandscape
 
     private val windowHeightPx: Int
         get() {
@@ -88,7 +89,7 @@ class InputView(
             return resources.displayMetrics.heightPixels * percent / 100
         }
 
-    private val onWindowHeightChangeListener = Prefs.OnChangeListener<Int> {
+    private val onWindowHeightChangeListener = ManagedPreference.OnChangeListener<Int> {
         updateKeyboardHeight()
     }
 
@@ -100,7 +101,7 @@ class InputView(
         // MUST call before any operation
         setupScope()
 
-        Prefs.getInstance().keyboardHeightPercent
+        AppPrefs.getInstance().keyboard.keyboardHeightPercent
             .registerOnChangeListener(onWindowHeightChangeListener)
         orientationListener.enable()
 
@@ -129,7 +130,7 @@ class InputView(
 
     override fun onDetachedFromWindow() {
         preedit.dismiss()
-        Prefs.getInstance().keyboardHeightPercent
+        AppPrefs.getInstance().keyboard.keyboardHeightPercent
             .unregisterOnChangeListener(onWindowHeightChangeListener)
         orientationListener.disable()
         super.onDetachedFromWindow()

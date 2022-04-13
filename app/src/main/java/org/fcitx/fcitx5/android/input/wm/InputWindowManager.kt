@@ -12,6 +12,7 @@ import org.fcitx.fcitx5.android.input.broadcast.InputBroadcaster
 import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
+import org.fcitx.fcitx5.android.utils.isUiThread
 import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.must
 import org.mechdancer.dependency.minusAssign
@@ -30,8 +31,9 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
     private val keyboardWindow: KeyboardWindow by manager.must()
     private lateinit var scope: DynamicScope
 
-    var currentWindow: InputWindow? = null
-        private set
+    private var keyboardView: View? = null
+    private var currentWindow: InputWindow? = null
+    private var currentView: View? = null
 
     private fun prepareAnimation(remove: View, add: View) {
         val slide = Slide().apply {
@@ -51,26 +53,39 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
      * Attach a new window, removing the old one
      */
     fun attachWindow(window: InputWindow) {
+        ensureThread()
         if (window == currentWindow)
             throw IllegalArgumentException("$window is already attached")
         // add the new window to scope
         scope += window
-        currentWindow?.let {
-            prepareAnimation(it.view, window.view)
+        val newView =
+            // we keep the view for keyboard window
+            if (window === keyboardWindow && keyboardView != null) {
+                keyboardView!!
+            } else if (window === keyboardWindow && keyboardView == null) {
+                window.onCreateView().also { keyboardView = it }
+            } else {
+                window.onCreateView()
+            }
+        if (currentWindow != null) {
+            val oldWindow = currentWindow!!
+            val oldView = currentView!!
+            prepareAnimation(oldView, newView)
             // notify the window that it will be detached
-            it.onDetached()
+            oldWindow.onDetached()
             // remove the old window from layout
-            view.removeView(it.view)
+            view.removeView(oldView)
             // broadcast the old window was removed from layout
-            broadcaster.onWindowDetached(it)
-            Timber.d("Detach $it")
+            broadcaster.onWindowDetached(oldWindow)
+            Timber.d("Detach $oldWindow")
             // finally remove the old window from scope only if it's not keyboard window,
             // because keyboard window is always in scope
-            if (it !is KeyboardWindow)
-                scope -= it
+            if (oldWindow !== keyboardWindow)
+                scope -= oldWindow
         }
         // add the new window to layout
-        view.apply { add(window.view, lParams(matchParent, matchParent)) }
+        view.apply { add(newView, lParams(matchParent, matchParent)) }
+        currentView = newView
         Timber.d("Attach $window")
         // notify the window it was attached
         window.onAttached()
@@ -83,6 +98,7 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
      * Remove current window and attach keyboard window
      */
     fun switchToKeyboardWindow() {
+        ensureThread()
         if (currentWindow === keyboardWindow) {
             return
         }
@@ -93,5 +109,10 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
 
     override fun onScopeSetupFinished(scope: DynamicScope) {
         this.scope = scope
+    }
+
+    private fun ensureThread() {
+        if (!isUiThread())
+            throw IllegalThreadStateException("Window manager must be operated in main thread!")
     }
 }

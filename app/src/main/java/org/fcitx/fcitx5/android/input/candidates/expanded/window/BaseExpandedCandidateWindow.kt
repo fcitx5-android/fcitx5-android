@@ -1,5 +1,7 @@
 package org.fcitx.fcitx5.android.input.candidates.expanded.window
 
+import android.view.View
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
@@ -28,11 +30,16 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
     private val horizontalCandidate: HorizontalCandidateComponent by manager.must()
     private val windowManager: InputWindowManager by manager.must()
 
-    private val lifecycleCoroutineScope by lazy {
-        view.findViewTreeLifecycleOwner()!!.lifecycleScope
-    }
+    private lateinit var lifecycleCoroutineScope: LifecycleCoroutineScope
+    protected lateinit var candidateLayout: ExpandedCandidateLayout
+        private set
 
-    abstract override val view: ExpandedCandidateLayout
+    abstract fun onCreateCandidateLayout(): ExpandedCandidateLayout
+
+    final override fun onCreateView(): View {
+        candidateLayout = onCreateCandidateLayout()
+        return candidateLayout
+    }
 
     private val keyActionListener = BaseKeyboard.KeyActionListener {
         if (it is KeyAction.LayoutSwitchAction) {
@@ -54,8 +61,9 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
     abstract fun nextPage()
 
     override fun onAttached() {
+        lifecycleCoroutineScope = candidateLayout.findViewTreeLifecycleOwner()!!.lifecycleScope
         bar.expandButtonStateMachine.push(ExpandedCandidatesAttached)
-        view.embeddedKeyboard.keyActionListener = keyActionListener
+        candidateLayout.embeddedKeyboard.keyActionListener = keyActionListener
         offsetJob = horizontalCandidate.expandedCandidateOffset.onEach {
             adapter.updateCandidatesWithOffset(horizontalCandidate.adapter.candidates, it)
         }.launchIn(lifecycleCoroutineScope)
@@ -70,7 +78,7 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
         )
         offsetJob?.cancel()
         offsetJob = null
-        view.embeddedKeyboard.keyActionListener = null
+        candidateLayout.embeddedKeyboard.keyActionListener = null
     }
 
     override fun onCandidateUpdate(data: Array<String>) {
@@ -78,6 +86,6 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
             windowManager.switchToKeyboardWindow()
             return
         }
-        view.resetPosition()
+        candidateLayout.resetPosition()
     }
 }

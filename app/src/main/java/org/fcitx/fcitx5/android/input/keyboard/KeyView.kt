@@ -6,8 +6,6 @@ import android.content.res.Configuration
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
-import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.StateListDrawable
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.updateLayoutParams
@@ -16,6 +14,7 @@ import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.resources.styledColor
 import splitties.resources.styledColorSL
+import splitties.resources.styledDrawable
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.imageDrawable
@@ -32,11 +31,7 @@ abstract class KeyView(ctx: Context, val def: KeyDef.Appearance) : CustomGesture
         // sync pressed state from parent
         isDuplicateParentStateEnabled = true
         // pressed highlight
-        foreground = StateListDrawable().apply {
-            addState(intArrayOf(android.R.attr.state_pressed), GradientDrawable().apply {
-                setColor(styledColor(android.R.attr.colorControlHighlight))
-            })
-        }
+        foreground = styledDrawable(android.R.attr.selectableItemBackground)
         add(layout, lParams(matchParent, matchParent))
     }
 

@@ -11,8 +11,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.data.Prefs
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.*
 import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.*
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.*
@@ -48,8 +48,8 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     private val service by manager.inputMethodService()
     private val horizontalCandidate: HorizontalCandidateComponent by manager.must()
 
-    private val clipboardItemTimeout by Prefs.getInstance().clipboardItemTimeout
-    private val expandedCandidateStyle by Prefs.getInstance().expandedCandidateStyle
+    private val clipboardItemTimeout by AppPrefs.getInstance().clipboard.clipboardItemTimeout
+    private val expandedCandidateStyle by AppPrefs.getInstance().keyboard.expandedCandidateStyle
 
     private var clipboardTimeoutJob: Job? = null
 
@@ -223,7 +223,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         when (window) {
             is InputWindow.ExtendedInputWindow<*> -> {
                 titleUi.setTitle(window.title)
-                window.barExtension?.let { titleUi.addExtension(it) }
+                window.onCreateBarExtension()?.let { titleUi.addExtension(it) }
                 titleUi.setReturnButtonOnClickListener {
                     windowManager.switchToKeyboardWindow()
                 }
