@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.input.broadcast
 
 import android.view.inputmethod.EditorInfo
+import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import org.fcitx.fcitx5.android.input.wm.InputWindow
@@ -43,6 +44,10 @@ class InputBroadcaster : UniqueComponent<InputBroadcaster>(), Dependent, InputBr
 
     override fun onCandidateUpdate(data: Array<String>) {
         receivers.forEach { it.onCandidateUpdate(data) }
+    }
+
+    override fun onStatusAreaUpdate(actions: Array<Action>) {
+        receivers.forEach { it.onStatusAreaUpdate(actions) }
     }
 
     override fun onSelectionUpdate(start: Int, end: Int) {

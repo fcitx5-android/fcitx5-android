@@ -161,6 +161,9 @@ class InputView(
             is FcitxEvent.IMChangeEvent -> {
                 broadcaster.onImeUpdate(it.data)
             }
+            is FcitxEvent.StatusAreaEvent -> {
+                broadcaster.onStatusAreaUpdate(it.data)
+            }
             else -> {
             }
         }
