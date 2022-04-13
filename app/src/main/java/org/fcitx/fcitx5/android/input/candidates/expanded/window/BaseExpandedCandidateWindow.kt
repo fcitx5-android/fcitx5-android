@@ -17,6 +17,7 @@ import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateLayou
 import org.fcitx.fcitx5.android.input.keyboard.BaseKeyboard
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction
+import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.mechdancer.dependency.manager.must
@@ -87,5 +88,11 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
             return
         }
         candidateLayout.resetPosition()
+    }
+
+    override fun onPreeditUpdate(content: PreeditContent) {
+        if (content.preedit.run { preedit.isEmpty() && clientPreedit.isEmpty() }) {
+            windowManager.switchToKeyboardWindow()
+        }
     }
 }
