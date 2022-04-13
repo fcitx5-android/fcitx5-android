@@ -90,8 +90,6 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
         init: (FlexboxLayoutManager.() -> Unit)? = null
     ) {
         layoutManager = object : FlexboxLayoutManager(context) {
-            // there is a bug in measuring if the recycler view is used with linear layout with weight
-            override fun isAutoMeasureEnabled(): Boolean = false
             override fun generateLayoutParams(lp: ViewGroup.LayoutParams?) =
                 LayoutParams(lp).apply {
                     flexGrow = 1f

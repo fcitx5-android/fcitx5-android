@@ -2,22 +2,21 @@ package org.fcitx.fcitx5.android.input.candidates.expanded
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.widget.LinearLayout
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.input.keyboard.*
 import splitties.resources.styledColor
 import splitties.views.backgroundColor
+import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.add
-import splitties.views.dsl.core.lParams
-import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.recyclerview.recyclerView
 
 @SuppressLint("ViewConstructor")
 class ExpandedCandidateLayout(
     context: Context,
     initRecyclerView: RecyclerView.() -> Unit = {}
-) : LinearLayout(context) {
+) : ConstraintLayout(context) {
 
     class Keyboard(context: Context) : BaseKeyboard(context, Layout) {
         companion object {
@@ -68,12 +67,21 @@ class ExpandedCandidateLayout(
 
     init {
         id = R.id.expanded_candidate_view
-        weightSum = 1f
-        orientation = HORIZONTAL
         backgroundColor = styledColor(android.R.attr.colorBackground)
 
-        add(recyclerView, lParams(0, matchParent) { weight = 0.85f })
-        add(embeddedKeyboard, lParams(0, matchParent) { weight = 0.15f })
+        add(recyclerView, lParams {
+            topOfParent()
+            startOfParent()
+            before(embeddedKeyboard)
+            bottomOfParent()
+        })
+        add(embeddedKeyboard, lParams {
+            matchConstraintPercentWidth = 0.15f
+            topOfParent()
+            after(recyclerView)
+            endOfParent()
+            bottomOfParent()
+        })
 
         initRecyclerView(recyclerView)
     }
