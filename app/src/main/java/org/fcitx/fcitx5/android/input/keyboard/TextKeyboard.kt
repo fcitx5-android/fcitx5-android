@@ -23,37 +23,37 @@ class TextKeyboard(
 
         val Layout: List<List<KeyDef>> = listOf(
             listOf(
-                AlphaBetKey("Q", "1"),
-                AlphaBetKey("W", "2"),
-                AlphaBetKey("E", "3"),
-                AlphaBetKey("R", "4"),
-                AlphaBetKey("T", "5"),
-                AlphaBetKey("Y", "6"),
-                AlphaBetKey("U", "7"),
-                AlphaBetKey("I", "8"),
-                AlphaBetKey("O", "9"),
-                AlphaBetKey("P", "0")
+                AlphabetDigitKey("Q", 1),
+                AlphabetDigitKey("W", 2),
+                AlphabetDigitKey("E", 3),
+                AlphabetDigitKey("R", 4),
+                AlphabetDigitKey("T", 5),
+                AlphabetDigitKey("Y", 6),
+                AlphabetDigitKey("U", 7),
+                AlphabetDigitKey("I", 8),
+                AlphabetDigitKey("O", 9),
+                AlphabetDigitKey("P", 0)
             ),
             listOf(
-                AlphaBetKey("A", "@"),
-                AlphaBetKey("S", "`"),
-                AlphaBetKey("D", "$"),
-                AlphaBetKey("F", "_"),
-                AlphaBetKey("G", "&"),
-                AlphaBetKey("H", "/"),
-                AlphaBetKey("J", ";"),
-                AlphaBetKey("K", "("),
-                AlphaBetKey("L", ")")
+                AlphabetKey("A", "@"),
+                AlphabetKey("S", "`"),
+                AlphabetKey("D", "$"),
+                AlphabetKey("F", "_"),
+                AlphabetKey("G", "&"),
+                AlphabetKey("H", "/"),
+                AlphabetKey("J", ";"),
+                AlphabetKey("K", "("),
+                AlphabetKey("L", ")")
             ),
             listOf(
                 CapsKey(),
-                AlphaBetKey("Z", "'"),
-                AlphaBetKey("X", ":"),
-                AlphaBetKey("C", "\""),
-                AlphaBetKey("V", "?"),
-                AlphaBetKey("B", "!"),
-                AlphaBetKey("N", "~"),
-                AlphaBetKey("M", "\\"),
+                AlphabetKey("Z", "'"),
+                AlphabetKey("X", ":"),
+                AlphabetKey("C", "\""),
+                AlphabetKey("V", "?"),
+                AlphabetKey("B", "!"),
+                AlphabetKey("N", "~"),
+                AlphabetKey("M", "\\"),
                 BackspaceKey()
             ),
             listOf(
@@ -61,7 +61,7 @@ class TextKeyboard(
                 QuickPhraseKey(),
                 LanguageKey(),
                 SpaceKey(),
-                AlphaBetKey(",", "."),
+                AlphabetKey(",", "."),
                 ReturnKey()
             ),
         )
