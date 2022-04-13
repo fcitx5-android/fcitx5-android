@@ -558,7 +558,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
     auto statusAreaUpdateCallback = []() {
         auto env = GlobalRef->AttachEnv();
         const auto actions = Fcitx::Instance().statusAreaActions();
-        jobjectArray vararg = env->NewObjectArray(static_cast<int>(actions.size()), GlobalRef->Object, nullptr);
+        jobjectArray vararg = env->NewObjectArray(static_cast<int>(actions.size()), GlobalRef->Action, nullptr);
         for (int i = 0; i < actions.size(); i++) {
             auto obj = fcitxActionToJObject(env, actions[i]);
             env->SetObjectArrayElement(vararg, i, obj);
