@@ -10,4 +10,5 @@ object Const {
     const val githubRepo = "https://github.com/fcitx5-android/fcitx5-android"
     const val lgpl = "LGPL-2.1-or-later"
     const val lgplLicenseUrl = "https://www.gnu.org/licenses/old-licenses/lgpl-2.1"
+    const val privacyPolicyUrl = "https://gist.github.com/android-fcitx5/107177d3aeda194a8035a468e72ff1ef"
 }

@@ -29,6 +29,10 @@ class AboutFragment : PreferenceFragmentCompat() {
             setTitle(R.string.privacy_policy)
             isIconSpaceReserved = false
             isSingleLineTitle = false
+            setOnPreferenceClickListener {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Const.privacyPolicyUrl)))
+                true
+            }
         })
 
         screen.addPreference(Preference(context).apply {
