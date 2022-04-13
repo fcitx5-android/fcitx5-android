@@ -953,6 +953,20 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_setCapabilityFlags(JNIEnv *env, jclass 
 }
 
 extern "C"
+JNIEXPORT jobjectArray JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_getFcitxStatusAreaActions(JNIEnv *env, jclass clazz) {
+    RETURN_VALUE_IF_NOT_RUNNING(nullptr)
+    const auto actions = Fcitx::Instance().statusAreaActions();
+    jobjectArray array = env->NewObjectArray(static_cast<int>(actions.size()), GlobalRef->Action, nullptr);
+    for (int i = 0; i < actions.size(); i++) {
+        auto obj = fcitxActionToJObject(env, actions[i]);
+        env->SetObjectArrayElement(array, i, obj);
+        env->DeleteLocalRef(obj);
+    }
+    return array;
+}
+
+extern "C"
 JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_activateUserInterfaceAction(JNIEnv *env, jclass clazz, jint id) {
     RETURN_IF_NOT_RUNNING
