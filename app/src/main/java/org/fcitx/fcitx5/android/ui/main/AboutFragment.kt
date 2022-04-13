@@ -10,6 +10,7 @@ import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.utils.Const
+import org.fcitx.fcitx5.android.utils.formatDateTime
 
 class AboutFragment : PreferenceFragmentCompat() {
 
@@ -107,7 +108,7 @@ class AboutFragment : PreferenceFragmentCompat() {
             isIconSpaceReserved = false
             isSingleLineTitle = false
             isCopyingEnabled = true
-            summary = Const.buildTime
+            summary = formatDateTime(Const.buildTime)
         })
 
         preferenceScreen = screen

@@ -16,6 +16,7 @@ import org.fcitx.fcitx5.android.FcitxApplication
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.databinding.ActivityLogBinding
 import org.fcitx.fcitx5.android.ui.common.LogView
+import org.fcitx.fcitx5.android.utils.Const
 import org.fcitx.fcitx5.android.utils.DeviceInfo
 import org.fcitx.fcitx5.android.utils.Logcat
 import org.fcitx.fcitx5.android.utils.iso8601UTCDateTime
@@ -37,6 +38,10 @@ class LogActivity : AppCompatActivity() {
                         .currentLog
                         .let { log ->
                             runCatching {
+                                it.write("--------- Build Info\n")
+                                it.write("Build Time: ${iso8601UTCDateTime(Const.buildTime)}\n")
+                                it.write("Build Git Hash: ${Const.buildGitHash}\n")
+                                it.write("Build Version Name: ${Const.versionName}\n")
                                 it.write("--------- Device Info\n")
                                 it.write(DeviceInfo.get(this@LogActivity))
                                 it.write(log.toString())
