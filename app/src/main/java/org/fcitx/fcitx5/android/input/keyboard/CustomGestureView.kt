@@ -41,8 +41,8 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
     var swipeThresholdX = 24f
     var swipeThresholdY = 24f
 
-    @Volatile
-    private var swipeTriggered = false
+    private var maybeSwipeOnKeyUp = false
+    private var swipeRepeatTriggered = false
     private var swipeLastX = -1f
     private var swipeLastY = -1f
     private var swipeXUnconsumed = 0f
@@ -77,7 +77,7 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                     longPressJob?.cancel()
                     longPressJob = lifecycleScope.launch {
                         delay(longPressDelay.toLong())
-                        if (!swipeTriggered) {
+                        if (!(maybeSwipeOnKeyUp || swipeRepeatTriggered)) {
                             longPressTriggered = true
                             performLongClick()
                         }
@@ -104,7 +104,7 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
             MotionEvent.ACTION_UP -> {
                 isPressed = false
 
-                val shouldPerformClick = !(longPressTriggered || swipeTriggered || repeatStarted)
+                var shouldPerformClick = !(longPressTriggered || repeatStarted)
 
                 if (longPressEnabled) {
                     longPressTriggered = false
@@ -117,10 +117,19 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                     repeatStarted = false
                 }
                 if (swipeEnabled) {
+                    if (maybeSwipeOnKeyUp && swipeXUnconsumed.absoluteValue > swipeThresholdX) {
+                        shouldPerformClick = false
+                        swipeX(swipeXUnconsumed.sign)
+                    } else if (maybeSwipeOnKeyUp && swipeYUnconsumed.absoluteValue > swipeThresholdY) {
+                        shouldPerformClick = false
+                        swipeY(swipeYUnconsumed.sign)
+                    } else if (maybeSwipeOnKeyUp)
+                        shouldPerformClick = !swipeRepeatTriggered && shouldPerformClick
                     swipeXUnconsumed = 0f
                     swipeYUnconsumed = 0f
-                    swipeTriggered = false
                 }
+                if (swipeRepeatEnabled)
+                    swipeRepeatTriggered = false
 
                 if (shouldPerformClick) {
                     if (doubleTapEnabled) {
@@ -146,26 +155,24 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                     swipeLastX = x
                     swipeLastY = y
                     while (swipeXUnconsumed.absoluteValue > swipeThresholdX) {
-                        if ((longPressTriggered || swipeTriggered) && !swipeRepeatEnabled) return true
-                        swipeTriggered = true
+                        if ((longPressTriggered || maybeSwipeOnKeyUp) && !swipeRepeatEnabled) return true
+                        maybeSwipeOnKeyUp = true
                         val direction = swipeXUnconsumed.sign
-                        swipeXUnconsumed -= direction * swipeThresholdX
-                        if (direction > 0) {
-                            onSwipeRightListener?.invoke(this)
-                        } else {
-                            onSwipeLeftListener?.invoke(this)
+                        if (swipeRepeatEnabled) {
+                            swipeRepeatTriggered = true
+                            swipeX(direction)
                         }
+                        swipeXUnconsumed -= direction * swipeThresholdX
                     }
                     while (swipeYUnconsumed.absoluteValue > swipeThresholdY) {
-                        if ((longPressTriggered || swipeTriggered) && !swipeRepeatEnabled) return true
-                        swipeTriggered = true
+                        if ((longPressTriggered || maybeSwipeOnKeyUp) && !swipeRepeatEnabled) return true
+                        maybeSwipeOnKeyUp = true
                         val direction = swipeYUnconsumed.sign
-                        swipeYUnconsumed -= direction * swipeThresholdX
-                        if (direction > 0) {
-                            onSwipeDownListener?.invoke(this)
-                        } else {
-                            onSwipeUpListener?.invoke(this)
+                        if (swipeRepeatEnabled) {
+                            swipeRepeatTriggered = true
+                            swipeY(direction)
                         }
+                        swipeYUnconsumed -= direction * swipeThresholdY
                     }
                     return true
                 }
@@ -181,15 +188,33 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                     repeatJob = null
                 }
                 if (swipeEnabled) {
-                    swipeTriggered = false
+                    maybeSwipeOnKeyUp = false
                     swipeXUnconsumed = 0f
                     swipeYUnconsumed = 0f
                 }
+                if (swipeRepeatEnabled)
+                    swipeRepeatTriggered = false
                 isPressed = false
                 return true
             }
         }
         return true
+    }
+
+    private fun swipeX(direction: Float) {
+        if (direction > 0) {
+            onSwipeRightListener?.invoke(this)
+        } else {
+            onSwipeLeftListener?.invoke(this)
+        }
+    }
+
+    private fun swipeY(direction: Float) {
+        if (direction > 0) {
+            onSwipeDownListener?.invoke(this)
+        } else {
+            onSwipeUpListener?.invoke(this)
+        }
     }
 
     override fun setOnLongClickListener(l: OnLongClickListener?) {
