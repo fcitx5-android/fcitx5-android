@@ -66,12 +66,10 @@ sealed class FcitxEvent<T>(open val data: T) {
         data class Data(val sym: KeySym, val states: KeyStates, val unicode: Int, val up: Boolean)
     }
 
-    data class IMChangeEvent(override val data: Data) :
-        FcitxEvent<IMChangeEvent.Data>(data) {
+    data class IMChangeEvent(override val data: InputMethodEntry) :
+        FcitxEvent<InputMethodEntry>(data) {
         override val eventType: EventType
             get() = EventType.Change
-
-        data class Data(val status: InputMethodEntry)
     }
 
     data class StatusAreaEvent(override val data: Array<Action>) :
@@ -147,7 +145,7 @@ sealed class FcitxEvent<T>(open val data: T) {
                 EventType.Key -> KeyEvent(
                     KeyEvent.Data(KeySym.of(params[0] as Int), KeyStates.of(params[1] as Int), params[2] as Int, params[3] as Boolean)
                 )
-                EventType.Change -> IMChangeEvent(IMChangeEvent.Data(params[0] as InputMethodEntry))
+                EventType.Change -> IMChangeEvent(params[0] as InputMethodEntry)
                 EventType.StatusArea -> StatusAreaEvent(params as Array<Action>)
                 else -> UnknownEvent(params)
             }

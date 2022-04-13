@@ -160,7 +160,7 @@ class InputView(
                 preedit.updateAux(it)
             }
             is FcitxEvent.IMChangeEvent -> {
-                broadcaster.onImeUpdate(it.data.status)
+                broadcaster.onImeUpdate(it.data)
             }
             else -> {
             }
