@@ -86,7 +86,7 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
 
         val clipboardButton = toolButton(R.drawable.ic_clipboard)
 
-        val settingsButton = toolButton(R.drawable.ic_baseline_settings_24)
+        val moreButton = toolButton(R.drawable.ic_baseline_more_horiz_24)
 
         val hideKeyboardButton = imageButton {
             background = styledDrawable(android.R.attr.actionBarItemBackground)
@@ -108,8 +108,8 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
             addButton(undoButton) { startOfParent(); before(redoButton) }
             addButton(redoButton) { after(undoButton); before(cursorMoveButton) }
             addButton(cursorMoveButton) { after(redoButton); before(clipboardButton) }
-            addButton(clipboardButton) { after(cursorMoveButton); before(settingsButton) }
-            addButton(settingsButton) { after(clipboardButton); endOfParent() }
+            addButton(clipboardButton) { after(cursorMoveButton); before(moreButton) }
+            addButton(moreButton) { after(clipboardButton); endOfParent() }
         }
 
         private val clipboardText = textView {
