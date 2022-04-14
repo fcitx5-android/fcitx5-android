@@ -38,9 +38,18 @@ class MainViewModel : ViewModel() {
         aboutButton.value = false
     }
 
+    val listeners = hashSetOf<MainViewModel.() -> Unit>()
+
+    fun onBindFcitxInstance(block: MainViewModel.() -> Unit) {
+        if (this::fcitx.isInitialized) block.invoke(this)
+        else listeners.add(block)
+    }
+
     init {
         FcitxDaemonManager.bindFcitxDaemon(javaClass.name) {
             fcitx = getFcitxDaemon().fcitx
+            listeners.forEach { it.invoke(this@MainViewModel) }
+            listeners.clear()
         }
     }
 

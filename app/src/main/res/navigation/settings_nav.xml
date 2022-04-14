@@ -31,6 +31,13 @@
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
+            android:id="@+id/action_mainFragment_to_imConfigFragment"
+            app:destination="@id/imConfigFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
             android:id="@+id/action_mainFragment_to_behaviorSettingsFragment"
             app:destination="@id/behaviorSettingsFragment"
             app:enterAnim="@anim/nav_default_enter_anim"

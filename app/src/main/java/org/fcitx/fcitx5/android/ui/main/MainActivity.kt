@@ -69,6 +69,7 @@ class MainActivity : AppCompatActivity() {
     private fun processIntent(intent: Intent?) {
         listOf(
             ::processAddDictIntent,
+            ::processConfigIntent,
             ::processAddInputMethodIntent
         ).firstOrNull { it(intent) }
     }
@@ -92,6 +93,29 @@ class MainActivity : AppCompatActivity() {
                     .show()
             }
             return true
+        }
+        return false
+    }
+
+    private fun processConfigIntent(intent: Intent?): Boolean {
+        intent?.getStringExtra(INTENT_DATA_CONFIG)?.let {
+            val target: Pair<Int, Bundle?> = when (it) {
+                INTENT_DATA_CONFIG_GLOBAL ->
+                    Pair(R.id.action_mainFragment_to_globalConfigFragment, null)
+                INTENT_DATA_CONFIG_IM -> Pair(
+                    R.id.action_mainFragment_to_imConfigFragment,
+                    intent.getBundleExtra(INTENT_DATA_CONFIG_IM) ?: return false
+                )
+                INTENT_DATA_CONFIG_BEHAVIOR ->
+                    Pair(R.id.action_mainFragment_to_behaviorSettingsFragment, null)
+                else -> return false
+            }
+            viewModel.onBindFcitxInstance {
+                navHostFragment.navController.apply {
+                    popBackStack(R.id.mainFragment, false)
+                    navigate(target.first, target.second)
+                }
+            }
         }
         return false
     }
@@ -148,6 +172,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val INTENT_DATA_ADD_IM = "im"
+        const val INTENT_DATA_ADD_IM = "add_im"
+        const val INTENT_DATA_CONFIG = "config"
+        const val INTENT_DATA_CONFIG_GLOBAL = "global"
+        const val INTENT_DATA_CONFIG_IM = "im"
+        const val INTENT_DATA_CONFIG_BEHAVIOR = "behavior"
     }
 }
