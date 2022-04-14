@@ -109,7 +109,9 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        arguments?.get("uri")?.let { it as? Uri }?.let { importFromUri(it) }
+        arguments?.get(INTENT_DATA_URI)
+            ?.let { it as? Uri }
+            ?.let { importFromUri(it) }
         super.onViewCreated(view, savedInstanceState)
     }
 
@@ -246,5 +248,6 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
         private var RELOAD_ID = 0
         private var IMPORT_ID = 0
         const val CHANNEL_ID = "pinyin_dict"
+        const val INTENT_DATA_URI = "uri"
     }
 }
