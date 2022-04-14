@@ -1,6 +1,8 @@
 package org.fcitx.fcitx5.android.input.status
 
 import android.widget.ImageView
+import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
@@ -10,7 +12,10 @@ import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
+import org.fcitx.fcitx5.android.input.status.StatusAreaEntry.Android.Type.*
 import org.fcitx.fcitx5.android.input.wm.InputWindow
+import org.fcitx.fcitx5.android.ui.main.MainActivity
+import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
 import org.fcitx.fcitx5.android.utils.AppUtil
 import splitties.dimensions.dp
 import splitties.resources.styledDrawable
@@ -28,11 +33,59 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
     private val service: FcitxInputMethodService by manager.inputMethodService()
     private val fcitx: Fcitx by manager.fcitx()
 
+    private val staticEntries by lazy {
+        arrayOf(
+            StatusAreaEntry.Android(
+                context.getString(R.string.global_options),
+                R.drawable.ic_baseline_tune_24,
+                GlobalOptions
+            ),
+            StatusAreaEntry.Android(
+                context.getString(R.string.input_method_options),
+                R.drawable.ic_baseline_language_24,
+                InputMethod
+            ),
+            StatusAreaEntry.Android(
+                context.getString(R.string.reload_config),
+                R.drawable.ic_baseline_sync_24,
+                ReloadConfig
+            ),
+            StatusAreaEntry.Android(
+                context.getString(R.string.behavior),
+                R.drawable.ic_baseline_keyboard_24,
+                Behavior
+            )
+        )
+    }
+
     private val adapter: StatusAreaAdapter by lazy {
         object : StatusAreaAdapter() {
-            override fun onItemClick(actionId: Int) {
+            override fun onItemClick(it: StatusAreaEntry) {
                 service.lifecycleScope.launch {
-                    fcitx.activateAction(actionId)
+                    when (it) {
+                        is StatusAreaEntry.Fcitx -> fcitx.activateAction(it.action.id)
+                        is StatusAreaEntry.Android -> when (it.type) {
+                            GlobalOptions -> AppUtil.launchMainToConfig(
+                                context, MainActivity.INTENT_DATA_CONFIG_GLOBAL
+                            )
+                            InputMethod -> fcitx.currentIme().let {
+                                AppUtil.launchMainToConfig(
+                                    context, MainActivity.INTENT_DATA_CONFIG_IM,
+                                    bundleOf(
+                                        InputMethodConfigFragment.ARG_NAME to it.displayName,
+                                        InputMethodConfigFragment.ARG_UNIQUE_NAME to it.uniqueName
+                                    )
+                                )
+                            }
+                            ReloadConfig -> {
+                                fcitx.reloadConfig()
+                                Toast.makeText(service, R.string.done, Toast.LENGTH_SHORT).show()
+                            }
+                            Behavior -> AppUtil.launchMainToConfig(
+                                context, MainActivity.INTENT_DATA_CONFIG_BEHAVIOR
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -46,7 +99,10 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
     }
 
     override fun onStatusAreaUpdate(actions: Array<Action>) {
-        adapter.entries = actions
+        adapter.entries = arrayOf(
+            *staticEntries,
+            *actions.map { StatusAreaEntry.fromAction(it) }.toTypedArray()
+        )
     }
 
     override fun onCreateView() = view.apply {
@@ -75,7 +131,7 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
 
     override fun onAttached() {
         service.lifecycleScope.launch {
-            adapter.entries = fcitx.statusArea()
+            onStatusAreaUpdate(fcitx.statusArea())
         }
     }
 

@@ -3,12 +3,11 @@ package org.fcitx.fcitx5.android.input.status
 import android.annotation.SuppressLint
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import org.fcitx.fcitx5.android.core.Action
 
 abstract class StatusAreaAdapter : RecyclerView.Adapter<StatusAreaAdapter.Holder>() {
     inner class Holder(val ui: StatusAreaEntryUi) : RecyclerView.ViewHolder(ui.root)
 
-    var entries: Array<Action> = arrayOf()
+    var entries: Array<StatusAreaEntry> = arrayOf()
         @SuppressLint("NotifyDataSetChanged")
         set(value) {
             field = value
@@ -20,14 +19,15 @@ abstract class StatusAreaAdapter : RecyclerView.Adapter<StatusAreaAdapter.Holder
     }
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
-        val action = entries[position]
-        holder.ui.setAction(action)
-        holder.ui.root.setOnClickListener {
-            onItemClick(action.id)
+        entries[position].let {
+            holder.ui.setEntry(it)
+            holder.ui.root.setOnClickListener { _ ->
+                onItemClick(it)
+            }
         }
     }
 
     override fun getItemCount() = entries.size
 
-    abstract fun onItemClick(actionId: Int)
+    abstract fun onItemClick(it: StatusAreaEntry)
 }
