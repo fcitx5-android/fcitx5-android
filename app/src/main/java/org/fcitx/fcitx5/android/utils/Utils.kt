@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.inputmethodservice.InputMethodService
 import android.net.Uri
+import android.os.Bundle
 import android.os.Looper
 import android.provider.OpenableColumns
 import android.util.TypedValue
@@ -13,13 +14,16 @@ import android.view.ViewTreeObserver
 import android.view.inputmethod.InputConnection
 import android.widget.EditText
 import androidx.annotation.AttrRes
+import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.navigation.NavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.sun.jna.Library
 import com.sun.jna.Native
 import org.fcitx.fcitx5.android.FcitxApplication
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import splitties.experimental.InternalSplittiesApi
 import splitties.resources.withResolvedThemeAttribute
@@ -114,3 +118,8 @@ private val iso8601DateFormat by lazy {
 
 fun iso8601UTCDateTime(timeMillis: Long? = null): String =
     iso8601DateFormat.format(timeMillis?.let { Date(it) } ?: Date())
+
+fun NavController.navigateFromMain(@IdRes dest: Int, bundle: Bundle? = null) {
+    popBackStack(R.id.mainFragment, false)
+    navigate(dest, bundle)
+}

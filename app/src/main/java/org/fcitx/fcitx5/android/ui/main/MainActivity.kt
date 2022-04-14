@@ -15,7 +15,9 @@ import kotlinx.coroutines.runBlocking
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.databinding.ActivityMainBinding
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
+import org.fcitx.fcitx5.android.ui.main.settings.PinyinDictionaryFragment
 import org.fcitx.fcitx5.android.ui.setup.SetupActivity
+import org.fcitx.fcitx5.android.utils.navigateFromMain
 
 class MainActivity : AppCompatActivity() {
 
@@ -82,12 +84,9 @@ class MainActivity : AppCompatActivity() {
                     .setMessage(R.string.whether_import_dict)
                     .setNegativeButton(android.R.string.cancel) { _, _ -> }
                     .setPositiveButton(R.string.import_) { _, _ ->
-                        // ensure we are at top level
-                        navHostFragment.navController.popBackStack(R.id.mainFragment, false)
-                        // navigate to dictionary manager with uri to import
-                        navHostFragment.navController.navigate(
+                        navHostFragment.navController.navigateFromMain(
                             R.id.action_mainFragment_to_pinyinDictionaryFragment,
-                            bundleOf("uri" to it)
+                            bundleOf(PinyinDictionaryFragment.INTENT_DATA_URI to it)
                         )
                     }
                     .show()
@@ -99,22 +98,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun processConfigIntent(intent: Intent?): Boolean {
         intent?.getStringExtra(INTENT_DATA_CONFIG)?.let {
-            val target: Pair<Int, Bundle?> = when (it) {
+            val target = when (it) {
                 INTENT_DATA_CONFIG_GLOBAL ->
-                    Pair(R.id.action_mainFragment_to_globalConfigFragment, null)
-                INTENT_DATA_CONFIG_IM -> Pair(
-                    R.id.action_mainFragment_to_imConfigFragment,
-                    intent.getBundleExtra(INTENT_DATA_CONFIG_IM) ?: return false
-                )
+                    R.id.action_mainFragment_to_globalConfigFragment to null
+                INTENT_DATA_CONFIG_IM ->
+                    R.id.action_mainFragment_to_imConfigFragment to
+                            (intent.getBundleExtra(INTENT_DATA_CONFIG_IM) ?: return false)
                 INTENT_DATA_CONFIG_BEHAVIOR ->
-                    Pair(R.id.action_mainFragment_to_behaviorSettingsFragment, null)
+                    R.id.action_mainFragment_to_behaviorSettingsFragment to null
                 else -> return false
             }
+            // we need fcitx instance
             viewModel.onBindFcitxInstance {
-                navHostFragment.navController.apply {
-                    popBackStack(R.id.mainFragment, false)
-                    navigate(target.first, target.second)
-                }
+                navHostFragment.navController.navigateFromMain(target.first, target.second)
             }
         }
         return false
@@ -126,12 +122,7 @@ class MainActivity : AppCompatActivity() {
                 .setTitle(R.string.no_more_input_methods)
                 .setMessage(R.string.add_more_input_methods)
                 .setPositiveButton(R.string.add) { _, _ ->
-                    // ensure we are at top level
-                    navHostFragment.navController.popBackStack(R.id.mainFragment, false)
-                    // navigate to input method list
-                    navHostFragment.navController.navigate(
-                        R.id.action_mainFragment_to_imListFragment,
-                    )
+                    navHostFragment.navController.navigateFromMain(R.id.action_mainFragment_to_imListFragment)
                 }
                 .setNegativeButton(android.R.string.cancel) { _, _ -> }
                 .show()
