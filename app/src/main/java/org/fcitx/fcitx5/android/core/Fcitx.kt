@@ -27,6 +27,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
     fun translate(str: String, domain: String = "fcitx5") = getFcitxTranslation(domain, str)
 
     suspend fun save() = withFcitxContext { saveFcitxState() }
+    suspend fun reloadConfig() = withFcitxContext { reloadFcitxConfig() }
     suspend fun sendKey(key: String, state: UInt = 0u, up: Boolean = false) =
         withFcitxContext { sendKeyToFcitxString(key, state.toInt(), up) }
 
@@ -162,6 +163,9 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
         @JvmStatic
         external fun saveFcitxState()
+
+        @JvmStatic
+        external fun reloadFcitxConfig()
 
         @JvmStatic
         external fun sendKeyToFcitxString(key: String, state: Int, up: Boolean)
