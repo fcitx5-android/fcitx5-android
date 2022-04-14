@@ -71,6 +71,22 @@ public:
         setupCallback(p_frontend);
     }
 
+    void reloadConfig() {
+        p_instance->reloadConfig();
+        p_instance->refresh();
+        auto &addonManager = p_instance->addonManager();
+        for (const auto category : {fcitx::AddonCategory::InputMethod,
+                                    fcitx::AddonCategory::Frontend,
+                                    fcitx::AddonCategory::Loader,
+                                    fcitx::AddonCategory::Module,
+                                    fcitx::AddonCategory::UI}) {
+            const auto names = addonManager.addonNames(category);
+            for (const auto &name : names) {
+                p_instance->reloadAddonConfig(name);
+            }
+        }
+    }
+
     void sendKey(fcitx::Key key, bool up = false) {
         p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, key, up);
     }
@@ -589,7 +605,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_getFcitxTranslation(JNIEnv *env, jclass
     const char *s = env->GetStringUTFChars(str, nullptr);
     const char *t = fcitx::translateDomain(d, s);
     env->ReleaseStringUTFChars(str, s);
-    env->ReleaseStringUTFChars(domain ,d);
+    env->ReleaseStringUTFChars(domain, d);
     return env->NewStringUTF(t);
 }
 
@@ -605,6 +621,13 @@ JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_saveFcitxState(JNIEnv *env, jclass clazz) {
     RETURN_IF_NOT_RUNNING
     Fcitx::Instance().save();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_reloadFcitxConfig(JNIEnv *env, jclass clazz) {
+    RETURN_IF_NOT_RUNNING
+    Fcitx::Instance().reloadConfig();
 }
 
 extern "C"
