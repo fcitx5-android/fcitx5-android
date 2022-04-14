@@ -98,4 +98,6 @@
     <string name="reset">Reset</string>
     <string name="quickphrase_keyword">Keyword</string>
     <string name="quickphrase_phrase">Phrase</string>
+    <string name="reload_config">Reload Config</string>
+    <string name="input_method_options">Input Method Options</string>
 </resources>
