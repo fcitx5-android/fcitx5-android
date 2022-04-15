@@ -33,13 +33,14 @@ class AlphabetKey(
     ),
     setOf(
         Behavior.Press(KeyAction.FcitxKeyAction(character)),
+        Behavior.LongPress(KeyAction.FcitxKeyAction(punctuation)),
         Behavior.SwipeDown(KeyAction.FcitxKeyAction(punctuation))
     )
 )
 
 class AlphabetDigitKey(
     val character: String,
-    private val altText: String,
+    altText: String,
     val sym: UInt,
 ) : KeyDef(
     Appearance.AltText(
@@ -50,6 +51,7 @@ class AlphabetDigitKey(
     ),
     setOf(
         Behavior.Press(KeyAction.FcitxKeyAction(character)),
+        Behavior.LongPress(KeyAction.SymAction(sym, NumLockState)),
         Behavior.SwipeDown(KeyAction.SymAction(sym, NumLockState))
     )
 ) {

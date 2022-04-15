@@ -127,6 +127,7 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                         shouldPerformClick = !swipeRepeatTriggered && shouldPerformClick
                     swipeXUnconsumed = 0f
                     swipeYUnconsumed = 0f
+                    maybeSwipeOnKeyUp = false
                 }
                 if (swipeRepeatEnabled)
                     swipeRepeatTriggered = false
