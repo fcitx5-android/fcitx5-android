@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import cat.ereza.customactivityoncrash.CustomActivityOnCrash
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -80,7 +81,7 @@ class LogActivity : AppCompatActivity() {
             setSupportActionBar(toolbar)
             this@LogActivity.logView = logView
             logView.setLogcat(
-                if (intent.hasExtra(NOT_CRASH)) {
+                if (CustomActivityOnCrash.getConfigFromIntent(intent) == null) {
                     supportActionBar!!.apply {
                         setDisplayHomeAsUpEnabled(true)
                         setTitle(R.string.real_time_logs)
@@ -105,9 +106,5 @@ class LogActivity : AppCompatActivity() {
             }
         }
         registerLauncher()
-    }
-
-    companion object {
-        const val NOT_CRASH = "not_crash"
     }
 }

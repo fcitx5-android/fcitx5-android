@@ -19,7 +19,6 @@ object AppUtil {
     fun launchLog(context: Context, initIntent: Intent.() -> Unit = {}) {
         context.startActivity(
             Intent(context, LogActivity::class.java).apply {
-                putExtra(LogActivity.NOT_CRASH, 0)
                 initIntent.invoke(this)
             }
         )
