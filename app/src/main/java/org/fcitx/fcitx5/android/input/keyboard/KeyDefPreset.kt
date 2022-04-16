@@ -5,6 +5,7 @@ import androidx.annotation.DrawableRes
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.core.KeyStates
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
 
 class SymbolKey(
     val symbol: String,
@@ -65,7 +66,6 @@ class AlphabetDigitKey(
 class CapsKey : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_keyboard_capslock_24,
-        tint = android.R.attr.colorControlNormal,
         viewId = R.id.button_caps,
         percentWidth = 0.15f
     ),
@@ -86,7 +86,7 @@ class LayoutSwitchKey(
         textSize = 16f,
         typeface = Typeface.BOLD,
         percentWidth,
-        textColor = android.R.attr.colorControlNormal,
+        textColor = ThemeManager.currentTheme.funKeyColor,
     ),
     setOf(
         Behavior.Press(action = KeyAction.LayoutSwitchAction(to))
@@ -96,8 +96,7 @@ class LayoutSwitchKey(
 class BackspaceKey(percentWidth: Float = 0.15f) : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_backspace_24,
-        tint = android.R.attr.colorControlNormal,
-        percentWidth,
+        percentWidth = percentWidth,
         viewId = R.id.button_backspace
     ),
     setOf(
@@ -109,7 +108,6 @@ class BackspaceKey(percentWidth: Float = 0.15f) : KeyDef(
 class QuickPhraseKey : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_format_quote_24,
-        tint = android.R.attr.colorControlNormal,
         viewId = R.id.button_quickphrase
     ),
     setOf(
@@ -121,7 +119,6 @@ class QuickPhraseKey : KeyDef(
 class LanguageKey : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_language_24,
-        tint = android.R.attr.colorControlNormal,
         viewId = R.id.button_lang
     ),
     setOf(
@@ -136,6 +133,7 @@ class SpaceKey : KeyDef(
         textSize = 13f,
         typeface = Typeface.NORMAL,
         percentWidth = 0f,
+        background = ThemeManager.currentTheme.keyBackgroundColorBordered,
         viewId = R.id.button_space
     ),
     setOf(
@@ -146,9 +144,9 @@ class SpaceKey : KeyDef(
 class ReturnKey(percentWidth: Float = 0.15f) : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_keyboard_return_24,
-        tint = android.R.attr.colorForegroundInverse,
+        tint = ThemeManager.currentTheme.keyTextColorInverse,
         percentWidth,
-        background = android.R.attr.colorAccent,
+        background = ThemeManager.currentTheme.keyAccentBackgroundColor,
         viewId = R.id.button_return
     ),
     setOf(
@@ -165,8 +163,7 @@ class ImageLayoutSwitchKey(
 ) : KeyDef(
     Appearance.Image(
         src = icon,
-        tint = android.R.attr.colorControlNormal,
-        percentWidth,
+        percentWidth = percentWidth,
         viewId = viewId
     ),
     setOf(
@@ -177,7 +174,6 @@ class ImageLayoutSwitchKey(
 class MiniSpaceKey : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_space_bar_24,
-        tint = android.R.attr.colorControlNormal,
         percentWidth = 0.15f,
         viewId = R.id.button_mini_space
     ),

@@ -165,13 +165,20 @@ sealed class ManagedPreference<T : Any, P : Preference>(
 
     }
 
+    abstract class NoUiManagedPreference<T : Any>(
+        sharedPreferences: SharedPreferences,
+        key: String,
+        defaultValue: T
+    ) : ManagedPreference<T, Nothing>(sharedPreferences, key, defaultValue, {}) {
+        final override fun createUiProtected(context: Context): Nothing =
+            throw UnsupportedOperationException()
+    }
+
     class RawBool(
         sharedPreferences: SharedPreferences,
         key: String,
         defaultValue: Boolean,
-    ) : ManagedPreference<Boolean, Nothing>(sharedPreferences, key, defaultValue, {}) {
-        override fun createUiProtected(context: Context): Nothing =
-            throw UnsupportedOperationException()
+    ) : NoUiManagedPreference<Boolean>(sharedPreferences, key, defaultValue) {
 
         override fun setValue(value: Boolean) {
             sharedPreferences.edit { putBoolean(key, value) }
@@ -184,9 +191,7 @@ sealed class ManagedPreference<T : Any, P : Preference>(
         sharedPreferences: SharedPreferences,
         key: String,
         defaultValue: String,
-    ) : ManagedPreference<String, Nothing>(sharedPreferences, key, defaultValue, {}) {
-        override fun createUiProtected(context: Context): Nothing =
-            throw UnsupportedOperationException()
+    ) : NoUiManagedPreference<String>(sharedPreferences, key, defaultValue) {
 
         override fun setValue(value: String) {
             sharedPreferences.edit { putString(key, value) }
@@ -196,20 +201,47 @@ sealed class ManagedPreference<T : Any, P : Preference>(
         override fun getValue(): String = sharedPreferences.getString(key, defaultValue)!!
     }
 
+    class RawStringLike<T : Any>(
+        sharedPreferences: SharedPreferences,
+        key: String,
+        val codec: StringLikeCodec<T>,
+        defaultValue: T,
+    ) : NoUiManagedPreference<T>(sharedPreferences, key, defaultValue) {
+
+        override fun setValue(value: T) {
+            sharedPreferences.edit { putString(key, codec.encode(value)) }
+        }
+
+        override fun getValue(): T = sharedPreferences.getString(key, null).let { raw ->
+            raw?.let { codec.decode(it) }
+                ?: throw RuntimeException("Failed to decode preference [$key] $raw")
+        }
+    }
+
     class RawInt(
         sharedPreferences: SharedPreferences,
         key: String,
         defaultValue: Int,
-    ) : ManagedPreference<Int, Nothing>(sharedPreferences, key, defaultValue, {}) {
-        override fun createUiProtected(context: Context): Nothing =
-            throw UnsupportedOperationException()
+    ) : NoUiManagedPreference<Int>(sharedPreferences, key, defaultValue) {
 
         override fun setValue(value: Int) {
             sharedPreferences.edit { putInt(key, value) }
-
         }
 
         override fun getValue(): Int = sharedPreferences.getInt(key, defaultValue)
+    }
+
+    class RawFloat(
+        sharedPreferences: SharedPreferences,
+        key: String,
+        defaultValue: Float,
+    ) : NoUiManagedPreference<Float>(sharedPreferences, key, defaultValue) {
+
+        override fun setValue(value: Float) {
+            sharedPreferences.edit { putFloat(key, value) }
+        }
+
+        override fun getValue(): Float = sharedPreferences.getFloat(key, defaultValue)
     }
 
 }

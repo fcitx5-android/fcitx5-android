@@ -2,12 +2,13 @@ package org.fcitx.fcitx5.android.input.clipboard
 
 import android.content.Context
 import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.text.TextUtils
 import androidx.cardview.widget.CardView
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.applyKeyTextColor
+import org.fcitx.fcitx5.android.utils.resource.toColorFilter
 import splitties.dimensions.dp
-import splitties.resources.styledColor
 import splitties.resources.styledDrawable
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
@@ -23,16 +24,14 @@ class ClipboardEntryUi(override val ctx: Context) : Ui {
         verticalPadding = dp(4)
         horizontalPadding = dp(8)
         ellipsize = TextUtils.TruncateAt.END
-        setTextColor(styledColor(android.R.attr.colorForeground))
+        ThemeManager.currentTheme.applyKeyTextColor(this)
     }
 
     val pin = imageView {
         imageResource = R.drawable.ic_baseline_push_pin_24
         colorFilter =
-            PorterDuffColorFilter(
-                styledColor(android.R.attr.colorForeground),
-                PorterDuff.Mode.SRC_IN
-            )
+            ThemeManager.currentTheme.keyTextColorInverse.toColorFilter(PorterDuff.Mode.SRC_IN)
+                .resolve(context)
         alpha = 0.3f
     }
 
@@ -54,6 +53,8 @@ class ClipboardEntryUi(override val ctx: Context) : Ui {
         minimumHeight = dp(30)
         isClickable = true
         foreground = styledDrawable(android.R.attr.selectableItemBackground)
+        setCardBackgroundColor(ThemeManager.currentTheme.clipboardEntryColor.resolve(context))
+        cardElevation = 0f
         add(wrapper, lParams(matchParent, wrapContent))
     }
 }

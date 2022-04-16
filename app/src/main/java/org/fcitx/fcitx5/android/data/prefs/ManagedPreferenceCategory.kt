@@ -8,8 +8,8 @@ import androidx.preference.PreferenceScreen
 abstract class ManagedPreferenceCategory(
     @StringRes private val title: Int,
     private val sharedPreferences: SharedPreferences
-) {
-    val managedPreferences = mutableMapOf<String, ManagedPreference<*, *>>()
+) : ManagedPreferenceProvider {
+    override val managedPreferences = mutableMapOf<String, ManagedPreference<*, *>>()
 
     protected fun switch(
         @StringRes
@@ -83,7 +83,7 @@ abstract class ManagedPreferenceCategory(
         managedPreferences[key] = it
     }
 
-    fun createUi(screen: PreferenceScreen): PreferenceCategory {
+    override fun createUi(screen: PreferenceScreen) {
         val category = PreferenceCategory(screen.context)
         category.isIconSpaceReserved = false
         category.setTitle(title)
@@ -91,6 +91,5 @@ abstract class ManagedPreferenceCategory(
         managedPreferences.forEach {
             category.addPreference(it.value.createUi(screen.context))
         }
-        return category
     }
 }

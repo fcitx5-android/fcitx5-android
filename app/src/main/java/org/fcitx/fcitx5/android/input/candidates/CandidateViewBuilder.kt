@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.input.candidates
 
+import android.graphics.PorterDuff
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
@@ -8,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.*
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.Fcitx
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.candidates.adapter.GridCandidateViewAdapter
 import org.fcitx.fcitx5.android.input.candidates.adapter.SimpleCandidateViewAdapter
@@ -18,6 +20,7 @@ import org.fcitx.fcitx5.android.input.candidates.expanded.decoration.GridDecorat
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.utils.hapticIfEnabled
+import org.fcitx.fcitx5.android.utils.resource.toColorFilter
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
@@ -106,13 +109,19 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
         this.adapter = adapter
     }
 
+    private fun RecyclerView.dividerDrawable() =
+        styledDrawable(android.R.attr.listDivider)!!.apply {
+            colorFilter = ThemeManager.currentTheme.dividerColor.toColorFilter(PorterDuff.Mode.SRC)
+                .resolve(context)
+        }
+
     fun RecyclerView.addFlexboxHorizontalDecoration() =
-        FlexboxHorizontalDecoration(styledDrawable(android.R.attr.listDivider)!!).also {
+        FlexboxHorizontalDecoration(dividerDrawable()).also {
             addItemDecoration(it)
         }
 
     fun RecyclerView.addFlexboxVerticalDecoration() =
-        FlexboxVerticalDecoration(styledDrawable(android.R.attr.listDivider)!!).also {
+        FlexboxVerticalDecoration(dividerDrawable()).also {
             addItemDecoration(it)
         }
 

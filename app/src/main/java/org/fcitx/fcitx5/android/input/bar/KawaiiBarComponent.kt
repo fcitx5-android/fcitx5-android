@@ -13,6 +13,8 @@ import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.applyBarColor
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.*
 import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.*
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.*
@@ -33,6 +35,7 @@ import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.inputConnection
 import org.mechdancer.dependency.manager.must
 import splitties.bitflags.hasFlag
+import splitties.views.backgroundColor
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
@@ -199,6 +202,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     override val view by lazy {
         ViewAnimator(context).apply {
+            ThemeManager.currentTheme.applyBarColor(this)
             add(idleUi.root, lParams(matchParent, matchParent))
             add(candidateUi.root, lParams(matchParent, matchParent))
             add(titleUi.root, lParams(matchParent, matchParent))

@@ -8,6 +8,8 @@ import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.core.Fcitx
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.applyBarIconColor
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.fcitx
@@ -18,7 +20,6 @@ import org.fcitx.fcitx5.android.ui.main.MainActivity
 import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
 import org.fcitx.fcitx5.android.utils.AppUtil
 import splitties.dimensions.dp
-import splitties.resources.styledDrawable
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.horizontalLayout
 import splitties.views.dsl.core.imageButton
@@ -115,7 +116,7 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
 
     private val settingsButton by lazy {
         context.imageButton {
-            background = styledDrawable(android.R.attr.actionBarItemBackground)
+            ThemeManager.currentTheme.applyBarIconColor(this)
             imageResource = R.drawable.ic_baseline_settings_24
             scaleType = ImageView.ScaleType.CENTER_INSIDE
         }

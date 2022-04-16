@@ -2,14 +2,15 @@ package org.fcitx.fcitx5.android.input.status
 
 import android.content.Context
 import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RoundRectShape
 import android.view.ViewGroup
 import android.widget.ImageView
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.applyKeyTextColor
+import org.fcitx.fcitx5.android.utils.resource.toColorFilter
 import splitties.dimensions.dp
 import splitties.resources.drawable
-import splitties.resources.styledColor
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.gravityCenter
@@ -28,7 +29,7 @@ class StatusAreaEntryUi(override val ctx: Context) : Ui {
     val label = textView {
         textSize = 12f
         gravity = gravityCenter
-        setTextColor(styledColor(android.R.attr.colorForeground))
+        ThemeManager.currentTheme.applyKeyTextColor(this)
     }
 
     override val root = constraintLayout {
@@ -48,17 +49,14 @@ class StatusAreaEntryUi(override val ctx: Context) : Ui {
 
     fun setEntry(entry: StatusAreaEntry) = with(ctx) {
         icon.setImageDrawable(drawable(entry.icon))
-        icon.colorFilter = PorterDuffColorFilter(
-            styledColor(
-                if (entry.active) android.R.attr.colorForegroundInverse
-                else android.R.attr.colorControlNormal
-            ),
-            PorterDuff.Mode.SRC_IN
-        )
-        bkgShape.paint.color = styledColor(
-            if (entry.active) android.R.attr.colorAccent
-            else android.R.attr.colorButtonNormal
-        )
+        icon.colorFilter = (if (entry.active)
+            ThemeManager.currentTheme.keyTextColorInverse
+        else
+            ThemeManager.currentTheme.funKeyColor).toColorFilter(PorterDuff.Mode.SRC_IN)
+            .resolve(ctx)
+        bkgShape.paint.color = (
+                if (entry.active) ThemeManager.currentTheme.keyAccentBackgroundColor
+                else ThemeManager.currentTheme.keyBackgroundColorBordered).resolve(ctx)
         label.text = entry.label
     }
 }

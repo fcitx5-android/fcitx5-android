@@ -2,13 +2,13 @@ package org.fcitx.fcitx5.android.input.keyboard
 
 import android.content.Context
 import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.view.inputmethod.EditorInfo
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.preedit.PreeditContent
+import org.fcitx.fcitx5.android.utils.resource.toColorFilter
 import splitties.resources.drawable
-import splitties.resources.styledColor
 import splitties.views.imageDrawable
 import splitties.views.imageResource
 
@@ -140,14 +140,10 @@ class TextKeyboard(
                     CapsState.Once, CapsState.Lock -> R.drawable.ic_baseline_keyboard_capslock_24
                 }
             )
-            colorFilter = PorterDuffColorFilter(
-                styledColor(
-                    when (capsState) {
-                        CapsState.None, CapsState.Once -> android.R.attr.colorControlNormal
-                        CapsState.Lock -> android.R.attr.colorAccent
-                    }
-                ), PorterDuff.Mode.SRC_IN
-            )
+            colorFilter = (when (capsState) {
+                CapsState.None, CapsState.Once -> ThemeManager.currentTheme.funKeyColor
+                CapsState.Lock -> ThemeManager.currentTheme.keyAccentBackgroundColor
+            }).toColorFilter(PorterDuff.Mode.SRC_IN).resolve(context)
         }
     }
 
