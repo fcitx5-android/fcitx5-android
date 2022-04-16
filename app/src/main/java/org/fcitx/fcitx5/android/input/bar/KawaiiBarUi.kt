@@ -13,9 +13,10 @@ import android.widget.ViewAnimator
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.applyBarIconColor
 import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.State.*
 import splitties.dimensions.dp
-import splitties.resources.styledDrawable
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.gravityCenter
@@ -32,6 +33,7 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
             background = null
             imageResource = R.drawable.ic_baseline_expand_more_24
             visibility = ConstraintLayout.INVISIBLE
+            ThemeManager.currentTheme.applyBarIconColor(this)
         }
 
         override val root = ctx.constraintLayout {
@@ -70,12 +72,13 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
 
         private fun toolButton(@DrawableRes icon: Int) = imageButton {
             imageResource = icon
-            background = styledDrawable(android.R.attr.actionBarItemBackground)
+            ThemeManager.currentTheme.applyBarIconColor(this)
             scaleType = ImageView.ScaleType.CENTER_INSIDE
         }
 
         val menuButton = toolButton(R.drawable.ic_baseline_expand_more_24).apply {
             rotation = getCurrentState().menuButtonRotation
+            ThemeManager.currentTheme.applyBarIconColor(this)
         }
 
         val undoButton = toolButton(R.drawable.ic_baseline_undo_24)
@@ -89,7 +92,7 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
         val moreButton = toolButton(R.drawable.ic_baseline_more_horiz_24)
 
         val hideKeyboardButton = imageButton {
-            background = styledDrawable(android.R.attr.actionBarItemBackground)
+            ThemeManager.currentTheme.applyBarIconColor(this)
             imageResource = R.drawable.ic_baseline_arrow_drop_down_24
         }
 
@@ -231,12 +234,13 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
 
         private val backButton = imageButton {
             imageResource = R.drawable.ic_baseline_arrow_back_24
-            background = styledDrawable(android.R.attr.actionBarItemBackground)
+            ThemeManager.currentTheme.applyBarIconColor(this)
             scaleType = ImageView.ScaleType.CENTER_INSIDE
         }
 
         private val titleText = textView {
             typeface = Typeface.defaultFromStyle(Typeface.BOLD)
+            setTextColor(ThemeManager.currentTheme.funKeyColor.resolve(context))
             gravity = gravityVerticalCenter
             textSize = 16f
         }

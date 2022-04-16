@@ -2,6 +2,10 @@ package org.fcitx.fcitx5.android.utils
 
 import android.content.ContentResolver
 import android.content.Context
+import android.graphics.Color
+import android.graphics.ColorFilter
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.inputmethodservice.InputMethodService
 import android.net.Uri
 import android.os.Bundle
@@ -29,6 +33,7 @@ import splitties.experimental.InternalSplittiesApi
 import splitties.resources.withResolvedThemeAttribute
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 val InputMethodService.inputConnection: InputConnection?
     get() = currentInputConnection
@@ -122,4 +127,9 @@ fun iso8601UTCDateTime(timeMillis: Long? = null): String =
 fun NavController.navigateFromMain(@IdRes dest: Int, bundle: Bundle? = null) {
     popBackStack(R.id.mainFragment, false)
     navigate(dest, bundle)
+}
+
+fun darkenColorFilter(percent: Int): ColorFilter {
+    val value = percent * 255 / 100
+    return PorterDuffColorFilter(Color.argb(value, 0, 0, 0), PorterDuff.Mode.SRC_ATOP)
 }

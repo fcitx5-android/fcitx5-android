@@ -4,16 +4,19 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.StateListDrawable
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.updateLayoutParams
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.applyKeyAltTextColor
+import org.fcitx.fcitx5.android.data.theme.applyKeyTextColor
+import org.fcitx.fcitx5.android.utils.resource.toColorFilter
 import org.fcitx.fcitx5.android.utils.styledFloat
 import splitties.dimensions.dp
 import splitties.resources.drawable
-import splitties.resources.styledColor
-import splitties.resources.styledColorSL
 import splitties.resources.styledDrawable
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
@@ -26,12 +29,33 @@ abstract class KeyView(ctx: Context, val def: KeyDef.Appearance) : CustomGesture
     }
 
     val card = view(::CardView) {
-        radius = dp(4f)
-        setCardBackgroundColor(styledColorSL(def.background))
+        radius = dp(ThemeManager.prefs.keyRadius.getValue())
+        cardElevation = 0f
+        def.background
+            ?.let { setCardBackgroundColor(it.resolve(context)) }
+            ?: run {
+                if (ThemeManager.prefs.keyBorder.getValue())
+                    setCardBackgroundColor(
+                        ThemeManager.currentTheme.keyBackgroundColorBordered.resolve(
+                            context
+                        )
+                    )
+                else ThemeManager.currentTheme.keyBackgroundColor?.let {
+                    setCardBackgroundColor(it.resolve(context))
+                }
+                    ?: run { background = null }
+            }
         // sync pressed state from parent
         isDuplicateParentStateEnabled = true
         // pressed highlight
-        foreground = styledDrawable(android.R.attr.selectableItemBackground)
+        foreground =
+            if (ThemeManager.prefs.keyRippleEffect.getValue())
+                styledDrawable(android.R.attr.selectableItemBackground)
+            else StateListDrawable().apply {
+                addState(intArrayOf(android.R.attr.state_pressed), GradientDrawable().apply {
+                    setColor(ThemeManager.currentTheme.keyAccentForeground.resolve(context))
+                })
+            }
         add(layout, lParams(matchParent, matchParent))
     }
 
@@ -44,14 +68,13 @@ abstract class KeyView(ctx: Context, val def: KeyDef.Appearance) : CustomGesture
             id = def.viewId
         }
         add(card, lParams(matchParent, matchParent) {
-            horizontalMargin = dp(2)
-            verticalMargin = dp(5)
+            horizontalMargin = dp(ThemeManager.prefs.keyHorizontalMargin.getValue())
+            verticalMargin = dp(ThemeManager.prefs.keyVerticalMargin.getValue())
         })
     }
 
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
-        card.cardElevation = if (enabled) dp(2f) else 0f
         layout.alpha = if (enabled) 1f else styledFloat(android.R.attr.disabledAlpha)
     }
 }
@@ -62,11 +85,12 @@ open class TextKeyView(ctx: Context, def: KeyDef.Appearance.Text) : KeyView(ctx,
         isClickable = false
         isFocusable = false
         background = null
-        setTextColor(styledColor(android.R.attr.colorForeground))
         text = def.displayText
         textSize = def.textSize
         typeface = Typeface.defaultFromStyle(def.typeface)
-        setTextColor(styledColor(def.textColor))
+        def.textColor
+            ?.let { setTextColor(it.resolve(context)) }
+            ?: run { ThemeManager.currentTheme.applyKeyTextColor(this) }
     }
 
     init {
@@ -87,6 +111,7 @@ class AltTextKeyView(ctx: Context, def: KeyDef.Appearance.AltText) : TextKeyView
         // hardcoded text size for now
         textSize = 12f
         text = def.altText
+        ThemeManager.currentTheme.applyKeyAltTextColor(this)
     }
 
     init {
@@ -126,7 +151,10 @@ class ImageKeyView(ctx: Context, def: KeyDef.Appearance.Image) : KeyView(ctx, de
         isClickable = false
         isFocusable = false
         imageDrawable = drawable(def.src)
-        colorFilter = PorterDuffColorFilter(styledColor(def.tint), PorterDuff.Mode.SRC_IN)
+        colorFilter = (def.tint?.toColorFilter(PorterDuff.Mode.SRC_IN)
+            ?: ThemeManager.currentTheme.funKeyColor.toColorFilter(PorterDuff.Mode.SRC_IN)).resolve(
+            context
+        )
     }
 
     init {

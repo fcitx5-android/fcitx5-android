@@ -10,6 +10,8 @@ class AppPrefs(
     private val sharedPreferences: SharedPreferences,
     private val resources: Resources
 ) {
+
+    private val providers = mutableListOf<ManagedPreferenceProvider>()
     private val managedPreferences = mutableMapOf<String, ManagedPreference<*, *>>()
 
     private val onSharedPreferenceChangeListener =
@@ -17,20 +19,15 @@ class AppPrefs(
             managedPreferences[key]?.fireChange()
         }
 
-    private fun<T:ManagedPreferenceCategory> T.add() = apply {
-        this@AppPrefs.managedPreferences.putAll(this.managedPreferences)
+    private fun <T : ManagedPreferenceProvider> T.register() = apply {
+        registerProvider { this }
     }
 
-    inner class Internal {
-        private fun <T : Any> ManagedPreference<T, Nothing>.add() = apply {
-            managedPreferences[key] = this
-        }
-
-        val firstRun = ManagedPreference.RawBool(sharedPreferences, "first_run", true).add()
-        val lastSymbolLayout =
-            ManagedPreference.RawString(sharedPreferences, "last_symbol_layout", "NumSym").add()
-        val verboseLog = ManagedPreference.RawBool(sharedPreferences, "verbose_log", false).add()
-        val pid = ManagedPreference.RawInt(sharedPreferences, "pid", 0).add()
+    inner class Internal : ManagedPreferenceInternal(sharedPreferences) {
+        val firstRun = bool("first_run", true)
+        val lastSymbolLayout = string("last_symbol_layout", "NumSym")
+        val verboseLog = bool("verbose_log", false)
+        val pid = int("pid", 0)
     }
 
     inner class Advanced : ManagedPreferenceCategory(R.string.advanced, sharedPreferences) {
@@ -103,15 +100,22 @@ class AppPrefs(
         )
     }
 
-    val internal = Internal()
-    val keyboard = Keyboard().add()
-    val clipboard = Clipboard().add()
-    val advanced = Advanced().add()
+    val internal = Internal().register()
+    val keyboard = Keyboard().register()
+    val clipboard = Clipboard().register()
+    val advanced = Advanced().register()
 
     fun createUi(screen: PreferenceScreen) {
-        keyboard.createUi(screen)
-        clipboard.createUi(screen)
-        advanced.createUi(screen)
+        providers.forEach {
+            it.createUi(screen)
+        }
+    }
+
+    fun <T : ManagedPreferenceProvider> registerProvider(providerF: (SharedPreferences) -> T): T {
+        val provider = providerF(sharedPreferences)
+        providers.add(provider)
+        managedPreferences.putAll(provider.managedPreferences)
+        return provider
     }
 
     companion object {
@@ -120,7 +124,6 @@ class AppPrefs(
         /**
          * MUST call before use
          */
-        @Synchronized
         fun init(sharedPreferences: SharedPreferences, resources: Resources) {
             if (instance != null)
                 return
@@ -128,7 +131,6 @@ class AppPrefs(
             sharedPreferences.registerOnSharedPreferenceChangeListener(getInstance().onSharedPreferenceChangeListener)
         }
 
-        @Synchronized
         fun getInstance() = instance!!
     }
 }

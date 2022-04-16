@@ -2,11 +2,12 @@ package org.fcitx.fcitx5.android.input.clipboard
 
 import android.content.Context
 import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.applyKeyTextColor
+import org.fcitx.fcitx5.android.utils.resource.toColorFilter
 import splitties.dimensions.dp
 import splitties.resources.str
-import splitties.resources.styledColor
 import splitties.views.dsl.appcompat.AppCompatStyles
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
@@ -24,11 +25,12 @@ sealed class ClipboardInstructionUi(override val ctx: Context) : Ui {
             text = str(R.string.instruction_enable_clipboard_listening)
             verticalPadding = dp(8)
             horizontalPadding = dp(12)
+            ThemeManager.currentTheme.applyKeyTextColor(this)
         }
 
         val enableButton = appCompatStyles.button.borderless {
             text = str(R.string.clipboard_enable)
-            setTextColor(styledColor(android.R.attr.colorAccent))
+            setTextColor(ThemeManager.currentTheme.keyAccentBackgroundColor.resolve(context))
         }
 
         override val root = constraintLayout {
@@ -48,14 +50,14 @@ sealed class ClipboardInstructionUi(override val ctx: Context) : Ui {
 
         private val icon = imageView {
             imageResource = R.drawable.ic_baseline_content_paste_24
-            colorFilter = PorterDuffColorFilter(
-                styledColor(android.R.attr.colorControlNormal),
-                PorterDuff.Mode.SRC_IN
-            )
+            colorFilter =
+                ThemeManager.currentTheme.funKeyColor.toColorFilter(PorterDuff.Mode.SRC_IN)
+                    .resolve(context)
         }
 
         private val instructionText = textView {
             text = str(R.string.instruction_copy)
+            ThemeManager.currentTheme.applyKeyTextColor(this)
         }
 
         override val root = constraintLayout {

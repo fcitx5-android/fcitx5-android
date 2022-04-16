@@ -2,21 +2,25 @@ package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.graphics.ColorUtils
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
+import cn.berberman.girls.utils.either.otherwise
+import cn.berberman.girls.utils.either.then
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Fcitx
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcaster
 import org.fcitx.fcitx5.android.input.candidates.CandidateViewBuilder
@@ -29,7 +33,6 @@ import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.UniqueComponentWrapper
 import org.mechdancer.dependency.plusAssign
 import splitties.dimensions.dp
-import splitties.resources.styledColor
 import splitties.views.backgroundColor
 import splitties.views.bottomPadding
 import splitties.views.dsl.constraintlayout.*
@@ -123,7 +126,15 @@ class InputView(
         service.lifecycleScope.launch {
             broadcaster.onImeUpdate(fcitx.currentIme())
         }
-        backgroundColor = themedContext.styledColor(android.R.attr.colorBackground)
+
+        ThemeManager.currentTheme.background.then {
+            background =
+                BitmapDrawable(resources, BitmapFactory.decodeFile(it.path))
+        }
+            .otherwise {
+                backgroundColor = it.resolve(themedContext)
+            }
+
         add(kawaiiBar.view, lParams(matchParent, dp(40)) {
             topOfParent()
             startOfParent()
@@ -153,9 +164,8 @@ class InputView(
 
     fun onShow() {
         service.window.window?.also {
-            val bkgColor = themedContext.styledColor(android.R.attr.colorBackground)
             ViewCompat.getWindowInsetsController(it.decorView)?.isAppearanceLightNavigationBars =
-                ColorUtils.calculateContrast(Color.WHITE, bkgColor) < 1.5f
+                ThemeManager.currentTheme.lightNavigationBar.resolve(themedContext)
         }
         kawaiiBar.onShow()
         windowManager.switchToKeyboardWindow()

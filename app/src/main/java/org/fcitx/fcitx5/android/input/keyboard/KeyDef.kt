@@ -1,7 +1,7 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
-import androidx.annotation.AttrRes
 import androidx.annotation.DrawableRes
+import org.fcitx.fcitx5.android.utils.resource.ColorResource
 
 open class KeyDef(
     val appearance: Appearance,
@@ -9,8 +9,7 @@ open class KeyDef(
 ) {
     sealed class Appearance(
         val percentWidth: Float,
-        @AttrRes
-        val background: Int,
+        val background: ColorResource? = null,
         val viewId: Int
     ) {
         open class Text(
@@ -18,9 +17,8 @@ open class KeyDef(
             val textSize: Float,
             val typeface: Int,
             percentWidth: Float = 0.1f,
-            @AttrRes
-            val textColor: Int = android.R.attr.colorForeground,
-            background: Int = android.R.attr.colorButtonNormal,
+            val textColor: ColorResource? = null,
+            background: ColorResource? = null,
             viewId: Int = -1
         ) : Appearance(percentWidth, background, viewId)
 
@@ -30,18 +28,17 @@ open class KeyDef(
             textSize: Float,
             typeface: Int,
             percentWidth: Float = 0.1f,
-            textColor: Int = android.R.attr.colorForeground,
-            background: Int = android.R.attr.colorButtonNormal,
+            textColor: ColorResource? = null,
+            background: ColorResource? = null,
             viewId: Int = -1
         ) : Text(displayText, textSize, typeface, percentWidth, textColor, background, viewId)
 
         class Image(
             @DrawableRes
             val src: Int,
-            @AttrRes
-            val tint: Int,
+            val tint: ColorResource? = null,
             percentWidth: Float = 0.1f,
-            background: Int = android.R.attr.colorButtonNormal,
+            background: ColorResource? = null,
             viewId: Int = -1
         ) : Appearance(percentWidth, background, viewId)
     }

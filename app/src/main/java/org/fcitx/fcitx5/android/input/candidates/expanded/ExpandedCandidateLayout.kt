@@ -5,9 +5,9 @@ import android.content.Context
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.applyBarColor
 import org.fcitx.fcitx5.android.input.keyboard.*
-import splitties.resources.styledColor
-import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.add
 import splitties.views.dsl.recyclerview.recyclerView
@@ -67,7 +67,7 @@ class ExpandedCandidateLayout(
 
     init {
         id = R.id.expanded_candidate_view
-        backgroundColor = styledColor(android.R.attr.colorBackground)
+        ThemeManager.currentTheme.applyBarColor(this)
 
         add(recyclerView, lParams {
             topOfParent()
