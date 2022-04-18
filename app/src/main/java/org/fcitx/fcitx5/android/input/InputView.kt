@@ -2,10 +2,13 @@ package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
-import android.view.OrientationEventListener
+import android.graphics.Color
+import android.os.Build
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.ColorUtils
-import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -22,13 +25,13 @@ import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
+import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.UniqueComponentWrapper
 import org.mechdancer.dependency.plusAssign
-import org.mechdancer.dependency.scope
 import splitties.dimensions.dp
-import splitties.resources.color
 import splitties.resources.styledColor
 import splitties.views.backgroundColor
+import splitties.views.bottomPadding
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.matchParent
@@ -59,7 +62,7 @@ class InputView(
 
     private val commonKeyActionListener = CommonKeyActionListener()
 
-    val scope = scope { }
+    val scope = DynamicScope()
 
     private fun setupScope() {
         scope += UniqueComponentWrapper(service)
@@ -93,17 +96,29 @@ class InputView(
         updateKeyboardHeight()
     }
 
-    private val orientationListener = object : OrientationEventListener(context) {
-        override fun onOrientationChanged(o: Int) = updateKeyboardHeight()
-    }
-
     init {
         // MUST call before any operation
         setupScope()
 
+        service.window.window!!.also {
+            // allow draw behind navigation bar
+            WindowCompat.setDecorFitsSystemWindows(it, false)
+            // transparent navigation bar
+            it.navigationBarColor = Color.TRANSPARENT
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // don't apply scrim to transparent navigation bar
+                it.isNavigationBarContrastEnforced = false
+            }
+        }
+
         AppPrefs.getInstance().keyboard.keyboardHeightPercent
             .registerOnChangeListener(onWindowHeightChangeListener)
-        orientationListener.enable()
+        ViewCompat.setOnApplyWindowInsetsListener(this) { v, insets ->
+            insets.getInsets(WindowInsetsCompat.Type.navigationBars()).let {
+                v.bottomPadding = it.bottom
+            }
+            WindowInsetsCompat.CONSUMED
+        }
 
         service.lifecycleScope.launch {
             broadcaster.onImeUpdate(fcitx.currentIme())
@@ -122,7 +137,7 @@ class InputView(
         })
     }
 
-    fun updateKeyboardHeight() {
+    private fun updateKeyboardHeight() {
         windowManager.view.updateLayoutParams {
             height = windowHeightPx
         }
@@ -132,16 +147,15 @@ class InputView(
         preedit.dismiss()
         AppPrefs.getInstance().keyboard.keyboardHeightPercent
             .unregisterOnChangeListener(onWindowHeightChangeListener)
-        orientationListener.disable()
+        ViewCompat.setOnApplyWindowInsetsListener(this, null)
         super.onDetachedFromWindow()
     }
 
     fun onShow() {
         service.window.window?.also {
             val bkgColor = themedContext.styledColor(android.R.attr.colorBackground)
-            it.navigationBarColor = bkgColor
-            WindowInsetsControllerCompat(it, it.decorView).isAppearanceLightNavigationBars =
-                ColorUtils.calculateContrast(color(android.R.color.white), bkgColor) < 1.5f
+            ViewCompat.getWindowInsetsController(it.decorView)?.isAppearanceLightNavigationBars =
+                ColorUtils.calculateContrast(Color.WHITE, bkgColor) < 1.5f
         }
         kawaiiBar.onShow()
         windowManager.switchToKeyboardWindow()
