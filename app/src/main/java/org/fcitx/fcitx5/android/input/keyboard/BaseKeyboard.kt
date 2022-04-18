@@ -61,7 +61,7 @@ abstract class BaseKeyboard(
         }
     }
 
-    protected fun createKeyView(def: KeyDef): KeyView {
+    private fun createKeyView(def: KeyDef): KeyView {
         return when (def.appearance) {
             is KeyDef.Appearance.AltText -> AltTextKeyView(context, def.appearance)
             is KeyDef.Appearance.Text -> TextKeyView(context, def.appearance)
@@ -71,11 +71,28 @@ abstract class BaseKeyboard(
                 swipeEnabled = true
                 swipeRepeatEnabled = true
                 swipeThresholdX = 20f
-                onSwipeLeftListener = {
-                    onAction(KeyAction.SymAction(KeySym(0xff51u), KeyStates()))
+                onSwipeLeftListener = { _, cnt ->
+                    repeat(cnt) {
+                        onAction(KeyAction.SymAction(KeySym(0xff51u), KeyStates()))
+                    }
                 }
-                onSwipeRightListener = {
-                    onAction(KeyAction.SymAction(KeySym(0xff53u), KeyStates()))
+                onSwipeRightListener = { _, cnt ->
+                    repeat(cnt) {
+                        onAction(KeyAction.SymAction(KeySym(0xff53u), KeyStates()))
+                    }
+                }
+            } else if (def is BackspaceKey) {
+                swipeEnabled = true
+                swipeRepeatEnabled = true
+                swipeThresholdX = 20f
+                onSwipeLeftListener = { _, cnt ->
+                    onAction(KeyAction.MoveSelectionAction(-1 * cnt))
+                }
+                onSwipeRightListener = { _, cnt ->
+                    onAction(KeyAction.MoveSelectionAction(cnt))
+                }
+                onTouchLeaveListener = {
+                    onAction(KeyAction.DeleteSelectionAction)
                 }
             }
             def.behaviors.forEach {
@@ -88,7 +105,7 @@ abstract class BaseKeyboard(
                     }
                     is KeyDef.Behavior.SwipeDown -> {
                         swipeEnabled = true
-                        onSwipeDownListener = { _ ->
+                        onSwipeDownListener = { _, _ ->
                             onAction(it.action)
                         }
                     }

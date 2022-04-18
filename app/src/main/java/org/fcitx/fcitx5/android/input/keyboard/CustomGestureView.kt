@@ -3,7 +3,6 @@ package org.fcitx.fcitx5.android.input.keyboard
 import android.content.Context
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewConfiguration
 import android.widget.FrameLayout
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -20,21 +19,21 @@ import kotlin.math.sign
 
 abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
 
+    enum class SwipeAxis { X, Y }
+
     private val lifecycleScope by lazy {
         findViewTreeLifecycleOwner()?.lifecycleScope!!
     }
 
+    @Volatile
+    private var longPressTriggered = false
     var longPressEnabled = false
     private var longPressJob: Job? = null
 
     @Volatile
-    private var longPressTriggered = false
-
+    private var repeatStarted = false
     var repeatEnabled = false
     private var repeatJob: Job? = null
-
-    @Volatile
-    private var repeatStarted = false
 
     var swipeEnabled = false
     var swipeRepeatEnabled = false
@@ -48,17 +47,17 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
     private var swipeXUnconsumed = 0f
     private var swipeYUnconsumed = 0f
 
-
     var doubleTapEnabled = false
     private var lastClickTime = 0L
-    private var firstClick = false
+    private var maybeDoubleTap = false
 
-    var onSwipeUpListener: ((View) -> Unit)? = null
-    var onSwipeRightListener: ((View) -> Unit)? = null
-    var onSwipeDownListener: ((View) -> Unit)? = null
-    var onSwipeLeftListener: ((View) -> Unit)? = null
+    var onSwipeUpListener: ((View, Int) -> Unit)? = null
+    var onSwipeRightListener: ((View, Int) -> Unit)? = null
+    var onSwipeDownListener: ((View, Int) -> Unit)? = null
+    var onSwipeLeftListener: ((View, Int) -> Unit)? = null
     var onDoubleTapListener: ((View) -> Unit)? = null
     var onRepeatListener: ((View) -> Unit)? = null
+    var onTouchLeaveListener: ((View) -> Unit)? = null
 
     private fun calculateInterval(t: Long) =
         if (t > accelerateTime) endInterval
@@ -104,7 +103,8 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
             MotionEvent.ACTION_UP -> {
                 isPressed = false
 
-                var shouldPerformClick = !(longPressTriggered || repeatStarted)
+                val shouldPerformClick =
+                    !(longPressTriggered || repeatStarted || swipeRepeatTriggered || maybeSwipeOnKeyUp)
 
                 if (longPressEnabled) {
                     longPressTriggered = false
@@ -112,38 +112,43 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                     longPressJob = null
                 }
                 if (repeatEnabled) {
+                    repeatStarted = false
                     repeatJob?.cancel()
                     repeatJob = null
-                    repeatStarted = false
                 }
                 if (swipeEnabled) {
-                    if (maybeSwipeOnKeyUp && swipeXUnconsumed.absoluteValue > swipeThresholdX) {
-                        shouldPerformClick = false
-                        swipeX(swipeXUnconsumed.sign)
-                    } else if (maybeSwipeOnKeyUp && swipeYUnconsumed.absoluteValue > swipeThresholdY) {
-                        shouldPerformClick = false
-                        swipeY(swipeYUnconsumed.sign)
-                    } else if (maybeSwipeOnKeyUp)
-                        shouldPerformClick = !swipeRepeatTriggered && shouldPerformClick
+                    if (maybeSwipeOnKeyUp) {
+                        maybeSwipeOnKeyUp = false
+                        if (swipeXUnconsumed.absoluteValue > swipeThresholdX) {
+                            swipeX(swipeXUnconsumed.sign)
+                        }
+                        if (swipeYUnconsumed.absoluteValue > swipeThresholdY) {
+                            swipeY(swipeYUnconsumed.sign)
+                        }
+                    }
+                    if (swipeRepeatEnabled) {
+                        swipeRepeatTriggered = false
+                    }
                     swipeXUnconsumed = 0f
                     swipeYUnconsumed = 0f
-                    maybeSwipeOnKeyUp = false
                 }
-                if (swipeRepeatEnabled)
-                    swipeRepeatTriggered = false
 
                 if (shouldPerformClick) {
                     if (doubleTapEnabled) {
-                        if (firstClick && System.currentTimeMillis() - lastClickTime <= ViewConfiguration.getDoubleTapTimeout()) {
+                        val now = System.currentTimeMillis()
+                        if (maybeDoubleTap && now - lastClickTime <= longPressDelay) {
+                            maybeDoubleTap = false
                             onDoubleTapListener?.invoke(this)
-                            firstClick = false
                         } else {
-                            firstClick = true
-                            lastClickTime = System.currentTimeMillis()
+                            maybeDoubleTap = true
                             performClick()
                         }
-                    } else performClick()
+                        lastClickTime = now
+                    } else {
+                        performClick()
+                    }
                 }
+                onTouchLeaveListener?.invoke(this)
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
@@ -151,30 +156,16 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                 val y = event.y
                 drawableHotspotChanged(x, y)
                 if (swipeEnabled) {
+                    if ((!swipeRepeatEnabled && maybeSwipeOnKeyUp)
+                        || longPressTriggered
+                        || repeatStarted
+                    ) return true
                     swipeXUnconsumed += x - swipeLastX
                     swipeYUnconsumed += y - swipeLastY
                     swipeLastX = x
                     swipeLastY = y
-                    while (swipeXUnconsumed.absoluteValue > swipeThresholdX) {
-                        if ((longPressTriggered || maybeSwipeOnKeyUp) && !swipeRepeatEnabled) return true
-                        maybeSwipeOnKeyUp = true
-                        val direction = swipeXUnconsumed.sign
-                        if (swipeRepeatEnabled) {
-                            swipeRepeatTriggered = true
-                            swipeX(direction)
-                        }
-                        swipeXUnconsumed -= direction * swipeThresholdX
-                    }
-                    while (swipeYUnconsumed.absoluteValue > swipeThresholdY) {
-                        if ((longPressTriggered || maybeSwipeOnKeyUp) && !swipeRepeatEnabled) return true
-                        maybeSwipeOnKeyUp = true
-                        val direction = swipeYUnconsumed.sign
-                        if (swipeRepeatEnabled) {
-                            swipeRepeatTriggered = true
-                            swipeY(direction)
-                        }
-                        swipeYUnconsumed -= direction * swipeThresholdY
-                    }
+                    swipeXUnconsumed = consumeSwipe(swipeXUnconsumed, swipeThresholdX, SwipeAxis.X)
+                    swipeYUnconsumed = consumeSwipe(swipeYUnconsumed, swipeThresholdY, SwipeAxis.Y)
                     return true
                 }
             }
@@ -185,16 +176,22 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                     repeatJob = null
                 }
                 if (repeatEnabled) {
+                    repeatStarted = false
                     repeatJob?.cancel()
                     repeatJob = null
+                }
+                if (doubleTapEnabled) {
+                    maybeDoubleTap = false
+                    lastClickTime = 0
                 }
                 if (swipeEnabled) {
                     maybeSwipeOnKeyUp = false
                     swipeXUnconsumed = 0f
                     swipeYUnconsumed = 0f
+                    if (swipeRepeatEnabled) {
+                        swipeRepeatTriggered = false
+                    }
                 }
-                if (swipeRepeatEnabled)
-                    swipeRepeatTriggered = false
                 isPressed = false
                 return true
             }
@@ -202,20 +199,47 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
         return true
     }
 
-    private fun swipeX(direction: Float) {
+    private fun swipeX(direction: Float, count: Int = 1) {
         if (direction > 0) {
-            onSwipeRightListener?.invoke(this)
+            onSwipeRightListener?.invoke(this, count)
         } else {
-            onSwipeLeftListener?.invoke(this)
+            onSwipeLeftListener?.invoke(this, count)
         }
     }
 
-    private fun swipeY(direction: Float) {
+    private fun swipeY(direction: Float, count: Int = 1) {
         if (direction > 0) {
-            onSwipeDownListener?.invoke(this)
+            onSwipeDownListener?.invoke(this, count)
         } else {
-            onSwipeUpListener?.invoke(this)
+            onSwipeUpListener?.invoke(this, count)
         }
+    }
+
+    private fun consumeSwipe(unconsumed: Float, threshold: Float, axis: SwipeAxis): Float {
+        val direction = unconsumed.sign
+        var remaining = unconsumed.absoluteValue
+        var count = 0
+        while (remaining >= threshold) {
+            if (repeatEnabled && !repeatStarted) {
+                repeatJob?.cancel()
+                repeatJob = null
+            }
+            remaining -= threshold
+            count += 1
+            if (swipeRepeatEnabled) {
+                swipeRepeatTriggered = true
+            } else {
+                maybeSwipeOnKeyUp = true
+                return unconsumed
+            }
+        }
+        if (count > 0) {
+            when (axis) {
+                SwipeAxis.X -> swipeX(direction, count)
+                SwipeAxis.Y -> swipeY(direction, count)
+            }
+        }
+        return direction * remaining
     }
 
     override fun setOnLongClickListener(l: OnLongClickListener?) {
