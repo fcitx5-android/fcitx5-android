@@ -7,6 +7,7 @@ import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.utils.AppUtil
+import org.fcitx.fcitx5.android.utils.inputConnection
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
@@ -42,8 +43,19 @@ class CommonKeyActionListener :
                         }
                     }
                     is KeyAction.InputMethodSwitchAction -> inputMethodManager.showInputMethodPicker()
+                    is KeyAction.MoveSelectionAction -> {
+                        val current = service.selection
+                        val start = current.start + action.start
+                        val end = current.end + action.end
+                        if (start > end) return@launch
+                        service.inputConnection?.setSelection(start, end)
+                    }
+                    is KeyAction.DeleteSelectionAction -> {
+                        if (service.selection.isNotEmpty()) {
+                            service.inputConnection?.commitText("", 1)
+                        }
+                    }
                     else -> {
-
                     }
                 }
             }

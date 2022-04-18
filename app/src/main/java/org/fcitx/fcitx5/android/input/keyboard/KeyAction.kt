@@ -16,9 +16,7 @@ sealed class KeyAction {
         }
     }
 
-
     data class SymAction(val sym: KeySym, val states: KeyStates = VirtualState) : KeyAction() {
-
         constructor(sym: UInt, states: KeyStates = VirtualState) : this(KeySym(sym), states)
 
         companion object {
@@ -37,5 +35,9 @@ sealed class KeyAction {
     object InputMethodSwitchAction : KeyAction()
 
     data class LayoutSwitchAction(val act: String = "") : KeyAction()
+
+    class MoveSelectionAction(val start: Int = 0, val end: Int = 0) : KeyAction()
+
+    object DeleteSelectionAction : KeyAction()
 
 }

@@ -32,6 +32,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         val end: Int get() = data[1]
 
         fun isEmpty() = data[0] == data[1]
+        fun isNotEmpty() = data[0] != data[1]
 
         fun contains(other: CursorRange): Boolean {
             return start <= other.start && other.end <= end
