@@ -11,10 +11,10 @@ object InputMethodUtil {
     private val serviceName =
         ComponentName(appContext, FcitxInputMethodService::class.java).flattenToShortString()
 
-    fun isEnabled() = serviceName in Settings.Secure.getString(
+    fun isEnabled() = serviceName in (Settings.Secure.getString(
         appContext.contentResolver,
         Settings.Secure.ENABLED_INPUT_METHODS
-    ).split(':')
+    ) ?: "").split(':')
 
     fun isSelected() = serviceName == Settings.Secure.getString(
         appContext.contentResolver,
