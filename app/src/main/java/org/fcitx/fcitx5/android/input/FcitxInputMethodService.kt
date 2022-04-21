@@ -3,6 +3,7 @@ package org.fcitx.fcitx5.android.input
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.SystemClock
+import android.text.InputType
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.View
@@ -103,17 +104,25 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     private fun handleReturnKey() {
-        if (editorInfo == null || editorInfo!!.imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION)) {
-            sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
-            return
-        }
-        editorInfo!!.run {
+        editorInfo?.apply {
+            if (inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL) {
+                sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
+                return
+            }
             if (actionLabel?.isNotEmpty() == true) {
-                actionId
-            } else {
-                imeOptions and EditorInfo.IME_MASK_ACTION
-            }.let { inputConnection?.performEditorAction(it) }
-        }
+                inputConnection?.performEditorAction(editorInfo!!.actionId)
+                return
+            }
+            if (imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION)) {
+                inputConnection?.commitText("\n", 1)
+                return
+            }
+            when (val action = imeOptions and EditorInfo.IME_MASK_ACTION) {
+                EditorInfo.IME_ACTION_UNSPECIFIED,
+                EditorInfo.IME_ACTION_NONE -> inputConnection?.commitText("\n", 1)
+                else -> inputConnection?.performEditorAction(action)
+            }
+        } ?: sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
     }
 
     private fun sendDownKeyEvent(eventTime: Long, keyEventCode: Int, metaState: Int = 0) {
