@@ -44,4 +44,10 @@ object ThemePreset {
         clipboardEntryColor = resColor(R.color.blue_500)
     )
 
+    // TODO remove this
+    val preview = app.copy(
+        keyBackgroundColor = null,
+        keyBackgroundColorBordered = resColor(R.color.key)
+    )
+
 }

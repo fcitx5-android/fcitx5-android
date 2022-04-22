@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.utils
 
 import android.content.ContentResolver
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.ColorFilter
 import android.graphics.PorterDuff
@@ -132,4 +133,23 @@ fun NavController.navigateFromMain(@IdRes dest: Int, bundle: Bundle? = null) {
 fun darkenColorFilter(percent: Int): ColorFilter {
     val value = percent * 255 / 100
     return PorterDuffColorFilter(Color.argb(value, 0, 0, 0), PorterDuff.Mode.SRC_ATOP)
+}
+
+// only portrait
+fun Context.keyboardWindowAspectRatio(): Pair<Int, Int> {
+    val x: Int
+    val y: Int
+    when (resources.configuration.orientation) {
+        Configuration.ORIENTATION_LANDSCAPE -> {
+            x = resources.displayMetrics.heightPixels
+            y = resources.displayMetrics.widthPixels
+        }
+        else -> {
+            x = resources.displayMetrics.widthPixels
+            y = resources.displayMetrics.heightPixels
+        }
+
+    }
+    return x to y *
+            AppPrefs.getInstance().keyboard.keyboardHeightPercent.getValue() / 100
 }

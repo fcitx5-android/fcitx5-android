@@ -1,14 +1,12 @@
 package org.fcitx.fcitx5.android.data.theme
 
 import android.graphics.Color
-import cn.berberman.girls.utils.either.Either
 import org.fcitx.fcitx5.android.utils.ContextF
 import org.fcitx.fcitx5.android.utils.resource.ColorResource
 import java.io.File
 
 sealed class Theme {
 
-    abstract val background: Either<ColorResource, File>
     abstract val barColor: ColorResource
 
     // override by keyBackgroundColorBordered when key border is enabled
@@ -28,7 +26,7 @@ sealed class Theme {
     abstract val lightNavigationBar: ContextF<Boolean>
 
     data class CustomBackground(
-        val image: File,
+        val backgroundImage: File,
         override val barColor: ColorResource,
         override val keyBackgroundColor: ColorResource?,
         override val keyBackgroundColorBordered: ColorResource,
@@ -40,9 +38,7 @@ sealed class Theme {
         override val dividerColor: ColorResource,
         override val lightNavigationBar: ContextF<Boolean>,
         override val clipboardEntryColor: ColorResource
-    ) : Theme() {
-        override val background: Either<ColorResource, File> = Either.right(image)
-    }
+    ) : Theme()
 
 
     data class Builtin(
@@ -58,9 +54,7 @@ sealed class Theme {
         override val dividerColor: ColorResource,
         override val lightNavigationBar: ContextF<Boolean>,
         override val clipboardEntryColor: ColorResource
-    ) : Theme() {
-        override val background: Either<ColorResource, File> = Either.left(backgroundColor)
-    }
+    ) : Theme()
 
     val keyTextColorInverse by lazy {
         keyTextColor.map {

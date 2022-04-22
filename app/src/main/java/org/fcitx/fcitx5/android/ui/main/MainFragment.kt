@@ -1,12 +1,16 @@
 package org.fcitx.fcitx5.android.ui.main
 
 import android.os.Bundle
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.launch
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.ui.common.BackgroundImageActivity
+import timber.log.Timber
 
 class MainFragment : PreferenceFragmentCompat() {
 
@@ -24,7 +28,12 @@ class MainFragment : PreferenceFragmentCompat() {
         super.onPause()
     }
 
+    private lateinit var launcher: ActivityResultLauncher<Unit>
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        launcher = registerForActivityResult(BackgroundImageActivity.Contract()) {
+            Timber.d("Background: $it")
+        }
         val context = preferenceManager.context
         val screen = preferenceManager.createPreferenceScreen(context)
         val fcitxCategory = PreferenceCategory(context).apply {
@@ -43,6 +52,7 @@ class MainFragment : PreferenceFragmentCompat() {
             setTitle(R.string.input_methods)
             setIcon(R.drawable.ic_baseline_language_24)
             setOnPreferenceClickListener {
+                launcher.launch()
                 findNavController().navigate(R.id.action_mainFragment_to_imListFragment)
                 true
             }
