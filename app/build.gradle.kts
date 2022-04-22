@@ -233,6 +233,7 @@ installFcitxComponent("generate-desktop-file", "config", file("src/main/assets")
 installFcitxComponent("translation-file", "translation", file("src/main/assets"))
 
 dependencies {
+    implementation ("com.github.CanHub:Android-Image-Cropper:4.2.1")
     implementation("cat.ereza:customactivityoncrash:2.3.0")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("org.mechdancer:dependency:0.1.2")

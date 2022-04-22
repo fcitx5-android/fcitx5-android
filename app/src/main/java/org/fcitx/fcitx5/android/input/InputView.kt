@@ -12,14 +12,13 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
-import cn.berberman.girls.utils.either.otherwise
-import cn.berberman.girls.utils.either.then
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Fcitx
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
+import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcaster
@@ -127,13 +126,14 @@ class InputView(
             broadcaster.onImeUpdate(fcitx.currentIme())
         }
 
-        ThemeManager.currentTheme.background.then {
-            background =
-                BitmapDrawable(resources, BitmapFactory.decodeFile(it.path))
+        when (val theme = ThemeManager.currentTheme) {
+            is Theme.Builtin -> backgroundColor = theme.backgroundColor.resolve(themedContext)
+            is Theme.CustomBackground -> background =
+                BitmapDrawable(
+                    resources,
+                    BitmapFactory.decodeFile(theme.backgroundImage.path)
+                )
         }
-            .otherwise {
-                backgroundColor = it.resolve(themedContext)
-            }
 
         add(kawaiiBar.view, lParams(matchParent, dp(40)) {
             topOfParent()
