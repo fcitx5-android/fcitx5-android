@@ -5,13 +5,16 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.createBitmap
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageView
@@ -23,9 +26,10 @@ import org.fcitx.fcitx5.android.utils.darkenColorFilter
 import org.fcitx.fcitx5.android.utils.keyboardWindowAspectRatio
 import splitties.dimensions.dp
 import splitties.resources.color
+import splitties.resources.styledColorSL
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
-import splitties.views.dsl.material.rangeSlider
+import splitties.views.dsl.material.slider
 import splitties.views.gravityCenter
 import java.io.File
 
@@ -58,10 +62,16 @@ class BackgroundImageActivity : AppCompatActivity() {
     }
 
     private val brightness by lazy {
-        rangeSlider {
+        slider {
             valueFrom = 0f
             valueTo = 100f
             stepSize = 1f
+            val colorAccent = styledColorSL(android.R.attr.colorAccent)
+            thumbTintList = colorAccent
+            haloTintList = colorAccent
+            trackTintList = colorAccent
+            trackInactiveTintList = styledColorSL(android.R.attr.colorButtonNormal)
+            isTickVisible = false
             setLabelFormatter {
                 "${it.toInt()}%"
             }
@@ -77,11 +87,15 @@ class BackgroundImageActivity : AppCompatActivity() {
     private val ui by lazy {
         verticalLayout {
             gravity = gravityCenter
+            add(fakeKeyboard, lParams(inputViewWidth, inputViewHeight))
             add(text, lParams())
             add(brightness, lParams(width = dp(300)))
             add(finishButton, lParams())
         }
     }
+
+    private var inputViewWidth = 0
+    private var inputViewHeight = 0
 
     private lateinit var launcher: ActivityResultLauncher<CropImageContractOptions>
 
@@ -91,9 +105,15 @@ class BackgroundImageActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(ui)
         val (x, y) = keyboardWindowAspectRatio()
-        ui.add(fakeKeyboard, ui.lParams(x, y))
+        inputViewWidth = x
+        // bar height
+        inputViewHeight = y + dp(40)
+        // bottom padding
+        ViewCompat.getRootWindowInsets(this.fakeKeyboard)?.let {
+            inputViewHeight += it.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+        }
+        setContentView(ui)
         launcher = registerForActivityResult(CropImageContract()) {
             if (!it.isSuccessful)
                 cancel()
@@ -104,7 +124,7 @@ class BackgroundImageActivity : AppCompatActivity() {
                     image.colorFilter = darkenColorFilter(100 - value.toInt())
                     fakeKeyboard.background = image
                 }
-                brightness.setValues(70f)
+                brightness.value = 70f
                 finishButton.setOnClickListener {
                     done()
                 }
@@ -113,7 +133,8 @@ class BackgroundImageActivity : AppCompatActivity() {
         launcher.launch(options {
             setGuidelines(CropImageView.Guidelines.ON)
             setImageSource(includeGallery = true, includeCamera = false)
-            setAspectRatio(x, y)
+            setAspectRatio(inputViewWidth, inputViewHeight)
+            setOutputCompressFormat(Bitmap.CompressFormat.PNG)
         })
 
     }
@@ -124,9 +145,14 @@ class BackgroundImageActivity : AppCompatActivity() {
     }
 
     private fun done() {
-        val bitmap = createBitmap(image.intrinsicWidth, image.intrinsicHeight)
+        val bitmap = Bitmap.createBitmap(inputViewWidth, inputViewHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
-        image.draw(canvas)
+        canvas.drawBitmap(
+            cropped, null, Rect(0, 0, inputViewWidth, inputViewHeight),
+            Paint().apply {
+                colorFilter = darkenColorFilter(100 - brightness.value.toInt())
+            }
+        )
         val file = File.createTempFile(
             "img", ".png",
             appContext.getExternalFilesDir(null)
