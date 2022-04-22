@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.applyKeyTextColor
 
 abstract class BaseCandidateViewAdapter :
@@ -38,7 +38,7 @@ abstract class BaseCandidateViewAdapter :
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = createTextView(parent)
         return ViewHolder(view).apply {
-            ThemeManager.currentTheme.applyKeyTextColor(textView)
+            theme.applyKeyTextColor(textView)
             itemView.setOnClickListener { onSelect(this.idx + offset) }
             itemView.setOnTouchListener { v, event ->
                 when (event.action) {
@@ -54,6 +54,8 @@ abstract class BaseCandidateViewAdapter :
         holder.textView.text = getCandidateAt(position)
         holder.idx = position
     }
+
+    abstract val theme: Theme
 
     override fun getItemCount() = candidates.size - offset
 

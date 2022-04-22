@@ -19,14 +19,14 @@ import splitties.views.dsl.core.*
 import splitties.views.gravityCenter
 import splitties.views.imageResource
 
-class TextEditingUi(override val ctx: Context) : Ui {
+class TextEditingUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
     private fun Theme.setForegroundAndBackground(view: View) {
         view.apply {
             if (ThemeManager.prefs.keyRippleEffect.getValue()) {
                 foreground = styledDrawable(android.R.attr.selectableItemBackground)
                 background = GradientDrawable().apply {
                     setColor(color(android.R.color.transparent))
-                    setStroke(dp(1) / 2, ThemeManager.currentTheme.dividerColor.resolve(context))
+                    setStroke(dp(1) / 2, inputTheme.dividerColor.resolve(context))
                 }
             } else {
                 foreground = null
@@ -36,14 +36,14 @@ class TextEditingUi(override val ctx: Context) : Ui {
                         setColor(keyAccentForeground.resolve(context))
                         setStroke(
                             dp(1) / 2,
-                            ThemeManager.currentTheme.dividerColor.resolve(context)
+                            inputTheme.dividerColor.resolve(context)
                         )
                     })
                     addState(intArrayOf(android.R.attr.state_enabled), GradientDrawable().apply {
                         setColor(color(android.R.color.transparent))
                         setStroke(
                             dp(1) / 2,
-                            ThemeManager.currentTheme.dividerColor.resolve(context)
+                            inputTheme.dividerColor.resolve(context)
                         )
                     })
                 }
@@ -56,7 +56,6 @@ class TextEditingUi(override val ctx: Context) : Ui {
             isClickable = false
             isFocusable = false
             background = null
-            ThemeManager.currentTheme.applyKeyTextColor(this)
         }
 
         init {
@@ -77,17 +76,18 @@ class TextEditingUi(override val ctx: Context) : Ui {
 
     private fun textButton(str: String) = GTextButton(ctx).apply {
         text.text = str
+        inputTheme.applyKeyTextColor(text)
         stateListAnimator = null
-        ThemeManager.currentTheme.setForegroundAndBackground(this)
+        inputTheme.setForegroundAndBackground(this)
     }
 
     private fun iconButton(@DrawableRes icon: Int) = GImageButton(ctx).apply {
         image.imageResource = icon
         image.colorFilter =
-            ThemeManager.currentTheme.funKeyColor
+            inputTheme.funKeyColor
                 .toColorFilter(PorterDuff.Mode.SRC_IN)
                 .resolve(context)
-        ThemeManager.currentTheme.setForegroundAndBackground(this)
+        inputTheme.setForegroundAndBackground(this)
     }
 
     val upButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_up_24)
@@ -199,13 +199,13 @@ class TextEditingUi(override val ctx: Context) : Ui {
     fun updateSelection(hasSelection: Boolean, userSelection: Boolean) {
         if (hasSelection || userSelection) {
             selectButton.apply {
-                text.setTextColor(ThemeManager.currentTheme.keyTextColorInverse.resolve(context))
-                ThemeManager.currentTheme.applyKeyAccentBackgroundColor(this)
+                text.setTextColor(inputTheme.keyTextColorInverse.resolve(context))
+                inputTheme.applyKeyAccentBackgroundColor(this)
             }
         } else {
             selectButton.apply {
-                ThemeManager.currentTheme.applyKeyTextColor(text)
-                ThemeManager.currentTheme.setForegroundAndBackground(this)
+                inputTheme.applyKeyTextColor(text)
+                inputTheme.setForegroundAndBackground(this)
             }
         }
         if (hasSelection) {
@@ -226,7 +226,7 @@ class TextEditingUi(override val ctx: Context) : Ui {
     }
 
     val clipboardButton = imageButton {
-        ThemeManager.currentTheme.applyBarIconColor(this)
+        inputTheme.applyBarIconColor(this)
         imageResource = R.drawable.ic_clipboard
         scaleType = ImageView.ScaleType.CENTER_INSIDE
     }

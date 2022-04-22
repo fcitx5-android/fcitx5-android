@@ -14,6 +14,7 @@ import org.fcitx.fcitx5.android.input.candidates.CandidateViewBuilder
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.candidates.adapter.BaseCandidateViewAdapter
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateLayout
+import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.keyboard.BaseKeyboard
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction
@@ -26,6 +27,7 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
     InputWindow.SimpleInputWindow<T>(), InputBroadcastReceiver {
 
     protected val builder: CandidateViewBuilder by manager.must()
+    protected val theme by manager.theme()
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
     private val bar: KawaiiBarComponent by manager.must()
     private val horizontalCandidate: HorizontalCandidateComponent by manager.must()

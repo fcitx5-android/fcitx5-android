@@ -9,6 +9,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
+import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import splitties.bitflags.hasFlag
 import splitties.views.dsl.constraintlayout.*
@@ -16,6 +17,7 @@ import splitties.views.imageResource
 
 abstract class BaseKeyboard(
     context: Context,
+    protected val theme: Theme,
     private val keyLayout: List<List<KeyDef>>
 ) : ConstraintLayout(context) {
 
@@ -63,9 +65,9 @@ abstract class BaseKeyboard(
 
     private fun createKeyView(def: KeyDef): KeyView {
         return when (def.appearance) {
-            is KeyDef.Appearance.AltText -> AltTextKeyView(context, def.appearance)
-            is KeyDef.Appearance.Text -> TextKeyView(context, def.appearance)
-            is KeyDef.Appearance.Image -> ImageKeyView(context, def.appearance)
+            is KeyDef.Appearance.AltText -> AltTextKeyView(context, theme, def.appearance)
+            is KeyDef.Appearance.Text -> TextKeyView(context, theme, def.appearance)
+            is KeyDef.Appearance.Image -> ImageKeyView(context, theme, def.appearance)
         }.apply {
             if (def is SpaceKey) {
                 swipeEnabled = true

@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.*
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.Fcitx
-import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.candidates.adapter.GridCandidateViewAdapter
 import org.fcitx.fcitx5.android.input.candidates.adapter.SimpleCandidateViewAdapter
@@ -19,6 +19,7 @@ import org.fcitx.fcitx5.android.input.candidates.expanded.decoration.FlexboxVert
 import org.fcitx.fcitx5.android.input.candidates.expanded.decoration.GridDecoration
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
+import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.utils.hapticIfEnabled
 import org.fcitx.fcitx5.android.utils.resource.toColorFilter
 import org.mechdancer.dependency.Dependent
@@ -32,6 +33,7 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
 
     private val service: FcitxInputMethodService by manager.inputMethodService()
     private val fcitx: Fcitx by manager.fcitx()
+    private val theme by manager.theme()
 
     fun gridAdapter() = object : GridCandidateViewAdapter() {
         override fun onTouchDown(view: View) {
@@ -41,6 +43,9 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
         override fun onSelect(idx: Int) {
             service.lifecycleScope.launch { fcitx.select(idx) }
         }
+
+        override val theme: Theme
+            get() = this@CandidateViewBuilder.theme
     }
 
     fun simpleAdapter() = object : SimpleCandidateViewAdapter() {
@@ -51,6 +56,9 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
         override fun onSelect(idx: Int) {
             service.lifecycleScope.launch { fcitx.select(idx) }
         }
+
+        override val theme: Theme
+            get() = this@CandidateViewBuilder.theme
     }
 //
 //    // setup a listener that sets the span count of gird layout according to recycler view's width
@@ -111,7 +119,7 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
 
     private fun RecyclerView.dividerDrawable() =
         styledDrawable(android.R.attr.listDivider)!!.apply {
-            colorFilter = ThemeManager.currentTheme.dividerColor.toColorFilter(PorterDuff.Mode.SRC)
+            colorFilter = theme.dividerColor.toColorFilter(PorterDuff.Mode.SRC)
                 .resolve(context)
         }
 

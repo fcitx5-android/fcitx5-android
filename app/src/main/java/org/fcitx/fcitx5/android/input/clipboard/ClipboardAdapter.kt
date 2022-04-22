@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardEntry
+import org.fcitx.fcitx5.android.data.theme.Theme
 import kotlin.collections.set
 
 abstract class ClipboardAdapter :
@@ -33,7 +34,7 @@ abstract class ClipboardAdapter :
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(ClipboardEntryUi(parent.context))
+        ViewHolder(ClipboardEntryUi(parent.context, theme))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         with(holder.entryUi) {
@@ -123,6 +124,8 @@ abstract class ClipboardAdapter :
         }
         diff.dispatchUpdatesTo(this)
     }
+
+    abstract val theme: Theme
 
     override fun getItemCount(): Int = _entries.size
 

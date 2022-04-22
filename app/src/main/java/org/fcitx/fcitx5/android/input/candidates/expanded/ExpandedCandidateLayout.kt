@@ -5,7 +5,7 @@ import android.content.Context
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.applyBarColor
 import org.fcitx.fcitx5.android.input.keyboard.*
 import splitties.views.dsl.constraintlayout.*
@@ -15,10 +15,11 @@ import splitties.views.dsl.recyclerview.recyclerView
 @SuppressLint("ViewConstructor")
 class ExpandedCandidateLayout(
     context: Context,
+    inputTheme: Theme,
     initRecyclerView: RecyclerView.() -> Unit = {}
 ) : ConstraintLayout(context) {
 
-    class Keyboard(context: Context) : BaseKeyboard(context, Layout) {
+    class Keyboard(context: Context, theme: Theme) : BaseKeyboard(context, theme, Layout) {
         companion object {
             const val UpBtnLabel = "U"
             const val DownBtnLabel = "D"
@@ -60,14 +61,14 @@ class ExpandedCandidateLayout(
 
     var pageDnBtn: ImageKeyView
 
-    val embeddedKeyboard = Keyboard(context).apply {
+    val embeddedKeyboard = Keyboard(context, inputTheme).apply {
         pageUpBtn = findViewById(Keyboard.UpBtnId)
         pageDnBtn = findViewById(Keyboard.DownBtnId)
     }
 
     init {
         id = R.id.expanded_candidate_view
-        ThemeManager.currentTheme.applyBarColor(this)
+        inputTheme.applyBarColor(this)
 
         add(recyclerView, lParams {
             topOfParent()

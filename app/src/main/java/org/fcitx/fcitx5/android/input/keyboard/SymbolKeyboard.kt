@@ -1,13 +1,17 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.inputmethod.EditorInfo
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.data.theme.Theme
 import splitties.views.imageResource
 
+@SuppressLint("ViewConstructor")
 class SymbolKeyboard(
-    context: Context
-) : BaseKeyboard(context, Layout) {
+    context: Context,
+    theme: Theme,
+) : BaseKeyboard(context, theme, Layout) {
 
     companion object {
         const val Name = "Symbol"

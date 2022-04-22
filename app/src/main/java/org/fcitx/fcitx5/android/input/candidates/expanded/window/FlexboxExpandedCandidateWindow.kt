@@ -16,7 +16,7 @@ class FlexboxExpandedCandidateWindow :
         get() = candidateLayout.recyclerView.layoutManager as FlexboxLayoutManager
 
     override fun onCreateCandidateLayout(): ExpandedCandidateLayout =
-        ExpandedCandidateLayout(context).apply {
+        ExpandedCandidateLayout(context, theme).apply {
             recyclerView.apply {
                 with(builder) {
                     setupFlexboxLayoutManager(this@FlexboxExpandedCandidateWindow.adapter, true)

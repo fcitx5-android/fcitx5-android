@@ -7,6 +7,7 @@ import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcaster
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.inputView
+import org.fcitx.fcitx5.android.input.dependency.theme
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
@@ -19,12 +20,13 @@ class PreeditComponent : UniqueComponent<PreeditComponent>(), Dependent,
     private val context by manager.context()
     private val broadcaster: InputBroadcaster by manager.must()
     private val inputView by manager.inputView()
+    private val theme by manager.theme()
 
     private val cachedPreedit = PreeditContent(
         FcitxEvent.PreeditEvent.Data("", 0, "", 0),
         FcitxEvent.InputPanelAuxEvent.Data("", "")
     )
-    private val preeditUi by lazy { PreeditUi(context) }
+    private val preeditUi by lazy { PreeditUi(context, theme) }
     private val preeditPopup by lazy {
         PopupWindow(
             preeditUi.root,

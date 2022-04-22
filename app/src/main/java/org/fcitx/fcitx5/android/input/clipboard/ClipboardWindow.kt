@@ -8,10 +8,12 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
+import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.State.*
 import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.TransitionEvent.*
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
+import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.utils.EventStateMachine
 import org.fcitx.fcitx5.android.utils.inputConnection
@@ -20,6 +22,7 @@ import kotlin.properties.Delegates
 class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
 
     private val service: FcitxInputMethodService by manager.inputMethodService()
+    private val theme by manager.theme()
 
     private lateinit var stateMachine: EventStateMachine<ClipboardStateMachine.State, ClipboardStateMachine.TransitionEvent>
 
@@ -62,11 +65,14 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
             override fun onPaste(id: Int) {
                 service.inputConnection?.commitText(getEntryById(id).text, 1)
             }
+
+            override val theme: Theme
+                get() = this@ClipboardWindow.theme
         }
     }
 
     private val ui by lazy {
-        ClipboardUi(context).apply {
+        ClipboardUi(context, theme).apply {
             recyclerView.apply {
                 layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
                 adapter = this@ClipboardWindow.adapter

@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
-import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.data.theme.applyBarColor
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.*
 import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.*
@@ -27,6 +26,7 @@ import org.fcitx.fcitx5.android.input.clipboard.ClipboardWindow
 import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
+import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.editing.TextEditingWindow
 import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import org.fcitx.fcitx5.android.input.status.StatusAreaWindow
@@ -35,7 +35,6 @@ import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.inputConnection
 import org.mechdancer.dependency.manager.must
 import splitties.bitflags.hasFlag
-import splitties.views.backgroundColor
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
@@ -47,6 +46,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     InputBroadcastReceiver {
 
     private val context by manager.context()
+    private val theme by manager.theme()
     private val windowManager: InputWindowManager by manager.must()
     private val service by manager.inputMethodService()
     private val horizontalCandidate: HorizontalCandidateComponent by manager.must()
@@ -84,7 +84,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     }
 
     private val idleUi: KawaiiBarUi.Idle by lazy {
-        KawaiiBarUi.Idle(context) { idleUiStateMachine.currentState }.also {
+        KawaiiBarUi.Idle(context, theme) { idleUiStateMachine.currentState }.also {
             it.menuButton.setOnClickListener {
                 idleUiStateMachine.push(MenuButtonClicked)
                 // reset timeout timer (if present) when user switch layout
@@ -120,10 +120,10 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     }
 
     private val candidateUi by lazy {
-        KawaiiBarUi.Candidate(context, horizontalCandidate.view)
+        KawaiiBarUi.Candidate(context, theme, horizontalCandidate.view)
     }
 
-    private val titleUi by lazy { KawaiiBarUi.Title(context) }
+    private val titleUi by lazy { KawaiiBarUi.Title(context, theme) }
 
     private val barStateMachine = KawaiiBarStateMachine.new {
         switchUiByState(it)
@@ -202,7 +202,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     override val view by lazy {
         ViewAnimator(context).apply {
-            ThemeManager.currentTheme.applyBarColor(this)
+            theme.applyBarColor(this)
             add(idleUi.root, lParams(matchParent, matchParent))
             add(candidateUi.root, lParams(matchParent, matchParent))
             add(titleUi.root, lParams(matchParent, matchParent))

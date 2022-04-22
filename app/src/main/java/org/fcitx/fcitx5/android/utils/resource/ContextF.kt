@@ -1,4 +1,4 @@
-package org.fcitx.fcitx5.android.utils
+package org.fcitx.fcitx5.android.utils.resource
 
 import android.content.Context
 

@@ -8,12 +8,13 @@ import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.core.Fcitx
-import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.applyBarIconColor
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
+import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.status.StatusAreaEntry.Android.Type.*
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.ui.main.MainActivity
@@ -33,6 +34,7 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
 
     private val service: FcitxInputMethodService by manager.inputMethodService()
     private val fcitx: Fcitx by manager.fcitx()
+    private val theme by manager.theme()
 
     private val staticEntries by lazy {
         arrayOf(
@@ -89,6 +91,9 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
                     }
                 }
             }
+
+            override val theme: Theme
+                get() = this@StatusAreaWindow.theme
         }
     }
 
@@ -116,7 +121,7 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
 
     private val settingsButton by lazy {
         context.imageButton {
-            ThemeManager.currentTheme.applyBarIconColor(this)
+            theme.applyBarIconColor(this)
             imageResource = R.drawable.ic_baseline_settings_24
             scaleType = ImageView.ScaleType.CENTER_INSIDE
         }

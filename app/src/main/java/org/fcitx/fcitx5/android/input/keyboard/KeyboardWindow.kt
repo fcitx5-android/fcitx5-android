@@ -10,6 +10,7 @@ import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
+import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.mechdancer.dependency.manager.must
@@ -24,6 +25,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
 
     private val service: FcitxInputMethodService by manager.inputMethodService()
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
+    private val theme by manager.theme()
 
     private var _currentIme: InputMethodEntry? = null
 
@@ -35,11 +37,11 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
     private val keyboards: HashMap<String, BaseKeyboard> by lazy {
         hashMapOf(
             // a placeholder layout to avoid crash
-            EMPTY to (object : BaseKeyboard(context, listOf(listOf())) {}),
-            TextKeyboard.Name to TextKeyboard(context),
-            NumberKeyboard.Name to NumberKeyboard(context),
-            NumSymKeyboard.Name to NumSymKeyboard(context),
-            SymbolKeyboard.Name to SymbolKeyboard(context)
+            EMPTY to (object : BaseKeyboard(context, theme, listOf(listOf())) {}),
+            TextKeyboard.Name to TextKeyboard(context, theme),
+            NumberKeyboard.Name to NumberKeyboard(context, theme),
+            NumSymKeyboard.Name to NumSymKeyboard(context, theme),
+            SymbolKeyboard.Name to SymbolKeyboard(context, theme)
         )
     }
     private var currentKeyboardName = EMPTY
