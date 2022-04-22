@@ -1,7 +1,6 @@
 package org.fcitx.fcitx5.android.data.theme
 
-import android.graphics.Color
-import org.fcitx.fcitx5.android.utils.ContextF
+import org.fcitx.fcitx5.android.utils.inverseColor
 import org.fcitx.fcitx5.android.utils.resource.ColorResource
 import java.io.File
 
@@ -20,10 +19,7 @@ sealed class Theme {
     abstract val dividerColor: ColorResource
     abstract val clipboardEntryColor: ColorResource
 
-    // we need context for the default day light theme
-    // true -> force light
-    // false -> system default
-    abstract val lightNavigationBar: ContextF<Boolean>
+    abstract val isDark: Boolean
 
     data class CustomBackground(
         val backgroundImage: File,
@@ -36,7 +32,7 @@ sealed class Theme {
         override val keyAccentForeground: ColorResource,
         override val funKeyColor: ColorResource,
         override val dividerColor: ColorResource,
-        override val lightNavigationBar: ContextF<Boolean>,
+        override val isDark: Boolean,
         override val clipboardEntryColor: ColorResource
     ) : Theme()
 
@@ -52,17 +48,11 @@ sealed class Theme {
         override val keyAccentForeground: ColorResource,
         override val funKeyColor: ColorResource,
         override val dividerColor: ColorResource,
-        override val lightNavigationBar: ContextF<Boolean>,
+        override val isDark: Boolean,
         override val clipboardEntryColor: ColorResource
     ) : Theme()
 
     val keyTextColorInverse by lazy {
-        keyTextColor.map {
-            Color.rgb(
-                255 - Color.red(it),
-                255 - Color.green(it),
-                255 - Color.blue(it)
-            )
-        }
+        keyTextColor.map(::inverseColor)
     }
 }

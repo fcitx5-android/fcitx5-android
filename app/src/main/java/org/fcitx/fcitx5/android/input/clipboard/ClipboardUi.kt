@@ -7,7 +7,7 @@ import android.widget.ViewAnimator
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.applyBarColor
 import org.fcitx.fcitx5.android.data.theme.applyBarIconColor
 import splitties.dimensions.dp
@@ -16,16 +16,16 @@ import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.imageResource
 import timber.log.Timber
 
-class ClipboardUi(override val ctx: Context) : Ui {
+class ClipboardUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
 
     val recyclerView = recyclerView {
-        ThemeManager.currentTheme.applyBarColor(this)
+        inputTheme.applyBarColor(this)
         addItemDecoration(SpacesItemDecoration(dp(4)))
     }
 
-    val enableUi = ClipboardInstructionUi.Enable(ctx)
+    val enableUi = ClipboardInstructionUi.Enable(ctx, inputTheme)
 
-    val emptyUi = ClipboardInstructionUi.Empty(ctx)
+    val emptyUi = ClipboardInstructionUi.Empty(ctx, inputTheme)
 
     override val root = view(::ViewAnimator) {
         add(recyclerView, lParams(matchParent, matchParent))
@@ -34,7 +34,7 @@ class ClipboardUi(override val ctx: Context) : Ui {
     }
 
     val deleteAllButton = imageButton {
-        ThemeManager.currentTheme.applyBarIconColor(this)
+        inputTheme.applyBarIconColor(this)
         imageResource = R.drawable.ic_baseline_delete_sweep_24
         scaleType = ImageView.ScaleType.CENTER_INSIDE
         visibility = View.INVISIBLE

@@ -5,7 +5,6 @@ import androidx.annotation.DrawableRes
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.core.KeyStates
-import org.fcitx.fcitx5.android.data.theme.ThemeManager
 
 class SymbolKey(
     val symbol: String,
@@ -15,7 +14,7 @@ class SymbolKey(
         displayText = symbol,
         textSize = 20f,
         typeface = Typeface.NORMAL,
-        percentWidth
+        percentWidth = percentWidth
     ),
     setOf(
         Behavior.Press(action = KeyAction.FcitxKeyAction(symbol))
@@ -85,8 +84,8 @@ class LayoutSwitchKey(
         displayText,
         textSize = 16f,
         typeface = Typeface.BOLD,
-        percentWidth,
-        textColor = ThemeManager.currentTheme.funKeyColor,
+        percentWidth = percentWidth,
+        isFunKey = true
     ),
     setOf(
         Behavior.Press(action = KeyAction.LayoutSwitchAction(to))
@@ -133,7 +132,7 @@ class SpaceKey : KeyDef(
         textSize = 13f,
         typeface = Typeface.NORMAL,
         percentWidth = 0f,
-        background = ThemeManager.currentTheme.keyBackgroundColorBordered,
+        forceBordered = true,
         viewId = R.id.button_space
     ),
     setOf(
@@ -144,9 +143,8 @@ class SpaceKey : KeyDef(
 class ReturnKey(percentWidth: Float = 0.15f) : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_keyboard_return_24,
-        tint = ThemeManager.currentTheme.keyTextColorInverse,
-        percentWidth,
-        background = ThemeManager.currentTheme.keyAccentBackgroundColor,
+        accentBackground = true,
+        percentWidth = percentWidth,
         viewId = R.id.button_return
     ),
     setOf(
@@ -191,7 +189,7 @@ class NumPadKey(
         displayText,
         textSize = 16f,
         typeface = Typeface.NORMAL,
-        percentWidth
+        percentWidth = percentWidth
     ),
     setOf(
         Behavior.Press(action = KeyAction.SymAction(sym, NumLockState))

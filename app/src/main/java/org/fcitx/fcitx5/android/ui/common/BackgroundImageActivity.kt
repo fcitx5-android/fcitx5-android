@@ -20,6 +20,7 @@ import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageView
 import com.canhub.cropper.options
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.data.theme.ThemePreset
 import org.fcitx.fcitx5.android.input.keyboard.TextKeyboard
 import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.darkenColorFilter
@@ -55,7 +56,7 @@ class BackgroundImageActivity : AppCompatActivity() {
             add(frameLayout {
                 backgroundColor = color(R.color.darken_background)
             }, lParams(matchParent, dp(40)))
-            add(TextKeyboard(context), lParams(matchParent, matchParent))
+            add(TextKeyboard(context, ThemePreset.preview), lParams(matchParent, matchParent))
             scaleX = .8f
             scaleY = .8f
         }

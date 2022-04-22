@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.fcitx.fcitx5.android.core.*
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.service.FcitxDaemonManager
 import org.fcitx.fcitx5.android.utils.inputConnection
 import splitties.bitflags.hasFlag
@@ -194,7 +195,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 .eventFlow
                 .onEach { handleFcitxEvent(it) }
                 .launchIn(lifecycleScope)
-        inputView = InputView(this, fcitx)
+        // TODO theme
+        inputView = InputView(this, fcitx, ThemeManager.currentTheme)
         return inputView
     }
 

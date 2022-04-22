@@ -6,7 +6,7 @@ import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RoundRectShape
 import android.view.ViewGroup
 import android.widget.ImageView
-import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.applyKeyTextColor
 import org.fcitx.fcitx5.android.utils.resource.toColorFilter
 import splitties.dimensions.dp
@@ -15,7 +15,7 @@ import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.gravityCenter
 
-class StatusAreaEntryUi(override val ctx: Context) : Ui {
+class StatusAreaEntryUi(override val ctx: Context, private val intputTheme: Theme) : Ui {
 
     private val bkgShape = ctx.dp(24f).let { r ->
         ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
@@ -29,7 +29,7 @@ class StatusAreaEntryUi(override val ctx: Context) : Ui {
     val label = textView {
         textSize = 12f
         gravity = gravityCenter
-        ThemeManager.currentTheme.applyKeyTextColor(this)
+        intputTheme.applyKeyTextColor(this)
     }
 
     override val root = constraintLayout {
@@ -50,13 +50,13 @@ class StatusAreaEntryUi(override val ctx: Context) : Ui {
     fun setEntry(entry: StatusAreaEntry) = with(ctx) {
         icon.setImageDrawable(drawable(entry.icon))
         icon.colorFilter = (if (entry.active)
-            ThemeManager.currentTheme.keyTextColorInverse
+            intputTheme.keyTextColorInverse
         else
-            ThemeManager.currentTheme.funKeyColor).toColorFilter(PorterDuff.Mode.SRC_IN)
+            intputTheme.funKeyColor).toColorFilter(PorterDuff.Mode.SRC_IN)
             .resolve(ctx)
         bkgShape.paint.color = (
-                if (entry.active) ThemeManager.currentTheme.keyAccentBackgroundColor
-                else ThemeManager.currentTheme.keyBackgroundColorBordered).resolve(ctx)
+                if (entry.active) intputTheme.keyAccentBackgroundColor
+                else intputTheme.keyBackgroundColorBordered).resolve(ctx)
         label.text = entry.label
     }
 }

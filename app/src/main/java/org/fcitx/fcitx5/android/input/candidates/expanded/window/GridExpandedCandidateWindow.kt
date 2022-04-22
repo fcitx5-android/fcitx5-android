@@ -33,7 +33,7 @@ class GridExpandedCandidateWindow :
         get() = candidateLayout.recyclerView.layoutManager as GridLayoutManager
 
     override fun onCreateCandidateLayout(): ExpandedCandidateLayout =
-        ExpandedCandidateLayout(context).apply {
+        ExpandedCandidateLayout(context,theme).apply {
             recyclerView.apply {
                 with(builder) {
                     setupGridLayoutManager(this@GridExpandedCandidateWindow.adapter, true)

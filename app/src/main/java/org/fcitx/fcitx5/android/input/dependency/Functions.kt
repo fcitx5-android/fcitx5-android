@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.input.dependency
 
 import android.view.ContextThemeWrapper
 import org.fcitx.fcitx5.android.core.Fcitx
+import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.InputView
 import org.mechdancer.dependency.UniqueComponentWrapper
@@ -20,3 +21,6 @@ fun DependencyManager.inputView() =
 
 fun DependencyManager.inputMethodService() =
     mustWrapped<UniqueComponentWrapper<FcitxInputMethodService>, FcitxInputMethodService>()
+
+fun DependencyManager.theme() =
+    mustWrapped<UniqueComponentWrapper<Theme>, Theme>()

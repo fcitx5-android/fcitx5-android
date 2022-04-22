@@ -24,5 +24,5 @@ object ThemeManager {
     val prefs = AppPrefs.getInstance().registerProvider(::Prefs)
 
     // TODO
-    val currentTheme: Theme = ThemePreset.preview
+    val currentTheme: Theme = ThemePreset.test
 }

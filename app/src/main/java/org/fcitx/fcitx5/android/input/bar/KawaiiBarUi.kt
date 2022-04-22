@@ -13,7 +13,7 @@ import android.widget.ViewAnimator
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.applyBarIconColor
 import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.State.*
 import splitties.dimensions.dp
@@ -25,15 +25,16 @@ import splitties.views.imageResource
 import splitties.views.padding
 import timber.log.Timber
 
-sealed class KawaiiBarUi(override val ctx: Context) : Ui {
+sealed class KawaiiBarUi(override val ctx: Context, protected val intputTheme: Theme) : Ui {
 
-    class Candidate(ctx: Context, private val horizontalView: View) : KawaiiBarUi(ctx) {
+    class Candidate(ctx: Context, intputTheme: Theme, private val horizontalView: View) :
+        KawaiiBarUi(ctx, intputTheme) {
 
         val expandButton = imageButton(R.id.expand_candidate_btn) {
             background = null
             imageResource = R.drawable.ic_baseline_expand_more_24
             visibility = ConstraintLayout.INVISIBLE
-            ThemeManager.currentTheme.applyBarIconColor(this)
+            intputTheme.applyBarIconColor(this)
         }
 
         override val root = ctx.constraintLayout {
@@ -54,8 +55,9 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
 
     class Idle(
         ctx: Context,
+        intputTheme: Theme,
         private val getCurrentState: () -> IdleUiStateMachine.State,
-    ) : KawaiiBarUi(ctx) {
+    ) : KawaiiBarUi(ctx, intputTheme) {
 
         private val IdleUiStateMachine.State.menuButtonRotation
             get() =
@@ -72,13 +74,13 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
 
         private fun toolButton(@DrawableRes icon: Int) = imageButton {
             imageResource = icon
-            ThemeManager.currentTheme.applyBarIconColor(this)
+            intputTheme.applyBarIconColor(this)
             scaleType = ImageView.ScaleType.CENTER_INSIDE
         }
 
         val menuButton = toolButton(R.drawable.ic_baseline_expand_more_24).apply {
             rotation = getCurrentState().menuButtonRotation
-            ThemeManager.currentTheme.applyBarIconColor(this)
+            intputTheme.applyBarIconColor(this)
         }
 
         val undoButton = toolButton(R.drawable.ic_baseline_undo_24)
@@ -92,7 +94,7 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
         val moreButton = toolButton(R.drawable.ic_baseline_more_horiz_24)
 
         val hideKeyboardButton = imageButton {
-            ThemeManager.currentTheme.applyBarIconColor(this)
+            intputTheme.applyBarIconColor(this)
             imageResource = R.drawable.ic_baseline_arrow_drop_down_24
         }
 
@@ -230,17 +232,17 @@ sealed class KawaiiBarUi(override val ctx: Context) : Ui {
         }
     }
 
-    class Title(ctx: Context) : KawaiiBarUi(ctx) {
+    class Title(ctx: Context, intputTheme: Theme) : KawaiiBarUi(ctx, intputTheme) {
 
         private val backButton = imageButton {
             imageResource = R.drawable.ic_baseline_arrow_back_24
-            ThemeManager.currentTheme.applyBarIconColor(this)
+            intputTheme.applyBarIconColor(this)
             scaleType = ImageView.ScaleType.CENTER_INSIDE
         }
 
         private val titleText = textView {
             typeface = Typeface.defaultFromStyle(Typeface.BOLD)
-            setTextColor(ThemeManager.currentTheme.funKeyColor.resolve(context))
+            setTextColor(intputTheme.funKeyColor.resolve(context))
             gravity = gravityVerticalCenter
             textSize = 16f
         }

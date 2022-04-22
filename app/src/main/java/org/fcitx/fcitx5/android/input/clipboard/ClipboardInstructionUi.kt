@@ -3,7 +3,7 @@ package org.fcitx.fcitx5.android.input.clipboard
 import android.content.Context
 import android.graphics.PorterDuff
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.applyKeyTextColor
 import org.fcitx.fcitx5.android.utils.resource.toColorFilter
 import splitties.dimensions.dp
@@ -15,9 +15,10 @@ import splitties.views.horizontalPadding
 import splitties.views.imageResource
 import splitties.views.verticalPadding
 
-sealed class ClipboardInstructionUi(override val ctx: Context) : Ui {
+sealed class ClipboardInstructionUi(override val ctx: Context, protected val intputTheme: Theme) :
+    Ui {
 
-    class Enable(ctx: Context) : ClipboardInstructionUi(ctx) {
+    class Enable(ctx: Context, intputTheme: Theme) : ClipboardInstructionUi(ctx, intputTheme) {
 
         private val appCompatStyles = AppCompatStyles(ctx)
 
@@ -25,12 +26,12 @@ sealed class ClipboardInstructionUi(override val ctx: Context) : Ui {
             text = str(R.string.instruction_enable_clipboard_listening)
             verticalPadding = dp(8)
             horizontalPadding = dp(12)
-            ThemeManager.currentTheme.applyKeyTextColor(this)
+            intputTheme.applyKeyTextColor(this)
         }
 
         val enableButton = appCompatStyles.button.borderless {
             text = str(R.string.clipboard_enable)
-            setTextColor(ThemeManager.currentTheme.keyAccentBackgroundColor.resolve(context))
+            setTextColor(intputTheme.keyAccentBackgroundColor.resolve(context))
         }
 
         override val root = constraintLayout {
@@ -46,18 +47,18 @@ sealed class ClipboardInstructionUi(override val ctx: Context) : Ui {
         }
     }
 
-    class Empty(ctx: Context) : ClipboardInstructionUi(ctx) {
+    class Empty(ctx: Context, intputTheme: Theme) : ClipboardInstructionUi(ctx, intputTheme) {
 
         private val icon = imageView {
             imageResource = R.drawable.ic_baseline_content_paste_24
             colorFilter =
-                ThemeManager.currentTheme.funKeyColor.toColorFilter(PorterDuff.Mode.SRC_IN)
+                intputTheme.funKeyColor.toColorFilter(PorterDuff.Mode.SRC_IN)
                     .resolve(context)
         }
 
         private val instructionText = textView {
             text = str(R.string.instruction_copy)
-            ThemeManager.currentTheme.applyKeyTextColor(this)
+            intputTheme.applyKeyTextColor(this)
         }
 
         override val root = constraintLayout {

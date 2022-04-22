@@ -19,7 +19,6 @@ import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcaster
 import org.fcitx.fcitx5.android.input.candidates.CandidateViewBuilder
@@ -29,7 +28,7 @@ import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.mechdancer.dependency.DynamicScope
-import org.mechdancer.dependency.UniqueComponentWrapper
+import org.mechdancer.dependency.manager.wrapToUniqueComponent
 import org.mechdancer.dependency.plusAssign
 import splitties.dimensions.dp
 import splitties.views.backgroundColor
@@ -43,7 +42,8 @@ import splitties.views.dsl.core.withTheme
 @SuppressLint("ViewConstructor")
 class InputView(
     val service: FcitxInputMethodService,
-    val fcitx: Fcitx
+    val fcitx: Fcitx,
+    val theme: Theme
 ) : ConstraintLayout(service) {
 
     private val themedContext = context.withTheme(R.style.Theme_FcitxAppTheme)
@@ -67,18 +67,19 @@ class InputView(
     val scope = DynamicScope()
 
     private fun setupScope() {
-        scope += UniqueComponentWrapper(service)
-        scope += UniqueComponentWrapper(themedContext)
-        scope += UniqueComponentWrapper(fcitx)
+        scope += service.wrapToUniqueComponent()
+        scope += themedContext.wrapToUniqueComponent()
+        scope += fcitx.wrapToUniqueComponent()
         scope += candidateViewBuilder
         scope += preedit
         scope += kawaiiBar
         scope += broadcaster
-        scope += UniqueComponentWrapper(this)
+        scope += this.wrapToUniqueComponent()
         scope += windowManager
         scope += keyboardWindow
         scope += commonKeyActionListener
         scope += horizontalCandidate
+        scope += theme.wrapToUniqueComponent()
         broadcaster.onScopeSetupFinished(scope)
     }
 
@@ -126,7 +127,7 @@ class InputView(
             broadcaster.onImeUpdate(fcitx.currentIme())
         }
 
-        when (val theme = ThemeManager.currentTheme) {
+        when (theme) {
             is Theme.Builtin -> backgroundColor = theme.backgroundColor.resolve(themedContext)
             is Theme.CustomBackground -> background =
                 BitmapDrawable(
@@ -165,7 +166,7 @@ class InputView(
     fun onShow() {
         service.window.window?.also {
             ViewCompat.getWindowInsetsController(it.decorView)?.isAppearanceLightNavigationBars =
-                ThemeManager.currentTheme.lightNavigationBar.resolve(themedContext)
+                !theme.isDark
         }
         kawaiiBar.onShow()
         windowManager.switchToKeyboardWindow()
