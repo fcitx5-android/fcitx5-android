@@ -6,6 +6,7 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.TextView
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import splitties.dimensions.dp
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
@@ -19,7 +20,7 @@ class PreeditUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
     }
 
     private val cursorView = view(::View) {
-        backgroundColor = inputTheme.dividerColor
+        backgroundColor = inputTheme.keyTextColor
     }
 
     private val afterCursor = textView {
@@ -28,7 +29,9 @@ class PreeditUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
     }
 
     private val upView = horizontalLayout {
-        backgroundColor = inputTheme.barColor
+        backgroundColor = inputTheme.run {
+            if (ThemeManager.prefs.keyBorder.getValue()) backgroundColor else barColor
+        }
         horizontalPadding = dp(8)
         add(beforeCursor, lParams())
         add(cursorView, lParams(dp(1), matchParent) { verticalMargin = dp(2) })
@@ -36,7 +39,9 @@ class PreeditUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
     }
 
     private val downView = textView {
-        backgroundColor = inputTheme.barColor
+        backgroundColor = inputTheme.run {
+            if (ThemeManager.prefs.keyBorder.getValue()) backgroundColor else barColor
+        }
         horizontalPadding = dp(8)
         textSize = 16f
     }
