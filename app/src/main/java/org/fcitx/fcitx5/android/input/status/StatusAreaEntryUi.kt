@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.ShapeDrawable
-import android.graphics.drawable.shapes.RoundRectShape
+import android.graphics.drawable.shapes.OvalShape
 import android.view.ViewGroup
 import android.widget.ImageView
 import org.fcitx.fcitx5.android.data.theme.Theme
@@ -16,12 +16,10 @@ import splitties.views.gravityCenter
 
 class StatusAreaEntryUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
 
-    private val bkgShape = ctx.dp(24f).let { r ->
-        ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
-    }
+    private val bkgDrawable = ShapeDrawable(OvalShape())
 
     val icon = imageView {
-        background = bkgShape
+        background = bkgDrawable
         scaleType = ImageView.ScaleType.CENTER_INSIDE
     }
 
@@ -52,7 +50,7 @@ class StatusAreaEntryUi(override val ctx: Context, private val inputTheme: Theme
             if (entry.active) inputTheme.accentKeyTextColor else inputTheme.keyTextColor,
             PorterDuff.Mode.SRC_IN
         )
-        bkgShape.paint.color =
+        bkgDrawable.paint.color =
             if (entry.active) inputTheme.accentKeyBackgroundColor else inputTheme.keyBackgroundColor
         label.text = entry.label
     }
