@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.input.editing
 
 import android.content.Context
+import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
@@ -13,7 +14,6 @@ import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
 import splitties.dimensions.dp
-import splitties.resources.color
 import splitties.resources.styledDrawable
 import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.*
@@ -26,7 +26,7 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
         if (ThemeManager.prefs.keyRippleEffect.getValue()) {
             foreground = styledDrawable(android.R.attr.selectableItemBackground)
             background = GradientDrawable().apply {
-                setColor(color(android.R.color.transparent))
+                setColor(Color.TRANSPARENT)
                 setStroke(dp(1) / 2, theme.dividerColor)
             }
         } else {
@@ -37,7 +37,7 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
                     setStroke(dp(1) / 2, theme.dividerColor)
                 })
                 addState(intArrayOf(android.R.attr.state_enabled), GradientDrawable().apply {
-                    setColor(color(android.R.color.transparent))
+                    setColor(Color.TRANSPARENT)
                     setStroke(dp(1) / 2, theme.dividerColor)
                 })
             }
