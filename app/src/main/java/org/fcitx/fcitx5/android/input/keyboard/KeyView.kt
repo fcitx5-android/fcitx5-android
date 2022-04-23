@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
@@ -12,9 +13,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.updateLayoutParams
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
-import org.fcitx.fcitx5.android.data.theme.applyKeyAltTextColor
-import org.fcitx.fcitx5.android.data.theme.applyKeyTextColor
-import org.fcitx.fcitx5.android.utils.resource.toColorFilter
 import org.fcitx.fcitx5.android.utils.styledFloat
 import splitties.dimensions.dp
 import splitties.resources.drawable
@@ -31,17 +29,19 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
     }
 
     val card = view(::CardView) {
-        radius = dp(ThemeManager.prefs.keyRadius.getValue())
+        radius = dp(ThemeManager.prefs.keyRadius.getValue().toFloat())
         cardElevation = 0f
-        if (def is KeyDef.Appearance.Text && def.forceBordered) {
-            setCardBackgroundColor(theme.keyBackgroundColorBordered.resolve(context))
-        } else if (def is KeyDef.Appearance.Image && def.accentBackground)
-            setCardBackgroundColor(theme.keyAccentBackgroundColor.resolve(context))
-        else if (ThemeManager.prefs.keyBorder.getValue())
-            setCardBackgroundColor(theme.keyBackgroundColorBordered.resolve(context))
-        else theme.keyBackgroundColor?.let {
-            setCardBackgroundColor(it.resolve(context))
-        } ?: run { background = null }
+        if (ThemeManager.prefs.keyBorder.getValue() || def.forceBordered) {
+            setCardBackgroundColor(
+                when (def.variant) {
+                    KeyDef.Appearance.Variant.Normal -> theme.keyBackgroundColor
+                    KeyDef.Appearance.Variant.Alternative -> theme.altKeyBackgroundColor
+                    KeyDef.Appearance.Variant.Accent -> theme.accentKeyBackgroundColor
+                }
+            )
+        } else {
+            background = null
+        }
 
         // sync pressed state from parent
         isDuplicateParentStateEnabled = true
@@ -51,7 +51,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                 styledDrawable(android.R.attr.selectableItemBackground)
             else StateListDrawable().apply {
                 addState(intArrayOf(android.R.attr.state_pressed), GradientDrawable().apply {
-                    setColor(theme.keyAccentForeground.resolve(context))
+                    setColor(theme.keyPressHighlightColor)
                 })
             }
         add(layout, lParams(matchParent, matchParent))
@@ -87,10 +87,13 @@ open class TextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Text) 
         text = def.displayText
         textSize = def.textSize
         typeface = Typeface.defaultFromStyle(def.typeface)
-        if (def.isFunKey)
-            setTextColor(theme.funKeyColor.resolve(context))
-        else
-            theme.applyKeyTextColor(this)
+        setTextColor(
+            when (def.variant) {
+                KeyDef.Appearance.Variant.Normal -> theme.keyTextColor
+                KeyDef.Appearance.Variant.Alternative -> theme.altKeyTextColor
+                KeyDef.Appearance.Variant.Accent -> theme.accentKeyTextColor
+            }
+        )
     }
 
     init {
@@ -112,7 +115,14 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
         // hardcoded text size for now
         textSize = 12f
         text = def.altText
-        theme.applyKeyAltTextColor(this)
+        // TODO darken altText color
+        setTextColor(
+            when (def.variant) {
+                KeyDef.Appearance.Variant.Normal -> theme.keyTextColor
+                KeyDef.Appearance.Variant.Alternative -> theme.altKeyTextColor
+                KeyDef.Appearance.Variant.Accent -> theme.accentKeyTextColor
+            }
+        )
     }
 
     init {
@@ -153,10 +163,14 @@ class ImageKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Image) :
         isClickable = false
         isFocusable = false
         imageDrawable = drawable(def.src)
-        colorFilter = if (def.accentBackground)
-            theme.keyTextColorInverse.toColorFilter(PorterDuff.Mode.SRC_IN).resolve(context)
-        else
-            theme.funKeyColor.toColorFilter(PorterDuff.Mode.SRC_IN).resolve(context)
+        colorFilter = PorterDuffColorFilter(
+            when (def.variant) {
+                KeyDef.Appearance.Variant.Normal -> theme.keyTextColor
+                KeyDef.Appearance.Variant.Alternative -> theme.altKeyTextColor
+                KeyDef.Appearance.Variant.Accent -> theme.accentKeyTextColor
+            },
+            PorterDuff.Mode.SRC_IN
+        )
     }
 
     init {

@@ -54,10 +54,10 @@ class SymbolKeyboard(
             ),
             listOf(
                 LayoutSwitchKey("ABC", TextKeyboard.Name),
-                SymbolKey("<"),
+                SymbolKey("<", variant = KeyDef.Appearance.Variant.Alternative),
                 ImageLayoutSwitchKey(R.drawable.ic_number_pad, NumberKeyboard.Name, 0.1f),
                 SpaceKey(),
-                SymbolKey(">"),
+                SymbolKey(">", variant = KeyDef.Appearance.Variant.Alternative),
                 ReturnKey()
             )
         )

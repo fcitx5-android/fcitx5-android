@@ -26,7 +26,6 @@ import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.darkenColorFilter
 import org.fcitx.fcitx5.android.utils.keyboardWindowAspectRatio
 import splitties.dimensions.dp
-import splitties.resources.color
 import splitties.resources.styledColorSL
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
@@ -51,12 +50,12 @@ class BackgroundImageActivity : AppCompatActivity() {
         }
     }
 
-    private val fakeKeyboard by lazy {
+    private val fakeInputView by lazy {
         verticalLayout {
             add(frameLayout {
-                backgroundColor = color(R.color.darken_background)
+                backgroundColor = ThemePreset.PreviewDark.barColor
             }, lParams(matchParent, dp(40)))
-            add(TextKeyboard(context, ThemePreset.preview), lParams(matchParent, matchParent))
+            add(TextKeyboard(context, ThemePreset.PreviewDark), lParams(matchParent, matchParent))
             scaleX = .8f
             scaleY = .8f
         }
@@ -88,7 +87,7 @@ class BackgroundImageActivity : AppCompatActivity() {
     private val ui by lazy {
         verticalLayout {
             gravity = gravityCenter
-            add(fakeKeyboard, lParams(inputViewWidth, inputViewHeight))
+            add(fakeInputView, lParams(inputViewWidth, inputViewHeight))
             add(text, lParams())
             add(brightness, lParams(width = dp(300)))
             add(finishButton, lParams())
@@ -111,7 +110,7 @@ class BackgroundImageActivity : AppCompatActivity() {
         // bar height
         inputViewHeight = y + dp(40)
         // bottom padding
-        ViewCompat.getRootWindowInsets(this.fakeKeyboard)?.let {
+        ViewCompat.getRootWindowInsets(fakeInputView)?.let {
             inputViewHeight += it.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
         }
         setContentView(ui)
@@ -123,7 +122,7 @@ class BackgroundImageActivity : AppCompatActivity() {
                 image = BitmapDrawable(resources, cropped)
                 brightness.addOnChangeListener { _, value, _ ->
                     image.colorFilter = darkenColorFilter(100 - value.toInt())
-                    fakeKeyboard.background = image
+                    fakeInputView.background = image
                 }
                 brightness.value = 70f
                 finishButton.setOnClickListener {
@@ -148,12 +147,9 @@ class BackgroundImageActivity : AppCompatActivity() {
     private fun done() {
         val bitmap = Bitmap.createBitmap(inputViewWidth, inputViewHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
-        canvas.drawBitmap(
-            cropped, null, Rect(0, 0, inputViewWidth, inputViewHeight),
-            Paint().apply {
-                colorFilter = darkenColorFilter(100 - brightness.value.toInt())
-            }
-        )
+        canvas.drawBitmap(cropped, null, Rect(0, 0, canvas.width, canvas.height), Paint().apply {
+            colorFilter = darkenColorFilter(100 - brightness.value.toInt())
+        })
         val file = File.createTempFile(
             "img", ".png",
             appContext.getExternalFilesDir(null)

@@ -1,6 +1,8 @@
 package org.fcitx.fcitx5.android.input.bar
 
 import android.content.Context
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
 import android.text.TextUtils
 import android.view.View
@@ -14,9 +16,9 @@ import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.data.theme.applyBarIconColor
 import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.State.*
 import splitties.dimensions.dp
+import splitties.resources.styledDrawable
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.gravityCenter
@@ -25,16 +27,16 @@ import splitties.views.imageResource
 import splitties.views.padding
 import timber.log.Timber
 
-sealed class KawaiiBarUi(override val ctx: Context, protected val intputTheme: Theme) : Ui {
+sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Theme) : Ui {
 
-    class Candidate(ctx: Context, intputTheme: Theme, private val horizontalView: View) :
-        KawaiiBarUi(ctx, intputTheme) {
+    class Candidate(ctx: Context, inputTheme: Theme, private val horizontalView: View) :
+        KawaiiBarUi(ctx, inputTheme) {
 
         val expandButton = imageButton(R.id.expand_candidate_btn) {
             background = null
             imageResource = R.drawable.ic_baseline_expand_more_24
             visibility = ConstraintLayout.INVISIBLE
-            intputTheme.applyBarIconColor(this)
+            colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
         }
 
         override val root = ctx.constraintLayout {
@@ -55,9 +57,9 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val intputTheme: T
 
     class Idle(
         ctx: Context,
-        intputTheme: Theme,
+        inputTheme: Theme,
         private val getCurrentState: () -> IdleUiStateMachine.State,
-    ) : KawaiiBarUi(ctx, intputTheme) {
+    ) : KawaiiBarUi(ctx, inputTheme) {
 
         private val IdleUiStateMachine.State.menuButtonRotation
             get() =
@@ -74,13 +76,13 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val intputTheme: T
 
         private fun toolButton(@DrawableRes icon: Int) = imageButton {
             imageResource = icon
-            intputTheme.applyBarIconColor(this)
+            background = styledDrawable(android.R.attr.actionBarItemBackground)
+            colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
             scaleType = ImageView.ScaleType.CENTER_INSIDE
         }
 
         val menuButton = toolButton(R.drawable.ic_baseline_expand_more_24).apply {
             rotation = getCurrentState().menuButtonRotation
-            intputTheme.applyBarIconColor(this)
         }
 
         val undoButton = toolButton(R.drawable.ic_baseline_undo_24)
@@ -93,10 +95,7 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val intputTheme: T
 
         val moreButton = toolButton(R.drawable.ic_baseline_more_horiz_24)
 
-        val hideKeyboardButton = imageButton {
-            intputTheme.applyBarIconColor(this)
-            imageResource = R.drawable.ic_baseline_arrow_drop_down_24
-        }
+        val hideKeyboardButton = toolButton(R.drawable.ic_baseline_arrow_drop_down_24)
 
         private fun ConstraintLayout.addButton(
             v: View,
@@ -117,19 +116,23 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val intputTheme: T
             addButton(moreButton) { after(clipboardButton); endOfParent() }
         }
 
+        private val clipboardIcon = imageView {
+            imageResource = R.drawable.ic_clipboard
+            colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
+        }
+
         private val clipboardText = textView {
             isSingleLine = true
             ellipsize = TextUtils.TruncateAt.END
             typeface = Typeface.defaultFromStyle(Typeface.BOLD)
+            setTextColor(inputTheme.altKeyTextColor)
         }
 
         val clipboardItem = horizontalLayout {
             visibility = View.INVISIBLE
             gravity = gravityCenter
             padding = dp(4)
-            add(imageView {
-                imageResource = R.drawable.ic_clipboard
-            }, lParams(dp(20), dp(20)))
+            add(clipboardIcon, lParams(dp(20), dp(20)))
             add(clipboardText, lParams {
                 leftMargin = dp(4)
             })
@@ -232,17 +235,18 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val intputTheme: T
         }
     }
 
-    class Title(ctx: Context, intputTheme: Theme) : KawaiiBarUi(ctx, intputTheme) {
+    class Title(ctx: Context, inputTheme: Theme) : KawaiiBarUi(ctx, inputTheme) {
 
         private val backButton = imageButton {
             imageResource = R.drawable.ic_baseline_arrow_back_24
-            intputTheme.applyBarIconColor(this)
+            background = styledDrawable(android.R.attr.actionBarItemBackground)
+            colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
             scaleType = ImageView.ScaleType.CENTER_INSIDE
         }
 
         private val titleText = textView {
             typeface = Typeface.defaultFromStyle(Typeface.BOLD)
-            setTextColor(intputTheme.funKeyColor.resolve(context))
+            setTextColor(inputTheme.altKeyTextColor)
             gravity = gravityVerticalCenter
             textSize = 16f
         }

@@ -8,36 +8,44 @@ open class KeyDef(
 ) {
     sealed class Appearance(
         val percentWidth: Float,
+        val variant: Variant,
+        val forceBordered: Boolean,
         val viewId: Int,
     ) {
+        enum class Variant {
+            Normal, Alternative, Accent
+        }
+
         open class Text(
             val displayText: String,
             val textSize: Float,
             val typeface: Int,
-            val forceBordered: Boolean = false,
-            val isFunKey: Boolean = false,
             percentWidth: Float = 0.1f,
+            variant: Variant = Variant.Normal,
+            forceBordered: Boolean = false,
             viewId: Int = -1
-        ) : Appearance(percentWidth, viewId)
+        ) : Appearance(percentWidth, variant, forceBordered, viewId)
 
         class AltText(
             displayText: String,
             val altText: String,
             textSize: Float,
             typeface: Int,
-            forceBordered: Boolean = false,
-            isFunKey: Boolean = false,
             percentWidth: Float = 0.1f,
+            variant: Variant = Variant.Normal,
+            forceBordered: Boolean = false,
             viewId: Int = -1
-        ) : Text(displayText, textSize, typeface, forceBordered, isFunKey, percentWidth, viewId)
+        ) : Text(displayText, textSize, typeface, percentWidth, variant, forceBordered, viewId)
 
         class Image(
             @DrawableRes
             val src: Int,
             val accentBackground: Boolean = false,
             percentWidth: Float = 0.1f,
+            variant: Variant = Variant.Normal,
+            forceBordered: Boolean = false,
             viewId: Int = -1
-        ) : Appearance(percentWidth, viewId)
+        ) : Appearance(percentWidth, variant, forceBordered, viewId)
     }
 
     sealed class Behavior {

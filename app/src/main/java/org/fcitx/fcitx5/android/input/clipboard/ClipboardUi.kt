@@ -1,6 +1,8 @@
 package org.fcitx.fcitx5.android.input.clipboard
 
 import android.content.Context
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.view.View
 import android.widget.ImageView
 import android.widget.ViewAnimator
@@ -8,9 +10,8 @@ import androidx.transition.Fade
 import androidx.transition.TransitionManager
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.data.theme.applyBarColor
-import org.fcitx.fcitx5.android.data.theme.applyBarIconColor
 import splitties.dimensions.dp
+import splitties.resources.styledDrawable
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.imageResource
@@ -19,7 +20,6 @@ import timber.log.Timber
 class ClipboardUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
 
     val recyclerView = recyclerView {
-        inputTheme.applyBarColor(this)
         addItemDecoration(SpacesItemDecoration(dp(4)))
     }
 
@@ -34,7 +34,8 @@ class ClipboardUi(override val ctx: Context, private val inputTheme: Theme) : Ui
     }
 
     val deleteAllButton = imageButton {
-        inputTheme.applyBarIconColor(this)
+        background = styledDrawable(android.R.attr.actionBarItemBackground)
+        colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
         imageResource = R.drawable.ic_baseline_delete_sweep_24
         scaleType = ImageView.ScaleType.CENTER_INSIDE
         visibility = View.INVISIBLE

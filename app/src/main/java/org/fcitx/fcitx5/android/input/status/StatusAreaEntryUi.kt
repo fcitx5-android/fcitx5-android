@@ -2,20 +2,19 @@ package org.fcitx.fcitx5.android.input.status
 
 import android.content.Context
 import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RoundRectShape
 import android.view.ViewGroup
 import android.widget.ImageView
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.data.theme.applyKeyTextColor
-import org.fcitx.fcitx5.android.utils.resource.toColorFilter
 import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.gravityCenter
 
-class StatusAreaEntryUi(override val ctx: Context, private val intputTheme: Theme) : Ui {
+class StatusAreaEntryUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
 
     private val bkgShape = ctx.dp(24f).let { r ->
         ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
@@ -29,7 +28,7 @@ class StatusAreaEntryUi(override val ctx: Context, private val intputTheme: Them
     val label = textView {
         textSize = 12f
         gravity = gravityCenter
-        intputTheme.applyKeyTextColor(this)
+        setTextColor(inputTheme.keyTextColor)
     }
 
     override val root = constraintLayout {
@@ -49,14 +48,12 @@ class StatusAreaEntryUi(override val ctx: Context, private val intputTheme: Them
 
     fun setEntry(entry: StatusAreaEntry) = with(ctx) {
         icon.setImageDrawable(drawable(entry.icon))
-        icon.colorFilter = (if (entry.active)
-            intputTheme.keyTextColorInverse
-        else
-            intputTheme.funKeyColor).toColorFilter(PorterDuff.Mode.SRC_IN)
-            .resolve(ctx)
-        bkgShape.paint.color = (
-                if (entry.active) intputTheme.keyAccentBackgroundColor
-                else intputTheme.keyBackgroundColorBordered).resolve(ctx)
+        icon.colorFilter = PorterDuffColorFilter(
+            if (entry.active) inputTheme.accentKeyTextColor else inputTheme.keyTextColor,
+            PorterDuff.Mode.SRC_IN
+        )
+        bkgShape.paint.color =
+            if (entry.active) inputTheme.accentKeyBackgroundColor else inputTheme.keyBackgroundColor
         label.text = entry.label
     }
 }

@@ -1,27 +1,71 @@
 package org.fcitx.fcitx5.android.data.theme
 
-import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.utils.resource.attrColor
-import org.fcitx.fcitx5.android.utils.resource.resColor
+import android.graphics.Color
 
 object ThemePreset {
 
-    val test = Theme.Builtin(
-        backgroundColor = resColor(R.color.red_400),
-        barColor = resColor(R.color.red_A700),
-        keyBackgroundColor = null,
-        keyBackgroundColorBordered = resColor(R.color.key),
-        keyTextColor = resColor(R.color.yellow_800),
-        keyAltTextColor = resColor(R.color.yellow_500),
-        keyAccentBackgroundColor = resColor(R.color.blue_500),
-        keyAccentForeground = attrColor(android.R.attr.colorControlHighlight),
-        funKeyColor = resColor(R.color.design_default_color_primary_variant),
-        dividerColor = resColor(R.color.blue_500),
-        isDark = true,
-        clipboardEntryColor = resColor(R.color.blue_500)
+    val PixelLight = Theme.Builtin(
+        backgroundColor = 0xffeeeeeeu.toInt(),
+        barColor = 0xffeeeeeeu.toInt(),
+        keyboardColor = 0xfffafafau.toInt(),
+        keyBackgroundColor = 0xffffffffu.toInt(),
+        keyTextColor = 0xff212121u.toInt(),
+        altKeyBackgroundColor = 0xffe1e1e1u.toInt(),
+        altKeyTextColor = 0xff6e6e6eu.toInt(),
+        accentKeyBackgroundColor = 0xff4285f4u.toInt(),
+        accentKeyTextColor = 0xffffffffu.toInt(),
+        keyPressHighlightColor = 0x7f000000u.toInt(),
+        dividerColor = 0x5f000000u.toInt(),
+        clipboardEntryColor = 0xffffffffu.toInt(),
+        isDark = false
     )
 
-    // TODO
-    val preview = test
+    val PixelDark = Theme.Builtin(
+        backgroundColor = 0xff2d2d2du.toInt(),
+        barColor = 0xff373737u.toInt(),
+        keyboardColor = 0xff2d2d2du.toInt(),
+        keyBackgroundColor = 0xff464646u.toInt(),
+        keyTextColor = 0xfffafafau.toInt(),
+        altKeyBackgroundColor = 0xff373737u.toInt(),
+        altKeyTextColor = 0xffacacacu.toInt(),
+        accentKeyBackgroundColor = 0xff5e97f6u.toInt(),
+        accentKeyTextColor = 0xffffffffu.toInt(),
+        keyPressHighlightColor = 0x7fffffffu.toInt(),
+        dividerColor = 0x5fffffffu.toInt(),
+        clipboardEntryColor = 0xff464646u.toInt(),
+        isDark = true
+    )
+
+    val PreviewLight = Theme.Builtin(
+        backgroundColor = Color.TRANSPARENT,
+        barColor = 0x5f000000,
+        keyboardColor = Color.TRANSPARENT,
+        keyBackgroundColor = 0x32000000,
+        keyTextColor = 0xff000000u.toInt(),
+        altKeyBackgroundColor = 0x10000000,
+        altKeyTextColor = 0xff4564546u.toInt(),
+        accentKeyBackgroundColor = 0xff5e97f6u.toInt(),
+        accentKeyTextColor = 0xffffffffu.toInt(),
+        keyPressHighlightColor = 0x7fffffffu.toInt(),
+        dividerColor = 0x5fffffffu.toInt(),
+        clipboardEntryColor = 0x32ffffff,
+        isDark = false
+    )
+
+    val PreviewDark = Theme.Builtin(
+        backgroundColor = Color.TRANSPARENT,
+        barColor = 0x5f000000,
+        keyboardColor = Color.TRANSPARENT,
+        keyBackgroundColor = 0x32ffffff,
+        keyTextColor = 0xffffffffu.toInt(),
+        altKeyBackgroundColor = 0x10ffffff,
+        altKeyTextColor = 0xffb9b9bdu.toInt(),
+        accentKeyBackgroundColor = 0xff5e97f6u.toInt(),
+        accentKeyTextColor = 0xffffffffu.toInt(),
+        keyPressHighlightColor = 0x7fffffffu.toInt(),
+        dividerColor = 0x5fffffffu.toInt(),
+        clipboardEntryColor = 0x32ffffff,
+        isDark = true
+    )
 
 }

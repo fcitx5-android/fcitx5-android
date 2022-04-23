@@ -1,5 +1,7 @@
 package org.fcitx.fcitx5.android.input.status
 
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.os.bundleOf
@@ -9,7 +11,6 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.core.Fcitx
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.data.theme.applyBarIconColor
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.fcitx
@@ -21,6 +22,7 @@ import org.fcitx.fcitx5.android.ui.main.MainActivity
 import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
 import org.fcitx.fcitx5.android.utils.AppUtil
 import splitties.dimensions.dp
+import splitties.resources.styledDrawable
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.horizontalLayout
 import splitties.views.dsl.core.imageButton
@@ -121,7 +123,8 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
 
     private val settingsButton by lazy {
         context.imageButton {
-            theme.applyBarIconColor(this)
+            background = styledDrawable(android.R.attr.actionBarItemBackground)
+            colorFilter = PorterDuffColorFilter(theme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
             imageResource = R.drawable.ic_baseline_settings_24
             scaleType = ImageView.ScaleType.CENTER_INSIDE
         }

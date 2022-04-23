@@ -8,13 +8,15 @@ import org.fcitx.fcitx5.android.core.KeyStates
 
 class SymbolKey(
     val symbol: String,
-    percentWidth: Float = 0.1f
+    percentWidth: Float = 0.1f,
+    variant: Appearance.Variant = Appearance.Variant.Normal
 ) : KeyDef(
     Appearance.Text(
         displayText = symbol,
         textSize = 20f,
         typeface = Typeface.NORMAL,
-        percentWidth = percentWidth
+        percentWidth = percentWidth,
+        variant = variant
     ),
     setOf(
         Behavior.Press(action = KeyAction.FcitxKeyAction(symbol))
@@ -23,13 +25,15 @@ class SymbolKey(
 
 class AlphabetKey(
     val character: String,
-    val punctuation: String
+    val punctuation: String,
+    variant: Appearance.Variant = Appearance.Variant.Normal
 ) : KeyDef(
     Appearance.AltText(
         displayText = character,
         altText = punctuation,
         textSize = 20f,
-        typeface = Typeface.NORMAL
+        typeface = Typeface.NORMAL,
+        variant = variant
     ),
     setOf(
         Behavior.Press(KeyAction.FcitxKeyAction(character)),
@@ -66,7 +70,8 @@ class CapsKey : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_keyboard_capslock_24,
         viewId = R.id.button_caps,
-        percentWidth = 0.15f
+        percentWidth = 0.15f,
+        variant = Appearance.Variant.Alternative
     ),
     setOf(
         Behavior.Press(action = KeyAction.CapsAction(false)),
@@ -78,24 +83,29 @@ class CapsKey : KeyDef(
 class LayoutSwitchKey(
     displayText: String,
     val to: String = "",
-    percentWidth: Float = 0.15f
+    percentWidth: Float = 0.15f,
+    variant: Appearance.Variant = Appearance.Variant.Alternative
 ) : KeyDef(
     Appearance.Text(
         displayText,
         textSize = 16f,
         typeface = Typeface.BOLD,
         percentWidth = percentWidth,
-        isFunKey = true
+        variant = variant
     ),
     setOf(
         Behavior.Press(action = KeyAction.LayoutSwitchAction(to))
     )
 )
 
-class BackspaceKey(percentWidth: Float = 0.15f) : KeyDef(
+class BackspaceKey(
+    percentWidth: Float = 0.15f,
+    variant: Appearance.Variant = Appearance.Variant.Alternative
+) : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_backspace_24,
         percentWidth = percentWidth,
+        variant = variant,
         viewId = R.id.button_backspace
     ),
     setOf(
@@ -107,6 +117,7 @@ class BackspaceKey(percentWidth: Float = 0.15f) : KeyDef(
 class QuickPhraseKey : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_format_quote_24,
+        variant = Appearance.Variant.Alternative,
         viewId = R.id.button_quickphrase
     ),
     setOf(
@@ -118,6 +129,7 @@ class QuickPhraseKey : KeyDef(
 class LanguageKey : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_language_24,
+        forceBordered = true,
         viewId = R.id.button_lang
     ),
     setOf(
@@ -145,6 +157,8 @@ class ReturnKey(percentWidth: Float = 0.15f) : KeyDef(
         src = R.drawable.ic_baseline_keyboard_return_24,
         accentBackground = true,
         percentWidth = percentWidth,
+        variant = Appearance.Variant.Accent,
+        forceBordered = true,
         viewId = R.id.button_return
     ),
     setOf(
@@ -157,11 +171,13 @@ class ImageLayoutSwitchKey(
     icon: Int,
     to: String,
     percentWidth: Float = 0.1f,
+    variant: Appearance.Variant = Appearance.Variant.Normal,
     viewId: Int = -1
 ) : KeyDef(
     Appearance.Image(
         src = icon,
         percentWidth = percentWidth,
+        variant = variant,
         viewId = viewId
     ),
     setOf(
@@ -173,6 +189,7 @@ class MiniSpaceKey : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_space_bar_24,
         percentWidth = 0.15f,
+        variant = Appearance.Variant.Alternative,
         viewId = R.id.button_mini_space
     ),
     setOf(
@@ -183,13 +200,15 @@ class MiniSpaceKey : KeyDef(
 class NumPadKey(
     displayText: String,
     val sym: UInt,
-    percentWidth: Float = 0.1f
+    percentWidth: Float = 0.1f,
+    variant: Appearance.Variant = Appearance.Variant.Normal
 ) : KeyDef(
     Appearance.Text(
         displayText,
         textSize = 16f,
         typeface = Typeface.NORMAL,
-        percentWidth = percentWidth
+        percentWidth = percentWidth,
+        variant = variant
     ),
     setOf(
         Behavior.Press(action = KeyAction.SymAction(sym, NumLockState))

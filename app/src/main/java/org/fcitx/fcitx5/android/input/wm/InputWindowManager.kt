@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.input.wm
 
+import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
 import androidx.transition.Fade
@@ -37,6 +38,7 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
 
     private fun prepareAnimation(remove: View, add: View) {
         val slide = Slide().apply {
+            slideEdge = if (add === keyboardView) Gravity.BOTTOM else Gravity.TOP
             addTarget(add)
         }
         val fade = Fade().apply {

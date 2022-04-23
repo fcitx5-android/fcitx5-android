@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.data.theme.applyKeyTextColor
 
 abstract class BaseCandidateViewAdapter :
     RecyclerView.Adapter<BaseCandidateViewAdapter.ViewHolder>() {
@@ -36,9 +35,10 @@ abstract class BaseCandidateViewAdapter :
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = createTextView(parent)
+        val view = createTextView(parent).apply {
+            setTextColor(theme.keyTextColor)
+        }
         return ViewHolder(view).apply {
-            theme.applyKeyTextColor(textView)
             itemView.setOnClickListener { onSelect(this.idx + offset) }
             itemView.setOnTouchListener { v, event ->
                 when (event.action) {

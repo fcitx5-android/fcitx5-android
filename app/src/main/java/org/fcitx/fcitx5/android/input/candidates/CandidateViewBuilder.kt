@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.input.candidates
 
 import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
@@ -21,7 +22,6 @@ import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.utils.hapticIfEnabled
-import org.fcitx.fcitx5.android.utils.resource.toColorFilter
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
@@ -119,8 +119,7 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
 
     private fun RecyclerView.dividerDrawable() =
         styledDrawable(android.R.attr.listDivider)!!.apply {
-            colorFilter = theme.dividerColor.toColorFilter(PorterDuff.Mode.SRC)
-                .resolve(context)
+            colorFilter = PorterDuffColorFilter(theme.dividerColor, PorterDuff.Mode.SRC_IN)
         }
 
     fun RecyclerView.addFlexboxHorizontalDecoration() =
