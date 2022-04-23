@@ -1,7 +1,7 @@
 package org.fcitx.fcitx5.android.input.candidates
 
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.RectShape
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
@@ -26,7 +26,7 @@ import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
 import org.mechdancer.dependency.manager.managedHandler
-import splitties.resources.styledDrawable
+import splitties.dimensions.dp
 
 class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
     ManagedHandler by managedHandler() {
@@ -73,10 +73,13 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
 //        }
 //    }
 
+    private fun RecyclerView.dividerDrawable() = ShapeDrawable(RectShape()).apply {
+        intrinsicWidth = dp(1)
+        paint.color = theme.dividerColor
+    }
+
     fun RecyclerView.addGridDecoration() =
-        GridDecoration(styledDrawable(android.R.attr.listDivider)!!).also {
-            addItemDecoration(it)
-        }
+        addItemDecoration(GridDecoration(dividerDrawable()))
 
     fun RecyclerView.setupGridLayoutManager(
         adapter: GridCandidateViewAdapter,
@@ -117,20 +120,11 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
         this.adapter = adapter
     }
 
-    private fun RecyclerView.dividerDrawable() =
-        styledDrawable(android.R.attr.listDivider)!!.apply {
-            colorFilter = PorterDuffColorFilter(theme.dividerColor, PorterDuff.Mode.SRC_IN)
-        }
-
     fun RecyclerView.addFlexboxHorizontalDecoration() =
-        FlexboxHorizontalDecoration(dividerDrawable()).also {
-            addItemDecoration(it)
-        }
+        addItemDecoration(FlexboxHorizontalDecoration(dividerDrawable()))
 
     fun RecyclerView.addFlexboxVerticalDecoration() =
-        FlexboxVerticalDecoration(dividerDrawable()).also {
-            addItemDecoration(it)
-        }
+        addItemDecoration(FlexboxVerticalDecoration(dividerDrawable()))
 
     companion object {
         private const val INITIAL_SPAN_COUNT = 6

@@ -15,7 +15,7 @@ object ThemePreset {
         accentKeyBackgroundColor = 0xff4285f4u.toInt(),
         accentKeyTextColor = 0xffffffffu.toInt(),
         keyPressHighlightColor = 0x7f000000u.toInt(),
-        dividerColor = 0x5f000000u.toInt(),
+        dividerColor = 0x1f000000u.toInt(),
         clipboardEntryColor = 0xffffffffu.toInt(),
         isDark = false
     )
@@ -31,7 +31,7 @@ object ThemePreset {
         accentKeyBackgroundColor = 0xff5e97f6u.toInt(),
         accentKeyTextColor = 0xffffffffu.toInt(),
         keyPressHighlightColor = 0x7fffffffu.toInt(),
-        dividerColor = 0x5fffffffu.toInt(),
+        dividerColor = 0x1fffffffu.toInt(),
         clipboardEntryColor = 0xff464646u.toInt(),
         isDark = true
     )
@@ -47,7 +47,7 @@ object ThemePreset {
         accentKeyBackgroundColor = 0xff5e97f6u.toInt(),
         accentKeyTextColor = 0xffffffffu.toInt(),
         keyPressHighlightColor = 0x7fffffffu.toInt(),
-        dividerColor = 0x5fffffffu.toInt(),
+        dividerColor = 0x1fffffffu.toInt(),
         clipboardEntryColor = 0x32ffffff,
         isDark = false
     )
@@ -63,7 +63,7 @@ object ThemePreset {
         accentKeyBackgroundColor = 0xff5e97f6u.toInt(),
         accentKeyTextColor = 0xffffffffu.toInt(),
         keyPressHighlightColor = 0x7fffffffu.toInt(),
-        dividerColor = 0x5fffffffu.toInt(),
+        dividerColor = 0x1fffffffu.toInt(),
         clipboardEntryColor = 0x32ffffff,
         isDark = true
     )
