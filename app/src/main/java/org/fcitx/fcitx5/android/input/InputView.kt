@@ -128,7 +128,7 @@ class InputView(
         }
 
         when (theme) {
-            is Theme.Builtin -> backgroundColor = theme.backgroundColor.resolve(themedContext)
+            is Theme.Builtin -> backgroundColor = theme.backgroundColor
             is Theme.CustomBackground -> background =
                 BitmapDrawable(
                     resources,

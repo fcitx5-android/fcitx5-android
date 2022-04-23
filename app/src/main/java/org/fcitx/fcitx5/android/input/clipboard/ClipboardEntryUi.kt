@@ -2,13 +2,11 @@ package org.fcitx.fcitx5.android.input.clipboard
 
 import android.content.Context
 import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.text.TextUtils
 import androidx.cardview.widget.CardView
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.data.theme.ThemeManager
-import org.fcitx.fcitx5.android.data.theme.applyKeyTextColor
-import org.fcitx.fcitx5.android.utils.resource.toColorFilter
 import splitties.dimensions.dp
 import splitties.resources.styledDrawable
 import splitties.views.dsl.constraintlayout.*
@@ -17,7 +15,7 @@ import splitties.views.horizontalPadding
 import splitties.views.imageResource
 import splitties.views.verticalPadding
 
-class ClipboardEntryUi(override val ctx: Context, private val intputTheme: Theme) : Ui {
+class ClipboardEntryUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
 
     val text = textView {
         maxLines = 4
@@ -25,14 +23,12 @@ class ClipboardEntryUi(override val ctx: Context, private val intputTheme: Theme
         verticalPadding = dp(4)
         horizontalPadding = dp(8)
         ellipsize = TextUtils.TruncateAt.END
-        intputTheme.applyKeyTextColor(this)
+        setTextColor(inputTheme.keyTextColor)
     }
 
     val pin = imageView {
         imageResource = R.drawable.ic_baseline_push_pin_24
-        colorFilter =
-            intputTheme.keyTextColorInverse.toColorFilter(PorterDuff.Mode.SRC_IN)
-                .resolve(context)
+        colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
         alpha = 0.3f
     }
 
@@ -54,7 +50,7 @@ class ClipboardEntryUi(override val ctx: Context, private val intputTheme: Theme
         minimumHeight = dp(30)
         isClickable = true
         foreground = styledDrawable(android.R.attr.selectableItemBackground)
-        setCardBackgroundColor(intputTheme.clipboardEntryColor.resolve(context))
+        setCardBackgroundColor(inputTheme.clipboardEntryColor)
         cardElevation = 0f
         add(wrapper, lParams(matchParent, wrapContent))
     }

@@ -52,7 +52,6 @@ class MainFragment : PreferenceFragmentCompat() {
             setTitle(R.string.input_methods)
             setIcon(R.drawable.ic_baseline_language_24)
             setOnPreferenceClickListener {
-                launcher.launch()
                 findNavController().navigate(R.id.action_mainFragment_to_imListFragment)
                 true
             }
@@ -75,6 +74,15 @@ class MainFragment : PreferenceFragmentCompat() {
             setIcon(R.drawable.ic_baseline_keyboard_24)
             setOnPreferenceClickListener {
                 findNavController().navigate(R.id.action_mainFragment_to_behaviorSettingsFragment)
+                true
+            }
+        })
+        androidCategory.addPreference(Preference(context).apply {
+            setTitle(R.string.theme)
+            setIcon(R.drawable.ic_baseline_palette_24)
+            setOnPreferenceClickListener {
+                launcher.launch()
+                findNavController().navigate(R.id.action_mainFragment_to_themeSettingsFragment)
                 true
             }
         })
