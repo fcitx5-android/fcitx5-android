@@ -6,6 +6,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.keyboard.*
 import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.*
@@ -33,7 +34,7 @@ class ExpandedCandidateLayout(
                         R.drawable.ic_baseline_arrow_upward_24,
                         to = UpBtnLabel,
                         percentWidth = 1f,
-                        variant = KeyDef.Appearance.Variant.Normal,
+                        variant = KeyDef.Appearance.Variant.Alternative,
                         viewId = UpBtnId
                     )
                 ),
@@ -42,11 +43,11 @@ class ExpandedCandidateLayout(
                         R.drawable.ic_baseline_arrow_downward_24,
                         to = DownBtnLabel,
                         percentWidth = 1f,
-                        variant = KeyDef.Appearance.Variant.Normal,
+                        variant = KeyDef.Appearance.Variant.Alternative,
                         viewId = DownBtnId
                     )
                 ),
-                listOf(BackspaceKey(percentWidth = 1f, variant = KeyDef.Appearance.Variant.Normal)),
+                listOf(BackspaceKey(percentWidth = 1f, KeyDef.Appearance.Variant.Alternative)),
                 listOf(ReturnKey(percentWidth = 1f))
             )
         }
