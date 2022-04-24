@@ -109,7 +109,7 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
         isClickable = false
         isFocusable = false
         // hardcoded text size for now
-        textSize = 12f
+        textSize = 10.7f
         text = def.altText
         // TODO darken altText color
         setTextColor(
