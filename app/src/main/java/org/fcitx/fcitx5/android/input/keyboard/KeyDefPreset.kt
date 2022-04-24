@@ -13,7 +13,7 @@ class SymbolKey(
 ) : KeyDef(
     Appearance.Text(
         displayText = symbol,
-        textSize = 20f,
+        textSize = 23f,
         typeface = Typeface.NORMAL,
         percentWidth = percentWidth,
         variant = variant
@@ -31,7 +31,7 @@ class AlphabetKey(
     Appearance.AltText(
         displayText = character,
         altText = punctuation,
-        textSize = 20f,
+        textSize = 23f,
         typeface = Typeface.NORMAL,
         variant = variant
     ),
@@ -50,7 +50,7 @@ class AlphabetDigitKey(
     Appearance.AltText(
         displayText = character,
         altText = altText,
-        textSize = 20f,
+        textSize = 23f,
         typeface = Typeface.NORMAL
     ),
     setOf(
@@ -199,12 +199,13 @@ class MiniSpaceKey : KeyDef(
 class NumPadKey(
     displayText: String,
     val sym: UInt,
+    textSize: Float = 16f,
     percentWidth: Float = 0.1f,
     variant: Appearance.Variant = Appearance.Variant.Normal
 ) : KeyDef(
     Appearance.Text(
         displayText,
-        textSize = 16f,
+        textSize = textSize,
         typeface = Typeface.NORMAL,
         percentWidth = percentWidth,
         variant = variant
