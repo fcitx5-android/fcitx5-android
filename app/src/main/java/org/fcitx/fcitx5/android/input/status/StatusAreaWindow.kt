@@ -21,8 +21,8 @@ import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.ui.main.MainActivity
 import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
 import org.fcitx.fcitx5.android.utils.AppUtil
+import org.fcitx.fcitx5.android.utils.borderlessRippleDrawable
 import splitties.dimensions.dp
-import splitties.resources.styledDrawable
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.horizontalLayout
 import splitties.views.dsl.core.imageButton
@@ -123,7 +123,7 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
 
     private val settingsButton by lazy {
         context.imageButton {
-            background = styledDrawable(android.R.attr.actionBarItemBackground)
+            background = borderlessRippleDrawable(theme.keyPressHighlightColor, dp(20))
             colorFilter = PorterDuffColorFilter(theme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
             imageResource = R.drawable.ic_baseline_settings_24
             scaleType = ImageView.ScaleType.CENTER_INSIDE

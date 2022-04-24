@@ -10,8 +10,8 @@ import androidx.transition.Fade
 import androidx.transition.TransitionManager
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.utils.borderlessRippleDrawable
 import splitties.dimensions.dp
-import splitties.resources.styledDrawable
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.imageResource
@@ -34,7 +34,7 @@ class ClipboardUi(override val ctx: Context, private val inputTheme: Theme) : Ui
     }
 
     val deleteAllButton = imageButton {
-        background = styledDrawable(android.R.attr.actionBarItemBackground)
+        background = borderlessRippleDrawable(inputTheme.keyPressHighlightColor, dp(20))
         colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
         imageResource = R.drawable.ic_baseline_delete_sweep_24
         scaleType = ImageView.ScaleType.CENTER_INSIDE

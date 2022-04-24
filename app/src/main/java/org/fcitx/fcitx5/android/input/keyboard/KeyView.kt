@@ -6,18 +6,17 @@ import android.content.res.Configuration
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
-import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.StateListDrawable
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.updateLayoutParams
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Variant
+import org.fcitx.fcitx5.android.utils.pressHighlightDrawable
+import org.fcitx.fcitx5.android.utils.rippleDrawable
 import org.fcitx.fcitx5.android.utils.styledFloat
 import splitties.dimensions.dp
 import splitties.resources.drawable
-import splitties.resources.styledDrawable
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.imageDrawable
@@ -49,12 +48,8 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
         // pressed highlight
         foreground =
             if (ThemeManager.prefs.keyRippleEffect.getValue())
-                styledDrawable(android.R.attr.selectableItemBackground)
-            else StateListDrawable().apply {
-                addState(intArrayOf(android.R.attr.state_pressed), GradientDrawable().apply {
-                    setColor(theme.keyPressHighlightColor)
-                })
-            }
+                rippleDrawable(theme.keyPressHighlightColor)
+            else pressHighlightDrawable(theme.keyPressHighlightColor)
         add(layout, lParams(matchParent, matchParent))
     }
 

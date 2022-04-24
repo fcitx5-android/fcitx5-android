@@ -7,8 +7,8 @@ import android.text.TextUtils
 import androidx.cardview.widget.CardView
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.utils.rippleDrawable
 import splitties.dimensions.dp
-import splitties.resources.styledDrawable
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.horizontalPadding
@@ -49,7 +49,7 @@ class ClipboardEntryUi(override val ctx: Context, private val inputTheme: Theme)
         minimumWidth = dp(40)
         minimumHeight = dp(30)
         isClickable = true
-        foreground = styledDrawable(android.R.attr.selectableItemBackground)
+        foreground = rippleDrawable(inputTheme.keyPressHighlightColor)
         setCardBackgroundColor(inputTheme.clipboardEntryColor)
         cardElevation = 0f
         add(wrapper, lParams(matchParent, wrapContent))
