@@ -17,8 +17,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.State.*
+import org.fcitx.fcitx5.android.utils.borderlessRippleDrawable
 import splitties.dimensions.dp
-import splitties.resources.styledDrawable
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.gravityCenter
@@ -76,7 +76,7 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
 
         private fun toolButton(@DrawableRes icon: Int) = imageButton {
             imageResource = icon
-            background = styledDrawable(android.R.attr.actionBarItemBackground)
+            background = borderlessRippleDrawable(inputTheme.keyPressHighlightColor, dp(20))
             colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
             scaleType = ImageView.ScaleType.CENTER_INSIDE
         }
@@ -239,7 +239,7 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
 
         private val backButton = imageButton {
             imageResource = R.drawable.ic_baseline_arrow_back_24
-            background = styledDrawable(android.R.attr.actionBarItemBackground)
+            background = borderlessRippleDrawable(inputTheme.keyPressHighlightColor, dp(20))
             colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
             scaleType = ImageView.ScaleType.CENTER_INSIDE
         }
