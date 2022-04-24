@@ -129,7 +129,6 @@ class QuickPhraseKey : KeyDef(
 class LanguageKey : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_language_24,
-        forceBordered = true,
         viewId = R.id.button_lang
     ),
     setOf(
