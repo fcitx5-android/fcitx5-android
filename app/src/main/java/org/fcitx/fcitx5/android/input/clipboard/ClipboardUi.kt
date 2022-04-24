@@ -10,8 +10,10 @@ import androidx.transition.Fade
 import androidx.transition.TransitionManager
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.utils.borderlessRippleDrawable
 import splitties.dimensions.dp
+import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.imageResource
@@ -28,6 +30,9 @@ class ClipboardUi(override val ctx: Context, private val inputTheme: Theme) : Ui
     val emptyUi = ClipboardInstructionUi.Empty(ctx, inputTheme)
 
     override val root = view(::ViewAnimator) {
+        if (!ThemeManager.prefs.keyBorder.getValue()) {
+            backgroundColor = inputTheme.barColor
+        }
         add(recyclerView, lParams(matchParent, matchParent))
         add(emptyUi.root, lParams(matchParent, matchParent))
         add(enableUi.root, lParams(matchParent, matchParent))
