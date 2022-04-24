@@ -2,18 +2,19 @@ package org.fcitx.fcitx5.android.input.keyboard
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
-import androidx.cardview.widget.CardView
+import android.graphics.drawable.*
+import androidx.annotation.ColorInt
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.updateLayoutParams
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Variant
-import org.fcitx.fcitx5.android.utils.pressHighlightDrawable
-import org.fcitx.fcitx5.android.utils.rippleDrawable
 import org.fcitx.fcitx5.android.utils.styledFloat
 import splitties.dimensions.dp
 import splitties.resources.drawable
@@ -23,34 +24,15 @@ import splitties.views.imageDrawable
 
 abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearance) :
     CustomGestureView(ctx) {
+
+    val bordered = ThemeManager.prefs.keyBorder.getValue() || def.forceBordered
+    val radius = dp(ThemeManager.prefs.keyRadius.getValue().toFloat())
+    val hMargin = dp(ThemeManager.prefs.keyHorizontalMargin.getValue())
+    val vMargin = dp(ThemeManager.prefs.keyVerticalMargin.getValue())
+
     val layout = constraintLayout {
         // sync any state from parent
         isDuplicateParentStateEnabled = true
-    }
-
-    val card = view(::CardView) {
-        radius = dp(ThemeManager.prefs.keyRadius.getValue().toFloat())
-        cardElevation = 0f
-        if (ThemeManager.prefs.keyBorder.getValue() || def.forceBordered) {
-            setCardBackgroundColor(
-                when (def.variant) {
-                    Variant.Normal -> theme.keyBackgroundColor
-                    Variant.Alternative -> theme.altKeyBackgroundColor
-                    Variant.Accent -> theme.accentKeyBackgroundColor
-                }
-            )
-        } else {
-            background = null
-        }
-
-        // sync pressed state from parent
-        isDuplicateParentStateEnabled = true
-        // pressed highlight
-        foreground =
-            if (ThemeManager.prefs.keyRippleEffect.getValue())
-                rippleDrawable(theme.keyPressHighlightColor)
-            else pressHighlightDrawable(theme.keyPressHighlightColor)
-        add(layout, lParams(matchParent, matchParent))
     }
 
     init {
@@ -61,11 +43,57 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
         if (def.viewId > 0) {
             id = def.viewId
         }
-        add(card, lParams(matchParent, matchParent) {
-            horizontalMargin = dp(ThemeManager.prefs.keyHorizontalMargin.getValue())
-            verticalMargin = dp(ThemeManager.prefs.keyVerticalMargin.getValue())
-        })
+        // key border
+        if (bordered) {
+            background = LayerDrawable(
+                arrayOf(
+                    GradientDrawable().apply {
+                        cornerRadius = radius
+                        setColor(theme.keyShadowColor)
+                    },
+                    GradientDrawable().apply {
+                        cornerRadius = radius
+                        setColor(
+                            when (def.variant) {
+                                Variant.Normal -> theme.keyBackgroundColor
+                                Variant.Alternative -> theme.altKeyBackgroundColor
+                                Variant.Accent -> theme.accentKeyBackgroundColor
+                            }
+                        )
+                    }
+                )
+            ).apply {
+                val shadowWidth = dp(1)
+                setLayerInset(0, hMargin, vMargin, hMargin, vMargin - shadowWidth)
+                setLayerInset(1, hMargin, vMargin, hMargin, vMargin)
+            }
+        }
+        // press highlight
+        foreground = if (ThemeManager.prefs.keyRippleEffect.getValue())
+            RippleDrawable(
+                ColorStateList.valueOf(theme.keyPressHighlightColor), null,
+                // ripple should be masked with an opaque color
+                highlightMaskDrawable(Color.WHITE)
+            )
+        else
+            StateListDrawable().apply {
+                addState(
+                    intArrayOf(android.R.attr.state_pressed),
+                    // use mask drawable as highlight directly
+                    highlightMaskDrawable(theme.keyPressHighlightColor)
+                )
+            }
+        add(layout, lParams(matchParent, matchParent))
     }
+
+    private fun highlightMaskDrawable(@ColorInt color: Int) =
+        InsetDrawable(
+            if (bordered) GradientDrawable().apply {
+                cornerRadius = radius
+                setColor(color)
+            } else ColorDrawable(color),
+            hMargin, vMargin, hMargin, vMargin
+        )
 
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
@@ -128,12 +156,12 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
 
     private fun applyLayout(orientation: Int) = when (orientation) {
         Configuration.ORIENTATION_LANDSCAPE -> {
-            mainText.updateLayoutParams<ConstraintLayout.LayoutParams> { endOfParent() }
+            mainText.updateLayoutParams<ConstraintLayout.LayoutParams> { bottomOfParent() }
             altText.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                topOfParent()
+                topOfParent(vMargin)
                 bottomToBottom = ConstraintLayout.LayoutParams.UNSET
                 startToStart = ConstraintLayout.LayoutParams.UNSET
-                endOfParent(dp(4))
+                endOfParent(hMargin + dp(4))
             }
         }
         else -> {
