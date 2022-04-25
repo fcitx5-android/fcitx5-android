@@ -72,7 +72,7 @@ class ExpandedCandidateLayout(
     init {
         id = R.id.expanded_candidate_view
         if (!ThemeManager.prefs.keyBorder.getValue()) {
-            backgroundColor = inputTheme.barColor
+            backgroundColor = inputTheme.barColor.color
         }
 
         add(recyclerView, lParams {

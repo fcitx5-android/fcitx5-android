@@ -51,7 +51,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                 arrayOf(
                     GradientDrawable().apply {
                         cornerRadius = radius
-                        setColor(theme.keyShadowColor)
+                        setColor(theme.keyShadowColor.color)
                     },
                     GradientDrawable().apply {
                         cornerRadius = radius
@@ -60,7 +60,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                                 Variant.Normal, Variant.AltForeground -> theme.keyBackgroundColor
                                 Variant.Alternative -> theme.altKeyBackgroundColor
                                 Variant.Accent -> theme.accentKeyBackgroundColor
-                            }
+                            }.color
                         )
                     }
                 )
@@ -78,7 +78,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                     background = InsetDrawable(
                         GradientDrawable().apply {
                             cornerRadius = dp(3f)
-                            setColor(theme.spaceBarColor)
+                            setColor(theme.spaceBarColor.color)
                         },
                         hPadding, vPadding, hPadding, vPadding
                     )
@@ -89,7 +89,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                         imageDrawable = GradientDrawable().apply {
                             shape = GradientDrawable.OVAL
                             setSize(dp(35), dp(35))
-                            setColor(theme.accentKeyBackgroundColor)
+                            setColor(theme.accentKeyBackgroundColor.color)
                         }
                         scaleType = ImageView.ScaleType.CENTER_INSIDE
                     }
@@ -101,7 +101,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
         // press highlight
         foreground = if (ThemeManager.prefs.keyRippleEffect.getValue())
             RippleDrawable(
-                ColorStateList.valueOf(theme.keyPressHighlightColor), null,
+                ColorStateList.valueOf(theme.keyPressHighlightColor.color), null,
                 // ripple should be masked with an opaque color
                 highlightMaskDrawable(Color.WHITE)
             )
@@ -110,7 +110,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                 addState(
                     intArrayOf(android.R.attr.state_pressed),
                     // use mask drawable as highlight directly
-                    highlightMaskDrawable(theme.keyPressHighlightColor)
+                    highlightMaskDrawable(theme.keyPressHighlightColor.color)
                 )
             }
         add(layout, lParams(matchParent, matchParent))
@@ -146,7 +146,7 @@ open class TextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Text) 
                 Variant.Normal -> theme.keyTextColor
                 Variant.AltForeground, Variant.Alternative -> theme.altKeyTextColor
                 Variant.Accent -> theme.accentKeyTextColor
-            }
+            }.color
         )
     }
 
@@ -174,7 +174,7 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
             when (def.variant) {
                 Variant.Normal, Variant.AltForeground, Variant.Alternative -> theme.altKeyTextColor
                 Variant.Accent -> theme.accentKeyTextColor
-            }
+            }.color
         )
     }
 
@@ -221,7 +221,7 @@ class ImageKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Image) :
                 Variant.Normal -> theme.keyTextColor
                 Variant.AltForeground, Variant.Alternative -> theme.altKeyTextColor
                 Variant.Accent -> theme.accentKeyTextColor
-            },
+            }.color,
             PorterDuff.Mode.SRC_IN
         )
     }

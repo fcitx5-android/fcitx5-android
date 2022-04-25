@@ -36,7 +36,7 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
             background = null
             imageResource = R.drawable.ic_baseline_expand_more_24
             visibility = ConstraintLayout.INVISIBLE
-            colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
+            colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
         }
 
         override val root = ctx.constraintLayout {
@@ -76,8 +76,8 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
 
         private fun toolButton(@DrawableRes icon: Int) = imageButton {
             imageResource = icon
-            background = borderlessRippleDrawable(inputTheme.keyPressHighlightColor, dp(20))
-            colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
+            background = borderlessRippleDrawable(inputTheme.keyPressHighlightColor.color, dp(20))
+            colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
             scaleType = ImageView.ScaleType.CENTER_INSIDE
         }
 
@@ -118,14 +118,14 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
 
         private val clipboardIcon = imageView {
             imageResource = R.drawable.ic_clipboard
-            colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
+            colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
         }
 
         private val clipboardText = textView {
             isSingleLine = true
             ellipsize = TextUtils.TruncateAt.END
             typeface = Typeface.defaultFromStyle(Typeface.BOLD)
-            setTextColor(inputTheme.altKeyTextColor)
+            setTextColor(inputTheme.altKeyTextColor.color)
         }
 
         val clipboardItem = horizontalLayout {
@@ -239,14 +239,14 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
 
         private val backButton = imageButton {
             imageResource = R.drawable.ic_baseline_arrow_back_24
-            background = borderlessRippleDrawable(inputTheme.keyPressHighlightColor, dp(20))
-            colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
+            background = borderlessRippleDrawable(inputTheme.keyPressHighlightColor.color, dp(20))
+            colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
             scaleType = ImageView.ScaleType.CENTER_INSIDE
         }
 
         private val titleText = textView {
             typeface = Typeface.defaultFromStyle(Typeface.BOLD)
-            setTextColor(inputTheme.altKeyTextColor)
+            setTextColor(inputTheme.altKeyTextColor.color)
             gravity = gravityVerticalCenter
             textSize = 16f
         }

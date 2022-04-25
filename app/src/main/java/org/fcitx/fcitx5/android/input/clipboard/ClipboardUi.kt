@@ -31,7 +31,7 @@ class ClipboardUi(override val ctx: Context, private val inputTheme: Theme) : Ui
 
     override val root = view(::ViewAnimator) {
         if (!ThemeManager.prefs.keyBorder.getValue()) {
-            backgroundColor = inputTheme.barColor
+            backgroundColor = inputTheme.barColor.color
         }
         add(recyclerView, lParams(matchParent, matchParent))
         add(emptyUi.root, lParams(matchParent, matchParent))
@@ -39,8 +39,8 @@ class ClipboardUi(override val ctx: Context, private val inputTheme: Theme) : Ui
     }
 
     val deleteAllButton = imageButton {
-        background = borderlessRippleDrawable(inputTheme.keyPressHighlightColor, dp(20))
-        colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
+        background = borderlessRippleDrawable(inputTheme.keyPressHighlightColor.color, dp(20))
+        colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
         imageResource = R.drawable.ic_baseline_delete_sweep_24
         scaleType = ImageView.ScaleType.CENTER_INSIDE
         visibility = View.INVISIBLE

@@ -104,7 +104,7 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
     val view by lazy {
         context.recyclerView {
             if (!ThemeManager.prefs.keyBorder.getValue()) {
-                backgroundColor = theme.barColor
+                backgroundColor = theme.barColor.color
             }
             layoutManager = gridLayoutManager(4)
             adapter = this@StatusAreaWindow.adapter
@@ -128,8 +128,8 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
 
     private val settingsButton by lazy {
         context.imageButton {
-            background = borderlessRippleDrawable(theme.keyPressHighlightColor, dp(20))
-            colorFilter = PorterDuffColorFilter(theme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
+            background = borderlessRippleDrawable(theme.keyPressHighlightColor.color, dp(20))
+            colorFilter = PorterDuffColorFilter(theme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
             imageResource = R.drawable.ic_baseline_settings_24
             scaleType = ImageView.ScaleType.CENTER_INSIDE
         }

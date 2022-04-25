@@ -25,12 +25,12 @@ sealed class ClipboardInstructionUi(override val ctx: Context, protected val inp
             text = str(R.string.instruction_enable_clipboard_listening)
             verticalPadding = dp(8)
             horizontalPadding = dp(12)
-            setTextColor(inputTheme.keyTextColor)
+            setTextColor(inputTheme.keyTextColor.color)
         }
 
         val enableButton = appCompatStyles.button.borderless {
             text = str(R.string.clipboard_enable)
-            setTextColor(inputTheme.accentKeyBackgroundColor)
+            setTextColor(inputTheme.accentKeyBackgroundColor.color)
         }
 
         override val root = constraintLayout {
@@ -50,12 +50,12 @@ sealed class ClipboardInstructionUi(override val ctx: Context, protected val inp
 
         private val icon = imageView {
             imageResource = R.drawable.ic_baseline_content_paste_24
-            colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
+            colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
         }
 
         private val instructionText = textView {
             text = str(R.string.instruction_copy)
-            setTextColor(inputTheme.keyTextColor)
+            setTextColor(inputTheme.keyTextColor.color)
         }
 
         override val root = constraintLayout {

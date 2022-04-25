@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
-import org.fcitx.fcitx5.android.data.theme.ThemePreset
 import org.fcitx.fcitx5.android.input.clipboard.SpacesItemDecoration
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import splitties.dimensions.dp
@@ -95,12 +94,7 @@ class ThemeListFragment : Fragment() {
             }.apply {
                 // TODO space items evenly
                 addItemDecoration(SpacesItemDecoration(dp(24)))
-                entries = arrayOf(
-                    ThemePreset.PixelLight,
-                    ThemePreset.PixelDark,
-                    ThemePreset.PreviewLight,
-                    ThemePreset.PreviewDark
-                )
+                entries = ThemeManager.getAllThemes().toTypedArray()
             }
         }
 

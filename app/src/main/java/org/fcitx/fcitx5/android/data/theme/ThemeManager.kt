@@ -26,5 +26,13 @@ object ThemeManager {
     val prefs = AppPrefs.getInstance().registerProvider(::Prefs)
 
     // TODO
+    fun getAllThemes() = builtinThemes
+
+    private val builtinThemes = listOf(
+        ThemePreset.PixelLight,
+        ThemePreset.PreviewDark
+    )
+
+    // TODO
     val currentTheme: Theme = ThemePreset.PixelDark
 }

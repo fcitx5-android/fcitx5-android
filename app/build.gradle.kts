@@ -24,6 +24,8 @@ plugins {
     id("kotlin-android")
     kotlin("kapt")
     id("com.cookpad.android.plugin.license-tools") version "1.2.0"
+    kotlin("plugin.serialization") version "1.6.10"
+    id("kotlin-parcelize")
 }
 
 val dataDescriptorName = "descriptor.json"
@@ -233,6 +235,7 @@ installFcitxComponent("generate-desktop-file", "config", file("src/main/assets")
 installFcitxComponent("translation-file", "translation", file("src/main/assets"))
 
 dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     implementation ("com.github.CanHub:Android-Image-Cropper:4.2.1")
     implementation("cat.ereza:customactivityoncrash:2.3.0")
     implementation("com.google.android.flexbox:flexbox:3.0.0")

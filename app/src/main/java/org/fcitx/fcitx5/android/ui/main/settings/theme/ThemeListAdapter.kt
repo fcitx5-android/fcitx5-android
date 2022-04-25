@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.ui.main.settings.theme
 
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.data.theme.Theme
 import splitties.dimensions.dp
@@ -11,8 +12,10 @@ abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHold
 
     var entries: Array<Theme> = arrayOf()
         set(value) {
+            val callback = ThemeDiffCallback(field, value)
+            val diff = DiffUtil.calculateDiff(callback)
             field = value
-            notifyDataSetChanged()
+            diff.dispatchUpdatesTo(this)
         }
 
     private fun entryAt(position: Int) = entries[position - 1]

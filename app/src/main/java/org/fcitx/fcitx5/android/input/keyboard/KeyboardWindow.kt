@@ -63,7 +63,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
     override fun onCreateView(): View {
         keyboardView = context.frameLayout(R.id.keyboard_view) {
             if (!ThemeManager.prefs.keyBorder.getValue()) {
-                backgroundColor = theme.keyboardColor
+                backgroundColor = theme.keyboardColor.color
             }
         }
         return keyboardView
