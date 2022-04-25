@@ -13,7 +13,7 @@ open class KeyDef(
         val viewId: Int,
     ) {
         enum class Variant {
-            Normal, Alternative, Accent
+            Normal, AltForeground, Alternative, Accent
         }
 
         open class Text(
@@ -40,7 +40,6 @@ open class KeyDef(
         class Image(
             @DrawableRes
             val src: Int,
-            val accentBackground: Boolean = false,
             percentWidth: Float = 0.1f,
             variant: Variant = Variant.Normal,
             forceBordered: Boolean = false,

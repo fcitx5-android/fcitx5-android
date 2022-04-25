@@ -45,7 +45,7 @@ class NumberKeyboard(
                     "!?#",
                     NumSymKeyboard.Name,
                     percentWidth = 0.13333f,
-                    variant = KeyDef.Appearance.Variant.Normal
+                    variant = KeyDef.Appearance.Variant.AltForeground
                 ),
                 NumPadKey("0", 0xffb0u, 30f, 0.23334f),
                 SymbolKey("=", 0.13333f),
