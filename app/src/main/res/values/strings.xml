@@ -108,4 +108,6 @@
     <string name="key_radius">Key radius</string>
     <string name="key_horizontal_margin">Key horizontal margin</string>
     <string name="key_vertical_margin">Key vertical margin</string>
+    <string name="configure_theme">Configure Theme</string>
+    <string name="choose_image">Choose Image</string>
 </resources>
