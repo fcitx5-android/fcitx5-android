@@ -129,6 +129,7 @@ class QuickPhraseKey : KeyDef(
 class LanguageKey : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_language_24,
+        variant = Appearance.Variant.AltForeground,
         viewId = R.id.button_lang
     ),
     setOf(
@@ -154,7 +155,6 @@ class SpaceKey : KeyDef(
 class ReturnKey(percentWidth: Float = 0.15f) : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_keyboard_return_24,
-        accentBackground = true,
         percentWidth = percentWidth,
         variant = Appearance.Variant.Accent,
         forceBordered = true,
@@ -170,7 +170,7 @@ class ImageLayoutSwitchKey(
     icon: Int,
     to: String,
     percentWidth: Float = 0.1f,
-    variant: Appearance.Variant = Appearance.Variant.Normal,
+    variant: Appearance.Variant = Appearance.Variant.AltForeground,
     viewId: Int = -1
 ) : KeyDef(
     Appearance.Image(

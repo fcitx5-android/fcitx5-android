@@ -55,7 +55,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                         cornerRadius = radius
                         setColor(
                             when (def.variant) {
-                                Variant.Normal -> theme.keyBackgroundColor
+                                Variant.Normal, Variant.AltForeground -> theme.keyBackgroundColor
                                 Variant.Alternative -> theme.altKeyBackgroundColor
                                 Variant.Accent -> theme.accentKeyBackgroundColor
                             }
@@ -114,7 +114,7 @@ open class TextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Text) 
         setTextColor(
             when (def.variant) {
                 Variant.Normal -> theme.keyTextColor
-                Variant.Alternative -> theme.altKeyTextColor
+                Variant.AltForeground, Variant.Alternative -> theme.altKeyTextColor
                 Variant.Accent -> theme.accentKeyTextColor
             }
         )
@@ -136,14 +136,13 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
     val altText = textView {
         isClickable = false
         isFocusable = false
-        // hardcoded text size for now
+        // TODO hardcoded alt text size
         textSize = 10.7f
         text = def.altText
         // TODO darken altText color
         setTextColor(
             when (def.variant) {
-                Variant.Normal -> theme.keyTextColor
-                Variant.Alternative -> theme.altKeyTextColor
+                Variant.Normal, Variant.AltForeground, Variant.Alternative -> theme.altKeyTextColor
                 Variant.Accent -> theme.accentKeyTextColor
             }
         )
@@ -189,8 +188,8 @@ class ImageKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Image) :
         imageDrawable = drawable(def.src)
         colorFilter = PorterDuffColorFilter(
             when (def.variant) {
-                // always apply alternative text color to image key
-                Variant.Normal, Variant.Alternative -> theme.altKeyTextColor
+                Variant.Normal -> theme.keyTextColor
+                Variant.AltForeground, Variant.Alternative -> theme.altKeyTextColor
                 Variant.Accent -> theme.accentKeyTextColor
             },
             PorterDuff.Mode.SRC_IN
