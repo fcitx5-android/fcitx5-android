@@ -9,9 +9,11 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
 import android.graphics.drawable.*
+import android.widget.ImageView
 import androidx.annotation.ColorInt
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.updateLayoutParams
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Variant
@@ -25,7 +27,7 @@ import splitties.views.imageDrawable
 abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearance) :
     CustomGestureView(ctx) {
 
-    val bordered = ThemeManager.prefs.keyBorder.getValue() || def.forceBordered
+    val bordered = ThemeManager.prefs.keyBorder.getValue()
     val radius = dp(ThemeManager.prefs.keyRadius.getValue().toFloat())
     val hMargin = dp(ThemeManager.prefs.keyHorizontalMargin.getValue())
     val vMargin = dp(ThemeManager.prefs.keyVerticalMargin.getValue())
@@ -67,6 +69,34 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                 setLayerInset(0, hMargin, vMargin, hMargin, vMargin - shadowWidth)
                 setLayerInset(1, hMargin, vMargin, hMargin, vMargin)
             }
+        } else if (def.forceBordered) {
+            // special background
+            when (def.viewId) {
+                R.id.button_space -> {
+                    val hPadding = dp(10)
+                    val vPadding = dp(16)
+                    background = InsetDrawable(
+                        GradientDrawable().apply {
+                            cornerRadius = dp(3f)
+                            setColor(theme.spaceBarColor)
+                        },
+                        hPadding, vPadding, hPadding, vPadding
+                    )
+                }
+                R.id.button_return -> {
+                    // background drawable has no ScaleType support, use an ImageView instead ...
+                    val img = imageView {
+                        imageDrawable = GradientDrawable().apply {
+                            shape = GradientDrawable.OVAL
+                            setSize(dp(35), dp(35))
+                            setColor(theme.accentKeyBackgroundColor)
+                        }
+                        scaleType = ImageView.ScaleType.CENTER_INSIDE
+                    }
+                    add(img, lParams(matchParent, matchParent))
+                }
+            }
+            // TODO set press highlight mask for special background keys
         }
         // press highlight
         foreground = if (ThemeManager.prefs.keyRippleEffect.getValue())
