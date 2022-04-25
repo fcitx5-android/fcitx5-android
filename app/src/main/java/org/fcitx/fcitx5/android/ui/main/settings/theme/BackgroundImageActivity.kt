@@ -1,5 +1,6 @@
-package org.fcitx.fcitx5.android.ui.common
+package org.fcitx.fcitx5.android.ui.main.settings.theme
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -10,27 +11,23 @@ import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.SeekBar
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageView
 import com.canhub.cropper.options
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.ThemePreset
-import org.fcitx.fcitx5.android.input.keyboard.TextKeyboard
 import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.darkenColorFilter
-import org.fcitx.fcitx5.android.utils.keyboardWindowAspectRatio
 import splitties.dimensions.dp
-import splitties.resources.styledColorSL
-import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
-import splitties.views.dsl.material.slider
 import splitties.views.gravityCenter
+import splitties.views.gravityEnd
+import splitties.views.horizontalPadding
 import java.io.File
 
 class BackgroundImageActivity : AppCompatActivity() {
@@ -43,38 +40,31 @@ class BackgroundImageActivity : AppCompatActivity() {
             intent?.getStringExtra(RESULT)
     }
 
-    private val text by lazy {
+    private lateinit var preview: KeyboardPreviewUi
+
+    val brightnessLabel by lazy {
         textView {
-            textSize = 15f
             setText(R.string.brightness)
         }
     }
 
-    private val fakeInputView by lazy {
-        verticalLayout {
-            add(frameLayout {
-                backgroundColor = ThemePreset.PreviewDark.barColor
-            }, lParams(matchParent, dp(40)))
-            add(TextKeyboard(context, ThemePreset.PreviewDark), lParams(matchParent, matchParent))
-            scaleX = .8f
-            scaleY = .8f
+    val brightnessValue by lazy {
+        textView {
+            gravity = gravityEnd
         }
     }
 
-    private val brightness by lazy {
-        slider {
-            valueFrom = 0f
-            valueTo = 100f
-            stepSize = 1f
-            val colorAccent = styledColorSL(android.R.attr.colorAccent)
-            thumbTintList = colorAccent
-            haloTintList = colorAccent
-            trackTintList = colorAccent
-            trackInactiveTintList = styledColorSL(android.R.attr.colorButtonNormal)
-            isTickVisible = false
-            setLabelFormatter {
-                "${it.toInt()}%"
-            }
+    val brightness by lazy {
+        horizontalLayout {
+            horizontalPadding = dp(16)
+            add(brightnessLabel, lParams())
+            add(brightnessValue, lParams(width = matchParent))
+        }
+    }
+
+    private val brightnessSeekBar by lazy {
+        seekBar {
+            max = 100
         }
     }
 
@@ -87,15 +77,12 @@ class BackgroundImageActivity : AppCompatActivity() {
     private val ui by lazy {
         verticalLayout {
             gravity = gravityCenter
-            add(fakeInputView, lParams(inputViewWidth, inputViewHeight))
-            add(text, lParams())
+            add(preview.root, lParams(wrapContent, wrapContent))
             add(brightness, lParams(width = dp(300)))
+            add(brightnessSeekBar, lParams(width = dp(300)))
             add(finishButton, lParams())
         }
     }
-
-    private var inputViewWidth = 0
-    private var inputViewHeight = 0
 
     private lateinit var launcher: ActivityResultLauncher<CropImageContractOptions>
 
@@ -105,14 +92,7 @@ class BackgroundImageActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val (x, y) = keyboardWindowAspectRatio()
-        inputViewWidth = x
-        // bar height
-        inputViewHeight = y + dp(40)
-        // bottom padding
-        ViewCompat.getRootWindowInsets(fakeInputView)?.let {
-            inputViewHeight += it.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-        }
+        preview = KeyboardPreviewUi(this, ThemePreset.PreviewDark)
         setContentView(ui)
         launcher = registerForActivityResult(CropImageContract()) {
             if (!it.isSuccessful)
@@ -120,11 +100,18 @@ class BackgroundImageActivity : AppCompatActivity() {
             else {
                 cropped = it.getBitmap(this)!!
                 image = BitmapDrawable(resources, cropped)
-                brightness.addOnChangeListener { _, value, _ ->
-                    image.colorFilter = darkenColorFilter(100 - value.toInt())
-                    fakeInputView.background = image
-                }
-                brightness.value = 70f
+                brightnessSeekBar.setOnSeekBarChangeListener(object :
+                    SeekBar.OnSeekBarChangeListener {
+                    override fun onStartTrackingTouch(bar: SeekBar) {}
+                    override fun onStopTrackingTouch(bar: SeekBar) {}
+                    @SuppressLint("SetTextI18n")
+                    override fun onProgressChanged(bar: SeekBar, progress: Int, fromUser: Boolean) {
+                        brightnessValue.text = "$progress%"
+                        image.colorFilter = darkenColorFilter(100 - progress)
+                        preview.setBackground(image)
+                    }
+                })
+                brightnessSeekBar.progress = 70
                 finishButton.setOnClickListener {
                     done()
                 }
@@ -133,10 +120,9 @@ class BackgroundImageActivity : AppCompatActivity() {
         launcher.launch(options {
             setGuidelines(CropImageView.Guidelines.ON)
             setImageSource(includeGallery = true, includeCamera = false)
-            setAspectRatio(inputViewWidth, inputViewHeight)
+            setAspectRatio(preview.intrinsicWidth, preview.intrinsicHeight)
             setOutputCompressFormat(Bitmap.CompressFormat.PNG)
         })
-
     }
 
     private fun cancel() {
@@ -145,10 +131,11 @@ class BackgroundImageActivity : AppCompatActivity() {
     }
 
     private fun done() {
-        val bitmap = Bitmap.createBitmap(inputViewWidth, inputViewHeight, Bitmap.Config.ARGB_8888)
+        val bitmap = Bitmap
+            .createBitmap(preview.intrinsicWidth, preview.intrinsicHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         canvas.drawBitmap(cropped, null, Rect(0, 0, canvas.width, canvas.height), Paint().apply {
-            colorFilter = darkenColorFilter(100 - brightness.value.toInt())
+            colorFilter = darkenColorFilter(100 - brightnessSeekBar.progress)
         })
         val file = File.createTempFile(
             "img", ".png",
