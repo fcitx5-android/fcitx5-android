@@ -26,11 +26,11 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
     private val borderWidth = ctx.dp(1) / 2
 
     private fun View.applyBorderedBackground() {
-        background = borderDrawable(borderWidth, theme.dividerColor)
+        background = borderDrawable(borderWidth, theme.dividerColor.color)
         foreground =
             if (ThemeManager.prefs.keyRippleEffect.getValue())
-                rippleDrawable(theme.keyPressHighlightColor)
-            else pressHighlightDrawable(theme.keyPressHighlightColor)
+                rippleDrawable(theme.keyPressHighlightColor.color)
+            else pressHighlightDrawable(theme.keyPressHighlightColor.color)
     }
 
     class GTextButton(context: Context) : CustomGestureView(context) {
@@ -58,14 +58,14 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     private fun textButton(str: String) = GTextButton(ctx).apply {
         text.text = str
-        text.setTextColor(theme.keyTextColor)
+        text.setTextColor(theme.keyTextColor.color)
         stateListAnimator = null
         applyBorderedBackground()
     }
 
     private fun iconButton(@DrawableRes icon: Int) = GImageButton(ctx).apply {
         image.imageResource = icon
-        image.colorFilter = PorterDuffColorFilter(theme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
+        image.colorFilter = PorterDuffColorFilter(theme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
         applyBorderedBackground()
     }
 
@@ -84,17 +84,17 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
                     intArrayOf(android.R.attr.state_activated),
                     intArrayOf(android.R.attr.state_enabled)
                 ),
-                intArrayOf(theme.accentKeyTextColor, theme.keyTextColor)
+                intArrayOf(theme.accentKeyTextColor.color, theme.keyTextColor.color)
             )
         )
         background = StateListDrawable().apply {
             addState(
                 intArrayOf(android.R.attr.state_activated),
-                borderDrawable(borderWidth, theme.dividerColor, theme.accentKeyBackgroundColor)
+                borderDrawable(borderWidth, theme.dividerColor.color, theme.accentKeyBackgroundColor.color)
             )
             addState(
                 intArrayOf(android.R.attr.state_enabled),
-                borderDrawable(borderWidth, theme.dividerColor)
+                borderDrawable(borderWidth, theme.dividerColor.color)
             )
         }
     }
@@ -215,8 +215,8 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
     }
 
     val clipboardButton = imageButton {
-        background = borderlessRippleDrawable(theme.keyPressHighlightColor, dp(20))
-        colorFilter = PorterDuffColorFilter(theme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
+        background = borderlessRippleDrawable(theme.keyPressHighlightColor.color, dp(20))
+        colorFilter = PorterDuffColorFilter(theme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
         imageResource = R.drawable.ic_clipboard
         scaleType = ImageView.ScaleType.CENTER_INSIDE
     }

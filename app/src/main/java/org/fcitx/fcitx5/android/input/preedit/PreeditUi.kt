@@ -16,22 +16,22 @@ class PreeditUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
 
     private val beforeCursor = textView {
         textSize = 16f
-        setTextColor(inputTheme.keyTextColor)
+        setTextColor(inputTheme.keyTextColor.color)
     }
 
     private val cursorView = view(::View) {
-        backgroundColor = inputTheme.keyTextColor
+        backgroundColor = inputTheme.keyTextColor.color
     }
 
     private val afterCursor = textView {
         textSize = 16f
-        setTextColor(inputTheme.keyTextColor)
+        setTextColor(inputTheme.keyTextColor.color)
     }
 
     private val upView = horizontalLayout {
         backgroundColor = inputTheme.run {
             if (ThemeManager.prefs.keyBorder.getValue()) backgroundColor else barColor
-        }
+        }.color
         horizontalPadding = dp(8)
         add(beforeCursor, lParams())
         add(cursorView, lParams(dp(1), matchParent) { verticalMargin = dp(2) })
@@ -41,7 +41,7 @@ class PreeditUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
     private val downView = textView {
         backgroundColor = inputTheme.run {
             if (ThemeManager.prefs.keyBorder.getValue()) backgroundColor else barColor
-        }
+        }.color
         horizontalPadding = dp(8)
         textSize = 16f
     }

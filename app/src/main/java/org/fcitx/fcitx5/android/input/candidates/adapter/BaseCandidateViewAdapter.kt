@@ -36,7 +36,7 @@ abstract class BaseCandidateViewAdapter :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = createTextView(parent).apply {
-            setTextColor(theme.keyTextColor)
+            setTextColor(theme.keyTextColor.color)
         }
         return ViewHolder(view).apply {
             itemView.setOnClickListener { onSelect(this.idx + offset) }

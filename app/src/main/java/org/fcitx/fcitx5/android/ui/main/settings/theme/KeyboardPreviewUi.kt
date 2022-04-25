@@ -1,6 +1,8 @@
 package org.fcitx.fcitx5.android.ui.main.settings.theme
 
 import android.content.Context
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.view.View
 import androidx.core.view.ViewCompat
@@ -63,15 +65,19 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
         if (this::fakeKeyboardWindow.isInitialized) {
             root.removeView(fakeKeyboardWindow)
         }
-        fakeKawaiiBar.backgroundColor = theme.barColor
+        fakeKawaiiBar.backgroundColor = theme.barColor.color
         fakeKeyboardWindow = TextKeyboard(ctx, theme)
         root.apply { add(fakeKeyboardWindow, lParams(keyboardWidth, keyboardHeight)) }
         when (theme) {
             is Theme.Builtin -> {
-                root.backgroundColor = theme.backgroundColor
+                root.backgroundColor = theme.backgroundColor.color
             }
-            is Theme.CustomBackground -> {
-                root.background = Drawable.createFromStream(theme.backgroundImage.inputStream(), "")
+            is Theme.Custom -> {
+                theme.backgroundImage?.let {
+                    root.background = BitmapDrawable(ctx.resources, BitmapFactory.decodeFile(it))
+                } ?: run {
+                    root.backgroundColor = theme.backgroundColor.color
+                }
             }
         }
     }

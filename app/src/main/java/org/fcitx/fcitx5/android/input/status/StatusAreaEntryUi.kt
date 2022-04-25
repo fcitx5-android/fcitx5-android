@@ -26,7 +26,7 @@ class StatusAreaEntryUi(override val ctx: Context, private val inputTheme: Theme
     val label = textView {
         textSize = 12f
         gravity = gravityCenter
-        setTextColor(inputTheme.keyTextColor)
+        setTextColor(inputTheme.keyTextColor.color)
     }
 
     override val root = constraintLayout {
@@ -47,11 +47,11 @@ class StatusAreaEntryUi(override val ctx: Context, private val inputTheme: Theme
     fun setEntry(entry: StatusAreaEntry) = with(ctx) {
         icon.setImageDrawable(drawable(entry.icon))
         icon.colorFilter = PorterDuffColorFilter(
-            if (entry.active) inputTheme.accentKeyTextColor else inputTheme.keyTextColor,
+            (if (entry.active) inputTheme.accentKeyTextColor else inputTheme.keyTextColor).color,
             PorterDuff.Mode.SRC_IN
         )
         bkgDrawable.paint.color =
-            if (entry.active) inputTheme.accentKeyBackgroundColor else inputTheme.keyBackgroundColor
+            (if (entry.active) inputTheme.accentKeyBackgroundColor else inputTheme.keyBackgroundColor).color
         label.text = entry.label
     }
 }

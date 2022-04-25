@@ -23,12 +23,12 @@ class ClipboardEntryUi(override val ctx: Context, private val inputTheme: Theme)
         verticalPadding = dp(4)
         horizontalPadding = dp(8)
         ellipsize = TextUtils.TruncateAt.END
-        setTextColor(inputTheme.keyTextColor)
+        setTextColor(inputTheme.keyTextColor.color)
     }
 
     val pin = imageView {
         imageResource = R.drawable.ic_baseline_push_pin_24
-        colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
+        colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
         alpha = 0.3f
     }
 
@@ -49,8 +49,8 @@ class ClipboardEntryUi(override val ctx: Context, private val inputTheme: Theme)
         minimumWidth = dp(40)
         minimumHeight = dp(30)
         isClickable = true
-        foreground = rippleDrawable(inputTheme.keyPressHighlightColor)
-        setCardBackgroundColor(inputTheme.clipboardEntryColor)
+        foreground = rippleDrawable(inputTheme.keyPressHighlightColor.color)
+        setCardBackgroundColor(inputTheme.clipboardEntryColor.color)
         cardElevation = 0f
         add(wrapper, lParams(matchParent, wrapContent))
     }

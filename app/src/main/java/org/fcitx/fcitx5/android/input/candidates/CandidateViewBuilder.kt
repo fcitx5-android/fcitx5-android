@@ -76,7 +76,7 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
     private fun RecyclerView.dividerDrawable() = ShapeDrawable(RectShape()).apply {
         intrinsicWidth = dp(1)
         intrinsicHeight = dp(1)
-        paint.color = theme.dividerColor
+        paint.color = theme.dividerColor.color
     }
 
     fun RecyclerView.addGridDecoration() =

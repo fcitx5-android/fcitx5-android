@@ -147,7 +147,7 @@ class TextKeyboard(
                 when (capsState) {
                     CapsState.None, CapsState.Once -> theme.altKeyTextColor
                     CapsState.Lock -> theme.accentKeyBackgroundColor
-                }, PorterDuff.Mode.SRC_IN
+                }.color, PorterDuff.Mode.SRC_IN
             )
         }
     }

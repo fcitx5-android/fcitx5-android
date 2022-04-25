@@ -128,12 +128,11 @@ class InputView(
         }
 
         when (theme) {
-            is Theme.Builtin -> backgroundColor = theme.backgroundColor
-            is Theme.CustomBackground -> background =
-                BitmapDrawable(
-                    resources,
-                    BitmapFactory.decodeFile(theme.backgroundImage.path)
-                )
+            is Theme.Builtin -> backgroundColor = theme.backgroundColor.color
+            is Theme.Custom -> theme.backgroundImage?.let {
+                background =
+                    BitmapDrawable(resources, BitmapFactory.decodeFile(it))
+            } ?: run { backgroundColor = theme.backgroundColor.color }
         }
 
         add(kawaiiBar.view, lParams(matchParent, dp(40)) {

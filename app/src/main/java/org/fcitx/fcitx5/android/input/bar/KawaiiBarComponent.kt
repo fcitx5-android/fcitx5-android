@@ -204,7 +204,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     override val view by lazy {
         ViewAnimator(context).apply {
             if (!ThemeManager.prefs.keyBorder.getValue()) {
-                backgroundColor = theme.barColor
+                backgroundColor = theme.barColor.color
             }
             add(idleUi.root, lParams(matchParent, matchParent))
             add(candidateUi.root, lParams(matchParent, matchParent))
