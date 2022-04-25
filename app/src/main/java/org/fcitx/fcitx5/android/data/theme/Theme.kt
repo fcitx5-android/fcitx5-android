@@ -20,6 +20,7 @@ sealed class Theme {
     abstract val keyPressHighlightColor: Int
     abstract val keyShadowColor: Int
 
+    abstract val spaceBarColor: Int
     abstract val dividerColor: Int
     abstract val clipboardEntryColor: Int
     abstract val isDark: Boolean
@@ -37,6 +38,7 @@ sealed class Theme {
         override val accentKeyTextColor: Int,
         override val keyPressHighlightColor: Int,
         override val keyShadowColor: Int,
+        override val spaceBarColor: Int,
         override val dividerColor: Int,
         override val clipboardEntryColor: Int,
         override val isDark: Boolean
@@ -54,6 +56,7 @@ sealed class Theme {
         override val accentKeyTextColor: Int,
         override val keyPressHighlightColor: Int,
         override val keyShadowColor: Int,
+        override val spaceBarColor: Int,
         override val dividerColor: Int,
         override val clipboardEntryColor: Int,
         override val isDark: Boolean
