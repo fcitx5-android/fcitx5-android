@@ -69,8 +69,10 @@ object ThemeManager {
     fun getAllThemes() = listThemes() + builtinThemes
 
     private val builtinThemes = listOf(
+        ThemePreset.MaterialLight,
+        ThemePreset.MaterialDark,
         ThemePreset.PixelLight,
-        ThemePreset.PreviewDark
+        ThemePreset.PixelDark
     )
 
     // TODO
