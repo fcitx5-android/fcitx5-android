@@ -1,36 +1,46 @@
 package org.fcitx.fcitx5.android.utils.config
 
+import android.os.Parcelable
 import cn.berberman.girls.utils.either.Either
 import cn.berberman.girls.utils.either.runCatchingEither
+import kotlinx.parcelize.Parcelize
 import org.fcitx.fcitx5.android.utils.MyParser
-import java.io.Serializable
 
-sealed class ConfigType<T> : Serializable {
+sealed class ConfigType<T> : Parcelable {
+    @Parcelize
     object TyInt : ConfigType<TyInt>() {
         override fun toString(): String = javaClass.simpleName
     }
 
+    @Parcelize
     object TyString : ConfigType<TyString>() {
         override fun toString(): String = javaClass.simpleName
     }
 
+    @Parcelize
     object TyBool : ConfigType<TyBool>() {
         override fun toString(): String = javaClass.simpleName
     }
 
+    @Parcelize
     object TyKey : ConfigType<TyKey>() {
         override fun toString(): String = javaClass.simpleName
     }
 
+    @Parcelize
     object TyEnum : ConfigType<TyEnum>() {
         override fun toString(): String = javaClass.simpleName
     }
 
+    @Parcelize
     object TyExternal : ConfigType<TyExternal>() {
         override fun toString(): String = javaClass.simpleName
     }
 
+    @Parcelize
     data class TyCustom(val typeName: String) : ConfigType<TyCustom>()
+
+    @Parcelize
     data class TyList(val subtype: ConfigType<*>) : ConfigType<TyList>()
 
     companion object : MyParser<String, ConfigType<*>, Companion.UnknownConfigTypeException> {

@@ -46,16 +46,16 @@ class ThemeThumbnailUi(override val ctx: Context) : Ui {
 
     fun setTheme(theme: Theme) {
         bkg.imageDrawable = when (theme) {
-            is Theme.Builtin -> ColorDrawable(theme.backgroundColor)
-            is Theme.CustomBackground -> bkg.imageDrawable
+            is Theme.Builtin -> ColorDrawable(theme.backgroundColor.color)
+            is Theme.Custom -> bkg.imageDrawable
         }
         spaceBar.background = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadius = ctx.dp(2f)
-            setColor(theme.spaceBarColor)
+            setColor(theme.spaceBarColor.color)
         }
         returnKey.background = ShapeDrawable(OvalShape()).apply {
-            paint.color = theme.accentKeyBackgroundColor
+            paint.color = theme.accentKeyBackgroundColor.color
         }
     }
 }

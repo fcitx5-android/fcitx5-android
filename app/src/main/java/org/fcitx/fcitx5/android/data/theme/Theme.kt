@@ -1,10 +1,12 @@
 package org.fcitx.fcitx5.android.data.theme
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import org.fcitx.fcitx5.android.utils.ColorInt
 
 @Serializable
-sealed class Theme {
+sealed class Theme : Parcelable {
 
     abstract val name: String
 
@@ -30,6 +32,7 @@ sealed class Theme {
     abstract val isDark: Boolean
 
     @Serializable
+    @Parcelize
     data class Custom(
         override val name: String,
         val backgroundImage: String?,
@@ -50,6 +53,7 @@ sealed class Theme {
         override val isDark: Boolean
     ) : Theme()
 
+    @Parcelize
     data class Builtin(
         override val name: String,
         override val backgroundColor: ColorInt,
