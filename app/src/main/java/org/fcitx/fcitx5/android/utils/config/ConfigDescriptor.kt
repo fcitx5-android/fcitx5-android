@@ -1,27 +1,32 @@
 package org.fcitx.fcitx5.android.utils.config
 
+import android.os.Parcelable
 import cn.berberman.girls.utils.either.*
+import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.utils.MyParser
-import java.io.Serializable
 
-sealed class ConfigDescriptor<T, U> : Serializable {
+sealed class ConfigDescriptor<T, U> : Parcelable {
     abstract val name: String
     abstract val type: ConfigType<T>
     abstract val description: String?
     abstract val defaultValue: U?
 
+    @Parcelize
     data class ConfigTopLevelDef(
         val name: String,
         val values: List<ConfigDescriptor<*, *>>,
         val customTypes: List<ConfigCustomTypeDef>
-    ) : Serializable
+    ) : Parcelable
 
+    @Parcelize
     data class ConfigCustomTypeDef(
         val name: String,
         val values: List<ConfigDescriptor<*, *>>
-    ) : Serializable
+    ) : Parcelable
 
+    @Parcelize
     data class ConfigInt(
         override val name: String,
         override val description: String? = null,
@@ -33,6 +38,7 @@ sealed class ConfigDescriptor<T, U> : Serializable {
             get() = ConfigType.TyInt
     }
 
+    @Parcelize
     data class ConfigString(
         override val name: String,
         override val description: String? = null,
@@ -42,6 +48,7 @@ sealed class ConfigDescriptor<T, U> : Serializable {
             get() = ConfigType.TyString
     }
 
+    @Parcelize
     data class ConfigBool(
         override val name: String,
         override val description: String? = null,
@@ -53,6 +60,7 @@ sealed class ConfigDescriptor<T, U> : Serializable {
     }
 
     // TODO: Placeholder
+    @Parcelize
     data class ConfigKey(
         override val name: String,
         override val description: String? = null,
@@ -63,6 +71,7 @@ sealed class ConfigDescriptor<T, U> : Serializable {
 
     }
 
+    @Parcelize
     data class ConfigEnum(
         override val name: String,
         override val description: String? = null,
@@ -75,6 +84,7 @@ sealed class ConfigDescriptor<T, U> : Serializable {
 
     }
 
+    @Parcelize
     data class ConfigCustom(
         override val name: String,
         override val type: ConfigType.TyCustom,
@@ -86,6 +96,7 @@ sealed class ConfigDescriptor<T, U> : Serializable {
             get() = null
     }
 
+    @Parcelize
     data class ConfigList(
         override val name: String,
         override val type: ConfigType.TyList,
@@ -93,12 +104,13 @@ sealed class ConfigDescriptor<T, U> : Serializable {
         /**
          * [Any?] is used for a union type. See [parseE] for details.
          */
-        override val defaultValue: List<Any?>? = null,
+        override val defaultValue: @RawValue List<Any?>? = null,
     ) : ConfigDescriptor<ConfigType.TyList, List<Any?>>()
 
     /**
      * Specialized [ConfigList] for enum
      */
+    @Parcelize
     data class ConfigEnumList(
         override val name: String,
         override val description: String? = null,
@@ -112,6 +124,7 @@ sealed class ConfigDescriptor<T, U> : Serializable {
     }
 
     // TODO: Placeholder
+    @Parcelize
     data class ConfigExternal(
         override val name: String,
         override val description: String? = null,

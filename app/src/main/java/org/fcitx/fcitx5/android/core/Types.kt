@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.core
 
-import java.io.Serializable
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
 data class InputMethodSubMode(val name: String, val label: String, val icon: String) {
     constructor() : this("", "", "")
@@ -63,12 +64,13 @@ data class InputMethodEntry(
         get() = name.ifEmpty { uniqueName }
 }
 
+@Parcelize
 data class RawConfig(
     val name: String,
     val comment: String,
     var value: String,
     var subItems: Array<RawConfig>? = arrayOf()
-) : Serializable {
+) : Parcelable {
     constructor(name: String, value: String) : this(name, "", value, null)
     constructor(name: String, v: Boolean) : this(name, "", if (v) "True" else "False", null)
     constructor(subItems: Array<RawConfig>) : this("", "", "", subItems)
