@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewOutlineProvider
 import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -47,6 +48,8 @@ class ThemeListFragment : Fragment() {
             add(previewUi.root, lParams())
             scaleX = 0.5f
             scaleY = 0.5f
+            outlineProvider = ViewOutlineProvider.BOUNDS
+            elevation = dp(4f)
         }
 
         val settingsText = textView {
