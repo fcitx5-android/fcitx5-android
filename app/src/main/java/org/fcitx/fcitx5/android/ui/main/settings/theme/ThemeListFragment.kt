@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
-import org.fcitx.fcitx5.android.input.clipboard.SpacesItemDecoration
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import splitties.dimensions.dp
 import splitties.resources.drawable
@@ -85,18 +84,23 @@ class ThemeListFragment : Fragment() {
         }
 
         val themeList = recyclerView {
-            layoutManager = GridLayoutManager(this@ctx, 2)
+            val spanCount = 2
+            val itemWidth = dp(128)
+            val itemHeight = dp(88)
+            layoutManager = object : GridLayoutManager(this@ctx, spanCount) {
+                override fun generateDefaultLayoutParams() = LayoutParams(itemWidth, itemHeight)
+            }
             this@ThemeListFragment.adapter = object : ThemeListAdapter() {
                 override fun onChooseImage() = launchImageSelector()
                 override fun onSelectTheme(theme: Theme) = updatePreviewTheme(theme)
             }.apply {
-                // TODO space items evenly
-                addItemDecoration(SpacesItemDecoration(dp(24)))
                 val allThemes = ThemeManager.getAllThemes()
                 entries.addAll(allThemes)
                 notifyItemRangeInserted(0, allThemes.size)
             }
             adapter = this@ThemeListFragment.adapter
+            // evenly spaced items
+            addItemDecoration(ThemeListItemDecoration(itemWidth, spanCount))
         }
         launcher = registerForActivityResult(BackgroundImageActivity.Contract()) { result ->
             if (result != null) {
