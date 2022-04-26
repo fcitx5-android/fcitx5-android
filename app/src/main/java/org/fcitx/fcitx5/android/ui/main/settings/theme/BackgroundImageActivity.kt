@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.provider.MediaStore
 import android.view.MenuItem
+import android.view.ViewOutlineProvider
 import android.widget.SeekBar
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
@@ -36,13 +37,13 @@ import org.fcitx.fcitx5.android.data.theme.ThemePreset
 import org.fcitx.fcitx5.android.utils.darkenColorFilter
 import splitties.dimensions.dp
 import splitties.resources.resolveThemeAttribute
+import splitties.resources.styledColor
+import splitties.views.backgroundColor
+import splitties.views.bottomPadding
 import splitties.views.dsl.appcompat.switch
 import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.add
-import splitties.views.dsl.core.seekBar
+import splitties.views.dsl.core.*
 import splitties.views.dsl.core.styles.AndroidStyles
-import splitties.views.dsl.core.textView
-import splitties.views.dsl.core.wrapContent
 import splitties.views.gravityVerticalCenter
 import splitties.views.textAppearance
 import java.io.File
@@ -104,10 +105,28 @@ class BackgroundImageActivity : AppCompatActivity() {
             setText(android.R.string.ok)
         }
     }
+    private val buttonsBar by lazy {
+        constraintLayout {
+            backgroundColor = styledColor(android.R.attr.colorBackground)
+            outlineProvider = ViewOutlineProvider.BOUNDS
+            elevation = dp(8f)
+            add(cancelButton, lParams(wrapContent, wrapContent) {
+                topOfParent()
+                startOfParent()
+                bottomOfParent()
+            })
+            add(finishButton, lParams(wrapContent, wrapContent) {
+                topOfParent()
+                endOfParent()
+                bottomOfParent()
+            })
+        }
+    }
 
-    private val ui by lazy {
+    private val scrollView by lazy {
         val lineHeight = dp(48)
         constraintLayout {
+            bottomPadding = dp(24)
             add(preview.root, lParams(wrapContent, wrapContent) {
                 topOfParent()
                 centerHorizontally()
@@ -135,14 +154,22 @@ class BackgroundImageActivity : AppCompatActivity() {
             add(brightnessSeekBar, lParams(matchConstraints, wrapContent) {
                 below(brightnessLabel)
                 centerHorizontally(dp(30))
-                above(cancelButton)
-            })
-            add(cancelButton, lParams(wrapContent, wrapContent) {
-                startOfParent()
                 bottomOfParent()
             })
-            add(finishButton, lParams(wrapContent, wrapContent) {
-                endOfParent()
+        }.wrapInScrollView {
+            isFillViewport = true
+        }
+    }
+
+    private val ui by lazy {
+        constraintLayout {
+            add(scrollView, lParams {
+                topOfParent()
+                centerHorizontally()
+                above(buttonsBar)
+            })
+            add(buttonsBar, lParams(matchConstraints, wrapContent) {
+                centerHorizontally()
                 bottomOfParent()
             })
         }
