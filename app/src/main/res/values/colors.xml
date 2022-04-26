@@ -7,6 +7,4 @@
     <color name="blue_500">#2196F3</color>
     <color name="grey_400">#BDBDBD</color>
     <color name="grey_700">#616161</color>
-    <color name="darken_background">#59000000</color>
-    <color name="key">#33FFFFFF</color>
 </resources>
