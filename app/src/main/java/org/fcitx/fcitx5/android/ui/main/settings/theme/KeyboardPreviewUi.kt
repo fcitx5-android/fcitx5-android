@@ -2,12 +2,15 @@ package org.fcitx.fcitx5.android.ui.main.settings.theme
 
 import android.content.Context
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.view.View
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.keyboard.TextKeyboard
 import org.fcitx.fcitx5.android.utils.keyboardWindowAspectRatio
 import splitties.dimensions.dp
@@ -65,19 +68,20 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
         if (this::fakeKeyboardWindow.isInitialized) {
             root.removeView(fakeKeyboardWindow)
         }
-        fakeKawaiiBar.backgroundColor = theme.barColor.color
+        fakeKawaiiBar.backgroundColor =
+            if (ThemeManager.prefs.keyBorder.getValue()) Color.TRANSPARENT
+            else theme.barColor.color
         fakeKeyboardWindow = TextKeyboard(ctx, theme)
-        root.apply { add(fakeKeyboardWindow, lParams(keyboardWidth, keyboardHeight)) }
-        when (theme) {
-            is Theme.Builtin -> {
-                root.backgroundColor = theme.backgroundColor.color
-            }
-            is Theme.Custom -> {
-                theme.backgroundImage?.let {
-                    root.background = BitmapDrawable(ctx.resources, BitmapFactory.decodeFile(it.first))
-                } ?: run {
-                    root.backgroundColor = theme.backgroundColor.color
-                }
+        root.apply {
+            add(fakeKeyboardWindow, lParams(keyboardWidth, keyboardHeight))
+            background = when (theme) {
+                is Theme.Builtin -> ColorDrawable(
+                    if (ThemeManager.prefs.keyBorder.getValue()) theme.backgroundColor.color
+                    else theme.keyboardColor.color
+                )
+                is Theme.Custom -> theme.backgroundImage?.let {
+                    BitmapDrawable(ctx.resources, BitmapFactory.decodeFile(it.first))
+                } ?: ColorDrawable(theme.backgroundColor.color)
             }
         }
     }
