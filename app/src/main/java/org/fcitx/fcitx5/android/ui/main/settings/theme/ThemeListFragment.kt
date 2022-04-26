@@ -64,20 +64,17 @@ class ThemeListFragment : Fragment() {
 
         val previewWrapper = constraintLayout {
             add(preview, lParams(wrapContent, wrapContent) {
-                topOfParent(dp(-40))
+                topOfParent(dp(-52))
                 startOfParent()
                 endOfParent()
             })
-            add(settingsText, lParams(matchConstraints, dp(48)) {
-                below(preview, dp(-48))
+            add(settingsText, lParams(wrapContent, dp(48)) {
                 startOfParent(dp(64))
-                before(settingsButton)
-                bottomOfParent(dp(8))
+                bottomOfParent(dp(4))
             })
             add(settingsButton, lParams(dp(48), dp(48)) {
-                below(preview, dp(-48))
                 endOfParent(dp(64))
-                bottomOfParent(dp(8))
+                bottomOfParent(dp(4))
             })
             backgroundColor = styledColor(R.attr.colorPrimary)
             elevation = dp(4f)
@@ -92,11 +89,10 @@ class ThemeListFragment : Fragment() {
             }
             this@ThemeListFragment.adapter = object : ThemeListAdapter() {
                 override fun onChooseImage() = launchImageSelector()
-                override fun onSelectTheme(theme: Theme) = updatePreviewTheme(theme)
+                override fun onSelectTheme(theme: Theme) = selectTheme(theme)
+                override fun onEditTheme(theme: Theme.Custom) = editTheme(theme)
             }.apply {
-                val allThemes = ThemeManager.getAllThemes()
-                entries.addAll(allThemes)
-                notifyItemRangeInserted(0, allThemes.size)
+                setThemes(ThemeManager.getAllThemes())
             }
             adapter = this@ThemeListFragment.adapter
             // evenly spaced items
@@ -105,18 +101,13 @@ class ThemeListFragment : Fragment() {
         launcher = registerForActivityResult(BackgroundImageActivity.Contract()) { result ->
             if (result != null) {
                 ThemeManager.saveTheme(result.theme)
-                if (!result.newCreated) {
-                    val index = adapter.entries.indexOfFirst { it.name == result.theme.name }
-                    adapter.entries[index] = result.theme
-                    adapter.notifyItemChanged(index)
+                if (result.newCreated) {
+                    adapter.prependTheme(result.theme)
                 } else {
-                    adapter.entries.add(0, result.theme)
-                    adapter.notifyItemInserted(0)
+                    adapter.replaceTheme(result.theme)
                 }
-
             }
         }
-
 
         constraintLayout {
             add(previewWrapper, lParams(height = wrapContent) {
@@ -145,7 +136,11 @@ class ThemeListFragment : Fragment() {
         launcher.launch(null)
     }
 
-    private fun updatePreviewTheme(theme: Theme) {
+    private fun selectTheme(theme: Theme) {
         previewUi.setTheme(theme)
+    }
+
+    private fun editTheme(theme: Theme.Custom) {
+        launcher.launch(theme)
     }
 }
