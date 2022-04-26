@@ -14,14 +14,14 @@ import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.utils.borderlessRippleDrawable
+import org.fcitx.fcitx5.android.utils.rippleDrawable
 import splitties.dimensions.dp
 import splitties.resources.drawable
-import splitties.resources.styledDrawable
 import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.imageDrawable
+import splitties.views.setPaddingDp
 
 class ThemeThumbnailUi(override val ctx: Context) : Ui {
     val bkg = imageView {
@@ -40,12 +40,12 @@ class ThemeThumbnailUi(override val ctx: Context) : Ui {
     }
 
     val editButton = imageView {
-        scaleType = ImageView.ScaleType.CENTER_INSIDE
+        setPaddingDp(16, 4, 4, 16)
+        scaleType = ImageView.ScaleType.FIT_CENTER
         imageDrawable = ctx.drawable(R.drawable.ic_baseline_edit_24)
     }
 
     override val root = constraintLayout {
-        foreground = styledDrawable(R.attr.selectableItemBackground)
         outlineProvider = ViewOutlineProvider.BOUNDS
         elevation = dp(2f)
         add(bkg, lParams(matchParent, matchParent))
@@ -63,13 +63,16 @@ class ThemeThumbnailUi(override val ctx: Context) : Ui {
         add(checkMark, lParams(dp(60), dp(60)) {
             centerInParent()
         })
-        add(editButton, lParams(dp(30), dp(30)) {
+        add(editButton, lParams(dp(44), dp(44)) {
             topOfParent()
             endOfParent()
         })
     }
 
     fun setTheme(theme: Theme, checked: Boolean = false) {
+        root.apply {
+            foreground = rippleDrawable(theme.keyPressHighlightColor.color)
+        }
         bkg.imageDrawable = when (theme) {
             is Theme.Builtin -> ColorDrawable(theme.backgroundColor.color)
             is Theme.Custom -> theme.backgroundImage?.let {
@@ -89,7 +92,7 @@ class ThemeThumbnailUi(override val ctx: Context) : Ui {
         editButton.apply {
             visibility = if (theme is Theme.Custom) View.VISIBLE else View.GONE
             colorFilter = foreground
-            background = borderlessRippleDrawable(theme.keyPressHighlightColor.color, dp(15))
+            background = rippleDrawable(theme.keyPressHighlightColor.color)
         }
         setChecked(checked)
         checkMark.colorFilter = foreground
