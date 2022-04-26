@@ -17,10 +17,13 @@ import android.view.MenuItem
 import android.widget.SeekBar
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.applyCanvas
 import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
+import androidx.core.view.updateLayoutParams
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageView
@@ -32,14 +35,19 @@ import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.data.theme.ThemePreset
 import org.fcitx.fcitx5.android.utils.darkenColorFilter
 import splitties.dimensions.dp
-import splitties.views.dsl.core.*
-import splitties.views.gravityCenter
-import splitties.views.gravityEnd
-import splitties.views.horizontalPadding
+import splitties.resources.resolveThemeAttribute
+import splitties.views.dsl.appcompat.switch
+import splitties.views.dsl.constraintlayout.*
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.seekBar
+import splitties.views.dsl.core.styles.AndroidStyles
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.wrapContent
+import splitties.views.gravityVerticalCenter
+import splitties.views.textAppearance
 import java.io.File
 
 class BackgroundImageActivity : AppCompatActivity() {
-
 
     @Parcelize
     data class Result(val theme: Theme.Custom, val newCreated: Boolean) : Parcelable
@@ -56,45 +64,87 @@ class BackgroundImageActivity : AppCompatActivity() {
 
     private lateinit var preview: KeyboardPreviewUi
 
+    private fun createTextView(@StringRes string: Int? = null) = textView {
+        if (string != null) {
+            setText(string)
+        }
+        gravity = gravityVerticalCenter
+        textAppearance = resolveThemeAttribute(R.attr.textAppearanceListItem)
+    }
+
+    val variantLabel by lazy {
+        createTextView(R.string.dark_keys)
+    }
+    val variantSwitch by lazy {
+        switch { }
+    }
+
     val brightnessLabel by lazy {
-        textView {
-            setText(R.string.brightness)
-        }
+        createTextView(R.string.brightness)
     }
-
     val brightnessValue by lazy {
-        textView {
-            gravity = gravityEnd
-        }
+        createTextView()
     }
-
-    val brightness by lazy {
-        horizontalLayout {
-            horizontalPadding = dp(16)
-            add(brightnessLabel, lParams())
-            add(brightnessValue, lParams(width = matchParent))
-        }
-    }
-
     private val brightnessSeekBar by lazy {
         seekBar {
             max = 100
         }
     }
 
+    private val androidStyles by lazy {
+        AndroidStyles(this)
+    }
+    private val cancelButton by lazy {
+        androidStyles.button.borderless {
+            setText(android.R.string.cancel)
+        }
+    }
     private val finishButton by lazy {
-        button {
-            setText(R.string.done)
+        androidStyles.button.borderless {
+            setText(android.R.string.ok)
         }
     }
 
     private val ui by lazy {
-        verticalLayout {
-            gravity = gravityCenter
-            add(preview.root, lParams(wrapContent, wrapContent))
-            add(brightness, lParams(width = dp(300)))
-            add(brightnessSeekBar, lParams(width = dp(300)))
-            add(finishButton, lParams())
+        val lineHeight = dp(48)
+        constraintLayout {
+            add(preview.root, lParams(wrapContent, wrapContent) {
+                topOfParent()
+                centerHorizontally()
+                above(variantLabel)
+                verticalChainStyle = ConstraintLayout.LayoutParams.CHAIN_PACKED
+            })
+            add(variantLabel, lParams(wrapContent, lineHeight) {
+                below(preview.root, dp(16))
+                startOfParent(dp(46))
+                above(brightnessLabel)
+            })
+            add(variantSwitch, lParams(wrapContent, lineHeight) {
+                topToTopOf(variantLabel)
+                endOfParent(dp(46))
+            })
+            add(brightnessLabel, lParams(wrapContent, lineHeight) {
+                below(variantLabel)
+                startOfParent(dp(46))
+                above(brightnessSeekBar)
+            })
+            add(brightnessValue, lParams(wrapContent, lineHeight) {
+                topToTopOf(brightnessLabel)
+                endOfParent(dp(46))
+            })
+            add(brightnessSeekBar, lParams(matchConstraints, wrapContent) {
+                below(brightnessLabel)
+                centerHorizontally(dp(30))
+                above(cancelButton)
+            })
+            add(cancelButton, lParams(wrapContent, wrapContent) {
+                startOfParent()
+                bottomOfParent()
+            })
+            add(finishButton, lParams(wrapContent, wrapContent) {
+                endOfParent()
+                bottomOfParent()
+            })
         }
     }
 
@@ -119,12 +169,12 @@ class BackgroundImageActivity : AppCompatActivity() {
             return
 
         theme = if (isDark)
-            ThemePreset.PreviewDark.deriveCustomBackground(
+            ThemePreset.TransparentDark.deriveCustomBackground(
                 theme.name,
                 theme.background.first,
                 theme.background.second
             ) else
-            ThemePreset.PreviewLight.deriveCustomBackground(
+            ThemePreset.TransparentLight.deriveCustomBackground(
                 theme.name,
                 theme.background.first,
                 theme.background.second
@@ -147,12 +197,17 @@ class BackgroundImageActivity : AppCompatActivity() {
             val (n, c, s) = ThemeManager.newCustomBackgroundImages()
             croppedImageFile = c
             srcImageFile = s
-            theme = originTheme ?: ThemePreset.PreviewDark.deriveCustomBackground(
-                n, c.path, s.path
-            )
+            theme = originTheme
+                ?: (if (variantSwitch.isChecked) ThemePreset.TransparentDark else ThemePreset.TransparentLight)
+                    .deriveCustomBackground(n, c.path, s.path)
         }
         preview = KeyboardPreviewUi(this, theme)
+        variantSwitch.isChecked = theme.isDark
         setContentView(ui)
+        preview.root.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            width = preview.intrinsicWidth
+            height = preview.intrinsicHeight
+        }
         launcher = registerForActivityResult(CropImageContract()) {
             if (!it.isSuccessful)
                 cancel()
@@ -170,23 +225,26 @@ class BackgroundImageActivity : AppCompatActivity() {
                 }
                 cropped = it.getBitmap(this)!!
                 image = BitmapDrawable(resources, cropped)
+                variantSwitch.setOnCheckedChangeListener { _, isChecked ->
+                    setDark(isChecked)
+                    preview.setBackground(image)
+                }
                 brightnessSeekBar.setOnSeekBarChangeListener(object :
                     SeekBar.OnSeekBarChangeListener {
                     override fun onStartTrackingTouch(bar: SeekBar) {}
                     override fun onStopTrackingTouch(bar: SeekBar) {}
 
                     @SuppressLint("SetTextI18n")
-                    override fun onProgressChanged(
-                        bar: SeekBar,
-                        progress: Int,
-                        fromUser: Boolean
-                    ) {
+                    override fun onProgressChanged(bar: SeekBar, progress: Int, fromUser: Boolean) {
                         brightnessValue.text = "$progress%"
                         image.colorFilter = darkenColorFilter(100 - progress)
                         preview.setBackground(image)
                     }
                 })
                 brightnessSeekBar.progress = 70
+                cancelButton.setOnClickListener {
+                    cancel()
+                }
                 finishButton.setOnClickListener {
                     done()
                 }
