@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.ui.main.settings.theme
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
@@ -9,15 +10,14 @@ import android.graphics.drawable.Drawable
 import android.view.View
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.keyboard.TextKeyboard
-import org.fcitx.fcitx5.android.utils.keyboardWindowAspectRatio
 import splitties.dimensions.dp
 import splitties.views.backgroundColor
 import splitties.views.bottomPadding
 import splitties.views.dsl.core.*
-import timber.log.Timber
 
 class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
 
@@ -37,10 +37,22 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
         add(fakeKawaiiBar, lParams(matchParent, dp(40)))
     }
 
+    private fun keyboardWindowAspectRatio(): Pair<Int, Int> {
+        val w = ctx.resources.displayMetrics.widthPixels
+        val h = ctx.resources.displayMetrics.heightPixels
+        val ratio = AppPrefs.getInstance().keyboard.run {
+            when (ctx.resources.configuration.orientation) {
+                Configuration.ORIENTATION_LANDSCAPE -> this.keyboardHeightPercentLandscape
+                else -> this.keyboardHeightPercent
+            }.getValue()
+        }
+        return w to (h * ratio / 100)
+    }
+
     init {
-        val (x, y) = ctx.keyboardWindowAspectRatio()
-        keyboardWidth = x
-        keyboardHeight = y
+        val (w, h) = keyboardWindowAspectRatio()
+        keyboardWidth = w
+        keyboardHeight = h
         setTheme(theme)
         intrinsicWidth = keyboardWidth
         // bar height
@@ -50,7 +62,6 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
                 // bottom padding
                 ViewCompat.getRootWindowInsets(v)?.let {
                     val bottom = it.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-                    Timber.d("Bottom padding: $bottom")
                     intrinsicHeight += bottom
                     root.bottomPadding = bottom
                 }
