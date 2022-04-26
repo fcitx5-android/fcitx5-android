@@ -26,24 +26,22 @@ import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.gravityVerticalCenter
 import splitties.views.imageDrawable
 import splitties.views.textAppearance
-import timber.log.Timber
 
 class ThemeListFragment : Fragment() {
 
     private val viewModel: MainViewModel by activityViewModels()
 
-    private lateinit var launcher: ActivityResultLauncher<Unit>
+    private lateinit var launcher: ActivityResultLauncher<Theme.Custom?>
 
     private lateinit var previewUi: KeyboardPreviewUi
+
+    private lateinit var adapter: ThemeListAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View = with(requireContext()) ctx@{
-        launcher = registerForActivityResult(BackgroundImageActivity.Contract()) {
-            Timber.d("Background: $it")
-        }
 
         previewUi = KeyboardPreviewUi(this, ThemeManager.currentTheme)
         val preview = frameLayout {
@@ -88,15 +86,33 @@ class ThemeListFragment : Fragment() {
 
         val themeList = recyclerView {
             layoutManager = GridLayoutManager(this@ctx, 2)
-            adapter = object : ThemeListAdapter() {
+            this@ThemeListFragment.adapter = object : ThemeListAdapter() {
                 override fun onChooseImage() = launchImageSelector()
                 override fun onSelectTheme(theme: Theme) = updatePreviewTheme(theme)
             }.apply {
                 // TODO space items evenly
                 addItemDecoration(SpacesItemDecoration(dp(24)))
-                entries = ThemeManager.getAllThemes().toTypedArray()
+                val allThemes = ThemeManager.getAllThemes()
+                entries.addAll(allThemes)
+                notifyItemRangeInserted(0, allThemes.size)
+            }
+            adapter = this@ThemeListFragment.adapter
+        }
+        launcher = registerForActivityResult(BackgroundImageActivity.Contract()) { result ->
+            if (result != null) {
+                ThemeManager.saveTheme(result.theme)
+                if (!result.newCreated) {
+                    val index = adapter.entries.indexOfFirst { it.name == result.theme.name }
+                    adapter.entries[index] = result.theme
+                    adapter.notifyItemChanged(index)
+                } else {
+                    adapter.entries.add(0, result.theme)
+                    adapter.notifyItemInserted(0)
+                }
+
             }
         }
+
 
         constraintLayout {
             add(previewWrapper, lParams(height = wrapContent) {
@@ -122,7 +138,7 @@ class ThemeListFragment : Fragment() {
     }
 
     private fun launchImageSelector() {
-        launcher.launch(Unit)
+        launcher.launch(null)
     }
 
     private fun updatePreviewTheme(theme: Theme) {

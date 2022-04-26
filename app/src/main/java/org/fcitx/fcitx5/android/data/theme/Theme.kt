@@ -35,7 +35,8 @@ sealed class Theme : Parcelable {
     @Parcelize
     data class Custom(
         override val name: String,
-        val backgroundImage: String?,
+        // absolute file paths of cropped and src png files
+        val backgroundImage: Pair<String, String>?,
         override val backgroundColor: ColorInt,
         override val barColor: ColorInt,
         override val keyboardColor: ColorInt,
@@ -71,6 +72,30 @@ sealed class Theme : Parcelable {
         override val dividerColor: ColorInt,
         override val clipboardEntryColor: ColorInt,
         override val isDark: Boolean
-    ) : Theme()
+    ) : Theme() {
+        fun deriveCustomBackground(
+            name: String,
+            croppedBackgroundImage: String,
+            originBackgroundImage: String
+        ) = Custom(
+            name,
+            croppedBackgroundImage to originBackgroundImage,
+            backgroundColor,
+            barColor,
+            keyboardColor,
+            keyBackgroundColor,
+            keyTextColor,
+            altKeyBackgroundColor,
+            altKeyTextColor,
+            accentKeyBackgroundColor,
+            accentKeyTextColor,
+            keyPressHighlightColor,
+            keyShadowColor,
+            spaceBarColor,
+            dividerColor,
+            clipboardEntryColor,
+            isDark
+        )
+    }
 
 }

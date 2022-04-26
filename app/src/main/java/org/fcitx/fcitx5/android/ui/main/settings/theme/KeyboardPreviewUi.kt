@@ -74,7 +74,7 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
             }
             is Theme.Custom -> {
                 theme.backgroundImage?.let {
-                    root.background = BitmapDrawable(ctx.resources, BitmapFactory.decodeFile(it))
+                    root.background = BitmapDrawable(ctx.resources, BitmapFactory.decodeFile(it.first))
                 } ?: run {
                     root.backgroundColor = theme.backgroundColor.color
                 }

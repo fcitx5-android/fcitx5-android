@@ -131,7 +131,7 @@ class InputView(
             is Theme.Builtin -> backgroundColor = theme.backgroundColor.color
             is Theme.Custom -> theme.backgroundImage?.let {
                 background =
-                    BitmapDrawable(resources, BitmapFactory.decodeFile(it))
+                    BitmapDrawable(resources, BitmapFactory.decodeFile(it.first))
             } ?: run { backgroundColor = theme.backgroundColor.color }
         }
 

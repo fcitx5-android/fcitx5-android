@@ -10,13 +10,7 @@ import splitties.views.dsl.core.Ui
 abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHolder>() {
     class ViewHolder(val ui: Ui) : RecyclerView.ViewHolder(ui.root)
 
-    var entries: Array<Theme> = arrayOf()
-        set(value) {
-            val callback = ThemeDiffCallback(field, value)
-            val diff = DiffUtil.calculateDiff(callback)
-            field = value
-            diff.dispatchUpdatesTo(this)
-        }
+    val entries = mutableListOf<Theme>()
 
     private fun entryAt(position: Int) = entries[position - 1]
 
