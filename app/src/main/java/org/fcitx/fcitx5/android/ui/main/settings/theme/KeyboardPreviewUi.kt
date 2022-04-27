@@ -2,9 +2,7 @@ package org.fcitx.fcitx5.android.ui.main.settings.theme
 
 import android.content.Context
 import android.content.res.Configuration
-import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.view.View
@@ -78,6 +76,7 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
             override fun onAttachedToWindow() {
                 super.onAttachedToWindow()
                 recalculateSize()
+                onSizeMeasured?.invoke(intrinsicWidth, intrinsicHeight)
             }
 
             override fun onConfigurationChanged(newConfig: Configuration?) {
@@ -122,7 +121,7 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
             is Theme.Custom -> theme.backgroundImage
                 ?.croppedFilePath
                 ?.takeIf { File(it).exists() }
-                ?.let { BitmapDrawable(ctx.resources, BitmapFactory.decodeFile(it)) }
+                ?.let { theme.backgroundImage.toDrawable(ctx.resources) }
                 ?: ColorDrawable(theme.backgroundColor.color)
         })
         if (this::fakeKeyboardWindow.isInitialized) {

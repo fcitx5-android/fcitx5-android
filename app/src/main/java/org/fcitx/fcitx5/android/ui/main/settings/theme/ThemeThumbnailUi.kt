@@ -1,10 +1,8 @@
 package org.fcitx.fcitx5.android.ui.main.settings.theme
 
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.ShapeDrawable
@@ -75,9 +73,8 @@ class ThemeThumbnailUi(override val ctx: Context) : Ui {
         }
         bkg.imageDrawable = when (theme) {
             is Theme.Builtin -> ColorDrawable(theme.backgroundColor.color)
-            is Theme.Custom -> theme.backgroundImage?.let {
-                BitmapDrawable(ctx.resources, BitmapFactory.decodeFile(it.croppedFilePath))
-            } ?: ColorDrawable(theme.backgroundColor.color)
+            is Theme.Custom -> theme.backgroundImage?.toDrawable(ctx.resources)
+                ?: ColorDrawable(theme.backgroundColor.color)
         }
         bar.backgroundColor = theme.barColor.color
         spaceBar.background = GradientDrawable().apply {

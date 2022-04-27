@@ -25,6 +25,7 @@ import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.gravityVerticalCenter
 import splitties.views.imageDrawable
 import splitties.views.textAppearance
+import timber.log.Timber
 
 class ThemeListFragment : ProgressFragment() {
 
@@ -36,20 +37,37 @@ class ThemeListFragment : ProgressFragment() {
 
     private lateinit var themeList: RecyclerView
 
+    private val onThemeChangedListener = ThemeManager.OnThemeChangedListener {
+        Timber.d(it.toString())
+        previewUi.setTheme(it)
+        adapter.setCheckedTheme(it)
+    }
+
     override fun beforeCreateView() {
         launcher = registerForActivityResult(BackgroundImageActivity.Contract()) { result ->
             if (result != null) {
-                val theme = result.theme
-                ThemeManager.saveTheme(theme)
-                if (result.newCreated) {
-                    adapter.prependTheme(theme)
-                    ThemeManager.switchTheme(theme)
-                    adapter.setCheckedTheme(theme)
-                } else {
-                    // An active theme has been updated
-                    if (theme.name == ThemeManager.getActiveTheme().name)
-                        ThemeManager.fireChange()
-                    adapter.replaceTheme(theme)
+                when (result) {
+                    is BackgroundImageActivity.BackgroundResult.Created -> {
+                        val theme = result.theme
+                        ThemeManager.saveTheme(theme)
+                        adapter.prependTheme(theme)
+                        ThemeManager.switchTheme(theme)
+                    }
+                    is BackgroundImageActivity.BackgroundResult.Deleted -> {
+                        val name = result.name
+                        // Update the list first, as we rely on theme changed listener
+                        // in the case that the deleted theme was active
+                        adapter.removeTheme(name)
+                        ThemeManager.deleteTheme(name)
+                    }
+                    is BackgroundImageActivity.BackgroundResult.Updated -> {
+                        val theme = result.theme
+                        ThemeManager.saveTheme(theme)
+                        // An active theme has been updated
+                        if (theme.name == ThemeManager.getActiveTheme().name)
+                            ThemeManager.fireChange()
+                        adapter.replaceTheme(theme)
+                    }
                 }
             }
         }
@@ -57,7 +75,7 @@ class ThemeListFragment : ProgressFragment() {
 
     override suspend fun initialize(): View = with(requireContext()) {
         previewUi = KeyboardPreviewUi(this, ThemeManager.getActiveTheme())
-        val preview = previewUi.root.apply  {
+        val preview = previewUi.root.apply {
             scaleX = 0.5f
             scaleY = 0.5f
             outlineProvider = ViewOutlineProvider.BOUNDS
@@ -114,6 +132,8 @@ class ThemeListFragment : ProgressFragment() {
             addItemDecoration(ThemeListItemDecoration(itemWidth, spanCount))
         }
 
+        ThemeManager.addOnChangedListener(onThemeChangedListener)
+
         constraintLayout {
             add(previewWrapper, lParams(height = wrapContent) {
                 topOfParent()
@@ -142,12 +162,15 @@ class ThemeListFragment : ProgressFragment() {
     }
 
     private fun selectTheme(theme: Theme) {
-        previewUi.setTheme(theme)
         ThemeManager.switchTheme(theme)
-        adapter.setCheckedTheme(theme)
     }
 
     private fun editTheme(theme: Theme.Custom) {
         launcher.launch(theme)
+    }
+
+    override fun onDestroy() {
+        ThemeManager.removeOnChangedListener(onThemeChangedListener)
+        super.onDestroy()
     }
 }

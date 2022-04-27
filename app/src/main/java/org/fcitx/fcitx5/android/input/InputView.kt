@@ -2,9 +2,7 @@ package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
-import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.widget.ImageView
@@ -141,7 +139,7 @@ class InputView(
             is Theme.Custom -> theme.backgroundImage
                 ?.croppedFilePath
                 ?.takeIf { File(it).exists() }
-                ?.let { BitmapDrawable(resources, BitmapFactory.decodeFile(it)) }
+                ?.let { theme.backgroundImage.toDrawable(resources) }
                 ?: ColorDrawable(theme.backgroundColor.color)
         }
 

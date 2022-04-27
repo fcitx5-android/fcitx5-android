@@ -51,20 +51,22 @@ object ThemeManager {
         customThemes.add(0, theme)
     }
 
-    fun deleteTheme(theme: Theme.Custom) {
-        if (theme == currentTheme)
+    fun deleteTheme(name: String) {
+        if (currentTheme.name == name)
             switchTheme(defaultTheme)
+        val theme = customThemes.find { it.name == name }
+            ?: throw IllegalArgumentException("Theme $name does not exist")
         themeFile(theme).delete()
         theme.backgroundImage?.let {
             File(it.croppedFilePath).delete()
             File(it.srcFilePath).delete()
         }
-        customThemes.removeAll { it == theme }
+        customThemes.remove(theme)
     }
 
     fun switchTheme(theme: Theme) {
         if (getTheme(theme.name) == null)
-            throw IllegalArgumentException("Unknown theme $theme")
+            throw IllegalArgumentException("Unregistered theme $theme")
         internalPrefs.activeThemeName.setValue(theme.name)
     }
 
