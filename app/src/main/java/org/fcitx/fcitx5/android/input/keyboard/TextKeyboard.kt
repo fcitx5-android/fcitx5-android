@@ -64,7 +64,7 @@ class TextKeyboard(
                 QuickPhraseKey(),
                 LanguageKey(),
                 SpaceKey(),
-                AlphabetKey(",", "."),
+                AlphabetKey(",", ".", KeyDef.Appearance.Variant.Alternative),
                 ReturnKey()
             ),
         )

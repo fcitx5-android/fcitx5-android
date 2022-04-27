@@ -28,10 +28,15 @@ class PreeditUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
         setTextColor(inputTheme.keyTextColor.color)
     }
 
+    private val barBackground = when (inputTheme) {
+        is Theme.Builtin ->
+            if (ThemeManager.prefs.keyBorder.getValue()) inputTheme.backgroundColor
+            else inputTheme.barColor
+        is Theme.Custom -> inputTheme.backgroundColor
+    }
+
     private val upView = horizontalLayout {
-        backgroundColor = inputTheme.run {
-            if (ThemeManager.prefs.keyBorder.getValue()) backgroundColor else barColor
-        }.color
+        backgroundColor = barBackground.color
         horizontalPadding = dp(8)
         add(beforeCursor, lParams())
         add(cursorView, lParams(dp(1), matchParent) { verticalMargin = dp(2) })
@@ -39,9 +44,7 @@ class PreeditUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
     }
 
     private val downView = textView {
-        backgroundColor = inputTheme.run {
-            if (ThemeManager.prefs.keyBorder.getValue()) backgroundColor else barColor
-        }.color
+        backgroundColor = barBackground.color
         horizontalPadding = dp(8)
         textSize = 16f
     }
