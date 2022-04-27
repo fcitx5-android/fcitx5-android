@@ -88,8 +88,8 @@ object ThemePreset {
     /**
      * transparent background with semi-transparent white keys
      */
-    val TransparentLight = Theme.Builtin(
-        name = "PreviewLight",
+    val TransparentDark = Theme.Builtin(
+        name = "TransparentDark",
         backgroundColor = Color.TRANSPARENT.color,
         barColor = 0x5f000000.color,
         keyboardColor = Color.TRANSPARENT.color,
@@ -104,14 +104,14 @@ object ThemePreset {
         spaceBarColor = 0x4bffffff.color,
         dividerColor = 0x1fffffff.color,
         clipboardEntryColor = 0x32ffffff.color,
-        isDark = false
+        isDark = true
     )
 
     /**
      * transparent background with semi-transparent black keys
      */
-    val TransparentDark = Theme.Builtin(
-        name = "PreviewDark",
+    val TransparentLight = Theme.Builtin(
+        name = "TransparentLight",
         backgroundColor = Color.TRANSPARENT.color,
         barColor = 0x5f000000.color,
         keyboardColor = Color.TRANSPARENT.color,
@@ -126,7 +126,7 @@ object ThemePreset {
         spaceBarColor = 0x32000000.color,
         dividerColor = 0x1f000000.color,
         clipboardEntryColor = 0x32000000.color,
-        isDark = true
+        isDark = false
     )
 
 }
