@@ -3,7 +3,6 @@ package org.fcitx.fcitx5.android.ui.main.settings.theme
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import splitties.views.dsl.core.Ui
 
 abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHolder>() {
@@ -11,19 +10,30 @@ abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHold
 
     val entries = mutableListOf<Theme>()
 
-    var checkedIndex = -1
-        private set
+    private var checkedIndex = -1
 
-    private fun entryAt(position: Int) = entries[position - OFFSET]
+    private fun entryAt(position: Int) = entries.getOrNull(position - OFFSET)
 
-    fun setThemes(themes: List<Theme>) {
+    private fun positionOf(theme: Theme) = entries.indexOf(theme) + OFFSET
+
+    fun setThemes(themes: List<Theme>, active: Theme) {
         entries.clear()
         entries.addAll(themes)
+        checkedIndex = entries.indexOf(active) + OFFSET
         notifyItemRangeInserted(OFFSET, themes.size)
+    }
+
+    fun setCheckedTheme(theme: Theme) {
+        val oldChecked = entryAt(checkedIndex)
+        if (oldChecked === theme) return
+        notifyItemChanged(checkedIndex)
+        checkedIndex = positionOf(theme)
+        notifyItemChanged(checkedIndex)
     }
 
     fun prependTheme(it: Theme) {
         entries.add(0, it)
+        checkedIndex += 1
         notifyItemInserted(OFFSET)
     }
 
@@ -46,18 +56,14 @@ abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHold
         when (val it = getItemViewType(position)) {
             CHOOSE_IMAGE -> holder.ui.root.setOnClickListener { onChooseImage() }
             THEME -> (holder.ui as ThemeThumbnailUi).apply {
-                entryAt(position).let { theme ->
-                    val isActive = theme.name == ThemeManager.getActiveTheme().name
-                    if (isActive)
-                        checkedIndex = holder.absoluteAdapterPosition
-                    setTheme(theme, isActive)
-                    root.setOnClickListener {
-                        onSelectTheme(theme, holder.absoluteAdapterPosition)
-                        checkedIndex = holder.absoluteAdapterPosition
-                    }
-                    editButton.setOnClickListener {
-                        if (theme is Theme.Custom) onEditTheme(theme)
-                    }
+                val theme = entryAt(position)!!
+                val isActive = position == checkedIndex
+                setTheme(theme, isActive)
+                root.setOnClickListener {
+                    onSelectTheme(theme)
+                }
+                editButton.setOnClickListener {
+                    if (theme is Theme.Custom) onEditTheme(theme)
                 }
             }
             else -> throw IllegalArgumentException(INVALID_TYPE + it)
@@ -70,7 +76,7 @@ abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHold
 
     abstract fun onChooseImage()
 
-    abstract fun onSelectTheme(theme: Theme, position: Int)
+    abstract fun onSelectTheme(theme: Theme)
 
     abstract fun onEditTheme(theme: Theme.Custom)
 
