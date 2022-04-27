@@ -25,15 +25,19 @@ import androidx.core.graphics.applyCanvas
 import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
 import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.lifecycleScope
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageView
 import com.canhub.cropper.options
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.data.theme.ThemePreset
+import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
 import org.fcitx.fcitx5.android.utils.darkenColorFilter
 import splitties.dimensions.dp
 import splitties.resources.resolveThemeAttribute
@@ -179,6 +183,8 @@ class BackgroundImageActivity : AppCompatActivity() {
     private lateinit var image: BitmapDrawable
     private lateinit var src: Bitmap
     private lateinit var cropped: Bitmap
+    private var rect: Rect? = null
+    private var newCreated = true
 
     private lateinit var theme: Theme.Custom
     private lateinit var srcImageFile: File
@@ -189,8 +195,6 @@ class BackgroundImageActivity : AppCompatActivity() {
         get() = backgroundImage
             ?: throw IllegalStateException("Custom theme only supports backgroundImage for now")
 
-    private var newCreated = true
-
     private fun setDark(isDark: Boolean) {
         if (theme.isDark == isDark)
             return
@@ -198,23 +202,26 @@ class BackgroundImageActivity : AppCompatActivity() {
         theme = if (isDark)
             ThemePreset.TransparentDark.deriveCustomBackground(
                 theme.name,
-                theme.background.first,
-                theme.background.second
+                theme.background.croppedFilePath,
+                theme.background.srcFilePath,
+                theme.background.cropRect
             ) else
             ThemePreset.TransparentLight.deriveCustomBackground(
                 theme.name,
-                theme.background.first,
-                theme.background.second
+                theme.background.croppedFilePath,
+                theme.background.srcFilePath,
+                theme.background.cropRect
             )
         preview.setTheme(theme)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val originTheme = intent?.getParcelableExtra<Theme.Custom>(ORIGIN_THEME)?.also {
-            it.background.run {
-                croppedImageFile = File(first)
-                srcImageFile = File(second)
+        val originTheme = intent?.getParcelableExtra<Theme.Custom>(ORIGIN_THEME)?.also { t ->
+            t.background.also {
+                croppedImageFile = File(it.croppedFilePath)
+                srcImageFile = File(it.srcFilePath)
+                rect = it.cropRect
             }
         }
         originTheme?.let {
@@ -239,6 +246,8 @@ class BackgroundImageActivity : AppCompatActivity() {
             if (!it.isSuccessful)
                 cancel()
             else {
+                rect = it.cropRect!!
+                theme = theme.copy(backgroundImage = theme.backgroundImage?.copy(cropRect = rect))
                 @Suppress("DEPRECATION")
                 src = when {
                     Build.VERSION.SDK_INT < 28 -> MediaStore.Images.Media.getBitmap(
@@ -278,6 +287,7 @@ class BackgroundImageActivity : AppCompatActivity() {
             }
         }
         launcher.launch(options(srcImageFile.takeIf { it.exists() }?.toUri()) {
+            setInitialCropWindowRectangle(rect)
             setGuidelines(CropImageView.Guidelines.ON)
             setImageSource(includeGallery = true, includeCamera = false)
             setAspectRatio(preview.intrinsicWidth, preview.intrinsicHeight)
@@ -301,23 +311,22 @@ class BackgroundImageActivity : AppCompatActivity() {
                     colorFilter = darkenColorFilter(100 - brightnessSeekBar.progress)
                 })
         }
-        croppedImageFile.delete()
-        srcImageFile.delete()
-        croppedImageFile.outputStream().use {
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+        lifecycleScope.withLoadingDialog(this) {
+            withContext(Dispatchers.IO) {
+                croppedImageFile.delete()
+                srcImageFile.delete()
+                croppedImageFile.outputStream().use {
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+                }
+                srcImageFile.outputStream().use {
+                    src.compress(Bitmap.CompressFormat.PNG, 100, it)
+                }
+            }
+            setResult(
+                Activity.RESULT_OK,
+                Intent().apply { putExtra(RESULT, Result(theme, newCreated)) })
+            finish()
         }
-        srcImageFile.outputStream().use {
-            src.compress(Bitmap.CompressFormat.PNG, 100, it)
-        }
-        setResult(
-            Activity.RESULT_OK,
-            Intent().apply {
-                putExtra(
-                    RESULT,
-                    Result(theme, newCreated)
-                )
-            })
-        finish()
     }
 
     override fun onBackPressed() {

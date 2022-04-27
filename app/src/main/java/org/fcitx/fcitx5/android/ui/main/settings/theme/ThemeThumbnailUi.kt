@@ -76,7 +76,7 @@ class ThemeThumbnailUi(override val ctx: Context) : Ui {
         bkg.imageDrawable = when (theme) {
             is Theme.Builtin -> ColorDrawable(theme.backgroundColor.color)
             is Theme.Custom -> theme.backgroundImage?.let {
-                BitmapDrawable(ctx.resources, BitmapFactory.decodeFile(it.first))
+                BitmapDrawable(ctx.resources, BitmapFactory.decodeFile(it.croppedFilePath))
             } ?: ColorDrawable(theme.backgroundColor.color)
         }
         bar.backgroundColor = theme.barColor.color

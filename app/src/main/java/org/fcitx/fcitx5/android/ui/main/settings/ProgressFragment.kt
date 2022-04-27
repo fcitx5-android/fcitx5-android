@@ -23,6 +23,8 @@ abstract class ProgressFragment : Fragment() {
 
     abstract suspend fun initialize(): View
 
+    open fun beforeCreateView() {}
+
     protected val viewModel: MainViewModel by activityViewModels()
 
     protected val fcitx
@@ -32,7 +34,10 @@ abstract class ProgressFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View = requireContext().frameLayout().also { root = it }
+    ): View {
+        beforeCreateView()
+        return requireContext().frameLayout().also { root = it }
+    }
 
     final override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         lifecycleScope.withLoadingDialog(requireContext()) {

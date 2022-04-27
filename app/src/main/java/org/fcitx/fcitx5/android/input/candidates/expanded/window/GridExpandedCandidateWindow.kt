@@ -13,7 +13,7 @@ class GridExpandedCandidateWindow :
 
     private val gridSpanCountListener: ManagedPreference.OnChangeListener<Int> by lazy {
         ManagedPreference.OnChangeListener {
-            layoutManager.spanCount = getValue()
+            layoutManager.spanCount = it
         }
     }
 

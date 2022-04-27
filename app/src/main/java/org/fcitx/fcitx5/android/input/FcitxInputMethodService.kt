@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.fcitx.fcitx5.android.core.*
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.service.FcitxDaemonManager
 import org.fcitx.fcitx5.android.utils.inputConnection
@@ -54,10 +55,16 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     private val ignoreSystemCursor by AppPrefs.getInstance().advanced.ignoreSystemCursor
 
+    private val onThemeChangedListener = ThemeManager.OnThemeChangedListener {
+        createInputView(it)
+        setInputView(inputView)
+    }
+
     override fun onCreate() {
         FcitxDaemonManager.bindFcitxDaemon(javaClass.name, this) {
             fcitx = getFcitxDaemon().fcitx
         }
+        ThemeManager.addOnChangedListener(onThemeChangedListener)
         super.onCreate()
     }
 
@@ -190,14 +197,19 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onCreateInputView(): View {
         super.onCreateInputView()
+        createInputView()
+        return inputView
+    }
+
+    private fun createInputView(theme: Theme = ThemeManager.getActiveTheme()) {
         if (eventHandlerJob == null)
             eventHandlerJob = fcitx
                 .eventFlow
                 .onEach { handleFcitxEvent(it) }
                 .launchIn(lifecycleScope)
-        // TODO theme
-        inputView = InputView(this, fcitx, ThemeManager.currentTheme)
-        return inputView
+        if (::inputView.isInitialized)
+            inputView.scope.clear()
+        inputView = InputView(this, fcitx, theme)
     }
 
     override fun onEvaluateFullscreenMode() = false
@@ -368,6 +380,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onDestroy() {
         FcitxDaemonManager.unbind(javaClass.name)
+        ThemeManager.removeOnChangedListener(onThemeChangedListener)
         eventHandlerJob?.cancel()
         eventHandlerJob = null
         super.onDestroy()

@@ -19,8 +19,8 @@ sealed class ManagedPreference<T : Any, P : Preference>(
     private val uiConfig: P.() -> Unit
 ) : ReadWriteProperty<Any?, T> {
 
-    fun interface OnChangeListener<T : Any> {
-        fun ManagedPreference<T, *>.onChange()
+    fun interface OnChangeListener<in T : Any> {
+        fun onChange(value: T)
     }
 
     private val listeners by lazy { WeakHashSet<OnChangeListener<T>>() }
@@ -49,7 +49,7 @@ sealed class ManagedPreference<T : Any, P : Preference>(
     }
 
     fun fireChange() {
-        listeners.forEach { with(it) { onChange() } }
+        listeners.forEach { with(it) { onChange(getValue()) } }
     }
 
     interface StringLikeCodec<T : Any> {

@@ -1,19 +1,15 @@
 package org.fcitx.fcitx5.android.ui.main.settings.theme
 
-import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import androidx.activity.result.ActivityResultLauncher
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
-import org.fcitx.fcitx5.android.ui.main.MainViewModel
+import org.fcitx.fcitx5.android.ui.main.settings.ProgressFragment
 import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.resources.resolveThemeAttribute
@@ -27,9 +23,8 @@ import splitties.views.gravityVerticalCenter
 import splitties.views.imageDrawable
 import splitties.views.textAppearance
 
-class ThemeListFragment : Fragment() {
+class ThemeListFragment : ProgressFragment() {
 
-    private val viewModel: MainViewModel by activityViewModels()
 
     private lateinit var launcher: ActivityResultLauncher<Theme.Custom?>
 
@@ -37,13 +32,26 @@ class ThemeListFragment : Fragment() {
 
     private lateinit var adapter: ThemeListAdapter
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View = with(requireContext()) ctx@{
+    private lateinit var themeList: RecyclerView
 
-        previewUi = KeyboardPreviewUi(this, ThemeManager.currentTheme)
+    override fun beforeCreateView() {
+        launcher = registerForActivityResult(BackgroundImageActivity.Contract()) { result ->
+            if (result != null) {
+                ThemeManager.saveTheme(result.theme)
+                if (result.newCreated) {
+                    adapter.prependTheme(result.theme)
+                } else {
+                    // An active theme has been updated
+                    if (result.theme.name == ThemeManager.getActiveTheme().name)
+                        ThemeManager.fireChange()
+                    adapter.replaceTheme(result.theme)
+                }
+            }
+        }
+    }
+
+    override suspend fun initialize(): View = with(requireContext()) {
+        previewUi = KeyboardPreviewUi(this, ThemeManager.getActiveTheme())
         val preview = frameLayout {
             add(previewUi.root, lParams())
             scaleX = 0.5f
@@ -83,16 +91,18 @@ class ThemeListFragment : Fragment() {
             elevation = dp(4f)
         }
 
-        val themeList = recyclerView {
+        themeList = recyclerView {
             val spanCount = 2
             val itemWidth = dp(128)
             val itemHeight = dp(88)
-            layoutManager = object : GridLayoutManager(this@ctx, spanCount) {
+            layoutManager = object : GridLayoutManager(context, spanCount) {
                 override fun generateDefaultLayoutParams() = LayoutParams(itemWidth, itemHeight)
             }
             this@ThemeListFragment.adapter = object : ThemeListAdapter() {
                 override fun onChooseImage() = launchImageSelector()
-                override fun onSelectTheme(theme: Theme) = selectTheme(theme)
+                override fun onSelectTheme(theme: Theme, position: Int) =
+                    selectTheme(theme, position)
+
                 override fun onEditTheme(theme: Theme.Custom) = editTheme(theme)
             }.apply {
                 setThemes(ThemeManager.getAllThemes())
@@ -100,16 +110,6 @@ class ThemeListFragment : Fragment() {
             adapter = this@ThemeListFragment.adapter
             // evenly spaced items
             addItemDecoration(ThemeListItemDecoration(itemWidth, spanCount))
-        }
-        launcher = registerForActivityResult(BackgroundImageActivity.Contract()) { result ->
-            if (result != null) {
-                ThemeManager.saveTheme(result.theme)
-                if (result.newCreated) {
-                    adapter.prependTheme(result.theme)
-                } else {
-                    adapter.replaceTheme(result.theme)
-                }
-            }
         }
 
         constraintLayout {
@@ -131,7 +131,7 @@ class ThemeListFragment : Fragment() {
         super.onResume()
         viewModel.setToolbarTitle(requireContext().getString(R.string.theme))
         if (this::previewUi.isInitialized) {
-            previewUi.setTheme(ThemeManager.currentTheme)
+            previewUi.setTheme(ThemeManager.getActiveTheme())
         }
     }
 
@@ -139,8 +139,16 @@ class ThemeListFragment : Fragment() {
         launcher.launch(null)
     }
 
-    private fun selectTheme(theme: Theme) {
+    private fun setChecked(position: Int, checked: Boolean) {
+        ((themeList.getChildViewHolder(themeList.getChildAt(position)) as ThemeListAdapter.ViewHolder).ui as ThemeThumbnailUi)
+            .setChecked(checked)
+    }
+
+    private fun selectTheme(theme: Theme, position: Int) {
+        setChecked(adapter.checkedIndex, false)
+        setChecked(position, true)
         previewUi.setTheme(theme)
+        ThemeManager.switchTheme(theme)
     }
 
     private fun editTheme(theme: Theme.Custom) {

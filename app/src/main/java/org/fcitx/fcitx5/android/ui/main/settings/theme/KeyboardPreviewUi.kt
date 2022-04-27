@@ -18,6 +18,7 @@ import splitties.dimensions.dp
 import splitties.views.backgroundColor
 import splitties.views.bottomPadding
 import splitties.views.dsl.core.*
+import java.io.File
 
 class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
 
@@ -90,8 +91,10 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
                     if (ThemeManager.prefs.keyBorder.getValue()) theme.backgroundColor.color
                     else theme.keyboardColor.color
                 )
-                is Theme.Custom -> theme.backgroundImage?.let {
-                    BitmapDrawable(ctx.resources, BitmapFactory.decodeFile(it.first))
+                is Theme.Custom -> theme.backgroundImage?.let { (fp, _, _) ->
+                    fp.takeIf { File(fp).exists() }?.let {
+                        BitmapDrawable(ctx.resources, BitmapFactory.decodeFile(it))
+                    }
                 } ?: ColorDrawable(theme.backgroundColor.color)
             }
         }

@@ -111,9 +111,13 @@ class AppPrefs(
         }
     }
 
-    fun <T : ManagedPreferenceProvider> registerProvider(providerF: (SharedPreferences) -> T): T {
+    fun <T : ManagedPreferenceProvider> registerProvider(
+        includeUi: Boolean = true,
+        providerF: (SharedPreferences) -> T
+    ): T {
         val provider = providerF(sharedPreferences)
-        providers.add(provider)
+        if (includeUi)
+            providers.add(provider)
         managedPreferences.putAll(provider.managedPreferences)
         return provider
     }

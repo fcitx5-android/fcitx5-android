@@ -11,6 +11,9 @@ abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHold
 
     val entries = mutableListOf<Theme>()
 
+    var checkedIndex = -1
+        private set
+
     private fun entryAt(position: Int) = entries[position - OFFSET]
 
     fun setThemes(themes: List<Theme>) {
@@ -44,8 +47,14 @@ abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHold
             CHOOSE_IMAGE -> holder.ui.root.setOnClickListener { onChooseImage() }
             THEME -> (holder.ui as ThemeThumbnailUi).apply {
                 entryAt(position).let { theme ->
-                    setTheme(theme, theme.name.contentEquals(ThemeManager.currentTheme.name))
-                    root.setOnClickListener { onSelectTheme(theme) }
+                    val isActive = theme.name == ThemeManager.getActiveTheme().name
+                    if (isActive)
+                        checkedIndex = holder.absoluteAdapterPosition
+                    setTheme(theme, isActive)
+                    root.setOnClickListener {
+                        onSelectTheme(theme, holder.absoluteAdapterPosition)
+                        checkedIndex = holder.absoluteAdapterPosition
+                    }
                     editButton.setOnClickListener {
                         if (theme is Theme.Custom) onEditTheme(theme)
                     }
@@ -61,7 +70,7 @@ abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHold
 
     abstract fun onChooseImage()
 
-    abstract fun onSelectTheme(theme: Theme)
+    abstract fun onSelectTheme(theme: Theme, position: Int)
 
     abstract fun onEditTheme(theme: Theme.Custom)
 
