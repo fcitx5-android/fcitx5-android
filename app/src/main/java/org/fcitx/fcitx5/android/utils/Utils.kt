@@ -20,6 +20,7 @@ import android.widget.EditText
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.annotation.IdRes
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.NavController
@@ -141,3 +142,6 @@ fun inverseColor(@ColorInt color: Int) = Color.argb(
     255 - Color.green(color),
     255 - Color.blue(color)
 )
+
+inline val ConstraintLayout.LayoutParams.unset
+    get() = ConstraintLayout.LayoutParams.UNSET
