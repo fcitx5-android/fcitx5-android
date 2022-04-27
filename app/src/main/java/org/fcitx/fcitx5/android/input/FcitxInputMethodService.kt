@@ -56,6 +56,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private val ignoreSystemCursor by AppPrefs.getInstance().advanced.ignoreSystemCursor
 
     private val onThemeChangedListener = ThemeManager.OnThemeChangedListener {
+        // InputView should be created first in onCreateInputView
+        // setInputView should be used to 'replace' current InputView only
+        if (!::inputView.isInitialized) return@OnThemeChangedListener
         createInputView(it)
         setInputView(inputView)
     }
