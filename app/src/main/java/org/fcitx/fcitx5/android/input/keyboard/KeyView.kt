@@ -25,6 +25,7 @@ import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.existingOrNewId
 import splitties.views.imageDrawable
+import splitties.views.padding
 
 abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearance) :
     CustomGestureView(ctx) {
@@ -75,15 +76,17 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
             // special background
             when (def.viewId) {
                 R.id.button_space -> {
-                    val hPadding = dp(10)
-                    val vPadding = dp(16)
+                    val hInset = dp(10)
+                    val vInset = dp(16)
                     background = InsetDrawable(
                         GradientDrawable().apply {
                             cornerRadius = dp(3f)
                             setColor(theme.spaceBarColor.color)
                         },
-                        hPadding, vPadding, hPadding, vPadding
+                        hInset, vInset, hInset, vInset
                     )
+                    // InsetDrawable sets padding to container view; remove padding to prevent text from bing clipped
+                    padding = 0
                 }
                 R.id.button_return -> {
                     // background drawable has no ScaleType support, use an ImageView instead ...
