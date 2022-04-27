@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
@@ -73,27 +74,39 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
         keyboardWidth = w
         keyboardHeight = h
         setTheme(theme)
+        root = object : FrameLayout(ctx) {
+            override fun onAttachedToWindow() {
+                super.onAttachedToWindow()
+                recalculateSize()
+            }
+
+            override fun onConfigurationChanged(newConfig: Configuration?) {
+                recalculateSize()
+            }
+        }.apply {
+            add(fakeInputView, lParams())
+        }
+    }
+
+    fun recalculateSize() {
+        val (w, h) = keyboardWindowAspectRatio()
+        keyboardWidth = w
+        keyboardHeight = h
+        fakeKeyboardWindow.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            width = keyboardWidth
+            height = keyboardHeight
+        }
         intrinsicWidth = keyboardWidth
         // bar height
         intrinsicHeight = keyboardHeight + ctx.dp(40)
-        root = frameLayout {
-            add(fakeInputView, lParams(intrinsicWidth, intrinsicHeight))
+        // bottom padding
+        ViewCompat.getRootWindowInsets(root)?.also {
+            intrinsicHeight += it.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
         }
-        root.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
-            override fun onViewAttachedToWindow(v: View) {
-                // bottom padding
-                ViewCompat.getRootWindowInsets(v)?.let {
-                    intrinsicHeight += it.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-                }
-                onSizeMeasured?.invoke(intrinsicWidth, intrinsicHeight)
-                fakeInputView.updateLayoutParams<FrameLayout.LayoutParams> {
-                    width = intrinsicWidth
-                    height = intrinsicHeight
-                }
-            }
-
-            override fun onViewDetachedFromWindow(v: View) {}
-        })
+        fakeInputView.updateLayoutParams<FrameLayout.LayoutParams> {
+            width = intrinsicWidth
+            height = intrinsicHeight
+        }
     }
 
     fun setBackground(drawable: Drawable) {
