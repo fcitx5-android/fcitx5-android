@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
@@ -63,7 +64,7 @@ class BackgroundImageActivity : AppCompatActivity() {
             intent?.getParcelableExtra(RESULT)
     }
 
-    private lateinit var preview: KeyboardPreviewUi
+    private lateinit var previewUi: KeyboardPreviewUi
 
     private fun createTextView(@StringRes string: Int? = null) = textView {
         if (string != null) {
@@ -127,14 +128,14 @@ class BackgroundImageActivity : AppCompatActivity() {
         val lineHeight = dp(48)
         constraintLayout {
             bottomPadding = dp(24)
-            add(preview.root, lParams(wrapContent, wrapContent) {
+            add(previewUi.root, lParams(wrapContent, wrapContent) {
                 topOfParent()
                 centerHorizontally()
                 above(variantLabel)
                 verticalChainStyle = ConstraintLayout.LayoutParams.CHAIN_PACKED
             })
             add(variantLabel, lParams(wrapContent, lineHeight) {
-                below(preview.root, dp(16))
+                below(previewUi.root, dp(16))
                 startOfParent(dp(46))
                 above(brightnessLabel)
             })
@@ -205,8 +206,8 @@ class BackgroundImageActivity : AppCompatActivity() {
                 theme.background.srcFilePath,
                 theme.background.cropRect
             )
-        preview.setTheme(theme)
-        preview.setBackground(image)
+        previewUi.setTheme(theme)
+        previewUi.setBackground(image)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -229,7 +230,7 @@ class BackgroundImageActivity : AppCompatActivity() {
                 ?: (if (variantSwitch.isChecked) ThemePreset.TransparentLight else ThemePreset.TransparentDark)
                     .deriveCustomBackground(n, c.path, s.path)
         }
-        preview = KeyboardPreviewUi(this, theme)
+        previewUi = KeyboardPreviewUi(this, theme)
         variantSwitch.isChecked = !theme.isDark
         setContentView(ui)
         launcher = registerForActivityResult(CropImageContract()) {
@@ -263,7 +264,7 @@ class BackgroundImageActivity : AppCompatActivity() {
                     override fun onProgressChanged(bar: SeekBar, progress: Int, fromUser: Boolean) {
                         brightnessValue.text = "$progress%"
                         image.colorFilter = darkenColorFilter(100 - progress)
-                        preview.setBackground(image)
+                        previewUi.setBackground(image)
                     }
                 })
                 brightnessSeekBar.progress = 70
@@ -275,7 +276,7 @@ class BackgroundImageActivity : AppCompatActivity() {
                 }
             }
         }
-        preview.onSizeMeasured = { w, h ->
+        previewUi.onSizeMeasured = { w, h ->
             launcher.launch(options(srcImageFile.takeIf { it.exists() }?.toUri()) {
                 setInitialCropWindowRectangle(rect)
                 setGuidelines(CropImageView.Guidelines.ON_TOUCH)
@@ -296,7 +297,7 @@ class BackgroundImageActivity : AppCompatActivity() {
     }
 
     private fun done() {
-        val bitmap = createBitmap(preview.intrinsicWidth, preview.intrinsicHeight)
+        val bitmap = createBitmap(previewUi.intrinsicWidth, previewUi.intrinsicHeight)
         bitmap.applyCanvas {
             drawBitmap(
                 cropped,
