@@ -52,8 +52,7 @@ class ThemeListFragment : ProgressFragment() {
 
     override suspend fun initialize(): View = with(requireContext()) {
         previewUi = KeyboardPreviewUi(this, ThemeManager.getActiveTheme())
-        val preview = frameLayout {
-            add(previewUi.root, lParams())
+        val preview = previewUi.root.apply  {
             scaleX = 0.5f
             scaleY = 0.5f
             outlineProvider = ViewOutlineProvider.BOUNDS
