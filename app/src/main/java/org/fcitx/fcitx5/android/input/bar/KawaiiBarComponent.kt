@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.input.bar
 
+import android.graphics.Color
 import android.os.Build
 import android.view.KeyEvent
 import android.view.View
@@ -203,9 +204,9 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     override val view by lazy {
         ViewAnimator(context).apply {
-            if (!ThemeManager.prefs.keyBorder.getValue()) {
-                backgroundColor = theme.barColor.color
-            }
+            backgroundColor =
+                if (ThemeManager.prefs.keyBorder.getValue()) Color.TRANSPARENT
+                else theme.barColor.color
             add(idleUi.root, lParams(matchParent, matchParent))
             add(candidateUi.root, lParams(matchParent, matchParent))
             add(titleUi.root, lParams(matchParent, matchParent))
