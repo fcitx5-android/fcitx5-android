@@ -1,9 +1,11 @@
 package org.fcitx.fcitx5.android.data.theme
 
+import android.graphics.Rect
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import org.fcitx.fcitx5.android.utils.ColorInt
+import org.fcitx.fcitx5.android.utils.RectSerializer
 
 @Serializable
 sealed class Theme : Parcelable {
@@ -36,7 +38,7 @@ sealed class Theme : Parcelable {
     data class Custom(
         override val name: String,
         // absolute file paths of cropped and src png files
-        val backgroundImage: Pair<String, String>?,
+        val backgroundImage: CustomBackground?,
         override val backgroundColor: ColorInt,
         override val barColor: ColorInt,
         override val keyboardColor: ColorInt,
@@ -52,7 +54,15 @@ sealed class Theme : Parcelable {
         override val dividerColor: ColorInt,
         override val clipboardEntryColor: ColorInt,
         override val isDark: Boolean
-    ) : Theme()
+    ) : Theme() {
+        @Parcelize
+        @Serializable
+        data class CustomBackground(
+            val croppedFilePath: String,
+            val srcFilePath: String,
+            val cropRect: @Serializable(with = RectSerializer::class) Rect?
+        ) : Parcelable
+    }
 
     @Parcelize
     data class Builtin(
@@ -76,10 +86,15 @@ sealed class Theme : Parcelable {
         fun deriveCustomBackground(
             name: String,
             croppedBackgroundImage: String,
-            originBackgroundImage: String
+            originBackgroundImage: String,
+            cropBackgroundRect: Rect? = null,
         ) = Custom(
             name,
-            croppedBackgroundImage to originBackgroundImage,
+            Custom.CustomBackground(
+                croppedBackgroundImage,
+                originBackgroundImage,
+                cropBackgroundRect
+            ),
             backgroundColor,
             barColor,
             keyboardColor,

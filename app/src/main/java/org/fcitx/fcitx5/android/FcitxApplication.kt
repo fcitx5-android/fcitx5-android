@@ -11,6 +11,7 @@ import androidx.preference.PreferenceManager
 import cat.ereza.customactivityoncrash.config.CaocConfig
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.ui.main.LogActivity
 import timber.log.Timber
 import kotlin.system.exitProcess
@@ -61,6 +62,7 @@ class FcitxApplication : Application() {
             setValue(currentPid)
         }
         ClipboardManager.init(applicationContext)
+        ThemeManager.init()
     }
 
     companion object {

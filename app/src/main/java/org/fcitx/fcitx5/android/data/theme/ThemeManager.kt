@@ -6,14 +6,31 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceCategory
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceInternal
+import org.fcitx.fcitx5.android.utils.WeakHashSet
 import org.fcitx.fcitx5.android.utils.appContext
 import java.io.File
 import java.util.*
 
 object ThemeManager {
 
+    fun interface OnThemeChangedListener {
+        fun onThemeChanged(theme: Theme)
+    }
+
     private val dir = File(appContext.getExternalFilesDir(null), "theme").also { it.mkdirs() }
+
+    private val onChangeListeners = WeakHashSet<OnThemeChangedListener>()
+
+    fun addOnChangedListener(listener: OnThemeChangedListener) {
+        onChangeListeners.add(listener)
+    }
+
+    fun removeOnChangedListener(listener: OnThemeChangedListener) {
+        onChangeListeners.remove(listener)
+    }
 
     fun newCustomBackgroundImages(): Triple<String, File, File> {
         val themeName = UUID.randomUUID().toString()
@@ -26,24 +43,34 @@ object ThemeManager {
 
     fun saveTheme(theme: Theme.Custom) {
         themeFile(theme).writeText(Json.encodeToString(theme))
+        knownThemes[theme.name] = theme
     }
 
     fun deleteTheme(theme: Theme.Custom) {
+        if (theme == currentTheme)
+            switchTheme(defaultTheme)
         themeFile(theme).delete()
         theme.backgroundImage?.let {
-            File(it.first).delete()
-            File(it.second).delete()
+            File(it.croppedFilePath).delete()
+            File(it.srcFilePath).delete()
         }
+        knownThemes.remove(theme.name)
     }
 
-    fun listThemes(): List<Theme.Custom> =
+    fun switchTheme(theme: Theme) {
+        if (theme.name !in knownThemes)
+            throw IllegalArgumentException("Unknown theme $theme")
+        internalPrefs.activeThemeName.setValue(theme.name)
+    }
+
+    private fun listThemes(): List<Theme.Custom> =
         dir.listFiles()?.mapNotNull {
             runCatching { Json.decodeFromString<Theme.Custom>(it.readText()) }.getOrNull()?.apply {
                 if (backgroundImage != null) {
-                    if (!File(backgroundImage.first).exists())
-                        throw IllegalStateException("${backgroundImage.first} specified by $name is missing!")
-                    if (!File(backgroundImage.second).exists())
-                        throw IllegalStateException("${backgroundImage.second} specified by $name is missing!")
+                    if (!File(backgroundImage.croppedFilePath).exists())
+                        throw IllegalStateException("${backgroundImage.croppedFilePath} specified by $name is missing!")
+                    if (!File(backgroundImage.srcFilePath).exists())
+                        throw IllegalStateException("${backgroundImage.srcFilePath} specified by $name is missing!")
                 }
             }
         } ?: listOf()
@@ -64,9 +91,18 @@ object ThemeManager {
 
     }
 
-    val prefs = AppPrefs.getInstance().registerProvider(::Prefs)
+    class InternalPrefs(sharedPreferences: SharedPreferences) :
+        ManagedPreferenceInternal(sharedPreferences) {
+        val activeThemeName = string("active_theme_name", defaultTheme.name)
+    }
 
-    fun getAllThemes() = listThemes() + builtinThemes
+    private val defaultTheme = ThemePreset.PixelDark
+
+    val prefs = AppPrefs.getInstance().registerProvider(false, ::Prefs)
+
+    private val internalPrefs = AppPrefs.getInstance().registerProvider(providerF = ::InternalPrefs)
+
+    private val knownThemes = mutableMapOf<String, Theme>()
 
     private val builtinThemes = listOf(
         ThemePreset.MaterialLight,
@@ -75,6 +111,41 @@ object ThemeManager {
         ThemePreset.PixelDark
     )
 
-    // TODO
-    val currentTheme: Theme = ThemePreset.PixelDark
+    private val onActiveThemeNameChange = ManagedPreference.OnChangeListener<String> {
+        currentTheme = internalPrefs.activeThemeName.getValue()
+            .let { knownThemes[it] ?: throw RuntimeException("Unknown theme $it") }
+        this@ThemeManager.fireChange()
+    }
+
+    private val prefsChange = ManagedPreference.OnChangeListener<Any> {
+        this@ThemeManager.fireChange()
+    }
+
+    fun init() {
+        listThemes().forEach {
+            knownThemes[it.name] = it
+        }
+        builtinThemes.forEach {
+            knownThemes[it.name] = it
+        }
+        internalPrefs.activeThemeName.registerOnChangeListener(onActiveThemeNameChange)
+        prefs.keyBorder.registerOnChangeListener(prefsChange)
+        prefs.keyRadius.registerOnChangeListener(prefsChange)
+        prefs.keyRippleEffect.registerOnChangeListener(prefsChange)
+        prefs.keyVerticalMargin.registerOnChangeListener(prefsChange)
+        prefs.keyHorizontalMargin.registerOnChangeListener(prefsChange)
+        currentTheme = internalPrefs.activeThemeName.getValue()
+            .let { knownThemes[it] ?: throw RuntimeException("Unknown theme $it") }
+    }
+
+    private lateinit var currentTheme: Theme
+
+    fun fireChange() {
+        onChangeListeners.forEach { it.onThemeChanged(currentTheme) }
+    }
+
+    fun getAllThemes() = knownThemes.values.sortedBy { it is Theme.Builtin }
+
+    fun getActiveTheme() = currentTheme
+
 }
