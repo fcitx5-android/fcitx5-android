@@ -8,15 +8,17 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.view.View
+import android.widget.FrameLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.keyboard.TextKeyboard
 import splitties.dimensions.dp
 import splitties.views.backgroundColor
-import splitties.views.bottomPadding
+import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import java.io.File
 
@@ -34,9 +36,15 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
     private var keyboardHeight = -1
     private lateinit var fakeKeyboardWindow: TextKeyboard
 
-    override val root = verticalLayout {
-        add(fakeKawaiiBar, lParams(matchParent, dp(40)))
+    private val fakeInputView = constraintLayout {
+        add(fakeKawaiiBar, lParams(height = dp(40)) {
+            centerHorizontally()
+        })
     }
+
+    override val root: FrameLayout
+
+    var onSizeMeasured: ((Int, Int) -> Unit)? = null
 
     private fun keyboardWindowAspectRatio(): Pair<Int, Int> {
         val w = ctx.resources.displayMetrics.widthPixels
@@ -58,13 +66,19 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
         intrinsicWidth = keyboardWidth
         // bar height
         intrinsicHeight = keyboardHeight + ctx.dp(40)
+        root = frameLayout {
+            add(fakeInputView, lParams(intrinsicWidth, intrinsicHeight))
+        }
         root.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
             override fun onViewAttachedToWindow(v: View) {
                 // bottom padding
                 ViewCompat.getRootWindowInsets(v)?.let {
-                    val bottom = it.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-                    intrinsicHeight += bottom
-                    root.bottomPadding = bottom
+                    intrinsicHeight += it.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+                }
+                onSizeMeasured?.invoke(intrinsicWidth, intrinsicHeight)
+                fakeInputView.updateLayoutParams<FrameLayout.LayoutParams> {
+                    width = intrinsicWidth
+                    height = intrinsicHeight
                 }
             }
 

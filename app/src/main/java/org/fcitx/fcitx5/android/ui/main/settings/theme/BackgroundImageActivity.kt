@@ -24,7 +24,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.applyCanvas
 import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
-import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
@@ -238,10 +237,6 @@ class BackgroundImageActivity : AppCompatActivity() {
         preview = KeyboardPreviewUi(this, theme)
         variantSwitch.isChecked = theme.isDark
         setContentView(ui)
-        preview.root.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            width = preview.intrinsicWidth
-            height = preview.intrinsicHeight
-        }
         launcher = registerForActivityResult(CropImageContract()) {
             if (!it.isSuccessful)
                 cancel()
@@ -286,13 +281,19 @@ class BackgroundImageActivity : AppCompatActivity() {
                 }
             }
         }
-        launcher.launch(options(srcImageFile.takeIf { it.exists() }?.toUri()) {
-            setInitialCropWindowRectangle(rect)
-            setGuidelines(CropImageView.Guidelines.ON)
-            setImageSource(includeGallery = true, includeCamera = false)
-            setAspectRatio(preview.intrinsicWidth, preview.intrinsicHeight)
-            setOutputCompressFormat(Bitmap.CompressFormat.PNG)
-        })
+        preview.onSizeMeasured = { w, h ->
+            launcher.launch(options(srcImageFile.takeIf { it.exists() }?.toUri()) {
+                setInitialCropWindowRectangle(rect)
+                setGuidelines(CropImageView.Guidelines.ON_TOUCH)
+                setBorderLineColor(Color.WHITE)
+                setBorderLineThickness(dp(1f))
+                setBorderCornerColor(Color.WHITE)
+                setBorderCornerOffset(0f)
+                setImageSource(includeGallery = true, includeCamera = false)
+                setAspectRatio(w, h)
+                setOutputCompressFormat(Bitmap.CompressFormat.PNG)
+            })
+        }
     }
 
     private fun cancel() {
