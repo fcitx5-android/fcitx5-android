@@ -18,10 +18,12 @@ import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Variant
 import org.fcitx.fcitx5.android.utils.styledFloat
+import org.fcitx.fcitx5.android.utils.unset
 import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
+import splitties.views.existingOrNewId
 import splitties.views.imageDrawable
 
 abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearance) :
@@ -154,7 +156,7 @@ open class TextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Text) 
         layout.apply {
             add(mainText, lParams(wrapContent, wrapContent) {
                 centerInParent()
-                verticalChainStyle = ConstraintLayout.LayoutParams.CHAIN_PACKED
+                verticalChainStyle = packed
             })
         }
     }
@@ -185,21 +187,44 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
 
     private fun applyLayout(orientation: Int) = when (orientation) {
         Configuration.ORIENTATION_LANDSCAPE -> {
-            mainText.updateLayoutParams<ConstraintLayout.LayoutParams> { bottomOfParent() }
+            mainText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                // reset
+                bottomToTop = unset
+                // set
+                topToTop = parentId
+                startToStart = parentId
+                endToEnd = parentId
+                bottomToBottom = parentId
+            }
             altText.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                topOfParent(vMargin)
-                bottomToBottom = ConstraintLayout.LayoutParams.UNSET
-                startToStart = ConstraintLayout.LayoutParams.UNSET
-                endOfParent(hMargin + dp(4))
+                // reset
+                topToBottom = unset
+                bottomToBottom = unset
+                // set
+                topToTop = parentId; topMargin = vMargin
+                startToStart = unset
+                endToEnd = parentId; endMargin = (hMargin + dp(4))
             }
         }
         else -> {
-            mainText.updateLayoutParams<ConstraintLayout.LayoutParams> { above(altText) }
+            mainText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                // reset
+                bottomToBottom = unset
+                // set
+                topToTop = parentId
+                startToStart = parentId
+                endToEnd = parentId
+                bottomToTop = altText.existingOrNewId
+            }
             altText.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                below(mainText)
-                bottomOfParent()
-                startOfParent()
-                endOfParent()
+                // reset
+                topToTop = unset; topMargin = 0
+                endMargin = 0
+                // set
+                topToBottom = mainText.existingOrNewId
+                startToStart = parentId
+                endToEnd = parentId
+                bottomToBottom = parentId
             }
         }
     }
