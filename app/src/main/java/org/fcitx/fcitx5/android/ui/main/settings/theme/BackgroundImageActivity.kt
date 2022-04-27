@@ -4,10 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.ImageDecoder
-import android.graphics.Paint
-import android.graphics.Rect
+import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Bundle
@@ -194,24 +191,22 @@ class BackgroundImageActivity : AppCompatActivity() {
         get() = backgroundImage
             ?: throw IllegalStateException("Custom theme only supports backgroundImage for now")
 
-    private fun setDark(isDark: Boolean) {
-        if (theme.isDark == isDark)
-            return
-
-        theme = if (isDark)
-            ThemePreset.TransparentDark.deriveCustomBackground(
+    private fun setKeyVariant(darkKeys: Boolean) {
+        theme = if (darkKeys)
+            ThemePreset.TransparentLight.deriveCustomBackground(
                 theme.name,
                 theme.background.croppedFilePath,
                 theme.background.srcFilePath,
                 theme.background.cropRect
             ) else
-            ThemePreset.TransparentLight.deriveCustomBackground(
+            ThemePreset.TransparentDark.deriveCustomBackground(
                 theme.name,
                 theme.background.croppedFilePath,
                 theme.background.srcFilePath,
                 theme.background.cropRect
             )
         preview.setTheme(theme)
+        preview.setBackground(image)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -231,11 +226,11 @@ class BackgroundImageActivity : AppCompatActivity() {
             croppedImageFile = c
             srcImageFile = s
             theme = originTheme
-                ?: (if (variantSwitch.isChecked) ThemePreset.TransparentDark else ThemePreset.TransparentLight)
+                ?: (if (variantSwitch.isChecked) ThemePreset.TransparentLight else ThemePreset.TransparentDark)
                     .deriveCustomBackground(n, c.path, s.path)
         }
         preview = KeyboardPreviewUi(this, theme)
-        variantSwitch.isChecked = theme.isDark
+        variantSwitch.isChecked = !theme.isDark
         setContentView(ui)
         launcher = registerForActivityResult(CropImageContract()) {
             if (!it.isSuccessful)
@@ -257,8 +252,7 @@ class BackgroundImageActivity : AppCompatActivity() {
                 cropped = it.getBitmap(this)!!
                 image = BitmapDrawable(resources, cropped)
                 variantSwitch.setOnCheckedChangeListener { _, isChecked ->
-                    setDark(isChecked)
-                    preview.setBackground(image)
+                    setKeyVariant(darkKeys = isChecked)
                 }
                 brightnessSeekBar.setOnSeekBarChangeListener(object :
                     SeekBar.OnSeekBarChangeListener {

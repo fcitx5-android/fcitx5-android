@@ -164,8 +164,8 @@ class InputView(
 
     fun onShow() {
         service.window.window?.also {
-            ViewCompat.getWindowInsetsController(it.decorView)?.isAppearanceLightNavigationBars =
-                !theme.isDark
+            ViewCompat.getWindowInsetsController(it.decorView)
+                ?.isAppearanceLightNavigationBars = !theme.isDark
         }
         kawaiiBar.onShow()
         windowManager.switchToKeyboardWindow()
