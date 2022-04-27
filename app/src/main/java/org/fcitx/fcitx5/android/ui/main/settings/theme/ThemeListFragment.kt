@@ -17,14 +17,16 @@ import splitties.resources.styledColor
 import splitties.resources.styledDrawable
 import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.*
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.imageButton
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.gravityVerticalCenter
 import splitties.views.imageDrawable
 import splitties.views.textAppearance
 
 class ThemeListFragment : ProgressFragment() {
-
 
     private lateinit var launcher: ActivityResultLauncher<Theme.Custom?>
 
@@ -37,14 +39,17 @@ class ThemeListFragment : ProgressFragment() {
     override fun beforeCreateView() {
         launcher = registerForActivityResult(BackgroundImageActivity.Contract()) { result ->
             if (result != null) {
-                ThemeManager.saveTheme(result.theme)
+                val theme = result.theme
+                ThemeManager.saveTheme(theme)
                 if (result.newCreated) {
-                    adapter.prependTheme(result.theme)
+                    adapter.prependTheme(theme)
+                    ThemeManager.switchTheme(theme)
+                    adapter.setCheckedTheme(theme)
                 } else {
                     // An active theme has been updated
-                    if (result.theme.name == ThemeManager.getActiveTheme().name)
+                    if (theme.name == ThemeManager.getActiveTheme().name)
                         ThemeManager.fireChange()
-                    adapter.replaceTheme(result.theme)
+                    adapter.replaceTheme(theme)
                 }
             }
         }
@@ -99,12 +104,10 @@ class ThemeListFragment : ProgressFragment() {
             }
             this@ThemeListFragment.adapter = object : ThemeListAdapter() {
                 override fun onChooseImage() = launchImageSelector()
-                override fun onSelectTheme(theme: Theme, position: Int) =
-                    selectTheme(theme, position)
-
+                override fun onSelectTheme(theme: Theme) = selectTheme(theme)
                 override fun onEditTheme(theme: Theme.Custom) = editTheme(theme)
             }.apply {
-                setThemes(ThemeManager.getAllThemes())
+                setThemes(ThemeManager.getAllThemes(), ThemeManager.getActiveTheme())
             }
             adapter = this@ThemeListFragment.adapter
             // evenly spaced items
@@ -138,16 +141,10 @@ class ThemeListFragment : ProgressFragment() {
         launcher.launch(null)
     }
 
-    private fun setChecked(position: Int, checked: Boolean) {
-        ((themeList.getChildViewHolder(themeList.getChildAt(position)) as ThemeListAdapter.ViewHolder).ui as ThemeThumbnailUi)
-            .setChecked(checked)
-    }
-
-    private fun selectTheme(theme: Theme, position: Int) {
-        setChecked(adapter.checkedIndex, false)
-        setChecked(position, true)
+    private fun selectTheme(theme: Theme) {
         previewUi.setTheme(theme)
         ThemeManager.switchTheme(theme)
+        adapter.setCheckedTheme(theme)
     }
 
     private fun editTheme(theme: Theme.Custom) {

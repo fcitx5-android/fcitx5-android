@@ -11,7 +11,9 @@ import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceCategory
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceInternal
 import org.fcitx.fcitx5.android.utils.WeakHashSet
 import org.fcitx.fcitx5.android.utils.appContext
+import timber.log.Timber
 import java.io.File
+import java.io.FileFilter
 import java.util.*
 
 object ThemeManager {
@@ -39,11 +41,14 @@ object ThemeManager {
         return Triple(themeName, croppedImageFile, srcImageFile)
     }
 
+    private fun getTheme(name: String) =
+        customThemes.find { it.name == name } ?: builtinThemes.find { it.name == name }
+
     private fun themeFile(theme: Theme.Custom) = File(dir, theme.name + ".json")
 
     fun saveTheme(theme: Theme.Custom) {
         themeFile(theme).writeText(Json.encodeToString(theme))
-        knownThemes[theme.name] = theme
+        customThemes.add(0, theme)
     }
 
     fun deleteTheme(theme: Theme.Custom) {
@@ -54,26 +59,34 @@ object ThemeManager {
             File(it.croppedFilePath).delete()
             File(it.srcFilePath).delete()
         }
-        knownThemes.remove(theme.name)
+        customThemes.removeAll { it == theme }
     }
 
     fun switchTheme(theme: Theme) {
-        if (theme.name !in knownThemes)
+        if (getTheme(theme.name) == null)
             throw IllegalArgumentException("Unknown theme $theme")
         internalPrefs.activeThemeName.setValue(theme.name)
     }
 
-    private fun listThemes(): List<Theme.Custom> =
-        dir.listFiles()?.mapNotNull {
-            runCatching { Json.decodeFromString<Theme.Custom>(it.readText()) }.getOrNull()?.apply {
-                if (backgroundImage != null) {
-                    if (!File(backgroundImage.croppedFilePath).exists())
-                        throw IllegalStateException("${backgroundImage.croppedFilePath} specified by $name is missing!")
-                    if (!File(backgroundImage.srcFilePath).exists())
-                        throw IllegalStateException("${backgroundImage.srcFilePath} specified by $name is missing!")
+    private fun listThemes(): MutableList<Theme.Custom> =
+        dir.listFiles(FileFilter { it.extension == "json" })
+            ?.sortedByDescending { it.lastModified() } // newest first
+            ?.mapNotNull decode@{
+                val theme = runCatching { Json.decodeFromString<Theme.Custom>(it.readText()) }
+                    .getOrElse { e ->
+                        Timber.w("Failed to decode theme file ${it.absolutePath}: ${e.message}")
+                        return@decode null
+                    }
+                if (theme.backgroundImage != null) {
+                    if (!File(theme.backgroundImage.croppedFilePath).exists() ||
+                        !File(theme.backgroundImage.srcFilePath).exists()
+                    ) {
+                        Timber.w("Cannot find background image file for theme ${theme.name}")
+                        return@decode null
+                    }
                 }
-            }
-        } ?: listOf()
+                return@decode theme
+            }?.toMutableList() ?: mutableListOf()
 
     class Prefs(sharedPreferences: SharedPreferences) :
         ManagedPreferenceCategory(R.string.theme, sharedPreferences) {
@@ -102,7 +115,7 @@ object ThemeManager {
 
     private val internalPrefs = AppPrefs.getInstance().registerProvider(providerF = ::InternalPrefs)
 
-    private val knownThemes = mutableMapOf<String, Theme>()
+    private val customThemes = listThemes()
 
     private val builtinThemes = listOf(
         ThemePreset.MaterialLight,
@@ -112,8 +125,8 @@ object ThemeManager {
     )
 
     private val onActiveThemeNameChange = ManagedPreference.OnChangeListener<String> {
-        currentTheme = internalPrefs.activeThemeName.getValue()
-            .let { knownThemes[it] ?: throw RuntimeException("Unknown theme $it") }
+        currentTheme = getTheme(internalPrefs.activeThemeName.getValue())
+            ?: throw RuntimeException("Unknown theme $it")
         this@ThemeManager.fireChange()
     }
 
@@ -122,20 +135,19 @@ object ThemeManager {
     }
 
     fun init() {
-        listThemes().forEach {
-            knownThemes[it.name] = it
-        }
-        builtinThemes.forEach {
-            knownThemes[it.name] = it
-        }
         internalPrefs.activeThemeName.registerOnChangeListener(onActiveThemeNameChange)
         prefs.keyBorder.registerOnChangeListener(prefsChange)
         prefs.keyRadius.registerOnChangeListener(prefsChange)
         prefs.keyRippleEffect.registerOnChangeListener(prefsChange)
         prefs.keyVerticalMargin.registerOnChangeListener(prefsChange)
         prefs.keyHorizontalMargin.registerOnChangeListener(prefsChange)
-        currentTheme = internalPrefs.activeThemeName.getValue()
-            .let { knownThemes[it] ?: throw RuntimeException("Unknown theme $it") }
+        // fallback to MaterialLight if active theme was deleted
+        internalPrefs.activeThemeName.getValue().let {
+            currentTheme = getTheme(it) ?: defaultTheme.apply {
+                Timber.w("Cannot find active theme '$it', fallback to $name")
+                internalPrefs.activeThemeName.setValue(name)
+            }
+        }
     }
 
     private lateinit var currentTheme: Theme
@@ -144,7 +156,7 @@ object ThemeManager {
         onChangeListeners.forEach { it.onThemeChanged(currentTheme) }
     }
 
-    fun getAllThemes() = knownThemes.values.sortedBy { it is Theme.Builtin }
+    fun getAllThemes() = customThemes + builtinThemes
 
     fun getActiveTheme() = currentTheme
 
