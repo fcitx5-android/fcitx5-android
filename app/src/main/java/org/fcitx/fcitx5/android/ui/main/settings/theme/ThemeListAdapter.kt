@@ -4,6 +4,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.data.theme.Theme
 import splitties.views.dsl.core.Ui
+import timber.log.Timber
 
 abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHolder>() {
     class ViewHolder(val ui: Ui) : RecyclerView.ViewHolder(ui.root)
@@ -24,11 +25,13 @@ abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHold
     }
 
     fun setCheckedTheme(theme: Theme) {
+        Timber.d("Checked is $checkedIndex")
         val oldChecked = entryAt(checkedIndex)
         if (oldChecked === theme) return
         notifyItemChanged(checkedIndex)
         checkedIndex = positionOf(theme)
         notifyItemChanged(checkedIndex)
+        Timber.d("Set checked to $checkedIndex")
     }
 
     fun prependTheme(it: Theme) {
@@ -41,6 +44,26 @@ abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHold
         val index = entries.indexOfFirst { it.name.contentEquals(theme.name) }
         entries[index] = theme
         notifyItemChanged(index + OFFSET)
+    }
+
+    fun removeTheme(name: String) {
+        val index = entries.indexOfFirst { it.name.contentEquals(name) }
+        entries.removeAt(index)
+        notifyItemRemoved(index + OFFSET)
+        val cmp = (index - OFFSET).compareTo(checkedIndex)
+        when {
+            cmp > 0 -> {
+                // Do nothing
+            }
+            cmp == 0 -> {
+                // Reset
+                checkedIndex = -1
+            }
+            cmp < 0 -> {
+                // Fix
+                checkedIndex -= 1
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =

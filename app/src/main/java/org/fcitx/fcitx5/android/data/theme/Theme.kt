@@ -1,11 +1,15 @@
 package org.fcitx.fcitx5.android.data.theme
 
+import android.content.res.Resources
+import android.graphics.BitmapFactory
 import android.graphics.Rect
 import android.os.Parcelable
+import androidx.core.graphics.drawable.toDrawable
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import org.fcitx.fcitx5.android.utils.ColorInt
 import org.fcitx.fcitx5.android.utils.RectSerializer
+import org.fcitx.fcitx5.android.utils.darkenColorFilter
 
 @Serializable
 sealed class Theme : Parcelable {
@@ -60,8 +64,14 @@ sealed class Theme : Parcelable {
         data class CustomBackground(
             val croppedFilePath: String,
             val srcFilePath: String,
-            val cropRect: @Serializable(with = RectSerializer::class) Rect?
-        ) : Parcelable
+            val brightness: Int = 70,
+            val cropRect: @Serializable(with = RectSerializer::class) Rect?,
+        ) : Parcelable {
+            fun toDrawable(resources: Resources) =
+                BitmapFactory.decodeFile(croppedFilePath).toDrawable(resources).apply {
+                    colorFilter = darkenColorFilter(100 - brightness)
+                }
+        }
     }
 
     @Parcelize
@@ -87,12 +97,14 @@ sealed class Theme : Parcelable {
             name: String,
             croppedBackgroundImage: String,
             originBackgroundImage: String,
+            brightness: Int = 70,
             cropBackgroundRect: Rect? = null,
         ) = Custom(
             name,
             Custom.CustomBackground(
                 croppedBackgroundImage,
                 originBackgroundImage,
+                brightness,
                 cropBackgroundRect
             ),
             backgroundColor,
