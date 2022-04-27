@@ -9,6 +9,7 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.ImageView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
@@ -20,6 +21,7 @@ import splitties.dimensions.dp
 import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
+import splitties.views.imageDrawable
 import java.io.File
 
 class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
@@ -30,6 +32,10 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
     var intrinsicHeight: Int = -1
         private set
 
+    private val bkg = imageView {
+        scaleType = ImageView.ScaleType.CENTER_CROP
+    }
+
     private val fakeKawaiiBar = view(::View)
 
     private var keyboardWidth = -1
@@ -37,6 +43,10 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
     private lateinit var fakeKeyboardWindow: TextKeyboard
 
     private val fakeInputView = constraintLayout {
+        add(bkg, lParams {
+            centerVertically()
+            centerHorizontally()
+        })
         add(fakeKawaiiBar, lParams(height = dp(40)) {
             centerHorizontally()
         })
@@ -87,30 +97,33 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
     }
 
     fun setBackground(drawable: Drawable) {
-        root.background = drawable
+        bkg.imageDrawable = drawable
     }
 
     fun setTheme(theme: Theme) {
+        setBackground(when (theme) {
+            is Theme.Builtin -> ColorDrawable(
+                if (ThemeManager.prefs.keyBorder.getValue()) theme.backgroundColor.color
+                else theme.keyboardColor.color
+            )
+            is Theme.Custom -> theme.backgroundImage
+                ?.croppedFilePath
+                ?.takeIf { File(it).exists() }
+                ?.let { BitmapDrawable(ctx.resources, BitmapFactory.decodeFile(it)) }
+                ?: ColorDrawable(theme.backgroundColor.color)
+        })
         if (this::fakeKeyboardWindow.isInitialized) {
-            root.removeView(fakeKeyboardWindow)
+            fakeInputView.removeView(fakeKeyboardWindow)
         }
         fakeKawaiiBar.backgroundColor =
             if (ThemeManager.prefs.keyBorder.getValue()) Color.TRANSPARENT
             else theme.barColor.color
         fakeKeyboardWindow = TextKeyboard(ctx, theme)
-        root.apply {
-            add(fakeKeyboardWindow, lParams(keyboardWidth, keyboardHeight))
-            background = when (theme) {
-                is Theme.Builtin -> ColorDrawable(
-                    if (ThemeManager.prefs.keyBorder.getValue()) theme.backgroundColor.color
-                    else theme.keyboardColor.color
-                )
-                is Theme.Custom -> theme.backgroundImage?.let { (fp, _, _) ->
-                    fp.takeIf { File(fp).exists() }?.let {
-                        BitmapDrawable(ctx.resources, BitmapFactory.decodeFile(it))
-                    }
-                } ?: ColorDrawable(theme.backgroundColor.color)
-            }
+        fakeInputView.apply {
+            add(fakeKeyboardWindow, lParams(keyboardWidth, keyboardHeight) {
+                below(fakeKawaiiBar)
+                centerHorizontally()
+            })
         }
     }
 }

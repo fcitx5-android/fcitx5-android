@@ -5,7 +5,10 @@ import android.content.res.Configuration
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
+import android.widget.ImageView
+import android.widget.Space
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -31,12 +34,10 @@ import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.wrapToUniqueComponent
 import org.mechdancer.dependency.plusAssign
 import splitties.dimensions.dp
-import splitties.views.backgroundColor
-import splitties.views.bottomPadding
 import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.add
-import splitties.views.dsl.core.matchParent
-import splitties.views.dsl.core.withTheme
+import splitties.views.dsl.core.*
+import splitties.views.imageDrawable
+import java.io.File
 
 
 @SuppressLint("ViewConstructor")
@@ -45,6 +46,12 @@ class InputView(
     val fcitx: Fcitx,
     val theme: Theme
 ) : ConstraintLayout(service) {
+
+    private val customBackground = imageView {
+        scaleType = ImageView.ScaleType.CENTER_CROP
+    }
+
+    private val bottomPaddingSpace = view(::Space)
 
     private val themedContext = context.withTheme(R.style.Theme_FcitxAppTheme)
 
@@ -116,9 +123,11 @@ class InputView(
 
         AppPrefs.getInstance().keyboard.keyboardHeightPercent
             .registerOnChangeListener(onWindowHeightChangeListener)
-        ViewCompat.setOnApplyWindowInsetsListener(this) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
             insets.getInsets(WindowInsetsCompat.Type.navigationBars()).let {
-                v.bottomPadding = it.bottom
+                bottomPaddingSpace.updateLayoutParams<LayoutParams> {
+                    height = it.bottom
+                }
             }
             WindowInsetsCompat.CONSUMED
         }
@@ -127,23 +136,30 @@ class InputView(
             broadcaster.onImeUpdate(fcitx.currentIme())
         }
 
-        when (theme) {
-            is Theme.Builtin -> backgroundColor = theme.backgroundColor.color
-            is Theme.Custom -> theme.backgroundImage?.let {
-                background =
-                    BitmapDrawable(resources, BitmapFactory.decodeFile(it.croppedFilePath))
-            } ?: run { backgroundColor = theme.backgroundColor.color }
+        customBackground.imageDrawable = when (theme) {
+            is Theme.Builtin -> ColorDrawable(theme.backgroundColor.color)
+            is Theme.Custom -> theme.backgroundImage
+                ?.croppedFilePath
+                ?.takeIf { File(it).exists() }
+                ?.let { BitmapDrawable(resources, BitmapFactory.decodeFile(it)) }
+                ?: ColorDrawable(theme.backgroundColor.color)
         }
 
+        add(customBackground, lParams {
+            centerVertically()
+            centerHorizontally()
+        })
         add(kawaiiBar.view, lParams(matchParent, dp(40)) {
             topOfParent()
-            startOfParent()
-            endOfParent()
+            centerHorizontally()
         })
         add(windowManager.view, lParams(matchParent, windowHeightPx) {
             below(kawaiiBar.view)
-            startOfParent()
-            endOfParent()
+            centerHorizontally()
+            above(bottomPaddingSpace)
+        })
+        add(bottomPaddingSpace, lParams(matchParent) {
+            centerHorizontally()
             bottomOfParent()
         })
     }
