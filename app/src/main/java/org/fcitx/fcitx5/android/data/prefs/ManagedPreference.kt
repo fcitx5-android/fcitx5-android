@@ -8,6 +8,7 @@ import androidx.preference.Preference
 import androidx.preference.SwitchPreference
 import org.fcitx.fcitx5.android.ui.common.DialogSeekBarPreference
 import org.fcitx.fcitx5.android.utils.WeakHashSet
+import timber.log.Timber
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -132,8 +133,9 @@ sealed class ManagedPreference<T : Any, P : Preference>(
 
         override fun getValue(): T =
             sharedPreferences.getString(key, null).let { raw ->
-                raw?.let { codec.decode(it) }
-                    ?: throw RuntimeException("Failed to decode preference [$key] $raw")
+                raw?.runCatching { codec.decode(this) }
+                    ?.onFailure { Timber.w("Failed to decode value '$raw' of preference $key") }
+                    ?.getOrNull() ?: defaultValue
             }
     }
 

@@ -7,7 +7,6 @@ enum class ExpandedCandidateStyle {
     Flexbox;
 
     companion object : ManagedPreference.StringLikeCodec<ExpandedCandidateStyle> {
-        override fun decode(raw: String): ExpandedCandidateStyle? =
-            runCatching { valueOf(raw) }.getOrNull()
+        override fun decode(raw: String): ExpandedCandidateStyle = valueOf(raw)
     }
 }
