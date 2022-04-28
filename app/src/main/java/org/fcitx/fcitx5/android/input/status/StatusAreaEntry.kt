@@ -13,10 +13,11 @@ sealed class StatusAreaEntry(
     class Android(label: String, icon: Int, val type: Type) :
         StatusAreaEntry(label, icon, false) {
         enum class Type {
-            GlobalOptions,
+            GlobalOptions, // unused
             InputMethod,
             ReloadConfig,
-            Behavior
+            Behavior,
+            ThemeList
         }
     }
 

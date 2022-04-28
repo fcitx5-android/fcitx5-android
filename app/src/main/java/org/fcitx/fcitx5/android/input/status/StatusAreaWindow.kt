@@ -43,9 +43,9 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
     private val staticEntries by lazy {
         arrayOf(
             StatusAreaEntry.Android(
-                context.getString(R.string.global_options),
-                R.drawable.ic_baseline_tune_24,
-                GlobalOptions
+                context.getString(R.string.theme),
+                R.drawable.ic_baseline_palette_24,
+                ThemeList
             ),
             StatusAreaEntry.Android(
                 context.getString(R.string.input_method_options),
@@ -90,6 +90,9 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
                             }
                             Behavior -> AppUtil.launchMainToConfig(
                                 context, MainActivity.INTENT_DATA_CONFIG_BEHAVIOR
+                            )
+                            ThemeList -> AppUtil.launchMainToConfig(
+                                context, MainActivity.INTENT_DATA_CONFIG_THEME
                             )
                         }
                     }
