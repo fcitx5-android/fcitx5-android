@@ -82,22 +82,28 @@ class BackgroundImageActivity : AppCompatActivity() {
         textAppearance = resolveThemeAttribute(R.attr.textAppearanceListItem)
     }
 
-    val variantLabel by lazy {
+    private val variantLabel by lazy {
         createTextView(R.string.dark_keys)
     }
-    val variantSwitch by lazy {
+    private val variantSwitch by lazy {
         switch { }
     }
 
-    val brightnessLabel by lazy {
+    private val brightnessLabel by lazy {
         createTextView(R.string.brightness)
     }
-    val brightnessValue by lazy {
+    private val brightnessValue by lazy {
         createTextView()
     }
     private val brightnessSeekBar by lazy {
         seekBar {
             max = 100
+        }
+    }
+
+    private val cropButton by lazy {
+        button {
+            setText(R.string.crop)
         }
     }
 
@@ -153,8 +159,13 @@ class BackgroundImageActivity : AppCompatActivity() {
                 above(variantLabel)
                 verticalChainStyle = ConstraintLayout.LayoutParams.CHAIN_PACKED
             })
-            add(variantLabel, lParams(wrapContent, lineHeight) {
+            add(cropButton, lParams(wrapContent, lineHeight) {
                 below(previewUi.root, dp(16))
+                startOfParent(dp(46))
+                above(variantLabel)
+            })
+            add(variantLabel, lParams(wrapContent, lineHeight) {
+                below(cropButton)
                 startOfParent(dp(46))
                 above(brightnessLabel)
             })
@@ -243,9 +254,9 @@ class BackgroundImageActivity : AppCompatActivity() {
 
             @SuppressLint("SetTextI18n")
             override fun onProgressChanged(bar: SeekBar, progress: Int, fromUser: Boolean) {
-                brightnessValue.text = "$progress%"
-                image.colorFilter = darkenColorFilter(100 - progress)
-                previewUi.setBackground(image)
+                if (!fromUser)
+                    return
+                updateState()
             }
         })
         cancelButton.setOnClickListener {
@@ -282,56 +293,78 @@ class BackgroundImageActivity : AppCompatActivity() {
                 delete()
             }
         }
+        cropButton.setOnClickListener {
+            launchCrop(previewUi.intrinsicWidth, previewUi.intrinsicHeight)
+        }
         setContentView(ui)
         // after image was initialized
         val initValues = {
             brightnessSeekBar.progress = theme.background.brightness
             variantSwitch.isChecked = !theme.isDark
+            updateState()
         }
         if (!newCreated) {
             initValues()
         }
         launcher = registerForActivityResult(CropImageContract()) {
-            if (!it.isSuccessful && newCreated)
-                cancel()
+            if (!it.isSuccessful)
+                if (newCreated)
+                    cancel()
+                else
+                    return@registerForActivityResult
             else {
                 rect = it.cropRect!!
-                theme = theme.copy(backgroundImage = theme.backgroundImage?.copy(cropRect = rect))
                 @Suppress("DEPRECATION")
-                src = when {
-                    Build.VERSION.SDK_INT < 28 -> MediaStore.Images.Media.getBitmap(
-                        contentResolver,
-                        it.originalUri!!
-                    )
-                    else -> {
-                        val source = ImageDecoder.createSource(contentResolver, it.originalUri!!)
-                        ImageDecoder.decodeBitmap(source)
+                if (src == null)
+                    src = when {
+                        Build.VERSION.SDK_INT < 28 -> MediaStore.Images.Media.getBitmap(
+                            contentResolver,
+                            it.originalUri!!
+                        )
+                        else -> {
+                            val source =
+                                ImageDecoder.createSource(contentResolver, it.originalUri!!)
+                            ImageDecoder.decodeBitmap(source)
+                        }
                     }
-                }
                 cropped = it.getBitmap(this)!!
                 image = BitmapDrawable(resources, cropped)
-                initValues()
+                updateState()
             }
         }
 
         if (newCreated)
             previewUi.onSizeMeasured = { w, h ->
-                launcher.launch(options(srcImageFile.takeIf { it.exists() }?.toUri()) {
-                    setInitialCropWindowRectangle(rect)
-                    setGuidelines(CropImageView.Guidelines.ON_TOUCH)
-                    setBorderLineColor(Color.WHITE)
-                    setBorderLineThickness(dp(1f))
-                    setBorderCornerColor(Color.WHITE)
-                    setBorderCornerOffset(0f)
-                    setImageSource(includeGallery = true, includeCamera = false)
-                    setAspectRatio(w, h)
-                    setOutputCompressFormat(Bitmap.CompressFormat.PNG)
-                })
+                launchCrop(w, h)
             }
     }
 
+    private fun launchCrop(w: Int, h: Int) {
+        launcher.launch(options(srcImageFile.takeIf { it.exists() }?.toUri()) {
+            setInitialCropWindowRectangle(rect)
+            setGuidelines(CropImageView.Guidelines.ON_TOUCH)
+            setBorderLineColor(Color.WHITE)
+            setBorderLineThickness(dp(1f))
+            setBorderCornerColor(Color.WHITE)
+            setBorderCornerOffset(0f)
+            setImageSource(includeGallery = true, includeCamera = false)
+            setAspectRatio(w, h)
+            setOutputCompressFormat(Bitmap.CompressFormat.PNG)
+        })
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun updateState() {
+        val progress = brightnessSeekBar.progress
+        brightnessValue.text = "$progress%"
+        image.colorFilter = darkenColorFilter(100 - progress)
+        previewUi.setBackground(image)
+    }
+
     private fun cancel() {
-        setResult(Activity.RESULT_CANCELED, Intent().apply { putExtra(RESULT, null as BackgroundResult?) })
+        setResult(
+            Activity.RESULT_CANCELED,
+            Intent().apply { putExtra(RESULT, null as BackgroundResult?) })
         finish()
     }
 
@@ -353,7 +386,13 @@ class BackgroundImageActivity : AppCompatActivity() {
                 Activity.RESULT_OK,
                 Intent().apply {
                     val newTheme =
-                        theme.copy(backgroundImage = theme.background.copy(brightness = brightnessSeekBar.progress))
+                        theme.copy(
+                            backgroundImage =
+                            theme.background.copy(
+                                brightness = brightnessSeekBar.progress,
+                                cropRect = rect
+                            )
+                        )
                     putExtra(
                         RESULT,
                         if (newCreated)

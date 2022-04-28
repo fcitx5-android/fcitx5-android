@@ -111,4 +111,5 @@
     <string name="configure_theme">Configure Theme</string>
     <string name="choose_image">Choose Image</string>
     <string name="dark_keys">Dark Keys</string>
+    <string name="crop">Crop</string>
 </resources>

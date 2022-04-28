@@ -25,7 +25,6 @@ import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.gravityVerticalCenter
 import splitties.views.imageDrawable
 import splitties.views.textAppearance
-import timber.log.Timber
 
 class ThemeListFragment : ProgressFragment() {
 
@@ -38,7 +37,6 @@ class ThemeListFragment : ProgressFragment() {
     private lateinit var themeList: RecyclerView
 
     private val onThemeChangedListener = ThemeManager.OnThemeChangedListener {
-        Timber.d(it.toString())
         previewUi.setTheme(it)
         adapter.setCheckedTheme(it)
     }
@@ -63,10 +61,11 @@ class ThemeListFragment : ProgressFragment() {
                     is BackgroundImageActivity.BackgroundResult.Updated -> {
                         val theme = result.theme
                         ThemeManager.saveTheme(theme)
-                        // An active theme has been updated
-                        if (theme.name == ThemeManager.getActiveTheme().name)
-                            ThemeManager.fireChange()
                         adapter.replaceTheme(theme)
+                        // the listener was already called in ThemeManager.saveTheme
+                        // but it should have been called after the adapter changed
+                        // thus we manually call the listener here
+                        onThemeChangedListener.onThemeChanged(theme)
                     }
                 }
             }
