@@ -213,8 +213,9 @@ sealed class ManagedPreference<T : Any, P : Preference>(
         }
 
         override fun getValue(): T = sharedPreferences.getString(key, null).let { raw ->
-            raw?.let { codec.decode(it) }
-                ?: throw RuntimeException("Failed to decode preference [$key] $raw")
+            raw?.runCatching { codec.decode(this) }
+                ?.onFailure { Timber.w("Failed to decode value '$raw' of preference $key") }
+                ?.getOrNull() ?: defaultValue
         }
     }
 
