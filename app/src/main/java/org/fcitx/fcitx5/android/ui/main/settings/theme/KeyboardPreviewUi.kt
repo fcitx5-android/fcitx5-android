@@ -67,6 +67,15 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
         return w to (h * ratio / 100)
     }
 
+    /**
+     * https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-11.0.0_r48/services/core/java/com/android/server/wm/DisplayPolicy.java#3221
+     * https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-11.0.0_r48/services/core/java/com/android/server/wm/DisplayPolicy.java#3059
+     */
+    private fun navbarHeight() = ctx.resources.run {
+        val id = getIdentifier("navigation_bar_frame_height", "dimen", "android")
+        if (id > 0) getDimensionPixelSize(id) else 0
+    }
+
     init {
         val (w, h) = keyboardWindowAspectRatio()
         keyboardWidth = w
@@ -100,7 +109,11 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
         intrinsicHeight = keyboardHeight + ctx.dp(40)
         // bottom padding
         ViewCompat.getRootWindowInsets(root)?.also {
-            intrinsicHeight += it.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            // IME window has different navbar height when system navigation in "gesture navigation" mode
+            // thus the inset from Activity root window is unreliable
+            if (it.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom > 0) {
+                intrinsicHeight += navbarHeight()
+            }
         }
         fakeInputView.updateLayoutParams<FrameLayout.LayoutParams> {
             width = intrinsicWidth
