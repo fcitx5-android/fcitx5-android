@@ -18,7 +18,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import com.canhub.cropper.CropImageContract
@@ -38,14 +37,12 @@ import splitties.dimensions.dp
 import splitties.resources.color
 import splitties.resources.resolveThemeAttribute
 import splitties.resources.styledColor
-import splitties.views.backgroundColor
-import splitties.views.bottomPadding
+import splitties.resources.styledDrawable
+import splitties.views.*
 import splitties.views.dsl.appcompat.switch
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.dsl.core.styles.AndroidStyles
-import splitties.views.gravityVerticalCenter
-import splitties.views.textAppearance
 import java.io.File
 
 class BackgroundImageActivity : AppCompatActivity() {
@@ -74,16 +71,20 @@ class BackgroundImageActivity : AppCompatActivity() {
 
     private lateinit var previewUi: KeyboardPreviewUi
 
-    private fun createTextView(@StringRes string: Int? = null) = textView {
+    private fun createTextView(@StringRes string: Int? = null, ripple: Boolean = false) = textView {
         if (string != null) {
             setText(string)
         }
         gravity = gravityVerticalCenter
         textAppearance = resolveThemeAttribute(R.attr.textAppearanceListItem)
+        horizontalPadding = dp(16)
+        if (ripple) {
+            background = styledDrawable(R.attr.selectableItemBackground)
+        }
     }
 
     private val variantLabel by lazy {
-        createTextView(R.string.dark_keys)
+        createTextView(R.string.dark_keys, ripple = true)
     }
     private val variantSwitch by lazy {
         switch { }
@@ -101,10 +102,8 @@ class BackgroundImageActivity : AppCompatActivity() {
         }
     }
 
-    private val cropButton by lazy {
-        button {
-            setText(R.string.crop)
-        }
+    private val cropLabel by lazy {
+        createTextView(R.string.recrop_image, ripple = true)
     }
 
     private val androidStyles by lazy {
@@ -151,40 +150,43 @@ class BackgroundImageActivity : AppCompatActivity() {
 
     private val scrollView by lazy {
         val lineHeight = dp(48)
+        val itemMargin = dp(30)
         constraintLayout {
             bottomPadding = dp(24)
             add(previewUi.root, lParams(wrapContent, wrapContent) {
                 topOfParent()
                 centerHorizontally()
-                above(variantLabel)
-                verticalChainStyle = ConstraintLayout.LayoutParams.CHAIN_PACKED
+                above(cropLabel, dp(8))
+                verticalChainStyle = packed
             })
-            add(cropButton, lParams(wrapContent, lineHeight) {
-                below(previewUi.root, dp(16))
-                startOfParent(dp(46))
+            add(cropLabel, lParams(matchConstraints, lineHeight) {
+                below(previewUi.root)
+                centerHorizontally(itemMargin)
                 above(variantLabel)
             })
-            add(variantLabel, lParams(wrapContent, lineHeight) {
-                below(cropButton)
-                startOfParent(dp(46))
+            add(variantLabel, lParams(matchConstraints, lineHeight) {
+                below(cropLabel)
+                startOfParent(itemMargin)
+                before(variantSwitch)
                 above(brightnessLabel)
             })
             add(variantSwitch, lParams(wrapContent, lineHeight) {
                 topToTopOf(variantLabel)
-                endOfParent(dp(46))
+                endOfParent(itemMargin)
             })
-            add(brightnessLabel, lParams(wrapContent, lineHeight) {
+            add(brightnessLabel, lParams(matchConstraints, lineHeight) {
                 below(variantLabel)
-                startOfParent(dp(46))
+                startOfParent(itemMargin)
+                before(brightnessValue)
                 above(brightnessSeekBar)
             })
             add(brightnessValue, lParams(wrapContent, lineHeight) {
                 topToTopOf(brightnessLabel)
-                endOfParent(dp(46))
+                endOfParent(itemMargin)
             })
             add(brightnessSeekBar, lParams(matchConstraints, wrapContent) {
                 below(brightnessLabel)
-                centerHorizontally(dp(30))
+                centerHorizontally(itemMargin)
                 bottomOfParent()
             })
         }.wrapInScrollView {
@@ -207,10 +209,10 @@ class BackgroundImageActivity : AppCompatActivity() {
     }
 
     private lateinit var launcher: ActivityResultLauncher<CropImageContractOptions>
-    private lateinit var image: BitmapDrawable
-    private var src: Bitmap? = null
-    private lateinit var cropped: Bitmap
-    private var rect: Rect? = null
+    private var srcBitmap: Bitmap? = null
+    private var cropRect: Rect? = null
+    private lateinit var croppedBitmap: Bitmap
+    private lateinit var filteredDrawable: BitmapDrawable
     private var newCreated = true
 
     private lateinit var theme: Theme.Custom
@@ -239,11 +241,21 @@ class BackgroundImageActivity : AppCompatActivity() {
                 theme.background.cropRect
             )
         previewUi.setTheme(theme)
-        previewUi.setBackground(image)
+        if (newCreated) {
+            // new created theme's background image file have not been created yet
+            // update preview background manually
+            previewUi.setBackground(filteredDrawable)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        cropLabel.setOnClickListener {
+            launchCrop(previewUi.intrinsicWidth, previewUi.intrinsicHeight)
+        }
+        variantLabel.setOnClickListener {
+            variantSwitch.isChecked = !variantSwitch.isChecked
+        }
         variantSwitch.setOnCheckedChangeListener { _, isChecked ->
             setKeyVariant(darkKeys = isChecked)
         }
@@ -252,11 +264,8 @@ class BackgroundImageActivity : AppCompatActivity() {
             override fun onStartTrackingTouch(bar: SeekBar) {}
             override fun onStopTrackingTouch(bar: SeekBar) {}
 
-            @SuppressLint("SetTextI18n")
             override fun onProgressChanged(bar: SeekBar, progress: Int, fromUser: Boolean) {
-                if (!fromUser)
-                    return
-                updateState()
+                if (fromUser) updateState()
             }
         })
         cancelButton.setOnClickListener {
@@ -271,9 +280,9 @@ class BackgroundImageActivity : AppCompatActivity() {
             t.background.also {
                 croppedImageFile = File(it.croppedFilePath)
                 srcImageFile = File(it.srcFilePath)
-                rect = it.cropRect
-                cropped = BitmapFactory.decodeFile(it.croppedFilePath)
-                image = BitmapDrawable(resources, cropped)
+                cropRect = it.cropRect
+                croppedBitmap = BitmapFactory.decodeFile(it.croppedFilePath)
+                filteredDrawable = BitmapDrawable(resources, croppedBitmap)
             }
             newCreated = false
         }
@@ -287,61 +296,46 @@ class BackgroundImageActivity : AppCompatActivity() {
                     .deriveCustomBackground(n, c.path, s.path)
         }
         previewUi = KeyboardPreviewUi(this, theme)
-        if (!newCreated) {
-            deleteButton.visibility = View.VISIBLE
-            deleteButton.setOnClickListener {
-                delete()
-            }
-        }
-        cropButton.setOnClickListener {
-            launchCrop(previewUi.intrinsicWidth, previewUi.intrinsicHeight)
-        }
         setContentView(ui)
-        // after image was initialized
-        val initValues = {
-            brightnessSeekBar.progress = theme.background.brightness
-            variantSwitch.isChecked = !theme.isDark
-            updateState()
-        }
-        if (!newCreated) {
-            initValues()
-        }
+        brightnessSeekBar.progress = theme.background.brightness
+        variantSwitch.isChecked = !theme.isDark
         launcher = registerForActivityResult(CropImageContract()) {
-            if (!it.isSuccessful)
+            if (!it.isSuccessful) {
                 if (newCreated)
                     cancel()
                 else
                     return@registerForActivityResult
-            else {
-                rect = it.cropRect!!
-                @Suppress("DEPRECATION")
-                if (src == null)
-                    src = when {
-                        Build.VERSION.SDK_INT < 28 -> MediaStore.Images.Media.getBitmap(
-                            contentResolver,
-                            it.originalUri!!
-                        )
-                        else -> {
-                            val source =
-                                ImageDecoder.createSource(contentResolver, it.originalUri!!)
-                            ImageDecoder.decodeBitmap(source)
-                        }
-                    }
-                cropped = it.getBitmap(this)!!
-                image = BitmapDrawable(resources, cropped)
+            } else {
+                cropRect = it.cropRect!!
+                srcBitmap = if (Build.VERSION.SDK_INT < 28)
+                    @Suppress("DEPRECATION")
+                    MediaStore.Images.Media.getBitmap(contentResolver, it.originalUri!!)
+                else ImageDecoder.decodeBitmap(
+                    ImageDecoder.createSource(contentResolver, it.originalUri!!)
+                )
+                croppedBitmap = it.getBitmap(this)!!
+                filteredDrawable = BitmapDrawable(resources, croppedBitmap)
                 updateState()
             }
         }
 
-        if (newCreated)
+        if (newCreated) {
+            cropLabel.visibility = View.GONE
             previewUi.onSizeMeasured = { w, h ->
                 launchCrop(w, h)
             }
+        } else {
+            deleteButton.apply {
+                visibility = View.VISIBLE
+                setOnClickListener { delete() }
+            }
+            updateState()
+        }
     }
 
     private fun launchCrop(w: Int, h: Int) {
         launcher.launch(options(srcImageFile.takeIf { it.exists() }?.toUri()) {
-            setInitialCropWindowRectangle(rect)
+            setInitialCropWindowRectangle(cropRect)
             setGuidelines(CropImageView.Guidelines.ON_TOUCH)
             setBorderLineColor(Color.WHITE)
             setBorderLineThickness(dp(1f))
@@ -357,8 +351,8 @@ class BackgroundImageActivity : AppCompatActivity() {
     private fun updateState() {
         val progress = brightnessSeekBar.progress
         brightnessValue.text = "$progress%"
-        image.colorFilter = darkenColorFilter(100 - progress)
-        previewUi.setBackground(image)
+        filteredDrawable.colorFilter = darkenColorFilter(100 - progress)
+        previewUi.setBackground(filteredDrawable)
     }
 
     private fun cancel() {
@@ -373,12 +367,12 @@ class BackgroundImageActivity : AppCompatActivity() {
             withContext(Dispatchers.IO) {
                 croppedImageFile.delete()
                 croppedImageFile.outputStream().use {
-                    cropped.compress(Bitmap.CompressFormat.PNG, 100, it)
+                    croppedBitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
                 }
                 if (newCreated) {
                     srcImageFile.delete()
                     srcImageFile.outputStream().use {
-                        requireNotNull(src).compress(Bitmap.CompressFormat.PNG, 100, it)
+                        requireNotNull(srcBitmap).compress(Bitmap.CompressFormat.PNG, 100, it)
                     }
                 }
             }
@@ -390,7 +384,7 @@ class BackgroundImageActivity : AppCompatActivity() {
                             backgroundImage =
                             theme.background.copy(
                                 brightness = brightnessSeekBar.progress,
-                                cropRect = rect
+                                cropRect = cropRect
                             )
                         )
                     putExtra(
