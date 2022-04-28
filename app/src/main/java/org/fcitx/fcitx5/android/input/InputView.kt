@@ -20,6 +20,7 @@ import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcaster
 import org.fcitx.fcitx5.android.input.candidates.CandidateViewBuilder
@@ -135,7 +136,10 @@ class InputView(
         }
 
         customBackground.imageDrawable = when (theme) {
-            is Theme.Builtin -> ColorDrawable(theme.backgroundColor.color)
+            is Theme.Builtin -> ColorDrawable(
+                if (ThemeManager.prefs.keyBorder.getValue()) theme.backgroundColor.color
+                else theme.keyboardColor.color
+            )
             is Theme.Custom -> theme.backgroundImage
                 ?.croppedFilePath
                 ?.takeIf { File(it).exists() }
