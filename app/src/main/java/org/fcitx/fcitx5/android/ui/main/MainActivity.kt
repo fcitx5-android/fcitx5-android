@@ -106,6 +106,8 @@ class MainActivity : AppCompatActivity() {
                             (intent.getBundleExtra(INTENT_DATA_CONFIG_IM) ?: return false)
                 INTENT_DATA_CONFIG_BEHAVIOR ->
                     R.id.action_mainFragment_to_behaviorSettingsFragment to null
+                INTENT_DATA_CONFIG_THEME ->
+                    R.id.action_mainFragment_to_themeListFragment to null
                 else -> return false
             }
             // we need fcitx instance
@@ -168,5 +170,6 @@ class MainActivity : AppCompatActivity() {
         const val INTENT_DATA_CONFIG_GLOBAL = "global"
         const val INTENT_DATA_CONFIG_IM = "im"
         const val INTENT_DATA_CONFIG_BEHAVIOR = "behavior"
+        const val INTENT_DATA_CONFIG_THEME = "theme"
     }
 }
