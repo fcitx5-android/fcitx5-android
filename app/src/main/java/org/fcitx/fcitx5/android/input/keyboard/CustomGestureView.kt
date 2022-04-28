@@ -147,8 +147,12 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                     } else {
                         performClick()
                     }
+                } else {
+                    // TODO refactor select-to-delete and cursor move KeyAction
+                    // invoking this listener in else branch kinda defeats the purpose of 'onTouchLeave'
+                    // since only backspace key is using it, this could be a workaround for double-delete issue
+                    onTouchLeaveListener?.invoke(this)
                 }
-                onTouchLeaveListener?.invoke(this)
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
