@@ -47,8 +47,8 @@ class ThemeListFragment : ProgressFragment() {
                 when (result) {
                     is BackgroundImageActivity.BackgroundResult.Created -> {
                         val theme = result.theme
-                        ThemeManager.saveTheme(theme)
                         adapter.prependTheme(theme)
+                        ThemeManager.saveTheme(theme)
                         ThemeManager.switchTheme(theme)
                     }
                     is BackgroundImageActivity.BackgroundResult.Deleted -> {
@@ -60,12 +60,8 @@ class ThemeListFragment : ProgressFragment() {
                     }
                     is BackgroundImageActivity.BackgroundResult.Updated -> {
                         val theme = result.theme
-                        ThemeManager.saveTheme(theme)
                         adapter.replaceTheme(theme)
-                        // the listener was already called in ThemeManager.saveTheme
-                        // but it should have been called after the adapter changed
-                        // thus we manually call the listener here
-                        onThemeChangedListener.onThemeChanged(theme)
+                        ThemeManager.saveTheme(theme)
                     }
                 }
             }
