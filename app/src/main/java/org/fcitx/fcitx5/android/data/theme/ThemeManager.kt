@@ -48,7 +48,14 @@ object ThemeManager {
 
     fun saveTheme(theme: Theme.Custom) {
         themeFile(theme).writeText(Json.encodeToString(theme))
-        customThemes.add(0, theme)
+        val old = customThemes.indexOfFirst { it.name == theme.name }.takeIf { it != -1 }
+        old?.let { customThemes[it] = theme } ?: run {
+            customThemes.add(0, theme)
+        }
+        if (getActiveTheme().name == theme.name) {
+            currentTheme = theme
+            fireChange()
+        }
     }
 
     fun deleteTheme(name: String) {
