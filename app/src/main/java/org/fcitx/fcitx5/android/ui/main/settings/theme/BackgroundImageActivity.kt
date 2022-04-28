@@ -18,6 +18,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.applyCanvas
+import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import com.canhub.cropper.CropImageContract
@@ -364,10 +366,17 @@ class BackgroundImageActivity : AppCompatActivity() {
 
     private fun done() {
         lifecycleScope.withLoadingDialog(this) {
+            val bitmap = createBitmap(previewUi.intrinsicWidth, previewUi.intrinsicHeight)
+            bitmap.applyCanvas {
+                drawBitmap(
+                    croppedBitmap, null,
+                    Rect(0, 0, previewUi.intrinsicWidth, previewUi.intrinsicHeight), Paint()
+                )
+            }
             withContext(Dispatchers.IO) {
                 croppedImageFile.delete()
                 croppedImageFile.outputStream().use {
-                    croppedBitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
                 }
                 if (newCreated) {
                     srcImageFile.delete()
