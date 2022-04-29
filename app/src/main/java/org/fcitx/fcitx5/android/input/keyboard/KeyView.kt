@@ -16,6 +16,7 @@ import androidx.core.view.updateLayoutParams
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.ThemeManager.Prefs.PunctuationPosition
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Variant
 import org.fcitx.fcitx5.android.utils.styledFloat
 import org.fcitx.fcitx5.android.utils.unset
@@ -188,51 +189,64 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
         applyLayout(resources.configuration.orientation)
     }
 
-    private fun applyLayout(orientation: Int) = when (orientation) {
-        Configuration.ORIENTATION_LANDSCAPE -> {
-            mainText.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                // reset
-                bottomToTop = unset
-                // set
-                topToTop = parentId
-                startToStart = parentId
-                endToEnd = parentId
-                bottomToBottom = parentId
-            }
-            altText.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                // reset
-                topToBottom = unset
-                bottomToBottom = unset
-                // set
-                topToTop = parentId; topMargin = vMargin
-                startToStart = unset
-                endToEnd = parentId; endMargin = (hMargin + dp(4))
-            }
+    private fun applyTopRightAltTextPosition() {
+        mainText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            // reset
+            bottomToTop = unset
+            // set
+            topToTop = parentId
+            startToStart = parentId
+            endToEnd = parentId
+            bottomToBottom = parentId
         }
-        else -> {
-            mainText.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                // reset
-                bottomToBottom = unset
-                // set
-                topToTop = parentId
-                startToStart = parentId
-                endToEnd = parentId
-                bottomToTop = altText.existingOrNewId
+        altText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            // reset
+            topToBottom = unset
+            bottomToBottom = unset
+            // set
+            topToTop = parentId; topMargin = vMargin
+            startToStart = unset
+            endToEnd = parentId; endMargin = (hMargin + dp(4))
+        }
+    }
+
+    private fun applyBottomAltTextPosition() {
+        mainText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            // reset
+            bottomToBottom = unset
+            // set
+            topToTop = parentId
+            startToStart = parentId
+            endToEnd = parentId
+            bottomToTop = altText.existingOrNewId
+        }
+        altText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            // reset
+            topToTop = unset; topMargin = 0
+            endMargin = 0
+            // set
+            topToBottom = mainText.existingOrNewId
+            startToStart = parentId
+            endToEnd = parentId
+            bottomToBottom = parentId
+        }
+    }
+
+    private fun applyLayout(orientation: Int) {
+        Configuration.ORIENTATION_PORTRAIT
+        when (ThemeManager.prefs.punctuationPosition.getValue()) {
+            PunctuationPosition.Bottom -> when (orientation) {
+                Configuration.ORIENTATION_LANDSCAPE -> applyTopRightAltTextPosition()
+                else -> applyBottomAltTextPosition()
             }
-            altText.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                // reset
-                topToTop = unset; topMargin = 0
-                endMargin = 0
-                // set
-                topToBottom = mainText.existingOrNewId
-                startToStart = parentId
-                endToEnd = parentId
-                bottomToBottom = parentId
-            }
+            PunctuationPosition.TopRight -> applyTopRightAltTextPosition()
         }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
+        if (ThemeManager.prefs.punctuationPosition.getValue() == PunctuationPosition.TopRight) {
+            return
+        }
         applyLayout(newConfig.orientation)
     }
 }

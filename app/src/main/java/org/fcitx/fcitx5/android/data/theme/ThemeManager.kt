@@ -111,6 +111,26 @@ object ThemeManager {
 
         val keyRadius = int(R.string.key_radius, "key_radius", 4, 0, 48)
 
+        val punctuationPosition = list(
+            R.string.punctuation_position,
+            "punctuation_position",
+            PunctuationPosition.Bottom,
+            PunctuationPosition,
+            listOf(
+                appContext.getString(R.string.punctuation_pos_bottom) to PunctuationPosition.Bottom,
+                appContext.getString(R.string.punctuation_pos_top_right) to PunctuationPosition.TopRight
+            )
+        )
+
+        enum class PunctuationPosition {
+            Bottom,
+            TopRight;
+
+            companion object : ManagedPreference.StringLikeCodec<PunctuationPosition> {
+                override fun decode(raw: String): PunctuationPosition = valueOf(raw)
+            }
+        }
+
         val navbarBackground = list(
             R.string.navbar_background,
             "navbar_background",
@@ -172,6 +192,7 @@ object ThemeManager {
         prefs.keyRippleEffect.registerOnChangeListener(prefsChange)
         prefs.keyVerticalMargin.registerOnChangeListener(prefsChange)
         prefs.keyHorizontalMargin.registerOnChangeListener(prefsChange)
+        prefs.punctuationPosition.registerOnChangeListener(prefsChange)
         prefs.navbarBackground.registerOnChangeListener(prefsChange)
         // fallback to MaterialLight if active theme was deleted
         internalPrefs.activeThemeName.getValue().let {
