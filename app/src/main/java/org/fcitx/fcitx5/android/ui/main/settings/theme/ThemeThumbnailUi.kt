@@ -72,7 +72,7 @@ class ThemeThumbnailUi(override val ctx: Context) : Ui {
             foreground = rippleDrawable(theme.keyPressHighlightColor.color)
         }
         bkg.imageDrawable = when (theme) {
-            is Theme.Builtin -> ColorDrawable(theme.backgroundColor.color)
+            is Theme.Builtin -> ColorDrawable(theme.keyboardColor.color)
             is Theme.Custom -> theme.backgroundImage?.toDrawable(ctx.resources)
                 ?: ColorDrawable(theme.backgroundColor.color)
         }
