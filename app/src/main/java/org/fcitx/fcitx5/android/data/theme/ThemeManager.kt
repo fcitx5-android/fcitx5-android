@@ -172,7 +172,12 @@ object ThemeManager {
         ThemePreset.MaterialLight,
         ThemePreset.MaterialDark,
         ThemePreset.PixelLight,
-        ThemePreset.PixelDark
+        ThemePreset.PixelDark,
+        ThemePreset.NordLight,
+        ThemePreset.NordDark,
+        ThemePreset.DeepBlue,
+        ThemePreset.Monokai,
+        ThemePreset.AMOLEDBlack,
     )
 
     private val onActiveThemeNameChange = ManagedPreference.OnChangeListener<String> {

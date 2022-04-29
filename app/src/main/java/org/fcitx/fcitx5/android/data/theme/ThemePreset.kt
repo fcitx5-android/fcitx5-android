@@ -85,6 +85,103 @@ object ThemePreset {
         isDark = true
     )
 
+    val DeepBlue = Theme.Builtin(
+        name = "DeepBlue",
+        backgroundColor = 0xff1565c0.color,
+        barColor = 0xff0d47a1.color,
+        keyboardColor = 0xff1565c0.color,
+        keyBackgroundColor = 0xff3f80cb.color,
+        keyTextColor = 0xffffffff.color,
+        altKeyBackgroundColor = 0xff2771c4.color,
+        // Google Pinyin's symbol color on alphabet key: #d6d6d6
+        altKeyTextColor = 0xffa9c6e7.color,
+        accentKeyBackgroundColor = 0xff2196f3.color,
+        accentKeyTextColor = 0xffffffff.color,
+        keyPressHighlightColor = 0x33ffffff.color,
+        keyShadowColor = 0xff1255a1.color,
+        spaceBarColor = 0xff7eaadc.color,
+        dividerColor = 0x1fffffff.color,
+        clipboardEntryColor = 0xff464646.color,
+        isDark = true
+    )
+
+    val AMOLEDBlack = Theme.Builtin(
+        name = "AMOLEDBlack",
+        backgroundColor = 0xff000000.color,
+        barColor = 0xff373737.color,
+        keyboardColor = 0xff000000.color,
+        keyBackgroundColor = 0xff2e2e2e.color,
+        keyTextColor = 0xffffffff.color,
+        altKeyBackgroundColor = 0xff141414.color,
+        // Google Pinyin's symbol color on alphabet key: #d9e6f5
+        altKeyTextColor = 0xffa1a1a1.color,
+        accentKeyBackgroundColor = 0xff80cbc4.color,
+        accentKeyTextColor = 0xffffffff.color,
+        keyPressHighlightColor = 0x33ffffff.color,
+        keyShadowColor = 0xff1255a1.color,
+        spaceBarColor = 0xff727272.color,
+        dividerColor = 0x1fffffff.color,
+        clipboardEntryColor = 0xff464646.color,
+        isDark = true
+    )
+
+    val NordLight = Theme.Builtin(
+        name = "NordLight",
+        backgroundColor = 0xffD8DEE9.color,
+        barColor = 0xffE5E9F0.color,
+        keyboardColor = 0xffECEFF4.color,
+        keyBackgroundColor = 0xffECEFF4.color,
+        keyTextColor = 0xff2E3440.color,
+        altKeyBackgroundColor = 0xffE5E9F0.color,
+        altKeyTextColor = 0xff434C5E.color,
+        accentKeyBackgroundColor = 0xff5E81AC.color,
+        accentKeyTextColor = 0xffECEFF4.color,
+        keyPressHighlightColor = 0x1f000000.color,
+        keyShadowColor = 0x1f000000.color,
+        spaceBarColor = 0xffD8DEE9.color,
+        dividerColor = 0x1f000000.color,
+        clipboardEntryColor = 0xffffffff.color,
+        isDark = false
+    )
+
+    val NordDark = Theme.Builtin(
+        name = "NordDark",
+        backgroundColor = 0xff2E3440.color,
+        barColor = 0xff434C5E.color,
+        keyboardColor = 0xff2E3440.color,
+        keyBackgroundColor = 0xff4C566A.color,
+        keyTextColor = 0xffECEFF4.color,
+        altKeyBackgroundColor = 0xff3B4252.color,
+        altKeyTextColor = 0xffD8DEE9.color,
+        accentKeyBackgroundColor = 0xff88C0D0.color,
+        accentKeyTextColor = 0xff2E3440.color,
+        keyPressHighlightColor = 0x33ffffff.color,
+        keyShadowColor = 0xff434C5E.color,
+        spaceBarColor = 0xff4C566A.color,
+        dividerColor = 0x1fffffff.color,
+        clipboardEntryColor = 0xff464646.color,
+        isDark = true
+    )
+
+    val Monokai = Theme.Builtin(
+        name = "Monokai",
+        backgroundColor = 0xff272822.color,
+        barColor = 0xff1f201b.color,
+        keyboardColor = 0xff272822.color,
+        keyBackgroundColor = 0xff33342c.color,
+        keyTextColor = 0xffd6d6d6.color,
+        altKeyBackgroundColor = 0xff2d2e27.color,
+        altKeyTextColor = 0xff797979.color,
+        accentKeyBackgroundColor = 0xffb05279.color,
+        accentKeyTextColor = 0xffd6d6d6.color,
+        keyPressHighlightColor = 0x33ffffff.color,
+        keyShadowColor = 0xff171813.color,
+        spaceBarColor = 0xff373830.color,
+        dividerColor = 0x1fffffff.color,
+        clipboardEntryColor = 0xff464646.color,
+        isDark = true
+    )
+
     /**
      * transparent background with semi-transparent white keys
      */
