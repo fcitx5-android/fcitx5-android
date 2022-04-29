@@ -15,6 +15,7 @@ import androidx.core.view.updateLayoutParams
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.ThemeManager.Prefs.NavbarBackground
 import org.fcitx.fcitx5.android.input.keyboard.TextKeyboard
 import splitties.dimensions.dp
 import splitties.views.backgroundColor
@@ -109,14 +110,16 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
         // bar height
         intrinsicHeight = barHeight + keyboardHeight
         // bottom padding
-        ViewCompat.getRootWindowInsets(root)?.also {
-            // IME window has different navbar height when system navigation in "gesture navigation" mode
-            // thus the inset from Activity root window is unreliable
-            if (it.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom > 0 ||
-                // in case navigation hint was hidden ...
-                it.getInsets(WindowInsetsCompat.Type.systemGestures()).bottom > 0
-            ) {
-                intrinsicHeight = barHeight + keyboardHeight + navbarHeight()
+        if (ThemeManager.prefs.navbarBackground.getValue() == NavbarBackground.Full) {
+            ViewCompat.getRootWindowInsets(root)?.also {
+                // IME window has different navbar height when system navigation in "gesture navigation" mode
+                // thus the inset from Activity root window is unreliable
+                if (it.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom > 0 ||
+                    // in case navigation hint was hidden ...
+                    it.getInsets(WindowInsetsCompat.Type.systemGestures()).bottom > 0
+                ) {
+                    intrinsicHeight = barHeight + keyboardHeight + navbarHeight()
+                }
             }
         }
         fakeInputView.updateLayoutParams<FrameLayout.LayoutParams> {
