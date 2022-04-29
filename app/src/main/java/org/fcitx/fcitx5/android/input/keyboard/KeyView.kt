@@ -22,7 +22,10 @@ import org.fcitx.fcitx5.android.utils.styledFloat
 import org.fcitx.fcitx5.android.utils.unset
 import splitties.dimensions.dp
 import splitties.resources.drawable
-import splitties.views.dsl.constraintlayout.*
+import splitties.views.dsl.constraintlayout.centerInParent
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.parentId
 import splitties.views.dsl.core.*
 import splitties.views.existingOrNewId
 import splitties.views.imageDrawable
@@ -160,7 +163,6 @@ open class TextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Text) 
         layout.apply {
             add(mainText, lParams(wrapContent, wrapContent) {
                 centerInParent()
-                verticalChainStyle = packed
             })
         }
     }
@@ -174,6 +176,7 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
         isFocusable = false
         // TODO hardcoded alt text size
         textSize = 10.7f
+        typeface = Typeface.defaultFromStyle(Typeface.BOLD)
         text = def.altText
         // TODO darken altText color
         setTextColor(
@@ -192,21 +195,19 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
     private fun applyTopRightAltTextPosition() {
         mainText.updateLayoutParams<ConstraintLayout.LayoutParams> {
             // reset
+            topMargin = 0
             bottomToTop = unset
             // set
             topToTop = parentId
-            startToStart = parentId
-            endToEnd = parentId
             bottomToBottom = parentId
         }
         altText.updateLayoutParams<ConstraintLayout.LayoutParams> {
             // reset
-            topToBottom = unset
-            bottomToBottom = unset
+            bottomToBottom = unset; bottomMargin = 0
             // set
             topToTop = parentId; topMargin = vMargin
             startToStart = unset
-            endToEnd = parentId; endMargin = (hMargin + dp(4))
+            endToEnd = parentId; endMargin = hMargin + dp(4)
         }
     }
 
@@ -215,9 +216,7 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
             // reset
             bottomToBottom = unset
             // set
-            topToTop = parentId
-            startToStart = parentId
-            endToEnd = parentId
+            topToTop = parentId; topMargin = vMargin
             bottomToTop = altText.existingOrNewId
         }
         altText.updateLayoutParams<ConstraintLayout.LayoutParams> {
@@ -225,10 +224,9 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
             topToTop = unset; topMargin = 0
             endMargin = 0
             // set
-            topToBottom = mainText.existingOrNewId
             startToStart = parentId
             endToEnd = parentId
-            bottomToBottom = parentId
+            bottomToBottom = parentId; bottomMargin = vMargin + dp(2)
         }
     }
 
