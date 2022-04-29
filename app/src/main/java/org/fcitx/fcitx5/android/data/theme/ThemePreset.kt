@@ -118,7 +118,7 @@ object ThemePreset {
         accentKeyBackgroundColor = 0xff80cbc4.color,
         accentKeyTextColor = 0xffffffff.color,
         keyPressHighlightColor = 0x33ffffff.color,
-        keyShadowColor = 0xff1255a1.color,
+        keyShadowColor = 0xff000000.color,
         spaceBarColor = 0xff727272.color,
         dividerColor = 0x1fffffff.color,
         clipboardEntryColor = 0xff464646.color,
