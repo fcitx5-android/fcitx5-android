@@ -102,7 +102,7 @@ object ThemeManager {
 
         val keyBorder = switch(R.string.key_border, "key_border", false)
 
-        val keyRippleEffect = switch(R.string.key_ripple_effect, "key_ripple_effect", true)
+        val keyRippleEffect = switch(R.string.key_ripple_effect, "key_ripple_effect", false)
 
         val keyHorizontalMargin =
             int(R.string.key_horizontal_margin, "key_horizontal_margin", 3, 0, 8)
