@@ -111,6 +111,28 @@ object ThemeManager {
 
         val keyRadius = int(R.string.key_radius, "key_radius", 4, 0, 48)
 
+        val navbarBackground = list(
+            R.string.navbar_background,
+            "navbar_background",
+            NavbarBackground.Full,
+            NavbarBackground,
+            listOf(
+                appContext.getString(R.string.navbar_bkg_none) to NavbarBackground.None,
+                appContext.getString(R.string.navbar_bkg_color_only) to NavbarBackground.ColorOnly,
+                appContext.getString(R.string.navbar_bkg_full) to NavbarBackground.Full
+            )
+        )
+
+        enum class NavbarBackground {
+            None,
+            ColorOnly,
+            Full;
+
+            companion object : ManagedPreference.StringLikeCodec<NavbarBackground> {
+                override fun decode(raw: String): NavbarBackground = valueOf(raw)
+            }
+        }
+
     }
 
     class InternalPrefs(sharedPreferences: SharedPreferences) :
@@ -150,6 +172,7 @@ object ThemeManager {
         prefs.keyRippleEffect.registerOnChangeListener(prefsChange)
         prefs.keyVerticalMargin.registerOnChangeListener(prefsChange)
         prefs.keyHorizontalMargin.registerOnChangeListener(prefsChange)
+        prefs.navbarBackground.registerOnChangeListener(prefsChange)
         // fallback to MaterialLight if active theme was deleted
         internalPrefs.activeThemeName.getValue().let {
             currentTheme = getTheme(it) ?: defaultTheme.apply {

@@ -21,6 +21,7 @@ import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.ThemeManager.Prefs.NavbarBackground
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcaster
 import org.fcitx.fcitx5.android.input.candidates.CandidateViewBuilder
@@ -38,13 +39,15 @@ import splitties.views.dsl.core.*
 import splitties.views.imageDrawable
 import java.io.File
 
-
 @SuppressLint("ViewConstructor")
 class InputView(
     val service: FcitxInputMethodService,
     val fcitx: Fcitx,
     val theme: Theme
 ) : ConstraintLayout(service) {
+
+    private var shouldUpdateNavbarForeground = false
+    private var shouldUpdateNavbarBackground = false
 
     private val customBackground = imageView {
         scaleType = ImageView.ScaleType.CENTER_CROP
@@ -109,30 +112,49 @@ class InputView(
         // MUST call before any operation
         setupScope()
 
-        service.window.window!!.also {
-            // allow draw behind navigation bar
-            WindowCompat.setDecorFitsSystemWindows(it, false)
-            // transparent navigation bar
-            it.navigationBarColor = Color.TRANSPARENT
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                // don't apply scrim to transparent navigation bar
-                it.isNavigationBarContrastEnforced = false
-            }
-        }
-
         AppPrefs.getInstance().keyboard.keyboardHeightPercent
             .registerOnChangeListener(onWindowHeightChangeListener)
-        ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
-            insets.getInsets(WindowInsetsCompat.Type.navigationBars()).let {
-                bottomPaddingSpace.updateLayoutParams<LayoutParams> {
-                    height = it.bottom
-                }
-            }
-            WindowInsetsCompat.CONSUMED
-        }
 
         service.lifecycleScope.launch {
             broadcaster.onImeUpdate(fcitx.currentIme())
+        }
+
+        service.window.window!!.also {
+            when (ThemeManager.prefs.navbarBackground.getValue()) {
+                NavbarBackground.None -> {
+                    WindowCompat.setDecorFitsSystemWindows(it, true)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        it.isNavigationBarContrastEnforced = true
+                    }
+                }
+                NavbarBackground.ColorOnly -> {
+                    shouldUpdateNavbarForeground = true
+                    shouldUpdateNavbarBackground = true
+                    WindowCompat.setDecorFitsSystemWindows(it, true)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        it.isNavigationBarContrastEnforced = false
+                    }
+                }
+                NavbarBackground.Full -> {
+                    shouldUpdateNavbarForeground = true
+                    // allow draw behind navigation bar
+                    WindowCompat.setDecorFitsSystemWindows(it, false)
+                    // transparent navigation bar
+                    it.navigationBarColor = Color.TRANSPARENT
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        // don't apply scrim to transparent navigation bar
+                        it.isNavigationBarContrastEnforced = false
+                    }
+                    ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
+                        insets.getInsets(WindowInsetsCompat.Type.navigationBars()).let {
+                            bottomPaddingSpace.updateLayoutParams<LayoutParams> {
+                                height = it.bottom
+                            }
+                        }
+                        WindowInsetsCompat.CONSUMED
+                    }
+                }
+            }
         }
 
         customBackground.imageDrawable = when (theme) {
@@ -181,9 +203,21 @@ class InputView(
     }
 
     fun onShow() {
-        service.window.window?.also {
-            ViewCompat.getWindowInsetsController(it.decorView)
-                ?.isAppearanceLightNavigationBars = !theme.isDark
+        if (shouldUpdateNavbarForeground || shouldUpdateNavbarBackground) {
+            service.window.window!!.also {
+                if (shouldUpdateNavbarForeground) {
+                    ViewCompat.getWindowInsetsController(it.decorView)
+                        ?.isAppearanceLightNavigationBars = !theme.isDark
+                }
+                if (shouldUpdateNavbarBackground) {
+                    it.navigationBarColor = when (theme) {
+                        is Theme.Builtin ->
+                            if (ThemeManager.prefs.keyBorder.getValue()) theme.backgroundColor.color
+                            else theme.keyboardColor.color
+                        is Theme.Custom -> theme.backgroundColor.color
+                    }
+                }
+            }
         }
         kawaiiBar.onShow()
         windowManager.switchToKeyboardWindow()
