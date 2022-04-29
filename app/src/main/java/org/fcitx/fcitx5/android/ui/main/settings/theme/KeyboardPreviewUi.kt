@@ -35,6 +35,7 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
         scaleType = ImageView.ScaleType.CENTER_CROP
     }
 
+    private val barHeight = ctx.dp(40)
     private val fakeKawaiiBar = view(::View)
 
     private var keyboardWidth = -1
@@ -106,13 +107,16 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
         }
         intrinsicWidth = keyboardWidth
         // bar height
-        intrinsicHeight = keyboardHeight + ctx.dp(40)
+        intrinsicHeight = barHeight + keyboardHeight
         // bottom padding
         ViewCompat.getRootWindowInsets(root)?.also {
             // IME window has different navbar height when system navigation in "gesture navigation" mode
             // thus the inset from Activity root window is unreliable
-            if (it.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom > 0) {
-                intrinsicHeight += navbarHeight()
+            if (it.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom > 0 ||
+                // in case navigation hint was hidden ...
+                it.getInsets(WindowInsetsCompat.Type.systemGestures()).bottom > 0
+            ) {
+                intrinsicHeight = barHeight + keyboardHeight + navbarHeight()
             }
         }
         fakeInputView.updateLayoutParams<FrameLayout.LayoutParams> {
