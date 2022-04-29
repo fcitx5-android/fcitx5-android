@@ -18,6 +18,6 @@ data class ClipboardEntry(
         fun fromClipData(clipData: ClipData): ClipboardEntry? = clipData.takeIf {
             it.description.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN) ||
                     it.description.hasMimeType(ClipDescription.MIMETYPE_TEXT_HTML)
-        }?.run { ClipboardEntry(text = getItemAt(0).text.toString()) }
+        }?.run { getItemAt(0).text?.toString()?.let { ClipboardEntry(text = it) } }
     }
 }
