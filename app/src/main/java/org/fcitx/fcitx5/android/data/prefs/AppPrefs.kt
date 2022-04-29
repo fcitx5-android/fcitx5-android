@@ -50,14 +50,14 @@ class AppPrefs(
                 )
             )
         val keyboardHeightPercent =
-            int(R.string.keyboard_height, "keyboard_height_percent", 30, 30, 70, "%")
+            int(R.string.keyboard_height, "keyboard_height_percent", 30, 10, 90, "%")
         val keyboardHeightPercentLandscape =
             int(
                 R.string.keyboard_height_landscape,
                 "keyboard_height_percent_landscape",
                 49,
-                30,
-                70,
+                10,
+                90,
                 "%"
             )
         val expandedCandidateGridSpanCountPortrait = int(
