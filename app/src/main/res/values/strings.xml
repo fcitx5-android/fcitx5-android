@@ -112,7 +112,7 @@
     <string name="choose_image">Choose Image</string>
     <string name="dark_keys">Dark Keys</string>
     <string name="recrop_image">Re-Crop Image</string>
-    <string name="navbar_background">Navigatino bar background</string>
+    <string name="navbar_background">Navigation bar background</string>
     <string name="navbar_bkg_none">No background</string>
     <string name="navbar_bkg_color_only">Follow keyboard color</string>
     <string name="navbar_bkg_full">Keyboard background image</string>
