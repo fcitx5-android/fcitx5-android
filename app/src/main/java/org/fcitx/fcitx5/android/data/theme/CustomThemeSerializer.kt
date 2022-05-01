@@ -29,13 +29,13 @@ object CustomThemeSerializer : JsonTransformingSerializer<Theme.Custom>(Theme.Cu
     private fun applyStrategy(oldVersion: String, obj: JsonObject) =
         strategies
             .takeWhile { it.version != oldVersion }
-            .fold(JsonObject::identity.upcast()) { f, strategy -> strategy.transformation.compose(f) }
+            .foldRight(JsonObject::identity.upcast()) { f, acc -> f compose acc }
             .invoke(obj)
 
     data class MigrationStrategy(
         val version: String,
         val transformation: (JsonObject) -> JsonObject
-    )
+    ) : (JsonObject) -> JsonObject by transformation
 
     private val strategies: List<MigrationStrategy> =
         // Add migrations here
