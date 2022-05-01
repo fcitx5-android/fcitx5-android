@@ -61,6 +61,7 @@ class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
             },
             show = { it.displayName }
         )
+        ui.addOnItemChangedListener(this)
         return ui.root
     }
 
