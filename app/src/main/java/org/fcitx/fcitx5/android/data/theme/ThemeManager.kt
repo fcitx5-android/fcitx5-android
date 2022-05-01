@@ -1,7 +1,6 @@
 package org.fcitx.fcitx5.android.data.theme
 
 import android.content.SharedPreferences
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
@@ -80,11 +79,12 @@ object ThemeManager {
         dir.listFiles(FileFilter { it.extension == "json" })
             ?.sortedByDescending { it.lastModified() } // newest first
             ?.mapNotNull decode@{
-                val theme = runCatching { Json.decodeFromString<Theme.Custom>(it.readText()) }
-                    .getOrElse { e ->
-                        Timber.w("Failed to decode theme file ${it.absolutePath}: ${e.message}")
-                        return@decode null
-                    }
+                val theme =
+                    runCatching { Json.decodeFromString(CustomThemeSerializer, it.readText()) }
+                        .getOrElse { e ->
+                            Timber.w("Failed to decode theme file ${it.absolutePath}: ${e.message}")
+                            return@decode null
+                        }
                 if (theme.backgroundImage != null) {
                     if (!File(theme.backgroundImage.croppedFilePath).exists() ||
                         !File(theme.backgroundImage.srcFilePath).exists()
