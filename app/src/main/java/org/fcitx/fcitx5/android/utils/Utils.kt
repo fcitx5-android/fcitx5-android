@@ -143,5 +143,9 @@ fun inverseColor(@ColorInt color: Int) = Color.argb(
     255 - Color.blue(color)
 )
 
+@Suppress("unused")
 inline val ConstraintLayout.LayoutParams.unset
     get() = ConstraintLayout.LayoutParams.UNSET
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun <T, U> kotlin.reflect.KFunction1<T, U>.upcast(): (T) -> U = this

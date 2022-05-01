@@ -2,7 +2,6 @@ package org.fcitx.fcitx5.android.data.theme
 
 import android.content.SharedPreferences
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
@@ -47,7 +46,7 @@ object ThemeManager {
     private fun themeFile(theme: Theme.Custom) = File(dir, theme.name + ".json")
 
     fun saveTheme(theme: Theme.Custom) {
-        themeFile(theme).writeText(Json.encodeToString(theme))
+        themeFile(theme).writeText(Json.encodeToString(CustomThemeSerializer, theme))
         val old = customThemes.indexOfFirst { it.name == theme.name }.takeIf { it != -1 }
         old?.let { customThemes[it] = theme } ?: run {
             customThemes.add(0, theme)

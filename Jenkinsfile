@@ -98,6 +98,10 @@ node("android") {
                     sh './gradlew compileReleaseKotlin'
                 }
 
+                withBuildStatus("Run release unit test") {
+                    sh './gradlew testReleaseUnitTest'
+                }
+
                 forEachABI("Assemble release") { String abi ->
                     withEnv(["ABI=$abi"]) {
                         sh "./gradlew assembleRelease"
