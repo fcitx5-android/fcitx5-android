@@ -6,4 +6,10 @@
     <exclude
         domain="file"
         path="descriptor.json" />
+    <exclude
+        domain="file"
+        path="licenses.json" />
+    <exclude
+        domain="file"
+        path="README.md" />
 </full-backup-content>

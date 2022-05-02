@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude
+            domain="file"
+            path="usr" />
+        <exclude
+            domain="file"
+            path="descriptor.json" />
+        <exclude
+            domain="file"
+            path="licenses.json" />
+        <exclude
+            domain="file"
+            path="README.md" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude
+            domain="file"
+            path="usr" />
+        <exclude
+            domain="file"
+            path="descriptor.json" />
+        <exclude
+            domain="file"
+            path="licenses.json" />
+        <exclude
+            domain="file"
+            path="README.md" />
+    </device-transfer>
+</data-extraction-rules>
