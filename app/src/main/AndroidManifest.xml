@@ -73,7 +73,7 @@
 
             <meta-data
                 android:name="android.view.im"
-                android:resource="@xml/method" />
+                android:resource="@xml/input_method" />
         </service>
     </application>
 

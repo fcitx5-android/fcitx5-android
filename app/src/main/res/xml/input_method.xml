@@ -3,7 +3,6 @@
     android:settingsActivity="org.fcitx.fcitx5.android.ui.main.MainActivity"
     android:supportsSwitchingToNextInputMethod="true">
     <subtype
-        android:icon="@drawable/ic_baseline_input_24"
         android:imeSubtypeMode="keyboard"
         android:isAsciiCapable="true" />
 </input-method>
