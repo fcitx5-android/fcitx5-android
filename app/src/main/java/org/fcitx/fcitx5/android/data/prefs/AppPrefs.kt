@@ -60,6 +60,11 @@ class AppPrefs(
                 90,
                 "%"
             )
+        val expandToolbarByDefault = switch(
+            R.string.expand_toolbar_by_default,
+            "expand_toolbar_by_default",
+            false
+        )
         val expandedCandidateGridSpanCountPortrait = int(
             R.string.expanded_candidate_grid_span_count_portrait,
             "expanded_candidate_grid_span_count_portrait",

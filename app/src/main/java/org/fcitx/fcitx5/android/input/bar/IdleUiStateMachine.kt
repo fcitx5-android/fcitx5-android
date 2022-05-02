@@ -19,8 +19,12 @@ object IdleUiStateMachine {
         KawaiiBarShown,
     }
 
-    fun new(block: (State) -> Unit): EventStateMachine<State, TransitionEvent> =
-        eventStateMachine(Empty) {
+    fun new(
+        toolbarByDefault: Boolean,
+        old: EventStateMachine<State, TransitionEvent>? = null,
+        block: ((State) -> Unit)? = null
+    ): EventStateMachine<State, TransitionEvent> =
+        eventStateMachine(old?.currentState ?: if (toolbarByDefault) Toolbar else Empty) {
             from(Toolbar) transitTo Clipboard on ClipboardUpdatedNonEmpty
             from(Toolbar) transitTo Empty on MenuButtonClicked
             from(ToolbarWithClip) transitTo Toolbar on Timeout
@@ -29,12 +33,12 @@ object IdleUiStateMachine {
             from(ToolbarWithClip) transitTo Clipboard on ClipboardUpdatedNonEmpty
             from(Clipboard) transitTo ToolbarWithClip on MenuButtonClicked
             from(Clipboard) transitTo ClipboardTimedOut on Timeout
-            from(Clipboard) transitTo Empty on Pasted
+            from(Clipboard) transitTo (if (toolbarByDefault) Toolbar else Empty) on Pasted
             from(ClipboardTimedOut) transitTo Toolbar on MenuButtonClicked
-            from(ClipboardTimedOut) transitTo Empty on KawaiiBarShown
+            from(ClipboardTimedOut) transitTo (if (toolbarByDefault) Toolbar else Empty) on KawaiiBarShown
             from(Empty) transitTo Toolbar on MenuButtonClicked
             from(Empty) transitTo Clipboard on ClipboardUpdatedNonEmpty
-            onNewState(block)
+            onNewState(old?.onNewStateListener ?: block ?: throw IllegalArgumentException())
         }
 }
 

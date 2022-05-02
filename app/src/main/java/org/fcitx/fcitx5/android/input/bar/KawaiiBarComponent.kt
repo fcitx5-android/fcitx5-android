@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.*
 import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.*
@@ -55,10 +56,13 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     private val clipboardItemTimeout by AppPrefs.getInstance().clipboard.clipboardItemTimeout
     private val expandedCandidateStyle by AppPrefs.getInstance().keyboard.expandedCandidateStyle
+    private val expandToolbarByDefault = AppPrefs.getInstance().keyboard.expandToolbarByDefault
 
     private var clipboardTimeoutJob: Job? = null
 
-    private val onClipboardUpdateListener by lazy {
+    private var firstShow = true
+
+    private val onClipboardUpdateListener =
         ClipboardManager.OnClipboardUpdateListener {
             service.lifecycleScope.launch {
                 if (it.isEmpty()) {
@@ -70,10 +74,15 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                 }
             }
         }
-    }
+
+    private val onExpandToolbarByDefaultUpdateListener =
+        ManagedPreference.OnChangeListener<Boolean> {
+            idleUiStateMachine = IdleUiStateMachine.new(it, idleUiStateMachine)
+        }
 
     init {
         ClipboardManager.addOnUpdateListener(onClipboardUpdateListener)
+        expandToolbarByDefault.registerOnChangeListener(onExpandToolbarByDefaultUpdateListener)
     }
 
     private fun launchClipboardTimeoutJob() {
@@ -147,7 +156,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         }
     }
 
-    private val idleUiStateMachine = IdleUiStateMachine.new {
+    private var idleUiStateMachine = IdleUiStateMachine.new(expandToolbarByDefault.getValue()) {
         idleUi.switchUiByState(it)
     }
 
@@ -186,6 +195,11 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             idleUi.privateMode(
                 service.editorInfo?.imeOptions?.hasFlag(EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING) == true
             )
+        }
+        if (firstShow) {
+            if (expandToolbarByDefault.getValue())
+                idleUi.switchUiByState(IdleUiStateMachine.State.Toolbar)
+            firstShow = false
         }
     }
 
