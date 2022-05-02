@@ -4,22 +4,22 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
-import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
-import android.provider.MediaStore
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewOutlineProvider
+import android.webkit.MimeTypeMap
 import android.widget.SeekBar
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.applyCanvas
-import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import com.canhub.cropper.CropImageContract
@@ -48,7 +48,6 @@ import splitties.views.dsl.core.styles.AndroidStyles
 import java.io.File
 
 class BackgroundImageActivity : AppCompatActivity() {
-
 
     sealed interface BackgroundResult : Parcelable {
         @Parcelize
@@ -211,7 +210,9 @@ class BackgroundImageActivity : AppCompatActivity() {
     }
 
     private lateinit var launcher: ActivityResultLauncher<CropImageContractOptions>
-    private var srcBitmap: Bitmap? = null
+    private var srcImageExtension: String? = null
+    private var srcImageBuffer: ByteArray? = null
+    private var tempImageFile: File? = null
     private var cropRect: Rect? = null
     private lateinit var croppedBitmap: Bitmap
     private lateinit var filteredDrawable: BitmapDrawable
@@ -308,14 +309,15 @@ class BackgroundImageActivity : AppCompatActivity() {
                 else
                     return@registerForActivityResult
             } else {
+                if (newCreated) {
+                    srcImageExtension = MimeTypeMap.getSingleton()
+                        .getExtensionFromMimeType(contentResolver.getType(it.originalUri!!))
+                    srcImageBuffer = contentResolver.openInputStream(it.originalUri!!)!!.readBytes()
+                }
                 cropRect = it.cropRect!!
-                srcBitmap = if (Build.VERSION.SDK_INT < 28)
-                    @Suppress("DEPRECATION")
-                    MediaStore.Images.Media.getBitmap(contentResolver, it.originalUri!!)
-                else ImageDecoder.decodeBitmap(
-                    ImageDecoder.createSource(contentResolver, it.originalUri!!)
+                croppedBitmap = Bitmap.createScaledBitmap(
+                    it.getBitmap(this)!!, previewUi.intrinsicWidth, previewUi.intrinsicHeight, true
                 )
-                croppedBitmap = it.getBitmap(this)!!
                 filteredDrawable = BitmapDrawable(resources, croppedBitmap)
                 updateState()
             }
@@ -336,6 +338,9 @@ class BackgroundImageActivity : AppCompatActivity() {
     }
 
     private fun launchCrop(w: Int, h: Int) {
+        if (tempImageFile == null || tempImageFile?.exists() != true) {
+            tempImageFile = File.createTempFile("cropped", ".png", cacheDir)
+        }
         launcher.launch(options(srcImageFile.takeIf { it.exists() }?.toUri()) {
             setInitialCropWindowRectangle(cropRect)
             setGuidelines(CropImageView.Guidelines.ON_TOUCH)
@@ -345,6 +350,7 @@ class BackgroundImageActivity : AppCompatActivity() {
             setBorderCornerOffset(0f)
             setImageSource(includeGallery = true, includeCamera = false)
             setAspectRatio(w, h)
+            setOutputUri(tempImageFile!!.toUri())
             setOutputCompressFormat(Bitmap.CompressFormat.PNG)
         })
     }
@@ -358,44 +364,43 @@ class BackgroundImageActivity : AppCompatActivity() {
     }
 
     private fun cancel() {
+        tempImageFile?.delete()
         setResult(
             Activity.RESULT_CANCELED,
-            Intent().apply { putExtra(RESULT, null as BackgroundResult?) })
+            Intent().apply { putExtra(RESULT, null as BackgroundResult?) }
+        )
         finish()
     }
 
     private fun done() {
         lifecycleScope.withLoadingDialog(this) {
-            val bitmap = createBitmap(previewUi.intrinsicWidth, previewUi.intrinsicHeight)
-            bitmap.applyCanvas {
-                drawBitmap(
-                    croppedBitmap, null,
-                    Rect(0, 0, previewUi.intrinsicWidth, previewUi.intrinsicHeight), Paint()
-                )
-            }
             withContext(Dispatchers.IO) {
+                tempImageFile?.delete()
                 croppedImageFile.delete()
                 croppedImageFile.outputStream().use {
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+                    croppedBitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
                 }
                 if (newCreated) {
-                    srcImageFile.delete()
-                    srcImageFile.outputStream().use {
-                        requireNotNull(srcBitmap).compress(Bitmap.CompressFormat.PNG, 100, it)
+                    if (srcImageExtension != null) {
+                        srcImageFile = File("${srcImageFile.absolutePath}.$srcImageExtension")
+                        theme = theme.copy(
+                            backgroundImage = theme.background.copy(
+                                srcFilePath = srcImageFile.absolutePath
+                            )
+                        )
                     }
+                    srcImageFile.writeBytes(srcImageBuffer!!)
                 }
             }
             setResult(
                 Activity.RESULT_OK,
                 Intent().apply {
-                    val newTheme =
-                        theme.copy(
-                            backgroundImage =
-                            theme.background.copy(
-                                brightness = brightnessSeekBar.progress,
-                                cropRect = cropRect
-                            )
+                    val newTheme = theme.copy(
+                        backgroundImage = theme.background.copy(
+                            brightness = brightnessSeekBar.progress,
+                            cropRect = cropRect
                         )
+                    )
                     putExtra(
                         RESULT,
                         if (newCreated)
@@ -409,10 +414,12 @@ class BackgroundImageActivity : AppCompatActivity() {
     }
 
     private fun delete() {
-        setResult(Activity.RESULT_OK,
+        setResult(
+            Activity.RESULT_OK,
             Intent().apply {
                 putExtra(RESULT, BackgroundResult.Deleted(theme.name))
-            })
+            }
+        )
         finish()
     }
 
@@ -421,14 +428,12 @@ class BackgroundImageActivity : AppCompatActivity() {
         cancel()
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            android.R.id.home -> {
-                cancel()
-                return true
-            }
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        android.R.id.home -> {
+            cancel()
+            true
         }
-        return false
+        else -> super.onOptionsItemSelected(item)
     }
 
     companion object {

@@ -35,7 +35,7 @@ object ThemeManager {
     fun newCustomBackgroundImages(): Triple<String, File, File> {
         val themeName = UUID.randomUUID().toString()
         val croppedImageFile = File(dir, "$themeName-cropped.png")
-        val srcImageFile = File(dir, "$themeName-src.png")
+        val srcImageFile = File(dir, "$themeName-src")
         return Triple(themeName, croppedImageFile, srcImageFile)
     }
 
