@@ -21,7 +21,7 @@ object ThemePreset {
         keyShadowColor = 0xffc0c3c4.color,
         spaceBarColor = 0xffc9ced1.color,
         dividerColor = 0x1f000000.color,
-        clipboardEntryColor = 0xffffffff.color,
+        clipboardEntryColor = 0xfffbfbfc.color,
         isDark = false
     )
 
@@ -41,7 +41,7 @@ object ThemePreset {
         keyShadowColor = 0xff1f292e.color,
         spaceBarColor = 0xff3b464c.color,
         dividerColor = 0x1fffffff.color,
-        clipboardEntryColor = 0xff464646.color,
+        clipboardEntryColor = 0xff404a50.color,
         isDark = true
     )
 
@@ -101,7 +101,7 @@ object ThemePreset {
         keyShadowColor = 0xff1255a1.color,
         spaceBarColor = 0xff7eaadc.color,
         dividerColor = 0x1fffffff.color,
-        clipboardEntryColor = 0xff464646.color,
+        clipboardEntryColor = 0xff3f80cb.color,
         isDark = true
     )
 
@@ -121,7 +121,7 @@ object ThemePreset {
         keyShadowColor = 0xff000000.color,
         spaceBarColor = 0xff727272.color,
         dividerColor = 0x1fffffff.color,
-        clipboardEntryColor = 0xff464646.color,
+        clipboardEntryColor = 0xff2e2e2e.color,
         isDark = true
     )
 
@@ -140,7 +140,7 @@ object ThemePreset {
         keyShadowColor = 0x1f000000.color,
         spaceBarColor = 0xffD8DEE9.color,
         dividerColor = 0x1f000000.color,
-        clipboardEntryColor = 0xffffffff.color,
+        clipboardEntryColor = 0xffECEFF4.color,
         isDark = false
     )
 
@@ -159,7 +159,7 @@ object ThemePreset {
         keyShadowColor = 0xff434C5E.color,
         spaceBarColor = 0xff4C566A.color,
         dividerColor = 0x1fffffff.color,
-        clipboardEntryColor = 0xff464646.color,
+        clipboardEntryColor = 0xff4C566A.color,
         isDark = true
     )
 
@@ -178,7 +178,7 @@ object ThemePreset {
         keyShadowColor = 0xff171813.color,
         spaceBarColor = 0xff373830.color,
         dividerColor = 0x1fffffff.color,
-        clipboardEntryColor = 0xff464646.color,
+        clipboardEntryColor = 0xff33342c.color,
         isDark = true
     )
 
