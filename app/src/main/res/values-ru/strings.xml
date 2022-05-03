@@ -100,4 +100,24 @@
     <string name="quickphrase_phrase">Фраза</string>
     <string name="reload_config">Перезагрузить конфигурацию</string>
     <string name="input_method_options">Параметры метода ввода</string>
+    <string name="theme">Тема</string>
+    <string name="key_ripple_effect">Активироватьть эффект пульсации клавиш</string>
+    <string name="key_border">Активировать ключевую границу</string>
+    <string name="theme_manager">Менеджер тем</string>
+    <string name="brightness">Яркость</string>
+    <string name="key_radius">Ключевой радиус</string>
+    <string name="key_horizontal_margin">Ключевое горизонтальное поле</string>
+    <string name="key_vertical_margin">Ключевое вертикальное поле</string>
+    <string name="configure_theme">Настроить тему</string>
+    <string name="choose_image">Выбрать изображение</string>
+    <string name="dark_keys">Темные клавиши</string>
+    <string name="recrop_image">Повторное кадрирование изображения</string>
+    <string name="navbar_background">Фон панели навигации</string>
+    <string name="navbar_bkg_none">Без фона</string>
+    <string name="navbar_bkg_color_only">Следить за цветом клавиатуры</string>
+    <string name="navbar_bkg_full">Фоновое изображение клавиатуры</string>
+    <string name="punctuation_position">Позиция пунктуации</string>
+    <string name="punctuation_pos_bottom">Внизу (только портрет)</string>
+    <string name="punctuation_pos_top_right">В правом верхнем углу</string>
+    <string name="expand_toolbar_by_default">Развернуть панель инструментов по умолчанию</string>
 </resources>
