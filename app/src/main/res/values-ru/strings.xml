@@ -105,7 +105,7 @@
     <string name="key_border">Активировать ключевую границу</string>
     <string name="theme_manager">Менеджер тем</string>
     <string name="brightness">Яркость</string>
-    <string name="key_radius">Ключевой радиус</string>
+    <string name="key_radius">Радиус клавиш</string>
     <string name="key_horizontal_margin">Ключевое горизонтальное поле</string>
     <string name="key_vertical_margin">Ключевое вертикальное поле</string>
     <string name="configure_theme">Настроить тему</string>
