@@ -107,7 +107,7 @@
     <string name="brightness">Яркость</string>
     <string name="key_radius">Радиус клавиш</string>
     <string name="key_horizontal_margin">Горизонтальное поле клавиш</string>
-    <string name="key_vertical_margin">Ключевое вертикальное поле</string>
+    <string name="key_vertical_margin">Вертикальное поле клавиш</string>
     <string name="configure_theme">Настроить тему</string>
     <string name="choose_image">Выбрать изображение</string>
     <string name="dark_keys">Темные клавиши</string>
