@@ -67,5 +67,9 @@ open class KeyDef(
         class DoubleTap(
             val action: KeyAction
         ) : Behavior()
+
+        class PopupPreview(
+            val action: KeyAction.PopupPreviewAction
+        ) : Behavior()
     }
 }
