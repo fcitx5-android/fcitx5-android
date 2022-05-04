@@ -6,11 +6,11 @@ import androidx.annotation.CallSuper
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.*
@@ -158,11 +158,12 @@ abstract class BaseKeyboard(
     protected fun updateReturnButton(
         `return`: ImageKeyView,
         info: EditorInfo?,
-        content: PreeditContent
+        preedit: FcitxEvent.PreeditEvent.Data
+        // aux: FcitxEvent.InputPanelAuxEvent.Data
     ) {
-        val hasPreedit = content.preedit.preedit.isNotEmpty()
+        val hasPreedit = preedit.preedit.isNotEmpty()
         // `auxUp` is not empty when switching input methods, ignore it to reduce flicker
-        //        || content.aux.auxUp.isNotEmpty()
+        //        || aux.auxUp.isNotEmpty()
         `return`.img.imageResource = if (hasPreedit) {
             R.drawable.ic_baseline_keyboard_return_24
         } else {
@@ -183,7 +184,7 @@ abstract class BaseKeyboard(
         // do nothing by default
     }
 
-    open fun onPreeditChange(info: EditorInfo?, content: PreeditContent) {
+    open fun onPreeditChange(info: EditorInfo?, data: FcitxEvent.PreeditEvent.Data) {
         // do nothing by default
     }
 
