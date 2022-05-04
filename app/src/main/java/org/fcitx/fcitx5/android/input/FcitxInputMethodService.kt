@@ -4,12 +4,12 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.os.SystemClock
 import android.text.InputType
-import android.view.KeyCharacterMap
-import android.view.KeyEvent
-import android.view.View
+import android.view.*
 import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
+import android.widget.FrameLayout
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
@@ -215,6 +215,35 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         inputView = InputView(this, fcitx, theme)
     }
 
+    override fun setInputView(view: View) {
+        window.window!!.decorView
+            .findViewById<FrameLayout>(android.R.id.inputArea)
+            .updateLayoutParams<ViewGroup.LayoutParams> {
+                height = ViewGroup.LayoutParams.MATCH_PARENT
+            }
+        super.setInputView(view)
+        view.updateLayoutParams<ViewGroup.LayoutParams> {
+            height = ViewGroup.LayoutParams.MATCH_PARENT
+        }
+    }
+
+    override fun onConfigureWindow(win: Window, isFullscreen: Boolean, isCandidatesOnly: Boolean) {
+        win.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+    }
+
+    override fun onComputeInsets(outInsets: Insets) {
+        if (!this::inputView.isInitialized) return
+        val softInputWindowHeight = window.window!!.decorView.height
+        val keyboardHeight = inputView.keyboardView.height
+        val topInsets = softInputWindowHeight - keyboardHeight
+        outInsets.apply {
+            contentTopInsets = topInsets
+            touchableInsets = Insets.TOUCHABLE_INSETS_CONTENT
+            touchableRegion.setEmpty()
+            visibleTopInsets = topInsets
+        }
+    }
+
     override fun onEvaluateFullscreenMode() = false
 
     private fun forwardKeyEvent(event: KeyEvent, up: Boolean = false): Boolean {
@@ -251,6 +280,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onStartInput(attribute: EditorInfo, restarting: Boolean) {
+        // TODO: requestCursorUpdates only when necessary
         inputConnection?.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
         editorInfo = attribute
         selection = CursorRange(attribute.initialSelStart, attribute.initialSelEnd)
