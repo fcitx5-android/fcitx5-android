@@ -29,6 +29,7 @@ import org.fcitx.fcitx5.android.input.candidates.CandidateViewBuilder
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
+import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.mechdancer.dependency.DynamicScope
@@ -74,6 +75,8 @@ class InputView(
 
     private val commonKeyActionListener = CommonKeyActionListener()
 
+    private val popup = PopupComponent()
+
     val scope = DynamicScope()
 
     private fun setupScope() {
@@ -88,6 +91,7 @@ class InputView(
         scope += windowManager
         scope += keyboardWindow
         scope += commonKeyActionListener
+        scope += popup
         scope += horizontalCandidate
         scope += theme.wrapToUniqueComponent()
         broadcaster.onScopeSetupFinished(scope)
@@ -199,6 +203,10 @@ class InputView(
         add(keyboardView, lParams(matchParent, wrapContent) {
             centerHorizontally()
             bottomOfParent()
+        })
+        add(popup.view, lParams(matchParent, matchParent) {
+            centerVertically()
+            centerHorizontally()
         })
     }
 
