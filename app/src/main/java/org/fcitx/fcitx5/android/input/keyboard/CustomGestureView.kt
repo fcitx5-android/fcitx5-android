@@ -57,6 +57,7 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
     var onSwipeLeftListener: ((View, Int) -> Unit)? = null
     var onDoubleTapListener: ((View) -> Unit)? = null
     var onRepeatListener: ((View) -> Unit)? = null
+    var onTouchDownListener: ((View) -> Unit)? = null
     var onTouchLeaveListener: ((View) -> Unit)? = null
 
     private fun calculateInterval(t: Long) =
@@ -72,6 +73,7 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                 drawableHotspotChanged(x, y)
                 isPressed = true
                 hapticIfEnabled()
+                onTouchDownListener?.invoke(this)
                 if (longPressEnabled) {
                     longPressJob?.cancel()
                     longPressJob = lifecycleScope.launch {
@@ -151,8 +153,10 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                     // TODO refactor select-to-delete and cursor move KeyAction
                     // invoking this listener in else branch kinda defeats the purpose of 'onTouchLeave'
                     // since only backspace key is using it, this could be a workaround for double-delete issue
-                    onTouchLeaveListener?.invoke(this)
+                    // onTouchLeaveListener?.invoke(this)
                 }
+                // FIXME this causes double-delete when swipe backspace key
+                onTouchLeaveListener?.invoke(this)
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
@@ -196,6 +200,7 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                         swipeRepeatTriggered = false
                     }
                 }
+                onTouchLeaveListener?.invoke(this)
                 isPressed = false
                 return true
             }
