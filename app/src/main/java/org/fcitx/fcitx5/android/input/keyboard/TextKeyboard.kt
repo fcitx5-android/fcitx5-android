@@ -6,9 +6,9 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.view.inputmethod.EditorInfo
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import splitties.resources.drawable
 import splitties.views.imageDrawable
 import splitties.views.imageResource
@@ -112,8 +112,8 @@ class TextKeyboard(
         `return`.img.imageResource = drawableForReturn(info)
     }
 
-    override fun onPreeditChange(info: EditorInfo?, content: PreeditContent) {
-        updateReturnButton(`return`, info, content)
+    override fun onPreeditChange(info: EditorInfo?, data: FcitxEvent.PreeditEvent.Data) {
+        updateReturnButton(`return`, info, data)
     }
 
     override fun onInputMethodChange(ime: InputMethodEntry) {

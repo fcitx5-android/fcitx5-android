@@ -4,7 +4,7 @@ import android.view.Gravity
 import android.view.WindowManager
 import android.widget.PopupWindow
 import org.fcitx.fcitx5.android.core.FcitxEvent
-import org.fcitx.fcitx5.android.input.broadcast.InputBroadcaster
+import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.inputView
 import org.fcitx.fcitx5.android.input.dependency.theme
@@ -12,13 +12,11 @@ import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
 import org.mechdancer.dependency.manager.managedHandler
-import org.mechdancer.dependency.manager.must
 
-class PreeditComponent : UniqueComponent<PreeditComponent>(), Dependent,
+class PreeditComponent : UniqueComponent<PreeditComponent>(), Dependent, InputBroadcastReceiver,
     ManagedHandler by managedHandler() {
 
     private val context by manager.context()
-    private val broadcaster: InputBroadcaster by manager.must()
     private val inputView by manager.inputView()
     private val theme by manager.theme()
 
@@ -43,19 +41,18 @@ class PreeditComponent : UniqueComponent<PreeditComponent>(), Dependent,
         preeditPopup.dismiss()
     }
 
-    fun updateAux(aux: FcitxEvent.InputPanelAuxEvent) {
-        cachedPreedit.aux = aux.data
+    override fun onInputPanelAuxUpdate(data: FcitxEvent.InputPanelAuxEvent.Data) {
+        cachedPreedit.aux = data
         updatePreedit()
     }
 
-    fun updatePreedit(preedit: FcitxEvent.PreeditEvent) {
-        cachedPreedit.preedit = preedit.data
+    override fun onPreeditUpdate(data: FcitxEvent.PreeditEvent.Data) {
+        cachedPreedit.preedit = data
         updatePreedit()
     }
 
     private fun updatePreedit() {
         preeditUi.update(cachedPreedit)
-        broadcaster.onPreeditUpdate(cachedPreedit)
         preeditPopup.run {
             if (!preeditUi.visible) {
                 dismiss()

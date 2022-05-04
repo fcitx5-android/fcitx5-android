@@ -6,13 +6,13 @@ import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
-import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.mechdancer.dependency.manager.must
 import splitties.resources.str
@@ -107,8 +107,8 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
         currentKeyboard.onInputMethodChange(currentIme)
     }
 
-    override fun onPreeditUpdate(content: PreeditContent) {
-        currentKeyboard.onPreeditChange(service.editorInfo, content)
+    override fun onPreeditUpdate(data: FcitxEvent.PreeditEvent.Data) {
+        currentKeyboard.onPreeditChange(service.editorInfo, data)
     }
 
     override fun onAttached() {

@@ -230,10 +230,10 @@ class InputView(
                 broadcaster.onCandidateUpdate(it.data)
             }
             is FcitxEvent.PreeditEvent -> {
-                preedit.updatePreedit(it)
+                broadcaster.onPreeditUpdate(it.data)
             }
             is FcitxEvent.InputPanelAuxEvent -> {
-                preedit.updateAux(it)
+                broadcaster.onInputPanelAuxUpdate(it.data)
             }
             is FcitxEvent.IMChangeEvent -> {
                 broadcaster.onImeUpdate(it.data)

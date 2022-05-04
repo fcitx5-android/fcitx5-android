@@ -2,8 +2,9 @@ package org.fcitx.fcitx5.android.input.broadcast
 
 import android.view.inputmethod.EditorInfo
 import org.fcitx.fcitx5.android.core.Action
+import org.fcitx.fcitx5.android.core.FcitxEvent.InputPanelAuxEvent
+import org.fcitx.fcitx5.android.core.FcitxEvent.PreeditEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
-import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.DynamicScope
@@ -30,8 +31,12 @@ class InputBroadcaster : UniqueComponent<InputBroadcaster>(), Dependent, InputBr
         }
     }
 
-    override fun onPreeditUpdate(content: PreeditContent) {
-        receivers.forEach { it.onPreeditUpdate(content) }
+    override fun onPreeditUpdate(data: PreeditEvent.Data) {
+        receivers.forEach { it.onPreeditUpdate(data) }
+    }
+
+    override fun onInputPanelAuxUpdate(data: InputPanelAuxEvent.Data) {
+        receivers.forEach { it.onInputPanelAuxUpdate(data) }
     }
 
     override fun onEditorInfoUpdate(info: EditorInfo?) {
