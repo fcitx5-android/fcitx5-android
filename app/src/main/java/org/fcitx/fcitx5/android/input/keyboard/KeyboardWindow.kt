@@ -4,6 +4,7 @@ import android.text.InputType
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
+import androidx.core.content.ContextCompat
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
@@ -84,8 +85,10 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
 
     private fun switchLayout(to: String) {
         if (to == currentKeyboardName) return
-        detachCurrentLayout()
-        attachLayout(to.ifEmpty { lastSymbolType })
+        ContextCompat.getMainExecutor(service).execute {
+            detachCurrentLayout()
+            attachLayout(to.ifEmpty { lastSymbolType })
+        }
     }
 
     override fun onEditorInfoUpdate(info: EditorInfo?) {
