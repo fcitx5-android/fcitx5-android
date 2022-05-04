@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
+import android.view.View
 import android.widget.ImageView
 import android.widget.Space
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -108,6 +109,8 @@ class InputView(
         updateKeyboardHeight()
     }
 
+    val keyboardView: View
+
     init {
         // MUST call before any operation
         setupScope()
@@ -169,20 +172,31 @@ class InputView(
                 ?: ColorDrawable(theme.backgroundColor.color)
         }
 
-        add(customBackground, lParams {
-            centerVertically()
+        keyboardView = constraintLayout {
+            add(customBackground, lParams {
+                centerVertically()
+                centerHorizontally()
+            })
+            add(kawaiiBar.view, lParams(matchParent, dp(40)) {
+                topOfParent()
+                centerHorizontally()
+            })
+            add(windowManager.view, lParams(matchParent, windowHeightPx) {
+                below(kawaiiBar.view)
+                centerHorizontally()
+                above(bottomPaddingSpace)
+            })
+            add(bottomPaddingSpace, lParams(matchParent) {
+                centerHorizontally()
+                bottomOfParent()
+            })
+        }
+
+        add(preedit.ui.root, lParams(matchParent, wrapContent) {
+            above(keyboardView)
             centerHorizontally()
         })
-        add(kawaiiBar.view, lParams(matchParent, dp(40)) {
-            topOfParent()
-            centerHorizontally()
-        })
-        add(windowManager.view, lParams(matchParent, windowHeightPx) {
-            below(kawaiiBar.view)
-            centerHorizontally()
-            above(bottomPaddingSpace)
-        })
-        add(bottomPaddingSpace, lParams(matchParent) {
+        add(keyboardView, lParams(matchParent, wrapContent) {
             centerHorizontally()
             bottomOfParent()
         })
@@ -195,7 +209,6 @@ class InputView(
     }
 
     override fun onDetachedFromWindow() {
-        preedit.dismiss()
         AppPrefs.getInstance().keyboard.keyboardHeightPercent
             .unregisterOnChangeListener(onWindowHeightChangeListener)
         ViewCompat.setOnApplyWindowInsetsListener(this, null)

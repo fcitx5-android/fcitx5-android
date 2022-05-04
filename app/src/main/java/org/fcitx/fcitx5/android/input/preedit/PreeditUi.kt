@@ -2,8 +2,7 @@ package org.fcitx.fcitx5.android.input.preedit
 
 import android.content.Context
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
+import android.view.View.*
 import android.widget.TextView
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
@@ -54,6 +53,7 @@ class PreeditUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
 
     override val root: View = verticalLayout {
         alpha = 0.8f
+        visibility = INVISIBLE
         add(upView, lParams())
         add(downView, lParams())
     }
@@ -87,12 +87,5 @@ class PreeditUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
         updateTextView(beforeCursor, beforeText, hasBefore)
         updateTextView(afterCursor, afterText, hasAfter)
         updateTextView(downView, downText, hasDown)
-    }
-
-    fun measureHeight(width: Int = 0): Int {
-        val widthSpec = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY)
-        val heightSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-        root.measure(widthSpec, heightSpec)
-        return root.measuredHeight
     }
 }
