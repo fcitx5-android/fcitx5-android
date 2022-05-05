@@ -1,7 +1,12 @@
 package org.fcitx.fcitx5.android.input.popup
 
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.dependency.context
+import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
@@ -17,10 +22,12 @@ import java.util.*
 class PopupComponent :
     UniqueComponent<PopupComponent>(), Dependent, ManagedHandler by managedHandler() {
 
+    private val service by manager.inputMethodService()
     private val context by manager.context()
     private val theme by manager.theme()
 
     private val showingEntryUi = HashMap<Int, PopupEntryUi>()
+    private val dismissJobs = HashMap<Int, Job>()
     private val freeEntryUi = LinkedList<PopupEntryUi>()
 
     private val keyBottomMargin by lazy {
@@ -32,6 +39,7 @@ class PopupComponent :
     private val popupHeight by lazy {
         context.dp(115)
     }
+    private val hideThreshold = 100L
 
     val view by lazy {
         context.frameLayout {
@@ -43,10 +51,16 @@ class PopupComponent :
     fun showPopup(viewId: Int, character: String, left: Int, top: Int, right: Int, bottom: Int) {
         Timber.d("showPopup('$character', left=$left, top=$top, right=$right, bottom=$bottom)")
         showingEntryUi[viewId]?.apply {
+            dismissJobs[viewId]?.also {
+                it.cancel()
+                dismissJobs.remove(viewId)
+            }
+            lastShowTime = System.currentTimeMillis()
             setText(character)
             return
         }
         val popup = (freeEntryUi.removeFirstOrNull() ?: PopupEntryUi(context, theme)).apply {
+            lastShowTime = System.currentTimeMillis()
             setText(character)
         }
         view.apply {
@@ -60,9 +74,22 @@ class PopupComponent :
 
     fun dismissPopup(viewId: Int) {
         showingEntryUi[viewId]?.also {
-            showingEntryUi.remove(viewId)
-            view.removeView(it.root)
-            freeEntryUi.add(it)
+            val timeLeft = it.lastShowTime + hideThreshold - System.currentTimeMillis()
+            if (timeLeft <= 0L) {
+                reallyDismissPopup(viewId, it)
+            } else {
+                dismissJobs[viewId] = service.lifecycleScope.launch {
+                    delay(timeLeft)
+                    reallyDismissPopup(viewId, it)
+                    dismissJobs.remove(viewId)
+                }
+            }
         }
+    }
+
+    private fun reallyDismissPopup(viewId: Int, popup: PopupEntryUi) {
+        showingEntryUi.remove(viewId)
+        view.removeView(popup.root)
+        freeEntryUi.add(popup)
     }
 }
