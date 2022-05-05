@@ -12,6 +12,7 @@ import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.preedit.PreeditContent
 import splitties.bitflags.hasFlag
+import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.imageResource
 
@@ -26,6 +27,9 @@ abstract class BaseKeyboard(
     }
 
     var keyActionListener: KeyActionListener? = null
+
+    private val selectionSwipeThreshold = dp(10f)
+    private val inputSwipeThreshold = dp(36f)
 
     init {
         with(context) {
@@ -72,7 +76,7 @@ abstract class BaseKeyboard(
             if (def is SpaceKey) {
                 swipeEnabled = true
                 swipeRepeatEnabled = true
-                swipeThresholdX = 20f
+                swipeThresholdX = selectionSwipeThreshold
                 onSwipeLeftListener = { _, cnt ->
                     repeat(cnt) {
                         onAction(KeyAction.SymAction(KeySym(0xff51u), KeyStates()))
@@ -86,7 +90,7 @@ abstract class BaseKeyboard(
             } else if (def is BackspaceKey) {
                 swipeEnabled = true
                 swipeRepeatEnabled = true
-                swipeThresholdX = 20f
+                swipeThresholdX = selectionSwipeThreshold
                 onSwipeLeftListener = { _, cnt ->
                     onAction(KeyAction.MoveSelectionAction(-1 * cnt))
                 }
@@ -107,6 +111,7 @@ abstract class BaseKeyboard(
                     }
                     is KeyDef.Behavior.SwipeDown -> {
                         swipeEnabled = true
+                        swipeThresholdY = inputSwipeThreshold
                         onSwipeDownListener = { _, _ ->
                             onAction(it.action)
                         }
