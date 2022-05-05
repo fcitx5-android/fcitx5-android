@@ -60,10 +60,15 @@ class CommonKeyActionListener :
                     }
                     is KeyAction.PopupPreviewAction -> {
                         if (action.dismiss) {
-                            popup.dismissPopup(action.character)
+                            popup.dismissPopup(action.viewId)
                         } else {
                             popup.showPopup(
-                                action.character, action.left, action.top, action.right, action.bottom
+                                action.viewId,
+                                action.character,
+                                action.left,
+                                action.top,
+                                action.right,
+                                action.bottom
                             )
                         }
                     }

@@ -15,10 +15,9 @@ import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.textView
 import splitties.views.gravityCenter
 
-class PopupEntryUi(override val ctx: Context, val theme: Theme, var character: String) : Ui {
+class PopupEntryUi(override val ctx: Context, val theme: Theme) : Ui {
 
     val textView = textView {
-        text = character
         textSize = 28f
         gravity = gravityCenter
         setTextColor(theme.keyTextColor.color)
@@ -32,5 +31,9 @@ class PopupEntryUi(override val ctx: Context, val theme: Theme, var character: S
             topOfParent()
             centerHorizontally()
         })
+    }
+
+    fun setText(text: String) {
+        textView.text = text
     }
 }

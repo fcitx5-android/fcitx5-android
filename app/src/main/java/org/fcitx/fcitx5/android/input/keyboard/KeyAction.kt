@@ -41,6 +41,7 @@ sealed class KeyAction {
     object DeleteSelectionAction : KeyAction()
 
     data class PopupPreviewAction(
+        val viewId: Int,
         val character: String,
         val left: Int,
         val top: Int,
@@ -48,11 +49,11 @@ sealed class KeyAction {
         val bottom: Int,
         val dismiss: Boolean = false
     ) : KeyAction() {
-        constructor(character: String) : this(character, 0, 0, 0, 0)
+        constructor(character: String) : this(0, character, 0, 0, 0, 0)
 
-        fun withCoordinate(left: Int, top: Int, right: Int, bottom: Int) =
-            copy(character = character, left = left, top = top, right = right, bottom = bottom)
+        fun withCoordinate(viewId: Int, left: Int, top: Int, right: Int, bottom: Int) =
+            copy(viewId = viewId, left = left, top = top, right = right, bottom = bottom)
 
-        fun asDismiss() = copy(character = character, dismiss = true)
+        fun asDismiss(viewId: Int) = copy(viewId = viewId, dismiss = true)
     }
 }
