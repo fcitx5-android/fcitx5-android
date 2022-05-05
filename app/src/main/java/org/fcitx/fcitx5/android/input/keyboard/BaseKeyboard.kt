@@ -135,19 +135,18 @@ abstract class BaseKeyboard(
                     }
                     is KeyDef.Behavior.PopupPreview -> {
                         onTouchDownListener = { view ->
-                            val location = intArrayOf(0, 0)
-                            view.getLocationInWindow(location)
+                            val (x, y) = intArrayOf(0, 0).apply {
+                                view.getLocationInWindow(this)
+                            }
                             onAction(
                                 it.action.withCoordinate(
-                                    location[0],
-                                    location[1],
-                                    location[0] + view.width,
-                                    location[1] + view.height
+                                    view.id,
+                                    x, y, x + view.width, y + view.height
                                 )
                             )
                         }
-                        onTouchLeaveListener = { _ ->
-                            onAction(it.action.asDismiss())
+                        onTouchLeaveListener = { view ->
+                            onAction(it.action.asDismiss(view.id))
                         }
                     }
                 }

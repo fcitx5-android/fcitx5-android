@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.input.popup
 
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.mechdancer.dependency.Dependent
@@ -19,10 +20,18 @@ class PopupComponent :
     private val context by manager.context()
     private val theme by manager.theme()
 
-    private val showingEntryUi = HashMap<String, PopupEntryUi>()
-    private val freeEntryUi = ArrayDeque<PopupEntryUi>()
+    private val showingEntryUi = HashMap<Int, PopupEntryUi>()
+    private val freeEntryUi = LinkedList<PopupEntryUi>()
 
-    private val popupHeight by lazy { context.dp(115) }
+    private val keyBottomMargin by lazy {
+        context.dp(ThemeManager.prefs.keyVerticalMargin.getValue())
+    }
+    private val popupWidth by lazy {
+        context.dp(36)
+    }
+    private val popupHeight by lazy {
+        context.dp(115)
+    }
 
     val view by lazy {
         context.frameLayout {
@@ -31,22 +40,27 @@ class PopupComponent :
         }
     }
 
-    fun showPopup(character: String, left: Int, top: Int, right: Int, bottom: Int) {
+    fun showPopup(viewId: Int, character: String, left: Int, top: Int, right: Int, bottom: Int) {
         Timber.d("showPopup('$character', left=$left, top=$top, right=$right, bottom=$bottom)")
-        val popup = freeEntryUi.poll()?.apply { textView.text = character }
-            ?: PopupEntryUi(context, theme, character)
+        showingEntryUi[viewId]?.apply {
+            setText(character)
+            return
+        }
+        val popup = (freeEntryUi.removeFirstOrNull() ?: PopupEntryUi(context, theme)).apply {
+            setText(character)
+        }
         view.apply {
-            add(popup.root, lParams(dp(36), popupHeight) {
-                topMargin = bottom - popupHeight
-                leftMargin = left
+            add(popup.root, lParams(popupWidth, popupHeight) {
+                topMargin = bottom - popupHeight - keyBottomMargin
+                leftMargin = (left + right - popupWidth) / 2
             })
         }
-        showingEntryUi[character] = popup
+        showingEntryUi[viewId] = popup
     }
 
-    fun dismissPopup(character: String) {
-        showingEntryUi[character]?.also {
-            showingEntryUi.remove(character)
+    fun dismissPopup(viewId: Int) {
+        showingEntryUi[viewId]?.also {
+            showingEntryUi.remove(viewId)
             view.removeView(it.root)
             freeEntryUi.add(it)
         }
