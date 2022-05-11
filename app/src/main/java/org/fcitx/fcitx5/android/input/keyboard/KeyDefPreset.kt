@@ -19,9 +19,9 @@ class SymbolKey(
         variant = variant
     ),
     setOf(
-        Behavior.Press(action = KeyAction.FcitxKeyAction(symbol)),
-        Behavior.PopupPreview(KeyAction.PopupPreviewAction(symbol))
-    )
+        Behavior.Press(action = KeyAction.FcitxKeyAction(symbol))
+    ),
+    Popup.Preview(symbol)
 )
 
 class AlphabetKey(
@@ -39,9 +39,9 @@ class AlphabetKey(
     setOf(
         Behavior.Press(KeyAction.FcitxKeyAction(character)),
         Behavior.LongPress(KeyAction.FcitxKeyAction(punctuation)),
-        Behavior.SwipeDown(KeyAction.FcitxKeyAction(punctuation)),
-        Behavior.PopupPreview(KeyAction.PopupPreviewAction(character))
-    )
+        Behavior.SwipeDown(KeyAction.FcitxKeyAction(punctuation))
+    ),
+    Popup.AltPreview(character, punctuation)
 )
 
 class AlphabetDigitKey(
@@ -58,9 +58,9 @@ class AlphabetDigitKey(
     setOf(
         Behavior.Press(KeyAction.FcitxKeyAction(character)),
         Behavior.LongPress(KeyAction.SymAction(sym, NumLockState)),
-        Behavior.SwipeDown(KeyAction.SymAction(sym, NumLockState)),
-        Behavior.PopupPreview(KeyAction.PopupPreviewAction(character))
-    )
+        Behavior.SwipeDown(KeyAction.SymAction(sym, NumLockState))
+    ),
+    Popup.AltPreview(character, altText)
 ) {
     constructor(char: String, digit: Int) : this(char, digit.toString(), (0xffb0 + digit).toUInt())
 
