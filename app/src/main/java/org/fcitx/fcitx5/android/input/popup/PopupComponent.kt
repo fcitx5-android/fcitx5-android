@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.input.popup
 
+import android.graphics.Rect
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -16,7 +17,6 @@ import splitties.dimensions.dp
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.lParams
-import timber.log.Timber
 import java.util.*
 
 class PopupComponent :
@@ -51,25 +51,24 @@ class PopupComponent :
         }
     }
 
-    fun showPopup(viewId: Int, character: String, left: Int, top: Int, right: Int, bottom: Int) {
-        Timber.d("showPopup('$character', left=$left, top=$top, right=$right, bottom=$bottom)")
+    fun showPopup(viewId: Int, content: String, bounds: Rect) {
         showingEntryUi[viewId]?.apply {
             dismissJobs[viewId]?.also {
                 it.cancel()
                 dismissJobs.remove(viewId)
             }
             lastShowTime = System.currentTimeMillis()
-            setText(character)
+            setText(content)
             return
         }
         val popup = (freeEntryUi.poll() ?: PopupEntryUi(context, theme, popupRadius)).apply {
             lastShowTime = System.currentTimeMillis()
-            setText(character)
+            setText(content)
         }
         view.apply {
             add(popup.root, lParams(popupWidth, popupHeight) {
-                topMargin = bottom - popupHeight - keyBottomMargin
-                leftMargin = (left + right - popupWidth) / 2
+                topMargin = bounds.bottom - popupHeight - keyBottomMargin
+                leftMargin = (bounds.left + bounds.right - popupWidth) / 2
             })
         }
         showingEntryUi[viewId] = popup

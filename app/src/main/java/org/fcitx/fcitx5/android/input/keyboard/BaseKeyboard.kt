@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
 import android.content.Context
+import android.graphics.Rect
 import android.view.inputmethod.EditorInfo
 import androidx.annotation.CallSuper
 import androidx.annotation.DrawableRes
@@ -27,6 +28,13 @@ abstract class BaseKeyboard(
     }
 
     var keyActionListener: KeyActionListener? = null
+
+    interface KeyPopupListener {
+        fun onPreview(viewId: Int, content: String, bounds: Rect)
+        fun onDismiss(viewId: Int)
+    }
+
+    var keyPopupListener: KeyPopupListener? = null
 
     private val selectionSwipeThreshold = dp(10f)
     private val inputSwipeThreshold = dp(36f)
@@ -104,16 +112,24 @@ abstract class BaseKeyboard(
             def.behaviors.forEach {
                 when (it) {
                     is KeyDef.Behavior.LongPress -> {
-                        setOnLongClickListener { _ ->
+                        setOnLongClickListener { view ->
                             onAction(it.action)
+                            if (def.popup is KeyDef.Popup.AltPreview) {
+                                val v = view as KeyView
+                                onPopupPreview(v.id, def.popup.alternative, v.bounds)
+                            }
                             true
                         }
                     }
                     is KeyDef.Behavior.SwipeDown -> {
                         swipeEnabled = true
                         swipeThresholdY = inputSwipeThreshold
-                        onSwipeDownListener = { _, _ ->
+                        onSwipeDownListener = { view, _ ->
                             onAction(it.action)
+                            if (def.popup is KeyDef.Popup.AltPreview) {
+                                val v = view as KeyView
+                                onPopupPreview(v.id, def.popup.alternative, v.bounds)
+                            }
                         }
                     }
                     is KeyDef.Behavior.DoubleTap -> {
@@ -125,6 +141,15 @@ abstract class BaseKeyboard(
                     is KeyDef.Behavior.Press -> {
                         setOnClickListener { _ ->
                             onAction(it.action)
+                        }
+                        if (def.popup is KeyDef.Popup.Preview) {
+                            onTouchDownListener = { view ->
+                                val v = view as KeyView
+                                onPopupPreview(v.id, def.popup.content, v.bounds)
+                            }
+                            onTouchLeaveListener = { view ->
+                                onPopupDismiss(view.id)
+                            }
                         }
                     }
                     is KeyDef.Behavior.Repeat -> {
@@ -174,6 +199,16 @@ abstract class BaseKeyboard(
     @CallSuper
     open fun onAction(action: KeyAction) {
         keyActionListener?.onKeyAction(action)
+    }
+
+    @CallSuper
+    open fun onPopupPreview(viewId: Int, content: String, bounds: Rect) {
+        keyPopupListener?.onPreview(viewId, content, bounds)
+    }
+
+    @CallSuper
+    open fun onPopupDismiss(viewId: Int) {
+        keyPopupListener?.onDismiss(viewId)
     }
 
     open fun onAttach(info: EditorInfo? = null) {
