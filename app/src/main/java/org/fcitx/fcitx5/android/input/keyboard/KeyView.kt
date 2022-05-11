@@ -4,10 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Configuration
-import android.graphics.Color
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
-import android.graphics.Typeface
+import android.graphics.*
 import android.graphics.drawable.*
 import android.widget.ImageView
 import androidx.annotation.ColorInt
@@ -38,6 +35,8 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
     val radius = dp(ThemeManager.prefs.keyRadius.getValue().toFloat())
     val hMargin = dp(ThemeManager.prefs.keyHorizontalMargin.getValue())
     val vMargin = dp(ThemeManager.prefs.keyVerticalMargin.getValue())
+
+    val bounds = Rect()
 
     val layout = constraintLayout {
         // sync any state from parent
@@ -137,6 +136,11 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
         layout.alpha = if (enabled) 1f else styledFloat(android.R.attr.disabledAlpha)
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        val (x, y) = intArrayOf(0, 0).also { getLocationInWindow(it) }
+        bounds.set(x, y, x + w, y + h)
     }
 }
 
