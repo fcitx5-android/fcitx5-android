@@ -133,22 +133,6 @@ abstract class BaseKeyboard(
                             onAction(it.action)
                         }
                     }
-                    is KeyDef.Behavior.PopupPreview -> {
-                        onTouchDownListener = { view ->
-                            val (x, y) = intArrayOf(0, 0).apply {
-                                view.getLocationInWindow(this)
-                            }
-                            onAction(
-                                it.action.withCoordinate(
-                                    view.id,
-                                    x, y, x + view.width, y + view.height
-                                )
-                            )
-                        }
-                        onTouchLeaveListener = { view ->
-                            onAction(it.action.asDismiss(view.id))
-                        }
-                    }
                 }
             }
         }

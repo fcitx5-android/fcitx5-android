@@ -4,7 +4,8 @@ import androidx.annotation.DrawableRes
 
 open class KeyDef(
     val appearance: Appearance,
-    val behaviors: Set<Behavior>
+    val behaviors: Set<Behavior>,
+    val popup: Popup = Popup.None
 ) {
     sealed class Appearance(
         val percentWidth: Float,
@@ -67,9 +68,17 @@ open class KeyDef(
         class DoubleTap(
             val action: KeyAction
         ) : Behavior()
+    }
 
-        class PopupPreview(
-            val action: KeyAction.PopupPreviewAction
-        ) : Behavior()
+    sealed class Popup {
+        object None : Popup()
+
+        open class Preview(val content: String) : Popup()
+
+        class AltPreview(content: String, val alternative: String) : Preview(content)
+
+        class Keyboard(content: String, keys: Array<Key>) : Preview(content) {
+            data class Key(val str: String, val action: KeyAction)
+        }
     }
 }

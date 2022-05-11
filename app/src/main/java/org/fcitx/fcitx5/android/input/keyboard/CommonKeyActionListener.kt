@@ -6,14 +6,12 @@ import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
-import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.inputConnection
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
 import org.mechdancer.dependency.manager.managedHandler
-import org.mechdancer.dependency.manager.must
 import splitties.systemservices.inputMethodManager
 
 class CommonKeyActionListener :
@@ -22,7 +20,6 @@ class CommonKeyActionListener :
     private val context by manager.context()
     private val fcitx by manager.fcitx()
     private val service by manager.inputMethodService()
-    private val popup: PopupComponent by manager.must()
 
     val listener by lazy {
         BaseKeyboard.KeyActionListener { action ->
@@ -56,20 +53,6 @@ class CommonKeyActionListener :
                     is KeyAction.DeleteSelectionAction -> {
                         if (service.selection.isNotEmpty()) {
                             service.inputConnection?.commitText("", 1)
-                        }
-                    }
-                    is KeyAction.PopupPreviewAction -> {
-                        if (action.dismiss) {
-                            popup.dismissPopup(action.viewId)
-                        } else {
-                            popup.showPopup(
-                                action.viewId,
-                                action.character,
-                                action.left,
-                                action.top,
-                                action.right,
-                                action.bottom
-                            )
                         }
                     }
                     else -> {
