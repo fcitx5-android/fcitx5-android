@@ -3,6 +3,9 @@
     android:settingsActivity="org.fcitx.fcitx5.android.ui.main.MainActivity"
     android:supportsSwitchingToNextInputMethod="true">
     <subtype
+        android:icon="@mipmap/ic_launcher"
         android:imeSubtypeMode="keyboard"
-        android:isAsciiCapable="true" />
+        android:isAsciiCapable="true"
+        android:label="@string/app_name"
+        android:overridesImplicitlyEnabledSubtype="true" />
 </input-method>
