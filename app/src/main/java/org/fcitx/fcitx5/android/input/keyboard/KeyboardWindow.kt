@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
+import android.graphics.Rect
 import android.text.InputType
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -13,6 +14,7 @@ import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
+import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.mechdancer.dependency.manager.must
 import splitties.resources.str
@@ -26,6 +28,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
 
     private val service: FcitxInputMethodService by manager.inputMethodService()
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
+    private val popup: PopupComponent by manager.must()
     private val theme by manager.theme()
 
     private var _currentIme: InputMethodEntry? = null
@@ -58,6 +61,14 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
         }
     }
 
+    private val keyPopupListener = object : BaseKeyboard.KeyPopupListener {
+        override fun onPreview(viewId: Int, content: String, bounds: Rect) {
+            popup.showPopup(viewId, content, bounds)
+        }
+
+        override fun onDismiss(viewId: Int) = popup.dismissPopup(viewId)
+    }
+
     // This will be called EXACTLY ONCE
     override fun onCreateView(): View {
         keyboardView = context.frameLayout(R.id.keyboard_view)
@@ -69,6 +80,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
             it.onDetach()
             keyboardView.removeView(it)
             it.keyActionListener = null
+            it.keyPopupListener = null
         }
     }
 
@@ -79,6 +91,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
         }
         keyboardView.apply { add(currentKeyboard, lParams(matchParent, matchParent)) }
         currentKeyboard.keyActionListener = keyActionListener
+        currentKeyboard.keyPopupListener = keyPopupListener
         currentKeyboard.onAttach(service.editorInfo)
         currentKeyboard.onInputMethodChange(currentIme)
     }
@@ -117,11 +130,13 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
             keyboards.remove(EMPTY)
         } else {
             currentKeyboard.keyActionListener = keyActionListener
+            currentKeyboard.keyPopupListener = keyPopupListener
         }
     }
 
     override fun onDetached() {
         currentKeyboard.keyActionListener = null
+        currentKeyboard.keyPopupListener = null
     }
 
     companion object {
