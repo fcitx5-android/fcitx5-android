@@ -34,10 +34,13 @@ class PopupComponent :
         context.dp(ThemeManager.prefs.keyVerticalMargin.getValue())
     }
     private val popupWidth by lazy {
-        context.dp(36)
+        context.dp(38)
     }
     private val popupHeight by lazy {
-        context.dp(115)
+        context.dp(116)
+    }
+    private val popupRadius by lazy {
+        context.dp(ThemeManager.prefs.keyRadius.getValue()).toFloat()
     }
     private val hideThreshold = 100L
 
@@ -59,7 +62,7 @@ class PopupComponent :
             setText(character)
             return
         }
-        val popup = (freeEntryUi.removeFirstOrNull() ?: PopupEntryUi(context, theme)).apply {
+        val popup = (freeEntryUi.poll() ?: PopupEntryUi(context, theme, popupRadius)).apply {
             lastShowTime = System.currentTimeMillis()
             setText(character)
         }
