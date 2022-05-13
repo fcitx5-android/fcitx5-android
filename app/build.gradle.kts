@@ -14,9 +14,10 @@ fun exec(cmd: String): String = ByteArrayOutputStream().use {
     it.toString().trim()
 }
 
+val gitTag = exec("git describe --tags")
 val gitRevCount = exec("git rev-list --count HEAD")
 val gitHashShort = exec("git describe --always --dirty")
-val gitVersionName = exec("git describe --tags --long --always --dirty")
+val gitVersionName = exec("git describe --tags --long --always")
 
 plugins {
     id("com.android.application")
@@ -45,9 +46,9 @@ android {
         applicationId = "org.fcitx.fcitx5.android"
         minSdk = 23
         targetSdk = 31
-        versionCode = 1
-        versionName = "0.0.1"
-        setProperty("archivesBaseName", "$applicationId-v$versionName-$gitRevCount-g$gitHashShort")
+        versionCode = 2
+        versionName = gitVersionName
+        setProperty("archivesBaseName", "$applicationId-$gitVersionName")
         buildConfigField("String", "BUILD_GIT_HASH", "\"$gitHashShort\"")
         buildConfigField("long", "BUILD_TIME", System.currentTimeMillis().toString())
         buildConfigField("String", "DATA_DESCRIPTOR_NAME", "\"${dataDescriptorName}\"")
