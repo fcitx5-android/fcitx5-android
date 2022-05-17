@@ -11,6 +11,7 @@ import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.GestureType
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListener
@@ -31,6 +32,8 @@ abstract class BaseKeyboard(
     }
 
     var keyActionListener: KeyActionListener? = null
+
+    private var popupOnKeyPress by AppPrefs.getInstance().keyboard.popupOnKeyPress
 
     interface KeyPopupListener {
         fun onPreview(viewId: Int, content: String, bounds: Rect)
@@ -234,6 +237,7 @@ abstract class BaseKeyboard(
 
     @CallSuper
     open fun onPopupPreview(viewId: Int, content: String, bounds: Rect) {
+        if (!popupOnKeyPress) return
         keyPopupListener?.onPreview(viewId, content, bounds)
     }
 
