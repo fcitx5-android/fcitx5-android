@@ -12,10 +12,13 @@ import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.GestureType
+import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListener
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.imageResource
+import kotlin.math.absoluteValue
 
 abstract class BaseKeyboard(
     context: Context,
@@ -85,32 +88,59 @@ abstract class BaseKeyboard(
                 swipeEnabled = true
                 swipeRepeatEnabled = true
                 swipeThresholdX = selectionSwipeThreshold
-                onSwipeLeftListener = { _, cnt ->
-                    repeat(cnt) {
-                        onAction(KeyAction.SymAction(KeySym(0xff51u), KeyStates()))
-                    }
-                }
-                onSwipeRightListener = { _, cnt ->
-                    repeat(cnt) {
-                        onAction(KeyAction.SymAction(KeySym(0xff53u), KeyStates()))
+                onGestureListener = OnGestureListener { _, event ->
+                    when (event.type) {
+                        GestureType.Move -> {
+                            val sym = if (event.countX > 0) 0xff53u else 0xff51u
+                            val action = KeyAction.SymAction(KeySym(sym), KeyStates())
+                            repeat(event.countX.absoluteValue) {
+                                onAction(action)
+                            }
+                            true
+                        }
+                        else -> false
                     }
                 }
             } else if (def is BackspaceKey) {
                 swipeEnabled = true
                 swipeRepeatEnabled = true
                 swipeThresholdX = selectionSwipeThreshold
-                onSwipeLeftListener = { _, cnt ->
-                    onAction(KeyAction.MoveSelectionAction(-1 * cnt))
-                }
-                onSwipeRightListener = { _, cnt ->
-                    onAction(KeyAction.MoveSelectionAction(cnt))
-                }
-                onTouchLeaveListener = {
-                    onAction(KeyAction.DeleteSelectionAction)
+                onGestureListener = OnGestureListener { _, event ->
+                    when (event.type) {
+                        GestureType.Move -> {
+                            onAction(KeyAction.MoveSelectionAction(event.countX))
+                            true
+                        }
+                        GestureType.Up -> {
+                            onAction(KeyAction.DeleteSelectionAction)
+                            false
+                        }
+                        else -> false
+                    }
                 }
             }
             def.behaviors.forEach {
                 when (it) {
+                    is KeyDef.Behavior.Press -> {
+                        setOnClickListener { _ ->
+                            onAction(it.action)
+                        }
+                        if (def.popup is KeyDef.Popup.Preview) {
+                            onGestureListener = OnGestureListener { view, event ->
+                                view as KeyView
+                                when (event.type) {
+                                    GestureType.Down -> {
+                                        onPopupPreview(view.id, def.popup.content, view.bounds)
+                                    }
+                                    GestureType.Up -> {
+                                        onPopupDismiss(view.id)
+                                    }
+                                    else -> {}
+                                }
+                                false
+                            }
+                        }
+                    }
                     is KeyDef.Behavior.LongPress -> {
                         setOnLongClickListener { view ->
                             onAction(it.action)
@@ -121,40 +151,41 @@ abstract class BaseKeyboard(
                             true
                         }
                     }
+                    is KeyDef.Behavior.Repeat -> {
+                        repeatEnabled = true
+                        onRepeatListener = { _ ->
+                            onAction(it.action)
+                        }
+                    }
                     is KeyDef.Behavior.SwipeDown -> {
                         swipeEnabled = true
                         swipeThresholdY = inputSwipeThreshold
-                        onSwipeDownListener = { view, _ ->
-                            onAction(it.action)
-                            if (def.popup is KeyDef.Popup.AltPreview) {
-                                val v = view as KeyView
-                                onPopupPreview(v.id, def.popup.alternative, v.bounds)
-                            }
+                        val oldOnGestureListener = onGestureListener ?: OnGestureListener.Empty
+                        onGestureListener = OnGestureListener { view, event ->
+                            def.popup as KeyDef.Popup.AltPreview
+                            view as KeyView
+                            when (event.type) {
+                                GestureType.Move -> {
+                                    val preview = def.popup.run {
+                                        if (event.totalY > 0) alternative else content
+                                    }
+                                    onPopupPreview(view.id, preview, view.bounds)
+                                    true
+                                }
+                                GestureType.Up -> {
+                                    if (event.totalY > 0) {
+                                        onAction(it.action)
+                                        onPopupDismiss(view.id)
+                                        true
+                                    } else null
+                                }
+                                else -> null
+                            } ?: oldOnGestureListener.onGesture(view, event)
                         }
                     }
                     is KeyDef.Behavior.DoubleTap -> {
                         doubleTapEnabled = true
                         onDoubleTapListener = { _ ->
-                            onAction(it.action)
-                        }
-                    }
-                    is KeyDef.Behavior.Press -> {
-                        setOnClickListener { _ ->
-                            onAction(it.action)
-                        }
-                        if (def.popup is KeyDef.Popup.Preview) {
-                            onTouchDownListener = { view ->
-                                val v = view as KeyView
-                                onPopupPreview(v.id, def.popup.content, v.bounds)
-                            }
-                            onTouchLeaveListener = { view ->
-                                onPopupDismiss(view.id)
-                            }
-                        }
-                    }
-                    is KeyDef.Behavior.Repeat -> {
-                        repeatEnabled = true
-                        onRepeatListener = { _ ->
                             onAction(it.action)
                         }
                     }
