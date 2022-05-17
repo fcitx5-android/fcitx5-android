@@ -120,4 +120,5 @@
     <string name="punctuation_pos_bottom">Bottom (Portrait only)</string>
     <string name="punctuation_pos_top_right">Top Right</string>
     <string name="expand_toolbar_by_default">Expand toolbar by default</string>
+    <string name="popup_on_key_press">Popup on key press</string>
 </resources>
