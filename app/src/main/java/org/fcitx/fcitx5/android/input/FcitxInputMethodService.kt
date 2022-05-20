@@ -233,14 +233,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onComputeInsets(outInsets: Insets) {
         if (!this::inputView.isInitialized) return
-        val softInputWindowHeight = window.window!!.decorView.height
-        val keyboardHeight = inputView.keyboardView.height
-        val topInsets = softInputWindowHeight - keyboardHeight
+        val (_, y) = intArrayOf(0, 0).also { inputView.keyboardView.getLocationInWindow(it) }
         outInsets.apply {
-            contentTopInsets = topInsets
+            contentTopInsets = y
             touchableInsets = Insets.TOUCHABLE_INSETS_CONTENT
             touchableRegion.setEmpty()
-            visibleTopInsets = topInsets
+            visibleTopInsets = y
         }
     }
 
