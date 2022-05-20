@@ -11,6 +11,9 @@ import android.widget.Button
 import androidx.activity.viewModels
 import androidx.core.app.NotificationCompat
 import androidx.core.os.bundleOf
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -19,8 +22,12 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.databinding.ActivitySetupBinding
 import org.fcitx.fcitx5.android.ui.setup.SetupPage.Companion.firstUndonePage
 import org.fcitx.fcitx5.android.ui.setup.SetupPage.Companion.isLastPage
+import org.fcitx.fcitx5.android.utils.applyTranslucentSystemBars
 import org.fcitx.fcitx5.android.utils.getCurrentFragment
 import splitties.systemservices.notificationManager
+import splitties.views.bottomPadding
+import splitties.views.leftPadding
+import splitties.views.rightPadding
 
 class SetupActivity : FragmentActivity() {
 
@@ -33,7 +40,18 @@ class SetupActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        applyTranslucentSystemBars()
         val binding = ActivitySetupBinding.inflate(layoutInflater)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
+            val navBars = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            binding.root.apply {
+                bottomPadding = navBars.bottom
+                leftPadding = navBars.left
+                rightPadding = navBars.right
+            }
+            windowInsets
+        }
         setContentView(binding.root)
         prevButton = binding.prevButton.apply {
             text = getString(R.string.prev)

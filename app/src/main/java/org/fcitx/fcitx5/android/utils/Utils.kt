@@ -1,13 +1,16 @@
 package org.fcitx.fcitx5.android.utils
 
+import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.ColorFilter
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.inputmethodservice.InputMethodService
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.provider.OpenableColumns
@@ -21,6 +24,9 @@ import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.NavController
@@ -33,6 +39,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import splitties.experimental.InternalSplittiesApi
 import splitties.resources.withResolvedThemeAttribute
+import splitties.views.bottomPadding
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -149,3 +156,31 @@ inline val ConstraintLayout.LayoutParams.unset
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun <T, U> kotlin.reflect.KFunction1<T, U>.upcast(): (T) -> U = this
+
+fun Activity.applyTranslucentSystemBars() {
+    // with minSDK 23 we always have windowLightStatusBar
+    window.statusBarColor = Color.TRANSPARENT
+    WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars =
+        when (resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)) {
+            Configuration.UI_MODE_NIGHT_YES -> false
+            else -> true
+        }
+    // windowLightNavigationBar is available for 27+
+    window.navigationBarColor =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            Color.TRANSPARENT
+        } else {
+            // com.android.internal.R.color.system_bar_background_semi_transparent
+            0x66000000
+        }
+}
+
+fun RecyclerView.applyNavBarInsetsBottomPadding() {
+    clipToPadding = false
+    ViewCompat.setOnApplyWindowInsetsListener(this) { _, windowInsets ->
+        windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars()).also {
+            bottomPadding = it.bottom
+        }
+        windowInsets
+    }
+}

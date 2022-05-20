@@ -7,12 +7,12 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
-import androidx.preference.PreferenceFragmentCompat
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.ui.main.settings.PaddingPreferenceFragment
 import org.fcitx.fcitx5.android.utils.Const
 import org.fcitx.fcitx5.android.utils.formatDateTime
 
-class AboutFragment : PreferenceFragmentCompat() {
+class AboutFragment : PaddingPreferenceFragment() {
 
     private val viewModel: MainViewModel by activityViewModels()
 

@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.Licenses
 import org.fcitx.fcitx5.android.ui.common.SimpleAdapter
+import org.fcitx.fcitx5.android.utils.applyNavBarInsetsBottomPadding
 import splitties.views.dsl.recyclerview.recyclerView
 
 class LicensesFragment : Fragment() {
@@ -27,6 +28,7 @@ class LicensesFragment : Fragment() {
     ): View = requireContext().recyclerView {
         layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         adapter = SimpleAdapter()
+        applyNavBarInsetsBottomPadding()
         lifecycleScope.launch {
             Licenses.getAll()
                 .onSuccess {

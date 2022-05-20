@@ -4,10 +4,14 @@ import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.view.View
+import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
-import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.doOnAttach
+import androidx.core.view.updateLayoutParams
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -16,9 +20,8 @@ import com.google.android.material.snackbar.Snackbar
 import org.fcitx.fcitx5.android.R
 import splitties.dimensions.dp
 import splitties.resources.styledColor
+import splitties.views.bottomPadding
 import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.coordinatorlayout.coordinatorLayout
-import splitties.views.dsl.coordinatorlayout.defaultLParams
 import splitties.views.dsl.core.*
 import splitties.views.dsl.material.floatingActionButton
 import splitties.views.dsl.recyclerview.recyclerView
@@ -211,13 +214,14 @@ abstract class BaseDynamicListUi<T>(
     protected val recyclerView = recyclerView {
         adapter = this@BaseDynamicListUi
         layoutManager = verticalLayoutManager()
+        clipToPadding = false
         var fabShown = true
         addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 if (dy > 0 && fabShown) {
                     fabShown = false
                     val offset = fab.run {
-                        height + (layoutParams as CoordinatorLayout.LayoutParams).bottomMargin
+                        height + (layoutParams as ViewGroup.MarginLayoutParams).bottomMargin
                     }.toFloat()
                     fab.animate().setDuration(150L).translationY(offset)
                 } else if (dy < 0 && !fabShown) {
@@ -235,15 +239,29 @@ abstract class BaseDynamicListUi<T>(
         ItemTouchHelper(touchCallback).attachToRecyclerView(recyclerView)
     }
 
-    override val root: CoordinatorLayout = coordinatorLayout {
-        add(recyclerView, defaultLParams {
+    private fun updateViewMargin(insets: WindowInsetsCompat? = null) {
+        val windowInsets = (insets ?: ViewCompat.getRootWindowInsets(root)) ?: return
+        val navBars = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+        fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = navBars.bottom + ctx.dp(16)
+        }
+        recyclerView.bottomPadding = navBars.bottom
+    }
+
+    override val root = frameLayout {
+        add(recyclerView, lParams {
             height = matchParent
             width = matchParent
         })
-        add(fab, defaultLParams {
+        add(fab, lParams {
             gravity = gravityEndBottom
             margin = dp(16)
         })
+        doOnAttach { updateViewMargin() }
+        ViewCompat.setOnApplyWindowInsetsListener(this) { _, windowInsets ->
+            updateViewMargin(windowInsets)
+            windowInsets
+        }
         updateFAB()
     }
 

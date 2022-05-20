@@ -5,10 +5,10 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
-import androidx.preference.PreferenceFragmentCompat
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.ui.main.settings.PaddingPreferenceFragment
 
-class MainFragment : PreferenceFragmentCompat() {
+class MainFragment : PaddingPreferenceFragment() {
 
     private val viewModel: MainViewModel by activityViewModels()
 

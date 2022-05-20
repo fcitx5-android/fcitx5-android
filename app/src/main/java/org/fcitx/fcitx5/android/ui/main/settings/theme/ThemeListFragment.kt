@@ -10,6 +10,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.ui.main.settings.ProgressFragment
+import org.fcitx.fcitx5.android.utils.applyNavBarInsetsBottomPadding
 import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.resources.resolveThemeAttribute
@@ -125,6 +126,7 @@ class ThemeListFragment : ProgressFragment() {
             adapter = this@ThemeListFragment.adapter
             // evenly spaced items
             addItemDecoration(ThemeListItemDecoration(itemWidth, spanCount))
+            applyNavBarInsetsBottomPadding()
         }
 
         ThemeManager.addOnChangedListener(onThemeChangedListener)

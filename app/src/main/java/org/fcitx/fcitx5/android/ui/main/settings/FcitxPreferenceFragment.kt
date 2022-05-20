@@ -14,7 +14,7 @@ import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 
-abstract class FcitxPreferenceFragment : PreferenceFragmentCompat() {
+abstract class FcitxPreferenceFragment : PaddingPreferenceFragment() {
     abstract fun getPageTitle(): String
     abstract suspend fun obtainConfig(fcitx: Fcitx): RawConfig
     abstract suspend fun saveConfig(fcitx: Fcitx, newConfig: RawConfig)
