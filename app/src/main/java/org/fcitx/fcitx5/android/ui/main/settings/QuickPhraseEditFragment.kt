@@ -14,6 +14,7 @@ import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.quickphrase.QuickPhrase
 import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseData
+import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseEntry
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.utils.NaiveDustman
@@ -24,9 +25,7 @@ import splitties.views.horizontalPadding
 import splitties.views.topPadding
 
 class QuickPhraseEditFragment : ProgressFragment(),
-    OnItemChangedListener<QuickPhraseEditFragment.QuickPhraseEntry> {
-
-    data class QuickPhraseEntry(val keyword: String, val phrase: String)
+    OnItemChangedListener<QuickPhraseEntry> {
 
     private lateinit var ui: BaseDynamicListUi<QuickPhraseEntry>
 
@@ -50,9 +49,7 @@ class QuickPhraseEditFragment : ProgressFragment(),
         viewModel.disableToolbarSaveButton()
         viewModel.setToolbarTitle(quickPhrase.name)
         val initialEntries = withContext(Dispatchers.IO) {
-            quickPhrase.loadData().getOrThrow().map {
-                QuickPhraseEntry(it.key, it.value)
-            }
+            quickPhrase.loadData().getOrThrow()
         }
         ui = object : BaseDynamicListUi<QuickPhraseEntry>(
             requireContext(),
@@ -112,16 +109,19 @@ class QuickPhraseEditFragment : ProgressFragment(),
         return ui.root
     }
 
+    // The dustman didn't work well in this case,
+    // as one key may map to many phrases
+
     override fun onItemAdded(idx: Int, item: QuickPhraseEntry) {
-        dustman.addOrUpdate(item.keyword, item)
+        dustman.addOrUpdate(item.serialize(), item)
     }
 
     override fun onItemRemoved(idx: Int, item: QuickPhraseEntry) {
-        dustman.remove(item.keyword)
+        dustman.remove(item.serialize())
     }
 
     override fun onItemUpdated(idx: Int, old: QuickPhraseEntry, new: QuickPhraseEntry) {
-        dustman.addOrUpdate(new.keyword, new)
+        dustman.addOrUpdate(new.serialize(), new)
     }
 
     private fun saveConfig() {
@@ -129,8 +129,7 @@ class QuickPhraseEditFragment : ProgressFragment(),
             return
         lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
             quickPhrase.saveData(
-                QuickPhraseData(
-                    entries.associate { it.keyword to it.phrase })
+                QuickPhraseData(entries)
             )
             launch(Dispatchers.Main) {
                 resetDustman()
@@ -141,7 +140,7 @@ class QuickPhraseEditFragment : ProgressFragment(),
     }
 
     private fun resetDustman() {
-        dustman.reset((entries.associateBy { it.keyword }))
+        dustman.reset(entries.associateBy { it.serialize() })
     }
 
     override fun onPause() {

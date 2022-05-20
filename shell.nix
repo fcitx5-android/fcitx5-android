@@ -8,7 +8,7 @@ mkShell {
     gettext
     python39
     icu
-    androidStudioPackages.beta
+    android-studio
   ];
   ANDROID_SDK_ROOT = "${androidComposition.androidsdk}/libexec/android-sdk";
   NDK_VERSION = ndkVersion;
