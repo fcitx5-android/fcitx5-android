@@ -14,14 +14,17 @@ import androidx.core.view.doOnAttach
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.RecyclerView
 import cn.berberman.girls.utils.identity
+import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import org.fcitx.fcitx5.android.R
 import splitties.dimensions.dp
 import splitties.resources.styledColor
 import splitties.views.bottomPadding
 import splitties.views.dsl.constraintlayout.*
+import splitties.views.dsl.coordinatorlayout.coordinatorLayout
+import splitties.views.dsl.coordinatorlayout.defaultLParams
 import splitties.views.dsl.core.*
 import splitties.views.dsl.material.floatingActionButton
 import splitties.views.dsl.recyclerview.recyclerView
@@ -215,21 +218,6 @@ abstract class BaseDynamicListUi<T>(
         adapter = this@BaseDynamicListUi
         layoutManager = verticalLayoutManager()
         clipToPadding = false
-        var fabShown = true
-        addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (dy > 0 && fabShown) {
-                    fabShown = false
-                    val offset = fab.run {
-                        height + (layoutParams as ViewGroup.MarginLayoutParams).bottomMargin
-                    }.toFloat()
-                    fab.animate().setDuration(150L).translationY(offset)
-                } else if (dy < 0 && !fabShown) {
-                    fabShown = true
-                    fab.animate().setDuration(150L).translationY(0f)
-                }
-            }
-        })
     }
 
     fun addTouchCallback(
@@ -248,14 +236,15 @@ abstract class BaseDynamicListUi<T>(
         recyclerView.bottomPadding = navBars.bottom
     }
 
-    override val root = frameLayout {
-        add(recyclerView, lParams {
+    override val root = coordinatorLayout {
+        add(recyclerView, defaultLParams {
             height = matchParent
             width = matchParent
         })
-        add(fab, lParams {
+        add(fab, defaultLParams {
             gravity = gravityEndBottom
             margin = dp(16)
+            behavior = HideBottomViewOnScrollBehavior<FloatingActionButton>()
         })
         doOnAttach { updateViewMargin() }
         ViewCompat.setOnApplyWindowInsetsListener(this) { _, windowInsets ->
