@@ -75,13 +75,13 @@ public:
         p_instance->reloadConfig();
         p_instance->refresh();
         auto &addonManager = p_instance->addonManager();
-        for (const auto category : {fcitx::AddonCategory::InputMethod,
-                                    fcitx::AddonCategory::Frontend,
-                                    fcitx::AddonCategory::Loader,
-                                    fcitx::AddonCategory::Module,
-                                    fcitx::AddonCategory::UI}) {
+        for (const auto category: {fcitx::AddonCategory::InputMethod,
+                                   fcitx::AddonCategory::Frontend,
+                                   fcitx::AddonCategory::Loader,
+                                   fcitx::AddonCategory::Module,
+                                   fcitx::AddonCategory::UI}) {
             const auto names = addonManager.addonNames(category);
-            for (const auto &name : names) {
+            for (const auto &name: names) {
                 p_instance->reloadAddonConfig(name);
             }
         }
@@ -115,7 +115,7 @@ public:
         const auto &imMgr = p_instance->inputMethodManager();
         const auto &list = imMgr.currentGroup().inputMethodList();
         std::vector<const fcitx::InputMethodEntry *> entries;
-        for (const auto &ime : list) {
+        for (const auto &ime: list) {
             const auto *entry = imMgr.entry(ime.name());
             entries.emplace_back(entry);
         }
@@ -157,7 +157,7 @@ public:
         fcitx::InputMethodGroup newGroup(imMgr.currentGroup().name());
         newGroup.setDefaultLayout("us");
         auto &list = newGroup.inputMethodList();
-        for (const auto &e : entries) {
+        for (const auto &e: entries) {
             list.emplace_back(e);
         }
         imMgr.setGroup(std::move(newGroup));
@@ -269,13 +269,13 @@ public:
         const auto &disabledAddons = globalConfig.disabledAddons();
         std::unordered_set<std::string> disabledSet(disabledAddons.begin(), disabledAddons.end());
         std::map<const fcitx::AddonInfo *, bool> addons;
-        for (const auto category : {fcitx::AddonCategory::InputMethod,
-                                    fcitx::AddonCategory::Frontend,
-                                    fcitx::AddonCategory::Loader,
-                                    fcitx::AddonCategory::Module,
-                                    fcitx::AddonCategory::UI}) {
+        for (const auto category: {fcitx::AddonCategory::InputMethod,
+                                   fcitx::AddonCategory::Frontend,
+                                   fcitx::AddonCategory::Loader,
+                                   fcitx::AddonCategory::Module,
+                                   fcitx::AddonCategory::UI}) {
             const auto names = addonManager.addonNames(category);
-            for (const auto &name : names) {
+            for (const auto &name: names) {
                 const auto *info = addonManager.addonInfo(name);
                 if (!info) {
                     continue;
@@ -299,7 +299,7 @@ public:
         std::set<std::string> enabledSet(enabledAddons.begin(), enabledAddons.end());
         const auto &disabledAddons = globalConfig.disabledAddons();
         std::set<std::string> disabledSet(disabledAddons.begin(), disabledAddons.end());
-        for (const auto &item : state) {
+        for (const auto &item: state) {
             const auto *info = addonManager.addonInfo(item.first);
             if (!info) {
                 continue;
@@ -526,7 +526,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
         auto env = GlobalRef->AttachEnv();
         jobjectArray vararg = env->NewObjectArray(static_cast<int>(candidateList.size()), GlobalRef->String, nullptr);
         int i = 0;
-        for (const auto &s : candidateList) {
+        for (const auto &s: candidateList) {
             env->SetObjectArrayElement(vararg, i++, JString(env, s));
         }
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 0, vararg);
@@ -722,7 +722,7 @@ jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntr
 jobjectArray fcitxInputMethodEntriesToJObjectArray(JNIEnv *env, const std::vector<const fcitx::InputMethodEntry *> &entries) {
     jobjectArray array = env->NewObjectArray(static_cast<int>(entries.size()), GlobalRef->InputMethodEntry, nullptr);
     int i = 0;
-    for (const auto &entry : entries) {
+    for (const auto &entry: entries) {
         jobject obj = fcitxInputMethodEntryToJObject(env, entry);
         env->SetObjectArrayElement(array, i++, obj);
         env->DeleteLocalRef(obj);
@@ -803,7 +803,7 @@ jobject fcitxRawConfigToJObject(JNIEnv *env, const fcitx::RawConfig &cfg) {
     }
     jobjectArray array = env->NewObjectArray(static_cast<int>(cfg.subItemsSize()), GlobalRef->RawConfig, nullptr);
     int i = 0;
-    for (const auto &item : cfg.subItems()) {
+    for (const auto &item: cfg.subItems()) {
         jobject jItem = fcitxRawConfigToJObject(env, *cfg.get(item));
         env->SetObjectArrayElement(array, i++, jItem);
         env->DeleteLocalRef(jItem);
@@ -915,7 +915,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_getFcitxAddons(JNIEnv *env, jclass claz
     const auto &addons = Fcitx::Instance().getAddons();
     jobjectArray array = env->NewObjectArray(static_cast<int>(addons.size()), GlobalRef->AddonInfo, nullptr);
     int i = 0;
-    for (const auto addon : addons) {
+    for (const auto addon: addons) {
         const auto *info = addon.first;
         jobject obj = env->NewObject(GlobalRef->AddonInfo, GlobalRef->AddonInfoInit,
                                      *JString(env, info->uniqueName()),
