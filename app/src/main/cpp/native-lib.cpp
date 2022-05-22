@@ -361,16 +361,16 @@ public:
     }
 
     std::vector<ActionEntity> statusAreaActions() {
-        std::vector<ActionEntity> res{};
+        auto actions = std::vector<ActionEntity>();
         auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
-        for (auto group :{fcitx::StatusGroup::BeforeInputMethod,
+        for (auto group: {fcitx::StatusGroup::BeforeInputMethod,
                           fcitx::StatusGroup::InputMethod,
                           fcitx::StatusGroup::AfterInputMethod}) {
-            for (auto act : ic->statusArea().actions(group)) {
-                res.emplace_back(ActionEntity(act, ic));
+            for (auto act: ic->statusArea().actions(group)) {
+                actions.emplace_back(ActionEntity(act, ic));
             }
         }
-        return res;
+        return actions;
     }
 
     void activateAction(int id) {
@@ -456,6 +456,14 @@ extern "C" void setup_log_stream(bool verbose, log_callback_t callback) {
 jobject fcitxInputMethodEntryWithSubModeToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry, const std::vector<std::string> &subMode);
 
 jobject fcitxActionToJObject(JNIEnv *env, const ActionEntity &act) {
+    jobjectArray menu = nullptr;
+    if (act.menu) {
+        const int size = static_cast<int>(act.menu->size());
+        menu = env->NewObjectArray(size, GlobalRef->Action, nullptr);
+        for (int i = 0; i < size; i++) {
+            env->SetObjectArrayElement(menu, i, fcitxActionToJObject(env, act.menu->at(i)));
+        }
+    }
     auto obj = env->NewObject(GlobalRef->Action, GlobalRef->ActionInit,
                               act.id,
                               act.isSeparator,
@@ -464,8 +472,12 @@ jobject fcitxActionToJObject(JNIEnv *env, const ActionEntity &act) {
                               *JString(env, act.name),
                               *JString(env, act.icon),
                               *JString(env, act.shortText),
-                              *JString(env, act.longText)
+                              *JString(env, act.longText),
+                              menu
     );
+    if (menu) {
+        env->DeleteLocalRef(menu);
+    }
     return obj;
 }
 

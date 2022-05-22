@@ -164,5 +164,28 @@ data class Action(
     val icon: String,
     val shortText: String,
     val longText: String,
-    // TODO: support menu (nested actions)
-)
+    val menu: Array<Action>?
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Action
+
+        if (id != other.id) return false
+        if (name != other.name) return false
+        if (menu != null) {
+            if (other.menu == null) return false
+            if (!menu.contentEquals(other.menu)) return false
+        } else if (other.menu != null) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = id
+        result = 31 * result + name.hashCode()
+        result = 31 * result + (menu?.contentHashCode() ?: 0)
+        return result
+    }
+}
