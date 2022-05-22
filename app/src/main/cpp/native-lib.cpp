@@ -516,6 +516,8 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
 
     fcitx::registerDomain("fcitx5", locale_dir_char);
     fcitx::registerDomain("fcitx5-chinese-addons", locale_dir_char);
+    fcitx::registerDomain("fcitx5-lua", locale_dir_char);
+    fcitx::registerDomain("fcitx5-android", locale_dir_char);
 
     env->ReleaseStringUTFChars(locale, locale_char);
     env->ReleaseStringUTFChars(appData, app_data);

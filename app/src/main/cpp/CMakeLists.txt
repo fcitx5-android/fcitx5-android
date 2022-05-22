@@ -49,6 +49,7 @@ option(ENABLE_LIBUUID "" OFF)
 add_subdirectory(fcitx5)
 
 include(fcitx5/src/lib/fcitx-utils/Fcitx5Macros.cmake)
+add_subdirectory(po)
 add_subdirectory(androidfrontend)
 add_subdirectory(androidkeyboard)
 

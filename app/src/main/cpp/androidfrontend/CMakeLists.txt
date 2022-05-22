@@ -1,3 +1,5 @@
+add_definitions(-DFCITX_GETTEXT_DOMAIN=\"fcitx5-android\")
+
 add_library(androidfrontend MODULE androidfrontend.cpp)
 target_link_libraries(androidfrontend Fcitx5::Core)
 
