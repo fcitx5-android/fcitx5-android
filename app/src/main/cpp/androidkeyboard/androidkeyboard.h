@@ -25,29 +25,27 @@ FCITX_CONFIG_ENUM_NAME_WITH_I18N(
 
 FCITX_CONFIGURATION(
         AndroidKeyboardEngineConfig,
-        Option<int, IntConstrain>
-            pageSize{this, "PageSize", _("Page size"), 5, IntConstrain(3, 10)};
         Option<bool>
-            enableWordHint{this, "EnableWordHint", _("Completion"), true};
+            enableWordHint{this, "EnableWordHint", _("Enable word hint"), true};
+        Option<int, IntConstrain>
+            pageSize{this, "PageSize", _("Word hint page size"), 5, IntConstrain(3, 10)};
         OptionWithAnnotation<ChooseModifier, ChooseModifierI18NAnnotation>
-            chooseModifier{this, "Choose Modifier", _("Choose key modifier"), ChooseModifier::Alt};
+            chooseModifier{this, "ChooseModifier", _("Choose key modifier"), ChooseModifier::Alt};
+        Option<bool>
+            insertSpace{this, "InsertSpace", _("Insert space between words"), false};
 )
 
 class AndroidKeyboardEngine;
 
-enum class CandidateMode {
-    Hint, LongPress
-};
-
 struct AndroidKeyboardEngineState : public InputContextProperty {
     InputBuffer buffer_;
-    CandidateMode mode_ = CandidateMode::Hint;
     std::string origKeyString_;
+    bool prependSpace_ = false;
 
     void reset() {
         buffer_.clear();
-        mode_ = CandidateMode::Hint;
         origKeyString_.clear();
+        prependSpace_ = false;
     }
 };
 
@@ -74,7 +72,7 @@ public:
 
     void reset(const InputMethodEntry &entry, InputContextEvent &event) override;
 
-    void resetState(InputContext *inputContext);
+    void resetState(InputContext *inputContext, bool fromCandidate = false);
 
     FCITX_ADDON_DEPENDENCY_LOADER(spell, instance_->addonManager());
 //    FCITX_ADDON_DEPENDENCY_LOADER(emoji, instance_->addonManager());
@@ -104,7 +102,6 @@ private:
     Instance *instance_;
     AndroidKeyboardEngineConfig config_;
     KeyList selectionKeys_;
-    bool enableWordHint_;
 
     FactoryFor<AndroidKeyboardEngineState> factory_{
             [](InputContext &) { return new AndroidKeyboardEngineState; }

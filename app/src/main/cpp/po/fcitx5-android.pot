@@ -16,3 +16,15 @@ msgstr ""
 
 msgid "Android Keyboard"
 msgstr ""
+
+msgid "Enable word hint"
+msgstr ""
+
+msgid "Word hint page size"
+msgstr ""
+
+msgid "Choose key modifier"
+msgstr ""
+
+msgid "Insert space between words"
+msgstr ""

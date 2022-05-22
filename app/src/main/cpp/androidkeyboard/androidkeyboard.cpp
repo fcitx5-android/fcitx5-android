@@ -76,7 +76,7 @@ public:
         inputContext->updatePreedit();
         inputContext->updateUserInterface(UserInterfaceComponent::InputPanel);
         inputContext->commitString(commit);
-        engine_->resetState(inputContext);
+        engine_->resetState(inputContext, true);
     }
 
 private:
@@ -86,7 +86,7 @@ private:
 } // namespace
 
 AndroidKeyboardEngine::AndroidKeyboardEngine(Instance *instance)
-        : instance_(instance), enableWordHint_(true) {
+        : instance_(instance) {
     instance_->inputContextManager().registerProperty("keyboardState", &factory_);
     reloadConfig();
 }
@@ -133,6 +133,12 @@ void AndroidKeyboardEngine::keyEvent(const InputMethodEntry &entry, KeyEvent &ev
     static KeyList FCITX_HYPHEN_APOS = {Key(FcitxKey_minus), Key(FcitxKey_apostrophe)};
     // check for valid character
     if (event.key().isSimple() || validSym) {
+        // prepend space before input next word
+        if (state->prependSpace_ && buffer.empty() &&
+            (event.key().isLAZ() || event.key().isUAZ() || event.key().isDigit())) {
+            state->prependSpace_ = false;
+            inputContext->commitString(" ");
+        }
         if (event.key().isLAZ() || event.key().isUAZ() || validSym ||
             (!buffer.empty() && event.key().checkKeyList(FCITX_HYPHEN_APOS))) {
             auto text = Key::keySymToUTF8(event.key().sym());
@@ -152,6 +158,9 @@ void AndroidKeyboardEngine::keyEvent(const InputMethodEntry &entry, KeyEvent &ev
 
     // if we reach here, just commit and discard buffer.
     commitBuffer(inputContext);
+    if (state->prependSpace_) {
+        state->prependSpace_ = false;
+    }
 }
 
 std::vector<InputMethodEntry> AndroidKeyboardEngine::listInputMethods() {
@@ -183,14 +192,13 @@ void AndroidKeyboardEngine::reloadConfig() {
         case ChooseModifier::Super:
             states = KeyState::Super;
             break;
-        default:
+        case ChooseModifier::NoModifier:
             break;
     }
 
-    for (auto sym : syms) {
+    for (auto sym: syms) {
         selectionKeys_.emplace_back(sym, states);
     }
-    enableWordHint_ = config_.enableWordHint.value();
 }
 
 void AndroidKeyboardEngine::save() {
@@ -217,10 +225,13 @@ void AndroidKeyboardEngine::reset(const InputMethodEntry &entry, InputContextEve
     inputContext->updateUserInterface(UserInterfaceComponent::InputPanel);
 }
 
-void AndroidKeyboardEngine::resetState(InputContext *inputContext) {
+void AndroidKeyboardEngine::resetState(InputContext *inputContext, bool fromCandidate) {
     auto *state = inputContext->propertyFor(&factory_);
     state->reset();
-    instance_->resetCompose(inputContext);
+    if (fromCandidate) {
+        // TODO set prependSpace_ to false when cursor moves; maybe it's time to implement SurroundingText
+        state->prependSpace_ = config_.insertSpace.value();
+    }
 }
 
 void AndroidKeyboardEngine::updateCandidate(const InputMethodEntry &entry, InputContext *inputContext) {
@@ -234,14 +245,13 @@ void AndroidKeyboardEngine::updateCandidate(const InputMethodEntry &entry, Input
     }
     auto candidateList = std::make_unique<CommonCandidateList>();
     auto spellType = guessSpellType(state->buffer_.userInput());
-    for (const auto &result : results) {
+    for (const auto &result: results) {
         candidateList->append<AndroidKeyboardCandidateWord>(
                 this, Text(formatWord(result, spellType)));
     }
     candidateList->setPageSize(*config_.pageSize);
     candidateList->setSelectionKey(selectionKeys_);
     candidateList->setCursorIncludeUnselected(true);
-    state->mode_ = CandidateMode::Hint;
     inputContext->inputPanel().setCandidateList(std::move(candidateList));
 
     updateUI(inputContext);
@@ -271,7 +281,7 @@ bool AndroidKeyboardEngine::updateBuffer(InputContext *inputContext, const std::
                                         CapabilityFlag::NoSpellCheck,
                                         CapabilityFlag::Sensitive};
     // no spell hint enabled or no supported dictionary
-    if (!enableWordHint_ ||
+    if (!config_.enableWordHint.value() ||
         inputContext->capabilityFlags().testAny(noPredictFlag) ||
         !supportHint(entry->languageCode())) {
         return false;
