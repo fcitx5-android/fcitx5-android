@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.graphics.Rect
 import android.view.inputmethod.EditorInfo
+import androidx.core.view.allViews
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
@@ -77,7 +79,25 @@ class TextKeyboard(
     val space: TextKeyView by lazy { findViewById(R.id.button_space) }
     val `return`: ImageKeyView by lazy { findViewById(R.id.button_return) }
 
+    private val alphabetKeys by lazy {
+        HashMap<String, TextKeyView>().apply {
+            allViews.forEach {
+                if (it is TextKeyView) {
+                    val str = it.mainText.text.toString()
+                    if (str.length == 1 && str[0].isLetter()) put(str, it)
+                }
+            }
+        }
+    }
+
     private var capsState: CapsState = CapsState.None
+
+    private fun transformAlphabet(c: String): String {
+        return when (capsState) {
+            CapsState.None -> c.lowercase()
+            else -> c.uppercase()
+        }
+    }
 
     override fun onAction(action: KeyAction) {
         when (action) {
@@ -93,18 +113,13 @@ class TextKeyboard(
         if (action.act.length > 1) {
             return
         }
-        when (capsState) {
-            CapsState.None -> action.lower()
-            CapsState.Once -> {
-                switchCapsState()
-                action.upper()
-            }
-            CapsState.Lock -> action.upper()
-        }
+        action.act = transformAlphabet(action.act)
+        if (capsState == CapsState.Once) switchCapsState()
     }
 
     override fun onAttach(info: EditorInfo?) {
         updateCapsButtonIcon()
+        updateAlphabetKeys()
         `return`.img.imageResource = drawableForReturn(info)
     }
 
@@ -124,6 +139,10 @@ class TextKeyboard(
         space.mainText.text = s
     }
 
+    override fun onPopupPreview(viewId: Int, content: String, bounds: Rect) {
+        super.onPopupPreview(viewId, transformAlphabet(content), bounds)
+    }
+
     private fun switchCapsState(lock: Boolean = false) {
         capsState = if (lock) when (capsState) {
             CapsState.Lock -> CapsState.None
@@ -133,6 +152,7 @@ class TextKeyboard(
             else -> CapsState.None
         }
         updateCapsButtonIcon()
+        updateAlphabetKeys()
     }
 
     private fun updateCapsButtonIcon() {
@@ -149,6 +169,12 @@ class TextKeyboard(
                     CapsState.Lock -> theme.accentKeyBackgroundColor
                 }.color, PorterDuff.Mode.SRC_IN
             )
+        }
+    }
+
+    private fun updateAlphabetKeys() {
+        alphabetKeys.forEach { (str, textKeyView) ->
+            textKeyView.mainText.text = transformAlphabet(str)
         }
     }
 

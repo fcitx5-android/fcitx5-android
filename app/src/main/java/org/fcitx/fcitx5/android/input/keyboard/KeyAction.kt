@@ -6,15 +6,7 @@ import org.fcitx.fcitx5.android.core.KeySym
 
 sealed class KeyAction {
 
-    data class FcitxKeyAction(var act: String) : KeyAction() {
-        fun upper() {
-            act = act.uppercase()
-        }
-
-        fun lower() {
-            act = act.lowercase()
-        }
-    }
+    data class FcitxKeyAction(var act: String) : KeyAction()
 
     data class SymAction(val sym: KeySym, val states: KeyStates = VirtualState) : KeyAction() {
         constructor(sym: UInt, states: KeyStates = VirtualState) : this(KeySym(sym), states)
