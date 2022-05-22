@@ -38,6 +38,7 @@ val targetABI = System.getenv("ABI")
 val defaultABI = "arm64-v8a"
 
 android {
+    namespace = "org.fcitx.fcitx5.android"
     compileSdk = 31
     buildToolsVersion = "31.0.0"
     ndkVersion = System.getenv("NDK_VERSION") ?: "23.1.7779620"
@@ -236,7 +237,7 @@ installFcitxComponent("generate-desktop-file", "config", file("src/main/assets")
 installFcitxComponent("translation-file", "translation", file("src/main/assets"))
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
     implementation ("com.github.CanHub:Android-Image-Cropper:4.2.1")
     implementation("cat.ereza:customactivityoncrash:2.3.0")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
@@ -250,7 +251,7 @@ dependencies {
     implementation("com.jakewharton.timber:timber:5.0.1")
     implementation("androidx.core:core-ktx:1.7.0")
     implementation("androidx.appcompat:appcompat:1.4.1")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.3")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.lifecycle", "lifecycle-runtime-ktx", "2.3.1")
     implementation("androidx.lifecycle:lifecycle-service:2.4.1")
     implementation("androidx.lifecycle:lifecycle-common-java8:2.4.1")
