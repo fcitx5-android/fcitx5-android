@@ -23,8 +23,9 @@ object IdleUiStateMachine {
         toolbarByDefault: Boolean,
         old: EventStateMachine<State, TransitionEvent>? = null,
         block: ((State) -> Unit)? = null
-    ): EventStateMachine<State, TransitionEvent> =
-        eventStateMachine(old?.currentState ?: if (toolbarByDefault) Toolbar else Empty) {
+    ): EventStateMachine<State, TransitionEvent> {
+        val initialState = if (toolbarByDefault) Toolbar else Empty
+        return eventStateMachine(old?.currentState ?: initialState) {
             from(Toolbar) transitTo Clipboard on ClipboardUpdatedNonEmpty
             from(Toolbar) transitTo Empty on MenuButtonClicked
             from(ToolbarWithClip) transitTo Toolbar on Timeout
@@ -33,12 +34,15 @@ object IdleUiStateMachine {
             from(ToolbarWithClip) transitTo Clipboard on ClipboardUpdatedNonEmpty
             from(Clipboard) transitTo ToolbarWithClip on MenuButtonClicked
             from(Clipboard) transitTo ClipboardTimedOut on Timeout
-            from(Clipboard) transitTo (if (toolbarByDefault) Toolbar else Empty) on Pasted
+            from(Clipboard) transitTo initialState on Pasted
             from(ClipboardTimedOut) transitTo Toolbar on MenuButtonClicked
-            from(ClipboardTimedOut) transitTo (if (toolbarByDefault) Toolbar else Empty) on KawaiiBarShown
+            from(ClipboardTimedOut) transitTo initialState on KawaiiBarShown
+            from(ClipboardTimedOut) transitTo initialState on Pasted
+            from(ClipboardTimedOut) transitTo initialState on ClipboardUpdatedEmpty
+            from(ClipboardTimedOut) transitTo Clipboard on ClipboardUpdatedNonEmpty
             from(Empty) transitTo Toolbar on MenuButtonClicked
             from(Empty) transitTo Clipboard on ClipboardUpdatedNonEmpty
             onNewState(old?.onNewStateListener ?: block ?: throw IllegalArgumentException())
         }
+    }
 }
-
