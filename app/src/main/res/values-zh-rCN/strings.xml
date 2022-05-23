@@ -120,4 +120,5 @@
     <string name="punctuation_pos_bottom">底部（仅限竖屏）</string>
     <string name="punctuation_pos_top_right">右上</string>
     <string name="expand_toolbar_by_default">默认展开工具栏</string>
+    <string name="popup_on_key_press">按键时弹出显示字符</string>
 </resources>
