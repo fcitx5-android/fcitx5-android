@@ -13,3 +13,6 @@
 [submodule "app/src/main/cpp/fcitx5-lua"]
 	path = app/src/main/cpp/fcitx5-lua
 	url = git@github.com:fcitx/fcitx5-lua.git
+[submodule "app/src/main/cpp/fcitx5-unikey"]
+	path = app/src/main/cpp/fcitx5-unikey
+	url = git@github.com:fcitx/fcitx5-unikey.git

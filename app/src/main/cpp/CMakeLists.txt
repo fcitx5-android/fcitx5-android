@@ -80,6 +80,11 @@ option(ENABLE_BROWSER "" OFF)
 option(USE_WEBKIT "" OFF)
 option(ENABLE_CLOUDPINYIN "" OFF)
 add_subdirectory(fcitx5-chinese-addons)
+
+option(ENABLE_TEST "" OFF)
+option(ENABLE_QT "" OFF)
+add_subdirectory(fcitx5-unikey)
+
 # rename to include this executable in apk
 set_target_properties(scel2org5 PROPERTIES OUTPUT_NAME libscel2org5.so)
 
