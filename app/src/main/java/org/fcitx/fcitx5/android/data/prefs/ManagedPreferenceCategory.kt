@@ -15,8 +15,9 @@ abstract class ManagedPreferenceCategory(
         @StringRes
         title: Int,
         key: String,
-        defaultValue: Boolean
-    ) = ManagedPreference.Switch(sharedPreferences, key, defaultValue) {
+        defaultValue: Boolean,
+        enableUiOn: () -> Boolean = { true },
+    ) = ManagedPreference.Switch(sharedPreferences, key, defaultValue, enableUiOn) {
         this.setTitle(title)
     }.also {
         managedPreferences[key] = it
@@ -28,13 +29,15 @@ abstract class ManagedPreferenceCategory(
         key: String,
         defaultValue: T,
         codec: ManagedPreference.StringLikeCodec<T>,
-        entries: List<Pair<String, T>>
+        entries: List<Pair<String, T>>,
+        enableUiOn: () -> Boolean = { true },
     ) = ManagedPreference.StringLikeList(
         sharedPreferences,
         key,
         defaultValue,
         codec,
-        entries.map { it.second }
+        entries.map { it.second },
+        enableUiOn
     ) {
         this.setTitle(title)
         this.entries = entries.map { it.first }.toTypedArray()
@@ -48,12 +51,14 @@ abstract class ManagedPreferenceCategory(
         title: Int,
         key: String,
         defaultValue: String,
-        entries: Array<String>
+        entries: Array<String>,
+        enableUiOn: () -> Boolean = { true },
     ) = ManagedPreference.StringList(
         sharedPreferences,
         key,
         defaultValue,
-        entries
+        entries,
+        enableUiOn
     ) {
         this.setTitle(title)
         this.entries = entries
@@ -69,11 +74,13 @@ abstract class ManagedPreferenceCategory(
         defaultValue: Int,
         min: Int,
         max: Int,
-        unit: String = ""
+        unit: String = "",
+        enableUiOn: () -> Boolean = { true },
     ) = ManagedPreference.SeekBarInt(
         sharedPreferences,
         key,
         defaultValue,
+        enableUiOn,
     ) {
         this.setTitle(title)
         this.min = min
@@ -89,7 +96,9 @@ abstract class ManagedPreferenceCategory(
         category.setTitle(title)
         screen.addPreference(category)
         managedPreferences.forEach {
-            category.addPreference(it.value.createUi(screen.context))
+            category.addPreference(it.value.createUi(screen.context).apply {
+                isEnabled = it.value.enableUiOn()
+            })
         }
     }
 }

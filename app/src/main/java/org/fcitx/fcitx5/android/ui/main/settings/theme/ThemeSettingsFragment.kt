@@ -3,19 +3,16 @@ package org.fcitx.fcitx5.android.ui.main.settings.theme
 import android.os.Bundle
 import androidx.fragment.app.activityViewModels
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceFragment
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
-import org.fcitx.fcitx5.android.ui.main.settings.PaddingPreferenceFragment
 
-class ThemeSettingsFragment: PaddingPreferenceFragment() {
+class ThemeSettingsFragment : ManagedPreferenceFragment(ThemeManager.prefs) {
     private val viewModel: MainViewModel by activityViewModels()
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        super.onCreatePreferences(savedInstanceState, rootKey)
         viewModel.disableToolbarSaveButton()
-        val context = preferenceManager.context
-        val screen = preferenceManager.createPreferenceScreen(context)
-        ThemeManager.prefs.createUi(screen)
-        preferenceScreen = screen
     }
 
     override fun onResume() {

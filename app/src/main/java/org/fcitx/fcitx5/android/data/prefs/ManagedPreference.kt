@@ -16,6 +16,7 @@ sealed class ManagedPreference<T : Any, P : Preference>(
     val sharedPreferences: SharedPreferences,
     val key: String,
     val defaultValue: T,
+    val enableUiOn: () -> Boolean,
     private val uiConfig: P.() -> Unit
 ) : ReadWriteProperty<Any?, T> {
 
@@ -61,11 +62,13 @@ sealed class ManagedPreference<T : Any, P : Preference>(
         sharedPreferences: SharedPreferences,
         key: String,
         defaultValue: Boolean,
+        enableUiOn: () -> Boolean,
         uiConfig: SwitchPreference.() -> Unit
     ) : ManagedPreference<Boolean, SwitchPreference>(
         sharedPreferences,
         key,
         defaultValue,
+        enableUiOn,
         uiConfig
     ) {
         override fun createUiProtected(context: Context): SwitchPreference =
@@ -89,8 +92,15 @@ sealed class ManagedPreference<T : Any, P : Preference>(
         key: String,
         defaultValue: String,
         val entries: Array<String>,
+        enableUiOn: () -> Boolean,
         uiConfig: ListPreference.() -> Unit
-    ) : ManagedPreference<String, ListPreference>(sharedPreferences, key, defaultValue, uiConfig) {
+    ) : ManagedPreference<String, ListPreference>(
+        sharedPreferences,
+        key,
+        defaultValue,
+        enableUiOn,
+        uiConfig
+    ) {
 
         override fun createUiProtected(context: Context): ListPreference =
             ListPreference(context).apply {
@@ -115,8 +125,15 @@ sealed class ManagedPreference<T : Any, P : Preference>(
         defaultValue: T,
         val codec: StringLikeCodec<T>,
         val entries: List<T>,
+        enableUiOn: () -> Boolean,
         uiConfig: ListPreference.() -> Unit
-    ) : ManagedPreference<T, ListPreference>(sharedPreferences, key, defaultValue, uiConfig) {
+    ) : ManagedPreference<T, ListPreference>(
+        sharedPreferences,
+        key,
+        defaultValue,
+        enableUiOn,
+        uiConfig
+    ) {
         override fun createUiProtected(context: Context): ListPreference =
             ListPreference(context).apply {
                 key = this@StringLikeList.key
@@ -143,11 +160,13 @@ sealed class ManagedPreference<T : Any, P : Preference>(
         sharedPreferences: SharedPreferences,
         key: String,
         defaultValue: Int,
+        enableUiOn: () -> Boolean,
         uiConfig: DialogSeekBarPreference.() -> Unit
     ) : ManagedPreference<Int, DialogSeekBarPreference>(
         sharedPreferences,
         key,
         defaultValue,
+        enableUiOn,
         uiConfig
     ) {
         override fun createUiProtected(context: Context): DialogSeekBarPreference =
@@ -169,7 +188,7 @@ sealed class ManagedPreference<T : Any, P : Preference>(
         sharedPreferences: SharedPreferences,
         key: String,
         defaultValue: T
-    ) : ManagedPreference<T, Nothing>(sharedPreferences, key, defaultValue, {}) {
+    ) : ManagedPreference<T, Nothing>(sharedPreferences, key, defaultValue, { false }, {}) {
         final override fun createUiProtected(context: Context): Nothing =
             throw UnsupportedOperationException()
     }

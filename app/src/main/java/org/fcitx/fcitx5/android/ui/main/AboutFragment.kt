@@ -8,7 +8,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.ui.main.settings.PaddingPreferenceFragment
+import org.fcitx.fcitx5.android.ui.common.PaddingPreferenceFragment
 import org.fcitx.fcitx5.android.utils.Const
 import org.fcitx.fcitx5.android.utils.formatDateTime
 

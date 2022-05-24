@@ -9,10 +9,10 @@ import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
 class AppPrefs(
     private val sharedPreferences: SharedPreferences,
     private val resources: Resources
-) {
+) : ManagedPreferenceProvider {
 
     private val providers = mutableListOf<ManagedPreferenceProvider>()
-    private val managedPreferences = mutableMapOf<String, ManagedPreference<*, *>>()
+    override val managedPreferences = mutableMapOf<String, ManagedPreference<*, *>>()
 
     private val onSharedPreferenceChangeListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
@@ -98,12 +98,12 @@ class AppPrefs(
             "clipboard_limit",
             5,
             1,
-            50
-        )
+            50,
+        ) { clipboardListening.getValue() }
         val clipboardItemTimeout = int(
             R.string.clipboard_item_timeout, "clipboard_item_timeout",
             30, 30, 300, "s"
-        )
+        ) { clipboardListening.getValue() }
     }
 
     val internal = Internal().register()
@@ -111,7 +111,7 @@ class AppPrefs(
     val clipboard = Clipboard().register()
     val advanced = Advanced().register()
 
-    fun createUi(screen: PreferenceScreen) {
+    override fun createUi(screen: PreferenceScreen) {
         providers.forEach {
             it.createUi(screen)
         }
