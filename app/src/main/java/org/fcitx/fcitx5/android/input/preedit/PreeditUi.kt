@@ -1,9 +1,16 @@
 package org.fcitx.fcitx5.android.input.preedit
 
 import android.content.Context
+import android.graphics.Paint
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.RectShape
+import android.text.Spannable
+import android.text.style.DynamicDrawableSpan
 import android.view.View
 import android.view.View.*
 import android.widget.TextView
+import androidx.annotation.ColorInt
+import androidx.core.text.buildSpannedString
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import splitties.dimensions.dp
@@ -13,18 +20,18 @@ import splitties.views.horizontalPadding
 
 class PreeditUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
 
-    private val beforeCursor = textView {
-        textSize = 16f
-        setTextColor(inputTheme.keyTextColor.color)
+    class CursorSpan(ctx: Context, @ColorInt color: Int, metrics: Paint.FontMetricsInt) :
+        DynamicDrawableSpan() {
+        private val drawable = ShapeDrawable(RectShape()).apply {
+            paint.color = color
+            setBounds(0, metrics.ascent, ctx.dp(1), metrics.bottom)
+        }
+
+        override fun getDrawable() = drawable
     }
 
-    private val cursorView = view(::View) {
-        backgroundColor = inputTheme.keyTextColor.color
-    }
-
-    private val afterCursor = textView {
-        textSize = 16f
-        setTextColor(inputTheme.keyTextColor.color)
+    private val cursorSpan by lazy {
+        CursorSpan(ctx, inputTheme.keyTextColor.color, upView.paint.fontMetricsInt)
     }
 
     private val barBackground = when (inputTheme) {
@@ -34,19 +41,16 @@ class PreeditUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
         is Theme.Custom -> inputTheme.backgroundColor
     }
 
-    private val upView = horizontalLayout {
+    private fun createTextView() = textView {
         backgroundColor = barBackground.color
         horizontalPadding = dp(8)
-        add(beforeCursor, lParams())
-        add(cursorView, lParams(dp(1), matchParent) { verticalMargin = dp(2) })
-        add(afterCursor, lParams())
-    }
-
-    private val downView = textView {
-        backgroundColor = barBackground.color
-        horizontalPadding = dp(8)
+        setTextColor(inputTheme.keyTextColor.color)
         textSize = 16f
     }
+
+    private val upView = createTextView()
+
+    private val downView = createTextView()
 
     var visible = false
         private set
@@ -58,7 +62,7 @@ class PreeditUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
         add(downView, lParams())
     }
 
-    private fun updateTextView(view: TextView, str: String, visible: Boolean) = view.run {
+    private fun updateTextView(view: TextView, str: CharSequence, visible: Boolean) = view.run {
         if (visible) {
             text = str
             if (visibility == GONE) visibility = VISIBLE
@@ -68,24 +72,33 @@ class PreeditUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
     }
 
     fun update(content: PreeditContent) {
-        val beforeText: String
-        val afterText: String
-        if (content.preedit.cursor >= 0) {
-            beforeText = content.aux.auxUp + content.preedit.run { preedit.take(cursor) }
-            afterText = content.preedit.run { preedit.drop(cursor) }
+        val upText: String
+        val upCursor: Int
+        if (content.aux.auxUp.isEmpty()) {
+            upText = content.preedit.preedit
+            upCursor = content.preedit.cursor
         } else {
-            beforeText = content.aux.auxUp + content.preedit.preedit
-            afterText = ""
+            upText = content.aux.auxUp + content.preedit.preedit
+            upCursor = content.preedit.cursor.let {
+                if (it < 0) -1
+                else content.aux.auxUp.length + 1 + it
+            }
         }
         val downText = content.aux.auxDown
-        val hasBefore = beforeText.isNotEmpty()
-        val hasAfter = afterText.isNotEmpty()
+        val hasUp = upText.isNotEmpty()
         val hasDown = downText.isNotEmpty()
-        visible = hasBefore || hasAfter || hasDown
+        visible = hasUp || hasDown
         if (!visible) return
-        cursorView.visibility = if (hasAfter) VISIBLE else GONE
-        updateTextView(beforeCursor, beforeText, hasBefore)
-        updateTextView(afterCursor, afterText, hasAfter)
+        upView.text = if (upCursor < 0 || upCursor == upText.length) {
+            upText
+        } else {
+            buildSpannedString {
+                append(upText, 0, upCursor)
+                append('|')
+                setSpan(cursorSpan, upCursor, upCursor + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                append(upText, upCursor, upText.length)
+            }
+        }
         updateTextView(downView, downText, hasDown)
     }
 }
