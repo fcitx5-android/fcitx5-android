@@ -80,8 +80,8 @@ class PreeditUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
         } else {
             upText = content.aux.auxUp + content.preedit.preedit
             upCursor = content.preedit.cursor.let {
-                if (it < 0) -1
-                else content.aux.auxUp.length + 1 + it
+                if (it < 0) it
+                else content.aux.auxUp.length + it
             }
         }
         val downText = content.aux.auxDown
