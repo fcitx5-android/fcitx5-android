@@ -332,10 +332,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             if (ignoreSystemCursor) return
             // fcitx cursor position is relative to client preedit (composing text)
             val position = selection.start - composing.start
+            // cursor in InvokeActionEvent counts by 'char'
+            val codePointPosition = composingText.codePointCount(0, position)
             // move fcitx cursor when cursor position changed
-            if (position != fcitxCursor) {
+            if (codePointPosition != fcitxCursor) {
                 lifecycleScope.launch {
-                    fcitx.moveCursor(position)
+                    fcitx.moveCursor(codePointPosition)
                 }
             }
         } else {
