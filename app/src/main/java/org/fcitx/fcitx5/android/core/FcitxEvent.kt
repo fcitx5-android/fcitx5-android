@@ -41,6 +41,20 @@ sealed class FcitxEvent<T>(open val data: T) {
             get() = EventType.Preedit
 
         data class Data(val preedit: String, val cursor: Int, val clientPreedit: String, val clientCursor: Int)
+
+        companion object {
+            private fun strCursor(str: String, byteCursor: Int): Int {
+                return if (byteCursor <= 0) {
+                    byteCursor
+                } else {
+                    str.encodeToByteArray().sliceArray(0 until byteCursor).decodeToString().length
+                }
+            }
+
+            fun fromByteCursor(preedit: String, cursor: Int, clientPreedit: String, clientCursor: Int) : PreeditEvent {
+                return PreeditEvent(Data(preedit, strCursor(preedit, cursor), clientPreedit, strCursor(clientPreedit, clientCursor)))
+            }
+        }
     }
 
     data class InputPanelAuxEvent(override val data: Data) :
@@ -135,8 +149,8 @@ sealed class FcitxEvent<T>(open val data: T) {
             when (Types[type]) {
                 EventType.Candidate -> CandidateListEvent(params as Array<String>)
                 EventType.Commit -> CommitStringEvent(params[0] as String)
-                EventType.Preedit -> PreeditEvent(
-                    PreeditEvent.Data(params[0] as String, params[1] as Int, params[2] as String, params[3] as Int)
+                EventType.Preedit -> PreeditEvent.fromByteCursor(
+                    params[0] as String, params[1] as Int, params[2] as String, params[3] as Int
                 )
                 EventType.Aux -> InputPanelAuxEvent(
                     InputPanelAuxEvent.Data(params[0] as String, params[1] as String)

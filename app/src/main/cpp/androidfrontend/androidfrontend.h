@@ -16,8 +16,7 @@ public:
 
     void updateCandidateList(const std::vector<std::string> &candidates);
     void commitString(const std::string &str);
-    void updatePreedit(const std::string &preedit, const int cursor,
-                       const std::string &clientPreedit, const int clientCursor);
+    void updatePreedit(const Text &preedit, const Text &clientPreedit);
     void updateInputPanelAux(const std::string &auxUp, const std::string &auxDown);
 
     ICUUID createInputContext(const std::string &program);

@@ -45,10 +45,10 @@ public:
 
     void updateClientSideUIImpl() override {
         InputPanel &ip = inputPanel();
-        const auto &preedit = ip.preedit();
-        const auto &clientPreedit = ip.clientPreedit();
-        frontend_->updatePreedit(filterText(preedit), preedit.cursor(),
-                                 filterText(clientPreedit), clientPreedit.cursor());
+        frontend_->updatePreedit(
+                frontend_->instance()->outputFilter(this, ip.preedit()),
+                frontend_->instance()->outputFilter(this, ip.clientPreedit())
+        );
         frontend_->updateInputPanelAux(filterText(ip.auxUp()), filterText(ip.auxDown()));
         std::vector<std::string> candidates;
         const auto &list = ip.candidateList();
@@ -150,9 +150,8 @@ void AndroidFrontend::updateCandidateList(const std::vector<std::string> &candid
     candidateListCallback(candidates);
 }
 
-void AndroidFrontend::updatePreedit(const std::string &preedit, const int cursor,
-                                    const std::string &clientPreedit, const int clientCursor) {
-    preeditCallback(preedit, cursor, clientPreedit, clientCursor);
+void AndroidFrontend::updatePreedit(const Text &preedit, const Text &clientPreedit) {
+    preeditCallback(preedit.toString(), preedit.cursor(), clientPreedit.toString(), clientPreedit.cursor());
 }
 
 void AndroidFrontend::updateInputPanelAux(const std::string &auxUp, const std::string &auxDown) {
