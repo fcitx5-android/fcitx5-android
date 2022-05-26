@@ -37,6 +37,21 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         fun isEmpty() = data[0] == data[1]
         fun isNotEmpty() = data[0] != data[1]
 
+        fun clear() {
+            data[0] = -1
+            data[1] = -1
+        }
+
+        fun update(start: Int, end: Int) {
+            data[0] = start
+            data[1] = end
+        }
+
+        fun update(i: Int) {
+            data[0] = i
+            data[1] = i
+        }
+
         fun contains(other: CursorRange): Boolean {
             return start <= other.start && other.end <= end
         }
@@ -48,8 +63,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     var editorInfo: EditorInfo? = null
 
-    var selection = CursorRange()
-    var composing = CursorRange()
+    private var cursorAnchorAvailable = false
+
+    val selection = CursorRange()
+    val composing = CursorRange()
     private var composingText = ""
     private var fcitxCursor = -1
 
@@ -75,6 +92,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         when (event) {
             is FcitxEvent.CommitStringEvent -> {
                 inputConnection?.commitText(event.data, 1)
+                selection.update(selection.start + event.data.length)
+                composing.clear()
             }
             is FcitxEvent.KeyEvent -> event.data.also {
                 if (it.states.virtual) {
@@ -106,7 +125,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 }
             }
             is FcitxEvent.PreeditEvent -> event.data.let {
-                updateComposingTextWithCursor(it.clientPreedit, it.clientCursor)
+                updateComposingText(it.clientPreedit, it.clientCursor)
             }
             else -> {
             }
@@ -278,10 +297,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onStartInput(attribute: EditorInfo, restarting: Boolean) {
-        // TODO: requestCursorUpdates only when necessary
-        inputConnection?.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
+        inputConnection?.apply {
+            cursorAnchorAvailable = requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
+        }
         editorInfo = attribute
-        selection = CursorRange(attribute.initialSelStart, attribute.initialSelEnd)
+        selection.update(attribute.initialSelStart, attribute.initialSelEnd)
+        composing.clear()
         lifecycleScope.launch {
             fcitx.setCapFlags(CapabilityFlags.fromEditorInfo(editorInfo))
         }
@@ -306,27 +327,36 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         candidatesStart: Int,
         candidatesEnd: Int
     ) {
-        selection = CursorRange(newSelStart, newSelEnd)
+        // onUpdateSelection can left behind when user types quickly enough, eg. long press backspace
+        // TODO: call InputConnection#beginBatchEdit() before starting key repeat
+        // skip cursor update if we are already up-to-date
+        if (selection.start == newSelStart && selection.end == newSelEnd) return
+        selection.update(newSelStart, newSelEnd)
         Timber.d("onUpdateSelection: $selection")
-        if (::inputView.isInitialized)
+        if (this::inputView.isInitialized) {
             inputView.onSelectionUpdate(newSelStart, newSelEnd)
-        else
-            Timber.w("Ignore onSelectionUpdate: inputView is not initialized")
+        }
+        // since `CursorAnchorInfo` has composingText, we can determine whether it's up-to-date
+        // handle cursor update in `onUpdateSelection` only when `CursorAnchorInfo` unavailable
+        if (cursorAnchorAvailable) return
+        handleCursorUpdate()
     }
 
     override fun onUpdateCursorAnchorInfo(info: CursorAnchorInfo) {
-        // onUpdateCursorAnchorInfo often left behind when user types quickly enough,
-        // especially in browsers. drop the event if `info.composingText` is not up to date.
+        // onUpdateCursorAnchorInfo can left behind when user types quickly enough
+        // skip the event if `info.composingText` is not up-to-date.
         if (info.composingText?.contentEquals(composingText) != true) return
-        selection = CursorRange(info.selectionStart, info.selectionEnd)
-        composing = info.composingText?.let {
-            CursorRange(info.composingTextStart, info.composingTextStart + it.length)
-        } ?: CursorRange()
-        Timber.d("AnchorInfo: selection=$selection composing=$composing")
+        selection.update(info.selectionStart, info.selectionEnd)
+        Timber.d("onUpdateCursorAnchorInfo: selection=$selection")
+        handleCursorUpdate()
+    }
+
+    private fun handleCursorUpdate() {
         // skip fcitx cursor move when composing empty
         if (composing.isEmpty()) return
         // workaround some misbehaved editors: report composingText but wrong selectionStart
         if (selection.start < 0 && composing.start >= 0) return
+        Timber.d("handleCursorUpdate: composing=$composing selection=$selection")
         // check if cursor inside composing text
         if (composing.contains(selection)) {
             if (ignoreSystemCursor) return
@@ -336,11 +366,13 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             val codePointPosition = composingText.codePointCount(0, position)
             // move fcitx cursor when cursor position changed
             if (codePointPosition != fcitxCursor) {
+                Timber.d("handleCursorUpdate: move fcitx cursor to $codePointPosition")
                 lifecycleScope.launch {
                     fcitx.moveCursor(codePointPosition)
                 }
             }
         } else {
+            Timber.d("handleCursorUpdate: focus out/in")
             // cursor outside composing range, finish composing as-is
             inputConnection?.finishComposingText()
             // `fcitx.reset()` here would commit preedit after new cursor position
@@ -354,11 +386,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     // FIXME: cursor flicker
     // because setComposingText(text, cursor) can only put cursor at end of composing,
-    // sometimes onUpdateCursorAnchorInfo would receive event with wrong cursor position.
+    // sometimes onUpdateCursorAnchorInfo/onUpdateSelection would receive event with wrong cursor position.
     // those events need to be filtered.
     // because of https://android.googlesource.com/platform/frameworks/base.git/+/refs/tags/android-11.0.0_r45/core/java/android/view/inputmethod/BaseInputConnection.java#851
     // it's not possible to set cursor inside composing text
-    private fun updateComposingTextWithCursor(text: String, cursor: Int) {
+    private fun updateComposingText(text: String, cursor: Int) {
         fcitxCursor = cursor
         val ic = currentInputConnection ?: return
         ic.beginBatchEdit()
@@ -367,6 +399,17 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 composingText = text
                 // set composing text AND put cursor at end of composing
                 ic.setComposingText(text, 1)
+                if (text.isEmpty()) {
+                    // clear composing text, put cursor at beginning of original composing
+                    selection.update(composing.start)
+                    composing.clear()
+                } else {
+                    // update composing text, put cursor at end of new composing
+                    val start = if (composing.isEmpty()) selection.start else composing.start
+                    composing.update(start, start + text.length)
+                    selection.update(composing.end)
+                }
+                Timber.d("updateComposingText: '$text' composing=$composing selection=$selection")
                 if (cursor == text.length) {
                     // cursor already at end of composing, skip cursor reposition
                     break
@@ -379,10 +422,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             if (ignoreSystemCursor || (cursor < 0) || text.isEmpty()) break
             // fcitx cursor position is relative to client preedit (composing text)
             val p = cursor + composing.start
-            Timber.d("TextWithCursor: p=$p composing=$composing")
             if (p != selection.start) {
-                Timber.d("TextWithCursor: move cursor $p")
+                Timber.d("updateComposingText: set Android selection ($p, $p)")
                 ic.setSelection(p, p)
+                selection.update(p)
             }
         } while (false)
         ic.endBatchEdit()
@@ -396,7 +439,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onFinishInput() {
-        inputConnection?.requestCursorUpdates(0)
+        if (cursorAnchorAvailable) {
+            cursorAnchorAvailable = false
+            inputConnection?.requestCursorUpdates(0)
+        }
         editorInfo = null
         lifecycleScope.launch {
             fcitx.setCapFlags(CapabilityFlags.DefaultFlags)
