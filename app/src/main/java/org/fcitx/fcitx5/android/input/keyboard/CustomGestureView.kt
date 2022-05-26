@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
 import android.content.Context
+import android.os.SystemClock
 import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
@@ -13,8 +14,6 @@ import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListener
 import org.fcitx.fcitx5.android.utils.hapticIfEnabled
-import kotlin.math.exp
-import kotlin.math.ln
 
 abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
 
@@ -78,11 +77,6 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
     var onRepeatListener: ((View) -> Unit)? = null
     var onGestureListener: OnGestureListener? = null
 
-    private fun calculateInterval(t: Long) =
-        if (t > accelerateTime) endInterval
-        else
-            (initialInterval * exp(-ln(initialInterval.toDouble() / endInterval) / accelerateTime * t)).toLong()
-
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
@@ -105,11 +99,12 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                     repeatJob = lifecycleScope.launch {
                         delay(longPressDelay.toLong())
                         repeatStarted = true
-                        val t0 = System.currentTimeMillis()
+                        var lastTriggerTime: Long
                         while (isActive && isEnabled) {
+                            lastTriggerTime = SystemClock.uptimeMillis()
                             onRepeatListener?.invoke(this@CustomGestureView)
-                            val t = System.currentTimeMillis() - t0
-                            delay(calculateInterval(t))
+                            val t = lastTriggerTime + RepeatInterval - SystemClock.uptimeMillis()
+                            if (t > 0) delay(t)
                         }
                     }
                 }
@@ -260,8 +255,6 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
     companion object {
         val longPressDelay by AppPrefs.getInstance().keyboard.longPressDelay
 
-        const val initialInterval: Long = 200L
-        const val endInterval: Long = 30L
-        const val accelerateTime: Long = 1000L
+        const val RepeatInterval = 50L
     }
 }
