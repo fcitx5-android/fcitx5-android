@@ -5,10 +5,10 @@ import android.os.Binder
 import android.os.IBinder
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.fcitx.fcitx5.android.core.*
+import org.fcitx.fcitx5.android.core.Fcitx
+import org.fcitx.fcitx5.android.core.FcitxLifecycle
+import org.fcitx.fcitx5.android.core.FcitxLifecycleObserver
 import timber.log.Timber
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -16,8 +16,8 @@ class FcitxDaemon : LifecycleService(), FcitxLifecycleObserver {
 
     val fcitx: Fcitx by lazy { Fcitx(this).also { it.lifecycle.addObserver(this) } }
 
-    private val onReadyListeners = ConcurrentLinkedQueue<() -> Unit>()
-    private val onStoppedListeners = ConcurrentLinkedQueue<() -> Unit>()
+    private val onReadyListeners = ConcurrentLinkedQueue<suspend () -> Unit>()
+    private val onStoppedListeners = ConcurrentLinkedQueue<suspend () -> Unit>()
 
     override fun onCreate() {
         Timber.d("onCreate")
@@ -27,7 +27,7 @@ class FcitxDaemon : LifecycleService(), FcitxLifecycleObserver {
     inner class FcitxBinder : Binder() {
         fun getFcitxDaemon() = this@FcitxDaemon
 
-        fun onReady(block: () -> Unit) {
+        fun onReady(block: suspend () -> Unit) {
             // if fcitx is ready, call right now
             if (fcitx.lifecycle.currentState == FcitxLifecycle.State.READY)
                 lifecycleScope.launch { block() }
@@ -35,7 +35,7 @@ class FcitxDaemon : LifecycleService(), FcitxLifecycleObserver {
             onReadyListeners.add(block)
         }
 
-        fun onStopped(block: () -> Unit) {
+        fun onStopped(block: suspend () -> Unit) {
             // if fcitx is stopped, call right now
             if (fcitx.lifecycle.currentState == FcitxLifecycle.State.STOPPED)
                 lifecycleScope.launch { block() }
@@ -46,8 +46,8 @@ class FcitxDaemon : LifecycleService(), FcitxLifecycleObserver {
 
     override fun onStateChanged(event: FcitxLifecycle.Event) {
         when (event) {
-            FcitxLifecycle.Event.ON_READY -> lifecycleScope.launch { onReadyListeners.forEach { it() } }
-            FcitxLifecycle.Event.ON_STOPPED -> lifecycleScope.launch { onStoppedListeners.forEach { it() } }
+            FcitxLifecycle.Event.ON_READY -> onReadyListeners.forEach { lifecycleScope.launch { it() } }
+            FcitxLifecycle.Event.ON_STOPPED -> onStoppedListeners.forEach { lifecycleScope.launch { it() } }
             else -> {
             }
         }
