@@ -43,8 +43,13 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
 
         fun update(start: Int, end: Int) {
-            data[0] = start
-            data[1] = end
+            if (end >= start) {
+                data[0] = start
+                data[1] = end
+            } else {
+                data[0] = end
+                data[1] = start
+            }
         }
 
         fun update(i: Int) {
@@ -92,8 +97,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         when (event) {
             is FcitxEvent.CommitStringEvent -> {
                 inputConnection?.commitText(event.data, 1)
-                selection.update(selection.start + event.data.length)
-                composing.clear()
+                // committed text should be put before start of composing (if any), or before cursor
+                val start = if (composing.start >= 0) composing.start else selection.start
+                selection.update(start + event.data.length)
+                // clear composing range, but retain it's position for next update
+                // see [^1] for explanation
+                composing.update(selection.start)
             }
             is FcitxEvent.KeyEvent -> event.data.also {
                 if (it.states.virtual) {
@@ -401,6 +410,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 ic.setComposingText(text, 1)
                 if (text.isEmpty()) {
                     // clear composing text, put cursor at beginning of original composing
+                    // [^1]: if this happens after committing text, composing should be cleared,
+                    //       and selection should be put at original composing start. so composing
+                    //       shouldn't be reset to (-1, -1), but it's original position
                     selection.update(composing.start)
                     composing.clear()
                 } else {
