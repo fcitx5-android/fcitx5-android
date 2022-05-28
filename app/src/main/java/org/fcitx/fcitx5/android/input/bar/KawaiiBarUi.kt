@@ -15,6 +15,8 @@ import android.widget.ViewAnimator
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.State.*
 import org.fcitx.fcitx5.android.utils.borderlessRippleDrawable
@@ -36,7 +38,8 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
             background = null
             imageResource = R.drawable.ic_baseline_expand_more_24
             visibility = ConstraintLayout.INVISIBLE
-            colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
+            colorFilter =
+                PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
         }
 
         override val root = ctx.constraintLayout {
@@ -77,7 +80,8 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
         private fun toolButton(@DrawableRes icon: Int) = imageButton {
             imageResource = icon
             background = borderlessRippleDrawable(inputTheme.keyPressHighlightColor.color, dp(20))
-            colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
+            colorFilter =
+                PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
             scaleType = ImageView.ScaleType.CENTER_INSIDE
         }
 
@@ -118,7 +122,8 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
 
         private val clipboardIcon = imageView {
             imageResource = R.drawable.ic_clipboard
-            colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
+            colorFilter =
+                PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
         }
 
         private val clipboardText = textView {
@@ -149,20 +154,38 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
         }
 
         private val animator = ViewAnimator(ctx).apply {
-            inAnimation = AnimationSet(true).apply {
-                duration = 200L
-                addAnimation(AlphaAnimation(0f, 1f))
-                addAnimation(ScaleAnimation(0f, 1f, 0f, 1f, 0f, dp(20f)))
-                addAnimation(TranslateAnimation(dp(-100f), 0f, 0f, 0f))
-            }
-            outAnimation = AnimationSet(true).apply {
-                duration = 200L
-                addAnimation(AlphaAnimation(1f, 0f))
-                addAnimation(ScaleAnimation(1f, 0f, 1f, 0f, 0f, dp(20f)))
-                addAnimation(TranslateAnimation(0f, dp(-100f), 0f, 0f))
-            }
             add(clipboardBar, lParams(matchParent, matchParent))
             add(buttonsBar, lParams(matchParent, matchParent))
+        }
+
+        private val onDisableAnimationChange = ManagedPreference.OnChangeListener<Boolean> {
+            animator.apply {
+                if (!it) {
+                    inAnimation = AnimationSet(true).apply {
+                        duration = 200L
+                        addAnimation(AlphaAnimation(0f, 1f))
+                        addAnimation(ScaleAnimation(0f, 1f, 0f, 1f, 0f, dp(20f)))
+                        addAnimation(TranslateAnimation(dp(-100f), 0f, 0f, 0f))
+                    }
+                    outAnimation = AnimationSet(true).apply {
+                        duration = 200L
+                        addAnimation(AlphaAnimation(1f, 0f))
+                        addAnimation(ScaleAnimation(1f, 0f, 1f, 0f, 0f, dp(20f)))
+                        addAnimation(TranslateAnimation(0f, dp(-100f), 0f, 0f))
+                    }
+                } else {
+                    inAnimation = null
+                    outAnimation = null
+                }
+            }
+        }
+
+        private val disableAnimation = AppPrefs.getInstance().advanced.disableAnimation
+
+        init {
+            disableAnimation.registerOnChangeListener(onDisableAnimationChange)
+            // After animator was initialized
+            onDisableAnimationChange.onChange(disableAnimation.getValue())
         }
 
         override val root = constraintLayout {
@@ -217,7 +240,10 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
                     transitionToClipboardBar()
                 }
             }
-            menuButton.animate().setDuration(200L).rotation(state.menuButtonRotation)
+            if (disableAnimation.getValue())
+                menuButton.rotation = state.menuButtonRotation
+            else
+                menuButton.animate().setDuration(200L).rotation(state.menuButtonRotation)
         }
 
         private fun enableClipboardItem() {
@@ -240,7 +266,8 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
         private val backButton = imageButton {
             imageResource = R.drawable.ic_baseline_arrow_back_24
             background = borderlessRippleDrawable(inputTheme.keyPressHighlightColor.color, dp(20))
-            colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
+            colorFilter =
+                PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
             scaleType = ImageView.ScaleType.CENTER_INSIDE
         }
 

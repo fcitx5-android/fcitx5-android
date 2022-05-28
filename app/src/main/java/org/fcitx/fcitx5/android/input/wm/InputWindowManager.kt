@@ -8,6 +8,7 @@ import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcaster
 import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
@@ -36,7 +37,11 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
     private var currentWindow: InputWindow? = null
     private var currentView: View? = null
 
+    private val disableAnimation by AppPrefs.getInstance().advanced.disableAnimation
+
     private fun prepareAnimation(remove: View, add: View) {
+        if (disableAnimation)
+            return
         val slide = Slide().apply {
             slideEdge = if (add === keyboardView) Gravity.BOTTOM else Gravity.TOP
             addTarget(add)
