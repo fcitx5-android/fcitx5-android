@@ -121,4 +121,5 @@
     <string name="punctuation_pos_top_right">В правом верхнем углу</string>
     <string name="expand_toolbar_by_default">Развернуть панель инструментов по умолчанию</string>
     <string name="popup_on_key_press">Всплывающее окно при нажатии клавиши</string>
+    <string name="disable_animation">Отключить анимацию</string>
 </resources>
