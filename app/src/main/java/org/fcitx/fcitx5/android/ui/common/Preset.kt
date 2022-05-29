@@ -5,7 +5,7 @@ import android.view.View
 import android.widget.CheckBox
 import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
-import kotlinx.coroutines.CoroutineScope
+import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -73,7 +73,7 @@ fun Context.ProgressBarDialogIndeterminate(): AlertDialog.Builder {
         .setCancelable(false)
 }
 
-fun CoroutineScope.withLoadingDialog(
+fun LifecycleCoroutineScope.withLoadingDialog(
     context: Context,
     threshold: Long = 200L,
     action: suspend () -> Unit

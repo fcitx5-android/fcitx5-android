@@ -20,6 +20,7 @@ import android.view.View
 import android.view.ViewTreeObserver
 import android.view.inputmethod.InputConnection
 import android.widget.EditText
+import android.widget.Toast
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.annotation.IdRes
@@ -34,6 +35,8 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.sun.jna.Library
 import com.sun.jna.Native
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.FcitxApplication
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
@@ -42,6 +45,9 @@ import splitties.resources.withResolvedThemeAttribute
 import splitties.views.bottomPadding
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 
 val InputMethodService.inputConnection: InputConnection?
@@ -182,5 +188,26 @@ fun RecyclerView.applyNavBarInsetsBottomPadding() {
             bottomPadding = it.bottom
         }
         windowInsets
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+inline fun <T : Any, U> Result<T?>.bindOnNotNull(block: (T) -> Result<U>): Result<U>? {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+    return when {
+        isSuccess && getOrThrow() != null -> block(getOrThrow()!!)
+        isSuccess && getOrThrow() == null -> null
+        else -> Result.failure(exceptionOrNull()!!)
+    }
+}
+
+suspend fun <T> Result<T>.toast(context: Context) = withContext(Dispatchers.Main.immediate) {
+    onSuccess {
+        Toast.makeText(context, R.string.done, Toast.LENGTH_SHORT).show()
+    }
+    onFailure {
+        Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
     }
 }

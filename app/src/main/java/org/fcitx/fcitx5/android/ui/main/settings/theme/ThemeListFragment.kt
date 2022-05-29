@@ -3,14 +3,22 @@ package org.fcitx.fcitx5.android.ui.main.settings.theme
 import android.view.View
 import android.view.ViewOutlineProvider
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
 import org.fcitx.fcitx5.android.ui.main.settings.ProgressFragment
 import org.fcitx.fcitx5.android.utils.applyNavBarInsetsBottomPadding
+import org.fcitx.fcitx5.android.utils.bindOnNotNull
+import org.fcitx.fcitx5.android.utils.toast
 import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.resources.resolveThemeAttribute
@@ -29,7 +37,9 @@ import splitties.views.textAppearance
 
 class ThemeListFragment : ProgressFragment() {
 
-    private lateinit var launcher: ActivityResultLauncher<Theme.Custom?>
+    private lateinit var imageLauncher: ActivityResultLauncher<Theme.Custom?>
+
+    private lateinit var exportLauncher: ActivityResultLauncher<String>
 
     private lateinit var previewUi: KeyboardPreviewUi
 
@@ -37,13 +47,15 @@ class ThemeListFragment : ProgressFragment() {
 
     private lateinit var themeList: RecyclerView
 
+    private var beingExported: Theme.Custom? = null
+
     private val onThemeChangedListener = ThemeManager.OnThemeChangedListener {
         previewUi.setTheme(it)
         adapter.setCheckedTheme(it)
     }
 
     override fun beforeCreateView() {
-        launcher = registerForActivityResult(BackgroundImageActivity.Contract()) { result ->
+        imageLauncher = registerForActivityResult(BackgroundImageActivity.Contract()) { result ->
             if (result != null) {
                 when (result) {
                     is BackgroundImageActivity.BackgroundResult.Created -> {
@@ -67,6 +79,21 @@ class ThemeListFragment : ProgressFragment() {
                 }
             }
         }
+        exportLauncher =
+            registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri ->
+                lifecycleScope.withLoadingDialog(requireContext()) {
+                    withContext(NonCancellable + Dispatchers.IO) {
+                        runCatching {
+                            uri?.let { requireContext().contentResolver.openOutputStream(it) }
+                        }.bindOnNotNull {
+                            requireNotNull(beingExported)
+                            ThemeManager.exportTheme(beingExported!!, it).also {
+                                beingExported = null
+                            }
+                        }?.toast(requireContext())
+                    }
+                }
+            }
     }
 
     override suspend fun initialize(): View = with(requireContext()) {
@@ -120,6 +147,7 @@ class ThemeListFragment : ProgressFragment() {
                 override fun onChooseImage() = launchImageSelector()
                 override fun onSelectTheme(theme: Theme) = selectTheme(theme)
                 override fun onEditTheme(theme: Theme.Custom) = editTheme(theme)
+                override fun onExportTheme(theme: Theme.Custom) = exportTheme(theme)
             }.apply {
                 setThemes(ThemeManager.getAllThemes(), ThemeManager.getActiveTheme())
             }
@@ -155,7 +183,7 @@ class ThemeListFragment : ProgressFragment() {
     }
 
     private fun launchImageSelector() {
-        launcher.launch(null)
+        imageLauncher.launch(null)
     }
 
     private fun selectTheme(theme: Theme) {
@@ -163,7 +191,12 @@ class ThemeListFragment : ProgressFragment() {
     }
 
     private fun editTheme(theme: Theme.Custom) {
-        launcher.launch(theme)
+        imageLauncher.launch(theme)
+    }
+
+    private fun exportTheme(theme: Theme.Custom) {
+        beingExported = theme
+        exportLauncher.launch(theme.name + ".zip")
     }
 
     override fun onDestroy() {

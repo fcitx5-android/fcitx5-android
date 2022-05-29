@@ -82,6 +82,12 @@ abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHold
                 root.setOnClickListener {
                     onSelectTheme(theme)
                 }
+                root.setOnLongClickListener {
+                    if (theme is Theme.Custom) {
+                        onExportTheme(theme)
+                        true
+                    } else false
+                }
                 editButton.setOnClickListener {
                     if (theme is Theme.Custom) onEditTheme(theme)
                 }
@@ -99,6 +105,8 @@ abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHold
     abstract fun onSelectTheme(theme: Theme)
 
     abstract fun onEditTheme(theme: Theme.Custom)
+
+    abstract fun onExportTheme(theme: Theme.Custom)
 
     companion object {
         const val OFFSET = 1

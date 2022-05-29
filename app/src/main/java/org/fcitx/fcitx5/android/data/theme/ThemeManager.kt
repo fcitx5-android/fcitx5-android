@@ -12,7 +12,10 @@ import org.fcitx.fcitx5.android.utils.appContext
 import timber.log.Timber
 import java.io.File
 import java.io.FileFilter
+import java.io.OutputStream
 import java.util.*
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
 object ThemeManager {
 
@@ -95,6 +98,45 @@ object ThemeManager {
                 }
                 return@decode theme
             }?.toMutableList() ?: mutableListOf()
+
+
+    /**
+     * [dest] will be closed on finished
+     */
+    fun exportTheme(theme: Theme.Custom, dest: OutputStream) =
+        runCatching {
+            ZipOutputStream(dest.buffered())
+                .use { zipStream ->
+                    // we don't export the internal path of images
+                    val tweakedTheme = theme.backgroundImage?.let {
+                        theme.copy(
+                            backgroundImage = theme.backgroundImage.copy(
+                                croppedFilePath =theme.backgroundImage.croppedFilePath.substringAfterLast('/'),
+                                srcFilePath = theme.backgroundImage.srcFilePath.substringAfterLast('/'),
+                            )
+                        )
+                    } ?: theme
+                    if (tweakedTheme.backgroundImage != null) {
+                        requireNotNull(theme.backgroundImage)
+                        // write cropped image
+                        zipStream.putNextEntry(ZipEntry(tweakedTheme.backgroundImage.croppedFilePath))
+                        File(theme.backgroundImage.croppedFilePath).inputStream()
+                            .use { it.copyTo(zipStream) }
+                        // write src image
+                        zipStream.putNextEntry(ZipEntry(tweakedTheme.backgroundImage.srcFilePath))
+                        File(theme.backgroundImage.srcFilePath).inputStream()
+                            .use { it.copyTo(zipStream) }
+                        // write json
+                        zipStream.putNextEntry(ZipEntry("${tweakedTheme.name}.json"))
+                        zipStream.write(
+                            Json.encodeToString(CustomThemeSerializer, tweakedTheme)
+                                .encodeToByteArray()
+                        )
+                        // done
+                        zipStream.closeEntry()
+                    }
+                }
+        }
 
     class Prefs(sharedPreferences: SharedPreferences) :
         ManagedPreferenceCategory(R.string.theme, sharedPreferences) {
