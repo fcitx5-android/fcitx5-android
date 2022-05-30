@@ -11,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NotificationCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -30,6 +29,7 @@ import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import org.fcitx.fcitx5.android.utils.NaiveDustman
+import org.fcitx.fcitx5.android.utils.errorDialog
 import org.fcitx.fcitx5.android.utils.queryFileName
 import splitties.systemservices.notificationManager
 import timber.log.Timber
@@ -140,11 +140,11 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                 val file = uri.queryFileName(contentResolver).bindNullable().let { File(it) }
                 when {
                     file.nameWithoutExtension in entries.map { it.name } -> {
-                        errorDialog(getString(R.string.dict_already_exists))
+                        importErrorDialog(getString(R.string.dict_already_exists))
                         return@fx pure(Unit)
                     }
                     Dictionary.Type.fromFileName(file.name) == null -> {
-                        errorDialog(getString(R.string.invalid_dict))
+                        importErrorDialog(getString(R.string.invalid_dict))
                         return@fx pure(Unit)
                     }
                 }
@@ -173,7 +173,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                     result
                 }
                     .onFailure {
-                        errorDialog(it.localizedMessage ?: it.stackTraceToString())
+                        importErrorDialog(it.localizedMessage ?: it.stackTraceToString())
                     }
                     .onSuccess {
                         launch(Dispatchers.Main) {
@@ -185,15 +185,8 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
             notificationManager.cancel(id)
         }
 
-    private fun errorDialog(message: String) {
-        lifecycleScope.launch {
-            AlertDialog.Builder(requireContext())
-                .setTitle(R.string.import_error)
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok) { _, _ -> }
-                .setIcon(R.drawable.ic_baseline_error_24)
-                .show()
-        }
+    private suspend fun importErrorDialog(message: String) {
+        errorDialog(requireContext(), getString(R.string.import_error), message)
     }
 
     private fun reloadDict() {

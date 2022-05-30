@@ -14,14 +14,14 @@ import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.imageDrawable
 
-class ChooseImageEntryUi(override val ctx: Context) : Ui {
+class AddThemeEntryUi(override val ctx: Context) : Ui {
     val text = textView {
-        setText(R.string.choose_image)
+        setText(R.string.add)
         setTextColor(Color.WHITE)
     }
 
     val icon = imageView {
-        imageDrawable = ctx.drawable(R.drawable.ic_baseline_photo_library_24)
+        imageDrawable = ctx.drawable(R.drawable.ic_baseline_plus_24)
         colorFilter = PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN)
     }
 

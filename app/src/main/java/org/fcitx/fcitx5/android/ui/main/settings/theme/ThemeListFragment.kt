@@ -4,21 +4,19 @@ import android.view.View
 import android.view.ViewOutlineProvider
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.withContext
+import cn.berberman.girls.utils.identity
+import kotlinx.coroutines.*
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
 import org.fcitx.fcitx5.android.ui.main.settings.ProgressFragment
-import org.fcitx.fcitx5.android.utils.applyNavBarInsetsBottomPadding
-import org.fcitx.fcitx5.android.utils.bindOnNotNull
-import org.fcitx.fcitx5.android.utils.toast
+import org.fcitx.fcitx5.android.utils.*
 import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.resources.resolveThemeAttribute
@@ -39,6 +37,8 @@ class ThemeListFragment : ProgressFragment() {
 
     private lateinit var imageLauncher: ActivityResultLauncher<Theme.Custom?>
 
+    private lateinit var importLauncher: ActivityResultLauncher<String>
+
     private lateinit var exportLauncher: ActivityResultLauncher<String>
 
     private lateinit var previewUi: KeyboardPreviewUi
@@ -50,8 +50,10 @@ class ThemeListFragment : ProgressFragment() {
     private var beingExported: Theme.Custom? = null
 
     private val onThemeChangedListener = ThemeManager.OnThemeChangedListener {
-        previewUi.setTheme(it)
-        adapter.setCheckedTheme(it)
+        lifecycleScope.launch {
+            previewUi.setTheme(it)
+            adapter.setCheckedTheme(it)
+        }
     }
 
     override fun beforeCreateView() {
@@ -79,6 +81,37 @@ class ThemeListFragment : ProgressFragment() {
                 }
             }
         }
+        importLauncher =
+            registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+                lifecycleScope.withLoadingDialog(requireContext()) {
+                    withContext(NonCancellable + Dispatchers.IO) {
+                        runCatching {
+                            uri?.let {
+                                it.queryFileName(requireContext().contentResolver)
+                                    ?.endsWith(".zip")
+                                    ?.takeIf(::identity)
+                                    ?: throw RuntimeException("Theme file must be a zip")
+                                requireContext().contentResolver.openInputStream(it)
+                            }
+                        }.bindOnNotNull {
+                            ThemeManager.importTheme(it)
+                        }?.onSuccess { (newCreated, theme) ->
+                            withContext(Dispatchers.Main) {
+                                if (newCreated)
+                                    adapter.prependTheme(theme)
+                                else
+                                    adapter.replaceTheme(theme)
+                            }
+                        }?.onFailure {
+                            errorDialog(
+                                requireContext(),
+                                getString(R.string.import_error),
+                                it.localizedMessage ?: it.stackTraceToString()
+                            )
+                        }
+                    }
+                }
+            }
         exportLauncher =
             registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri ->
                 lifecycleScope.withLoadingDialog(requireContext()) {
@@ -144,7 +177,7 @@ class ThemeListFragment : ProgressFragment() {
                 override fun generateDefaultLayoutParams() = LayoutParams(itemWidth, itemHeight)
             }
             this@ThemeListFragment.adapter = object : ThemeListAdapter() {
-                override fun onChooseImage() = launchImageSelector()
+                override fun onAddNewTheme() = addTheme()
                 override fun onSelectTheme(theme: Theme) = selectTheme(theme)
                 override fun onEditTheme(theme: Theme.Custom) = editTheme(theme)
                 override fun onExportTheme(theme: Theme.Custom) = exportTheme(theme)
@@ -182,8 +215,27 @@ class ThemeListFragment : ProgressFragment() {
         }
     }
 
-    private fun launchImageSelector() {
-        imageLauncher.launch(null)
+    private fun addTheme() {
+        val actions =
+            arrayOf(
+                getString(R.string.choose_image),
+                getString(R.string.import_from_file),
+                getString(R.string.duplicate_builtin)
+            )
+        AlertDialog.Builder(requireContext())
+            .setItems(actions) { _, i ->
+                when (i) {
+                    0 -> imageLauncher.launch(null)
+                    1 -> importLauncher.launch("application/zip")
+                    2 -> {
+                        // TODO
+                        runBlocking {
+                            errorDialog(requireContext(), "Not implemented", "TODO")
+                        }
+                    }
+                }
+            }
+            .show()
     }
 
     private fun selectTheme(theme: Theme) {

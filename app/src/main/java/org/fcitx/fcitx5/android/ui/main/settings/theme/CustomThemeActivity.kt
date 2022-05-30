@@ -227,18 +227,11 @@ class CustomThemeActivity : AppCompatActivity() {
 
     private val backgroundStates by lazy { BackgroundStates() }
 
-    private inline fun <reified T> whenHasBackground(
-        default: () -> T = { throw RuntimeException() },
-        block: BackgroundStates.(Theme.Custom.CustomBackground) -> T,
-    ): T {
-        return if (theme.backgroundImage != null)
+    private inline fun whenHasBackground(
+        block: BackgroundStates.(Theme.Custom.CustomBackground) -> Unit,
+    ) {
+        if (theme.backgroundImage != null)
             block(backgroundStates, theme.backgroundImage!!)
-        else
-        // yikes! kotlin does not support specialization
-            if (T::class == Unit::class)
-                Unit as T
-            else
-                default()
     }
 
     private fun BackgroundStates.setKeyVariant(
@@ -399,7 +392,6 @@ class CustomThemeActivity : AppCompatActivity() {
     private fun cancel() {
         whenHasBackground {
             tempImageFile?.delete()
-            Unit
         }
         setResult(
             Activity.RESULT_CANCELED,
@@ -433,8 +425,9 @@ class CustomThemeActivity : AppCompatActivity() {
             setResult(
                 Activity.RESULT_OK,
                 Intent().apply {
-                    val newTheme = whenHasBackground(default = { theme }) {
-                        theme.copy(
+                    var newTheme = theme
+                    whenHasBackground {
+                        newTheme = theme.copy(
                             backgroundImage = it.copy(
                                 brightness = brightnessSeekBar.progress,
                                 cropRect = cropRect

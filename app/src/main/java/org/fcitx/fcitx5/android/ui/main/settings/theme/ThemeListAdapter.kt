@@ -66,7 +66,7 @@ abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHold
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         ViewHolder(
             when (viewType) {
-                CHOOSE_IMAGE -> ChooseImageEntryUi(parent.context)
+                ADD_THEME -> AddThemeEntryUi(parent.context)
                 THEME -> ThemeThumbnailUi(parent.context)
                 else -> throw IllegalArgumentException(INVALID_TYPE + viewType)
             }
@@ -74,7 +74,7 @@ abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHold
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         when (val it = getItemViewType(position)) {
-            CHOOSE_IMAGE -> holder.ui.root.setOnClickListener { onChooseImage() }
+            ADD_THEME -> holder.ui.root.setOnClickListener { onAddNewTheme() }
             THEME -> (holder.ui as ThemeThumbnailUi).apply {
                 val theme = entryAt(position)!!
                 val isActive = position == checkedIndex
@@ -98,9 +98,9 @@ abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHold
 
     override fun getItemCount() = entries.size + 1
 
-    override fun getItemViewType(position: Int) = if (position == 0) CHOOSE_IMAGE else THEME
+    override fun getItemViewType(position: Int) = if (position == 0) ADD_THEME else THEME
 
-    abstract fun onChooseImage()
+    abstract fun onAddNewTheme()
 
     abstract fun onSelectTheme(theme: Theme)
 
@@ -111,7 +111,7 @@ abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHold
     companion object {
         const val OFFSET = 1
 
-        const val CHOOSE_IMAGE = 0
+        const val ADD_THEME = 0
         const val THEME = 1
 
         const val INVALID_TYPE = "Invalid ItemView Type: "

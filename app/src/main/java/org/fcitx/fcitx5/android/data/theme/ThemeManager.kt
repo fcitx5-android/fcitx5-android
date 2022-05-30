@@ -12,10 +12,14 @@ import org.fcitx.fcitx5.android.utils.appContext
 import timber.log.Timber
 import java.io.File
 import java.io.FileFilter
+import java.io.InputStream
 import java.io.OutputStream
 import java.util.*
 import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
+import kotlin.io.path.createTempDirectory
+import kotlin.io.path.pathString
 
 object ThemeManager {
 
@@ -139,6 +143,46 @@ object ThemeManager {
                     zipStream.closeEntry()
                 }
         }
+
+    /**
+     * @return (newCreated, theme)
+     */
+    fun importTheme(src: InputStream): Result<Pair<Boolean, Theme.Custom>> = runCatching {
+        ZipInputStream(src).use { zipStream ->
+            val tempDir = File(createTempDirectory().pathString)
+            val extracted = mutableListOf<File>()
+            var entry = zipStream.nextEntry
+            while (entry != null && !entry.isDirectory) {
+                val file = File(tempDir, entry.name)
+                zipStream.copyTo(file.outputStream())
+                extracted.add(file)
+                entry = zipStream.nextEntry
+            }
+            val jsonFile = extracted.find { it.extension == "json" }
+                ?: throw RuntimeException("Unable to find theme json")
+            val decoded = Json.decodeFromString(CustomThemeSerializer, jsonFile.readText())
+            if (builtinThemes.find { it.name == decoded.name } != null)
+                throw RuntimeException("Name clashed with builtin themes")
+            val exists = customThemes.find { it.name == decoded.name } != null
+            val newTheme = if (decoded.backgroundImage != null) {
+                val srcFile = File(dir, decoded.backgroundImage.srcFilePath)
+                val croppedFile = File(dir, decoded.backgroundImage.croppedFilePath)
+                extracted.find { it.name == srcFile.name }?.copyTo(srcFile)
+                    ?: throw RuntimeException("Unable to save src file")
+                extracted.find { it.name == croppedFile.name }?.copyTo(croppedFile)
+                    ?: throw RuntimeException("Unable to save cropped file")
+                decoded.copy(
+                    backgroundImage = decoded.backgroundImage.copy(
+                        croppedFilePath = srcFile.path,
+                        srcFilePath = srcFile.path
+                    )
+                )
+            } else
+                decoded
+            saveTheme(newTheme)
+            !exists to newTheme
+        }
+    }
 
     class Prefs(sharedPreferences: SharedPreferences) :
         ManagedPreferenceCategory(R.string.theme, sharedPreferences) {

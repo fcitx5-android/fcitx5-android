@@ -122,4 +122,6 @@
     <string name="expand_toolbar_by_default">Expand toolbar by default</string>
     <string name="popup_on_key_press">Popup on key press</string>
     <string name="disable_animation">Disable animation</string>
+    <string name="import_from_file">Import From File</string>
+    <string name="duplicate_builtin">Duplicate Builtin</string>
 </resources>

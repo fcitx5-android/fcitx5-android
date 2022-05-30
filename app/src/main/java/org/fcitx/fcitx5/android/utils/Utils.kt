@@ -24,6 +24,7 @@ import android.widget.Toast
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.annotation.IdRes
+import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -209,5 +210,16 @@ suspend fun <T> Result<T>.toast(context: Context) = withContext(Dispatchers.Main
     }
     onFailure {
         Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+    }
+}
+
+suspend fun errorDialog(context: Context, title: String, message: String) {
+    withContext(Dispatchers.Main.immediate) {
+        AlertDialog.Builder(context)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton(android.R.string.ok) { _, _ -> }
+            .setIcon(R.drawable.ic_baseline_error_24)
+            .show()
     }
 }
