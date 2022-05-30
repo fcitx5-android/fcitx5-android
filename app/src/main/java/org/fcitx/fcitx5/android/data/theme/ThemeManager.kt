@@ -111,8 +111,12 @@ object ThemeManager {
                     val tweakedTheme = theme.backgroundImage?.let {
                         theme.copy(
                             backgroundImage = theme.backgroundImage.copy(
-                                croppedFilePath =theme.backgroundImage.croppedFilePath.substringAfterLast('/'),
-                                srcFilePath = theme.backgroundImage.srcFilePath.substringAfterLast('/'),
+                                croppedFilePath = theme.backgroundImage.croppedFilePath.substringAfterLast(
+                                    '/'
+                                ),
+                                srcFilePath = theme.backgroundImage.srcFilePath.substringAfterLast(
+                                    '/'
+                                ),
                             )
                         )
                     } ?: theme
@@ -232,14 +236,9 @@ object ThemeManager {
     }
 
     fun init() {
-        internalPrefs.activeThemeName.registerOnChangeListener(onActiveThemeNameChange)
-        prefs.keyBorder.registerOnChangeListener(prefsChange)
-        prefs.keyRadius.registerOnChangeListener(prefsChange)
-        prefs.keyRippleEffect.registerOnChangeListener(prefsChange)
-        prefs.keyVerticalMargin.registerOnChangeListener(prefsChange)
-        prefs.keyHorizontalMargin.registerOnChangeListener(prefsChange)
-        prefs.punctuationPosition.registerOnChangeListener(prefsChange)
-        prefs.navbarBackground.registerOnChangeListener(prefsChange)
+        prefs.managedPreferences.forEach { (_, pref) ->
+            pref.registerOnChangeListener(prefsChange)
+        }
         // fallback to MaterialLight if active theme was deleted
         internalPrefs.activeThemeName.getValue().let {
             currentTheme = getTheme(it) ?: defaultTheme.apply {

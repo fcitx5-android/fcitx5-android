@@ -55,23 +55,23 @@ class ThemeListFragment : ProgressFragment() {
     }
 
     override fun beforeCreateView() {
-        imageLauncher = registerForActivityResult(BackgroundImageActivity.Contract()) { result ->
+        imageLauncher = registerForActivityResult(CustomThemeActivity.Contract()) { result ->
             if (result != null) {
                 when (result) {
-                    is BackgroundImageActivity.BackgroundResult.Created -> {
+                    is CustomThemeActivity.BackgroundResult.Created -> {
                         val theme = result.theme
                         adapter.prependTheme(theme)
                         ThemeManager.saveTheme(theme)
                         ThemeManager.switchTheme(theme)
                     }
-                    is BackgroundImageActivity.BackgroundResult.Deleted -> {
+                    is CustomThemeActivity.BackgroundResult.Deleted -> {
                         val name = result.name
                         // Update the list first, as we rely on theme changed listener
                         // in the case that the deleted theme was active
                         adapter.removeTheme(name)
                         ThemeManager.deleteTheme(name)
                     }
-                    is BackgroundImageActivity.BackgroundResult.Updated -> {
+                    is CustomThemeActivity.BackgroundResult.Updated -> {
                         val theme = result.theme
                         adapter.replaceTheme(theme)
                         ThemeManager.saveTheme(theme)

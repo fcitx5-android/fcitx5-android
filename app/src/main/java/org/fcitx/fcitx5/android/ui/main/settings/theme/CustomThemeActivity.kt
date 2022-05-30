@@ -47,7 +47,7 @@ import splitties.views.dsl.core.*
 import splitties.views.dsl.core.styles.AndroidStyles
 import java.io.File
 
-class BackgroundImageActivity : AppCompatActivity() {
+class CustomThemeActivity : AppCompatActivity() {
 
     sealed interface BackgroundResult : Parcelable {
         @Parcelize
@@ -62,7 +62,7 @@ class BackgroundImageActivity : AppCompatActivity() {
 
     class Contract : ActivityResultContract<Theme.Custom?, BackgroundResult?>() {
         override fun createIntent(context: Context, input: Theme.Custom?): Intent =
-            Intent(context, BackgroundImageActivity::class.java).apply {
+            Intent(context, CustomThemeActivity::class.java).apply {
                 putExtra(ORIGIN_THEME, input)
             }
 
@@ -209,39 +209,56 @@ class BackgroundImageActivity : AppCompatActivity() {
         }
     }
 
-    private lateinit var launcher: ActivityResultLauncher<CropImageContractOptions>
-    private var srcImageExtension: String? = null
-    private var srcImageBuffer: ByteArray? = null
-    private var tempImageFile: File? = null
-    private var cropRect: Rect? = null
-    private lateinit var croppedBitmap: Bitmap
-    private lateinit var filteredDrawable: BitmapDrawable
     private var newCreated = true
 
     private lateinit var theme: Theme.Custom
-    private lateinit var srcImageFile: File
-    private lateinit var croppedImageFile: File
 
-    // TODO
-    private val Theme.Custom.background
-        get() = backgroundImage
-            ?: throw IllegalStateException("Custom theme only supports backgroundImage for now")
+    private class BackgroundStates {
+        lateinit var launcher: ActivityResultLauncher<CropImageContractOptions>
+        var srcImageExtension: String? = null
+        var srcImageBuffer: ByteArray? = null
+        var tempImageFile: File? = null
+        var cropRect: Rect? = null
+        lateinit var croppedBitmap: Bitmap
+        lateinit var filteredDrawable: BitmapDrawable
+        lateinit var srcImageFile: File
+        lateinit var croppedImageFile: File
+    }
 
-    private fun setKeyVariant(darkKeys: Boolean) {
+    private val backgroundStates by lazy { BackgroundStates() }
+
+    private inline fun <reified T> whenHasBackground(
+        default: () -> T = { throw RuntimeException() },
+        block: BackgroundStates.(Theme.Custom.CustomBackground) -> T,
+    ): T {
+        return if (theme.backgroundImage != null)
+            block(backgroundStates, theme.backgroundImage!!)
+        else
+        // yikes! kotlin does not support specialization
+            if (T::class == Unit::class)
+                Unit as T
+            else
+                default()
+    }
+
+    private fun BackgroundStates.setKeyVariant(
+        background: Theme.Custom.CustomBackground,
+        darkKeys: Boolean
+    ) {
         theme = if (darkKeys)
             ThemePreset.TransparentLight.deriveCustomBackground(
                 theme.name,
-                theme.background.croppedFilePath,
-                theme.background.srcFilePath,
+                background.croppedFilePath,
+                background.srcFilePath,
                 brightnessSeekBar.progress,
-                theme.background.cropRect
+                background.cropRect
             ) else
             ThemePreset.TransparentDark.deriveCustomBackground(
                 theme.name,
-                theme.background.croppedFilePath,
-                theme.background.srcFilePath,
+                background.croppedFilePath,
+                background.srcFilePath,
                 brightnessSeekBar.progress,
-                theme.background.cropRect
+                background.cropRect
             )
         previewUi.setTheme(theme)
         if (newCreated) {
@@ -253,24 +270,6 @@ class BackgroundImageActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        cropLabel.setOnClickListener {
-            launchCrop(previewUi.intrinsicWidth, previewUi.intrinsicHeight)
-        }
-        variantLabel.setOnClickListener {
-            variantSwitch.isChecked = !variantSwitch.isChecked
-        }
-        variantSwitch.setOnCheckedChangeListener { _, isChecked ->
-            setKeyVariant(darkKeys = isChecked)
-        }
-        brightnessSeekBar.setOnSeekBarChangeListener(object :
-            SeekBar.OnSeekBarChangeListener {
-            override fun onStartTrackingTouch(bar: SeekBar) {}
-            override fun onStopTrackingTouch(bar: SeekBar) {}
-
-            override fun onProgressChanged(bar: SeekBar, progress: Int, fromUser: Boolean) {
-                if (fromUser) updateState()
-            }
-        })
         cancelButton.setOnClickListener {
             cancel()
         }
@@ -280,7 +279,7 @@ class BackgroundImageActivity : AppCompatActivity() {
         // recover from bundle
         val originTheme = intent?.getParcelableExtra<Theme.Custom>(ORIGIN_THEME)?.also { t ->
             theme = t
-            t.background.also {
+            whenHasBackground {
                 croppedImageFile = File(it.croppedFilePath)
                 srcImageFile = File(it.srcFilePath)
                 cropRect = it.cropRect
@@ -292,52 +291,91 @@ class BackgroundImageActivity : AppCompatActivity() {
         // create new
         if (originTheme == null) {
             val (n, c, s) = ThemeManager.newCustomBackgroundImages()
-            croppedImageFile = c
-            srcImageFile = s
+            backgroundStates.apply {
+                croppedImageFile = c
+                srcImageFile = s
+            }
             theme =
                 (if (variantSwitch.isChecked) ThemePreset.TransparentLight else ThemePreset.TransparentDark)
                     .deriveCustomBackground(n, c.path, s.path)
         }
         previewUi = KeyboardPreviewUi(this, theme)
-        setContentView(ui)
-        brightnessSeekBar.progress = theme.background.brightness
-        variantSwitch.isChecked = !theme.isDark
-        launcher = registerForActivityResult(CropImageContract()) {
-            if (!it.isSuccessful) {
-                if (newCreated)
-                    cancel()
-                else
-                    return@registerForActivityResult
-            } else {
-                if (newCreated) {
-                    srcImageExtension = MimeTypeMap.getSingleton()
-                        .getExtensionFromMimeType(contentResolver.getType(it.originalUri!!))
-                    srcImageBuffer = contentResolver.openInputStream(it.originalUri!!)!!.readBytes()
+        whenHasBackground {
+            cropLabel.setOnClickListener {
+                launchCrop(previewUi.intrinsicWidth, previewUi.intrinsicHeight)
+            }
+            variantLabel.setOnClickListener {
+                variantSwitch.isChecked = !variantSwitch.isChecked
+            }
+            variantSwitch.setOnCheckedChangeListener { _, isChecked ->
+                setKeyVariant(it, darkKeys = isChecked)
+            }
+            brightnessSeekBar.setOnSeekBarChangeListener(object :
+                SeekBar.OnSeekBarChangeListener {
+                override fun onStartTrackingTouch(bar: SeekBar) {}
+                override fun onStopTrackingTouch(bar: SeekBar) {}
+
+                override fun onProgressChanged(bar: SeekBar, progress: Int, fromUser: Boolean) {
+                    if (fromUser) updateState()
                 }
-                cropRect = it.cropRect!!
-                croppedBitmap = Bitmap.createScaledBitmap(
-                    it.getBitmap(this)!!, previewUi.intrinsicWidth, previewUi.intrinsicHeight, true
-                )
-                filteredDrawable = BitmapDrawable(resources, croppedBitmap)
-                updateState()
+            })
+        }
+        if (theme.backgroundImage == null) {
+            brightnessLabel.visibility = View.GONE
+            cropLabel.visibility = View.GONE
+            variantLabel.visibility = View.GONE
+            variantSwitch.visibility = View.GONE
+            brightnessSeekBar.visibility = View.GONE
+        }
+        setContentView(ui)
+        whenHasBackground { background ->
+            brightnessSeekBar.progress = background.brightness
+            variantSwitch.isChecked = !theme.isDark
+            launcher = registerForActivityResult(CropImageContract()) {
+                if (!it.isSuccessful) {
+                    if (newCreated)
+                        cancel()
+                    else
+                        return@registerForActivityResult
+                } else {
+                    if (newCreated) {
+                        srcImageExtension = MimeTypeMap.getSingleton()
+                            .getExtensionFromMimeType(contentResolver.getType(it.originalUri!!))
+                        srcImageBuffer =
+                            contentResolver.openInputStream(it.originalUri!!)!!.readBytes()
+                    }
+                    cropRect = it.cropRect!!
+                    croppedBitmap = Bitmap.createScaledBitmap(
+                        it.getBitmap(this@CustomThemeActivity)!!,
+                        previewUi.intrinsicWidth,
+                        previewUi.intrinsicHeight,
+                        true
+                    )
+                    filteredDrawable = BitmapDrawable(resources, croppedBitmap)
+                    updateState()
+                }
             }
         }
 
         if (newCreated) {
             cropLabel.visibility = View.GONE
-            previewUi.onSizeMeasured = { w, h ->
-                launchCrop(w, h)
+            whenHasBackground {
+                previewUi.onSizeMeasured = { w, h ->
+                    launchCrop(w, h)
+                }
             }
         } else {
             deleteButton.apply {
                 visibility = View.VISIBLE
                 setOnClickListener { delete() }
             }
-            updateState()
+            whenHasBackground {
+                updateState()
+            }
         }
     }
 
-    private fun launchCrop(w: Int, h: Int) {
+    private fun BackgroundStates.launchCrop(w: Int, h: Int) {
         if (tempImageFile == null || tempImageFile?.exists() != true) {
             tempImageFile = File.createTempFile("cropped", ".png", cacheDir)
         }
@@ -356,7 +394,7 @@ class BackgroundImageActivity : AppCompatActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun updateState() {
+    private fun BackgroundStates.updateState() {
         val progress = brightnessSeekBar.progress
         brightnessValue.text = "$progress%"
         filteredDrawable.colorFilter = darkenColorFilter(100 - progress)
@@ -364,7 +402,9 @@ class BackgroundImageActivity : AppCompatActivity() {
     }
 
     private fun cancel() {
-        tempImageFile?.delete()
+        whenHasBackground {
+            tempImageFile?.delete()
+        }
         setResult(
             Activity.RESULT_CANCELED,
             Intent().apply { putExtra(RESULT, null as BackgroundResult?) }
@@ -374,33 +414,37 @@ class BackgroundImageActivity : AppCompatActivity() {
 
     private fun done() {
         lifecycleScope.withLoadingDialog(this) {
-            withContext(Dispatchers.IO) {
-                tempImageFile?.delete()
-                croppedImageFile.delete()
-                croppedImageFile.outputStream().use {
-                    croppedBitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
-                }
-                if (newCreated) {
-                    if (srcImageExtension != null) {
-                        srcImageFile = File("${srcImageFile.absolutePath}.$srcImageExtension")
-                        theme = theme.copy(
-                            backgroundImage = theme.background.copy(
-                                srcFilePath = srcImageFile.absolutePath
-                            )
-                        )
+            whenHasBackground {
+                withContext(Dispatchers.IO) {
+                    tempImageFile?.delete()
+                    croppedImageFile.delete()
+                    croppedImageFile.outputStream().use {
+                        croppedBitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
                     }
-                    srcImageFile.writeBytes(srcImageBuffer!!)
+                    if (newCreated) {
+                        if (srcImageExtension != null) {
+                            srcImageFile = File("${srcImageFile.absolutePath}.$srcImageExtension")
+                            theme = theme.copy(
+                                backgroundImage = it.copy(
+                                    srcFilePath = srcImageFile.absolutePath
+                                )
+                            )
+                        }
+                        srcImageFile.writeBytes(srcImageBuffer!!)
+                    }
                 }
             }
             setResult(
                 Activity.RESULT_OK,
                 Intent().apply {
-                    val newTheme = theme.copy(
-                        backgroundImage = theme.background.copy(
-                            brightness = brightnessSeekBar.progress,
-                            cropRect = cropRect
+                    val newTheme = whenHasBackground(default = { theme }) {
+                        theme.copy(
+                            backgroundImage = it.copy(
+                                brightness = brightnessSeekBar.progress,
+                                cropRect = cropRect
+                            )
                         )
-                    )
+                    }
                     putExtra(
                         RESULT,
                         if (newCreated)

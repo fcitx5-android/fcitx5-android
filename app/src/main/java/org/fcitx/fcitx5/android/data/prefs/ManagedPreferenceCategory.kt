@@ -9,7 +9,8 @@ abstract class ManagedPreferenceCategory(
     @StringRes private val title: Int,
     private val sharedPreferences: SharedPreferences
 ) : ManagedPreferenceProvider {
-    override val managedPreferences = mutableMapOf<String, ManagedPreference<*, *>>()
+    override val managedPreferences =
+        mutableMapOf<String, ManagedPreference<*, *>>()
 
     protected fun switch(
         @StringRes

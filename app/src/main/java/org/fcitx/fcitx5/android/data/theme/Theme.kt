@@ -93,6 +93,26 @@ sealed class Theme : Parcelable {
         override val clipboardEntryColor: ColorInt,
         override val isDark: Boolean
     ) : Theme() {
+        fun deriveCustomNoBackrgound(name: String) = Custom(
+            name,
+            null,
+            backgroundColor,
+            barColor,
+            keyboardColor,
+            keyBackgroundColor,
+            keyTextColor,
+            altKeyBackgroundColor,
+            altKeyTextColor,
+            accentKeyBackgroundColor,
+            accentKeyTextColor,
+            keyPressHighlightColor,
+            keyShadowColor,
+            spaceBarColor,
+            dividerColor,
+            clipboardEntryColor,
+            isDark
+        )
+
         fun deriveCustomBackground(
             name: String,
             croppedBackgroundImage: String,
