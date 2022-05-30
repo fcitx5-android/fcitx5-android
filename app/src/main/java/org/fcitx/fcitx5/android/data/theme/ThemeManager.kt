@@ -111,12 +111,10 @@ object ThemeManager {
                     val tweakedTheme = theme.backgroundImage?.let {
                         theme.copy(
                             backgroundImage = theme.backgroundImage.copy(
-                                croppedFilePath = theme.backgroundImage.croppedFilePath.substringAfterLast(
-                                    '/'
-                                ),
-                                srcFilePath = theme.backgroundImage.srcFilePath.substringAfterLast(
-                                    '/'
-                                ),
+                                croppedFilePath = theme.backgroundImage.croppedFilePath
+                                    .substringAfterLast('/'),
+                                srcFilePath = theme.backgroundImage.srcFilePath
+                                    .substringAfterLast('/'),
                             )
                         )
                     } ?: theme
@@ -130,15 +128,15 @@ object ThemeManager {
                         zipStream.putNextEntry(ZipEntry(tweakedTheme.backgroundImage.srcFilePath))
                         File(theme.backgroundImage.srcFilePath).inputStream()
                             .use { it.copyTo(zipStream) }
-                        // write json
-                        zipStream.putNextEntry(ZipEntry("${tweakedTheme.name}.json"))
-                        zipStream.write(
-                            Json.encodeToString(CustomThemeSerializer, tweakedTheme)
-                                .encodeToByteArray()
-                        )
-                        // done
-                        zipStream.closeEntry()
                     }
+                    // write json
+                    zipStream.putNextEntry(ZipEntry("${tweakedTheme.name}.json"))
+                    zipStream.write(
+                        Json.encodeToString(CustomThemeSerializer, tweakedTheme)
+                            .encodeToByteArray()
+                    )
+                    // done
+                    zipStream.closeEntry()
                 }
         }
 
@@ -239,13 +237,14 @@ object ThemeManager {
         prefs.managedPreferences.forEach { (_, pref) ->
             pref.registerOnChangeListener(prefsChange)
         }
-        // fallback to MaterialLight if active theme was deleted
+        // fallback to default theme if active theme was deleted
         internalPrefs.activeThemeName.getValue().let {
             currentTheme = getTheme(it) ?: defaultTheme.apply {
                 Timber.w("Cannot find active theme '$it', fallback to $name")
                 internalPrefs.activeThemeName.setValue(name)
             }
         }
+        internalPrefs.activeThemeName.registerOnChangeListener(onActiveThemeNameChange)
     }
 
     private lateinit var currentTheme: Theme

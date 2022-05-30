@@ -132,8 +132,8 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
         bkg.imageDrawable = drawable
     }
 
-    fun setTheme(theme: Theme) {
-        setBackground(when (theme) {
+    fun setTheme(theme: Theme, background: Drawable? = null) {
+        setBackground(background ?: when (theme) {
             is Theme.Builtin -> ColorDrawable(
                 if (ThemeManager.prefs.keyBorder.getValue()) theme.backgroundColor.color
                 else theme.keyboardColor.color

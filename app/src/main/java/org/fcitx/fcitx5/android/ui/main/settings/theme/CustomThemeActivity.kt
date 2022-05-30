@@ -260,12 +260,7 @@ class CustomThemeActivity : AppCompatActivity() {
                 brightnessSeekBar.progress,
                 background.cropRect
             )
-        previewUi.setTheme(theme)
-        if (newCreated) {
-            // new created theme's background image file have not been created yet
-            // update preview background manually
-            previewUi.setBackground(filteredDrawable)
-        }
+        previewUi.setTheme(theme, filteredDrawable)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -404,6 +399,7 @@ class CustomThemeActivity : AppCompatActivity() {
     private fun cancel() {
         whenHasBackground {
             tempImageFile?.delete()
+            Unit
         }
         setResult(
             Activity.RESULT_CANCELED,
