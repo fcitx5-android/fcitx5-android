@@ -255,7 +255,7 @@ object ThemeManager {
 
     private val customThemes = listThemes()
 
-    private val builtinThemes = listOf(
+    val builtinThemes = listOf(
         ThemePreset.MaterialLight,
         ThemePreset.MaterialDark,
         ThemePreset.PixelLight,

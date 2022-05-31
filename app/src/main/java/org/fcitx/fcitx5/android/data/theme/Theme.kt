@@ -93,7 +93,7 @@ sealed class Theme : Parcelable {
         override val clipboardEntryColor: ColorInt,
         override val isDark: Boolean
     ) : Theme() {
-        fun deriveCustomNoBackrgound(name: String) = Custom(
+        fun deriveCustomNoBackground(name: String) = Custom(
             name,
             null,
             backgroundColor,

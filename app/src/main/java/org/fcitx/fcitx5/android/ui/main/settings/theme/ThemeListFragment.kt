@@ -10,10 +10,14 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import cn.berberman.girls.utils.identity
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.input.clipboard.SpacesItemDecoration
 import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
 import org.fcitx.fcitx5.android.ui.main.settings.ProgressFragment
 import org.fcitx.fcitx5.android.utils.*
@@ -31,7 +35,9 @@ import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.gravityVerticalCenter
 import splitties.views.imageDrawable
+import splitties.views.recyclerview.verticalLayoutManager
 import splitties.views.textAppearance
+import java.util.*
 
 class ThemeListFragment : ProgressFragment() {
 
@@ -228,10 +234,24 @@ class ThemeListFragment : ProgressFragment() {
                     0 -> imageLauncher.launch(null)
                     1 -> importLauncher.launch("application/zip")
                     2 -> {
-                        // TODO
-                        runBlocking {
-                            errorDialog(requireContext(), "Not implemented", "TODO")
+                        val view = requireContext().recyclerView {
+                            layoutManager = verticalLayoutManager()
+                            addItemDecoration(SpacesItemDecoration(dp(10)))
                         }
+                        val dialog = AlertDialog.Builder(requireContext())
+                            .setView(view)
+                            .create()
+                        view.adapter = object : BuiltinThemeListAdapter() {
+                            override fun onClick(theme: Theme.Builtin) {
+                                val newTheme =
+                                    theme.deriveCustomNoBackground(UUID.randomUUID().toString())
+                                adapter.prependTheme(newTheme)
+                                ThemeManager.saveTheme(newTheme)
+                                dialog.dismiss()
+                            }
+                        }
+                        dialog.show()
+                        dialog.window!!.setLayout(requireContext().dp(300),requireContext().dp(600))
                     }
                 }
             }
