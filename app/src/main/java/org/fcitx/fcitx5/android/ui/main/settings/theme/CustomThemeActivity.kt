@@ -77,10 +77,10 @@ class CustomThemeActivity : AppCompatActivity() {
             setText(string)
         }
         gravity = gravityVerticalCenter
-        textAppearance = resolveThemeAttribute(R.attr.textAppearanceListItem)
+        textAppearance = resolveThemeAttribute(androidx.appcompat.R.attr.textAppearanceListItem)
         horizontalPadding = dp(16)
         if (ripple) {
-            background = styledDrawable(R.attr.selectableItemBackground)
+            background = styledDrawable(androidx.appcompat.R.attr.selectableItemBackground)
         }
     }
 

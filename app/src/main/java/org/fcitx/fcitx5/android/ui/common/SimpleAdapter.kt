@@ -25,7 +25,7 @@ class SimpleAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         with(parent.context) {
             val textView = textView {
-                textAppearance = resolveThemeAttribute(R.attr.textAppearanceListItem)
+                textAppearance = resolveThemeAttribute(androidx.appcompat.R.attr.textAppearanceListItem)
             }
             ViewHolder(
                 horizontalLayout {

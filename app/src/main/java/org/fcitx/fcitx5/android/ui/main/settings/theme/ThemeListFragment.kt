@@ -146,12 +146,12 @@ class ThemeListFragment : ProgressFragment() {
 
         val settingsText = textView {
             setText(R.string.configure_theme)
-            textAppearance = resolveThemeAttribute(R.attr.textAppearanceListItem)
+            textAppearance = resolveThemeAttribute(androidx.appcompat.R.attr.textAppearanceListItem)
             gravity = gravityVerticalCenter
         }
         val settingsButton = imageButton {
             imageDrawable = drawable(R.drawable.ic_baseline_settings_24)
-            background = styledDrawable(R.attr.actionBarItemBackground)
+            background = styledDrawable(androidx.appcompat.R.attr.actionBarItemBackground)
             setOnClickListener {
                 findNavController().navigate(R.id.action_themeListFragment_to_themeSettingsFragment)
             }
@@ -171,7 +171,7 @@ class ThemeListFragment : ProgressFragment() {
                 endOfParent(dp(64))
                 bottomOfParent(dp(4))
             })
-            backgroundColor = styledColor(R.attr.colorPrimary)
+            backgroundColor = styledColor(androidx.appcompat.R.attr.colorPrimary)
             elevation = dp(4f)
         }
 
