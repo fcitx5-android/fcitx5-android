@@ -123,5 +123,5 @@
     <string name="popup_on_key_press">Всплывающее окно при нажатии клавиши</string>
     <string name="disable_animation">Отключить анимацию</string>
     <string name="import_from_file">Импорт из файла</string>
-    <string name="duplicate_builtin">Дублировать встроенный</string>
+    <string name="duplicate_builtin">Дублировать встроенное</string>
 </resources>
