@@ -2,27 +2,48 @@ package org.fcitx.fcitx5.android.data
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
+import org.fcitx.fcitx5.android.utils.MaybeSerializer
 import org.fcitx.fcitx5.android.utils.appContext
-import org.json.JSONObject
+import org.fcitx.fcitx5.android.utils.catMaybes
 
 object Licenses {
-    data class LibraryLicense(val libraryName: String, val licenseUrl: String?)
+
+    @Serializable
+    data class LibraryLicense(
+        val artifactId: LibraryArtifactID,
+        val license: String,
+        val licenseUrl: String,
+        val normalizedLicense: String,
+        val url: String? = null,
+        val libraryName: String,
+    )
+
+    @Serializable
+    data class LibraryArtifactID(
+        val name: String,
+        val group: String,
+        val version: String
+    )
 
     private var parsed: List<LibraryLicense>? = null
 
     suspend fun getAll(): Result<List<LibraryLicense>> = runCatching {
         parsed?.let { return@runCatching it }
         withContext(Dispatchers.IO) {
-            val content = appContext.assets.open(licensesJSON).bufferedReader().readText()
-            val jObject = JSONObject(content)
-            val jArray = jObject.getJSONArray("libraries")
-            val list = mutableListOf<LibraryLicense>()
-            for (i in 0 until jArray.length()) {
-                val library = jArray.getJSONObject(i)
-                val libraryName = library.getString("libraryName")
-                val licenseUrl = runCatching { library.getString("licenseUrl") }.getOrNull()
-                list.add(LibraryLicense(libraryName, licenseUrl))
-            }
+            val content =
+                appContext.assets.open(licensesJSON).bufferedReader().use { x -> x.readText() }
+            val list = Json.decodeFromString(
+                MapSerializer(
+                    String.serializer(),
+                    ListSerializer(MaybeSerializer(LibraryLicense.serializer()))
+                ),
+                content
+            )["libraries"]!!.catMaybes().sortedBy { it.libraryName }
             parsed = list
             list
         }

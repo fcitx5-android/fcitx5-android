@@ -34,6 +34,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.navigation.NavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import cn.berberman.girls.utils.maybe.Maybe
 import com.sun.jna.Library
 import com.sun.jna.Native
 import kotlinx.coroutines.Dispatchers
@@ -223,3 +224,5 @@ suspend fun errorDialog(context: Context, title: String, message: String) {
             .show()
     }
 }
+
+fun <T> List<Maybe<T>>.catMaybes() = mapNotNull { it.takeIf { it.isPresent }?.value }
