@@ -10,7 +10,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
 /**
- * A transparent wrapper of serializer, which ignore failures on deserialization
+ * A transparent wrapper of serializer, which ignores failures on deserialization
  */
 class MaybeSerializer<T : Any>(private val serializer: KSerializer<T>) : KSerializer<Maybe<T>> {
     override fun deserialize(decoder: Decoder): Maybe<T> =

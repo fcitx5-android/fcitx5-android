@@ -1,17 +1,24 @@
 package org.fcitx.fcitx5.android.data
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.fcitx.fcitx5.android.utils.Const
 import org.fcitx.fcitx5.android.utils.appContext
-import org.json.JSONObject
 import timber.log.Timber
 import java.io.File
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
 typealias SHA256 = String
-typealias DataDescriptor = Pair<SHA256, Map<String, SHA256>>
 
 object DataManager {
+
+    @Serializable
+    data class DataDescriptor(
+        val sha256: SHA256,
+        val files: Map<String, SHA256>
+    )
 
     sealed class Diff {
         abstract val key: String
@@ -27,37 +34,26 @@ object DataManager {
     private val lock = ReentrantLock()
 
     // should be consistent with the deserialization in build.gradle.kts (:app)
-    private fun deserialize(raw: String): Result<DataDescriptor> = runCatching {
-
-        val jObject = JSONObject(raw)
-        val sha256 = jObject.getString("sha256")
-        val files = jObject.getJSONObject("files")
-        val keys = files.names()!!
-        val jArray = files.toJSONArray(keys)!!
-
-        val map = mutableMapOf<String, String>()
-        for (i in 0 until jArray.length()) {
-            map[keys.getString(i)] = jArray.getString(i)
-        }
-        sha256 to map
+    private fun deserialize(raw: String) = runCatching {
+        Json.decodeFromString<DataDescriptor>(raw)
     }
 
     private fun diff(old: DataDescriptor, new: DataDescriptor): List<Diff> =
-        if (old.first == new.first)
+        if (old.sha256 == new.sha256)
             listOf()
         else
-            new.second.mapNotNull {
+            new.files.mapNotNull {
                 when {
-                    it.key !in old.second -> Diff.New(it.key, it.value)
-                    old.second[it.key] != it.value -> Diff.Update(
+                    it.key !in old.files -> Diff.New(it.key, it.value)
+                    old.files[it.key] != it.value -> Diff.Update(
                         it.key,
-                        old.second.getValue(it.key),
+                        old.files.getValue(it.key),
                         it.value
                     )
                     else -> null
                 }
             }.toMutableList().apply {
-                addAll(old.second.filterKeys { it !in new.second }
+                addAll(old.files.filterKeys { it !in new.files }
                     .map { Diff.Delete(it.key, it.value) })
             }
 
@@ -69,13 +65,13 @@ object DataManager {
                 ?.getOrNull()
                 ?.let { deserialize(it) }
                 ?.getOrNull()
-                ?: ("" to mapOf())
+                ?: DataDescriptor("", mapOf())
 
         val bundledDescriptor =
             appContext.assets
                 .open(Const.dataDescriptorName)
                 .bufferedReader()
-                .readText()
+                .use { it.readText() }
                 .let { deserialize(it) }
                 .getOrThrow()
 
