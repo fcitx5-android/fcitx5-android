@@ -21,9 +21,8 @@ val gitVersionName = exec("git describe --tags --long --always")
 
 plugins {
     id("com.android.application")
-    kotlin("android")
     id("kotlin-android")
-    kotlin("kapt")
+    id("com.google.devtools.ksp") version "1.6.21-1.0.5"
     id("com.cookpad.android.plugin.license-tools") version "1.2.0"
     kotlin("plugin.serialization") version "1.6.10"
     id("kotlin-parcelize")
@@ -59,12 +58,6 @@ android {
             useSupportLibrary = true
         }
 
-        kapt {
-            arguments {
-                arg("room.schemaLocation", "$projectDir/schemas")
-            }
-        }
-
         if (targetABI == null)
             ndk {
                 abiFilters.add(defaultABI)
@@ -76,7 +69,6 @@ android {
             isMinifyEnabled = false
             isDebuggable = false
             isJniDebuggable = false
-            multiDexEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -89,7 +81,6 @@ android {
             isDebuggable = true
             isDefault = true
             isJniDebuggable = true
-            multiDexEnabled = true
 
             resValue("string", "app_name", "@string/app_name_debug")
         }
@@ -236,6 +227,10 @@ fun installFcitxComponent(targetName: String, componentName: String, destDir: Fi
 installFcitxComponent("generate-desktop-file", "config", file("src/main/assets"))
 installFcitxComponent("translation-file", "translation", file("src/main/assets"))
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
     implementation ("com.github.CanHub:Android-Image-Cropper:4.2.1")
@@ -245,7 +240,7 @@ dependencies {
     val roomVersion = "2.4.2"
     implementation("androidx.room:room-runtime:$roomVersion")
     annotationProcessor("androidx.room:room-compiler:$roomVersion")
-    kapt("androidx.room:room-compiler:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     implementation("net.java.dev.jna:jna:5.11.0@aar")
     implementation("com.jakewharton.timber:timber:5.0.1")
