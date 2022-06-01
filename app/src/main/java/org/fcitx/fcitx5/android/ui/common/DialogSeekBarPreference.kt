@@ -31,7 +31,7 @@ class DialogSeekBarPreference : Preference {
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) :
-            this(context, attrs, R.attr.preferenceStyle)
+            this(context, attrs, androidx.preference.R.attr.preferenceStyle)
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         context.theme.obtainStyledAttributes(attrs, R.styleable.DialogSeekBarPreference, 0, 0).run {
