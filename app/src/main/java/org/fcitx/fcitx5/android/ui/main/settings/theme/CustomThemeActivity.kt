@@ -330,7 +330,8 @@ class CustomThemeActivity : AppCompatActivity() {
                         srcImageExtension = MimeTypeMap.getSingleton()
                             .getExtensionFromMimeType(contentResolver.getType(it.originalUri!!))
                         srcImageBuffer =
-                            contentResolver.openInputStream(it.originalUri!!)!!.readBytes()
+                            contentResolver.openInputStream(it.originalUri!!)!!
+                                .use { x -> x.readBytes() }
                     }
                     cropRect = it.cropRect!!
                     croppedBitmap = Bitmap.createScaledBitmap(
