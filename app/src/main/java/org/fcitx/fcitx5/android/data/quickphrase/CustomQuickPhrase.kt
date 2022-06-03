@@ -1,5 +1,7 @@
 package org.fcitx.fcitx5.android.data.quickphrase
 
+import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.utils.errorArg
 import java.io.File
 
 class CustomQuickPhrase(file: File) : QuickPhrase() {
@@ -25,7 +27,7 @@ class CustomQuickPhrase(file: File) : QuickPhrase() {
             file.name.endsWith(".$EXT.$DISABLE") -> {
                 false
             }
-            else -> throw IllegalArgumentException("Not a quickphrase file ${file.name}")
+            else -> errorArg(R.string.exception_quickphrase_filename, file.name)
         }
     }
 

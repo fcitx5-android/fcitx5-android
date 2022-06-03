@@ -1,6 +1,8 @@
 package org.fcitx.fcitx5.android.data.pinyin.dict
 
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.pinyin.PinyinDictManager
+import org.fcitx.fcitx5.android.utils.errorArg
 import java.io.File
 
 class TextDictionary(file: File) : Dictionary() {
@@ -12,7 +14,7 @@ class TextDictionary(file: File) : Dictionary() {
     init {
         ensureFileExists()
         if (file.extension != type.ext)
-            throw IllegalArgumentException("Not a text dict ${file.name}")
+            errorArg(R.string.exception_text_dict_filename, file.name)
     }
 
     override fun toTextDictionary(dest: File): TextDictionary {

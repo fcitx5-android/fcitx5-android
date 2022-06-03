@@ -1,7 +1,9 @@
 package org.fcitx.fcitx5.android.data.quickphrase
 
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.DataManager
 import org.fcitx.fcitx5.android.utils.appContext
+import org.fcitx.fcitx5.android.utils.errorArg
 import java.io.File
 import java.io.InputStream
 
@@ -33,7 +35,7 @@ object QuickPhraseManager {
 
     fun importFromFile(file: File): CustomQuickPhrase {
         if (file.extension != QuickPhrase.EXT)
-            throw IllegalArgumentException("${file.path} is not a quick phrase")
+            errorArg(R.string.exception_quickphrase_filename, file.path)
         // throw away data, only ensuring the format is correct
         QuickPhraseData.fromLines(file.readLines()).getOrThrow()
         val dest = File(customQuickPhraseDir, file.name)

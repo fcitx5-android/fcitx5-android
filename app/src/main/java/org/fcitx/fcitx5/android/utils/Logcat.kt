@@ -3,6 +3,7 @@ package org.fcitx.fcitx5.android.utils
 import android.os.Process
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import org.fcitx.fcitx5.android.R
 
 class Logcat(val pid: Int? = Process.myPid()) : CoroutineScope by CoroutineScope(Dispatchers.IO) {
 
@@ -43,7 +44,7 @@ class Logcat(val pid: Int? = Process.myPid()) : CoroutineScope by CoroutineScope
      */
     fun initLogFlow() =
         if (process != null)
-            throw IllegalStateException("Logcat process already created!")
+            errorState(R.string.exception_logcat_created)
         else launch {
             runCatching {
                 Runtime

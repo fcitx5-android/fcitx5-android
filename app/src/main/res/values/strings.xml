@@ -124,4 +124,18 @@
     <string name="disable_animation">Disable animation</string>
     <string name="import_from_file">Import From File</string>
     <string name="duplicate_builtin">Duplicate Builtin</string>
+    <string name="exception_logcat_created">Logcat process is already created</string>
+    <string name="exception_quickphrase_parse">Failed to parse quick phrase line: %1$s</string>
+    <string name="exception_quickphrase_filename">The filename extension of %1$s does not indicate a quick phrase</string>
+    <string name="exception_theme_filename">The filename extension of %1$s does not indicate a theme</string>
+    <string name="exception_theme_unknown">Theme %1$s is unknown</string>
+    <string name="exception_libime_dict_filename">The filename extension of %1$s does not indicate a libime dict</string>
+    <string name="exception_text_dict_filename">The filename extension of %1$s does not indicate a text dict</string>
+    <string name="exception_text_dict_filename">The filename extension of %1$s does not indicate a text dict</string>
+    <string name="exception_sougou_dict_filename">The filename extension of %1$s does not indicate a sougou dict</string>
+    <string name="exception_dict_filename">The filename extension of %1$s does not indicate a dict</string>
+    <string name="exception_theme_json">Unable to find theme json</string>
+    <string name="exception_theme_name_clash">Theme name clashes with builtin themes</string>
+    <string name="exception_theme_src_image">Unable to save source image of theme background</string>
+    <string name="exception_theme_cropped_image">Unable to save cropped image of theme background</string>
 </resources>

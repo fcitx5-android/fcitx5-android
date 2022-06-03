@@ -7,8 +7,7 @@ import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceCategory
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceInternal
-import org.fcitx.fcitx5.android.utils.WeakHashSet
-import org.fcitx.fcitx5.android.utils.appContext
+import org.fcitx.fcitx5.android.utils.*
 import timber.log.Timber
 import java.io.File
 import java.io.FileFilter
@@ -67,7 +66,7 @@ object ThemeManager {
         if (currentTheme.name == name)
             switchTheme(defaultTheme)
         val theme = customThemes.find { it.name == name }
-            ?: throw IllegalArgumentException("Theme $name does not exist")
+            ?: errorArg(R.string.exception_theme_unknown, name)
         themeFile(theme).delete()
         theme.backgroundImage?.let {
             File(it.croppedFilePath).delete()
@@ -78,7 +77,7 @@ object ThemeManager {
 
     fun switchTheme(theme: Theme) {
         if (getTheme(theme.name) == null)
-            throw IllegalArgumentException("Unregistered theme $theme")
+            errorArg(R.string.exception_theme_unknown, theme.name)
         internalPrefs.activeThemeName.setValue(theme.name)
     }
 
@@ -159,18 +158,18 @@ object ThemeManager {
                 entry = zipStream.nextEntry
             }
             val jsonFile = extracted.find { it.extension == "json" }
-                ?: throw RuntimeException("Unable to find theme json")
+                ?: errorRuntime(R.string.exception_theme_json)
             val decoded = Json.decodeFromString(CustomThemeSerializer, jsonFile.readText())
             if (builtinThemes.find { it.name == decoded.name } != null)
-                throw RuntimeException("Name clashed with builtin themes")
+                errorRuntime(R.string.exception_theme_name_clash)
             val exists = customThemes.find { it.name == decoded.name } != null
             val newTheme = if (decoded.backgroundImage != null) {
                 val srcFile = File(dir, decoded.backgroundImage.srcFilePath)
                 val croppedFile = File(dir, decoded.backgroundImage.croppedFilePath)
                 extracted.find { it.name == srcFile.name }?.copyTo(srcFile)
-                    ?: throw RuntimeException("Unable to save src file")
+                    ?: errorRuntime(R.string.exception_theme_src_image)
                 extracted.find { it.name == croppedFile.name }?.copyTo(croppedFile)
-                    ?: throw RuntimeException("Unable to save cropped file")
+                    ?: errorRuntime(R.string.exception_theme_cropped_image)
                 decoded.copy(
                     backgroundImage = decoded.backgroundImage.copy(
                         croppedFilePath = srcFile.path,
@@ -269,7 +268,7 @@ object ThemeManager {
 
     private val onActiveThemeNameChange = ManagedPreference.OnChangeListener<String> {
         currentTheme = getTheme(internalPrefs.activeThemeName.getValue())
-            ?: throw RuntimeException("Unknown theme $it")
+            ?: errorState(R.string.exception_theme_unknown, it)
         this@ThemeManager.fireChange()
     }
 

@@ -94,9 +94,11 @@ class ThemeListFragment : ProgressFragment() {
                         runCatching {
                             uri?.let {
                                 it.queryFileName(requireContext().contentResolver)
-                                    ?.endsWith(".zip")
-                                    ?.takeIf(::identity)
-                                    ?: throw RuntimeException("Theme file must be a zip")
+                                    ?.let { name ->
+                                        name.endsWith(".zip")
+                                            .takeIf(::identity)
+                                            ?: errorArg(R.string.exception_theme_filename, name)
+                                    }
                                 requireContext().contentResolver.openInputStream(it)
                             }
                         }.bindOnNotNull {
@@ -251,7 +253,10 @@ class ThemeListFragment : ProgressFragment() {
                             }
                         }
                         dialog.show()
-                        dialog.window!!.setLayout(requireContext().dp(300),requireContext().dp(600))
+                        dialog.window!!.setLayout(
+                            requireContext().dp(300),
+                            requireContext().dp(600)
+                        )
                     }
                 }
             }

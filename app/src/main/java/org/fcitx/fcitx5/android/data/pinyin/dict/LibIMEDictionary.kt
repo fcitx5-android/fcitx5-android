@@ -1,6 +1,8 @@
 package org.fcitx.fcitx5.android.data.pinyin.dict
 
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.pinyin.PinyinDictManager
+import org.fcitx.fcitx5.android.utils.errorArg
 import java.io.File
 
 class LibIMEDictionary(file: File) : Dictionary() {
@@ -26,7 +28,7 @@ class LibIMEDictionary(file: File) : Dictionary() {
             file.name.endsWith(".${type.ext}.$DISABLE") -> {
                 false
             }
-            else -> throw IllegalArgumentException("Not a libime dict ${file.name}")
+            else -> errorArg(R.string.exception_libime_dict_filename, file.name)
         }
     }
 

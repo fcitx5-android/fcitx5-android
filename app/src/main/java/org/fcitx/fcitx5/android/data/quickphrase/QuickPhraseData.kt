@@ -1,5 +1,8 @@
 package org.fcitx.fcitx5.android.data.quickphrase
 
+import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.utils.errorRuntime
+
 class QuickPhraseData(private val data: List<QuickPhraseEntry>) :
     List<QuickPhraseEntry> by data {
 
@@ -14,7 +17,7 @@ class QuickPhraseData(private val data: List<QuickPhraseEntry>) :
                             val key = l.substringBefore(' ')
                             val value = l.substringAfter(' ')
                             if (key.isEmpty() || value.isEmpty())
-                                throw RuntimeException("Failed to parse quickphrase line $it")
+                                errorRuntime(R.string.exception_quickphrase_parse, it)
                             QuickPhraseEntry(key, value)
                         }
                     }

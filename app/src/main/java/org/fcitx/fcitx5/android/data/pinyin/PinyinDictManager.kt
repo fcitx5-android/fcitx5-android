@@ -1,8 +1,10 @@
 package org.fcitx.fcitx5.android.data.pinyin
 
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.pinyin.dict.Dictionary
 import org.fcitx.fcitx5.android.data.pinyin.dict.LibIMEDictionary
 import org.fcitx.fcitx5.android.utils.appContext
+import org.fcitx.fcitx5.android.utils.errorArg
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
@@ -30,8 +32,7 @@ object PinyinDictManager {
         dictionaries().mapNotNull { it as? LibIMEDictionary }
 
     fun importFromFile(file: File): LibIMEDictionary {
-        val raw = Dictionary.new(file)
-            ?: throw IllegalArgumentException("${file.path} is not a libime/text/sougou dictionary")
+        val raw = Dictionary.new(file) ?: errorArg(R.string.exception_dict_filename, file.path)
         // convert to libime format in dictionaries dir
         // preserve original file name
         val new = raw.toLibIMEDictionary(
