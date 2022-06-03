@@ -131,7 +131,6 @@
     <string name="exception_theme_unknown">Theme %1$s is unknown</string>
     <string name="exception_libime_dict_filename">The filename extension of %1$s does not indicate a libime dict</string>
     <string name="exception_text_dict_filename">The filename extension of %1$s does not indicate a text dict</string>
-    <string name="exception_text_dict_filename">The filename extension of %1$s does not indicate a text dict</string>
     <string name="exception_sougou_dict_filename">The filename extension of %1$s does not indicate a sougou dict</string>
     <string name="exception_dict_filename">The filename extension of %1$s does not indicate a dict</string>
     <string name="exception_theme_json">Unable to find theme json</string>
