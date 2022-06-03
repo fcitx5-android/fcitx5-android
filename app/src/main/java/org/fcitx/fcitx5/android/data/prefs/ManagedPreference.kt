@@ -12,7 +12,7 @@ import timber.log.Timber
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-sealed class ManagedPreference<T : Any, P : Preference>(
+abstract class ManagedPreference<T : Any, P : Preference>(
     val sharedPreferences: SharedPreferences,
     val key: String,
     val defaultValue: T,

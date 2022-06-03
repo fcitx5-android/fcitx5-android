@@ -165,14 +165,17 @@ inline val ConstraintLayout.LayoutParams.unset
 @Suppress("NOTHING_TO_INLINE")
 inline fun <T, U> kotlin.reflect.KFunction1<T, U>.upcast(): (T) -> U = this
 
+fun Configuration.isDarkMode() =
+    when (uiMode.and(Configuration.UI_MODE_NIGHT_MASK)) {
+        Configuration.UI_MODE_NIGHT_YES -> true
+        else -> false
+    }
+
 fun Activity.applyTranslucentSystemBars() {
     // with minSDK 23 we always have windowLightStatusBar
     window.statusBarColor = Color.TRANSPARENT
     WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars =
-        when (resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)) {
-            Configuration.UI_MODE_NIGHT_YES -> false
-            else -> true
-        }
+        !resources.configuration.isDarkMode()
     // windowLightNavigationBar is available for 27+
     window.navigationBarColor =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {

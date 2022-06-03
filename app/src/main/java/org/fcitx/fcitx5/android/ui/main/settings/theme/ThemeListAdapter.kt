@@ -3,6 +3,7 @@ package org.fcitx.fcitx5.android.ui.main.settings.theme
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.ui.common.ThemeThumbnailUi
 import splitties.views.dsl.core.Ui
 
 abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHolder>() {

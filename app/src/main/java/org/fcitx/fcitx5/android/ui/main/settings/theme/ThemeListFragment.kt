@@ -241,9 +241,11 @@ class ThemeListFragment : ProgressFragment() {
                             addItemDecoration(SpacesItemDecoration(dp(10)))
                         }
                         val dialog = AlertDialog.Builder(requireContext())
+                            .setTitle(R.string.duplicate_builtin)
                             .setView(view)
                             .create()
-                        view.adapter = object : BuiltinThemeListAdapter() {
+                        view.adapter = object :
+                            SimpleThemeListAdapter<Theme.Builtin>(ThemeManager.builtinThemes) {
                             override fun onClick(theme: Theme.Builtin) {
                                 val newTheme =
                                     theme.deriveCustomNoBackground(UUID.randomUUID().toString())
@@ -253,10 +255,6 @@ class ThemeListFragment : ProgressFragment() {
                             }
                         }
                         dialog.show()
-                        dialog.window!!.setLayout(
-                            requireContext().dp(300),
-                            requireContext().dp(600)
-                        )
                     }
                 }
             }

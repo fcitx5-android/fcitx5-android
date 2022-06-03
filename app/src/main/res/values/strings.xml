@@ -137,4 +137,8 @@
     <string name="exception_theme_name_clash">Theme name clashes with builtin themes</string>
     <string name="exception_theme_src_image">Unable to save source image of theme background</string>
     <string name="exception_theme_cropped_image">Unable to save cropped image of theme background</string>
+    <string name="follow_system_day_night_theme">Follow system day light theme</string>
+    <string name="follow_system_day_night_theme_summary">Override manual theme selection</string>
+    <string name="light_mode_theme">Light mode theme</string>
+    <string name="dark_mode_theme">Dark mode theme</string>
 </resources>

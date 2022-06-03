@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.data.theme
 
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import kotlinx.serialization.json.Json
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
@@ -229,6 +230,27 @@ object ThemeManager {
             )
         )
 
+        val followSystemDayNightTheme = switch(
+            R.string.follow_system_day_night_theme,
+            "follow_system_dark_mode",
+            false,
+            summary = R.string.follow_system_day_night_theme_summary
+        )
+
+        val lightModeTheme = ManagedThemePreference(
+            sharedPreferences,
+            "light_mode_theme",
+            defaultTheme,
+            enableUiOn = { followSystemDayNightTheme.getValue() }
+        ) { setTitle(R.string.light_mode_theme) }.apply { register() }
+
+        val darkModeTheme = ManagedThemePreference(
+            sharedPreferences,
+            "dark_mode_theme",
+            defaultTheme,
+            enableUiOn = { followSystemDayNightTheme.getValue() }
+        ) { setTitle(R.string.dark_mode_theme) }.apply { register() }
+
         enum class NavbarBackground {
             None,
             ColorOnly,
@@ -276,7 +298,11 @@ object ThemeManager {
         this@ThemeManager.fireChange()
     }
 
-    fun init() {
+    private val onDayLightThemePrefsChange = ManagedPreference.OnChangeListener<Theme>{
+        onSystemDarkModeChanged()
+    }
+
+    fun init(configuration: Configuration) {
         prefs.managedPreferences.forEach { (_, pref) ->
             pref.registerOnChangeListener(prefsChange)
         }
@@ -288,6 +314,9 @@ object ThemeManager {
             }
         }
         internalPrefs.activeThemeName.registerOnChangeListener(onActiveThemeNameChange)
+        onSystemDarkModeChanged(configuration.isDarkMode())
+        prefs.lightModeTheme.registerOnChangeListener(onDayLightThemePrefsChange)
+        prefs.darkModeTheme.registerOnChangeListener(onDayLightThemePrefsChange)
     }
 
     private lateinit var currentTheme: Theme
@@ -299,5 +328,19 @@ object ThemeManager {
     fun getAllThemes() = customThemes + builtinThemes
 
     fun getActiveTheme() = currentTheme
+
+    private var isCurrentDark = false
+
+    fun onSystemDarkModeChanged(isDark: Boolean = isCurrentDark) {
+        isCurrentDark = isDark
+        with(prefs) {
+            if (followSystemDayNightTheme.getValue()) {
+                if (isDark)
+                    switchTheme(darkModeTheme.getValue())
+                else
+                    switchTheme(lightModeTheme.getValue())
+            }
+        }
+    }
 
 }

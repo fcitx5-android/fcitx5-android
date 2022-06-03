@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.Configuration
 import android.os.Process
 import android.util.Log
 import androidx.preference.PreferenceManager
@@ -13,6 +14,7 @@ import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.ui.main.LogActivity
+import org.fcitx.fcitx5.android.utils.isDarkMode
 import timber.log.Timber
 import kotlin.system.exitProcess
 
@@ -62,7 +64,12 @@ class FcitxApplication : Application() {
             setValue(currentPid)
         }
         ClipboardManager.init(applicationContext)
-        ThemeManager.init()
+        ThemeManager.init(resources.configuration)
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        ThemeManager.onSystemDarkModeChanged(newConfig.isDarkMode())
     }
 
     companion object {

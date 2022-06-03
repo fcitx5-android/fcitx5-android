@@ -17,12 +17,14 @@ abstract class ManagedPreferenceCategory(
         title: Int,
         key: String,
         defaultValue: Boolean,
+        @StringRes
+        summary: Int? = null,
         enableUiOn: () -> Boolean = { true },
     ) = ManagedPreference.Switch(sharedPreferences, key, defaultValue, enableUiOn) {
+        if (summary != null)
+            this.setSummary(summary)
         this.setTitle(title)
-    }.also {
-        managedPreferences[key] = it
-    }
+    }.apply { register() }
 
     protected fun <T : Any> list(
         @StringRes
@@ -43,9 +45,7 @@ abstract class ManagedPreferenceCategory(
         this.setTitle(title)
         this.entries = entries.map { it.first }.toTypedArray()
         this.setDialogTitle(title)
-    }.also {
-        managedPreferences[key] = it
-    }
+    }.apply { register() }
 
     protected fun list(
         @StringRes
@@ -64,9 +64,7 @@ abstract class ManagedPreferenceCategory(
         this.setTitle(title)
         this.entries = entries
         this.setDialogTitle(title)
-    }.also {
-        managedPreferences[key] = it
-    }
+    }.apply { register() }
 
     protected fun int(
         @StringRes
@@ -87,9 +85,7 @@ abstract class ManagedPreferenceCategory(
         this.min = min
         this.max = max
         this.unit = unit
-    }.also {
-        managedPreferences[key] = it
-    }
+    }.apply { register() }
 
     override fun createUi(screen: PreferenceScreen) {
         val category = PreferenceCategory(screen.context)
