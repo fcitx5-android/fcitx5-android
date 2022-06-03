@@ -298,7 +298,7 @@ object ThemeManager {
         this@ThemeManager.fireChange()
     }
 
-    private val onDayLightThemePrefsChange = ManagedPreference.OnChangeListener<Theme>{
+    private val dayLightThemePrefsChange = ManagedPreference.OnChangeListener<Any>{
         onSystemDarkModeChanged()
     }
 
@@ -315,8 +315,9 @@ object ThemeManager {
         }
         internalPrefs.activeThemeName.registerOnChangeListener(onActiveThemeNameChange)
         onSystemDarkModeChanged(configuration.isDarkMode())
-        prefs.lightModeTheme.registerOnChangeListener(onDayLightThemePrefsChange)
-        prefs.darkModeTheme.registerOnChangeListener(onDayLightThemePrefsChange)
+        prefs.followSystemDayNightTheme.registerOnChangeListener(dayLightThemePrefsChange)
+        prefs.lightModeTheme.registerOnChangeListener(dayLightThemePrefsChange)
+        prefs.darkModeTheme.registerOnChangeListener(dayLightThemePrefsChange)
     }
 
     private lateinit var currentTheme: Theme
