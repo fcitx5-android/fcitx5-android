@@ -20,7 +20,6 @@ import org.fcitx.fcitx5.android.core.*
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
-import org.fcitx.fcitx5.android.service.FcitxDaemon
 import org.fcitx.fcitx5.android.service.FcitxDaemonManager
 import org.fcitx.fcitx5.android.utils.inputConnection
 import splitties.bitflags.hasFlag
@@ -64,9 +63,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     private lateinit var inputView: InputView
-    private lateinit var fcitxDaemonBinder: FcitxDaemon.FcitxBinder
     private lateinit var fcitx: Fcitx
     private var eventHandlerJob: Job? = null
+    private var fcitxDelayedTask: (suspend () -> Unit)? = null
 
     var editorInfo: EditorInfo? = null
 
@@ -89,8 +88,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onCreate() {
         FcitxDaemonManager.bindFcitxDaemon(javaClass.name, this) {
-            fcitxDaemonBinder = this
             fcitx = getFcitxDaemon().fcitx
+            onReady {
+                fcitxDelayedTask?.invoke()
+                fcitxDelayedTask = null
+            }
         }
         ThemeManager.addOnChangedListener(onThemeChangedListener)
         super.onCreate()
@@ -315,10 +317,14 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         editorInfo = attribute
         selection.update(attribute.initialSelStart, attribute.initialSelEnd)
         composing.clear()
-        // fcitx might not be initialized yet, so we do setCapFlags in onReady
-        fcitxDaemonBinder.onReady {
+        // fcitx might not be initialized yet, so we do setCapFlags later
+        val setCapFlags = suspend {
             fcitx.setCapFlags(CapabilityFlags.fromEditorInfo(editorInfo))
         }
+        if (::fcitx.isInitialized)
+            lifecycleScope.launch { setCapFlags() }
+        else
+            fcitxDelayedTask = setCapFlags
     }
 
     override fun onStartInputView(info: EditorInfo, restarting: Boolean) {
