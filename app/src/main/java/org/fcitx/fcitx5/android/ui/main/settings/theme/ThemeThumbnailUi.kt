@@ -1,4 +1,4 @@
-package org.fcitx.fcitx5.android.ui.common
+package org.fcitx.fcitx5.android.ui.main.settings.theme
 
 import android.content.Context
 import android.graphics.PorterDuff

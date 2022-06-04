@@ -4,10 +4,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.ui.common.ThemeThumbnailUi
-import splitties.dimensions.dp
 import splitties.views.dsl.core.Ui
-import splitties.views.dsl.core.matchParent
 
 open class SimpleThemeListAdapter<T : Theme>(private val entries: List<T>) :
     RecyclerView.Adapter<SimpleThemeListAdapter.ViewHolder>() {
@@ -32,10 +29,9 @@ open class SimpleThemeListAdapter<T : Theme>(private val entries: List<T>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         (holder.ui as ThemeThumbnailUi).apply {
-            root.layoutParams = ViewGroup.LayoutParams(root.matchParent, root.dp(150))
-            editButton.visibility = View.GONE
             val theme = entries[position]
             setTheme(theme)
+            editButton.visibility = View.GONE
             setChecked(position == selected)
             root.setOnClickListener {
                 onClick(theme)

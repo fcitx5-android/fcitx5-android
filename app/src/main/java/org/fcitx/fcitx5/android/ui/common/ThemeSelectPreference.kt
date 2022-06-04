@@ -5,11 +5,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
-import org.fcitx.fcitx5.android.input.clipboard.SpacesItemDecoration
+import org.fcitx.fcitx5.android.ui.main.settings.theme.ResponsiveThemeListView
 import org.fcitx.fcitx5.android.ui.main.settings.theme.SimpleThemeListAdapter
 import splitties.dimensions.dp
-import splitties.views.dsl.recyclerview.recyclerView
-import splitties.views.recyclerview.verticalLayoutManager
 
 class ThemeSelectPreference(context: Context, private val defaultTheme: Theme) :
     Preference(context) {
@@ -22,9 +20,9 @@ class ThemeSelectPreference(context: Context, private val defaultTheme: Theme) :
         get() = getPersistedString(defaultTheme.name)
 
     override fun onClick() {
-        val view = context.recyclerView {
-            layoutManager = verticalLayoutManager()
-            addItemDecoration(SpacesItemDecoration(dp(10)))
+        val view = ResponsiveThemeListView(context).apply {
+            // force AlertDialog's customPanel to grow
+            minimumHeight = dp(500)
         }
         val allThemes = ThemeManager.getAllThemes()
         val adapter = SimpleThemeListAdapter(allThemes).apply {

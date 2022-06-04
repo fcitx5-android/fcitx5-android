@@ -7,7 +7,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import cn.berberman.girls.utils.identity
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +16,6 @@ import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
-import org.fcitx.fcitx5.android.input.clipboard.SpacesItemDecoration
 import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
 import org.fcitx.fcitx5.android.ui.main.settings.ProgressFragment
 import org.fcitx.fcitx5.android.utils.*
@@ -32,10 +30,8 @@ import splitties.views.dsl.core.add
 import splitties.views.dsl.core.imageButton
 import splitties.views.dsl.core.textView
 import splitties.views.dsl.core.wrapContent
-import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.gravityVerticalCenter
 import splitties.views.imageDrawable
-import splitties.views.recyclerview.verticalLayoutManager
 import splitties.views.textAppearance
 import java.util.*
 
@@ -177,13 +173,7 @@ class ThemeListFragment : ProgressFragment() {
             elevation = dp(4f)
         }
 
-        themeList = recyclerView {
-            val spanCount = 2
-            val itemWidth = dp(128)
-            val itemHeight = dp(88)
-            layoutManager = object : GridLayoutManager(context, spanCount) {
-                override fun generateDefaultLayoutParams() = LayoutParams(itemWidth, itemHeight)
-            }
+        themeList = ResponsiveThemeListView(this).apply {
             this@ThemeListFragment.adapter = object : ThemeListAdapter() {
                 override fun onAddNewTheme() = addTheme()
                 override fun onSelectTheme(theme: Theme) = selectTheme(theme)
@@ -193,8 +183,6 @@ class ThemeListFragment : ProgressFragment() {
                 setThemes(ThemeManager.getAllThemes(), ThemeManager.getActiveTheme())
             }
             adapter = this@ThemeListFragment.adapter
-            // evenly spaced items
-            addItemDecoration(ThemeListItemDecoration(itemWidth, spanCount))
             applyNavBarInsetsBottomPadding()
         }
 
@@ -231,17 +219,20 @@ class ThemeListFragment : ProgressFragment() {
                 getString(R.string.duplicate_builtin)
             )
         AlertDialog.Builder(requireContext())
+            .setTitle(R.string.new_theme)
+            .setNegativeButton(android.R.string.cancel, null)
             .setItems(actions) { _, i ->
                 when (i) {
                     0 -> imageLauncher.launch(null)
                     1 -> importLauncher.launch("application/zip")
                     2 -> {
-                        val view = requireContext().recyclerView {
-                            layoutManager = verticalLayoutManager()
-                            addItemDecoration(SpacesItemDecoration(dp(10)))
+                        val view = ResponsiveThemeListView(requireContext()).apply {
+                            // force AlertDialog's customPanel to grow
+                            minimumHeight = dp(500)
                         }
                         val dialog = AlertDialog.Builder(requireContext())
                             .setTitle(R.string.duplicate_builtin)
+                            .setNegativeButton(android.R.string.cancel, null)
                             .setView(view)
                             .create()
                         view.adapter = object :

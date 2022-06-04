@@ -3,7 +3,6 @@ package org.fcitx.fcitx5.android.ui.main.settings.theme
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.ui.common.ThemeThumbnailUi
 import splitties.views.dsl.core.Ui
 
 abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHolder>() {
@@ -67,7 +66,7 @@ abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHold
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         ViewHolder(
             when (viewType) {
-                ADD_THEME -> AddThemeEntryUi(parent.context)
+                ADD_THEME -> NewThemeEntryUi(parent.context)
                 THEME -> ThemeThumbnailUi(parent.context)
                 else -> throw IllegalArgumentException(INVALID_TYPE + viewType)
             }

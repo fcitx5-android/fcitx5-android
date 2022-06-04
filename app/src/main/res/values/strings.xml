@@ -141,4 +141,5 @@
     <string name="follow_system_day_night_theme_summary">Override manual theme selection</string>
     <string name="light_mode_theme">Light mode theme</string>
     <string name="dark_mode_theme">Dark mode theme</string>
+    <string name="new_theme">New theme</string>
 </resources>
