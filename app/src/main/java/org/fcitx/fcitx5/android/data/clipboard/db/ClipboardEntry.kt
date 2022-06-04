@@ -1,7 +1,6 @@
 package org.fcitx.fcitx5.android.data.clipboard.db
 
 import android.content.ClipData
-import android.content.ClipDescription
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -15,9 +14,9 @@ data class ClipboardEntry(
     companion object {
         const val TABLE_NAME = "clipboard"
 
-        fun fromClipData(clipData: ClipData): ClipboardEntry? = clipData.takeIf {
-            it.description.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN) ||
-                    it.description.hasMimeType(ClipDescription.MIMETYPE_TEXT_HTML)
-        }?.run { getItemAt(0).text?.toString()?.let { ClipboardEntry(text = it) } }
+        fun fromClipData(clipData: ClipData): ClipboardEntry? {
+            val str = clipData.getItemAt(0).text?.toString() ?: return null
+            return ClipboardEntry(text = str)
+        }
     }
 }
