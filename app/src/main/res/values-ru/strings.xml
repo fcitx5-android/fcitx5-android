@@ -124,4 +124,22 @@
     <string name="disable_animation">Отключить анимацию</string>
     <string name="import_from_file">Импорт из файла</string>
     <string name="duplicate_builtin">Дублировать встроенное</string>
+    <string name="exception_logcat_created">Процесс Logcat уже создан</string>
+    <string name="exception_quickphrase_parse">Не удалось разобрать строку быстрой фразы: %1$s</string>
+    <string name="exception_quickphrase_filename">Расширение имени файла %1$s не указывает на быструю фразу</string>
+    <string name="exception_theme_filename">Расширение имени файла %1$s не указывает на тему</string>
+    <string name="exception_theme_unknown">Тема %1$s неизвестна</string>
+    <string name="exception_libime_dict_filename">Расширение имени файла %1$s не указывает на словарь libime</string>
+    <string name="exception_text_dict_filename">Расширение имени файла %1$s не указывает на текстовый словарь</string>
+    <string name="exception_sougou_dict_filename">Расширение имени файла %1$s не указывает на словарь sougou</string>
+    <string name="exception_dict_filename">Расширение имени файла %1$s не указывает на словарь</string>
+    <string name="exception_theme_json">Не удалось найти тему json</string>
+    <string name="exception_theme_name_clash">Название темы конфликтует со встроенными темами</string>
+    <string name="exception_theme_src_image">Не удалось сохранить исходное изображение фона темы</string>
+    <string name="exception_theme_cropped_image">Не удалось сохранить обрезанное изображение фона темы</string>
+    <string name="follow_system_day_night_theme">Следовать теме дневного света системы</string>
+    <string name="follow_system_day_night_theme_summary">Отменить выбор темы вручную</string>
+    <string name="light_mode_theme">Светлая тема</string>
+    <string name="dark_mode_theme">Темная тема</string>
+    <string name="new_theme">Новая тема</string>
 </resources>
