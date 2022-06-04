@@ -24,6 +24,7 @@ import org.fcitx.fcitx5.android.ui.main.settings.PinyinDictionaryFragment
 import org.fcitx.fcitx5.android.ui.setup.SetupActivity
 import org.fcitx.fcitx5.android.utils.applyTranslucentSystemBars
 import org.fcitx.fcitx5.android.utils.navigateFromMain
+import splitties.dimensions.dp
 
 class MainActivity : AppCompatActivity() {
 
@@ -75,6 +76,16 @@ class MainActivity : AppCompatActivity() {
         binding.toolbar.setupWithNavController(navHostFragment.navController, appBarConfiguration)
         viewModel.toolbarTitle.observe(this) {
             binding.toolbar.title = it
+        }
+        viewModel.toolbarShadow.observe(this) {
+            if (it) {
+                binding.toolbar.elevation = dp(4f)
+                binding.appBar.elevation = dp(4f)
+            } else {
+                binding.toolbar.elevation = dp(0f)
+                binding.appBar.elevation = dp(0f)
+            }
+
         }
         viewModel.toolbarSaveButtonOnClickListener.observe(this) {
             binding.toolbar.menu.findItem(R.id.activity_main_menu_save).isVisible = it != null

@@ -12,6 +12,8 @@ class MainViewModel : ViewModel() {
 
     val toolbarTitle = MutableLiveData<String>()
 
+    val toolbarShadow = MutableLiveData<Boolean>()
+
     val toolbarSaveButtonOnClickListener = MutableLiveData<(() -> Unit)?>()
 
     val aboutButton = MutableLiveData<Boolean>()
@@ -20,6 +22,14 @@ class MainViewModel : ViewModel() {
 
     fun setToolbarTitle(title: String) {
         toolbarTitle.value = title
+    }
+
+    fun enableToolbarShadow() {
+        toolbarShadow.value = true
+    }
+
+    fun disableToolbarShadow() {
+        toolbarShadow.value = false
     }
 
     fun enableToolbarSaveButton(onClick: () -> Unit) {

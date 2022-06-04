@@ -206,6 +206,7 @@ class ThemeListFragment : ProgressFragment() {
     override fun onResume() {
         super.onResume()
         viewModel.setToolbarTitle(requireContext().getString(R.string.theme))
+        viewModel.disableToolbarShadow()
         if (this::previewUi.isInitialized) {
             previewUi.setTheme(ThemeManager.getActiveTheme())
         }
@@ -267,6 +268,7 @@ class ThemeListFragment : ProgressFragment() {
 
     override fun onDestroy() {
         ThemeManager.removeOnChangedListener(onThemeChangedListener)
+        viewModel.enableToolbarShadow()
         super.onDestroy()
     }
 }
