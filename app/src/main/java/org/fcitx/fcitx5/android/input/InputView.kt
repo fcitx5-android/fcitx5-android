@@ -3,7 +3,6 @@ package org.fcitx.fcitx5.android.input
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.view.View
 import android.widget.ImageView
@@ -39,7 +38,6 @@ import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.imageDrawable
-import java.io.File
 
 @SuppressLint("ViewConstructor")
 class InputView(
@@ -50,6 +48,8 @@ class InputView(
 
     private var shouldUpdateNavbarForeground = false
     private var shouldUpdateNavbarBackground = false
+
+    private val keyBorder by ThemeManager.prefs.keyBorder
 
     private val customBackground = imageView {
         scaleType = ImageView.ScaleType.CENTER_CROP
@@ -164,17 +164,7 @@ class InputView(
             }
         }
 
-        customBackground.imageDrawable = when (theme) {
-            is Theme.Builtin -> ColorDrawable(
-                if (ThemeManager.prefs.keyBorder.getValue()) theme.backgroundColor.color
-                else theme.keyboardColor.color
-            )
-            is Theme.Custom -> theme.backgroundImage
-                ?.croppedFilePath
-                ?.takeIf { File(it).exists() }
-                ?.let { theme.backgroundImage.toDrawable(resources) }
-                ?: ColorDrawable(theme.backgroundColor.color)
-        }
+        customBackground.imageDrawable = theme.backgroundDrawable(keyBorder)
 
         keyboardView = constraintLayout {
             add(customBackground, lParams {

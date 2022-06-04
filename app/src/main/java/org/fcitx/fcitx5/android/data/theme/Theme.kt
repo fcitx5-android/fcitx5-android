@@ -1,15 +1,16 @@
 package org.fcitx.fcitx5.android.data.theme
 
-import android.content.res.Resources
 import android.graphics.BitmapFactory
 import android.graphics.Rect
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.os.Parcelable
-import androidx.core.graphics.drawable.toDrawable
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import org.fcitx.fcitx5.android.utils.ColorInt
 import org.fcitx.fcitx5.android.utils.RectSerializer
-import org.fcitx.fcitx5.android.utils.darkenColorFilter
+import org.fcitx.fcitx5.android.utils.appContext
 
 @Serializable
 sealed class Theme : Parcelable {
@@ -36,6 +37,10 @@ sealed class Theme : Parcelable {
     abstract val dividerColor: ColorInt
     abstract val clipboardEntryColor: ColorInt
     abstract val isDark: Boolean
+
+    open fun backgroundDrawable(keyBorder: Boolean = false): Drawable {
+        return ColorDrawable(if (keyBorder) backgroundColor.color else keyboardColor.color)
+    }
 
     @Serializable
     @Parcelize
@@ -67,11 +72,14 @@ sealed class Theme : Parcelable {
             val brightness: Int = 70,
             val cropRect: @Serializable(with = RectSerializer::class) Rect?,
         ) : Parcelable {
-            fun toDrawable(resources: Resources) =
-                BitmapFactory.decodeFile(croppedFilePath).toDrawable(resources).apply {
-                    colorFilter = darkenColorFilter(100 - brightness)
-                }
+            fun toDrawable(): Drawable? {
+                val bitmap = BitmapFactory.decodeFile(croppedFilePath) ?: return null
+                return BitmapDrawable(appContext.resources, bitmap)
+            }
         }
+
+        override fun backgroundDrawable(keyBorder: Boolean) =
+            backgroundImage?.toDrawable() ?: super.backgroundDrawable(keyBorder)
     }
 
     @Parcelize

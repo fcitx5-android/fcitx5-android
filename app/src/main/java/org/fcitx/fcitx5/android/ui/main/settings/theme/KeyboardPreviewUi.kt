@@ -3,7 +3,6 @@ package org.fcitx.fcitx5.android.ui.main.settings.theme
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.view.View
 import android.widget.FrameLayout
@@ -22,7 +21,6 @@ import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.imageDrawable
-import java.io.File
 
 class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
 
@@ -31,6 +29,8 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
 
     var intrinsicHeight: Int = -1
         private set
+
+    private val keyBorder by ThemeManager.prefs.keyBorder
 
     private val bkg = imageView {
         scaleType = ImageView.ScaleType.CENTER_CROP
@@ -133,17 +133,7 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
     }
 
     fun setTheme(theme: Theme, background: Drawable? = null) {
-        setBackground(background ?: when (theme) {
-            is Theme.Builtin -> ColorDrawable(
-                if (ThemeManager.prefs.keyBorder.getValue()) theme.backgroundColor.color
-                else theme.keyboardColor.color
-            )
-            is Theme.Custom -> theme.backgroundImage
-                ?.croppedFilePath
-                ?.takeIf { File(it).exists() }
-                ?.let { theme.backgroundImage.toDrawable(ctx.resources) }
-                ?: ColorDrawable(theme.backgroundColor.color)
-        })
+        setBackground(background ?: theme.backgroundDrawable(keyBorder))
         if (this::fakeKeyboardWindow.isInitialized) {
             fakeInputView.removeView(fakeKeyboardWindow)
         }

@@ -3,7 +3,6 @@ package org.fcitx.fcitx5.android.ui.main.settings.theme
 import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.OvalShape
@@ -71,11 +70,7 @@ class ThemeThumbnailUi(override val ctx: Context) : Ui {
         root.apply {
             foreground = rippleDrawable(theme.keyPressHighlightColor.color)
         }
-        bkg.imageDrawable = when (theme) {
-            is Theme.Builtin -> ColorDrawable(theme.keyboardColor.color)
-            is Theme.Custom -> theme.backgroundImage?.toDrawable(ctx.resources)
-                ?: ColorDrawable(theme.backgroundColor.color)
-        }
+        bkg.imageDrawable = theme.backgroundDrawable()
         bar.backgroundColor = theme.barColor.color
         spaceBar.background = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
