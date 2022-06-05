@@ -46,7 +46,7 @@ class StatusAreaEntryUi(override val ctx: Context, private val inputTheme: Theme
         }
 
         init {
-            add(content, lParams(wrapContent, wrapContent, gravityCenter))
+            add(content, lParams(matchParent, matchParent))
             layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(96))
         }
     }
