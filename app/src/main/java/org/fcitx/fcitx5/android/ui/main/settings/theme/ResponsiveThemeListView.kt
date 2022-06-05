@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import splitties.dimensions.dp
+import kotlin.math.max
 
 class ResponsiveThemeListView(context: Context) : RecyclerView(context) {
 
@@ -16,7 +17,7 @@ class ResponsiveThemeListView(context: Context) : RecyclerView(context) {
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         if (w <= 0) return
-        val spanCount = estimateSpanCount(w)
+        val spanCount = max(1, estimateSpanCount(w))
         if (!this::grid.isInitialized) {
             grid = object : GridLayoutManager(context, spanCount) {
                 override fun generateDefaultLayoutParams() = LayoutParams(itemWidth, itemHeight)
