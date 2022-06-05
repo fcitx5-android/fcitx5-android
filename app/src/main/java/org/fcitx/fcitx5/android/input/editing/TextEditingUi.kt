@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.input.editing
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.ColorFilter
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.StateListDrawable
@@ -21,6 +22,7 @@ import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.gravityCenter
 import splitties.views.imageResource
+import splitties.views.padding
 
 class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
     private val borderWidth = ctx.dp(1) / 2
@@ -51,6 +53,10 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
             isFocusable = false
         }
 
+        var colorFilter: ColorFilter? by image::colorFilter
+        var imageResource: Int by image::imageResource
+        var scaleType: ImageView.ScaleType? by image::scaleType
+
         init {
             add(image, lParams(wrapContent, wrapContent, gravityCenter))
         }
@@ -64,8 +70,9 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
     }
 
     private fun iconButton(@DrawableRes icon: Int) = GImageButton(ctx).apply {
-        image.imageResource = icon
-        image.colorFilter = PorterDuffColorFilter(theme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
+        imageResource = icon
+        colorFilter = PorterDuffColorFilter(theme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
+        padding = dp(10)
         applyBorderedBackground()
     }
 
@@ -214,11 +221,12 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
         }
     }
 
-    val clipboardButton = imageButton {
+    val clipboardButton = GImageButton(ctx).apply {
         background = borderlessRippleDrawable(theme.keyPressHighlightColor.color, dp(20))
         colorFilter = PorterDuffColorFilter(theme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
         imageResource = R.drawable.ic_clipboard
         scaleType = ImageView.ScaleType.CENTER_INSIDE
+        padding = dp(10)
     }
 
     val extension = horizontalLayout {

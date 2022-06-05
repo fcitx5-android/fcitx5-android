@@ -8,6 +8,7 @@ import android.graphics.drawable.shapes.OvalShape
 import android.view.ViewGroup
 import android.widget.ImageView
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
 import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.views.dsl.constraintlayout.*
@@ -29,19 +30,25 @@ class StatusAreaEntryUi(override val ctx: Context, private val inputTheme: Theme
         setTextColor(inputTheme.keyTextColor.color)
     }
 
-    override val root = constraintLayout {
-        add(icon, lParams(dp(48), dp(48)) {
-            topOfParent(dp(4))
-            startOfParent()
-            endOfParent()
-            above(label)
-        })
-        add(label, lParams(wrapContent, wrapContent) {
-            below(icon, dp(6))
-            startOfParent()
-            endOfParent()
-        })
-        layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(96))
+    override val root = object : CustomGestureView(ctx) {
+        val content = constraintLayout {
+            add(icon, lParams(dp(48), dp(48)) {
+                topOfParent(dp(4))
+                startOfParent()
+                endOfParent()
+                above(label)
+            })
+            add(label, lParams(wrapContent, wrapContent) {
+                below(icon, dp(6))
+                startOfParent()
+                endOfParent()
+            })
+        }
+
+        init {
+            add(content, lParams(wrapContent, wrapContent, gravityCenter))
+            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(96))
+        }
     }
 
     fun setEntry(entry: StatusAreaEntry) = with(ctx) {
