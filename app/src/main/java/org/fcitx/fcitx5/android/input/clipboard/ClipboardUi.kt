@@ -12,12 +12,13 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.input.editing.TextEditingUi.GImageButton
 import org.fcitx.fcitx5.android.utils.borderlessRippleDrawable
 import splitties.dimensions.dp
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
-import splitties.views.imageResource
+import splitties.views.padding
 import timber.log.Timber
 
 class ClipboardUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
@@ -41,8 +42,9 @@ class ClipboardUi(override val ctx: Context, private val inputTheme: Theme) : Ui
         add(enableUi.root, lParams(matchParent, matchParent))
     }
 
-    val deleteAllButton = imageButton {
+    val deleteAllButton = GImageButton(ctx).apply {
         background = borderlessRippleDrawable(inputTheme.keyPressHighlightColor.color, dp(20))
+        padding = dp(10)
         colorFilter =
             PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
         imageResource = R.drawable.ic_baseline_delete_sweep_24

@@ -19,6 +19,7 @@ import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.State.*
+import org.fcitx.fcitx5.android.input.editing.TextEditingUi.GImageButton
 import org.fcitx.fcitx5.android.utils.borderlessRippleDrawable
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.*
@@ -34,12 +35,13 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
     class Candidate(ctx: Context, inputTheme: Theme, private val horizontalView: View) :
         KawaiiBarUi(ctx, inputTheme) {
 
-        val expandButton = imageButton(R.id.expand_candidate_btn) {
-            background = null
+        val expandButton = GImageButton(ctx).apply {
+            id = R.id.expand_candidate_btn
             imageResource = R.drawable.ic_baseline_expand_more_24
             visibility = ConstraintLayout.INVISIBLE
             colorFilter =
                 PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
+            padding = dp(10)
         }
 
         override val root = ctx.constraintLayout {
@@ -77,12 +79,13 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
 
         private var inPrivate = false
 
-        private fun toolButton(@DrawableRes icon: Int) = imageButton {
+        private fun toolButton(@DrawableRes icon: Int) = GImageButton(ctx).apply {
             imageResource = icon
             background = borderlessRippleDrawable(inputTheme.keyPressHighlightColor.color, dp(20))
             colorFilter =
                 PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
             scaleType = ImageView.ScaleType.CENTER_INSIDE
+            padding = dp(10)
         }
 
         val menuButton = toolButton(R.drawable.ic_baseline_expand_more_24).apply {
@@ -263,12 +266,13 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
 
     class Title(ctx: Context, inputTheme: Theme) : KawaiiBarUi(ctx, inputTheme) {
 
-        private val backButton = imageButton {
+        private val backButton = GImageButton(ctx).apply {
             imageResource = R.drawable.ic_baseline_arrow_back_24
             background = borderlessRippleDrawable(inputTheme.keyPressHighlightColor.color, dp(20))
             colorFilter =
                 PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
             scaleType = ImageView.ScaleType.CENTER_INSIDE
+            padding = dp(10)
         }
 
         private val titleText = textView {
