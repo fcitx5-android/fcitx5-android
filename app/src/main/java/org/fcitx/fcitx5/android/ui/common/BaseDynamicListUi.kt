@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnAttach
@@ -31,6 +32,7 @@ import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.gravityEndBottom
 import splitties.views.imageResource
 import splitties.views.recyclerview.verticalLayoutManager
+import kotlin.math.min
 
 abstract class BaseDynamicListUi<T>(
     override val ctx: Context,
@@ -244,7 +246,34 @@ abstract class BaseDynamicListUi<T>(
         add(fab, defaultLParams {
             gravity = gravityEndBottom
             margin = dp(16)
-            behavior = HideBottomViewOnScrollBehavior<FloatingActionButton>()
+            behavior = object : HideBottomViewOnScrollBehavior<FloatingActionButton>() {
+                override fun layoutDependsOn(
+                    parent: CoordinatorLayout,
+                    child: FloatingActionButton,
+                    dependency: View
+                ): Boolean {
+                    return dependency is Snackbar.SnackbarLayout
+                }
+
+                override fun onDependentViewChanged(
+                    parent: CoordinatorLayout,
+                    child: FloatingActionButton,
+                    dependency: View
+                ): Boolean {
+                    val translationY = min(0f, dependency.translationY - dependency.height)
+                    if (translationY != 0f)
+                        child.translationY = translationY
+                    return true
+                }
+
+                override fun onDependentViewRemoved(
+                    parent: CoordinatorLayout,
+                    child: FloatingActionButton,
+                    dependency: View
+                ) {
+                    child.translationY = 0f
+                }
+            }
         })
         doOnAttach { updateViewMargin() }
         ViewCompat.setOnApplyWindowInsetsListener(this) { _, windowInsets ->
