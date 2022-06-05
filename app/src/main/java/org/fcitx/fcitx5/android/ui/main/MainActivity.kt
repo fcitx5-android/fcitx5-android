@@ -78,14 +78,7 @@ class MainActivity : AppCompatActivity() {
             binding.toolbar.title = it
         }
         viewModel.toolbarShadow.observe(this) {
-            if (it) {
-                binding.toolbar.elevation = dp(4f)
-                binding.appBar.elevation = dp(4f)
-            } else {
-                binding.toolbar.elevation = dp(0f)
-                binding.appBar.elevation = dp(0f)
-            }
-
+            binding.appBar.elevation = dp(if (it) 4f else 0f)
         }
         viewModel.toolbarSaveButtonOnClickListener.observe(this) {
             binding.toolbar.menu.findItem(R.id.activity_main_menu_save).isVisible = it != null
