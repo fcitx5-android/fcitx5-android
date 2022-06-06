@@ -137,6 +137,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
     override fun onDetached() {
         currentKeyboard.keyActionListener = null
         currentKeyboard.keyPopupListener = null
+        popup.dismissAll()
     }
 
     companion object {

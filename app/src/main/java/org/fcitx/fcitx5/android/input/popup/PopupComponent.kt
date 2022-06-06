@@ -94,4 +94,14 @@ class PopupComponent :
         view.removeView(popup.root)
         freeEntryUi.add(popup)
     }
+
+    fun dismissAll() {
+        showingEntryUi.forEach {
+            dismissJobs[it.key]?.apply {
+                cancel()
+                dismissJobs.remove(it.key)
+            }
+            reallyDismissPopup(it.key, it.value)
+        }
+    }
 }
