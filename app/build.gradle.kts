@@ -234,7 +234,7 @@ ksp {
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
     implementation ("com.github.CanHub:Android-Image-Cropper:4.2.1")
-    implementation("cat.ereza:customactivityoncrash:2.3.0")
+    implementation("cat.ereza:customactivityoncrash:2.4.0")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("org.mechdancer:dependency:0.1.2")
     val roomVersion = "2.4.2"
@@ -244,8 +244,8 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
     implementation("net.java.dev.jna:jna:5.11.0@aar")
     implementation("com.jakewharton.timber:timber:5.0.1")
-    implementation("androidx.core:core-ktx:1.7.0")
-    implementation("androidx.appcompat:appcompat:1.4.1")
+    implementation("androidx.core:core-ktx:1.8.0")
+    implementation("androidx.appcompat:appcompat:1.4.2")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.lifecycle", "lifecycle-runtime-ktx", "2.3.1")
     implementation("androidx.lifecycle:lifecycle-service:2.4.1")
