@@ -30,6 +30,9 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
     var intrinsicHeight: Int = -1
         private set
 
+    private val heightPercent by AppPrefs.getInstance().keyboard.keyboardHeightPercent
+    private val heightPercentLandscape by AppPrefs.getInstance().keyboard.keyboardHeightPercentLandscape
+    private val navbarBackground by ThemeManager.prefs.navbarBackground
     private val keyBorder by ThemeManager.prefs.keyBorder
 
     private val bkg = imageView {
@@ -60,11 +63,9 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
     private fun keyboardWindowAspectRatio(): Pair<Int, Int> {
         val w = ctx.resources.displayMetrics.widthPixels
         val h = ctx.resources.displayMetrics.heightPixels
-        val ratio = AppPrefs.getInstance().keyboard.run {
-            when (ctx.resources.configuration.orientation) {
-                Configuration.ORIENTATION_LANDSCAPE -> this.keyboardHeightPercentLandscape
-                else -> this.keyboardHeightPercent
-            }.getValue()
+        val ratio = when (ctx.resources.configuration.orientation) {
+            Configuration.ORIENTATION_LANDSCAPE -> this.heightPercentLandscape
+            else -> this.heightPercent
         }
         return w to (h * ratio / 100)
     }
@@ -110,7 +111,7 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
         // bar height
         intrinsicHeight = barHeight + keyboardHeight
         // bottom padding
-        if (ThemeManager.prefs.navbarBackground.getValue() == NavbarBackground.Full) {
+        if (navbarBackground == NavbarBackground.Full) {
             ViewCompat.getRootWindowInsets(root)?.also {
                 // IME window has different navbar height when system navigation in "gesture navigation" mode
                 // thus the inset from Activity root window is unreliable
@@ -137,9 +138,7 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
         if (this::fakeKeyboardWindow.isInitialized) {
             fakeInputView.removeView(fakeKeyboardWindow)
         }
-        fakeKawaiiBar.backgroundColor =
-            if (ThemeManager.prefs.keyBorder.getValue()) Color.TRANSPARENT
-            else theme.barColor.color
+        fakeKawaiiBar.backgroundColor = if (keyBorder) Color.TRANSPARENT else theme.barColor.color
         fakeKeyboardWindow = TextKeyboard(ctx, theme)
         fakeInputView.apply {
             add(fakeKeyboardWindow, lParams(keyboardWidth, keyboardHeight) {

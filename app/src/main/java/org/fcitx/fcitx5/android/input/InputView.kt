@@ -50,6 +50,7 @@ class InputView(
     private var shouldUpdateNavbarBackground = false
 
     private val keyBorder by ThemeManager.prefs.keyBorder
+    private val navbarBackground by ThemeManager.prefs.navbarBackground
 
     private val customBackground = imageView {
         scaleType = ImageView.ScaleType.CENTER_CROP
@@ -127,7 +128,7 @@ class InputView(
         }
 
         service.window.window!!.also {
-            when (ThemeManager.prefs.navbarBackground.getValue()) {
+            when (navbarBackground) {
                 NavbarBackground.None -> {
                     WindowCompat.setDecorFitsSystemWindows(it, true)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -217,16 +218,14 @@ class InputView(
         if (shouldUpdateNavbarForeground || shouldUpdateNavbarBackground) {
             service.window.window!!.also {
                 if (shouldUpdateNavbarForeground) {
-                    ViewCompat.getWindowInsetsController(it.decorView)
-                        ?.isAppearanceLightNavigationBars = !theme.isDark
+                    WindowCompat.getInsetsController(it, it.decorView)
+                        .isAppearanceLightNavigationBars = !theme.isDark
                 }
                 if (shouldUpdateNavbarBackground) {
-                    it.navigationBarColor = when (theme) {
-                        is Theme.Builtin ->
-                            if (ThemeManager.prefs.keyBorder.getValue()) theme.backgroundColor.color
-                            else theme.keyboardColor.color
-                        is Theme.Custom -> theme.backgroundColor.color
-                    }
+                    it.navigationBarColor = (when (theme) {
+                        is Theme.Builtin -> if (keyBorder) theme.backgroundColor else theme.keyboardColor
+                        is Theme.Custom -> theme.backgroundColor
+                    }).color
                 }
             }
         }

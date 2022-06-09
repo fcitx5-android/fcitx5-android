@@ -31,10 +31,11 @@ class ClipboardUi(override val ctx: Context, private val inputTheme: Theme) : Ui
 
     val emptyUi = ClipboardInstructionUi.Empty(ctx, inputTheme)
 
+    private val keyBorder by ThemeManager.prefs.keyBorder
     private val disableAnimation by AppPrefs.getInstance().advanced.disableAnimation
 
     override val root = view(::ViewAnimator) {
-        if (!ThemeManager.prefs.keyBorder.getValue()) {
+        if (!keyBorder) {
             backgroundColor = inputTheme.barColor.color
         }
         add(recyclerView, lParams(matchParent, matchParent))

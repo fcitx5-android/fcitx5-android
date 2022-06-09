@@ -84,10 +84,11 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
 
     fun RecyclerView.setupGridLayoutManager(
         adapter: GridCandidateViewAdapter,
-        scrollVertically: Boolean
+        spanCount: Int = INITIAL_SPAN_COUNT,
+        scrollVertically: Boolean = true
     ) {
         layoutManager =
-            object : GridLayoutManager(context, INITIAL_SPAN_COUNT, VERTICAL, false) {
+            object : GridLayoutManager(context, spanCount, VERTICAL, false) {
                 override fun canScrollVertically() = scrollVertically
                 override fun setSpanCount(spanCount: Int) {
                     super.setSpanCount(spanCount)

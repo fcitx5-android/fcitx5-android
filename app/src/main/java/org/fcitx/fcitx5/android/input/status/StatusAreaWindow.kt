@@ -28,7 +28,6 @@ import splitties.dimensions.dp
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.horizontalLayout
-import splitties.views.dsl.core.imageButton
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.padding
@@ -105,9 +104,11 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
         }
     }
 
+    private val keyBorder by ThemeManager.prefs.keyBorder
+
     val view by lazy {
         context.recyclerView {
-            if (!ThemeManager.prefs.keyBorder.getValue()) {
+            if (!keyBorder) {
                 backgroundColor = theme.barColor.color
             }
             layoutManager = gridLayoutManager(4)

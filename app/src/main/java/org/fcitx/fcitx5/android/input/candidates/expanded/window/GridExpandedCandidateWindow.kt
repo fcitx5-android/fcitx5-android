@@ -5,24 +5,18 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
-import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateLayout
 
 class GridExpandedCandidateWindow :
     BaseExpandedCandidateWindow<GridExpandedCandidateWindow>() {
 
-    private val gridSpanCountListener: ManagedPreference.OnChangeListener<Int> by lazy {
-        ManagedPreference.OnChangeListener {
-            layoutManager.spanCount = it
-        }
-    }
-
-    private val gridSpanCountPref by lazy {
-        (if (context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-            AppPrefs.getInstance().keyboard.expandedCandidateGridSpanCountPortrait
-        else
-            AppPrefs.getInstance().keyboard.expandedCandidateGridSpanCountLandscape)
-            .also { it.registerOnChangeListener(gridSpanCountListener) }
+    private val gridSpanCount by lazy {
+        AppPrefs.getInstance().keyboard.run {
+            if (context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                expandedCandidateGridSpanCountPortrait
+            else
+                expandedCandidateGridSpanCountLandscape
+        }.getValue()
     }
 
     override val adapter by lazy {
@@ -33,12 +27,11 @@ class GridExpandedCandidateWindow :
         get() = candidateLayout.recyclerView.layoutManager as GridLayoutManager
 
     override fun onCreateCandidateLayout(): ExpandedCandidateLayout =
-        ExpandedCandidateLayout(context,theme).apply {
+        ExpandedCandidateLayout(context, theme).apply {
             recyclerView.apply {
                 with(builder) {
-                    setupGridLayoutManager(this@GridExpandedCandidateWindow.adapter, true)
+                    setupGridLayoutManager(this@GridExpandedCandidateWindow.adapter, gridSpanCount)
                     addGridDecoration()
-                    (layoutManager as GridLayoutManager).spanCount = gridSpanCountPref.getValue()
                 }
                 addOnScrollListener(object : RecyclerView.OnScrollListener() {
                     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {

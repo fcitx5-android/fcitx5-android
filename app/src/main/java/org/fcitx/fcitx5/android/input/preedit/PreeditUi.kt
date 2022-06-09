@@ -34,10 +34,10 @@ class PreeditUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
         CursorSpan(ctx, inputTheme.keyTextColor.color, upView.paint.fontMetricsInt)
     }
 
+    private val keyBorder by ThemeManager.prefs.keyBorder
+
     private val barBackground = when (inputTheme) {
-        is Theme.Builtin ->
-            if (ThemeManager.prefs.keyBorder.getValue()) inputTheme.backgroundColor
-            else inputTheme.barColor
+        is Theme.Builtin -> if (keyBorder) inputTheme.backgroundColor else inputTheme.barColor
         is Theme.Custom -> inputTheme.backgroundColor
     }
 

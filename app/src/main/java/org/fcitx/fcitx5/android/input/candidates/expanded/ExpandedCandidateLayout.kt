@@ -56,6 +56,8 @@ class ExpandedCandidateLayout(
         val `return`: ImageKeyView by lazy { findViewById(R.id.button_return) }
     }
 
+    private val keyBorder by ThemeManager.prefs.keyBorder
+
     val recyclerView = recyclerView {
         isVerticalScrollBarEnabled = false
     }
@@ -71,7 +73,7 @@ class ExpandedCandidateLayout(
 
     init {
         id = R.id.expanded_candidate_view
-        if (!ThemeManager.prefs.keyBorder.getValue()) {
+        if (!keyBorder) {
             backgroundColor = inputTheme.barColor.color
         }
 

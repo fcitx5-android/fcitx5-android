@@ -25,13 +25,15 @@ import splitties.views.imageResource
 import splitties.views.padding
 
 class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
+
+    private val keyRippleEffect by ThemeManager.prefs.keyRippleEffect
+
     private val borderWidth = ctx.dp(1) / 2
 
     private fun View.applyBorderedBackground() {
         background = borderDrawable(borderWidth, theme.dividerColor.color)
         foreground =
-            if (ThemeManager.prefs.keyRippleEffect.getValue())
-                rippleDrawable(theme.keyPressHighlightColor.color)
+            if (keyRippleEffect) rippleDrawable(theme.keyPressHighlightColor.color)
             else pressHighlightDrawable(theme.keyPressHighlightColor.color)
     }
 
