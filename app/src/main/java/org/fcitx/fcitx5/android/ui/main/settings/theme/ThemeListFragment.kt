@@ -266,9 +266,13 @@ class ThemeListFragment : ProgressFragment() {
         exportLauncher.launch(theme.name + ".zip")
     }
 
+    override fun onPause() {
+        viewModel.enableToolbarShadow()
+        super.onPause()
+    }
+
     override fun onDestroy() {
         ThemeManager.removeOnChangedListener(onThemeChangedListener)
-        viewModel.enableToolbarShadow()
         super.onDestroy()
     }
 }
