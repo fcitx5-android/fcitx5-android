@@ -60,7 +60,7 @@
     <string name="keyboard_height">Keyboard height</string>
     <string name="keyboard_height_landscape">Keyboard height (Landscape)</string>
     <string name="keyboard">Keyboard</string>
-    <string name="clipboard_item_timeout">Clipboard item timeout</string>
+    <string name="clipboard_suggestion_timeout">Clipboard suggestion timeout</string>
     <string name="version">Version</string>
     <string name="build_time">Build time</string>
     <string name="build_git_hash">Build Git hash</string>
@@ -93,7 +93,7 @@
     <string name="quickphrase_editor">Quick Phrase Editor</string>
     <string name="quickphrase_already_exists">Quick phrase already exists</string>
     <string name="invalid_quickphrase">Invalid type of quick phrase</string>
-    <string name="_new">New</string>
+    <string name="create_new">Create new</string>
     <string name="name">Name</string>
     <string name="reset">Reset</string>
     <string name="quickphrase_keyword">Keyword</string>
@@ -122,8 +122,8 @@
     <string name="expand_toolbar_by_default">Expand toolbar by default</string>
     <string name="popup_on_key_press">Popup on key press</string>
     <string name="disable_animation">Disable animation</string>
-    <string name="import_from_file">Import From File</string>
-    <string name="duplicate_builtin">Duplicate Builtin</string>
+    <string name="import_from_file">Import from file</string>
+    <string name="duplicate_builtin_theme">Duplicate builtin theme</string>
     <string name="exception_logcat_created">Logcat process is already created</string>
     <string name="exception_quickphrase_parse">Failed to parse quick phrase line: %1$s</string>
     <string name="exception_quickphrase_filename">The filename extension of %1$s does not indicate a quick phrase</string>
@@ -131,7 +131,7 @@
     <string name="exception_theme_unknown">Theme %1$s is unknown</string>
     <string name="exception_libime_dict_filename">The filename extension of %1$s does not indicate a libime dict</string>
     <string name="exception_text_dict_filename">The filename extension of %1$s does not indicate a text dict</string>
-    <string name="exception_sougou_dict_filename">The filename extension of %1$s does not indicate a sougou dict</string>
+    <string name="exception_sougou_dict_filename">The filename extension of %1$s does not indicate a sogou dict</string>
     <string name="exception_dict_filename">The filename extension of %1$s does not indicate a dict</string>
     <string name="exception_theme_json">Unable to find theme json</string>
     <string name="exception_theme_name_clash">Theme name clashes with builtin themes</string>

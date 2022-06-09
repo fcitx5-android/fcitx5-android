@@ -217,7 +217,7 @@ class ThemeListFragment : ProgressFragment() {
             arrayOf(
                 getString(R.string.choose_image),
                 getString(R.string.import_from_file),
-                getString(R.string.duplicate_builtin)
+                getString(R.string.duplicate_builtin_theme)
             )
         AlertDialog.Builder(requireContext())
             .setTitle(R.string.new_theme)
@@ -232,7 +232,7 @@ class ThemeListFragment : ProgressFragment() {
                             minimumHeight = dp(500)
                         }
                         val dialog = AlertDialog.Builder(requireContext())
-                            .setTitle(R.string.duplicate_builtin)
+                            .setTitle(R.string.duplicate_builtin_theme)
                             .setNegativeButton(android.R.string.cancel, null)
                             .setView(view)
                             .create()

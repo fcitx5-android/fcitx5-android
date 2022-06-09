@@ -153,7 +153,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                 enableUndo = false
                 fab.setOnClickListener {
                     // TODO use expandable fab instead
-                    val actions = arrayOf(getString(R.string.import_), getString(R.string.add))
+                    val actions = arrayOf(getString(R.string.import_from_file), getString(R.string.create_new))
                     AlertDialog.Builder(requireContext())
                         .setItems(actions) { _, i ->
                             when (i) {
@@ -175,7 +175,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                                         })
                                     }
                                     AlertDialog.Builder(requireContext())
-                                        .setTitle(R.string._new)
+                                        .setTitle(R.string.create_new)
                                         .setView(layout)
                                         .setPositiveButton(android.R.string.ok) { _, _ ->
                                             ui.addItem(item = QuickPhraseManager.newEmpty(editText.text.toString()))

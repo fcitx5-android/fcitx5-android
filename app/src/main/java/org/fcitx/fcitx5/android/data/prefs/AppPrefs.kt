@@ -102,7 +102,7 @@ class AppPrefs(
             50,
         ) { clipboardListening.getValue() }
         val clipboardItemTimeout = int(
-            R.string.clipboard_item_timeout, "clipboard_item_timeout",
+            R.string.clipboard_suggestion_timeout, "clipboard_item_timeout",
             30, 30, 300, "s"
         ) { clipboardListening.getValue() }
     }
