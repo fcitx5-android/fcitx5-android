@@ -60,18 +60,6 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
         override val theme: Theme
             get() = this@CandidateViewBuilder.theme
     }
-//
-//    // setup a listener that sets the span count of gird layout according to recycler view's width
-//    fun RecyclerView.autoSpanCount() {
-//        oneShotGlobalLayoutListener {
-//            (layoutManager as GridLayoutManager).apply {
-//                // set columns according to the width of recycler view
-//                // last item doesn't need padding, so we assume recycler view is wider
-//                spanCount = (measuredWidth + dimenPxSize(R.dimen.candidate_padding)) /
-//                        (dimenPxSize(R.dimen.candidate_min_width) + dimenPxSize(R.dimen.candidate_padding))
-//            }
-//        }
-//    }
 
     private fun RecyclerView.dividerDrawable() = ShapeDrawable(RectShape()).apply {
         intrinsicWidth = dp(1)

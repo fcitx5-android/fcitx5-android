@@ -17,12 +17,10 @@ import android.provider.OpenableColumns
 import android.util.TypedValue
 import android.view.HapticFeedbackConstants
 import android.view.View
-import android.view.ViewTreeObserver
 import android.view.inputmethod.InputConnection
 import android.widget.EditText
 import android.widget.Toast
 import androidx.annotation.AttrRes
-import androidx.annotation.ColorInt
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -75,33 +73,6 @@ inline fun <reified T : Library> nativeLib(name: String): Lazy<T> = lazy {
     Native.load(name, T::class.java)
 }
 
-fun View.globalLayoutListener(repeat: () -> Boolean = { true }, block: () -> Unit) {
-    viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-        override fun onGlobalLayout() {
-            if (!repeat())
-                viewTreeObserver.removeOnGlobalLayoutListener(this)
-            block()
-        }
-    })
-}
-
-fun View.oneShotGlobalLayoutListener(block: () -> Unit) = globalLayoutListener({ false }, block)
-
-fun <T : RecyclerView.ViewHolder> RecyclerView.Adapter<T>.onDataChanged(block: () -> Unit) =
-    registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-        override fun onChanged() {
-            block()
-        }
-
-        override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-            block()
-        }
-
-        override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
-            block()
-        }
-    })
-
 fun View.hapticIfEnabled() {
     if (AppPrefs.getInstance().keyboard.buttonHapticFeedback.getValue())
         performHapticFeedback(
@@ -109,7 +80,6 @@ fun View.hapticIfEnabled() {
             HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING or HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
         )
 }
-
 
 val EditText.str: String get() = editableText.toString()
 
@@ -150,13 +120,6 @@ fun darkenColorFilter(percent: Int): ColorFilter {
     val value = percent * 255 / 100
     return PorterDuffColorFilter(Color.argb(value, 0, 0, 0), PorterDuff.Mode.SRC_ATOP)
 }
-
-fun inverseColor(@ColorInt color: Int) = Color.argb(
-    Color.alpha(color),
-    255 - Color.red(color),
-    255 - Color.green(color),
-    255 - Color.blue(color)
-)
 
 @Suppress("unused")
 inline val ConstraintLayout.LayoutParams.unset
