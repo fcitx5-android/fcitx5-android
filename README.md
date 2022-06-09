@@ -2,15 +2,42 @@
 
 An attempt to run fcitx5 on Android.
 
+[![Jenkins Build Status](https://img.shields.io/jenkins/s/https/jenkins.fcitx-im.org/job/android/job/fcitx5-android.svg)](https://jenkins.fcitx-im.org/job/android/job/fcitx5-android/)
+
 ## Project status
 
-It can build, run, print to logcat, and dispatch event to JVM side. Also there is a minimal virtual keyboard.
+### Implemented
+
+- Virtual Keyboard (layout not customizable yet)
+- Expandable candidate view
+- Clipboard management (plain text only)
+- Themeing (custom color scheme and background image)
+- Popup preview on key press
+
+### Work in progress
+
+- Customiziable keyboard layout
+- More input methods
+- Long press popup keyboard for convenient symbol input
+- User-friendly symbol / emoji selector
+
+## Screenshots
+
+|拼音, builtin light theme, key border enabled|自然码双拼, builtin dark theme, border disabled|
+|:-:|:-:|
+|<img src="https://user-images.githubusercontent.com/13914967/172801207-0a229424-9a19-4d06-bdd4-2accf61f4de5.png" width="360px">|<img src="https://user-images.githubusercontent.com/13914967/172801229-e7d51003-d80c-462d-a756-a0c22e1d7dee.png" width="360px">|
+
+## Get involved
+
+Trello kanban: https://trello.com/b/gftk6ZdV/kanban
+
+Discuss on Telegram: https://t.me/fcitx5_android
 
 ## Build
 
 ### Dependencies
 
-- Android SDK Platform & Build-Tools 30 or newer version
+- Android SDK Platform & Build-Tools 31 or newer version
 - Android NDK (Side by side) 23 & cmake 3.18.1, they can be installed using SDK Manager in Android Studio or `sdkmanager` command line. **Note:** NDK 21 & 22 are confirmed not working with this project.
 - [KDE/extra-cmake-modules](https://github.com/KDE/extra-cmake-modules)
 - GNU Gettext (`msgfmt` binary)
@@ -49,16 +76,6 @@ Install Android SDK Platform, Android SDK Build-Tools, Android NDK and cmake via
 ![install CMake](https://user-images.githubusercontent.com/48406926/142433080-a4ad2446-889a-479c-837a-c2b5ad74b104.png)
 
 </details>
-
-### Additional patches
-
-No patching needed! We can run mainline fcitx5 on Android! Yay!
-
-## Screenshots
-
-|light|dark|
-|:-:|:-:|
-|<img src="https://user-images.githubusercontent.com/13914967/145842174-c2a1b9ae-1e15-4722-8c27-986ef8cc7163.png" width="360px">|<img src="https://user-images.githubusercontent.com/13914967/145842188-465b6677-3d4a-432f-a499-9a9bf877b617.png" width="360px">|
 
 ## Nix
 
