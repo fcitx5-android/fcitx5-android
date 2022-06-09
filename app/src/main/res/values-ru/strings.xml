@@ -60,7 +60,6 @@
     <string name="keyboard_height">Высота клавиатуры</string>
     <string name="keyboard_height_landscape">Высота клавиатуры (альбомная ориентация)</string>
     <string name="keyboard">Клавиатура</string>
-    <string name="clipboard_item_timeout">Тайм-аут элемента буфера обмена</string>
     <string name="version">Версия</string>
     <string name="build_time">Время сборки</string>
     <string name="build_git_hash">Построить хэш Git</string>
@@ -93,7 +92,6 @@
     <string name="quickphrase_editor">Редактор быстрых фраз</string>
     <string name="quickphrase_already_exists">Быстрая фраза уже существует</string>
     <string name="invalid_quickphrase">Недопустимый тип быстрой фразы</string>
-    <string name="_new">Новое</string>
     <string name="name">Имя</string>
     <string name="reset">Перезагрузить</string>
     <string name="quickphrase_keyword">Ключевое слово</string>
@@ -123,5 +121,4 @@
     <string name="popup_on_key_press">Всплывающее окно при нажатии клавиши</string>
     <string name="disable_animation">Отключить анимацию</string>
     <string name="import_from_file">Импорт из файла</string>
-    <string name="duplicate_builtin">Дублировать встроенное</string>
 </resources>

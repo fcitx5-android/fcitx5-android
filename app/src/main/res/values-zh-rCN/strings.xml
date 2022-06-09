@@ -60,7 +60,6 @@
     <string name="keyboard_height">键盘高度</string>
     <string name="keyboard_height_landscape">键盘高度（横屏）</string>
     <string name="keyboard">键盘</string>
-    <string name="clipboard_item_timeout">剪切板项时间限制</string>
     <string name="version">版本</string>
     <string name="build_time">构建时间</string>
     <string name="build_git_hash">构建 Git 哈希</string>
@@ -93,7 +92,6 @@
     <string name="quickphrase_editor">快速输入编辑器</string>
     <string name="quickphrase_already_exists">快速输入已存在</string>
     <string name="invalid_quickphrase">快速输入格式无效</string>
-    <string name="_new">新建</string>
     <string name="name">名称</string>
     <string name="reset">重置</string>
     <string name="quickphrase_keyword">关键词</string>
