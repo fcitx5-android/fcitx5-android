@@ -77,9 +77,17 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
     var onRepeatListener: ((View) -> Unit)? = null
     var onGestureListener: OnGestureListener? = null
 
+    override fun setEnabled(enabled: Boolean) {
+        super.setEnabled(enabled)
+        if (!enabled) {
+            isPressed = false
+        }
+    }
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
+                if (!isEnabled) return false
                 val x = event.x
                 val y = event.y
                 drawableHotspotChanged(x, y)
@@ -159,6 +167,7 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
+                if (!isEnabled) return false
                 val x = event.x
                 val y = event.y
                 drawableHotspotChanged(x, y)
