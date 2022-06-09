@@ -41,7 +41,6 @@ import splitties.views.backgroundColor
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
-import splitties.views.imageResource
 import timber.log.Timber
 import kotlin.time.Duration.Companion.seconds
 
@@ -68,7 +67,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                 if (it.isEmpty()) {
                     idleUiStateMachine.push(ClipboardUpdatedEmpty)
                 } else {
-                    idleUi.setClipboardItemText(it)
+                    idleUi.setClipboardItemText(it.take(42))
                     idleUiStateMachine.push(ClipboardUpdatedNonEmpty)
                     launchClipboardTimeoutJob()
                 }
@@ -118,7 +117,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             it.moreButton.setOnClickListener {
                 windowManager.attachWindow(StatusAreaWindow())
             }
-            it.clipboardItem.setOnClickListener {
+            it.clipboardSuggestionItem.setOnClickListener {
                 service.inputConnection?.performContextMenuAction(android.R.id.paste)
                 clipboardTimeoutJob?.cancel()
                 clipboardTimeoutJob = null

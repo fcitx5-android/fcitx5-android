@@ -20,7 +20,9 @@ import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.State.*
 import org.fcitx.fcitx5.android.input.editing.TextEditingUi.GImageButton
+import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
 import org.fcitx.fcitx5.android.utils.borderlessRippleDrawable
+import org.fcitx.fcitx5.android.utils.rippleDrawable
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
@@ -41,7 +43,6 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
             visibility = ConstraintLayout.INVISIBLE
             colorFilter =
                 PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
-            padding = dp(10)
         }
 
         override val root = ctx.constraintLayout {
@@ -131,13 +132,12 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
 
         private val clipboardText = textView {
             isSingleLine = true
+            maxWidth = dp(120)
             ellipsize = TextUtils.TruncateAt.END
-            typeface = Typeface.defaultFromStyle(Typeface.BOLD)
             setTextColor(inputTheme.altKeyTextColor.color)
         }
 
-        val clipboardItem = horizontalLayout {
-            visibility = View.INVISIBLE
+        private val clipboardSuggestionLayout = horizontalLayout {
             gravity = gravityCenter
             padding = dp(4)
             add(clipboardIcon, lParams(dp(20), dp(20)))
@@ -146,13 +146,21 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
             })
         }
 
+        val clipboardSuggestionItem = object : CustomGestureView(ctx) {
+            init {
+                visibility = View.INVISIBLE
+                background = rippleDrawable(inputTheme.keyPressHighlightColor.color)
+                add(clipboardSuggestionLayout, lParams(wrapContent, matchParent))
+            }
+        }
+
         private val clipboardBar = constraintLayout {
-            add(clipboardItem, lParams(wrapContent, matchConstraints) {
+            add(clipboardSuggestionItem, lParams(wrapContent, matchConstraints) {
                 topOfParent()
                 startOfParent()
                 endOfParent()
                 bottomOfParent()
-                horizontalMargin = dp(12)
+                verticalMargin = dp(4)
             })
         }
 
@@ -250,14 +258,12 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
         }
 
         private fun enableClipboardItem() {
-            clipboardItem.visibility = View.VISIBLE
+            clipboardSuggestionItem.visibility = View.VISIBLE
         }
 
         private fun disableClipboardItem() {
-            clipboardItem.visibility = View.INVISIBLE
+            clipboardSuggestionItem.visibility = View.INVISIBLE
         }
-
-        fun getClipboardItemText() = clipboardText.text.toString()
 
         fun setClipboardItemText(text: String) {
             clipboardText.text = text
