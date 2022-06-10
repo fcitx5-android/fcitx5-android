@@ -297,17 +297,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            return super.onKeyDown(keyCode, event)
-        }
-        return forwardKeyEvent(event, false)
+        return forwardKeyEvent(event, false) || super.onKeyDown(keyCode, event)
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            return super.onKeyUp(keyCode, event)
-        }
-        return forwardKeyEvent(event, true)
+        return forwardKeyEvent(event, true) || super.onKeyUp(keyCode, event)
     }
 
     override fun onStartInput(attribute: EditorInfo, restarting: Boolean) {
