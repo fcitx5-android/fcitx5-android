@@ -305,12 +305,16 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onStartInput(attribute: EditorInfo, restarting: Boolean) {
-        inputConnection?.apply {
-            cursorAnchorAvailable = requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
-        }
-        editorInfo = attribute
+        // update selection as soon as possible
         selection.update(attribute.initialSelStart, attribute.initialSelEnd)
         composing.clear()
+        editorInfo = attribute
+        Timber.d("onStartInput: initialSel=$selection")
+        if (!restarting) {
+            inputConnection?.apply {
+                cursorAnchorAvailable = requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
+            }
+        }
         // fcitx might not be initialized yet, so we do setCapFlags later
         val setCapFlags = suspend {
             fcitx.setCapFlags(CapabilityFlags.fromEditorInfo(editorInfo))
@@ -346,13 +350,14 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         if (selection.start == newSelStart && selection.end == newSelEnd) return
         selection.update(newSelStart, newSelEnd)
         Timber.d("onUpdateSelection: $selection")
+        // since `CursorAnchorInfo` has composingText, we can determine whether it's up-to-date
+        // handle cursor update in `onUpdateSelection` only when `CursorAnchorInfo` unavailable
+        if (!cursorAnchorAvailable) {
+            handleCursorUpdate()
+        }
         if (this::inputView.isInitialized) {
             inputView.onSelectionUpdate(newSelStart, newSelEnd)
         }
-        // since `CursorAnchorInfo` has composingText, we can determine whether it's up-to-date
-        // handle cursor update in `onUpdateSelection` only when `CursorAnchorInfo` unavailable
-        if (cursorAnchorAvailable) return
-        handleCursorUpdate()
     }
 
     override fun onUpdateCursorAnchorInfo(info: CursorAnchorInfo) {
