@@ -29,7 +29,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     @JvmInline
     value class CursorRange private constructor(val data: IntArray) {
-        constructor(start: Int = -1, end: Int = -1) : this(intArrayOf(start, end))
+        constructor(start: Int = 0, end: Int = 0) : this(intArrayOf(start, end))
 
         val start: Int get() = data[0]
         val end: Int get() = data[1]
@@ -38,8 +38,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         fun isNotEmpty() = data[0] != data[1]
 
         fun clear() {
-            data[0] = -1
-            data[1] = -1
+            data[0] = 0
+            data[1] = 0
         }
 
         fun update(start: Int, end: Int) {
