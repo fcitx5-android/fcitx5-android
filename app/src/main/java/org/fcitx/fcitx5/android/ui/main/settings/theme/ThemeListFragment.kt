@@ -229,7 +229,7 @@ class ThemeListFragment : ProgressFragment() {
                     2 -> {
                         val view = ResponsiveThemeListView(requireContext()).apply {
                             // force AlertDialog's customPanel to grow
-                            minimumHeight = dp(500)
+                            minimumHeight = Int.MAX_VALUE
                         }
                         val dialog = AlertDialog.Builder(requireContext())
                             .setTitle(R.string.duplicate_builtin_theme)
