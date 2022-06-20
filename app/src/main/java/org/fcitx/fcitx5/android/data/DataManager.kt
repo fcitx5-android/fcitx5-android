@@ -22,10 +22,27 @@ object DataManager {
 
     sealed class Diff {
         abstract val key: String
+        abstract val order: Int
 
-        data class New(override val key: String, val new: String) : Diff()
-        data class Update(override val key: String, val old: String, val new: String) : Diff()
-        data class Delete(override val key: String, val old: String) : Diff()
+        data class New(override val key: String, val new: String) : Diff() {
+            override val order: Int
+                get() = 3
+        }
+
+        data class Update(override val key: String, val old: String, val new: String) : Diff() {
+            override val order: Int
+                get() = 2
+        }
+
+        data class Delete(override val key: String, val old: String) : Diff() {
+            override val order: Int
+                get() = 0
+        }
+
+        data class DeleteDir(override val key: String) : Diff() {
+            override val order: Int
+                get() = 1
+        }
     }
 
     val dataDir = File(appContext.applicationInfo.dataDir)
@@ -44,17 +61,27 @@ object DataManager {
         else
             new.files.mapNotNull {
                 when {
-                    it.key !in old.files -> Diff.New(it.key, it.value)
-                    old.files[it.key] != it.value -> Diff.Update(
-                        it.key,
-                        old.files.getValue(it.key),
-                        it.value
-                    )
+                    // empty sha256 -> dir
+                    it.key !in old.files && it.value.isNotBlank() -> Diff.New(it.key, it.value)
+                    old.files[it.key] != it.value ->
+                        // if the new one is not a dir
+                        if (it.value.isNotBlank())
+                            Diff.Update(
+                                it.key,
+                                old.files.getValue(it.key),
+                                it.value
+                            )
+                        else null
                     else -> null
                 }
             }.toMutableList().apply {
                 addAll(old.files.filterKeys { it !in new.files }
-                    .map { Diff.Delete(it.key, it.value) })
+                    .map {
+                        if (it.value.isNotBlank())
+                            Diff.Delete(it.key, it.value)
+                        else
+                            Diff.DeleteDir(it.key)
+                    })
             }
 
     fun sync() = lock.withLock {
@@ -75,10 +102,12 @@ object DataManager {
                 .let { deserialize(it) }
                 .getOrThrow()
 
-        diff(destDescriptor, bundledDescriptor).forEach {
+        val d = diff(destDescriptor, bundledDescriptor).sortedBy { it.order }
+        d.forEach {
             Timber.d("Diff: $it")
             when (it) {
-                is Diff.Delete -> deleteFileOrDir(it.key)
+                is Diff.Delete -> deleteFile(it.key)
+                is Diff.DeleteDir -> deleteDir(it.key)
                 is Diff.New -> copyFile(it.key)
                 is Diff.Update -> copyFile(it.key)
             }
@@ -94,11 +123,16 @@ object DataManager {
         sync()
     }
 
-    private fun deleteFileOrDir(path: String) {
+    private fun deleteFile(path: String) {
         val file = File(dataDir, path)
-        if (file.isDirectory) {
-            file.deleteRecursively()
-        }
+        if (file.exists() && file.isFile)
+            file.delete()
+    }
+
+    private fun deleteDir(path: String) {
+        val dir = File(dataDir, path)
+        if (dir.exists() && dir.isDirectory)
+            dir.deleteRecursively()
     }
 
     private fun copyFile(filename: String) {

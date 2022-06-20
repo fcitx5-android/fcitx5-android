@@ -231,9 +231,22 @@ ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
 
+tasks.register<Delete>("cleanGenerated") {
+    delete(file("src/main/assets/usr/share/locale"))
+    // delete all non symlink dirs
+    delete(file("src/main/assets/usr/share/fcitx5").listFiles()!!.filter {
+        // https://stackoverflow.com/questions/813710/java-1-6-determine-symbolic-links
+        File(it.parentFile.canonicalFile, it.name).let { s ->
+            s.canonicalFile == s.absoluteFile
+        }
+    })
+    delete(file("src/main/assets/${dataDescriptorName}"))
+    delete(file("src/main/assets/licenses.json"))
+}.also { tasks.clean.dependsOn(it) }
+
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
-    implementation ("com.github.CanHub:Android-Image-Cropper:4.2.1")
+    implementation("com.github.CanHub:Android-Image-Cropper:4.2.1")
     implementation("cat.ereza:customactivityoncrash:2.4.0")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("org.mechdancer:dependency:0.1.2")
@@ -308,7 +321,7 @@ abstract class DataDescriptorTask : DefaultTask() {
         ((JsonSlurper().parseText(file.readText()) as Map<Any, Any>))["files"] as Map<String, String>
 
     companion object {
-        fun md5(file: File): String =
+        fun sha256(file: File): String =
             Files.asByteSource(file).hash(Hashing.sha256()).toString()
     }
 
@@ -317,20 +330,38 @@ abstract class DataDescriptorTask : DefaultTask() {
         val map =
             file.exists()
                 .takeIf { it }
-                ?.runCatching { deserialize().toMutableMap() }
+                ?.runCatching {
+                    deserialize()
+                        // remove all old dirs
+                        .filterValues { it.isNotBlank() }
+                        .toMutableMap()
+                }
                 ?.getOrNull()
                 ?: mutableMapOf()
+
+        fun File.allParents(): List<File> =
+            if (parentFile == null || parentFile.path in map)
+                listOf()
+            else
+                listOf(parentFile) + parentFile.allParents()
         inputChanges.getFileChanges(inputDir).forEach { change ->
-            if (change.fileType == FileType.DIRECTORY || change.file.name == file.name)
+            if (change.file.name == file.name)
                 return@forEach
             logger.log(LogLevel.DEBUG, "${change.changeType}: ${change.normalizedPath}")
-            val key = change.file.relativeTo(file.parentFile).path
+            val relativeFile = change.file.relativeTo(file.parentFile)
+            val key = relativeFile.path
             if (change.changeType == ChangeType.REMOVED) {
                 map.remove(key)
             } else {
-                map[key] = md5(change.file)
+                map[key] = sha256(change.file)
             }
         }
-        serialize(map)
+        // calculate dirs
+        inputDir.asFileTree.forEach {
+            it.relativeTo(file.parentFile).allParents().forEach { p ->
+                map[p.path] = ""
+            }
+        }
+        serialize(map.toSortedMap())
     }
 }
