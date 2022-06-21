@@ -219,7 +219,7 @@ ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
 
-tasks.register<Delete>("cleanGenerated") {
+tasks.register<Delete>("cleanGeneratedAssets") {
     delete(file("src/main/assets/usr/share/locale"))
     // delete all non symlink dirs
     delete(file("src/main/assets/usr/share/fcitx5").listFiles()!!.filter {
@@ -230,6 +230,10 @@ tasks.register<Delete>("cleanGenerated") {
     })
     delete(file("src/main/assets/${dataDescriptorName}"))
     delete(file("src/main/assets/licenses.json"))
+}.also { tasks.clean.dependsOn(it) }
+
+tasks.register<Delete>("cleanCxxIntermediates") {
+    delete(file(".cxx"))
 }.also { tasks.clean.dependsOn(it) }
 
 dependencies {

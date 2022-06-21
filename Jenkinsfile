@@ -94,7 +94,7 @@ node("android") {
                     sh 'mkdir out'
                 }
 
-                withBuildStatus("Clean generated assets") {
+                withBuildStatus("Clean build intermediates") {
                     sh './gradlew clean'
                 }
 
