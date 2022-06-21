@@ -60,6 +60,7 @@
     <string name="keyboard_height">Высота клавиатуры</string>
     <string name="keyboard_height_landscape">Высота клавиатуры (альбомная ориентация)</string>
     <string name="keyboard">Клавиатура</string>
+    <string name="clipboard_suggestion_timeout">Тайм-аут предложения буфера обмена</string>
     <string name="version">Версия</string>
     <string name="build_time">Время сборки</string>
     <string name="build_git_hash">Построить хэш Git</string>
@@ -92,6 +93,7 @@
     <string name="quickphrase_editor">Редактор быстрых фраз</string>
     <string name="quickphrase_already_exists">Быстрая фраза уже существует</string>
     <string name="invalid_quickphrase">Недопустимый тип быстрой фразы</string>
+    <string name="create_new">Создать новый</string>
     <string name="name">Имя</string>
     <string name="reset">Перезагрузить</string>
     <string name="quickphrase_keyword">Ключевое слово</string>
@@ -121,4 +123,23 @@
     <string name="popup_on_key_press">Всплывающее окно при нажатии клавиши</string>
     <string name="disable_animation">Отключить анимацию</string>
     <string name="import_from_file">Импорт из файла</string>
+    <string name="duplicate_builtin_theme">Дублировать встроенную тему</string>
+    <string name="exception_logcat_created">Процесс Logcat уже создан</string>
+    <string name="exception_quickphrase_parse">Не удалось разобрать строку быстрой фразы: %1$s</string>
+    <string name="exception_quickphrase_filename">Расширение имени файла %1$s не указывает на быструю фразу</string>
+    <string name="exception_theme_filename">Расширение имени файла %1$s не указывает на тему</string>
+    <string name="exception_theme_unknown">Тема %1$s неизвестна</string>
+    <string name="exception_libime_dict_filename">Расширение имени файла %1$s не указывает на словарь libime</string>
+    <string name="exception_text_dict_filename">Расширение имени файла %1$s не указывает на текстовый словарь</string>
+    <string name="exception_sougou_dict_filename">Расширение имени файла %1$s не указывает на словарь sogou</string>
+    <string name="exception_dict_filename">Расширение имени файла %1$s не указывает на словарь</string>
+    <string name="exception_theme_json">Не удалось найти тему json</string>
+    <string name="exception_theme_name_clash">Название темы конфликтует со встроенными темами</string>
+    <string name="exception_theme_src_image">Не удалось сохранить исходное изображение фона темы</string>
+    <string name="exception_theme_cropped_image">Не удалось сохранить обрезанное изображение фона темы</string>
+    <string name="follow_system_day_night_theme">Следовать теме дневного света системы</string>
+    <string name="follow_system_day_night_theme_summary">Переопределить выбор темы вручную</string>
+    <string name="light_mode_theme">Светлая тема</string>
+    <string name="dark_mode_theme">Темная тема</string>
+    <string name="new_theme">Новая тема</string>
 </resources>
