@@ -94,6 +94,10 @@ node("android") {
                     sh 'mkdir out'
                 }
 
+                withBuildStatus("Clean generated assets") {
+                    sh './gradlew clean'
+                }
+
                 withBuildStatus("Compile release kotlin") {
                     sh './gradlew compileReleaseKotlin'
                 }
