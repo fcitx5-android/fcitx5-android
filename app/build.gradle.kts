@@ -127,18 +127,6 @@ kotlin.sourceSets.all {
     languageSettings.optIn("kotlin.RequiresOptIn")
 }
 
-// reverse mapping in transifex.yml
-tasks.register<Copy>("renamePoFiles") {
-    from("src/main/cpp/po")
-    into("src/main/cpp/po")
-    include("zh-rCN.po")
-    include("zh-rTW.po")
-    rename { it.replace('-', '_').filter { char -> char != 'r' } }
-}.also {
-    tasks.preBuild.dependsOn(it)
-}
-
-
 // This task should have depended on buildCMakeABITask
 val installFcitxComponent by tasks.register("installFcitxComponent")
 
