@@ -237,6 +237,8 @@ tasks.register<Delete>("cleanCxxIntermediates") {
 }.also { tasks.clean.dependsOn(it) }
 
 dependencies {
+    val arrowVersion = "1.1.2"
+    implementation("io.arrow-kt:arrow-core:$arrowVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
     implementation("com.github.CanHub:Android-Image-Cropper:4.2.1")
     implementation("cat.ereza:customactivityoncrash:2.4.0")
@@ -262,7 +264,6 @@ dependencies {
     val navVersion = "2.4.2"
     implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
     implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
-    implementation("cn.berberman:girls-self-use:0.1.2")
     val splittiesVersion = "3.0.0"
     implementation("com.louiscad.splitties:splitties-bitflags:$splittiesVersion")
     implementation("com.louiscad.splitties:splitties-systemservices:$splittiesVersion")

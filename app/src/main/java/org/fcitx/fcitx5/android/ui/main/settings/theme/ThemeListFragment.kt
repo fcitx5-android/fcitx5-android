@@ -8,7 +8,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
-import cn.berberman.girls.utils.identity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -90,9 +89,10 @@ class ThemeListFragment : ProgressFragment() {
                         runCatching {
                             uri?.let {
                                 it.queryFileName(requireContext().contentResolver)
+                                    .orNull()
                                     ?.let { name ->
                                         name.endsWith(".zip")
-                                            .takeIf(::identity)
+                                            .takeIf(Boolean::identity)
                                             ?: errorArg(R.string.exception_theme_filename, name)
                                     }
                                 requireContext().contentResolver.openInputStream(it)

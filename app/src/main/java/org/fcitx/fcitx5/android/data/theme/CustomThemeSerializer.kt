@@ -1,8 +1,8 @@
 package org.fcitx.fcitx5.android.data.theme
 
-import cn.berberman.girls.utils.compose
-import cn.berberman.girls.utils.identity
+import arrow.core.compose
 import kotlinx.serialization.json.*
+import org.fcitx.fcitx5.android.utils.identity
 import org.fcitx.fcitx5.android.utils.upcast
 
 object CustomThemeSerializer : JsonTransformingSerializer<Theme.Custom>(Theme.Custom.serializer()) {

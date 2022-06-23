@@ -15,8 +15,9 @@ import androidx.core.app.NotificationCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import cn.berberman.girls.utils.maybe.Maybe
-import cn.berberman.girls.utils.maybe.fx
+import arrow.core.None
+import arrow.core.Option
+import arrow.core.continuations.option
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -136,17 +137,18 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
     private fun importFromUri(uri: Uri) =
         lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
             val id = IMPORT_ID++
-            Maybe.fx {
-                val file = uri.queryFileName(contentResolver).bindNullable().let { File(it) }
+            option {
+                val file = uri.queryFileName(contentResolver).bind().let { File(it) }
                 when {
                     file.nameWithoutExtension in entries.map { it.name } -> {
                         importErrorDialog(getString(R.string.dict_already_exists))
-                        return@fx pure(Unit)
+                        shift(None)
                     }
                     Dictionary.Type.fromFileName(file.name) == null -> {
                         importErrorDialog(getString(R.string.invalid_dict))
-                        return@fx pure(Unit)
+                        shift(None)
                     }
+                    else -> Unit
                 }
                 val builder =
                     NotificationCompat.Builder(requireContext(), CHANNEL_ID)
@@ -157,9 +159,10 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                         .setProgress(100, 0, true)
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                 builder.build().let { notificationManager.notify(id, it) }
-                val inputStream = runCatching { contentResolver.openInputStream(uri) }
-                    .getOrNull()
-                    .bindNullable()
+                val inputStream = Option
+                    .catch { contentResolver.openInputStream(uri) }
+                    .mapNotNull { it }
+                    .bind()
                 runCatching {
                     val result: LibIMEDictionary
                     measureTimeMillis {
@@ -180,7 +183,6 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                             ui.addItem(item = it)
                         }
                     }
-                pure(Unit)
             }
             notificationManager.cancel(id)
         }

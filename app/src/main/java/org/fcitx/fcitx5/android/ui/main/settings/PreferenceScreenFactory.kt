@@ -5,8 +5,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.findNavController
 import androidx.preference.*
-import cn.berberman.girls.utils.either.otherwise
-import cn.berberman.girls.utils.either.then
+import arrow.core.redeem
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
@@ -33,8 +32,7 @@ object PreferenceScreenFactory {
 
         ConfigDescriptor
             .parseTopLevel(desc)
-            .otherwise { throw it }
-            .then {
+            .redeem({ throw it }) {
                 screen.title = it.name
                 it.values.forEach { d ->
                     general(context, fragmentManager, cfg, screen, d, store)

@@ -20,8 +20,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import cn.berberman.girls.utils.maybe.Maybe
-import cn.berberman.girls.utils.maybe.fx
+import arrow.core.None
+import arrow.core.Option
+import arrow.core.continuations.option
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -153,7 +154,10 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                 enableUndo = false
                 fab.setOnClickListener {
                     // TODO use expandable fab instead
-                    val actions = arrayOf(getString(R.string.import_from_file), getString(R.string.create_new))
+                    val actions = arrayOf(
+                        getString(R.string.import_from_file),
+                        getString(R.string.create_new)
+                    )
                     AlertDialog.Builder(requireContext())
                         .setItems(actions) { _, i ->
                             when (i) {
@@ -236,18 +240,20 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
     private fun importFromUri(uri: Uri) =
         lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
             val id = IMPORT_ID++
-            Maybe.fx {
-                val file = uri.queryFileName(contentResolver).bindNullable().let { File(it) }
+            option {
+                val file = uri.queryFileName(contentResolver).bind().let { File(it) }
                 when {
                     file.nameWithoutExtension in entries.map { it.name } -> {
                         errorDialog(getString(R.string.quickphrase_already_exists))
-                        return@fx pure(Unit)
+                        shift(None)
                     }
                     file.extension != QuickPhrase.EXT -> {
                         errorDialog(getString(R.string.invalid_quickphrase))
-                        return@fx pure(Unit)
+                        shift(None)
                     }
+                    else -> Unit
                 }
+
                 val builder =
                     NotificationCompat.Builder(
                         requireContext(),
@@ -260,9 +266,9 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                         .setProgress(100, 0, true)
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                 builder.build().let { notificationManager.notify(id, it) }
-                val inputStream = runCatching { contentResolver.openInputStream(uri) }
-                    .getOrNull()
-                    .bindNullable()
+                val inputStream = Option.catch { contentResolver.openInputStream(uri) }
+                    .mapNotNull { it }
+                    .bind()
                 runCatching {
                     val result: CustomQuickPhrase
                     measureTimeMillis {
@@ -283,7 +289,6 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                             ui.addItem(item = it)
                         }
                     }
-                pure(Unit)
             }
             notificationManager.cancel(id)
         }
