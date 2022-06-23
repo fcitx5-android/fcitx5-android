@@ -220,7 +220,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                                             ConfigType.TyInt -> ele.value.toInt()
                                             ConfigType.TyKey -> ele.value
                                             ConfigType.TyString -> ele.value
-                                            ConfigType.TyEnum -> throw IllegalAccessException("Impossible!")
+                                            ConfigType.TyEnum -> error("Impossible!")
                                             else -> shift(ParseException.BadFormList(it))
                                         }
                                     }
@@ -242,7 +242,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
 
         fun parseTopLevel(raw: RawConfig): Either<ParseException, ConfigTopLevelDef> =
             either.eager {
-                val topLevel = raw.subItems?.get(0) ?: throw ParseException.BadFormDesc(raw)
+                val topLevel = raw.subItems?.get(0) ?: shift(ParseException.BadFormDesc(raw))
                 val customTypeDef = raw.subItems?.drop(1)?.mapNotNull {
                     it.subItems?.map { ele -> parse(ele).bind() }
                         ?.let { parsed -> ConfigCustomTypeDef(it.name, parsed) }

@@ -65,7 +65,7 @@ class ListFragment : Fragment() {
                             (cfg.subItems?.map { it.value } ?: listOf())
                         ) { it }
                     }
-                    ConfigType.TyEnum -> throw IllegalAccessException("Impossible!")
+                    ConfigType.TyEnum -> error("Impossible!")
                     else -> throw IllegalArgumentException("List of ${ConfigType.pretty(ty.subtype)} is unsupported")
                 }
             }
