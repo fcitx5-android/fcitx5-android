@@ -239,6 +239,7 @@ tasks.register<Delete>("cleanCxxIntermediates") {
 dependencies {
     val arrowVersion = "1.1.2"
     implementation("io.arrow-kt:arrow-core:$arrowVersion")
+    implementation("androidx.activity:activity-ktx:1.4.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
     implementation("com.github.CanHub:Android-Image-Cropper:4.2.1")
     implementation("cat.ereza:customactivityoncrash:2.4.0")
