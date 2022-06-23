@@ -33,17 +33,18 @@ object QuickPhraseManager {
         return CustomQuickPhrase(file)
     }
 
-    fun importFromFile(file: File): CustomQuickPhrase {
+    fun importFromFile(file: File): Result<CustomQuickPhrase> {
         if (file.extension != QuickPhrase.EXT)
             errorArg(R.string.exception_quickphrase_filename, file.path)
         // throw away data, only ensuring the format is correct
-        QuickPhraseData.fromLines(file.readLines()).getOrThrow()
-        val dest = File(customQuickPhraseDir, file.name)
-        file.copyTo(dest)
-        return CustomQuickPhrase(dest)
+        return QuickPhraseData.fromLines(file.readLines()).map {
+            val dest = File(customQuickPhraseDir, file.name)
+            file.copyTo(dest)
+            CustomQuickPhrase(dest)
+        }
     }
 
-    fun importFromInputStream(stream: InputStream, name: String): CustomQuickPhrase {
+    fun importFromInputStream(stream: InputStream, name: String): Result<CustomQuickPhrase> {
         val tempFile = File(appContext.cacheDir, name)
         tempFile.outputStream().use {
             stream.copyTo(it)

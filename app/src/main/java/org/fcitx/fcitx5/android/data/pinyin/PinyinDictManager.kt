@@ -31,7 +31,7 @@ object PinyinDictManager {
     fun libIMEDictionaries(): List<LibIMEDictionary> =
         dictionaries().mapNotNull { it as? LibIMEDictionary }
 
-    fun importFromFile(file: File): LibIMEDictionary {
+    fun importFromFile(file: File): Result<LibIMEDictionary> = runCatching {
         val raw = Dictionary.new(file) ?: errorArg(R.string.exception_dict_filename, file.path)
         // convert to libime format in dictionaries dir
         // preserve original file name
@@ -42,10 +42,10 @@ object PinyinDictManager {
             )
         )
         Timber.d("Converted $raw to $new")
-        return new
+        new
     }
 
-    fun importFromInputStream(stream: InputStream, name: String): LibIMEDictionary {
+    fun importFromInputStream(stream: InputStream, name: String): Result<LibIMEDictionary> {
         val tempFile = File(appContext.cacheDir, name)
         tempFile.outputStream().use {
             stream.copyTo(it)
