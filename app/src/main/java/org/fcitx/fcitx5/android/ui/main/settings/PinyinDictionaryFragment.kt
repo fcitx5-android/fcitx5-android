@@ -170,7 +170,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                             result = PinyinDictManager.importFromInputStream(
                                 i,
                                 file.name
-                            )
+                            ).getOrThrow()
                         }
                     }.also { Timber.d("Took $it to import $result") }
                     result

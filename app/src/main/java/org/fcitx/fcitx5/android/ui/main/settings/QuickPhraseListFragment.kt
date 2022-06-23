@@ -276,7 +276,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                             result = QuickPhraseManager.importFromInputStream(
                                 i,
                                 file.name
-                            )
+                            ).getOrThrow()
                         }
                     }.also { Timber.d("Took $it to import $result") }
                     result
