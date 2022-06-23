@@ -32,7 +32,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.navigation.NavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
-import cn.berberman.girls.utils.maybe.Maybe
+import arrow.core.toOption
 import com.sun.jna.Library
 import com.sun.jna.Native
 import kotlinx.coroutines.Dispatchers
@@ -67,7 +67,7 @@ fun Uri.queryFileName(contentResolver: ContentResolver) =
         val index = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
         it.moveToFirst()
         it.getString(index)
-    }
+    }.toOption()
 
 inline fun <reified T : Library> nativeLib(name: String): Lazy<T> = lazy {
     Native.load(name, T::class.java)
@@ -127,6 +127,10 @@ inline val ConstraintLayout.LayoutParams.unset
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun <T, U> kotlin.reflect.KFunction1<T, U>.upcast(): (T) -> U = this
+
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun <T> T.identity() = arrow.core.identity(this)
 
 fun Configuration.isDarkMode() =
     when (uiMode.and(Configuration.UI_MODE_NIGHT_MASK)) {
@@ -190,5 +194,3 @@ suspend fun errorDialog(context: Context, title: String, message: String) {
             .show()
     }
 }
-
-fun <T> List<Maybe<T>>.catMaybes() = mapNotNull { it.takeIf { it.isPresent }?.value }

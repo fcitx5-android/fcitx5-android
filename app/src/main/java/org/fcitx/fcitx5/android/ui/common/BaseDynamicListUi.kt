@@ -15,7 +15,7 @@ import androidx.core.view.doOnAttach
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.ItemTouchHelper
-import cn.berberman.girls.utils.identity
+import arrow.core.identity
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar

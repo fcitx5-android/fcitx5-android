@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.data
 
+import arrow.core.flattenOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -7,9 +8,8 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
-import org.fcitx.fcitx5.android.utils.MaybeSerializer
+import org.fcitx.fcitx5.android.utils.OptionSerializer
 import org.fcitx.fcitx5.android.utils.appContext
-import org.fcitx.fcitx5.android.utils.catMaybes
 
 object Licenses {
 
@@ -40,10 +40,10 @@ object Licenses {
             val list = Json.decodeFromString(
                 MapSerializer(
                     String.serializer(),
-                    ListSerializer(MaybeSerializer(LibraryLicense.serializer()))
+                    ListSerializer(OptionSerializer(LibraryLicense.serializer()))
                 ),
                 content
-            )["libraries"]!!.catMaybes().sortedBy { it.libraryName }
+            )["libraries"]!!.flattenOption().sortedBy { it.libraryName }
             parsed = list
             list
         }

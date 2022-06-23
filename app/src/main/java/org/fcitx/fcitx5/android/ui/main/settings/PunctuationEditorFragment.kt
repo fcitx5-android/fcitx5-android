@@ -3,8 +3,7 @@ package org.fcitx.fcitx5.android.ui.main.settings
 import android.app.AlertDialog
 import android.view.View
 import androidx.lifecycle.lifecycleScope
-import cn.berberman.girls.utils.either.otherwise
-import cn.berberman.girls.utils.either.then
+import arrow.core.redeem
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
@@ -59,8 +58,7 @@ class PunctuationEditorFragment : ProgressFragment(),
         val desc = raw["desc"]
         // parse config desc to get description text of the options
         ConfigDescriptor.parseTopLevel(desc)
-            .otherwise { throw it }
-            .then {
+            .redeem({ throw it }) {
                 it.customTypes.first().values.forEach { descriptor ->
                     when (descriptor.name) {
                         KEY -> keyDesc = descriptor.description ?: descriptor.name

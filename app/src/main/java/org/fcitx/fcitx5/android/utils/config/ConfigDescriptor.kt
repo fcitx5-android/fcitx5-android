@@ -1,7 +1,9 @@
 package org.fcitx.fcitx5.android.utils.config
 
 import android.os.Parcelable
-import cn.berberman.girls.utils.either.*
+import arrow.core.Either
+import arrow.core.continuations.either
+import arrow.core.flatMap
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import org.fcitx.fcitx5.android.core.RawConfig
@@ -102,7 +104,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
         override val type: ConfigType.TyList,
         override val description: String? = null,
         /**
-         * [Any?] is used for a union type. See [parseE] for details.
+         * [Any?] is used for a union type. See [parse] for details.
          */
         override val defaultValue: @RawValue List<Any?>? = null,
     ) : ConfigDescriptor<ConfigType.TyList, List<Any?>>()
@@ -163,18 +165,16 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
             data class BadFormDesc(val config: RawConfig) : ParseException()
         }
 
-        private fun parseE(raw: RawConfig): ConfigDescriptor<*, *> {
-            val type = raw.type ?: throw ParseException.NoTypeExist(raw)
-            return type.patternMatching<ConfigType.Companion.UnknownConfigTypeException, ConfigType<*>, ConfigDescriptor<*, *>>()
-                .onLeft { throw ParseException.TypeNoParse(it) }
-                .onRight {
+        override fun parse(raw: RawConfig): Either<ParseException, ConfigDescriptor<*, *>> =
+            ((raw.type?.mapLeft { ParseException.TypeNoParse(it) })
+                ?: (Either.Left(ParseException.NoTypeExist(raw)))).flatMap {
+                either.eager {
                     when (it) {
                         ConfigType.TyBool ->
                             ConfigBool(
                                 raw.name,
                                 raw.description,
                                 raw.defaultValue?.toBoolean()
-
                             )
                         is ConfigType.TyCustom -> ConfigCustom(
                             raw.name,
@@ -182,7 +182,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                             raw.description
                         )
                         ConfigType.TyEnum -> {
-                            val entries = raw.enum ?: throw ParseException.NoEnumFound(raw)
+                            val entries = raw.enum ?: shift(ParseException.NoEnumFound(raw))
                             ConfigEnum(
                                 raw.name,
                                 raw.description,
@@ -201,7 +201,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                         ConfigType.TyKey -> ConfigKey(raw.name, raw.description, raw.defaultValue)
                         is ConfigType.TyList ->
                             if (it.subtype == ConfigType.TyEnum) {
-                                val entries = raw.enum ?: throw ParseException.NoEnumFound(raw)
+                                val entries = raw.enum ?: shift(ParseException.NoEnumFound(raw))
                                 ConfigEnumList(
                                     raw.name,
                                     raw.description,
@@ -221,7 +221,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                                             ConfigType.TyKey -> ele.value
                                             ConfigType.TyString -> ele.value
                                             ConfigType.TyEnum -> throw IllegalAccessException("Impossible!")
-                                            else -> throw ParseException.BadFormList(it)
+                                            else -> shift(ParseException.BadFormList(it))
                                         }
                                     }
                                 )
@@ -236,34 +236,27 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                         )
                     }
                 }
-                .eval()
 
-        }
+            }
 
-        override fun parse(raw: RawConfig): Either<ParseException, ConfigDescriptor<*, *>> {
-            return parseE(raw).runCatchingEither { this }
-        }
-
-        private fun parseTopLevelE(raw: RawConfig): ConfigTopLevelDef {
-            val topLevel = raw.subItems?.get(0) ?: throw ParseException.BadFormDesc(raw)
-            val customTypeDef = raw.subItems?.drop(1)?.mapNotNull {
-                it.subItems?.map { ele -> parseE(ele) }
-                    ?.let { parsed -> ConfigCustomTypeDef(it.name, parsed) }
-            } ?: listOf()
-            val topDesc = topLevel.subItems?.map {
-                val parsed = parseE(it)
-                if (parsed is ConfigCustom)
-                    parsed.customTypeDef = customTypeDef.find { cTy ->
-                        cTy.name == parsed.type.typeName
-                    }
-                parsed
-            } ?: listOf()
-            return ConfigTopLevelDef(topLevel.name, topDesc, customTypeDef)
-        }
 
         fun parseTopLevel(raw: RawConfig): Either<ParseException, ConfigTopLevelDef> =
-            runCatchingEither {
-                parseTopLevelE(raw)
+            either.eager {
+                val topLevel = raw.subItems?.get(0) ?: throw ParseException.BadFormDesc(raw)
+                val customTypeDef = raw.subItems?.drop(1)?.mapNotNull {
+                    it.subItems?.map { ele -> parse(ele).bind() }
+                        ?.let { parsed -> ConfigCustomTypeDef(it.name, parsed) }
+                } ?: listOf()
+                val topDesc = topLevel.subItems?.map {
+                    val parsed = parse(it).bind()
+                    if (parsed is ConfigCustom)
+                        parsed.customTypeDef = customTypeDef.find { cTy ->
+                            cTy.name == parsed.type.typeName
+                        }
+                    parsed
+                } ?: listOf()
+                ConfigTopLevelDef(topLevel.name, topDesc, customTypeDef)
             }
     }
+
 }

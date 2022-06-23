@@ -1,8 +1,8 @@
 package org.fcitx.fcitx5.android.utils.config
 
 import android.os.Parcelable
-import cn.berberman.girls.utils.either.Either
-import cn.berberman.girls.utils.either.runCatchingEither
+import arrow.core.Either
+import arrow.core.continuations.either
 import kotlinx.parcelize.Parcelize
 import org.fcitx.fcitx5.android.utils.MyParser
 
@@ -48,23 +48,20 @@ sealed class ConfigType<T> : Parcelable {
         data class UnknownConfigTypeException(val type: String) : Exception()
 
         override fun parse(raw: String): Either<UnknownConfigTypeException, ConfigType<*>> =
-            runCatchingEither {
-                parseE(raw)
-            }
-
-        private fun parseE(raw: String): ConfigType<*> =
-            when (raw) {
-                "Integer" -> TyInt
-                "String" -> TyString
-                "Boolean" -> TyBool
-                "Key" -> TyKey
-                "Enum" -> TyEnum
-                "External" -> TyExternal
-                else -> {
-                    when {
-                        raw.startsWith("List|") -> TyList(parseE(raw.drop(5)))
-                        raw.contains("$") -> TyCustom(raw)
-                        else -> throw UnknownConfigTypeException(raw)
+            either.eager {
+                when (raw) {
+                    "Integer" -> TyInt
+                    "String" -> TyString
+                    "Boolean" -> TyBool
+                    "Key" -> TyKey
+                    "Enum" -> TyEnum
+                    "External" -> TyExternal
+                    else -> {
+                        when {
+                            raw.startsWith("List|") -> parse(raw.drop(5)).map(::TyList).bind()
+                            raw.contains("$") -> TyCustom(raw)
+                            else -> shift(UnknownConfigTypeException(raw))
+                        }
                     }
                 }
             }
