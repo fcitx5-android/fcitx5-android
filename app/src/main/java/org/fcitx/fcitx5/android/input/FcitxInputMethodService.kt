@@ -364,7 +364,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     override fun onUpdateCursorAnchorInfo(info: CursorAnchorInfo) {
         // onUpdateCursorAnchorInfo can left behind when user types quickly enough
         // skip the event if `info.composingText` is not up-to-date.
-        if (info.composingText?.contentEquals(composingText) != true) return
+        if (!composingText.contentEquals(info.composingText ?: "")) return
         selection.update(info.selectionStart, info.selectionEnd)
         Timber.d("onUpdateCursorAnchorInfo: selection=$selection")
         handleCursorUpdate()
