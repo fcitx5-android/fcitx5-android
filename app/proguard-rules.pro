@@ -5,6 +5,12 @@
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
+# disable obfuscation
+-dontobfuscate
+
+# Keep JNI interface
+-keep class org.fcitx.fcitx5.android.core.* { *; }
+
 # If your project uses WebView with JS, uncomment the following
 # and specify the fully qualified class name to the JavaScript interface
 # class:
