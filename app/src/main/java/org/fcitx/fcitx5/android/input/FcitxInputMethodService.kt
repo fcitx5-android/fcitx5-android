@@ -103,7 +103,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             is FcitxEvent.CommitStringEvent -> {
                 inputConnection?.commitText(event.data, 1)
                 // committed text should be put before start of composing (if any), or before cursor
-                val start = if (composing.start >= 0) composing.start else selection.start
+                val start = if (composing.isEmpty()) selection.start else composing.start
                 selection.update(start + event.data.length)
                 // clear composing range, but retain it's position for next update
                 // see [^1] for explanation
@@ -308,6 +308,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // update selection as soon as possible
         selection.update(attribute.initialSelStart, attribute.initialSelEnd)
         composing.clear()
+        composingText = ""
         editorInfo = attribute
         Timber.d("onStartInput: initialSel=$selection")
         if (!restarting) {
@@ -418,10 +419,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 // set composing text AND put cursor at end of composing
                 ic.setComposingText(text, 1)
                 if (text.isEmpty()) {
-                    // clear composing text, put cursor at beginning of original composing
+                    // clear composing text, put cursor at start of original composing
                     // [^1]: if this happens after committing text, composing should be cleared,
                     //       and selection should be put at original composing start. so composing
-                    //       shouldn't be reset to (-1, -1), but it's original position
+                    //       shouldn't be reset to [0, 0], but it's original position
                     selection.update(composing.start)
                     composing.clear()
                 } else {
