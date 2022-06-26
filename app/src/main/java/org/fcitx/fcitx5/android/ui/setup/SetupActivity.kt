@@ -28,6 +28,7 @@ import splitties.systemservices.notificationManager
 import splitties.views.bottomPadding
 import splitties.views.leftPadding
 import splitties.views.rightPadding
+import splitties.views.topPadding
 
 class SetupActivity : FragmentActivity() {
 
@@ -35,6 +36,7 @@ class SetupActivity : FragmentActivity() {
 
     private val viewModel: SetupViewModel by viewModels()
 
+    private lateinit var skipButton: Button
     private lateinit var prevButton: Button
     private lateinit var nextButton: Button
 
@@ -44,15 +46,20 @@ class SetupActivity : FragmentActivity() {
         val binding = ActivitySetupBinding.inflate(layoutInflater)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
-            val navBars = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            val sysBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             binding.root.apply {
-                bottomPadding = navBars.bottom
-                leftPadding = navBars.left
-                rightPadding = navBars.right
+                topPadding = sysBars.top
+                bottomPadding = sysBars.bottom
+                leftPadding = sysBars.left
+                rightPadding = sysBars.right
             }
             windowInsets
         }
         setContentView(binding.root)
+        skipButton = binding.skipButton.apply {
+            text = getString(R.string.skip)
+            setOnClickListener { finish() }
+        }
         prevButton = binding.prevButton.apply {
             text = getString(R.string.prev)
             setOnClickListener { viewPager.currentItem = viewPager.currentItem - 1 }
@@ -81,6 +88,9 @@ class SetupActivity : FragmentActivity() {
             }
         })
         viewModel.isAllDone.observe(this) { allDone ->
+            skipButton.apply {
+                visibility = if (allDone) View.GONE else View.VISIBLE
+            }
             nextButton.apply {
                 // hide next button for the last page when allDone == false
                 (allDone || !viewPager.currentItem.isLastPage()).let {

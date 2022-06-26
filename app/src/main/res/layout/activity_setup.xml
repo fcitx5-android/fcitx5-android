@@ -15,6 +15,13 @@
         app:layout_constraintTop_toTopOf="parent"
         android:orientation="horizontal" />
     <Button
+        android:id="@+id/skip_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="?android:attr/selectableItemBackground" />
+    <Button
         android:id="@+id/next_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
