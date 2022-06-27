@@ -153,12 +153,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
                 return
             }
-            if (actionLabel?.isNotEmpty() == true && actionId != EditorInfo.IME_ACTION_UNSPECIFIED) {
-                inputConnection?.performEditorAction(actionId)
-                return
-            }
             if (imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION)) {
                 inputConnection?.commitText("\n", 1)
+                return
+            }
+            if (actionLabel?.isNotEmpty() == true && actionId != EditorInfo.IME_ACTION_UNSPECIFIED) {
+                inputConnection?.performEditorAction(actionId)
                 return
             }
             when (val action = imeOptions and EditorInfo.IME_MASK_ACTION) {
