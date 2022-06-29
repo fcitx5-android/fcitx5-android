@@ -142,4 +142,5 @@
     <string name="light_mode_theme">Светлая тема</string>
     <string name="dark_mode_theme">Темная тема</string>
     <string name="new_theme">Новая тема</string>
+    <string name="skip">Пропустить</string>
 </resources>
