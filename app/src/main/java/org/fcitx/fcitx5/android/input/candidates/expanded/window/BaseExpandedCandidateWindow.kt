@@ -4,9 +4,11 @@ import android.view.View
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.*
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
@@ -67,9 +69,21 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
         lifecycleCoroutineScope = candidateLayout.findViewTreeLifecycleOwner()!!.lifecycleScope
         bar.expandButtonStateMachine.push(ExpandedCandidatesAttached)
         candidateLayout.embeddedKeyboard.keyActionListener = keyActionListener
-        offsetJob = horizontalCandidate.expandedCandidateOffset.onEach {
-            adapter.updateCandidatesWithOffset(horizontalCandidate.adapter.candidates, it)
-        }.launchIn(lifecycleCoroutineScope)
+        offsetJob = horizontalCandidate.expandedCandidateOffset
+            .onEach(this::updateCandidatesWithOffset)
+            .launchIn(lifecycleCoroutineScope)
+    }
+
+    private fun updateCandidatesWithOffset(offset: Int) {
+        val candidates = horizontalCandidate.adapter.candidates
+        if (candidates.isEmpty()) {
+            windowManager.switchToKeyboardWindow()
+        } else {
+            adapter.updateCandidatesWithOffset(candidates, offset)
+            lifecycleCoroutineScope.launch(Dispatchers.Main) {
+                candidateLayout.resetPosition()
+            }
+        }
     }
 
     override fun onDetached() {
@@ -82,14 +96,6 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
         offsetJob?.cancel()
         offsetJob = null
         candidateLayout.embeddedKeyboard.keyActionListener = null
-    }
-
-    override fun onCandidateUpdate(data: Array<String>) {
-        if (data.isEmpty()) {
-            windowManager.switchToKeyboardWindow()
-            return
-        }
-        candidateLayout.resetPosition()
     }
 
     override fun onPreeditUpdate(data: FcitxEvent.PreeditEvent.Data) {
