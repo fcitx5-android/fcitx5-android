@@ -6,6 +6,8 @@ import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateLayout
+import org.fcitx.fcitx5.android.input.candidates.expanded.SpanHelper
+import org.fcitx.fcitx5.android.input.candidates.expanded.decoration.GridDecoration
 
 class GridExpandedCandidateWindow :
     BaseExpandedCandidateWindow<GridExpandedCandidateWindow>() {
@@ -29,13 +31,14 @@ class GridExpandedCandidateWindow :
     override fun onCreateCandidateLayout(): ExpandedCandidateLayout =
         ExpandedCandidateLayout(context, theme).apply {
             recyclerView.apply {
-                with(builder) {
-                    setupGridLayoutManager(this@GridExpandedCandidateWindow.adapter, gridSpanCount)
-                    addGridDecoration()
+                layoutManager = GridLayoutManager(context, gridSpanCount).apply {
+                    spanSizeLookup = SpanHelper(this@GridExpandedCandidateWindow.adapter, this)
                 }
+                adapter = this@GridExpandedCandidateWindow.adapter
+                addItemDecoration(GridDecoration(builder.dividerDrawable()))
                 addOnScrollListener(object : RecyclerView.OnScrollListener() {
                     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                        this@GridExpandedCandidateWindow.layoutManager.apply {
+                        (recyclerView.layoutManager as GridLayoutManager).apply {
                             pageUpBtn.isEnabled = findFirstCompletelyVisibleItemPosition() != 0
                             pageDnBtn.isEnabled =
                                 findLastCompletelyVisibleItemPosition() != itemCount - 1

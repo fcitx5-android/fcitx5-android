@@ -1,7 +1,6 @@
 package org.fcitx.fcitx5.android.input.candidates.expanded
 
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.input.candidates.adapter.GridCandidateViewAdapter
 import kotlin.math.ceil
 import kotlin.math.max
@@ -14,7 +13,7 @@ class SpanHelper(
 
     data class ItemLayout(val spanIndex: Int, val spanSize: Int, val groupIndex: Int)
 
-    private lateinit var layout: Array<ItemLayout?>
+    private var layout: Array<ItemLayout?> = arrayOfNulls(adapter.itemCount)
 
     private var layoutCount = 0
 
@@ -27,12 +26,17 @@ class SpanHelper(
     /**
      * clear calculated layout
      */
-    fun invalidate() {
+    private fun invalidate() {
         // reallocate array only when space not enough
         if (adapter.itemCount > layout.size) {
             layout = arrayOfNulls(adapter.itemCount)
         }
         layoutCount = 0
+    }
+
+    override fun invalidateSpanIndexCache() {
+        invalidate()
+        super.invalidateSpanIndexCache()
     }
 
     /**
@@ -97,15 +101,4 @@ class SpanHelper(
         layoutItem(position)
         return layout[position]!!.spanSize
     }
-
-    fun attach() {
-        layout = arrayOfNulls(adapter.itemCount)
-        adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-            override fun onChanged() {
-                invalidate()
-            }
-        })
-        manager.spanSizeLookup = this
-    }
-
 }

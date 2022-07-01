@@ -13,6 +13,7 @@ import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEve
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesUpdatedNonEmpty
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
+import org.fcitx.fcitx5.android.input.candidates.expanded.decoration.FlexboxVerticalDecoration
 import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.mechdancer.dependency.manager.must
@@ -64,9 +65,7 @@ class HorizontalCandidateComponent :
                     )
                 }
             }
-            with(builder) {
-                addFlexboxVerticalDecoration()
-            }
+            addItemDecoration(FlexboxVerticalDecoration(builder.dividerDrawable()))
         }
     }
 
