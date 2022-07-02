@@ -16,7 +16,7 @@ class PreeditComponent : UniqueComponent<PreeditComponent>(), Dependent, InputBr
     private val context by manager.context()
     private val theme by manager.theme()
 
-    private val content = PreeditContent(
+    val content = PreeditContent(
         FcitxEvent.PreeditEvent.Data("", 0, "", 0),
         FcitxEvent.InputPanelAuxEvent.Data("", "")
     )

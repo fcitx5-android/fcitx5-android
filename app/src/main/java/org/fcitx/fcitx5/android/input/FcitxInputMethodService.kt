@@ -224,6 +224,15 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         inputConnection?.endBatchEdit()
     }
 
+    fun applySelectionOffset(offsetStart: Int, offsetEnd: Int = 0) {
+        inputConnection?.also {
+            val start = selection.start + offsetStart
+            val end = selection.end + offsetEnd
+            if (start > end) return
+            it.setSelection(start, end)
+        }
+    }
+
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         lifecycleScope.launch {

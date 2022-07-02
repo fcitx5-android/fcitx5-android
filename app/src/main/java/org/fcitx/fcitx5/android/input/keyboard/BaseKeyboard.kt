@@ -115,7 +115,7 @@ abstract class BaseKeyboard(
                             true
                         }
                         GestureType.Up -> {
-                            onAction(KeyAction.DeleteSelectionAction)
+                            onAction(KeyAction.DeleteSelectionAction(event.totalX))
                             false
                         }
                         else -> false
