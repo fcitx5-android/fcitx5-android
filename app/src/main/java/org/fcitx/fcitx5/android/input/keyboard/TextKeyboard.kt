@@ -2,8 +2,6 @@ package org.fcitx.fcitx5.android.input.keyboard
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
 import android.view.inputmethod.EditorInfo
 import androidx.core.view.allViews
@@ -159,15 +157,10 @@ class TextKeyboard(
         caps.img.apply {
             imageDrawable = drawable(
                 when (capsState) {
-                    CapsState.None -> R.drawable.ic_baseline_expand_less_24
-                    CapsState.Once, CapsState.Lock -> R.drawable.ic_baseline_keyboard_capslock_24
+                    CapsState.None -> R.drawable.ic_capslock_none
+                    CapsState.Once -> R.drawable.ic_capslock_once
+                    CapsState.Lock -> R.drawable.ic_capslock_lock
                 }
-            )
-            colorFilter = PorterDuffColorFilter(
-                when (capsState) {
-                    CapsState.None, CapsState.Once -> theme.altKeyTextColor
-                    CapsState.Lock -> theme.accentKeyBackgroundColor
-                }.color, PorterDuff.Mode.SRC_IN
             )
         }
     }
