@@ -89,7 +89,7 @@ class PreeditUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
         val hasDown = downText.isNotEmpty()
         visible = hasUp || hasDown
         if (!visible) return
-        upView.text = if (upCursor < 0 || upCursor == upText.length) {
+        updateTextView(upView, if (upCursor < 0 || upCursor == upText.length) {
             upText
         } else {
             buildSpannedString {
@@ -98,7 +98,7 @@ class PreeditUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
                 setSpan(cursorSpan, upCursor, upCursor + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
                 append(upText, upCursor, upText.length)
             }
-        }
+        }, hasUp)
         updateTextView(downView, downText, hasDown)
     }
 }
