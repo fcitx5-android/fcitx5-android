@@ -21,7 +21,9 @@ class SymbolKey(
     setOf(
         Behavior.Press(action = KeyAction.FcitxKeyAction(symbol))
     ),
-    Popup.Preview(symbol)
+    arrayOf(
+        Popup.Preview(symbol)
+    )
 )
 
 class AlphabetKey(
@@ -38,10 +40,19 @@ class AlphabetKey(
     ),
     setOf(
         Behavior.Press(KeyAction.FcitxKeyAction(character)),
-        Behavior.LongPress(KeyAction.FcitxKeyAction(punctuation)),
         Behavior.SwipeDown(KeyAction.FcitxKeyAction(punctuation))
     ),
-    Popup.AltPreview(character, punctuation)
+    arrayOf(
+        Popup.AltPreview(character, punctuation),
+        // TODO: proper symbol map
+        Popup.Keyboard(
+            arrayOf(
+                Popup.Keyboard.Key(character.uppercase(), KeyAction.FcitxKeyAction(character.uppercase())),
+                Popup.Keyboard.Key(character.lowercase(), KeyAction.FcitxKeyAction(character.lowercase())),
+                Popup.Keyboard.Key(punctuation, KeyAction.FcitxKeyAction(punctuation)),
+            )
+        )
+    )
 )
 
 class AlphabetDigitKey(
@@ -57,10 +68,19 @@ class AlphabetDigitKey(
     ),
     setOf(
         Behavior.Press(KeyAction.FcitxKeyAction(character)),
-        Behavior.LongPress(KeyAction.SymAction(sym, NumLockState)),
         Behavior.SwipeDown(KeyAction.SymAction(sym, NumLockState))
     ),
-    Popup.AltPreview(character, altText)
+    arrayOf(
+        Popup.AltPreview(character, altText),
+        // TODO: proper symbol map
+        Popup.Keyboard(
+            arrayOf(
+                Popup.Keyboard.Key(character.uppercase(), KeyAction.FcitxKeyAction(character.uppercase())),
+                Popup.Keyboard.Key(character.lowercase(), KeyAction.FcitxKeyAction(character.lowercase())),
+                Popup.Keyboard.Key(altText, KeyAction.FcitxKeyAction(altText)),
+            )
+        )
+    )
 ) {
     constructor(char: String, digit: Int) : this(char, digit.toString(), (0xffb0 + digit).toUInt())
 
