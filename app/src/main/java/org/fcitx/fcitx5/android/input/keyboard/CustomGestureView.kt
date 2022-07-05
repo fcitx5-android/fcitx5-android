@@ -132,11 +132,11 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        val x = event.x
+        val y = event.y
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 if (!isEnabled) return false
-                val x = event.x
-                val y = event.y
                 drawableHotspotChanged(x, y)
                 isPressed = true
                 hapticFeedback()
@@ -145,9 +145,8 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                     longPressJob?.cancel()
                     longPressJob = lifecycleScope.launch {
                         delay(longPressDelay.toLong())
-                        longPressTriggered = true
                         hapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                        performLongClick()
+                        longPressTriggered = performLongClick()
                     }
                 }
                 if (repeatEnabled) {
@@ -197,8 +196,6 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
             }
             MotionEvent.ACTION_MOVE -> {
                 if (!isEnabled) return false
-                val x = event.x
-                val y = event.y
                 drawableHotspotChanged(x, y)
                 if (!touchMovedOutside && !pointInView(x, y)) {
                     touchMovedOutside = true
