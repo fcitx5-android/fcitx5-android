@@ -195,7 +195,7 @@ class InputView(
             centerHorizontally()
             bottomOfParent()
         })
-        add(popup.view, lParams(matchParent, matchParent) {
+        add(popup.root, lParams(matchParent, matchParent) {
             centerVertically()
             centerHorizontally()
         })
