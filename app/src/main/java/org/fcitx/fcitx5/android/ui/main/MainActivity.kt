@@ -1,5 +1,7 @@
 package org.fcitx.fcitx5.android.ui.main
 
+import android.animation.ObjectAnimator
+import android.animation.StateListAnimator
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -71,14 +73,24 @@ class MainActivity : AppCompatActivity() {
             topLevelDestinationIds = setOf(),
             fallbackOnNavigateUpListener = ::onNavigateUpListener
         )
-        navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navHostFragment = binding.navHostFragment.getFragment()
         binding.toolbar.setupWithNavController(navHostFragment.navController, appBarConfiguration)
         viewModel.toolbarTitle.observe(this) {
             binding.toolbar.title = it
         }
-        viewModel.toolbarShadow.observe(this) {
-            binding.appBar.elevation = dp(if (it) 4f else 0f)
+        viewModel.appbarShadow.observe(this) {
+            binding.appBar.stateListAnimator = StateListAnimator().apply {
+                addState(
+                    intArrayOf(android.R.attr.state_enabled),
+                    ObjectAnimator.ofFloat(binding.appBar, "elevation", dp(if (it) 4f else 0f))
+                )
+            }
+        }
+        navHostFragment.navController.addOnDestinationChangedListener { _, dest, _ ->
+            when (dest.id) {
+                R.id.themeListFragment -> viewModel.disableAppbarShadow()
+                else -> viewModel.enableAppbarShadow()
+            }
         }
         viewModel.toolbarSaveButtonOnClickListener.observe(this) {
             binding.toolbar.menu.findItem(R.id.activity_main_menu_save).isVisible = it != null

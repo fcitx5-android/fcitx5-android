@@ -2,17 +2,19 @@ package org.fcitx.fcitx5.android.ui.main
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Fcitx
 import org.fcitx.fcitx5.android.service.FcitxDaemonManager
+import org.fcitx.fcitx5.android.utils.appContext
 
 class MainViewModel : ViewModel() {
 
     val isFcitxReady
         get() = this::fcitx.isInitialized && fcitx.isReady
 
-    val toolbarTitle = MutableLiveData<String>()
+    val toolbarTitle = MutableLiveData(appContext.getString(R.string.app_name))
 
-    val toolbarShadow = MutableLiveData<Boolean>()
+    val appbarShadow = MutableLiveData(true)
 
     val toolbarSaveButtonOnClickListener = MutableLiveData<(() -> Unit)?>()
 
@@ -24,12 +26,12 @@ class MainViewModel : ViewModel() {
         toolbarTitle.value = title
     }
 
-    fun enableToolbarShadow() {
-        toolbarShadow.value = true
+    fun enableAppbarShadow() {
+        appbarShadow.value = true
     }
 
-    fun disableToolbarShadow() {
-        toolbarShadow.value = false
+    fun disableAppbarShadow() {
+        appbarShadow.value = false
     }
 
     fun enableToolbarSaveButton(onClick: () -> Unit) {

@@ -1,10 +1,15 @@
 package org.fcitx.fcitx5.android.ui.main.settings.theme
 
+import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
@@ -16,7 +21,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
-import org.fcitx.fcitx5.android.ui.main.settings.ProgressFragment
+import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import org.fcitx.fcitx5.android.utils.*
 import splitties.dimensions.dp
 import splitties.resources.drawable
@@ -34,7 +39,9 @@ import splitties.views.imageDrawable
 import splitties.views.textAppearance
 import java.util.*
 
-class ThemeListFragment : ProgressFragment() {
+class ThemeListFragment : Fragment() {
+
+    private val viewModel: MainViewModel by activityViewModels()
 
     private lateinit var imageLauncher: ActivityResultLauncher<Theme.Custom?>
 
@@ -57,7 +64,8 @@ class ThemeListFragment : ProgressFragment() {
         }
     }
 
-    override fun beforeCreateView() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         imageLauncher = registerForActivityResult(CustomThemeActivity.Contract()) { result ->
             if (result != null) {
                 when (result) {
@@ -133,8 +141,14 @@ class ThemeListFragment : ProgressFragment() {
             }
     }
 
-    override suspend fun initialize(): View = with(requireContext()) {
-        previewUi = KeyboardPreviewUi(this, ThemeManager.getActiveTheme())
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View = with(requireContext()) {
+        val activeTheme = ThemeManager.getActiveTheme()
+
+        previewUi = KeyboardPreviewUi(this, activeTheme)
         val preview = previewUi.root.apply {
             scaleX = 0.5f
             scaleY = 0.5f
@@ -180,7 +194,7 @@ class ThemeListFragment : ProgressFragment() {
                 override fun onEditTheme(theme: Theme.Custom) = editTheme(theme)
                 override fun onExportTheme(theme: Theme.Custom) = exportTheme(theme)
             }.apply {
-                setThemes(ThemeManager.getAllThemes(), ThemeManager.getActiveTheme())
+                setThemes(ThemeManager.getAllThemes(), activeTheme)
             }
             adapter = this@ThemeListFragment.adapter
             applyNavBarInsetsBottomPadding()
@@ -206,10 +220,6 @@ class ThemeListFragment : ProgressFragment() {
     override fun onResume() {
         super.onResume()
         viewModel.setToolbarTitle(requireContext().getString(R.string.theme))
-        viewModel.disableToolbarShadow()
-        if (this::previewUi.isInitialized) {
-            previewUi.setTheme(ThemeManager.getActiveTheme())
-        }
     }
 
     private fun addTheme() {
@@ -264,11 +274,6 @@ class ThemeListFragment : ProgressFragment() {
     private fun exportTheme(theme: Theme.Custom) {
         beingExported = theme
         exportLauncher.launch(theme.name + ".zip")
-    }
-
-    override fun onPause() {
-        viewModel.enableToolbarShadow()
-        super.onPause()
     }
 
     override fun onDestroy() {
