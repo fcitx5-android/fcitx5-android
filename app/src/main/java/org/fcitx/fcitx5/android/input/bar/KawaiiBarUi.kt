@@ -209,13 +209,27 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
         }
 
         fun privateMode(activate: Boolean = true) {
+            if (activate == inPrivate) return
             inPrivate = activate
+            updateMenuButtonIcon()
+            updateMenuButtonRotation(instant = true)
+        }
+
+        private fun updateMenuButtonIcon() {
+            menuButton.imageResource =
+                if (inPrivate) R.drawable.ic_view_private
+                else R.drawable.ic_baseline_expand_more_24
+        }
+
+        private fun updateMenuButtonRotation(instant: Boolean = false) {
+            val targetRotation = getCurrentState().menuButtonRotation
             menuButton.apply {
-                imageResource = if (inPrivate)
-                    R.drawable.ic_view_private
-                else
-                    R.drawable.ic_baseline_expand_more_24
-                rotation = getCurrentState().menuButtonRotation
+                if (targetRotation == rotation) return
+                if (instant || disableAnimation.getValue()) {
+                    rotation = targetRotation
+                } else {
+                    animate().setDuration(200L).rotation(targetRotation)
+                }
             }
         }
 
@@ -251,10 +265,7 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
                     transitionToClipboardBar()
                 }
             }
-            if (disableAnimation.getValue())
-                menuButton.rotation = state.menuButtonRotation
-            else
-                menuButton.animate().setDuration(200L).rotation(state.menuButtonRotation)
+            updateMenuButtonRotation()
         }
 
         private fun enableClipboardItem() {

@@ -59,8 +59,6 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     private var clipboardTimeoutJob: Job? = null
 
-    private var firstShow = true
-
     private val onClipboardUpdateListener =
         ClipboardManager.OnClipboardUpdateListener {
             service.lifecycleScope.launch {
@@ -189,17 +187,12 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     }
 
     fun onShow() {
-        idleUiStateMachine.push(KawaiiBarShown)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             idleUi.privateMode(
                 service.editorInfo?.imeOptions?.hasFlag(EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING) == true
             )
         }
-        if (firstShow) {
-            if (expandToolbarByDefault.getValue())
-                idleUi.switchUiByState(IdleUiStateMachine.State.Toolbar)
-            firstShow = false
-        }
+        idleUiStateMachine.push(KawaiiBarShown)
     }
 
     private fun switchUiByState(state: KawaiiBarStateMachine.State) {
