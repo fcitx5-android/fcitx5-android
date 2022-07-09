@@ -92,38 +92,39 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     }
 
     private val idleUi: KawaiiBarUi.Idle by lazy {
-        KawaiiBarUi.Idle(context, theme) { idleUiStateMachine.currentState }.also {
-            it.menuButton.setOnClickListener {
+        KawaiiBarUi.Idle(context, theme) { idleUiStateMachine.currentState }.apply {
+            menuButton.setOnClickListener {
                 idleUiStateMachine.push(MenuButtonClicked)
                 // reset timeout timer (if present) when user switch layout
                 if (clipboardTimeoutJob != null) {
                     launchClipboardTimeoutJob()
                 }
             }
-            it.undoButton.setOnClickListener {
+            undoButton.setOnClickListener {
                 service.sendCombinationKeyEvents(KeyEvent.KEYCODE_Z, ctrl = true)
             }
-            it.redoButton.setOnClickListener {
+            redoButton.setOnClickListener {
                 service.sendCombinationKeyEvents(KeyEvent.KEYCODE_Z, ctrl = true, shift = true)
             }
-            it.cursorMoveButton.setOnClickListener {
+            cursorMoveButton.setOnClickListener {
                 windowManager.attachWindow(TextEditingWindow())
             }
-            it.clipboardButton.setOnClickListener {
+            clipboardButton.setOnClickListener {
                 windowManager.attachWindow(ClipboardWindow())
             }
-            it.moreButton.setOnClickListener {
+            moreButton.setOnClickListener {
                 windowManager.attachWindow(StatusAreaWindow())
             }
-            it.clipboardSuggestionItem.setOnClickListener {
+            clipboardSuggestionItem.setOnClickListener {
                 service.inputConnection?.performContextMenuAction(android.R.id.paste)
                 clipboardTimeoutJob?.cancel()
                 clipboardTimeoutJob = null
                 idleUiStateMachine.push(Pasted)
             }
-            it.hideKeyboardButton.setOnClickListener {
+            hideKeyboardButton.setOnClickListener {
                 service.requestHideSelf(0)
             }
+            switchUiByState(idleUiStateMachine.currentState)
         }
     }
 
