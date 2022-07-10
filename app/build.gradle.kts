@@ -227,7 +227,7 @@ ksp {
 tasks.register<Delete>("cleanGeneratedAssets") {
     delete(file("src/main/assets/usr/share/locale"))
     // delete all non symlink dirs
-    delete(file("src/main/assets/usr/share/fcitx5").listFiles()!!.filter {
+    delete(file("src/main/assets/usr/share/fcitx5").listFiles()?.filter {
         // https://stackoverflow.com/questions/813710/java-1-6-determine-symbolic-links
         File(it.parentFile.canonicalFile, it.name).let { s ->
             s.canonicalFile == s.absoluteFile
@@ -244,7 +244,7 @@ tasks.register<Delete>("cleanCxxIntermediates") {
 dependencies {
     val arrowVersion = "1.1.2"
     implementation("io.arrow-kt:arrow-core:$arrowVersion")
-    implementation("androidx.activity:activity-ktx:1.4.0")
+    implementation("androidx.activity:activity-ktx:1.5.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
     implementation("com.github.CanHub:Android-Image-Cropper:4.2.1")
     implementation("cat.ereza:customactivityoncrash:2.4.0")
@@ -261,8 +261,8 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.4.2")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.lifecycle", "lifecycle-runtime-ktx", "2.3.1")
-    implementation("androidx.lifecycle:lifecycle-service:2.4.1")
-    implementation("androidx.lifecycle:lifecycle-common-java8:2.4.1")
+    implementation("androidx.lifecycle:lifecycle-service:2.5.0")
+    implementation("androidx.lifecycle:lifecycle-common-java8:2.5.0")
     implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-android", "1.4.2")
     implementation("androidx.preference:preference-ktx:1.2.0")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
@@ -281,7 +281,7 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.4.0")
     androidTestImplementation("androidx.test:rules:1.4.0")
-    androidTestImplementation("androidx.lifecycle:lifecycle-runtime-testing:2.4.1")
+    androidTestImplementation("androidx.lifecycle:lifecycle-runtime-testing:2.5.0")
     androidTestImplementation("junit:junit:4.13.2")
 }
 
