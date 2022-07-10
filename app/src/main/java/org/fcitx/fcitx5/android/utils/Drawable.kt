@@ -2,10 +2,8 @@ package org.fcitx.fcitx5.android.utils
 
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.RippleDrawable
-import android.graphics.drawable.StateListDrawable
+import android.graphics.drawable.*
+import android.graphics.drawable.shapes.OvalShape
 import android.view.View
 import androidx.annotation.ColorInt
 
@@ -19,6 +17,13 @@ fun View.borderlessRippleDrawable(@ColorInt color: Int, r: Int = RippleDrawable.
 
 fun View.pressHighlightDrawable(@ColorInt color: Int) = StateListDrawable().apply {
     addState(intArrayOf(android.R.attr.state_pressed), ColorDrawable(color))
+}
+
+fun View.circlePressHighlightDrawable(@ColorInt color: Int) = StateListDrawable().apply {
+    addState(
+        intArrayOf(android.R.attr.state_pressed),
+        ShapeDrawable(OvalShape()).apply { paint.color = color }
+    )
 }
 
 fun View.borderDrawable(

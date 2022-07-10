@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.input.bar
 
 import android.content.Context
+import android.graphics.ColorFilter
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
@@ -22,27 +23,66 @@ import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.State.*
 import org.fcitx.fcitx5.android.input.editing.TextEditingUi.GImageButton
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
 import org.fcitx.fcitx5.android.utils.borderlessRippleDrawable
+import org.fcitx.fcitx5.android.utils.circlePressHighlightDrawable
+import org.fcitx.fcitx5.android.utils.pressHighlightDrawable
 import org.fcitx.fcitx5.android.utils.rippleDrawable
 import splitties.dimensions.dp
+import splitties.resources.drawable
+import splitties.views.*
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
-import splitties.views.gravityCenter
-import splitties.views.gravityVerticalCenter
-import splitties.views.imageResource
-import splitties.views.padding
 import timber.log.Timber
 
 sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Theme) : Ui {
 
+    companion object {
+        val disableAnimationPref = AppPrefs.getInstance().advanced.disableAnimation
+    }
+
+    inner class ToolButton(@DrawableRes icon: Int) : CustomGestureView(ctx) {
+        val image = imageView {
+            isClickable = false
+            isFocusable = false
+            imageDrawable = context.drawable(icon)
+            padding = dp(10)
+            scaleType = ImageView.ScaleType.CENTER_INSIDE
+            colorFilter =
+                PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
+        }
+
+        private val onDisableAnimationListener = ManagedPreference.OnChangeListener<Boolean> {
+            setupBackground(it)
+        }
+
+        private fun setupBackground(animation: Boolean) {
+            val color = inputTheme.keyPressHighlightColor.color
+            background =
+                if (animation) circlePressHighlightDrawable(color)
+                else borderlessRippleDrawable(color, dp(20))
+        }
+
+        init {
+            setupBackground(disableAnimationPref.getValue())
+            add(image, lParams(wrapContent, wrapContent, gravityCenter))
+        }
+
+        override fun onAttachedToWindow() {
+            super.onAttachedToWindow()
+            disableAnimationPref.registerOnChangeListener(onDisableAnimationListener)
+        }
+
+        override fun onDetachedFromWindow() {
+            super.onDetachedFromWindow()
+            disableAnimationPref.unregisterOnChangeListener(onDisableAnimationListener)
+        }
+    }
+
     class Candidate(ctx: Context, inputTheme: Theme, private val horizontalView: View) :
         KawaiiBarUi(ctx, inputTheme) {
 
-        val expandButton = GImageButton(ctx).apply {
+        val expandButton = ToolButton(R.drawable.ic_baseline_expand_more_24).apply {
             id = R.id.expand_candidate_btn
-            imageResource = R.drawable.ic_baseline_expand_more_24
-            visibility = ConstraintLayout.INVISIBLE
-            colorFilter =
-                PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
+            visibility = View.INVISIBLE
         }
 
         override val root = ctx.constraintLayout {
@@ -80,30 +120,21 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
 
         private var inPrivate = false
 
-        private fun toolButton(@DrawableRes icon: Int) = GImageButton(ctx).apply {
-            imageResource = icon
-            background = borderlessRippleDrawable(inputTheme.keyPressHighlightColor.color, dp(20))
-            colorFilter =
-                PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
-            scaleType = ImageView.ScaleType.CENTER_INSIDE
-            padding = dp(10)
-        }
-
-        val menuButton = toolButton(R.drawable.ic_baseline_expand_more_24).apply {
+        val menuButton = ToolButton(R.drawable.ic_baseline_expand_more_24).apply {
             rotation = getCurrentState().menuButtonRotation
         }
 
-        val undoButton = toolButton(R.drawable.ic_baseline_undo_24)
+        val undoButton = ToolButton(R.drawable.ic_baseline_undo_24)
 
-        val redoButton = toolButton(R.drawable.ic_baseline_redo_24)
+        val redoButton = ToolButton(R.drawable.ic_baseline_redo_24)
 
-        val cursorMoveButton = toolButton(R.drawable.ic_cursor_move)
+        val cursorMoveButton = ToolButton(R.drawable.ic_cursor_move)
 
-        val clipboardButton = toolButton(R.drawable.ic_clipboard)
+        val clipboardButton = ToolButton(R.drawable.ic_clipboard)
 
-        val moreButton = toolButton(R.drawable.ic_baseline_more_horiz_24)
+        val moreButton = ToolButton(R.drawable.ic_baseline_more_horiz_24)
 
-        val hideKeyboardButton = toolButton(R.drawable.ic_baseline_arrow_drop_down_24)
+        val hideKeyboardButton = ToolButton(R.drawable.ic_baseline_arrow_drop_down_24)
 
         private fun ConstraintLayout.addButton(
             v: View,
@@ -191,12 +222,10 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
             }
         }
 
-        private val disableAnimation = AppPrefs.getInstance().advanced.disableAnimation
-
         init {
-            disableAnimation.registerOnChangeListener(onDisableAnimationChange)
+            disableAnimationPref.registerOnChangeListener(onDisableAnimationChange)
             // After animator was initialized
-            onDisableAnimationChange.onChange(disableAnimation.getValue())
+            onDisableAnimationChange.onChange(disableAnimationPref.getValue())
         }
 
         override val root = constraintLayout {
@@ -216,7 +245,7 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
         }
 
         private fun updateMenuButtonIcon() {
-            menuButton.imageResource =
+            menuButton.image.imageResource =
                 if (inPrivate) R.drawable.ic_view_private
                 else R.drawable.ic_baseline_expand_more_24
         }
@@ -225,7 +254,7 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
             val targetRotation = getCurrentState().menuButtonRotation
             menuButton.apply {
                 if (targetRotation == rotation) return
-                if (instant || disableAnimation.getValue()) {
+                if (instant || disableAnimationPref.getValue()) {
                     rotation = targetRotation
                 } else {
                     animate().setDuration(200L).rotation(targetRotation)
@@ -283,14 +312,7 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
 
     class Title(ctx: Context, inputTheme: Theme) : KawaiiBarUi(ctx, inputTheme) {
 
-        private val backButton = GImageButton(ctx).apply {
-            imageResource = R.drawable.ic_baseline_arrow_back_24
-            background = borderlessRippleDrawable(inputTheme.keyPressHighlightColor.color, dp(20))
-            colorFilter =
-                PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
-            scaleType = ImageView.ScaleType.CENTER_INSIDE
-            padding = dp(10)
-        }
+        private val backButton = ToolButton(R.drawable.ic_baseline_arrow_back_24)
 
         private val titleText = textView {
             typeface = Typeface.defaultFromStyle(Typeface.BOLD)

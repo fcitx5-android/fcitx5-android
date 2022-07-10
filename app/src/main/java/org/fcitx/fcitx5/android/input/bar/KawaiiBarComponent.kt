@@ -41,6 +41,7 @@ import splitties.views.backgroundColor
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
+import splitties.views.imageResource
 import timber.log.Timber
 import kotlin.time.Duration.Companion.seconds
 
@@ -168,7 +169,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                 }
             )
         }
-        candidateUi.expandButton.imageResource = R.drawable.ic_baseline_expand_more_24
+        candidateUi.expandButton.image.imageResource = R.drawable.ic_baseline_expand_more_24
     }
 
     // set expand candidate button to close expand candidate
@@ -176,7 +177,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         candidateUi.expandButton.setOnClickListener {
             windowManager.switchToKeyboardWindow()
         }
-        candidateUi.expandButton.imageResource = R.drawable.ic_baseline_expand_less_24
+        candidateUi.expandButton.image.imageResource = R.drawable.ic_baseline_expand_less_24
     }
 
     // should be used with setExpandButtonToAttach or setExpandButtonToDetach
