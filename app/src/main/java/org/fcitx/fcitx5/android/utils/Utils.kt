@@ -25,8 +25,8 @@ import androidx.annotation.IdRes
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.NavController
@@ -139,10 +139,7 @@ fun Configuration.isDarkMode() =
     }
 
 fun Activity.applyTranslucentSystemBars() {
-    // with minSDK 23 we always have windowLightStatusBar
-    window.statusBarColor = Color.TRANSPARENT
-    WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars =
-        !resources.configuration.isDarkMode()
+    WindowCompat.setDecorFitsSystemWindows(window, false)
     // windowLightNavigationBar is available for 27+
     window.navigationBarColor =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {

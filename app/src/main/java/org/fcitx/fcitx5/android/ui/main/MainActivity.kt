@@ -12,7 +12,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.navigation.fragment.NavHostFragment
@@ -50,11 +49,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         applyTranslucentSystemBars()
         val binding = ActivityMainBinding.inflate(layoutInflater)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
             val statusBars = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
             val navBars = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            binding.appBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            binding.appbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = navBars.left
                 rightMargin = navBars.right
             }
@@ -79,10 +77,10 @@ class MainActivity : AppCompatActivity() {
             binding.toolbar.title = it
         }
         viewModel.appbarShadow.observe(this) {
-            binding.appBar.stateListAnimator = StateListAnimator().apply {
+            binding.appbar.stateListAnimator = StateListAnimator().apply {
                 addState(
                     intArrayOf(android.R.attr.state_enabled),
-                    ObjectAnimator.ofFloat(binding.appBar, "elevation", dp(if (it) 4f else 0f))
+                    ObjectAnimator.ofFloat(binding.appbar, "elevation", dp(if (it) 4f else 0f))
                 )
             }
         }
