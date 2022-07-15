@@ -49,14 +49,12 @@ abstract class FcitxPreferenceFragment : PaddingPreferenceFragment() {
             screen.forEach {
                 it.onPreferenceChangeListener = onPreferenceChangeListener
             }
-            if (screen.isEmpty())
-                screen.addPreference(
-                    Preference(requireContext())
-                        .apply {
-                            setTitle(R.string.no_config_options)
-                            isIconSpaceReserved = false
-                            isSingleLineTitle = true
-                        })
+            if (screen.isEmpty()) {
+                screen.addPreference(Preference(requireContext()).apply {
+                    setTitle(R.string.no_config_options)
+                    isIconSpaceReserved = false
+                })
+            }
             preferenceScreen = screen
             viewModel.disableAboutButton()
         }
