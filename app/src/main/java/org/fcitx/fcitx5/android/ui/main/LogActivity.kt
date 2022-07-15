@@ -3,7 +3,7 @@ package org.fcitx.fcitx5.android.ui.main
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -24,7 +24,7 @@ class LogActivity : AppCompatActivity() {
     private lateinit var logView: LogView
 
     private fun registerLauncher() {
-        launcher = registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri ->
+        launcher = registerForActivityResult(CreateDocument("text/plain")) { uri ->
             lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
                 runCatching {
                     if (uri != null)

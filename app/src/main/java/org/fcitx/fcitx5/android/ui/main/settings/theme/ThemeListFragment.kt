@@ -125,7 +125,7 @@ class ThemeListFragment : Fragment() {
                 }
             }
         exportLauncher =
-            registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri ->
+            registerForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
                 lifecycleScope.withLoadingDialog(requireContext()) {
                     withContext(NonCancellable + Dispatchers.IO) {
                         runCatching {
