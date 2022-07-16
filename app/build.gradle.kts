@@ -113,6 +113,7 @@ android {
     }
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -242,6 +243,7 @@ tasks.register<Delete>("cleanCxxIntermediates") {
 }.also { tasks.clean.dependsOn(it) }
 
 dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.6")
     val arrowVersion = "1.1.2"
     implementation("io.arrow-kt:arrow-core:$arrowVersion")
     implementation("androidx.activity:activity-ktx:1.5.0")
