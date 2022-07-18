@@ -9,6 +9,7 @@ import org.fcitx.fcitx5.android.R
 import splitties.dimensions.dp
 import splitties.resources.resolveThemeAttribute
 import splitties.resources.styledColor
+import splitties.resources.styledDimenPxSize
 import splitties.resources.styledDrawable
 import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.*
@@ -27,8 +28,7 @@ class DynamicListEntryUi(override val ctx: Context) : Ui {
     val checkBox = checkBox()
 
     val nameText = textView {
-        minHeight = dp(60)
-        setPaddingDp(0, 18, 0, 18)
+        setPaddingDp(0, 16, 0, 16)
         textAppearance = ctx.resolveThemeAttribute(androidx.appcompat.R.attr.textAppearanceListItem)
     }
 
@@ -45,45 +45,43 @@ class DynamicListEntryUi(override val ctx: Context) : Ui {
     override val root: View = constraintLayout {
         layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
         backgroundColor = styledColor(android.R.attr.colorBackground)
+        minHeight = styledDimenPxSize(android.R.attr.listPreferredItemHeightSmall)
 
         add(handleImage, lParams {
             width = dp(24)
-            height = dp(60)
-            topOfParent()
-            startOfParent(dp(18))
+            height = 0
+            centerVertically()
+            startOfParent(styledDimenPxSize(android.R.attr.listPreferredItemPaddingStart))
         })
 
         add(checkBox, lParams {
             width = dp(30)
-            height = dp(60)
-            topOfParent()
+            height = 0
+            centerVertically()
             after(handleImage, dp(12))
         })
 
         add(nameText, lParams {
             width = 0
             height = wrapContent
-            bottomOfParent()
+            centerVertically()
             before(editButton, dp(12))
             after(checkBox, dp(16))
-            topOfParent()
         })
 
         add(editButton, lParams {
-            width = dp(60)
+            width = dp(53)
             height = 0
+            centerVertically()
             before(settingsButton)
             after(nameText)
-            topOfParent()
-            bottomOfParent()
         })
 
         add(settingsButton, lParams {
-            width = dp(60)
+            width = dp(53)
             height = 0
-            bottomOfParent()
+            centerVertically()
             endOfParent()
-            topOfParent()
         })
     }
 }
