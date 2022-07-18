@@ -130,6 +130,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
     data class ConfigExternal(
         override val name: String,
         override val description: String? = null,
+        val uri: String? = null,
     ) : ConfigDescriptor<ConfigType.TyExternal, Nothing>() {
         override val type: ConfigType<ConfigType.TyExternal>
             get() = ConfigType.TyExternal
@@ -232,7 +233,8 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                         )
                         ConfigType.TyExternal -> ConfigExternal(
                             raw.name,
-                            raw.description
+                            raw.description,
+                            raw.findByName("External")?.value
                         )
                     }
                 }
