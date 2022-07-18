@@ -9,15 +9,13 @@ import android.widget.CheckBox
 import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.doOnAttach
-import androidx.core.view.updateLayoutParams
+import androidx.core.view.*
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.ItemTouchHelper
 import arrow.core.identity
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import org.fcitx.fcitx5.android.R
 import splitties.dimensions.dp
@@ -108,38 +106,40 @@ abstract class BaseDynamicListUi<T>(
         addOnItemChangedListener(object : OnItemChangedListener<T> {
             override fun onItemAdded(idx: Int, item: T) {
                 updateFAB()
-                showUndoSnackbar(
-                    ctx.getString(
-                        R.string.added_x,
-                        showEntry(item)
-                    )
-                ) { removeItem(idx) }
+                showUndoSnackbar(ctx.getString(R.string.added_x, showEntry(item))) {
+                    removeItem(idx)
+                }
             }
 
             override fun onItemRemoved(idx: Int, item: T) {
                 updateFAB()
                 showUndoSnackbar(ctx.getString(R.string.removed_x, showEntry(item))) {
-                    addItem(
-                        idx,
-                        item
-                    )
+                    addItem(idx, item)
                 }
             }
 
             override fun onItemUpdated(idx: Int, old: T, new: T) {
                 updateFAB()
-                if (mode !is Mode.Immutable) {
-                    showUndoSnackbar(ctx.getString(R.string.edited_x, showEntry(new))) {
-                        updateItem(idx, old)
-                    }
+                if (mode is Mode.Immutable) return
+                showUndoSnackbar(ctx.getString(R.string.edited_x, showEntry(new))) {
+                    updateItem(idx, old)
                 }
             }
         })
     }
 
     private fun showUndoSnackbar(text: String, action: View.OnClickListener) {
-        Snackbar.make(fab, text, Snackbar.LENGTH_SHORT)
+        Snackbar.make(root, text, Snackbar.LENGTH_SHORT)
             .apply { if (enableUndo) setAction(R.string.undo, action) }
+            .addCallback(object: BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                override fun onShown(transientBottomBar: Snackbar) {
+                    // snackbar is invisible when it attached to parent,
+                    // but change visibility won't trigger `onDependentViewChanged`.
+                    // so we need to update fab position when snackbar fully shown
+                    // see [^1]
+                    fab.translationY = -transientBottomBar.view.height.toFloat()
+                }
+            })
             .show()
     }
 
@@ -260,10 +260,13 @@ abstract class BaseDynamicListUi<T>(
                     child: FloatingActionButton,
                     dependency: View
                 ): Boolean {
-                    val translationY = min(0f, dependency.translationY - dependency.height)
-                    if (translationY != 0f)
-                        child.translationY = translationY
-                    return true
+                    // [^1]: snackbar is invisible when it attached to parent
+                    // update fab position only when snackbar is visible
+                    if (dependency.isVisible) {
+                        child.translationY = min(0f, dependency.translationY - dependency.height)
+                        return true
+                    }
+                    return false
                 }
 
                 override fun onDependentViewRemoved(
