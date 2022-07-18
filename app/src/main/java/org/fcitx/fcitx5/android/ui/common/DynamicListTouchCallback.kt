@@ -1,8 +1,16 @@
 package org.fcitx.fcitx5.android.ui.common
 
-import android.graphics.Canvas
+import android.graphics.*
+import android.graphics.drawable.ColorDrawable
+import androidx.core.graphics.drawable.toBitmap
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import org.fcitx.fcitx5.android.R
+import splitties.dimensions.dp
+import splitties.resources.appColor
+import splitties.resources.appDrawable
+import splitties.resources.appStyledColor
+import kotlin.math.absoluteValue
 
 open class DynamicListTouchCallback<T>(private val adapter: DynamicListAdapter<T>) :
     ItemTouchHelper.SimpleCallback(
@@ -13,8 +21,28 @@ open class DynamicListTouchCallback<T>(private val adapter: DynamicListAdapter<T
             ItemTouchHelper.LEFT
         else ItemTouchHelper.ACTION_STATE_IDLE
     ) {
+
     private var selected = true
     private var reset = false
+
+    private val deleteBackground by lazy {
+        ColorDrawable().apply {
+            color = appColor(R.color.red_400)
+        }
+    }
+
+    private val deleteIcon by lazy {
+        appDrawable(R.drawable.ic_baseline_delete_24)!!.toBitmap()
+    }
+
+    private val deleteIconPaint by lazy {
+        Paint().apply {
+            colorFilter = PorterDuffColorFilter(
+                appStyledColor(android.R.attr.colorBackground),
+                PorterDuff.Mode.SRC_IN
+            )
+        }
+    }
 
     override fun onMove(
         recyclerView: RecyclerView,
@@ -27,6 +55,58 @@ open class DynamicListTouchCallback<T>(private val adapter: DynamicListAdapter<T
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         adapter.removeItem(viewHolder.bindingAdapterPosition)
+    }
+
+    override fun onChildDrawOver(
+        c: Canvas,
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder?,
+        dX: Float,
+        dY: Float,
+        actionState: Int,
+        isCurrentlyActive: Boolean
+    ) {
+        val itemView = viewHolder?.itemView ?: return super.onChildDrawOver(
+            c,
+            recyclerView,
+            viewHolder,
+            dX,
+            dY,
+            actionState,
+            isCurrentlyActive
+        )
+        when (actionState) {
+            ItemTouchHelper.ACTION_STATE_SWIPE -> {
+                // consider swipe left only, dX < 0
+                val canvasLeft = (itemView.right + dX).toInt()
+                deleteBackground.apply {
+                    bounds = itemView.run { Rect(canvasLeft, top, right, bottom) }
+                }.draw(c)
+                deleteIcon.also {
+                    val iconMargin = (itemView.height - it.height) / 2
+                    val revealed = (dX.absoluteValue - iconMargin).toInt()
+                    c.drawBitmap(
+                        it,
+                        /* src= */ Rect(
+                            /* right = */ if (revealed > it.width) 0 else it.width - revealed,
+                            /* top   = */ 0,
+                            /* left  = */ it.width,
+                            /* bottom= */ it.height
+                        ),
+                        /* dst= */ Rect(
+                            /* right = */ if (revealed > it.width) itemView.right - iconMargin - it.width else canvasLeft,
+                            /* top   = */ itemView.top + iconMargin,
+                            /* left  = */ itemView.right - iconMargin,
+                            /* bottom= */ itemView.top + iconMargin + it.height
+                        ),
+                        deleteIconPaint
+                    )
+                }
+            }
+            ItemTouchHelper.ACTION_STATE_DRAG -> {
+            }
+        }
+        super.onChildDrawOver(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
     }
 
     override fun onChildDraw(
@@ -43,19 +123,13 @@ open class DynamicListTouchCallback<T>(private val adapter: DynamicListAdapter<T
                 if (selected) {
                     // elevate only when picked for the first time
                     selected = false
-                    viewHolder.itemView.animate().apply {
-                        translationZ(16f)
-                        duration = 200
-                    }.start()
+                    viewHolder.itemView.animate().setDuration(200).translationZ(recyclerView.dp(4f))
                 }
                 if (reset) {
                     // when your item is not floating anymore
                     reset = false
                     selected = true
-                    viewHolder.itemView.animate().apply {
-                        translationZ(0f)
-                        duration = 200
-                    }.start()
+                    viewHolder.itemView.animate().setDuration(200).translationZ(0f)
                 }
             }
             ItemTouchHelper.ACTION_STATE_SWIPE -> {
