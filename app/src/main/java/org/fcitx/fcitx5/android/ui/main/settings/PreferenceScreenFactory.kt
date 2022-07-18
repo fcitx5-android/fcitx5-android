@@ -67,8 +67,7 @@ object PreferenceScreenFactory {
 
         fun pinyinDictionary() = Preference(context).apply {
             setOnPreferenceClickListener {
-                val currentFragment =
-                    fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
+                val currentFragment = fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
                 val action = when (currentFragment) {
                     is AddonConfigFragment -> R.id.action_addonConfigFragment_to_pinyinDictionaryFragment
                     is InputMethodConfigFragment -> R.id.action_imConfigFragment_to_pinyinDictionaryFragment
@@ -81,23 +80,25 @@ object PreferenceScreenFactory {
 
         fun punctuationEditor(title: String) = Preference(context).apply {
             setOnPreferenceClickListener {
-                val currentFragment =
-                    fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
+                val currentFragment = fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
                 val action = when (currentFragment) {
                     is AddonConfigFragment -> R.id.action_addonConfigFragment_to_punctuationEditorFragment
                     is InputMethodConfigFragment -> R.id.action_imConfigFragment_to_punctuationEditorFragment
                     else -> throw IllegalStateException("Can not navigate to punctuation editor from current fragment")
                 }
-                currentFragment.findNavController()
-                    .navigate(action, bundleOf(PunctuationEditorFragment.TITLE to title))
+                currentFragment.findNavController().navigate(
+                    action,
+                    bundleOf(
+                        PunctuationEditorFragment.TITLE to title
+                    )
+                )
                 true
             }
         }
 
         fun quickPhraseEditor() = Preference(context).apply {
             setOnPreferenceClickListener {
-                val currentFragment =
-                    fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
+                val currentFragment = fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
                 val action = when (currentFragment) {
                     is AddonConfigFragment -> R.id.action_addonConfigFragment_to_quickPhraseListFragment
                     is InputMethodConfigFragment -> R.id.action_imConfigFragment_to_quickPhraseListFragment
@@ -110,15 +111,15 @@ object PreferenceScreenFactory {
 
         fun listPreference() = Preference(context).apply {
             setOnPreferenceClickListener {
-                val currentFragment =
-                    fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
+                val currentFragment = fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
                 val action = when (currentFragment) {
                     is AddonConfigFragment -> R.id.action_addonConfigFragment_to_listFragment
                     is InputMethodConfigFragment -> R.id.action_imConfigFragment_to_listFragment
                     else -> throw IllegalStateException("Can not navigate to listFragment from current fragment")
                 }
                 currentFragment.findNavController().navigate(
-                    action, bundleOf(
+                    action,
+                    bundleOf(
                         ListFragment.ARG_CFG to cfg[descriptor.name],
                         ListFragment.ARG_DESC to descriptor,
                     )
@@ -133,19 +134,18 @@ object PreferenceScreenFactory {
             }
         }
 
-        fun chttrans() = Preference(context).apply {
+        fun addonConfigPreference(addon: String) = Preference(context).apply {
             setOnPreferenceClickListener {
-                val currentFragment =
-                    fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
+                val currentFragment = fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
                 val action = when (currentFragment) {
                     is AddonConfigFragment -> R.id.action_addonConfigFragment_self
                     is InputMethodConfigFragment -> R.id.action_imConfigFragment_to_addonConfigFragment
-                    else -> throw IllegalStateException("Can not navigate to listFragment from current fragment")
+                    else -> throw IllegalStateException("Can not navigate to addonConfigFragment from current fragment")
                 }
                 currentFragment.findNavController().navigate(
                     action,
                     bundleOf(
-                        AddonConfigFragment.ARG_UNIQUE_NAME to "chttrans",
+                        AddonConfigFragment.ARG_UNIQUE_NAME to addon,
                         AddonConfigFragment.ARG_NAME to (descriptor.description ?: descriptor.name)
                     )
                 )
@@ -168,9 +168,9 @@ object PreferenceScreenFactory {
             is ConfigDescriptor.ConfigExternal -> when (descriptor.name) {
                 "DictManager" -> pinyinDictionary()
                 "Punctuation" -> punctuationEditor(descriptor.description ?: descriptor.name)
-                "Editor" -> quickPhraseEditor()
-                "QuickPhrase" -> quickPhraseEditor()
-                "Chttrans" -> chttrans()
+                "QuickPhrase", "Editor" -> quickPhraseEditor()
+                "Chttrans" -> addonConfigPreference("chttrans")
+                "TableGlobal" -> addonConfigPreference("table")
                 else -> stubPreference()
             }
             is ConfigDescriptor.ConfigInt -> DialogSeekBarPreference(context).apply {
