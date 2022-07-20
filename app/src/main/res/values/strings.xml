@@ -143,4 +143,5 @@
     <string name="dark_mode_theme">Dark mode theme</string>
     <string name="new_theme">New theme</string>
     <string name="skip">Skip</string>
+    <string name="horizontal_candidate_growth">Stretch horizontal candidates to fill the remaining width</string>
 </resources>

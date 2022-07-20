@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.runBlocking
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesUpdatedEmpty
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesUpdatedNonEmpty
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
@@ -39,6 +40,8 @@ class HorizontalCandidateComponent :
 
     val expandedCandidateOffset = _expandedCandidateOffset.asSharedFlow()
 
+    val horizontalCandidateGrowth by AppPrefs.getInstance().keyboard.horizontalCandidateGrowth
+
     private fun refreshExpanded() {
         runBlocking {
             _expandedCandidateOffset.emit(view.childCount)
@@ -52,7 +55,9 @@ class HorizontalCandidateComponent :
                 override fun canScrollVertically(): Boolean = false
                 override fun canScrollHorizontally(): Boolean = false
                 override fun generateLayoutParams(lp: ViewGroup.LayoutParams?) =
-                    LayoutParams(lp).apply { flexGrow = 1f }
+                    LayoutParams(lp).apply {
+                        flexGrow = if (horizontalCandidateGrowth) 1f else 0f
+                    }
 
                 override fun onLayoutCompleted(state: RecyclerView.State?) {
                     super.onLayoutCompleted(state)
