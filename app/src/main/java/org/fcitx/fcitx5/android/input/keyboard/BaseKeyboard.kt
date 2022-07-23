@@ -38,6 +38,9 @@ abstract class BaseKeyboard(
     interface KeyPopupListener {
         fun onPreview(viewId: Int, content: String, bounds: Rect)
         fun onDismiss(viewId: Int)
+        fun onShowKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect)
+        fun onChangeFocus(viewId: Int, deltaX: Int, deltaY: Int): Boolean
+        fun onKeyAction(viewId: Int): KeyAction?
     }
 
     var keyPopupListener: KeyPopupListener? = null
@@ -128,29 +131,10 @@ abstract class BaseKeyboard(
                         setOnClickListener { _ ->
                             onAction(it.action)
                         }
-                        if (def.popup is KeyDef.Popup.Preview) {
-                            onGestureListener = OnGestureListener { view, event ->
-                                view as KeyView
-                                when (event.type) {
-                                    GestureType.Down -> {
-                                        onPopupPreview(view.id, def.popup.content, view.bounds)
-                                    }
-                                    GestureType.Up -> {
-                                        onPopupDismiss(view.id)
-                                    }
-                                    else -> {}
-                                }
-                                false
-                            }
-                        }
                     }
                     is KeyDef.Behavior.LongPress -> {
-                        setOnLongClickListener { view ->
+                        setOnLongClickListener { _ ->
                             onAction(it.action)
-                            if (def.popup is KeyDef.Popup.AltPreview) {
-                                val v = view as KeyView
-                                onPopupPreview(v.id, def.popup.alternative, v.bounds)
-                            }
                             true
                         }
                     }
@@ -165,31 +149,94 @@ abstract class BaseKeyboard(
                         swipeThresholdY = inputSwipeThreshold
                         val oldOnGestureListener = onGestureListener ?: OnGestureListener.Empty
                         onGestureListener = OnGestureListener { view, event ->
-                            def.popup as KeyDef.Popup.AltPreview
-                            view as KeyView
                             when (event.type) {
-                                GestureType.Move -> {
-                                    val preview = def.popup.run {
-                                        if (event.totalY > 0) alternative else content
-                                    }
-                                    onPopupPreview(view.id, preview, view.bounds)
-                                    true
-                                }
                                 GestureType.Up -> {
                                     if (event.totalY > 0) {
                                         onAction(it.action)
-                                        onPopupDismiss(view.id)
                                         true
-                                    } else null
+                                    } else {
+                                        false
+                                    }
                                 }
-                                else -> null
-                            } ?: oldOnGestureListener.onGesture(view, event)
+                                else -> false
+                            } || oldOnGestureListener.onGesture(view, event)
                         }
                     }
                     is KeyDef.Behavior.DoubleTap -> {
                         doubleTapEnabled = true
                         onDoubleTapListener = { _ ->
                             onAction(it.action)
+                        }
+                    }
+                }
+            }
+            def.popup?.forEach {
+                when (it) {
+                    is KeyDef.Popup.Keyboard -> {
+                        setOnLongClickListener { view ->
+                            view as KeyView
+                            keyPopupListener?.onShowKeyboard(view.id, it, view.bounds)
+                            // do not consume this LongClick gesture
+                            false
+                        }
+                        val oldOnGestureListener = onGestureListener ?: OnGestureListener.Empty
+                        swipeThresholdX = dp(38f)
+                        swipeThresholdY = dp(48f)
+                        onGestureListener = OnGestureListener { view, event ->
+                            view as KeyView
+                            when (event.type) {
+                                GestureType.Move -> {
+                                    keyPopupListener
+                                        ?.onChangeFocus(view.id, event.countX, event.countY)
+                                        ?: false
+                                }
+                                GestureType.Up -> {
+                                    // ask popup keyboard whether there's a pending KeyAction
+                                    keyPopupListener?.onKeyAction(view.id)?.let { act ->
+                                        onAction(act)
+                                        onPopupDismiss(view.id)
+                                        true
+                                    } ?: false
+                                }
+                                else -> false
+                            } || oldOnGestureListener.onGesture(view, event)
+                        }
+                    }
+                    is KeyDef.Popup.AltPreview -> {
+                        val oldOnGestureListener = onGestureListener ?: OnGestureListener.Empty
+                        onGestureListener = OnGestureListener { view, event ->
+                            view as KeyView
+                            when (event.type) {
+                                GestureType.Down -> {
+                                    onPopupPreview(view.id, it.content, view.bounds)
+                                }
+                                GestureType.Move -> {
+                                    val text = if (event.totalY > 0) it.alternative else it.content
+                                    onPopupPreview(view.id, text, view.bounds)
+                                }
+                                GestureType.Up -> {
+                                    onPopupDismiss(view.id)
+                                }
+                            }
+                            // never consume gesture in preview popup
+                            oldOnGestureListener.onGesture(view, event)
+                        }
+                    }
+                    is KeyDef.Popup.Preview -> {
+                        val oldOnGestureListener = onGestureListener ?: OnGestureListener.Empty
+                        onGestureListener = OnGestureListener { view, event ->
+                            view as KeyView
+                            when (event.type) {
+                                GestureType.Down -> {
+                                    onPopupPreview(view.id, it.content, view.bounds)
+                                }
+                                GestureType.Up -> {
+                                    onPopupDismiss(view.id)
+                                }
+                                else -> {}
+                            }
+                            // never consume gesture in preview popup
+                            oldOnGestureListener.onGesture(view, event)
                         }
                     }
                 }

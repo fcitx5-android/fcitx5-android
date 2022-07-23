@@ -66,7 +66,21 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
             popup.showPopup(viewId, content, bounds)
         }
 
-        override fun onDismiss(viewId: Int) = popup.dismissPopup(viewId)
+        override fun onDismiss(viewId: Int) {
+            popup.dismissPopup(viewId)
+        }
+
+        override fun onShowKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
+            popup.showKeyboard(viewId, keyboard, bounds)
+        }
+
+        override fun onChangeFocus(viewId: Int, deltaX: Int, deltaY: Int): Boolean {
+            return popup.changeFocus(viewId, deltaX, deltaY)
+        }
+
+        override fun onKeyAction(viewId: Int): KeyAction? {
+            return popup.triggerFocusedKeyboard(viewId)
+        }
     }
 
     // This will be called EXACTLY ONCE

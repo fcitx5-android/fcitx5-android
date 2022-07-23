@@ -98,8 +98,7 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                     longPressJob?.cancel()
                     longPressJob = lifecycleScope.launch {
                         delay(longPressDelay.toLong())
-                        longPressTriggered = true
-                        performLongClick()
+                        longPressTriggered = performLongClick()
                     }
                 }
                 if (repeatEnabled) {
