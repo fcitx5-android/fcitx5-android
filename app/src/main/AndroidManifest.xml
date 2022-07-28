@@ -80,8 +80,7 @@
 
         <provider
             android:name=".provider.FcitxDataProvider"
-            android:authorities="org.fcitx.fcitx5.android.provider"
-            android:enabled="true"
+            android:authorities="${applicationId}.provider"
             android:exported="true"
             android:grantUriPermissions="true"
             android:permission="android.permission.MANAGE_DOCUMENTS">
