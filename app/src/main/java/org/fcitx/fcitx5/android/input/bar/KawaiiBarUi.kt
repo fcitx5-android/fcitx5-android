@@ -1,7 +1,6 @@
 package org.fcitx.fcitx5.android.input.bar
 
 import android.content.Context
-import android.graphics.ColorFilter
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
@@ -20,11 +19,9 @@ import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.State.*
-import org.fcitx.fcitx5.android.input.editing.TextEditingUi.GImageButton
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
 import org.fcitx.fcitx5.android.utils.borderlessRippleDrawable
 import org.fcitx.fcitx5.android.utils.circlePressHighlightDrawable
-import org.fcitx.fcitx5.android.utils.pressHighlightDrawable
 import org.fcitx.fcitx5.android.utils.rippleDrawable
 import splitties.dimensions.dp
 import splitties.resources.drawable
@@ -86,17 +83,14 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
         }
 
         override val root = ctx.constraintLayout {
-            add(expandButton, lParams(matchConstraints, dp(40)) {
-                matchConstraintPercentWidth = 0.1f
-                topOfParent()
+            add(expandButton, lParams(dp(40)) {
+                centerVertically()
                 endOfParent()
-                bottomOfParent()
             })
-            add(horizontalView, lParams(matchConstraints, dp(40)) {
-                topOfParent()
+            add(horizontalView, lParams {
+                centerVertically()
                 startOfParent()
                 before(expandButton)
-                bottomOfParent()
             })
         }
     }
@@ -141,8 +135,7 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val inputTheme: Th
             initParams: ConstraintLayout.LayoutParams.() -> Unit = {}
         ) {
             add(v, ConstraintLayout.LayoutParams(dp(40), dp(40)).apply {
-                topOfParent()
-                bottomOfParent()
+                centerVertically()
                 initParams(this)
             })
         }
