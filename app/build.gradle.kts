@@ -40,7 +40,7 @@ android {
     namespace = "org.fcitx.fcitx5.android"
     compileSdk = 31
     buildToolsVersion = "31.0.0"
-    ndkVersion = System.getenv("NDK_VERSION") ?: "23.1.7779620"
+    ndkVersion = System.getenv("NDK_VERSION") ?: "25.0.8775105"
 
     defaultConfig {
         applicationId = "org.fcitx.fcitx5.android"
@@ -103,7 +103,7 @@ android {
 
     externalNativeBuild {
         cmake {
-            version = "3.18.1"
+            version = "3.22.1"
             path("src/main/cpp/CMakeLists.txt")
         }
     }
