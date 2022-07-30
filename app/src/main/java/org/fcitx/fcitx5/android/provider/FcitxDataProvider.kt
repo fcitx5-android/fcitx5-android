@@ -62,11 +62,17 @@ class FcitxDataProvider : DocumentsProvider() {
     }
 
     private lateinit var baseDir: File
-
+    private lateinit var docIdPrefix: String
     private lateinit var textFilePaths: Array<String>
+
+    private val File.docId
+        get() = absolutePath.removePrefix(docIdPrefix)
+
+    private fun fileFromDocId(docId: String) = File(docIdPrefix, docId)
 
     override fun onCreate(): Boolean {
         baseDir = context!!.getExternalFilesDir(null)!!
+        docIdPrefix = "${baseDir.parent}${File.separator}"
         textFilePaths = Array(TEXT_FILES.size) { baseDir.resolve(TEXT_FILES[it]).absolutePath }
         return true
     }
@@ -74,21 +80,21 @@ class FcitxDataProvider : DocumentsProvider() {
     override fun queryRoots(projection: Array<out String>?) =
         MatrixCursor(projection ?: DEFAULT_ROOT_PROJECTION).apply {
             newRow().apply {
-                add(Root.COLUMN_ROOT_ID, baseDir.absolutePath)
+                add(Root.COLUMN_ROOT_ID, baseDir.docId)
                 add(
                     Root.COLUMN_FLAGS,
                     Root.FLAG_SUPPORTS_CREATE or Root.FLAG_SUPPORTS_SEARCH or Root.FLAG_SUPPORTS_IS_CHILD
                 )
                 add(Root.COLUMN_ICON, R.mipmap.app_icon)
                 add(Root.COLUMN_TITLE, context!!.getString(R.string.app_name))
-                add(Root.COLUMN_DOCUMENT_ID, baseDir.absolutePath)
+                add(Root.COLUMN_DOCUMENT_ID, baseDir.docId)
                 add(Root.COLUMN_MIME_TYPES, MIME_TYPE_WILDCARD)
             }
         }
 
     override fun queryDocument(documentId: String, projection: Array<out String>?) =
         MatrixCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION).apply {
-            newRowFromPath(documentId)
+            newRowFromFile(fileFromDocId(documentId))
         }
 
     override fun queryChildDocuments(
@@ -96,7 +102,7 @@ class FcitxDataProvider : DocumentsProvider() {
         projection: Array<out String>?,
         sortOrder: String?
     ) = MatrixCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION).apply {
-        File(parentDocumentId).listFiles()?.forEach {
+        fileFromDocId(parentDocumentId).listFiles()?.forEach {
             newRowFromFile(it)
         }
     }
@@ -106,7 +112,10 @@ class FcitxDataProvider : DocumentsProvider() {
         mode: String,
         signal: CancellationSignal?
     ): ParcelFileDescriptor {
-        return ParcelFileDescriptor.open(File(documentId), ParcelFileDescriptor.parseMode(mode))
+        return ParcelFileDescriptor.open(
+            fileFromDocId(documentId),
+            ParcelFileDescriptor.parseMode(mode)
+        )
     }
 
     @Throws(FileNotFoundException::class)
@@ -115,7 +124,7 @@ class FcitxDataProvider : DocumentsProvider() {
         sizeHint: Point,
         signal: CancellationSignal?
     ): AssetFileDescriptor {
-        val file = File(documentId)
+        val file = fileFromDocId(documentId)
         val pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
         return AssetFileDescriptor(pfd, 0, file.length())
     }
@@ -125,8 +134,8 @@ class FcitxDataProvider : DocumentsProvider() {
         parentDocumentId: String,
         mimeType: String,
         displayName: String
-    ): String? {
-        val newFile = File(createDocumentPath(parentDocumentId, displayName))
+    ): String {
+        val newFile = createAbstractFile(parentDocumentId, displayName)
         try {
             val ok = if (mimeType == Document.MIME_TYPE_DIR) {
                 newFile.mkdir()
@@ -137,14 +146,14 @@ class FcitxDataProvider : DocumentsProvider() {
                 throw FileNotFoundException("createDocument id=${newFile.path} failed")
             }
         } catch (e: IOException) {
-            throw FileNotFoundException("createDocument id=${newFile.path} failed")
+            throw FileNotFoundException("createDocument id=${newFile.path} failed: ${e.message}")
         }
-        return newFile.path
+        return newFile.docId
     }
 
     @Throws(FileNotFoundException::class)
     override fun deleteDocument(documentId: String) {
-        File(documentId).apply {
+        fileFromDocId(documentId).apply {
             val ok = if (isDirectory) {
                 deleteRecursively()
             } else {
@@ -157,7 +166,7 @@ class FcitxDataProvider : DocumentsProvider() {
     }
 
     override fun getDocumentType(documentId: String): String {
-        return File(documentId).mimeType
+        return fileFromDocId(documentId).mimeType
     }
 
     override fun isChildDocument(parentDocumentId: String, documentId: String): Boolean {
@@ -166,9 +175,8 @@ class FcitxDataProvider : DocumentsProvider() {
 
     @Throws(FileNotFoundException::class)
     override fun copyDocument(sourceDocumentId: String, targetParentDocumentId: String): String {
-        val oldFile = File(sourceDocumentId)
-        val newPath = createDocumentPath(targetParentDocumentId, oldFile.name)
-        val newFile = File(newPath)
+        val oldFile = fileFromDocId(sourceDocumentId)
+        val newFile = createAbstractFile(targetParentDocumentId, oldFile.name)
         oldFile.apply {
             try {
                 val ok = if (isDirectory) {
@@ -177,24 +185,24 @@ class FcitxDataProvider : DocumentsProvider() {
                     copyTo(newFile).exists()
                 }
                 if (!ok) {
-                    throw FileNotFoundException("copyDocument id=$sourceDocumentId to $newPath failed")
+                    throw FileNotFoundException("copyDocument id=$sourceDocumentId to ${newFile.docId} failed")
                 }
             } catch (e: Exception) {
-                throw FileNotFoundException("copyDocument id=$sourceDocumentId to $newPath failed: ${e.message}")
+                throw FileNotFoundException("copyDocument id=$sourceDocumentId to ${newFile.docId} failed: ${e.message}")
             }
         }
-        return newPath
+        return newFile.docId
     }
 
     @Throws(FileNotFoundException::class)
     override fun renameDocument(documentId: String, displayName: String): String {
-        val oldFile = File(documentId)
+        val oldFile = fileFromDocId(documentId)
         val newFile = oldFile.resolveSibling(displayName)
         if (newFile.exists()) {
             throw FileNotFoundException("renameDocument id=$documentId to $displayName failed: target exists")
         }
         oldFile.renameTo(newFile)
-        return newFile.absolutePath
+        return newFile.docId
     }
 
     @Throws(FileNotFoundException::class)
@@ -203,10 +211,10 @@ class FcitxDataProvider : DocumentsProvider() {
         sourceParentDocumentId: String,
         targetParentDocumentId: String
     ): String {
-        val oldFile = File(sourceDocumentId)
-        val newPath = createDocumentPath(targetParentDocumentId, oldFile.name)
-        oldFile.renameTo(File(newPath))
-        return newPath
+        val oldFile = fileFromDocId(sourceDocumentId)
+        val newFile = createAbstractFile(targetParentDocumentId, oldFile.name)
+        oldFile.renameTo(newFile)
+        return newFile.docId
     }
 
     @Throws(FileNotFoundException::class)
@@ -217,7 +225,7 @@ class FcitxDataProvider : DocumentsProvider() {
     ) = MatrixCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION).apply {
         val qs = query.lowercase()
         val queue = LinkedList<File>().apply {
-            add(File(rootId))
+            add(fileFromDocId(rootId))
         }
         while (!queue.isEmpty() && count < SEARCH_RESULTS_LIMIT) {
             val file: File = queue.removeFirst()
@@ -237,19 +245,15 @@ class FcitxDataProvider : DocumentsProvider() {
             else -> MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: MIME_TYPE_BIN
         }
 
-    private fun createDocumentPath(parentDocumentId: String, displayName: String): String {
-        var newFile = File(parentDocumentId, displayName)
+    private fun createAbstractFile(parentDocumentId: String, displayName: String): File {
+        val parent = fileFromDocId(parentDocumentId)
+        var newFile = parent.resolve(displayName)
         var noConflictId = 2
         while (newFile.exists()) {
-            newFile = File(parentDocumentId, "$displayName ($noConflictId)")
+            newFile = parent.resolve("$displayName ($noConflictId)")
             noConflictId += 1
         }
-        return newFile.path
-    }
-
-    @Throws(FileNotFoundException::class)
-    private fun MatrixCursor.newRowFromPath(path: String) {
-        newRowFromFile(File(path))
+        return newFile
     }
 
     @Throws(FileNotFoundException::class)
@@ -278,7 +282,7 @@ class FcitxDataProvider : DocumentsProvider() {
         }
 
         newRow().apply {
-            add(Document.COLUMN_DOCUMENT_ID, file.absolutePath)
+            add(Document.COLUMN_DOCUMENT_ID, file.docId)
             add(Document.COLUMN_MIME_TYPE, mimeType)
             add(Document.COLUMN_DISPLAY_NAME, file.name)
             add(Document.COLUMN_LAST_MODIFIED, file.lastModified())
