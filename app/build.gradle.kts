@@ -22,9 +22,9 @@ val gitVersionName = exec("git describe --tags --long --always")
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("com.google.devtools.ksp") version "1.6.21-1.0.5"
+    id("com.google.devtools.ksp") version "1.7.10-1.0.6"
     id("com.cookpad.android.plugin.license-tools") version "1.2.0"
-    kotlin("plugin.serialization") version "1.6.10"
+    kotlin("plugin.serialization") version "1.7.10"
     id("kotlin-parcelize")
 }
 
@@ -246,7 +246,7 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.6")
     val arrowVersion = "1.1.2"
     implementation("io.arrow-kt:arrow-core:$arrowVersion")
-    implementation("androidx.activity:activity-ktx:1.5.0")
+    implementation("androidx.activity:activity-ktx:1.5.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
     implementation("com.github.CanHub:Android-Image-Cropper:4.2.1")
     implementation("cat.ereza:customactivityoncrash:2.4.0")
@@ -261,10 +261,10 @@ dependencies {
     implementation("androidx.core:core-ktx:1.8.0")
     implementation("androidx.appcompat:appcompat:1.4.2")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.lifecycle", "lifecycle-runtime-ktx", "2.3.1")
-    implementation("androidx.lifecycle:lifecycle-service:2.5.0")
-    implementation("androidx.lifecycle:lifecycle-common-java8:2.5.0")
-    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-android", "1.4.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
+    implementation("androidx.lifecycle:lifecycle-service:2.5.1")
+    implementation("androidx.lifecycle:lifecycle-common-java8:2.5.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.2")
     implementation("androidx.preference:preference-ktx:1.2.0")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("androidx.viewpager2:viewpager2:1.0.0")
@@ -282,7 +282,7 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.4.0")
     androidTestImplementation("androidx.test:rules:1.4.0")
-    androidTestImplementation("androidx.lifecycle:lifecycle-runtime-testing:2.5.0")
+    androidTestImplementation("androidx.lifecycle:lifecycle-runtime-testing:2.5.1")
     androidTestImplementation("junit:junit:4.13.2")
 }
 
