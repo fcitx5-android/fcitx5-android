@@ -83,7 +83,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                 isEnabled = true
                 isChecked = entry.isEnabled
                 setOnClickListener {
-                    ui.updateItem(idx, entry.also {
+                    ui.updateItem(ui.indexItem(entry), entry.also {
                         if (isChecked)
                             it.enable()
                         else
