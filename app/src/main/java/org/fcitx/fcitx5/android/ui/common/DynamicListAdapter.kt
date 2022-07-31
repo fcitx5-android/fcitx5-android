@@ -90,4 +90,6 @@ abstract class DynamicListAdapter<T>(
         listener?.onItemUpdated(idx, old, item)
     }
 
+    fun indexItem(item: T): Int = _entries.indexOf(item)
+
 }

@@ -71,7 +71,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                 isChecked = entry.isEnabled
                 setOnClickListener {
                     ui.updateItem(
-                        idx,
+                        ui.indexItem(entry),
                         entry.also {
                             if (isChecked)
                                 it.enable()
