@@ -38,9 +38,9 @@ Discuss on Telegram: https://t.me/fcitx5_android
 ### Dependencies
 
 - Android SDK Platform & Build-Tools 31 or newer version
-- Android NDK (Side by side) 23 & cmake 3.18.1, they can be installed using SDK Manager in Android Studio or `sdkmanager` command line. **Note:** NDK 21 & 22 are confirmed not working with this project.
+- Android NDK (Side by side) 25 & CMake 3.22.1, they can be installed using SDK Manager in Android Studio or `sdkmanager` command line. **Note:** NDK 21 & 22 are confirmed not working with this project.
 - [KDE/extra-cmake-modules](https://github.com/KDE/extra-cmake-modules)
-- GNU Gettext (`msgfmt` binary)
+- GNU Gettext >= 0.20 (for `msgfmt` binary; or install `appstream` if you really have to use gettext <= 0.19.)
 
 ### How to set up development environment
 
@@ -54,10 +54,10 @@ git submodule update --init --recursive
 Install extra-cmake-modules from your distribution software repository:
 
 ```sh
-# For Arch
+# For Arch Linux (Arch has gettext in it's base meta package)
 sudo pacman -S extra-cmake-modules
 # For Debian/Ubuntu
-sudo apt install extra-cmake-modules
+sudo apt install extra-cmake-modules gettext
 ```
 
 Install Android SDK Platform, Android SDK Build-Tools, Android NDK and cmake via SDK Manager in Android Studio:
