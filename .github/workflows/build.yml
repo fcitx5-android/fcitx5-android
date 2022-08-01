@@ -40,8 +40,8 @@ jobs:
           sudo apt update
           sudo apt install extra-cmake-modules gettext
 
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
       - name: Build Release APK
-        uses: burrunan/gradle-cache-action@v1
-        with:
-          arguments: assembleRelease
-          gradle-version: wrapper
+        run: ./gradlew assembleRelease
