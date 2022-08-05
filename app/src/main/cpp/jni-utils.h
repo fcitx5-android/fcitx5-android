@@ -5,6 +5,45 @@
 
 #include <string>
 
+class CString {
+private:
+    JNIEnv *env_;
+    jstring str_;
+    const char *chr_;
+
+public:
+    CString(JNIEnv *env, jstring str)
+            : env_(env), str_(str), chr_(env->GetStringUTFChars(str, nullptr)) {}
+
+    ~CString() {
+        env_->ReleaseStringUTFChars(str_, chr_);
+    }
+
+    operator std::string() { return chr_; }
+
+    operator const char *() { return chr_; }
+
+    const char *operator*() { return chr_; }
+};
+
+template<typename T = jobject>
+class JRef {
+private:
+    JNIEnv *env_;
+    T ref_;
+
+public:
+    JRef(JNIEnv *env, jobject ref) : env_(env), ref_(reinterpret_cast<T>(ref)) {}
+
+    ~JRef() {
+        env_->DeleteLocalRef(ref_);
+    }
+
+    operator T() { return ref_; }
+
+    T operator*() { return ref_; }
+};
+
 class JString {
 private:
     JNIEnv *env_;
@@ -24,24 +63,6 @@ public:
     operator jstring() { return jstring_; }
 
     jstring operator*() { return jstring_; }
-};
-
-class JClass {
-private:
-    JNIEnv *env_;
-    jclass jclass_;
-
-public:
-    JClass(JNIEnv *env, const char *name)
-            : env_(env), jclass_(env->FindClass(name)) {}
-
-    ~JClass() {
-        env_->DeleteLocalRef(jclass_);
-    }
-
-    operator jclass() { return jclass_; }
-
-    jclass operator*() { return jclass_; }
 };
 
 class JEnv {
