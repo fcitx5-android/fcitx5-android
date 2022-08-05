@@ -143,4 +143,5 @@
     <string name="dark_mode_theme">Темная тема</string>
     <string name="new_theme">Новая тема</string>
     <string name="skip">Пропустить</string>
+    <string name="horizontal_candidate_growth">Растянуть кандидаты по горизонтали, чтобы заполнить оставшуюся ширину</string>
 </resources>

@@ -143,4 +143,5 @@
     <string name="dark_mode_theme">暗色模式主题</string>
     <string name="new_theme">新增主题</string>
     <string name="skip">跳过</string>
+    <string name="horizontal_candidate_growth">拉伸横向候选词以填充宽度</string>
 </resources>
