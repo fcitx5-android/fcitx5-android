@@ -18,14 +18,18 @@ public:
     std::optional<std::vector<ActionEntity>> menu;
 
     ActionEntity(fcitx::Action *act, fcitx::InputContext *ic) :
-            id(act->id()), isSeparator(act->isSeparator()), isCheckable(act->isCheckable()),
+            id(act->id()),
+            isSeparator(act->isSeparator()),
+            isCheckable(act->isCheckable()),
             isChecked(act->isChecked(ic)),
-            name(act->name()), icon(act->icon(ic)), shortText(act->shortText(ic)),
+            name(act->name()),
+            icon(act->icon(ic)),
+            shortText(act->shortText(ic)),
             longText(act->longText(ic)) {
         const auto m = act->menu();
         if (m) {
             menu = std::vector<ActionEntity>();
-            for (auto a : m->actions()) {
+            for (auto a: m->actions()) {
                 menu->emplace_back(ActionEntity(a, ic));
             }
         }

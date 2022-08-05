@@ -22,10 +22,6 @@ public:
 
     [[nodiscard]] const char *frontend() const override { return "androidfrontend"; }
 
-    std::string filterText(const fcitx::Text &orig) {
-        return frontend_->instance()->outputFilter(this, orig).toString();
-    }
-
     void commitStringImpl(const std::string &text) override {
         frontend_->commitString(text);
     }
@@ -91,6 +87,10 @@ public:
 
 private:
     AndroidFrontend *frontend_;
+
+    std::string filterText(const fcitx::Text &orig) {
+        return frontend_->instance()->outputFilter(this, orig).toString();
+    }
 };
 
 AndroidFrontend::AndroidFrontend(Instance *instance)
