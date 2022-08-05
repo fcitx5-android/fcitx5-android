@@ -1,5 +1,5 @@
-#ifndef FCITX5TEST_NATIVESTREAMBUF_H
-#define FCITX5TEST_NATIVESTREAMBUF_H
+#ifndef FCITX5_ANDROID_NATIVESTREAMBUF_H
+#define FCITX5_ANDROID_NATIVESTREAMBUF_H
 
 #include <array>
 #include <iostream>
@@ -40,4 +40,4 @@ private:
     callback_t _callback = nullptr;
 };
 
-#endif //FCITX5TEST_NATIVESTREAMBUF_H
+#endif //FCITX5_ANDROID_NATIVESTREAMBUF_H

@@ -1,5 +1,5 @@
-#ifndef FCITX5TEST_JNI_UTILS_H
-#define FCITX5TEST_JNI_UTILS_H
+#ifndef FCITX5_ANDROID_JNI_UTILS_H
+#define FCITX5_ANDROID_JNI_UTILS_H
 
 #include <jni.h>
 
@@ -132,4 +132,4 @@ public:
     const JEnv AttachEnv() const { return JEnv(jvm); }
 };
 
-#endif //FCITX5TEST_JNI_UTILS_H
+#endif //FCITX5_ANDROID_JNI_UTILS_H
