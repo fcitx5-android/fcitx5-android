@@ -27,13 +27,9 @@ class FcitxApplication : Application() {
             .enabled(!BuildConfig.DEBUG)
             .apply()
         instance = this
+        // we don't have AppPrefs available yet
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-        if (BuildConfig.DEBUG || sharedPrefs.getBoolean(
-                // we don't have AppPrefs available yet
-                "verbose_log",
-                false
-            )
-        ) {
+        if (BuildConfig.DEBUG || sharedPrefs.getBoolean("verbose_log", false)) {
             Timber.plant(object : Timber.DebugTree() {
                 override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
                     super.log(priority, "[${Thread.currentThread().name}] $tag", message, t)

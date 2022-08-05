@@ -317,16 +317,17 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
             with(context) {
                 DataManager.sync()
                 val locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    val locales = resources.configuration.locales
-                    StringBuilder().apply {
-                        for (i in 0 until locales.size()) {
-                            if (i != 0) append(":")
-                            append(locales[i].run { "${language}_${country}:$language" })
-                            // since there is not an `en.mo` file, `en` must be the only locale
-                            // in order to use default english translation
-                            if (i == 0 && locales[i].language == "en") break
+                    resources.configuration.locales.let {
+                        buildString {
+                            for (i in 0 until it.size()) {
+                                if (i != 0) append(":")
+                                append(it[i].run { "${language}_${country}:$language" })
+                                // since there is not an `en.mo` file, `en` must be the only locale
+                                // in order to use default english translation
+                                if (i == 0 && it[i].language == "en") break
+                            }
                         }
-                    }.toString()
+                    }
                 } else {
                     @Suppress("DEPRECATION")
                     resources.configuration.locale.run { "${language}_${country}:$language" }
