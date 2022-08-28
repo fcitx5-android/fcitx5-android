@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.input.keyboard
 
 import android.content.Context
 import android.os.SystemClock
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
@@ -13,7 +14,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListener
-import org.fcitx.fcitx5.android.utils.hapticIfEnabled
 
 abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
 
@@ -88,6 +88,15 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
         }
     }
 
+    private fun hapticFeedback(feedback: Int = HapticFeedbackConstants.KEYBOARD_TAP) {
+        if (buttonHapticFeedback) {
+            performHapticFeedback(
+                feedback,
+                HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING or HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
+            )
+        }
+    }
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
@@ -96,13 +105,14 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                 val y = event.y
                 drawableHotspotChanged(x, y)
                 isPressed = true
-                hapticIfEnabled()
+                hapticFeedback()
                 dispatchGestureEvent(GestureType.Down, x, y)
                 if (longPressEnabled) {
                     longPressJob?.cancel()
                     longPressJob = lifecycleScope.launch {
                         delay(longPressDelay.toLong())
                         longPressTriggered = true
+                        hapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                         performLongClick()
                     }
                 }
@@ -268,6 +278,7 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
     companion object {
         val longPressDelay by AppPrefs.getInstance().keyboard.longPressDelay
         val systemTouchSounds by AppPrefs.getInstance().keyboard.systemTouchSounds
+        val buttonHapticFeedback by AppPrefs.getInstance().keyboard.buttonHapticFeedback
 
         const val RepeatInterval = 50L
     }

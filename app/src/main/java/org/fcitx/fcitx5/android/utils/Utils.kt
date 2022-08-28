@@ -15,7 +15,6 @@ import android.os.Bundle
 import android.os.Looper
 import android.provider.OpenableColumns
 import android.util.TypedValue
-import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.inputmethod.InputConnection
 import android.widget.EditText
@@ -39,7 +38,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.FcitxApplication
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import splitties.experimental.InternalSplittiesApi
 import splitties.resources.withResolvedThemeAttribute
 import splitties.views.bottomPadding
@@ -71,14 +69,6 @@ fun Uri.queryFileName(contentResolver: ContentResolver) =
 
 inline fun <reified T : Library> nativeLib(name: String): Lazy<T> = lazy {
     Native.load(name, T::class.java)
-}
-
-fun View.hapticIfEnabled() {
-    if (AppPrefs.getInstance().keyboard.buttonHapticFeedback.getValue())
-        performHapticFeedback(
-            HapticFeedbackConstants.KEYBOARD_TAP,
-            HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING or HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
-        )
 }
 
 val EditText.str: String get() = editableText.toString()
