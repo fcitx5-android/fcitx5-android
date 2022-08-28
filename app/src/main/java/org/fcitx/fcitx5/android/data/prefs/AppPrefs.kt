@@ -39,6 +39,8 @@ class AppPrefs(
     inner class Keyboard : ManagedPreferenceCategory(R.string.keyboard, sharedPreferences) {
         val buttonHapticFeedback =
             switch(R.string.button_haptic_feedback, "button_haptic_feedback", true)
+        val systemTouchSounds =
+            switch(R.string.system_touch_sounds, "system_touch_sounds", true)
         val popupOnKeyPress = switch(R.string.popup_on_key_press, "popup_on_key_press", true)
         val horizontalCandidateGrowth =
             switch(R.string.horizontal_candidate_growth, "horizontal_candidate_growth", true)

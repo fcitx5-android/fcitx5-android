@@ -15,7 +15,7 @@
     <string name="ignore_sys_cursor">Ignore system cursor position</string>
     <string name="hide_key_config">Hide hotkey configurations</string>
     <string name="_not_available_">(Not Available)</string>
-    <string name="button_haptic_feedback">Haptic feedback on key pressed</string>
+    <string name="button_haptic_feedback">Haptic feedback on keypress</string>
     <string name="add">Add</string>
     <string name="edit">Edit</string>
     <string name="undo">Undo</string>
@@ -144,4 +144,5 @@
     <string name="new_theme">New theme</string>
     <string name="skip">Skip</string>
     <string name="horizontal_candidate_growth">Stretch horizontal candidates to fill the remaining width</string>
+    <string name="system_touch_sounds">System touch sounds on keypress</string>
 </resources>

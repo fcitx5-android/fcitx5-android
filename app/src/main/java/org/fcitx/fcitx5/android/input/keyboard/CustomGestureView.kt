@@ -77,6 +77,10 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
     var onRepeatListener: ((View) -> Unit)? = null
     var onGestureListener: OnGestureListener? = null
 
+    init {
+        isSoundEffectsEnabled = systemTouchSounds
+    }
+
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
         if (!enabled) {
@@ -263,6 +267,7 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
 
     companion object {
         val longPressDelay by AppPrefs.getInstance().keyboard.longPressDelay
+        val systemTouchSounds by AppPrefs.getInstance().keyboard.systemTouchSounds
 
         const val RepeatInterval = 50L
     }
