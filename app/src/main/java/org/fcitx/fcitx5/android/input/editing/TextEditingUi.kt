@@ -2,19 +2,17 @@ package org.fcitx.fcitx5.android.input.editing
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.graphics.ColorFilter
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.StateListDrawable
 import android.view.View
-import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.input.bar.ToolButton
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
 import org.fcitx.fcitx5.android.utils.borderDrawable
-import org.fcitx.fcitx5.android.utils.borderlessRippleDrawable
 import org.fcitx.fcitx5.android.utils.pressHighlightDrawable
 import org.fcitx.fcitx5.android.utils.rippleDrawable
 import splitties.dimensions.dp
@@ -55,10 +53,6 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
             isFocusable = false
         }
 
-        var colorFilter: ColorFilter? by image::colorFilter
-        var imageResource: Int by image::imageResource
-        var scaleType: ImageView.ScaleType? by image::scaleType
-
         init {
             add(image, lParams(wrapContent, wrapContent, gravityCenter))
         }
@@ -72,8 +66,9 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
     }
 
     private fun iconButton(@DrawableRes icon: Int) = GImageButton(ctx).apply {
-        imageResource = icon
-        colorFilter = PorterDuffColorFilter(theme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
+        image.imageResource = icon
+        image.colorFilter =
+            PorterDuffColorFilter(theme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
         padding = dp(10)
         applyBorderedBackground()
     }
@@ -99,7 +94,11 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
         background = StateListDrawable().apply {
             addState(
                 intArrayOf(android.R.attr.state_activated),
-                borderDrawable(borderWidth, theme.dividerColor.color, theme.accentKeyBackgroundColor.color)
+                borderDrawable(
+                    borderWidth,
+                    theme.dividerColor.color,
+                    theme.accentKeyBackgroundColor.color
+                )
             )
             addState(
                 intArrayOf(android.R.attr.state_enabled),
@@ -223,13 +222,7 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
         }
     }
 
-    val clipboardButton = GImageButton(ctx).apply {
-        background = borderlessRippleDrawable(theme.keyPressHighlightColor.color, dp(20))
-        colorFilter = PorterDuffColorFilter(theme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
-        imageResource = R.drawable.ic_clipboard
-        scaleType = ImageView.ScaleType.CENTER_INSIDE
-        padding = dp(10)
-    }
+    val clipboardButton = ToolButton(ctx, R.drawable.ic_clipboard, theme)
 
     val extension = horizontalLayout {
         add(clipboardButton, lParams(dp(40), dp(40)))

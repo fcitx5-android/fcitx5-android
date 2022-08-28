@@ -1,8 +1,5 @@
 package org.fcitx.fcitx5.android.input.status
 
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
@@ -13,24 +10,22 @@ import org.fcitx.fcitx5.android.core.Fcitx
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
+import org.fcitx.fcitx5.android.input.bar.ToolButton
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
-import org.fcitx.fcitx5.android.input.editing.TextEditingUi.GImageButton
 import org.fcitx.fcitx5.android.input.status.StatusAreaEntry.Android.Type.*
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.ui.main.MainActivity
 import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
 import org.fcitx.fcitx5.android.utils.AppUtil
-import org.fcitx.fcitx5.android.utils.borderlessRippleDrawable
 import splitties.dimensions.dp
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.horizontalLayout
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.recyclerview.recyclerView
-import splitties.views.padding
 import splitties.views.recyclerview.gridLayoutManager
 
 class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
@@ -132,13 +127,7 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
     override val title: String = ""
 
     private val settingsButton by lazy {
-        GImageButton(context).apply {
-            background = borderlessRippleDrawable(theme.keyPressHighlightColor.color, dp(20))
-            colorFilter = PorterDuffColorFilter(theme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
-            imageResource = R.drawable.ic_baseline_settings_24
-            scaleType = ImageView.ScaleType.CENTER_INSIDE
-            padding = dp(10)
-        }
+        ToolButton(context, R.drawable.ic_baseline_settings_24, theme)
     }
 
     private val barExtension by lazy {

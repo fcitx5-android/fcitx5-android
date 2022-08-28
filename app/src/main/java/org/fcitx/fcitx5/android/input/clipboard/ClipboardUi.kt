@@ -1,10 +1,7 @@
 package org.fcitx.fcitx5.android.input.clipboard
 
 import android.content.Context
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.view.View
-import android.widget.ImageView
 import android.widget.ViewAnimator
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
@@ -12,46 +9,36 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
-import org.fcitx.fcitx5.android.input.editing.TextEditingUi.GImageButton
-import org.fcitx.fcitx5.android.utils.borderlessRippleDrawable
+import org.fcitx.fcitx5.android.input.bar.ToolButton
 import splitties.dimensions.dp
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
-import splitties.views.padding
 import timber.log.Timber
 
-class ClipboardUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
+class ClipboardUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     val recyclerView = recyclerView {
         addItemDecoration(SpacesItemDecoration(dp(4)))
     }
 
-    val enableUi = ClipboardInstructionUi.Enable(ctx, inputTheme)
+    val enableUi = ClipboardInstructionUi.Enable(ctx, theme)
 
-    val emptyUi = ClipboardInstructionUi.Empty(ctx, inputTheme)
+    val emptyUi = ClipboardInstructionUi.Empty(ctx, theme)
 
     private val keyBorder by ThemeManager.prefs.keyBorder
     private val disableAnimation by AppPrefs.getInstance().advanced.disableAnimation
 
     override val root = view(::ViewAnimator) {
         if (!keyBorder) {
-            backgroundColor = inputTheme.barColor.color
+            backgroundColor = theme.barColor.color
         }
         add(recyclerView, lParams(matchParent, matchParent))
         add(emptyUi.root, lParams(matchParent, matchParent))
         add(enableUi.root, lParams(matchParent, matchParent))
     }
 
-    val deleteAllButton = GImageButton(ctx).apply {
-        background = borderlessRippleDrawable(inputTheme.keyPressHighlightColor.color, dp(20))
-        padding = dp(10)
-        colorFilter =
-            PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
-        imageResource = R.drawable.ic_baseline_delete_sweep_24
-        scaleType = ImageView.ScaleType.CENTER_INSIDE
-        visibility = View.INVISIBLE
-    }
+    val deleteAllButton = ToolButton(ctx, R.drawable.ic_baseline_delete_sweep_24, theme)
 
     val extension = horizontalLayout {
         add(deleteAllButton, lParams(dp(40), dp(40)))
