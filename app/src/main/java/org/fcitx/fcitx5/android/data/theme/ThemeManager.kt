@@ -240,14 +240,14 @@ object ThemeManager {
         val lightModeTheme = ManagedThemePreference(
             sharedPreferences,
             "light_mode_theme",
-            defaultTheme,
+            ThemePreset.PixelLight,
             enableUiOn = { followSystemDayNightTheme.getValue() }
         ) { setTitle(R.string.light_mode_theme) }.apply { register() }
 
         val darkModeTheme = ManagedThemePreference(
             sharedPreferences,
             "dark_mode_theme",
-            defaultTheme,
+            ThemePreset.PixelDark,
             enableUiOn = { followSystemDayNightTheme.getValue() }
         ) { setTitle(R.string.dark_mode_theme) }.apply { register() }
 
@@ -298,23 +298,26 @@ object ThemeManager {
         this@ThemeManager.fireChange()
     }
 
-    private val dayLightThemePrefsChange = ManagedPreference.OnChangeListener<Any>{
+    private val dayLightThemePrefsChange = ManagedPreference.OnChangeListener<Any> {
         onSystemDarkModeChanged()
     }
 
     fun init(configuration: Configuration) {
-        prefs.managedPreferences.forEach { (_, pref) ->
-            pref.registerOnChangeListener(prefsChange)
+        // fire all `OnThemeChangedListener`s on theme preferences change
+        prefs.managedPreferences.values.forEach {
+            it.registerOnChangeListener(prefsChange)
         }
-        // fallback to default theme if active theme was deleted
-        internalPrefs.activeThemeName.getValue().let {
-            currentTheme = getTheme(it) ?: defaultTheme.apply {
-                Timber.w("Cannot find active theme '$it', fallback to $name")
-                internalPrefs.activeThemeName.setValue(name)
+        currentTheme = if (prefs.followSystemDayNightTheme.getValue()) {
+            (if (configuration.isDarkMode()) prefs.darkModeTheme else prefs.lightModeTheme).getValue()
+        } else {
+            val activeThemeName = internalPrefs.activeThemeName.getValue()
+            // fallback to default theme if active theme not found
+            getTheme(activeThemeName) ?: defaultTheme.also {
+                Timber.w("Cannot find active theme '$activeThemeName', fallback to ${it.name}")
+                internalPrefs.activeThemeName.setValue(it.name)
             }
         }
         internalPrefs.activeThemeName.registerOnChangeListener(onActiveThemeNameChange)
-        onSystemDarkModeChanged(configuration.isDarkMode())
         prefs.followSystemDayNightTheme.registerOnChangeListener(dayLightThemePrefsChange)
         prefs.lightModeTheme.registerOnChangeListener(dayLightThemePrefsChange)
         prefs.darkModeTheme.registerOnChangeListener(dayLightThemePrefsChange)
@@ -334,13 +337,8 @@ object ThemeManager {
 
     fun onSystemDarkModeChanged(isDark: Boolean = isCurrentDark) {
         isCurrentDark = isDark
-        with(prefs) {
-            if (followSystemDayNightTheme.getValue()) {
-                if (isDark)
-                    switchTheme(darkModeTheme.getValue())
-                else
-                    switchTheme(lightModeTheme.getValue())
-            }
+        if (prefs.followSystemDayNightTheme.getValue()) {
+            switchTheme((if (isDark) prefs.darkModeTheme else prefs.lightModeTheme).getValue())
         }
     }
 
