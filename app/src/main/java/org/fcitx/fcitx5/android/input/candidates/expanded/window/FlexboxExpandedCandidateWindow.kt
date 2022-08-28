@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.input.candidates.expanded.window
 
+import android.util.DisplayMetrics
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
@@ -51,6 +52,8 @@ class FlexboxExpandedCandidateWindow :
             if (prev < 0) prev = 0
             startSmoothScroll(object : LinearSmoothScroller(context) {
                 override fun getVerticalSnapPreference() = SNAP_TO_END
+                override fun calculateSpeedPerPixel(dm: DisplayMetrics?) =
+                    if (disableAnimation) Float.MIN_VALUE else super.calculateSpeedPerPixel(dm)
             }.apply { targetPosition = prev })
         }
     }
@@ -61,6 +64,8 @@ class FlexboxExpandedCandidateWindow :
             if (next >= itemCount) next = itemCount - 1
             startSmoothScroll(object : LinearSmoothScroller(context) {
                 override fun getVerticalSnapPreference() = SNAP_TO_START
+                override fun calculateSpeedPerPixel(dm: DisplayMetrics?) =
+                    if (disableAnimation) Float.MIN_VALUE else super.calculateSpeedPerPixel(dm)
             }.apply { targetPosition = next })
         }
     }
