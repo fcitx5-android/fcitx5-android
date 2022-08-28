@@ -14,7 +14,6 @@
     <string name="ignore_sys_cursor">システムカーソル位置を無視する</string>
     <string name="hide_key_config">ホットキー設定を隠す</string>
     <string name="_not_available_">(利用不可)</string>
-    <string name="button_haptic_feedback">キープレス時の触覚フィードバック</string>
     <string name="add">追加</string>
     <string name="edit">編集</string>
     <string name="undo">アンドゥ</string>

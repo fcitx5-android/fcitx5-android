@@ -15,7 +15,6 @@
     <string name="ignore_sys_cursor">忽略系統游標位置</string>
     <string name="hide_key_config">隱藏快捷鍵設定</string>
     <string name="_not_available_">（無法使用）</string>
-    <string name="button_haptic_feedback">按下按鍵時的觸覺回饋</string>
     <string name="add">新增</string>
     <string name="edit">編輯</string>
     <string name="undo">還原</string>
@@ -138,4 +137,4 @@
     <string name="light_mode_theme">日間模式主題</string>
     <string name="dark_mode_theme">夜間模式主題</string>
     <string name="new_theme">新主題</string>
-</resources>
+    </resources>

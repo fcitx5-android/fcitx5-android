@@ -15,7 +15,6 @@
     <string name="ignore_sys_cursor">시스템 커서 위치 무시</string>
     <string name="hide_key_config">단축키 구성 숨김</string>
     <string name="_not_available_">(사용할 수 없음)</string>
-    <string name="button_haptic_feedback">눌린 키에 대한 햅틱 피드백</string>
     <string name="add">추가</string>
     <string name="edit">편집</string>
     <string name="undo">실행 취소</string>
@@ -98,4 +97,4 @@
     <string name="quickphrase_phrase">구문</string>
     <string name="reload_config">구성 새로고침</string>
     <string name="input_method_options">입력기 옵션</string>
-</resources>
+    </resources>
