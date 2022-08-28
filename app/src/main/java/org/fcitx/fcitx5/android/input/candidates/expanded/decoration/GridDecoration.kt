@@ -42,9 +42,9 @@ class GridDecoration(val drawable: Drawable) : RecyclerView.ItemDecoration() {
             val top = view.top - lp.topMargin
             val bottom = view.bottom + lp.bottomMargin
             // make the divider shorter
-            drawable.setBounds(left, top + parent.dp(8), right, bottom - parent.dp(8))
+            val vInset = parent.dp(8)
+            drawable.setBounds(left, top + vInset, right, bottom - vInset)
             drawable.draw(c)
         }
     }
-
 }

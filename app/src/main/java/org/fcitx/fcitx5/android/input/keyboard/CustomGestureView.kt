@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.SystemClock
 import android.view.HapticFeedbackConstants
@@ -15,7 +16,7 @@ import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListener
 
-abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
+open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
 
     enum class SwipeAxis { X, Y }
 
@@ -97,6 +98,7 @@ abstract class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {

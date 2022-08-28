@@ -3,7 +3,6 @@ package org.fcitx.fcitx5.android.input.candidates
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RectShape
 import android.view.ContextThemeWrapper
-import android.view.View
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.Fcitx
@@ -15,7 +14,6 @@ import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
-import org.fcitx.fcitx5.android.utils.hapticIfEnabled
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
@@ -31,10 +29,6 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
     private val theme by manager.theme()
 
     fun gridAdapter() = object : GridCandidateViewAdapter() {
-        override fun onTouchDown(view: View) {
-            view.hapticIfEnabled()
-        }
-
         override fun onSelect(idx: Int) {
             service.lifecycleScope.launch { fcitx.select(idx) }
         }
@@ -44,10 +38,6 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
     }
 
     fun simpleAdapter() = object : SimpleCandidateViewAdapter() {
-        override fun onTouchDown(view: View) {
-            view.hapticIfEnabled()
-        }
-
         override fun onSelect(idx: Int) {
             service.lifecycleScope.launch { fcitx.select(idx) }
         }

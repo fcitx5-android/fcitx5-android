@@ -1,17 +1,15 @@
 package org.fcitx.fcitx5.android.input.candidates.adapter
 
 import android.annotation.SuppressLint
-import android.view.MotionEvent
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import androidx.annotation.CallSuper
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.input.candidates.CandidateItemUi
 
 abstract class BaseCandidateViewAdapter :
     RecyclerView.Adapter<BaseCandidateViewAdapter.ViewHolder>() {
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val textView = itemView as TextView
+    inner class ViewHolder(val ui: CandidateItemUi) : RecyclerView.ViewHolder(ui.root) {
         var idx = -1
     }
 
@@ -34,34 +32,22 @@ abstract class BaseCandidateViewAdapter :
         updateCandidates(data)
     }
 
+    @CallSuper
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = createTextView(parent).apply {
-            setTextColor(theme.keyTextColor.color)
-        }
-        return ViewHolder(view).apply {
+        return ViewHolder(CandidateItemUi(parent.context, theme)).apply {
             itemView.setOnClickListener { onSelect(this.idx + offset) }
-            itemView.setOnTouchListener { v, event ->
-                when (event.action) {
-                    MotionEvent.ACTION_DOWN -> onTouchDown(v)
-                    MotionEvent.ACTION_BUTTON_PRESS -> v.performClick()
-                }
-                false
-            }
         }
     }
 
+    @CallSuper
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.textView.text = getCandidateAt(position)
+        holder.ui.text.text = getCandidateAt(position)
         holder.idx = position
     }
 
     abstract val theme: Theme
 
     override fun getItemCount() = candidates.size - offset
-
-    abstract fun createTextView(parent: ViewGroup): TextView
-
-    abstract fun onTouchDown(view: View)
 
     abstract fun onSelect(idx: Int)
 }

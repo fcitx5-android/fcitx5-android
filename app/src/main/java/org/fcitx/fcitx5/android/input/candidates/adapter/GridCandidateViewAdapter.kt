@@ -2,18 +2,11 @@ package org.fcitx.fcitx5.android.input.candidates.adapter
 
 import android.graphics.Paint
 import android.graphics.Rect
-import android.util.TypedValue
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.collection.lruCache
 import androidx.recyclerview.widget.GridLayoutManager
-import org.fcitx.fcitx5.android.R
 import splitties.dimensions.dp
-import splitties.resources.dimen
-import splitties.resources.dimenPxSize
 import splitties.views.dsl.core.matchParent
-import splitties.views.dsl.core.textView
-import splitties.views.gravityCenter
 
 abstract class GridCandidateViewAdapter : BaseCandidateViewAdapter() {
 
@@ -32,13 +25,11 @@ abstract class GridCandidateViewAdapter : BaseCandidateViewAdapter() {
         }
     }
 
-    override fun createTextView(parent: ViewGroup): TextView =
-        parent.context.textView {
-            layoutParams = GridLayoutManager.LayoutParams(matchParent, dp(40))
-            gravity = gravityCenter
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, dimen(R.dimen.candidate_font_size))
-            minWidth = dimenPxSize(R.dimen.candidate_min_width)
-            isSingleLine = true
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        return super.onCreateViewHolder(parent, viewType).apply {
+            ui.root.apply {
+                layoutParams = GridLayoutManager.LayoutParams(matchParent, dp(40))
+            }
         }
-
+    }
 }
