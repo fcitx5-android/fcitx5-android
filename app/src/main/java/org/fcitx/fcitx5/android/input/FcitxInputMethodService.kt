@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.fcitx.fcitx5.android.core.*
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.service.FcitxDaemonManager
@@ -78,11 +79,19 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     private val ignoreSystemCursor by AppPrefs.getInstance().advanced.ignoreSystemCursor
 
+    private val recreateInputViewListener = ManagedPreference.OnChangeListener<Any> {
+        recreateInputView()
+    }
+
     private val onThemeChangedListener = ThemeManager.OnThemeChangedListener {
+        recreateInputView(it)
+    }
+
+    private fun recreateInputView(theme: Theme = ThemeManager.getActiveTheme()) {
         // InputView should be created first in onCreateInputView
         // setInputView should be used to 'replace' current InputView only
-        if (!::inputView.isInitialized) return@OnThemeChangedListener
-        createInputView(it)
+        if (!::inputView.isInitialized) return
+        createInputView(theme)
         setInputView(inputView)
     }
 
@@ -93,6 +102,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 fcitxDelayedTask?.invoke()
                 fcitxDelayedTask = null
             }
+        }
+        AppPrefs.getInstance().apply {
+            keyboard.buttonHapticFeedback.registerOnChangeListener(recreateInputViewListener)
+            keyboard.systemTouchSounds.registerOnChangeListener(recreateInputViewListener)
+            advanced.disableAnimation.registerOnChangeListener(recreateInputViewListener)
         }
         ThemeManager.addOnChangedListener(onThemeChangedListener)
         super.onCreate()

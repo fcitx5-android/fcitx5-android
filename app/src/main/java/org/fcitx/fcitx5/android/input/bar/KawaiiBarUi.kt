@@ -31,7 +31,7 @@ import timber.log.Timber
 sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) : Ui {
 
     companion object {
-        val disableAnimationPref = AppPrefs.getInstance().advanced.disableAnimation
+        val disableAnimation by AppPrefs.getInstance().advanced.disableAnimation
     }
 
     protected fun toolButton(@DrawableRes icon: Int, initView: ToolButton.() -> Unit = {}) =
@@ -154,34 +154,24 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
         private val animator = ViewAnimator(ctx).apply {
             add(clipboardBar, lParams(matchParent, matchParent))
             add(buttonsBar, lParams(matchParent, matchParent))
-        }
 
-        private val onDisableAnimationChange = ManagedPreference.OnChangeListener<Boolean> {
-            animator.apply {
-                if (!it) {
-                    inAnimation = AnimationSet(true).apply {
-                        duration = 200L
-                        addAnimation(AlphaAnimation(0f, 1f))
-                        addAnimation(ScaleAnimation(0f, 1f, 0f, 1f, 0f, dp(20f)))
-                        addAnimation(TranslateAnimation(dp(-100f), 0f, 0f, 0f))
-                    }
-                    outAnimation = AnimationSet(true).apply {
-                        duration = 200L
-                        addAnimation(AlphaAnimation(1f, 0f))
-                        addAnimation(ScaleAnimation(1f, 0f, 1f, 0f, 0f, dp(20f)))
-                        addAnimation(TranslateAnimation(0f, dp(-100f), 0f, 0f))
-                    }
-                } else {
-                    inAnimation = null
-                    outAnimation = null
+            if (disableAnimation) {
+                inAnimation = null
+                outAnimation = null
+            } else {
+                inAnimation = AnimationSet(true).apply {
+                    duration = 200L
+                    addAnimation(AlphaAnimation(0f, 1f))
+                    addAnimation(ScaleAnimation(0f, 1f, 0f, 1f, 0f, dp(20f)))
+                    addAnimation(TranslateAnimation(dp(-100f), 0f, 0f, 0f))
+                }
+                outAnimation = AnimationSet(true).apply {
+                    duration = 200L
+                    addAnimation(AlphaAnimation(1f, 0f))
+                    addAnimation(ScaleAnimation(1f, 0f, 1f, 0f, 0f, dp(20f)))
+                    addAnimation(TranslateAnimation(0f, dp(-100f), 0f, 0f))
                 }
             }
-        }
-
-        init {
-            disableAnimationPref.registerOnChangeListener(onDisableAnimationChange)
-            // After animator was initialized
-            onDisableAnimationChange.onChange(disableAnimationPref.getValue())
         }
 
         override val root = constraintLayout {
@@ -210,7 +200,7 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
             val targetRotation = getCurrentState().menuButtonRotation
             menuButton.apply {
                 if (targetRotation == rotation) return
-                if (instant || disableAnimationPref.getValue()) {
+                if (instant || disableAnimation) {
                     rotation = targetRotation
                 } else {
                     animate().setDuration(200L).rotation(targetRotation)
