@@ -39,18 +39,16 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
 
     private val keyboards: HashMap<String, BaseKeyboard> by lazy {
         hashMapOf(
-            // a placeholder layout to avoid crash
-            EMPTY to (object : BaseKeyboard(context, theme, listOf(listOf())) {}),
             TextKeyboard.Name to TextKeyboard(context, theme),
             NumberKeyboard.Name to NumberKeyboard(context, theme),
             NumSymKeyboard.Name to NumSymKeyboard(context, theme),
             SymbolKeyboard.Name to SymbolKeyboard(context, theme)
         )
     }
-    private var currentKeyboardName = EMPTY
+    private var currentKeyboardName = ""
     private var lastSymbolType: String by AppPrefs.getInstance().internal.lastSymbolLayout
 
-    private val currentKeyboard: BaseKeyboard get() = keyboards.getValue(currentKeyboardName)
+    private val currentKeyboard: BaseKeyboard? get() = keyboards[currentKeyboardName]
 
     private val keyActionListener = BaseKeyboard.KeyActionListener {
         if (it is KeyAction.LayoutSwitchAction) {
@@ -71,11 +69,12 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
     // This will be called EXACTLY ONCE
     override fun onCreateView(): View {
         keyboardView = context.frameLayout(R.id.keyboard_view)
+        attachLayout(TextKeyboard.Name)
         return keyboardView
     }
 
     private fun detachCurrentLayout() {
-        keyboards[currentKeyboardName]?.also {
+        currentKeyboard?.also {
             it.onDetach()
             keyboardView.removeView(it)
             it.keyActionListener = null
@@ -88,11 +87,13 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
         if (target != TextKeyboard.Name && target != lastSymbolType) {
             lastSymbolType = target
         }
-        keyboardView.apply { add(currentKeyboard, lParams(matchParent, matchParent)) }
-        currentKeyboard.keyActionListener = keyActionListener
-        currentKeyboard.keyPopupListener = keyPopupListener
-        currentKeyboard.onAttach(service.editorInfo)
-        currentKeyboard.onInputMethodChange(currentIme)
+        currentKeyboard?.let {
+            it.keyActionListener = keyActionListener
+            it.keyPopupListener = keyPopupListener
+            keyboardView.apply { add(it, lParams(matchParent, matchParent)) }
+            it.onAttach(service.editorInfo)
+            it.onInputMethodChange(currentIme)
+        }
     }
 
     private fun switchLayout(to: String) {
@@ -111,36 +112,30 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
                 else -> TextKeyboard.Name
             }
         } ?: TextKeyboard.Name)
-        currentKeyboard.onEditorInfoChange(info)
+        currentKeyboard?.onEditorInfoChange(info)
     }
 
     override fun onImeUpdate(ime: InputMethodEntry) {
         _currentIme = ime
-        currentKeyboard.onInputMethodChange(currentIme)
+        currentKeyboard?.onInputMethodChange(currentIme)
     }
 
     override fun onPreeditUpdate(data: FcitxEvent.PreeditEvent.Data) {
-        currentKeyboard.onPreeditChange(service.editorInfo, data)
+        currentKeyboard?.onPreeditChange(service.editorInfo, data)
     }
 
     override fun onAttached() {
-        if (currentKeyboardName === EMPTY) {
-            attachLayout(TextKeyboard.Name)
-            keyboards.remove(EMPTY)
-        } else {
-            currentKeyboard.keyActionListener = keyActionListener
-            currentKeyboard.keyPopupListener = keyPopupListener
+        currentKeyboard?.let {
+            it.keyActionListener = keyActionListener
+            it.keyPopupListener = keyPopupListener
         }
     }
 
     override fun onDetached() {
-        currentKeyboard.keyActionListener = null
-        currentKeyboard.keyPopupListener = null
+        currentKeyboard?.let {
+            it.keyActionListener = null
+            it.keyPopupListener = null
+        }
         popup.dismissAll()
     }
-
-    companion object {
-        const val EMPTY = ""
-    }
-
 }

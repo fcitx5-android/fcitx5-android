@@ -63,17 +63,15 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
         ensureThread()
         if (window == currentWindow)
             throw IllegalArgumentException("$window is already attached")
-        // add the new window to scope
-        scope += window
-        val newView =
-            // we keep the view for keyboard window
-            if (window === keyboardWindow && keyboardView != null) {
-                keyboardView!!
-            } else if (window === keyboardWindow && keyboardView == null) {
-                window.onCreateView().also { keyboardView = it }
-            } else {
-                window.onCreateView()
-            }
+        val newView = if (window === keyboardWindow) {
+            // keep the view for keyboard window
+            keyboardView ?: window.onCreateView().also { keyboardView = it }
+            // keyboard window is always in scope,
+        } else {
+            // add the new window to scope, except keyboard window (it's always in scope)
+            scope += window
+            window.onCreateView()
+        }
         if (currentWindow != null) {
             val oldWindow = currentWindow!!
             val oldView = currentView!!
