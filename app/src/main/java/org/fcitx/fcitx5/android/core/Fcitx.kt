@@ -11,7 +11,6 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.DataManager
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
-import splitties.resources.str
 import timber.log.Timber
 
 class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
@@ -59,7 +58,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
     suspend fun currentIme() =
         withFcitxContext {
-            inputMethodStatus() ?: InputMethodEntry(context.str(R.string._not_available_))
+            inputMethodStatus() ?: InputMethodEntry(context.getString(R.string._not_available_))
         }
 
     suspend fun getGlobalConfig() = withFcitxContext {
@@ -119,7 +118,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
     init {
         if (lifecycle.currentState != FcitxLifecycle.State.STOPPED)
-            throw IllegalAccessException("Fcitx5 is already created!")
+            throw IllegalAccessException("Fcitx5 has already been created!")
     }
 
     private companion object JNI : FcitxLifecycleOwner {

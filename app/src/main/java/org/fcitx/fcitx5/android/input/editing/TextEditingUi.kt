@@ -7,6 +7,7 @@ import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.StateListDrawable
 import android.view.View
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
@@ -58,8 +59,8 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
         }
     }
 
-    private fun textButton(str: String) = GTextButton(ctx).apply {
-        text.text = str
+    private fun textButton(@StringRes id: Int) = GTextButton(ctx).apply {
+        text.setText(id)
         text.setTextColor(theme.keyTextColor.color)
         stateListAnimator = null
         applyBorderedBackground()
@@ -81,7 +82,7 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     val leftButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_left_24)
 
-    val selectButton = textButton(ctx.getString(R.string.select)).apply {
+    val selectButton = textButton(R.string.select).apply {
         text.setTextColor(
             ColorStateList(
                 arrayOf(
@@ -111,13 +112,13 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     val endButton = iconButton(R.drawable.ic_baseline_last_page_24)
 
-    val selectAllButton = textButton(ctx.getString(android.R.string.selectAll))
+    val selectAllButton = textButton(android.R.string.selectAll)
 
-    val cutButton = textButton(ctx.getString(android.R.string.cut)).apply { visibility = View.GONE }
+    val cutButton = textButton(android.R.string.cut).apply { visibility = View.GONE }
 
-    val copyButton = textButton(ctx.getString(android.R.string.copy))
+    val copyButton = textButton(android.R.string.copy)
 
-    val pasteButton = textButton(ctx.getString(android.R.string.paste))
+    val pasteButton = textButton(android.R.string.paste)
 
     val backspaceButton = iconButton(R.drawable.ic_baseline_backspace_24)
 

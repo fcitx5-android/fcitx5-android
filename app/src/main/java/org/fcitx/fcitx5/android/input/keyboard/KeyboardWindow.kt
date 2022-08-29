@@ -17,7 +17,6 @@ import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.mechdancer.dependency.manager.must
-import splitties.resources.str
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.lParams
@@ -34,7 +33,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
     private var _currentIme: InputMethodEntry? = null
 
     val currentIme
-        get() = _currentIme ?: InputMethodEntry(context.str(R.string._not_available_))
+        get() = _currentIme ?: InputMethodEntry(context.getString(R.string._not_available_))
 
     private lateinit var keyboardView: FrameLayout
 
