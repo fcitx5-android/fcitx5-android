@@ -35,6 +35,7 @@ import org.fcitx.fcitx5.android.input.status.StatusAreaWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.inputConnection
+import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.must
 import splitties.bitflags.hasFlag
 import splitties.views.backgroundColor
@@ -218,6 +219,12 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             add(idleUi.root, lParams(matchParent, matchParent))
             add(candidateUi.root, lParams(matchParent, matchParent))
             add(titleUi.root, lParams(matchParent, matchParent))
+        }
+    }
+
+    override fun onScopeSetupFinished(scope: DynamicScope) {
+        if (System.currentTimeMillis() - ClipboardManager.lastEntryTimestamp < clipboardItemTimeout * 1000L) {
+            onClipboardUpdateListener.onUpdate(ClipboardManager.lastEntry?.text ?: "")
         }
     }
 

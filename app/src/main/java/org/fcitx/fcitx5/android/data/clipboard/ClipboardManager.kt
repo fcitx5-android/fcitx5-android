@@ -47,6 +47,9 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
 
     private val limit by AppPrefs.getInstance().clipboard.clipboardHistoryLimit
 
+    var lastEntry: ClipboardEntry? = null
+    var lastEntryTimestamp: Long = -1L
+
     fun init(context: Context) {
         clipboardManager.addPrimaryClipChangedListener(this)
         clbDb = Room
@@ -91,6 +94,8 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
             ?.takeIf { it.text.isNotBlank() && UTF8Utils.instance.validateUTF8(it.text) }
             ?.let { e ->
                 Timber.d("Accept $e")
+                lastEntry = e
+                lastEntryTimestamp = System.currentTimeMillis()
                 launch {
                     mutex.withLock {
                         val all = clbDao.getAll()
