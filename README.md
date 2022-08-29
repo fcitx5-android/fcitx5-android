@@ -31,7 +31,9 @@ An attempt to run fcitx5 on Android.
 
 Trello kanban: https://trello.com/b/gftk6ZdV/kanban
 
-Discuss on Telegram: https://t.me/fcitx5_android
+Matrix Room: https://matrix.to/#/#fcitx5-android:mozilla.org
+
+Discuss on Telegram: https://t.me/+hci-DrFVWUM3NTUx ([@fcitx5_android](https://t.me/fcitx5_android) originally)
 
 ## Build
 
