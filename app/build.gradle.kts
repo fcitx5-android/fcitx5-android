@@ -14,9 +14,7 @@ fun exec(cmd: String): String = ByteArrayOutputStream().use {
     it.toString().trim()
 }
 
-val gitTag = exec("git describe --tags")
-val gitRevCount = exec("git rev-list --count HEAD")
-val gitHashShort = exec("git describe --always --dirty")
+val gitCommitHash = exec("git rev-parse HEAD")
 val gitVersionName = exec("git describe --tags --long --always")
 
 plugins {
@@ -49,7 +47,7 @@ android {
         versionCode = 2
         versionName = gitVersionName
         setProperty("archivesBaseName", "$applicationId-$gitVersionName")
-        buildConfigField("String", "BUILD_GIT_HASH", "\"$gitHashShort\"")
+        buildConfigField("String", "BUILD_GIT_HASH", "\"$gitCommitHash\"")
         buildConfigField("long", "BUILD_TIME", System.currentTimeMillis().toString())
         buildConfigField("String", "DATA_DESCRIPTOR_NAME", "\"${dataDescriptorName}\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
