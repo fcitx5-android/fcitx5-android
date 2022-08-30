@@ -151,7 +151,8 @@ class SpaceKey : KeyDef(
         viewId = R.id.button_space
     ),
     setOf(
-        Behavior.Press(action = KeyAction.SymAction(0x0020u))
+        Behavior.Press(action = KeyAction.SymAction(0x0020u)),
+        Behavior.LongPress(action = KeyAction.LangSwitchAction)
     )
 )
 
