@@ -27,11 +27,13 @@ import splitties.views.dsl.core.*
 import splitties.views.existingOrNewId
 import splitties.views.imageDrawable
 import splitties.views.padding
+import kotlin.math.min
 
 abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearance) :
     CustomGestureView(ctx) {
 
     val bordered = ThemeManager.prefs.keyBorder.getValue()
+    val rippled = ThemeManager.prefs.keyRippleEffect.getValue()
     val radius = dp(ThemeManager.prefs.keyRadius.getValue().toFloat())
     val hMargin = dp(ThemeManager.prefs.keyHorizontalMargin.getValue())
     val vMargin = dp(ThemeManager.prefs.keyVerticalMargin.getValue())
@@ -53,6 +55,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
         }
         // key border
         if (bordered) {
+            // background: key border
             background = LayerDrawable(
                 arrayOf(
                     GradientDrawable().apply {
@@ -75,53 +78,48 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                 setLayerInset(0, hMargin, vMargin, hMargin, vMargin - shadowWidth)
                 setLayerInset(1, hMargin, vMargin, hMargin, vMargin)
             }
-        } else if (def.forceBordered) {
+            // foreground: press highlight or ripple
+            setupPressHighlight()
+        } else {
             // special background
-            when (def.viewId) {
-                R.id.button_space -> {
-                    val hInset = dp(10)
-                    val vInset = dp(16)
-                    background = InsetDrawable(
-                        GradientDrawable().apply {
-                            cornerRadius = dp(3f)
-                            setColor(theme.spaceBarColor.color)
-                        },
-                        hInset, vInset, hInset, vInset
-                    )
-                    // InsetDrawable sets padding to container view; remove padding to prevent text from bing clipped
-                    padding = 0
-                }
-                R.id.button_return -> {
-                    // background drawable has no ScaleType support, use an ImageView instead ...
-                    val img = imageView {
-                        imageDrawable = GradientDrawable().apply {
-                            shape = GradientDrawable.OVAL
-                            setSize(dp(35), dp(35))
-                            setColor(theme.accentKeyBackgroundColor.color)
+            if (def.forceBordered) {
+                when (def.viewId) {
+                    R.id.button_return -> {
+                        val drawableSize = dp(35)
+                        // background drawable has no ScaleType support, use an ImageView instead ...
+                        val img = imageView {
+                            imageDrawable = GradientDrawable().apply {
+                                shape = GradientDrawable.OVAL
+                                setSize(drawableSize, drawableSize)
+                                setColor(theme.accentKeyBackgroundColor.color)
+                            }
+                            scaleType = ImageView.ScaleType.CENTER_INSIDE
                         }
-                        scaleType = ImageView.ScaleType.CENTER_INSIDE
+                        add(img, lParams(matchParent, matchParent))
                     }
-                    add(img, lParams(matchParent, matchParent))
                 }
+            } else {
+                setupPressHighlight()
             }
-            // TODO set press highlight mask for special background keys
         }
-        // press highlight
-        foreground = if (ThemeManager.prefs.keyRippleEffect.getValue())
+        add(layout, lParams(matchParent, matchParent))
+    }
+
+    private fun setupPressHighlight(mask: Drawable? = null) {
+        foreground = if (rippled)
             RippleDrawable(
                 ColorStateList.valueOf(theme.keyPressHighlightColor.color), null,
                 // ripple should be masked with an opaque color
-                highlightMaskDrawable(Color.WHITE)
+                mask ?: highlightMaskDrawable(Color.WHITE)
             )
         else
             StateListDrawable().apply {
                 addState(
                     intArrayOf(android.R.attr.state_pressed),
                     // use mask drawable as highlight directly
-                    highlightMaskDrawable(theme.keyPressHighlightColor.color)
+                    mask ?: highlightMaskDrawable(theme.keyPressHighlightColor.color)
                 )
             }
-        add(layout, lParams(matchParent, matchParent))
     }
 
     private fun highlightMaskDrawable(@ColorInt color: Int) =
@@ -141,6 +139,51 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         val (x, y) = intArrayOf(0, 0).also { getLocationInWindow(it) }
         bounds.set(x, y, x + w, y + h)
+        if (bordered) return
+        when (def.viewId) {
+            // adjust space bar background height when key border is disabled
+            R.id.button_space -> {
+                val bkgRadius = dp(3f)
+                val bkgDrawable = GradientDrawable().apply {
+                    cornerRadius = bkgRadius
+                    setColor(theme.spaceBarColor.color)
+                }
+                val minHeight = dp(26)
+                val hInset = dp(10)
+                val vInset = if (h < minHeight) 0 else min((h - minHeight) / 2, dp(16))
+                background = InsetDrawable(
+                    bkgDrawable,
+                    hInset, vInset, hInset, vInset
+                )
+                // InsetDrawable sets padding to container view; remove padding to prevent text from bing clipped
+                padding = 0
+                // apply press highlight for background area
+                setupPressHighlight(
+                    InsetDrawable(
+                        bkgDrawable.mutate().apply {
+                            this as GradientDrawable
+                            setColor(if (rippled) Color.WHITE else theme.keyPressHighlightColor.color)
+                        },
+                        hInset, vInset, hInset, vInset
+                    )
+                )
+            }
+            // adjust return button press highlight mask
+            R.id.button_return -> {
+                val maskSize = min(min(w, h), dp(35))
+                val hInset = (w - maskSize) / 2
+                val vInset = (h - maskSize) / 2
+                setupPressHighlight(
+                    InsetDrawable(
+                        GradientDrawable().apply {
+                            shape = GradientDrawable.OVAL
+                            setColor(if (rippled) Color.WHITE else theme.keyPressHighlightColor.color)
+                        },
+                        hInset, vInset, hInset, vInset
+                    )
+                )
+            }
+        }
     }
 }
 
