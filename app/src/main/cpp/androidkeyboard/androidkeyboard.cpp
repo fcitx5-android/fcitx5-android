@@ -198,9 +198,13 @@ void AndroidKeyboardEngine::setConfig(const RawConfig &config) {
 
 void AndroidKeyboardEngine::reset(const InputMethodEntry &entry, InputContextEvent &event) {
     auto *inputContext = event.inputContext();
-    // Android would commit composing text when finishing input, so we can always discard
-    // buffer on reset regardless of `event.type()`
-    resetState(inputContext);
+    // Android would commit composing text when finishing input (we simulate as focus in/out),
+    // but not so when switching input method in fcitx
+    if (event.type() == EventType::InputContextSwitchInputMethod) {
+        commitBuffer(inputContext);
+    } else {
+        resetState(inputContext);
+    }
     inputContext->inputPanel().reset();
     inputContext->updatePreedit();
     inputContext->updateUserInterface(UserInterfaceComponent::InputPanel);
