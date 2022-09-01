@@ -12,15 +12,17 @@ class ThemeListItemDecoration(val itemWidth: Int, val spanCount: Int) :
         parent: RecyclerView,
         state: RecyclerView.State
     ) {
+        val columnWidth = parent.width / spanCount
         val offset = (parent.width - itemWidth * spanCount) / (spanCount + 1)
         val halfOffset = offset / 2
         val position = parent.getChildAdapterPosition(view)
         val rowCount = parent.adapter?.run { itemCount / spanCount } ?: -1
+        val n = position % spanCount
         outRect.set(
-            if (position % spanCount == 0) offset else halfOffset,
+            (n + 1) * offset + n * (itemWidth - columnWidth),
             if (position < spanCount) offset else halfOffset,
-            if (position % spanCount == spanCount - 1) offset else halfOffset,
-            if (position / spanCount == rowCount) offset else halfOffset
+            0, // (n + 1) * (columnWidth - itemWidth - offset)
+            if (position / spanCount == rowCount - 1) offset else halfOffset
         )
     }
 }

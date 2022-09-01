@@ -10,7 +10,7 @@ class ResponsiveThemeListView(context: Context) : RecyclerView(context) {
 
     var itemWidth = dp(128)
     var itemHeight = dp(92)
-    var minMargin = dp(4)
+    var minMargin = dp(16)
 
     private lateinit var grid: GridLayoutManager
 
