@@ -6,7 +6,6 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.drawable.*
-import android.widget.ImageView
 import androidx.annotation.ColorInt
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.updateLayoutParams
@@ -81,24 +80,9 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
             // foreground: press highlight or ripple
             setupPressHighlight()
         } else {
-            // special background
-            if (def.forceBordered) {
-                when (def.viewId) {
-                    R.id.button_return -> {
-                        val drawableSize = dp(35)
-                        // background drawable has no ScaleType support, use an ImageView instead ...
-                        val img = imageView {
-                            imageDrawable = GradientDrawable().apply {
-                                shape = GradientDrawable.OVAL
-                                setSize(drawableSize, drawableSize)
-                                setColor(theme.accentKeyBackgroundColor.color)
-                            }
-                            scaleType = ImageView.ScaleType.CENTER_INSIDE
-                        }
-                        add(img, lParams(matchParent, matchParent))
-                    }
-                }
-            } else {
+            // normal press highlight for keys without special background
+            // special background is handled in `onSizeChanged()`
+            if (!def.forceBordered) {
                 setupPressHighlight()
             }
         }
@@ -141,18 +125,16 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
         bounds.set(x, y, x + w, y + h)
         if (bordered) return
         when (def.viewId) {
-            // adjust space bar background height when key border is disabled
             R.id.button_space -> {
                 val bkgRadius = dp(3f)
-                val bkgDrawable = GradientDrawable().apply {
-                    cornerRadius = bkgRadius
-                    setColor(theme.spaceBarColor.color)
-                }
                 val minHeight = dp(26)
                 val hInset = dp(10)
                 val vInset = if (h < minHeight) 0 else min((h - minHeight) / 2, dp(16))
                 background = InsetDrawable(
-                    bkgDrawable,
+                    GradientDrawable().apply {
+                        cornerRadius = bkgRadius
+                        setColor(theme.spaceBarColor.color)
+                    },
                     hInset, vInset, hInset, vInset
                 )
                 // InsetDrawable sets padding to container view; remove padding to prevent text from bing clipped
@@ -160,19 +142,26 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                 // apply press highlight for background area
                 setupPressHighlight(
                     InsetDrawable(
-                        bkgDrawable.mutate().apply {
-                            this as GradientDrawable
+                        GradientDrawable().apply {
+                            cornerRadius = bkgRadius
                             setColor(if (rippled) Color.WHITE else theme.keyPressHighlightColor.color)
                         },
                         hInset, vInset, hInset, vInset
                     )
                 )
             }
-            // adjust return button press highlight mask
             R.id.button_return -> {
-                val maskSize = min(min(w, h), dp(35))
-                val hInset = (w - maskSize) / 2
-                val vInset = (h - maskSize) / 2
+                val drawableSize = min(min(w, h), dp(35))
+                val hInset = (w - drawableSize) / 2
+                val vInset = (h - drawableSize) / 2
+                background = InsetDrawable(
+                    GradientDrawable().apply {
+                        shape = GradientDrawable.OVAL
+                        setColor(theme.accentKeyBackgroundColor.color)
+                    },
+                    hInset, vInset, hInset, vInset
+                )
+                padding = 0
                 setupPressHighlight(
                     InsetDrawable(
                         GradientDrawable().apply {
