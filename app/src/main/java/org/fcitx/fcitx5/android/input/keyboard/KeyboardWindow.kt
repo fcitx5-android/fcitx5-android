@@ -50,11 +50,11 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
 
     private val currentKeyboard: BaseKeyboard? get() = keyboards[currentKeyboardName]
 
-    private val keyActionListener = BaseKeyboard.KeyActionListener {
+    private val keyActionListener = BaseKeyboard.KeyActionListener { it, source ->
         if (it is KeyAction.LayoutSwitchAction) {
             switchLayout(it.act)
         } else {
-            commonKeyActionListener.listener.onKeyAction(it)
+            commonKeyActionListener.listener.onKeyAction(it, source)
         }
     }
 

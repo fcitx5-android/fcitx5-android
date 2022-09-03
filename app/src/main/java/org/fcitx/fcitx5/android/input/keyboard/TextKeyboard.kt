@@ -97,14 +97,16 @@ class TextKeyboard(
         }
     }
 
-    override fun onAction(action: KeyAction) {
+    override fun onAction(action: KeyAction, source: KeyActionSource) {
         when (action) {
-            is KeyAction.FcitxKeyAction -> transformKeyAction(action)
+            is KeyAction.FcitxKeyAction -> if (source == KeyActionSource.Keyboard) {
+                transformKeyAction(action)
+            }
             is KeyAction.CapsAction -> switchCapsState(action.lock)
             else -> {
             }
         }
-        super.onAction(action)
+        super.onAction(action, source)
     }
 
     private fun transformKeyAction(action: KeyAction.FcitxKeyAction) {
