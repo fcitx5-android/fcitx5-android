@@ -49,14 +49,14 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
         return candidateLayout
     }
 
-    private val keyActionListener = BaseKeyboard.KeyActionListener {
+    private val keyActionListener = BaseKeyboard.KeyActionListener { it, source ->
         if (it is KeyAction.LayoutSwitchAction) {
             when (it.act) {
                 ExpandedCandidateLayout.Keyboard.UpBtnLabel -> prevPage()
                 ExpandedCandidateLayout.Keyboard.DownBtnLabel -> nextPage()
             }
         } else {
-            commonKeyActionListener.listener.onKeyAction(it)
+            commonKeyActionListener.listener.onKeyAction(it, source)
         }
     }
 

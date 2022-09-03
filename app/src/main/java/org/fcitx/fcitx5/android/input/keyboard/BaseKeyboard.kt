@@ -27,8 +27,12 @@ abstract class BaseKeyboard(
     private val keyLayout: List<List<KeyDef>>
 ) : ConstraintLayout(context) {
 
+    enum class KeyActionSource {
+        Keyboard, Popup
+    }
+
     fun interface KeyActionListener {
-        fun onKeyAction(action: KeyAction)
+        fun onKeyAction(action: KeyAction, source: KeyActionSource)
     }
 
     var keyActionListener: KeyActionListener? = null
@@ -193,7 +197,7 @@ abstract class BaseKeyboard(
                                 GestureType.Up -> {
                                     // ask popup keyboard whether there's a pending KeyAction
                                     keyPopupListener?.onKeyAction(view.id)?.let { act ->
-                                        onAction(act)
+                                        onAction(act, KeyActionSource.Popup)
                                         onPopupDismiss(view.id)
                                         true
                                     } ?: false
@@ -278,8 +282,8 @@ abstract class BaseKeyboard(
     }
 
     @CallSuper
-    open fun onAction(action: KeyAction) {
-        keyActionListener?.onKeyAction(action)
+    open fun onAction(action: KeyAction, source: KeyActionSource = KeyActionSource.Keyboard) {
+        keyActionListener?.onKeyAction(action, source)
     }
 
     @CallSuper
