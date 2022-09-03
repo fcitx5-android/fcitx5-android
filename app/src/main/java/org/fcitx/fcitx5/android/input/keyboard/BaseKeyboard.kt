@@ -179,7 +179,7 @@ abstract class BaseKeyboard(
                     is KeyDef.Popup.Keyboard -> {
                         setOnLongClickListener { view ->
                             view as KeyView
-                            keyPopupListener?.onShowKeyboard(view.id, it, view.bounds)
+                            onPopupKeyboard(view.id, it, view.bounds)
                             // do not consume this LongClick gesture
                             false
                         }
@@ -243,6 +243,8 @@ abstract class BaseKeyboard(
                             oldOnGestureListener.onGesture(view, event)
                         }
                     }
+                    // TODO: menu style popup
+                    is KeyDef.Popup.Menu -> {}
                 }
             }
         }
@@ -295,6 +297,11 @@ abstract class BaseKeyboard(
     @CallSuper
     open fun onPopupDismiss(viewId: Int) {
         keyPopupListener?.onDismiss(viewId)
+    }
+
+    @CallSuper
+    open fun onPopupKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
+        keyPopupListener?.onShowKeyboard(viewId, keyboard, bounds)
     }
 
     open fun onAttach(info: EditorInfo? = null) {
