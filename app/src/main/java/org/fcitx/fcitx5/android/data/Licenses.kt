@@ -1,6 +1,5 @@
 package org.fcitx.fcitx5.android.data
 
-import arrow.core.flattenOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -8,7 +7,6 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
-import org.fcitx.fcitx5.android.utils.OptionSerializer
 import org.fcitx.fcitx5.android.utils.appContext
 
 object Licenses {
@@ -16,9 +14,9 @@ object Licenses {
     @Serializable
     data class LibraryLicense(
         val artifactId: LibraryArtifactID,
-        val license: String,
-        val licenseUrl: String,
-        val normalizedLicense: String,
+        val license: String? = null,
+        val licenseUrl: String? = null,
+        val normalizedLicense: String? = null,
         val url: String? = null,
         val libraryName: String,
     )
@@ -40,10 +38,12 @@ object Licenses {
             val list = Json.decodeFromString(
                 MapSerializer(
                     String.serializer(),
-                    ListSerializer(OptionSerializer(LibraryLicense.serializer()))
+                    ListSerializer(LibraryLicense.serializer())
                 ),
                 content
-            )["libraries"]!!.flattenOption().sortedBy { it.libraryName }
+            )["libraries"]!!
+                .filter { !it.licenseUrl.isNullOrEmpty() }
+                .sortedBy { it.libraryName }
             parsed = list
             list
         }
