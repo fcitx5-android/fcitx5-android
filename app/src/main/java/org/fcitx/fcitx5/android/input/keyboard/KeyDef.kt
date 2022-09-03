@@ -75,8 +75,10 @@ open class KeyDef(
 
         class AltPreview(content: String, val alternative: String) : Preview(content)
 
-        class Keyboard(val keys: Array<Key>) : Popup() {
-            data class Key(val str: String, val action: KeyAction)
+        class Keyboard(val label: String) : Popup()
+
+        class Menu(val items: Array<Item>) : Popup() {
+            class Item(val label: String, val action: KeyAction)
         }
     }
 }

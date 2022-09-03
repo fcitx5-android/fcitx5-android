@@ -79,8 +79,9 @@ class PopupComponent :
     }
 
     fun showKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
+        val keys = PopupPreset[keyboard.label] ?: return
         val popupEntryUi = showingEntryUi[viewId] ?: run {
-            showPopup(viewId, "", bounds)
+            showPopup(viewId, keyboard.label, bounds)
             showingEntryUi.getValue(viewId)
         }
         popupEntryUi.apply {

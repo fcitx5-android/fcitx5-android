@@ -143,6 +143,14 @@ class TextKeyboard(
         super.onPopupPreview(viewId, transformAlphabet(content), bounds)
     }
 
+    override fun onPopupKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
+        val label = keyboard.label
+        val k = if (label.length == 1 && label[0].isLetter())
+            KeyDef.Popup.Keyboard(transformAlphabet(label))
+        else keyboard
+        super.onPopupKeyboard(viewId, k, bounds)
+    }
+
     private fun switchCapsState(lock: Boolean = false) {
         capsState = if (lock) when (capsState) {
             CapsState.Lock -> CapsState.None

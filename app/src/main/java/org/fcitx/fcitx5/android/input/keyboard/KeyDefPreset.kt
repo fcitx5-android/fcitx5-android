@@ -6,10 +6,13 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.core.KeyStates
 
+val NumLockState = KeyStates(KeyState.NumLock, KeyState.Virtual)
+
 class SymbolKey(
     val symbol: String,
     percentWidth: Float = 0.1f,
-    variant: Appearance.Variant = Appearance.Variant.Normal
+    variant: Appearance.Variant = Appearance.Variant.Normal,
+    popup: Array<Popup>? = null
 ) : KeyDef(
     Appearance.Text(
         displayText = symbol,
@@ -21,15 +24,17 @@ class SymbolKey(
     setOf(
         Behavior.Press(action = KeyAction.FcitxKeyAction(symbol))
     ),
-    arrayOf(
-        Popup.Preview(symbol)
+    popup ?: arrayOf(
+        Popup.Preview(symbol),
+        Popup.Keyboard(symbol)
     )
 )
 
 class AlphabetKey(
     val character: String,
     val punctuation: String,
-    variant: Appearance.Variant = Appearance.Variant.Normal
+    variant: Appearance.Variant = Appearance.Variant.Normal,
+    popup: Array<Popup>? = null
 ) : KeyDef(
     Appearance.AltText(
         displayText = character,
@@ -42,16 +47,9 @@ class AlphabetKey(
         Behavior.Press(KeyAction.FcitxKeyAction(character)),
         Behavior.SwipeDown(KeyAction.FcitxKeyAction(punctuation))
     ),
-    arrayOf(
+    popup ?: arrayOf(
         Popup.AltPreview(character, punctuation),
-        // TODO: proper symbol map
-        Popup.Keyboard(
-            arrayOf(
-                Popup.Keyboard.Key(character.uppercase(), KeyAction.FcitxKeyAction(character.uppercase())),
-                Popup.Keyboard.Key(character.lowercase(), KeyAction.FcitxKeyAction(character.lowercase())),
-                Popup.Keyboard.Key(punctuation, KeyAction.FcitxKeyAction(punctuation)),
-            )
-        )
+        Popup.Keyboard(character)
     )
 )
 
@@ -59,6 +57,7 @@ class AlphabetDigitKey(
     val character: String,
     altText: String,
     val sym: UInt,
+    popup: Array<Popup>? = null
 ) : KeyDef(
     Appearance.AltText(
         displayText = character,
@@ -70,23 +69,21 @@ class AlphabetDigitKey(
         Behavior.Press(KeyAction.FcitxKeyAction(character)),
         Behavior.SwipeDown(KeyAction.SymAction(sym, NumLockState))
     ),
-    arrayOf(
+    popup ?: arrayOf(
         Popup.AltPreview(character, altText),
-        // TODO: proper symbol map
-        Popup.Keyboard(
-            arrayOf(
-                Popup.Keyboard.Key(character.uppercase(), KeyAction.FcitxKeyAction(character.uppercase())),
-                Popup.Keyboard.Key(character.lowercase(), KeyAction.FcitxKeyAction(character.lowercase())),
-                Popup.Keyboard.Key(altText, KeyAction.FcitxKeyAction(altText)),
-            )
-        )
+        Popup.Keyboard(character)
     )
 ) {
-    constructor(char: String, digit: Int) : this(char, digit.toString(), (0xffb0 + digit).toUInt())
-
-    companion object {
-        private val NumLockState = KeyStates(KeyState.NumLock, KeyState.Virtual)
-    }
+    constructor(
+        char: String,
+        digit: Int,
+        popup: Array<Popup>? = null
+    ) : this(
+        char,
+        digit.toString(),
+        (0xffb0 + digit).toUInt(),
+        popup
+    )
 }
 
 class CapsKey : KeyDef(
@@ -237,8 +234,4 @@ class NumPadKey(
     setOf(
         Behavior.Press(action = KeyAction.SymAction(sym, NumLockState))
     )
-) {
-    companion object {
-        private val NumLockState = KeyStates(KeyState.NumLock, KeyState.Virtual)
-    }
-}
+)
