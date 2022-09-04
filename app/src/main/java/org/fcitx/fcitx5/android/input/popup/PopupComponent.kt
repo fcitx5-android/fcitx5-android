@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.input.popup
 
 import android.graphics.Rect
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -80,19 +81,33 @@ class PopupComponent :
 
     fun showKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
         val keys = PopupPreset[keyboard.label] ?: return
-        val popupEntryUi = showingEntryUi[viewId] ?: run {
+        val entryUi = showingEntryUi[viewId]
+        if (entryUi != null) {
+            reallyShowKeyboard(viewId, entryUi, keys, bounds)
+        } else {
             showPopup(viewId, keyboard.label, bounds)
-            showingEntryUi.getValue(viewId)
+            // in case popup preview is disabled, wait newly created popup entry to layout
+            ContextCompat.getMainExecutor(service).execute {
+                reallyShowKeyboard(viewId, showingEntryUi.getValue(viewId), keys, bounds)
+            }
         }
-        val (x, y) = intArrayOf(0, 0).also { popupEntryUi.root.getLocationInWindow(it) }
+    }
+
+    private fun reallyShowKeyboard(
+        viewId: Int,
+        entryUi: PopupEntryUi,
+        keys: Array<String>,
+        bounds: Rect
+    ) {
         val keyboardUi = PopupKeyboardUi(context, theme, popupRadius, keys, bounds)
-        showingKeyboardUi[viewId] = keyboardUi
+        val (x, y) = intArrayOf(0, 0).also { entryUi.root.getLocationInWindow(it) }
         root.apply {
             add(keyboardUi.root, lParams {
                 leftMargin = x + keyboardUi.offsetX
                 topMargin = y + keyboardUi.offsetY
             })
         }
+        showingKeyboardUi[viewId] = keyboardUi
     }
 
     fun changeFocus(viewId: Int, deltaX: Int, deltaY: Int): Boolean {
@@ -120,13 +135,13 @@ class PopupComponent :
                 }
             }
         }
+    }
+
+    private fun reallyDismissPopup(viewId: Int, popup: PopupEntryUi) {
         showingKeyboardUi[viewId]?.also {
             showingKeyboardUi.remove(viewId)
             root.removeView(it.root)
         }
-    }
-
-    private fun reallyDismissPopup(viewId: Int, popup: PopupEntryUi) {
         showingEntryUi.remove(viewId)
         root.removeView(popup.root)
         freeEntryUi.add(popup)
