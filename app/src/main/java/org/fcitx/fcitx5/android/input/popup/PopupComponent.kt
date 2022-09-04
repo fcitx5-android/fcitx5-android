@@ -84,16 +84,14 @@ class PopupComponent :
             showPopup(viewId, keyboard.label, bounds)
             showingEntryUi.getValue(viewId)
         }
-        popupEntryUi.apply {
-            val (x, y) = intArrayOf(0, 0).also { root.getLocationInWindow(it) }
-            val keyboardUi = PopupKeyboardUi(ctx, theme, popupRadius, keyboard)
-            showingKeyboardUi[viewId] = keyboardUi
-            this@PopupComponent.root.apply {
-                add(keyboardUi.root, lParams {
-                    leftMargin = x
-                    topMargin = y
-                })
-            }
+        val (x, y) = intArrayOf(0, 0).also { popupEntryUi.root.getLocationInWindow(it) }
+        val keyboardUi = PopupKeyboardUi(context, theme, popupRadius, keys, bounds)
+        showingKeyboardUi[viewId] = keyboardUi
+        root.apply {
+            add(keyboardUi.root, lParams {
+                leftMargin = x + keyboardUi.offsetX
+                topMargin = y + keyboardUi.offsetY
+            })
         }
     }
 
