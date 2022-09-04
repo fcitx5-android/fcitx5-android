@@ -184,6 +184,7 @@ abstract class BaseKeyboard(
                             false
                         }
                         val oldOnGestureListener = onGestureListener ?: OnGestureListener.Empty
+                        swipeEnabled = true
                         swipeThresholdX = dp(38f)
                         swipeThresholdY = dp(48f)
                         onGestureListener = OnGestureListener { view, event ->
