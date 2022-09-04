@@ -39,12 +39,12 @@ class TextKeyboard(
             ),
             listOf(
                 AlphabetKey("A", "@"),
-                AlphabetKey("S", "`"),
-                AlphabetKey("D", "$"),
-                AlphabetKey("F", "_"),
-                AlphabetKey("G", "&"),
+                AlphabetKey("S", "*"),
+                AlphabetKey("D", "+"),
+                AlphabetKey("F", "-"),
+                AlphabetKey("G", "="),
                 AlphabetKey("H", "/"),
-                AlphabetKey("J", ";"),
+                AlphabetKey("J", "#"),
                 AlphabetKey("K", "("),
                 AlphabetKey("L", ")")
             ),
