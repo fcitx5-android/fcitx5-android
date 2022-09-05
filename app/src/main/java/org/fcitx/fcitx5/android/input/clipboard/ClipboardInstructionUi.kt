@@ -9,9 +9,8 @@ import splitties.dimensions.dp
 import splitties.views.dsl.appcompat.AppCompatStyles
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
-import splitties.views.horizontalPadding
 import splitties.views.imageResource
-import splitties.views.verticalPadding
+import splitties.views.setPaddingDp
 
 sealed class ClipboardInstructionUi(override val ctx: Context, protected val theme: Theme) : Ui {
 
@@ -21,8 +20,7 @@ sealed class ClipboardInstructionUi(override val ctx: Context, protected val the
 
         private val instructionText = textView {
             setText(R.string.instruction_enable_clipboard_listening)
-            verticalPadding = dp(8)
-            horizontalPadding = dp(12)
+            setPaddingDp(12, 8, 12, 8)
             setTextColor(theme.keyTextColor.color)
         }
 

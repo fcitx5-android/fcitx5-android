@@ -11,17 +11,15 @@ import org.fcitx.fcitx5.android.utils.rippleDrawable
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
-import splitties.views.horizontalPadding
 import splitties.views.imageResource
-import splitties.views.verticalPadding
+import splitties.views.setPaddingDp
 
 class ClipboardEntryUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
 
     val text = textView {
         maxLines = 4
         textSize = 14f
-        verticalPadding = dp(4)
-        horizontalPadding = dp(8)
+        setPaddingDp(8, 4, 8, 4)
         ellipsize = TextUtils.TruncateAt.END
         setTextColor(inputTheme.keyTextColor.color)
     }

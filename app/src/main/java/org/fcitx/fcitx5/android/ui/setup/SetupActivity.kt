@@ -24,10 +24,6 @@ import org.fcitx.fcitx5.android.ui.setup.SetupPage.Companion.isLastPage
 import org.fcitx.fcitx5.android.utils.applyTranslucentSystemBars
 import org.fcitx.fcitx5.android.utils.getCurrentFragment
 import splitties.systemservices.notificationManager
-import splitties.views.bottomPadding
-import splitties.views.leftPadding
-import splitties.views.rightPadding
-import splitties.views.topPadding
 
 class SetupActivity : FragmentActivity() {
 
@@ -45,12 +41,7 @@ class SetupActivity : FragmentActivity() {
         val binding = ActivitySetupBinding.inflate(layoutInflater)
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
             val sysBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            binding.root.apply {
-                topPadding = sysBars.top
-                bottomPadding = sysBars.bottom
-                leftPadding = sysBars.left
-                rightPadding = sysBars.right
-            }
+            binding.root.setPadding(sysBars.left, sysBars.top, sysBars.right, sysBars.bottom)
             windowInsets
         }
         setContentView(binding.root)

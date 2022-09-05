@@ -17,8 +17,7 @@ import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor
 import org.fcitx.fcitx5.android.utils.str
 import splitties.dimensions.dp
 import splitties.views.dsl.core.*
-import splitties.views.horizontalPadding
-import splitties.views.topPadding
+import splitties.views.setPaddingDp
 
 class PunctuationEditorFragment : ProgressFragment(),
     OnItemChangedListener<PunctuationEditorFragment.PunctuationMapEntry> {
@@ -140,8 +139,7 @@ class PunctuationEditorFragment : ProgressFragment(),
                     altMappingField.setText(altMapping)
                 }
                 val layout = verticalLayout {
-                    topPadding = dp(10)
-                    horizontalPadding = dp(20)
+                    setPaddingDp(20, 10, 20, 0)
                     add(keyLayout, lParams(matchParent))
                     add(mappingLayout, lParams(matchParent))
                     add(altMappingLayout, lParams(matchParent))
