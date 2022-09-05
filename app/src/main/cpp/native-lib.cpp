@@ -493,13 +493,18 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
     auto appLib_ = CString(env, appLib);
     auto extData_ = CString(env, extData);
 
+    std::string lang_ = fcitx::stringutils::split(*locale_, ":")[0];
     std::string config_home = fcitx::stringutils::joinPath(*extData_, "config");
     std::string data_home = fcitx::stringutils::joinPath(*extData_, "data");
     std::string usr_share = fcitx::stringutils::joinPath(*appData_, "usr", "share");
     std::string locale_dir = fcitx::stringutils::joinPath(usr_share, "locale");
     std::string libime_data = fcitx::stringutils::joinPath(usr_share, "libime");
 
+    // for fcitx default profile [DefaultInputMethod]
+    setenv("LANG", lang_.c_str(), 1);
+    // for libintl-lite loading gettext .mo translations
     setenv("LANGUAGE", locale_, 1);
+    // for fcitx i18nstring loading translations in .conf files
     setenv("FCITX_LOCALE", locale_, 1);
     setenv("HOME", extData_, 1);
     setenv("XDG_DATA_DIRS", usr_share.c_str(), 1);
