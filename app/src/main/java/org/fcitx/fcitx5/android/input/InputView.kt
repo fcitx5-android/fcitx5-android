@@ -230,7 +230,9 @@ class InputView(
             }
         }
         kawaiiBar.onShow()
-        windowManager.switchToKeyboardWindow()
+        // We cannot use the key for keyboard window,
+        // as this is the only place where the window manager gets keyboard window instance
+        windowManager.attachWindow(keyboardWindow)
         broadcaster.onEditorInfoUpdate(service.editorInfo)
     }
 

@@ -22,6 +22,7 @@ import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.keyboard.BaseKeyboard
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction
+import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.mechdancer.dependency.manager.must
@@ -80,7 +81,7 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
     private fun updateCandidatesWithOffset(offset: Int) {
         val candidates = horizontalCandidate.adapter.candidates
         if (candidates.isEmpty()) {
-            windowManager.switchToKeyboardWindow()
+            windowManager.attachWindow(KeyboardWindow)
         } else {
             adapter.updateCandidatesWithOffset(candidates, offset)
             lifecycleCoroutineScope.launch(Dispatchers.Main) {
@@ -103,7 +104,7 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
 
     override fun onPreeditUpdate(data: FcitxEvent.PreeditEvent.Data) {
         if (data.preedit.isEmpty() && data.clientPreedit.isEmpty()) {
-            windowManager.switchToKeyboardWindow()
+            windowManager.attachWindow(KeyboardWindow)
         }
     }
 }

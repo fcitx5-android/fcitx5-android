@@ -2,10 +2,13 @@ package org.fcitx.fcitx5.android.input.keyboard
 
 import android.graphics.Rect
 import android.text.InputType
+import android.view.Gravity
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
+import androidx.transition.Slide
+import androidx.transition.Transition
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
@@ -15,6 +18,7 @@ import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
+import org.fcitx.fcitx5.android.input.wm.EssentialWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.mechdancer.dependency.manager.must
 import splitties.views.dsl.core.add
@@ -22,13 +26,23 @@ import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 
-class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(),
+class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), EssentialWindow,
     InputBroadcastReceiver {
 
     private val service: FcitxInputMethodService by manager.inputMethodService()
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
     private val popup: PopupComponent by manager.must()
     private val theme by manager.theme()
+
+    companion object : EssentialWindow.Key
+
+    override val key: EssentialWindow.Key
+        get() = KeyboardWindow
+
+    override val enterAnimation: Transition
+        get() = Slide().apply {
+            slideEdge = Gravity.BOTTOM
+        }
 
     private var _currentIme: InputMethodEntry? = null
 

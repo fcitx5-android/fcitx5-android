@@ -31,6 +31,7 @@ import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.editing.TextEditingWindow
+import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
 import org.fcitx.fcitx5.android.input.status.StatusAreaWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
@@ -176,7 +177,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     // set expand candidate button to close expand candidate
     private fun setExpandButtonToDetach() {
         candidateUi.expandButton.setOnClickListener {
-            windowManager.switchToKeyboardWindow()
+            windowManager.attachWindow(KeyboardWindow)
         }
         candidateUi.expandButton.image.imageResource = R.drawable.ic_baseline_expand_less_24
     }
@@ -248,7 +249,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                 titleUi.setTitle(window.title)
                 window.onCreateBarExtension()?.let { titleUi.addExtension(it) }
                 titleUi.setReturnButtonOnClickListener {
-                    windowManager.switchToKeyboardWindow()
+                    windowManager.attachWindow(KeyboardWindow)
                 }
                 barStateMachine.push(ExtendedWindowAttached)
             }

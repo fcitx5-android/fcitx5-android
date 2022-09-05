@@ -1,10 +1,9 @@
 package org.fcitx.fcitx5.android.input.wm
 
-import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
 import androidx.transition.Fade
-import androidx.transition.Slide
+import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import org.fcitx.fcitx5.android.R
@@ -13,7 +12,6 @@ import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcaster
 import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
 import org.fcitx.fcitx5.android.input.dependency.context
-import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
 import org.fcitx.fcitx5.android.utils.isUiThread
 import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.must
@@ -30,52 +28,77 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
 
     private val context by manager.context()
     private val broadcaster: InputBroadcaster by manager.must()
-    private val keyboardWindow: KeyboardWindow by manager.must()
     private lateinit var scope: DynamicScope
 
-    private var keyboardView: View? = null
+    private val essentialWindows = mutableMapOf<EssentialWindow.Key, Pair<InputWindow, View>>()
+
     private var currentWindow: InputWindow? = null
     private var currentView: View? = null
 
     private val disableAnimation by AppPrefs.getInstance().advanced.disableAnimation
 
-    private fun prepareAnimation(remove: View, add: View) {
+    private fun prepareAnimation(enterAnimation: Transition?, remove: View, add: View) {
         if (disableAnimation)
             return
-        val slide = Slide().apply {
-            slideEdge = if (add === keyboardView) Gravity.BOTTOM else Gravity.TOP
-            addTarget(add)
-        }
+        enterAnimation?.addTarget(add)
         val fade = Fade().apply {
             addTarget(remove)
         }
         TransitionManager.beginDelayedTransition(view, TransitionSet().apply {
-            addTransition(slide)
+            enterAnimation?.let { addTransition(it) }
             addTransition(fade)
             duration = 100
         })
     }
 
     /**
+     * Attach an essential window by key
+     * IMPORTANT: the view of this essential window must have been initialized,
+     * i.e. another [attachWindow] that accepts the window instance should have been used at least once
+     * before using this function
+     */
+    fun attachWindow(windowKey: EssentialWindow.Key) {
+        ensureThread()
+        essentialWindows[windowKey]?.let { (window, _) ->
+            attachWindow(window)
+        } ?: throw IllegalStateException("$windowKey is not a known essential window key")
+    }
+
+    /**
+     * Remove an essential window
+     */
+    fun removeEssentialWindow(windowKey: EssentialWindow.Key) {
+        val (window, _) = essentialWindows[windowKey]
+            ?: throw IllegalStateException("$windowKey is not a known essential window key")
+        if (currentWindow === window)
+            throw IllegalStateException("$windowKey cannot be removed when it's active")
+        // remove from scope
+        scope -= window
+        // remove from map
+        essentialWindows.remove(windowKey)
+    }
+
+    /**
      * Attach a new window, removing the old one
+     * This function initialize the view for windows and save it for essential windows
      */
     fun attachWindow(window: InputWindow) {
         ensureThread()
-        if (window == currentWindow)
-            throw IllegalArgumentException("$window is already attached")
-        val newView = if (window === keyboardWindow) {
-            // keep the view for keyboard window
-            keyboardView ?: window.onCreateView().also { keyboardView = it }
-            // keyboard window is always in scope,
+        if (window === currentWindow)
+            Timber.d("Skip attaching $window")
+        val newView = if (window is EssentialWindow) {
+            // keep the view for essential windows
+            essentialWindows[window.key]?.second ?: window.onCreateView()
+                .also { essentialWindows[window.key] = window to it }
         } else {
-            // add the new window to scope, except keyboard window (it's always in scope)
+            // add the new window to scope, except essential windows (they are always in scope)
             scope += window
             window.onCreateView()
         }
         if (currentWindow != null) {
             val oldWindow = currentWindow!!
             val oldView = currentView!!
-            prepareAnimation(oldView, newView)
+            prepareAnimation(window.enterAnimation, oldView, newView)
             // notify the window that it will be detached
             oldWindow.onDetached()
             // remove the old window from layout
@@ -83,9 +106,8 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
             // broadcast the old window was removed from layout
             broadcaster.onWindowDetached(oldWindow)
             Timber.d("Detach $oldWindow")
-            // finally remove the old window from scope only if it's not keyboard window,
-            // because keyboard window is always in scope
-            if (oldWindow !== keyboardWindow)
+            // finally remove the old window from scope only if it's not an essential window,
+            if (oldWindow !is EssentialWindow)
                 scope -= oldWindow
         }
         // add the new window to layout
@@ -97,17 +119,6 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
         currentWindow = window
         // broadcast the new window was added to layout
         broadcaster.onWindowAttached(window)
-    }
-
-    /**
-     * Remove current window and attach keyboard window
-     */
-    fun switchToKeyboardWindow() {
-        ensureThread()
-        if (currentWindow === keyboardWindow) {
-            return
-        }
-        attachWindow(keyboardWindow)
     }
 
     override val view: FrameLayout by lazy { context.frameLayout(R.id.input_window) }

@@ -1,6 +1,9 @@
 package org.fcitx.fcitx5.android.input.wm
 
+import android.view.Gravity
 import android.view.View
+import androidx.transition.Slide
+import androidx.transition.Transition
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.IUniqueComponent
@@ -13,6 +16,13 @@ sealed class InputWindow : Dependent {
     protected val manager: DependencyManager = DependencyManager()
 
     protected val context by manager.context()
+
+    /**
+     * Animation when the window is added to the layout
+     */
+    open val enterAnimation: Transition? = Slide().apply {
+        slideEdge = Gravity.TOP
+    }
 
     /**
      * After the window was set up in dynamic scope
