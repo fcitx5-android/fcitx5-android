@@ -244,7 +244,7 @@ void AndroidKeyboardEngine::updateCandidate(const InputMethodEntry &entry, Input
 void AndroidKeyboardEngine::updateUI(InputContext *inputContext) {
     auto *state = inputContext->propertyFor(&factory_);
     Text preedit(preeditString(inputContext), TextFormatFlag::Underline);
-    preedit.setCursor(static_cast<int>(state->buffer_.cursor()));
+    preedit.setCursor(static_cast<int>(state->buffer_.cursorByChar()));
     inputContext->inputPanel().setClientPreedit(preedit);
     // we don't want preedit here ...
 //    if (!inputContext->capabilityFlags().test(CapabilityFlag::Preedit)) {
@@ -312,13 +312,15 @@ std::string AndroidKeyboardEngine::preeditString(InputContext *inputContext) {
 }
 
 void AndroidKeyboardEngine::invokeActionImpl(const InputMethodEntry &entry, InvokeActionEvent &event) {
+    size_t cursor = event.cursor();
     auto inputContext = event.inputContext();
-    if (event.cursor() < 0 ||
-        event.action() != InvokeActionEvent::Action::LeftClick) {
+    auto *state = inputContext->propertyFor(&factory_);
+    if (event.action() != InvokeActionEvent::Action::LeftClick
+        || cursor < 0
+        || cursor > state->buffer_.size()) {
         return InputMethodEngineV3::invokeActionImpl(entry, event);
     }
     event.filter();
-    auto *state = inputContext->propertyFor(&factory_);
     state->buffer_.setCursor(event.cursor());
     updateUI(inputContext);
 }
