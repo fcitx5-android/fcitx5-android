@@ -125,13 +125,21 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
             get() = ConfigType.TyList(ConfigType.TyEnum)
     }
 
-    // TODO: Placeholder
     @Parcelize
     data class ConfigExternal(
         override val name: String,
         override val description: String? = null,
         val uri: String? = null,
+        val knownType: ETy? = null
     ) : ConfigDescriptor<ConfigType.TyExternal, Nothing>() {
+        enum class ETy {
+            PinyinDict,
+            Punctuation,
+            QuickPhrase,
+            Chttrans,
+            Table
+        }
+
         override val type: ConfigType<ConfigType.TyExternal>
             get() = ConfigType.TyExternal
         override val defaultValue: Nothing?
@@ -234,7 +242,15 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                         ConfigType.TyExternal -> ConfigExternal(
                             raw.name,
                             raw.description,
-                            raw.findByName("External")?.value
+                            raw.findByName("External")?.value,
+                            when (raw.name) {
+                                "DictManager" -> ConfigExternal.ETy.PinyinDict
+                                "Punctuation" -> ConfigExternal.ETy.Punctuation
+                                "QuickPhrase", "Editor" -> ConfigExternal.ETy.QuickPhrase
+                                "Chttrans" -> ConfigExternal.ETy.Chttrans
+                                "TableGlobal" -> ConfigExternal.ETy.Table
+                                else -> null
+                            }
                         )
                     }
                 }

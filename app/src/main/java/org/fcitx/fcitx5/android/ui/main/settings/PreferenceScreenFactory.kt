@@ -13,6 +13,7 @@ import org.fcitx.fcitx5.android.ui.common.DialogSeekBarPreference
 import org.fcitx.fcitx5.android.ui.main.settings.addon.AddonConfigFragment
 import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor
+import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.*
 import org.fcitx.fcitx5.android.utils.config.ConfigType
 
 object PreferenceScreenFactory {
@@ -55,7 +56,7 @@ object PreferenceScreenFactory {
         if (hideKeyConfig && ConfigType.pretty(descriptor.type).contains("Key"))
             return
 
-        if (descriptor is ConfigDescriptor.ConfigCustom) {
+        if (descriptor is ConfigCustom) {
             custom(context, fragmentManager, cfg, screen, descriptor)
             return
         }
@@ -154,42 +155,44 @@ object PreferenceScreenFactory {
         }
 
         when (descriptor) {
-            is ConfigDescriptor.ConfigBool -> SwitchPreferenceCompat(context).apply {
+            is ConfigBool -> SwitchPreferenceCompat(context).apply {
                 setDefaultValue(descriptor.defaultValue)
             }
-            is ConfigDescriptor.ConfigEnum -> ListPreference(context).apply {
+            is ConfigEnum -> ListPreference(context).apply {
                 entries = (descriptor.entriesI18n ?: descriptor.entries).toTypedArray()
                 entryValues = descriptor.entries.toTypedArray()
                 dialogTitle = descriptor.description ?: descriptor.name
                 summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
                 setDefaultValue(descriptor.defaultValue)
             }
-            is ConfigDescriptor.ConfigEnumList -> listPreference()
-            is ConfigDescriptor.ConfigExternal -> when (descriptor.name) {
-                "DictManager" -> pinyinDictionary()
-                "Punctuation" -> punctuationEditor(descriptor.description ?: descriptor.name)
-                "QuickPhrase", "Editor" -> quickPhraseEditor()
-                "Chttrans" -> addonConfigPreference("chttrans")
-                "TableGlobal" -> addonConfigPreference("table")
+            is ConfigEnumList -> listPreference()
+            is ConfigExternal -> when (descriptor.knownType) {
+                ConfigExternal.ETy.PinyinDict -> pinyinDictionary()
+                ConfigExternal.ETy.Punctuation -> punctuationEditor(
+                    descriptor.description ?: descriptor.name
+                )
+                ConfigExternal.ETy.QuickPhrase -> quickPhraseEditor()
+                ConfigExternal.ETy.Chttrans -> addonConfigPreference("chttrans")
+                ConfigExternal.ETy.Table -> addonConfigPreference("table")
                 else -> stubPreference()
             }
-            is ConfigDescriptor.ConfigInt -> DialogSeekBarPreference(context).apply {
+            is ConfigInt -> DialogSeekBarPreference(context).apply {
                 summaryProvider = DialogSeekBarPreference.SimpleSummaryProvider
                 descriptor.defaultValue?.let { defaultValue = it }
                 descriptor.intMin?.let { min = it }
                 descriptor.intMax?.let { max = it }
             }
-            is ConfigDescriptor.ConfigKey -> stubPreference()
-            is ConfigDescriptor.ConfigList -> if (descriptor.type.subtype in ListFragment.supportedSubtypes)
+            is ConfigKey -> stubPreference()
+            is ConfigList -> if (descriptor.type.subtype in ListFragment.supportedSubtypes)
                 listPreference()
             else
                 stubPreference()
-            is ConfigDescriptor.ConfigString -> EditTextPreference(context).apply {
+            is ConfigString -> EditTextPreference(context).apply {
                 dialogTitle = descriptor.description ?: descriptor.name
                 summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
                 setDefaultValue(descriptor.defaultValue)
             }
-            is ConfigDescriptor.ConfigCustom -> throw IllegalAccessException("Impossible!")
+            is ConfigCustom -> throw IllegalAccessException("Impossible!")
         }.apply {
             key = descriptor.name
             title = descriptor.description ?: descriptor.name
@@ -206,7 +209,7 @@ object PreferenceScreenFactory {
         fragmentManager: FragmentManager,
         cfg: RawConfig,
         screen: PreferenceScreen,
-        descriptor: ConfigDescriptor.ConfigCustom
+        descriptor: ConfigCustom
     ) {
         val subStore = FcitxRawConfigStore(cfg[descriptor.name])
         val subPref = PreferenceCategory(context).apply {
