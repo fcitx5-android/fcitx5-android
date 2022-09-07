@@ -103,3 +103,6 @@ target_link_libraries(pinyindictionaryutils LibIME::Pinyin)
 
 add_library(utf8utils SHARED utf8utils.cpp)
 target_link_libraries(utf8utils Fcitx5::Utils)
+
+add_library(key-utils SHARED key-utils.cpp)
+target_link_libraries(key-utils Fcitx5::Utils)
