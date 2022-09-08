@@ -115,6 +115,9 @@ public:
     jclass Action;
     jmethodID ActionInit;
 
+    jclass Key;
+    jmethodID KeyInit;
+
     GlobalRefSingleton(JavaVM *jvm_) : jvm(jvm_) {
         JNIEnv *env;
         jvm->AttachCurrentThread(&env, nullptr);
@@ -148,6 +151,9 @@ public:
 
         Action = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("org/fcitx/fcitx5/android/core/Action")));
         ActionInit = env->GetMethodID(Action, "<init>", "(IZZZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lorg/fcitx/fcitx5/android/core/Action;)V");
+
+        Key = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("org/fcitx/fcitx5/android/core/Key")));
+        KeyInit = env->GetMethodID(Key, "<init>", "(Ljava/lang/String;II)V");
     }
 
     const JEnv AttachEnv() const { return JEnv(jvm); }

@@ -265,6 +265,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         @JvmStatic
         external fun scheduleEmpty()
 
+
         private var firstRun by AppPrefs.getInstance().internal.firstRun
 
         /**
