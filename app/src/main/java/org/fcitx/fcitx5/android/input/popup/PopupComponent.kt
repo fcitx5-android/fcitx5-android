@@ -108,7 +108,17 @@ class PopupComponent :
         keys: Array<String>,
         bounds: Rect
     ) {
-        val keyboardUi = PopupKeyboardUi(context, theme, popupRadius, keys, bounds)
+        val keyboardUi = PopupKeyboardUi(
+            context,
+            theme,
+            popupWidth,
+            popupHeight,
+            popupKeyHeight,
+            popupRadius,
+            bounds,
+            keys,
+            onDismissSelf = { dismissPopup(viewId) }
+        )
         val (x, y) = intArrayOf(0, 0).also { entryUi.root.getLocationInWindow(it) }
         root.apply {
             add(keyboardUi.root, lParams {

@@ -11,14 +11,32 @@ import splitties.views.dsl.core.*
 import splitties.views.gravityCenter
 import splitties.views.gravityEnd
 import splitties.views.gravityStart
+import kotlin.math.floor
 import kotlin.math.roundToInt
 
+/**
+ * @param ctx [Context]
+ * @param theme [Theme]
+ * @param keyWidth key width in popup keyboard
+ * @param popupHeight popup preview view height. Used to transform gesture coordinate from
+ * trigger view to popup keyboard view. See [changeFocus].
+ * @param keyHeight key height in popup keyboard
+ * @param radius popup keyboard and key radius
+ * @param bounds bound [Rect] of popup trigger view. Used to calculate free space of both sides and
+ * determine column order. See [focusColumn] and [columnOrder].
+ * @param keys symbols to show on popup keyboard
+ * @param onDismissSelf callback when popup keyboard wants to close
+ */
 class PopupKeyboardUi(
     override val ctx: Context,
     private val theme: Theme,
-    private val radius: Float,
+    private val keyWidth: Int,
+    popupHeight: Int,
+    private val keyHeight: Int,
+    radius: Float,
+    bounds: Rect,
     private val keys: Array<String>,
-    bounds: Rect
+    private val onDismissSelf: PopupKeyboardUi.() -> Unit = {}
 ) : Ui {
 
     private val inactiveBackground = GradientDrawable().apply {
@@ -31,15 +49,12 @@ class PopupKeyboardUi(
         setColor(theme.accentKeyBackgroundColor.color)
     }
 
-    private val keyWidth = ctx.dp(38)
-    private val keyHeight = ctx.dp(48)
-
     private val rowCount: Int
     private val columnCount: Int
 
-    // those 2 variables meas default focus row/column during initialization
-    private var focusRow: Int
-    private var focusColumn: Int
+    // those 2 variables meas initial focus row/column during initialization
+    private val focusRow: Int
+    private val focusColumn: Int
 
     init {
         val keyCount: Float = keys.size.toFloat()
@@ -51,14 +66,14 @@ class PopupKeyboardUi(
         }
         columnCount = (keyCount / rowCount).roundToInt()
 
-        focusRow = 0
-        focusColumn = (columnCount - 1) / 2
-
         val leftSpace = bounds.left
         val rightSpace = ctx.resources.displayMetrics.widthPixels - bounds.right
+        var col = (columnCount - 1) / 2
+        while (keyWidth * col > leftSpace) col--
+        while (keyWidth * (columnCount - col - 1) > rightSpace) col++
 
-        while (keyWidth * focusColumn > leftSpace) focusColumn--
-        while (keyWidth * (columnCount - focusColumn - 1) > rightSpace) focusColumn++
+        focusRow = 0
+        focusColumn = col
     }
 
     val offsetX = -keyWidth * focusColumn
@@ -115,11 +130,14 @@ class PopupKeyboardUi(
         }
     }
 
+    init {
+        markFocus(focusedIndex)
+    }
+
     override val root = verticalLayout root@{
         background = inactiveBackground
         outlineProvider = ViewOutlineProvider.BACKGROUND
         elevation = dp(2f)
-        markFocus(focusedIndex)
         // add rows in reverse order, because newly added view shows at bottom
         for (i in rowCount - 1 downTo 0) {
             val order = keyOrders[i]
@@ -135,40 +153,74 @@ class PopupKeyboardUi(
                         add(view, lParams(keyWidth, keyHeight))
                     }
                 }
-            }, lParams {
-                // the top most (last) row should to stretch, in case it needs to align right
-                if (i == rowCount - 1) {
-                    width = matchParent
-                }
-            })
+            }, lParams(width = matchParent))
         }
     }
 
     private fun markFocus(index: Int) {
-        if (index < 0 || index >= keyViews.size) return
-        keyViews[index].apply {
+        keyViews.getOrNull(index)?.apply {
             background = focusBackground
             setTextColor(theme.accentKeyTextColor.color)
         }
     }
 
     private fun markInactive(index: Int) {
-        if (index < 0 || index >= keyViews.size) return
-        keyViews[index].apply {
+        keyViews.getOrNull(index)?.apply {
             background = null
             setTextColor(theme.keyTextColor.color)
         }
     }
 
+    private val gestureOffsetX = (keyWidth - bounds.width()) / 2
+    private val gestureOffsetY = popupHeight - keyHeight - bounds.height()
+
+    /**
+     * Change focused view of popup keyboard according to gesture coordinate.
+     *
+     * Gesture events usually come from popup trigger view (eg. KeyView), and its coordinate is
+     * relative to trigger view's top-left corner.
+     *
+     * The X coordinate (horizontal) should be offset by half of the difference of `popupWidth` and
+     * `bounds.width()`, [gestureOffsetX].
+     *
+     * The Y coordinate (vertical) should first be inverted (because popup keyboard shows above
+     * trigger view, when pointer moves to popup keyboard, the value is negative), and the offset
+     * by a distance, which comes [gestureOffsetY].
+     *
+     * ```
+     *            ┌─── ┌─ ┌───┬───┐
+     *    popupKeyHeight  │ @ │ A │
+     *            │    └─ ├───┼───┘ ─┐
+     * popupHeight│       │   │      │gestureOffsetX
+     *            │    ┌─ │o─┐│ ─────┘
+     *    bounds.height() ││a││
+     *            │    └─ │└─┘│
+     *            └────── └───┘
+     * o: gesture coordinate origin
+     * ```
+     * @param x gesture X coordinate (relative to trigger view)
+     * @param y gesture Y coordinate (relative to trigger view)
+     *
+     * @return Whether the gesture should be consumed, ie. no more gesture events should
+     * be dispatched to the trigger view.
+     */
     fun changeFocus(x: Float, y: Float): Boolean {
-        // TODO: change key focus by key coordinate
-        focusRow = (x / keyWidth).roundToInt()
-        focusColumn = (y / keyHeight).roundToInt()
-        markInactive(focusedIndex)
-        focusedIndex = keyOrders[focusRow][focusColumn]
-        // TODO: handle missing keys in grid, fallback to existing ones
-        markFocus(focusedIndex)
-        return true
+        var newRow = floor((-y - gestureOffsetY) / keyHeight).toInt() + focusRow
+        var newColumn = floor((x + gestureOffsetX) / keyWidth).toInt() + focusColumn
+        if (newRow < -2 || newRow > rowCount || newColumn < -1 || newColumn > columnCount) {
+            onDismissSelf(this)
+            return true
+        }
+        newRow = limitIndex(newRow, rowCount)
+        newColumn = limitIndex(newColumn, columnCount)
+        val newFocus = keyOrders[newRow][newColumn]
+        if (newFocus < keyViews.size) {
+            markInactive(focusedIndex)
+            markFocus(newFocus)
+            focusedIndex = newFocus
+            return true
+        }
+        return false
     }
 
     fun trigger() = keys.getOrNull(focusedIndex)?.let { KeyAction.FcitxKeyAction(it) }
