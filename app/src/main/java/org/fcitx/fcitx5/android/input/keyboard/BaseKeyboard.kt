@@ -146,7 +146,7 @@ abstract class BaseKeyboard(
                         onGestureListener = OnGestureListener { view, event ->
                             when (event.type) {
                                 GestureType.Up -> {
-                                    if (event.totalY > 0) {
+                                    if (!event.consumed && event.totalY > 0) {
                                         onAction(it.action)
                                         true
                                     } else {

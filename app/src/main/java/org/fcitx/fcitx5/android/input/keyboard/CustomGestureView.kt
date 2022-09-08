@@ -24,15 +24,14 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
 
     data class Event(
         val type: GestureType,
+        val consumed: Boolean,
         val x: Float,
         val y: Float,
         val countX: Int,
         val countY: Int,
         val totalX: Int,
         val totalY: Int
-    ) {
-        constructor(type: GestureType, x: Float, y: Float) : this(type, x, y, 0, 0, 0, 0)
-    }
+    )
 
     fun interface OnGestureListener {
         fun onGesture(view: View, event: Event): Boolean
@@ -241,9 +240,11 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
         countX: Int = 0,
         countY: Int = 0
     ) {
-        onGestureListener
-            ?.onGesture(this, Event(type, x, y, countX, countY, swipeTotalX, swipeTotalY))
-            ?.also { gestureConsumed = it }
+        val event = Event(type, gestureConsumed, x, y, countX, countY, swipeTotalX, swipeTotalY)
+        val consumed = onGestureListener?.onGesture(this, event) ?: return
+        if (consumed && !gestureConsumed) {
+            gestureConsumed = true
+        }
     }
 
     private fun consumeSwipe(current: Float, axis: SwipeAxis): Int {
