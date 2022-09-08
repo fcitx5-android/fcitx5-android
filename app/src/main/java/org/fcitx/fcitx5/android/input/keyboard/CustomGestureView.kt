@@ -212,13 +212,9 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                     }
                 }
                 if (!swipeEnabled || longPressTriggered || repeatStarted) return true
-                val countX = consumeSwipe(x - swipeLastX + swipeXUnconsumed, SwipeAxis.X)
-                val countY = consumeSwipe(y - swipeLastY + swipeYUnconsumed, SwipeAxis.Y)
-                if (countX != 0 || countY != 0) {
-                    swipeTotalX += countX
-                    swipeTotalY += countY
-                    dispatchGestureEvent(GestureType.Move, x, y, countX, countY)
-                }
+                val countX = consumeSwipe(x, SwipeAxis.X)
+                val countY = consumeSwipe(y, SwipeAxis.Y)
+                dispatchGestureEvent(GestureType.Move, x, y, countX, countY)
                 swipeLastX = x
                 swipeLastY = y
                 return true
@@ -250,10 +246,18 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
             ?.also { gestureConsumed = it }
     }
 
-    private fun consumeSwipe(unconsumed: Float, axis: SwipeAxis): Int {
-        val threshold = when (axis) {
-            SwipeAxis.X -> swipeThresholdX
-            SwipeAxis.Y -> swipeThresholdY
+    private fun consumeSwipe(current: Float, axis: SwipeAxis): Int {
+        val unconsumed: Float
+        val threshold: Float
+        when (axis) {
+            SwipeAxis.X -> {
+                unconsumed = current - swipeLastX + swipeXUnconsumed
+                threshold = swipeThresholdX
+            }
+            SwipeAxis.Y -> {
+                unconsumed = current - swipeLastY + swipeYUnconsumed
+                threshold = swipeThresholdY
+            }
         }
         val remains: Float = unconsumed % threshold
         val count: Int = (unconsumed / threshold).toInt()
@@ -271,8 +275,14 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
             }
         }
         when (axis) {
-            SwipeAxis.X -> swipeXUnconsumed = remains
-            SwipeAxis.Y -> swipeYUnconsumed = remains
+            SwipeAxis.X -> {
+                swipeXUnconsumed = remains
+                swipeTotalX += count
+            }
+            SwipeAxis.Y -> {
+                swipeYUnconsumed = remains
+                swipeTotalY += count
+            }
         }
         return count
     }

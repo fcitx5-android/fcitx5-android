@@ -92,13 +92,16 @@ abstract class BaseKeyboard(
                 swipeThresholdX = selectionSwipeThreshold
                 onGestureListener = OnGestureListener { _, event ->
                     when (event.type) {
-                        GestureType.Move -> {
-                            val sym = if (event.countX > 0) 0xff53u else 0xff51u
-                            val action = KeyAction.SymAction(KeySym(sym), KeyStates())
-                            repeat(event.countX.absoluteValue) {
-                                onAction(action)
+                        GestureType.Move -> when (val count = event.countX) {
+                            0 -> false
+                            else -> {
+                                val sym = if (count > 0) 0xff53u else 0xff51u
+                                val action = KeyAction.SymAction(KeySym(sym), KeyStates())
+                                repeat(count.absoluteValue) {
+                                    onAction(action)
+                                }
+                                true
                             }
-                            true
                         }
                         else -> false
                     }
@@ -110,8 +113,11 @@ abstract class BaseKeyboard(
                 onGestureListener = OnGestureListener { _, event ->
                     when (event.type) {
                         GestureType.Move -> {
-                            onAction(KeyAction.MoveSelectionAction(event.countX))
-                            true
+                            val count = event.countX
+                            if (count != 0) {
+                                onAction(KeyAction.MoveSelectionAction(count))
+                                true
+                            } else false
                         }
                         GestureType.Up -> {
                             onAction(KeyAction.DeleteSelectionAction(event.totalX))
