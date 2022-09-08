@@ -1011,3 +1011,28 @@ JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_scheduleEmpty(JNIEnv *env, jclass clazz) {
     Fcitx::Instance().scheduleEmpty();
 }
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_org_fcitx_fcitx5_android_utils_KeyUtils_parseKey(JNIEnv *env, jclass clazz, jstring raw) {
+    fcitx::Key key(*CString(env, raw));
+    return env->NewObject(
+            GlobalRef->Key,
+            GlobalRef->KeyInit,
+            *JString(env, key.toString()),
+            key.sym(),
+            key.states()
+    );
+}
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_org_fcitx_fcitx5_android_utils_KeyUtils_createKey(JNIEnv *env, jclass clazz, jint sym, jint states) {
+    fcitx::Key key((fcitx::KeySym(sym)), fcitx::KeyStates(states));
+    return env->NewObject(
+            GlobalRef->Key,
+            GlobalRef->KeyInit,
+            *JString(env, key.toString()),
+            key.sym(),
+            key.states()
+    );
+}

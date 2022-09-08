@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.ui.main.settings
 
 import android.content.Context
+import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.findNavController
@@ -12,6 +13,7 @@ import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.ui.common.DialogSeekBarPreference
 import org.fcitx.fcitx5.android.ui.main.settings.addon.AddonConfigFragment
 import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
+import org.fcitx.fcitx5.android.utils.KeyUtils
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.*
 import org.fcitx.fcitx5.android.utils.config.ConfigType
@@ -154,6 +156,28 @@ object PreferenceScreenFactory {
             }
         }
 
+        fun keyPreference() = Preference(context).apply {
+            val key = KeyUtils.parseKey(cfg[descriptor.name].value)
+            setOnPreferenceClickListener {
+                val ui = KeyPreferenceUi(context).also { it.setKey(key) }
+                AlertDialog.Builder(context)
+                    .setTitle(descriptor.description ?: descriptor.name)
+                    .setView(ui.root)
+                    .setNeutralButton(android.R.string.cancel) { d, _ -> d.dismiss() }
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        val new = ui.lastKey.keyString
+                        cfg[descriptor.name].value = new
+                        callChangeListener(new)
+                    }
+                    .show()
+                true
+            }
+            summaryProvider = Preference.SummaryProvider<Preference> {
+                KeyUtils.parseKey(cfg[descriptor.name].value).showKeyString()
+            }
+        }
+
+
         when (descriptor) {
             is ConfigBool -> SwitchPreferenceCompat(context).apply {
                 setDefaultValue(descriptor.defaultValue)
@@ -182,7 +206,7 @@ object PreferenceScreenFactory {
                 descriptor.intMin?.let { min = it }
                 descriptor.intMax?.let { max = it }
             }
-            is ConfigKey -> stubPreference()
+            is ConfigKey -> keyPreference()
             is ConfigList -> if (descriptor.type.subtype in ListFragment.supportedSubtypes)
                 listPreference()
             else

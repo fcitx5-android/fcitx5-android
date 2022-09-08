@@ -61,7 +61,6 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
 
     }
 
-    // TODO: Placeholder
     @Parcelize
     data class ConfigKey(
         override val name: String,
