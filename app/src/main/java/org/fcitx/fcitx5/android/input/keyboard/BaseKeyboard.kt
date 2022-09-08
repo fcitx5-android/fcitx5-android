@@ -27,14 +27,6 @@ abstract class BaseKeyboard(
     private val keyLayout: List<List<KeyDef>>
 ) : ConstraintLayout(context) {
 
-    enum class KeyActionSource {
-        Keyboard, Popup
-    }
-
-    fun interface KeyActionListener {
-        fun onKeyAction(action: KeyAction, source: KeyActionSource)
-    }
-
     var keyActionListener: KeyActionListener? = null
 
     private var popupOnKeyPress by AppPrefs.getInstance().keyboard.popupOnKeyPress
@@ -285,7 +277,10 @@ abstract class BaseKeyboard(
     }
 
     @CallSuper
-    open fun onAction(action: KeyAction, source: KeyActionSource = KeyActionSource.Keyboard) {
+    open fun onAction(
+        action: KeyAction,
+        source: KeyActionListener.Source = KeyActionListener.Source.Keyboard
+    ) {
         keyActionListener?.onKeyAction(action, source)
     }
 

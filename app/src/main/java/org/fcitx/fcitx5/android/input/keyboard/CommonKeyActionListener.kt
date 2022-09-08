@@ -32,7 +32,7 @@ class CommonKeyActionListener :
     private var backspaceSwipeState = Stopped
 
     val listener by lazy {
-        BaseKeyboard.KeyActionListener { action, _ ->
+        KeyActionListener { action, _ ->
             service.lifecycleScope.launch {
                 when (action) {
                     is KeyAction.FcitxKeyAction -> fcitx.sendKey(action.act, KeyState.Virtual.state)
