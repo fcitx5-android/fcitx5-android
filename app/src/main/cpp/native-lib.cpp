@@ -499,6 +499,18 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
     std::string usr_share = fcitx::stringutils::joinPath(*appData_, "usr", "share");
     std::string locale_dir = fcitx::stringutils::joinPath(usr_share, "locale");
     std::string libime_data = fcitx::stringutils::joinPath(usr_share, "libime");
+    std::string lua_path = fcitx::stringutils::concat(
+            fcitx::stringutils::joinPath(data_home, "lua", "?.lua"), ";",
+            fcitx::stringutils::joinPath(data_home, "lua", "?", "init.lua"), ";",
+            fcitx::stringutils::joinPath(usr_share, "lua", "5.4", "?.lua"), ";",
+            fcitx::stringutils::joinPath(usr_share, "lua", "5.4", "?", "init.lua"), ";",
+            ";" // double semicolon, for default path defined in luaconf.h
+            );
+    std::string lua_cpath = fcitx::stringutils::concat(
+            fcitx::stringutils::joinPath(data_home, "lua", "?.so"), ";",
+            fcitx::stringutils::joinPath(usr_share, "lua", "5.4", "?.so"), ";",
+            ";"
+            );
 
     // for fcitx default profile [DefaultInputMethod]
     setenv("LANG", lang_.c_str(), 1);
@@ -512,6 +524,8 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
     setenv("FCITX_DATA_HOME", data_home.c_str(), 1);
     setenv("FCITX_ADDON_DIRS", appLib_, 1);
     setenv("LIBIME_MODEL_DIRS", libime_data.c_str(), 1);
+    setenv("LUA_PATH", lua_path.c_str(), 1);
+    setenv("LUA_CPATH", lua_cpath.c_str(), 1);
 
     const char *locale_dir_char = locale_dir.c_str();
     fcitx::registerDomain("fcitx5", locale_dir_char);
