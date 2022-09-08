@@ -143,6 +143,10 @@ class TextKeyboard(
         super.onPopupPreview(viewId, transformAlphabet(content), bounds)
     }
 
+    override fun onPopupPreviewUpdate(viewId: Int, content: String) {
+        super.onPopupPreviewUpdate(viewId, transformAlphabet(content))
+    }
+
     override fun onPopupKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
         val label = keyboard.label
         val k = if (label.length == 1 && label[0].isLetter())

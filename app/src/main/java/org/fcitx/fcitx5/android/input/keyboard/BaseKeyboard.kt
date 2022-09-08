@@ -15,6 +15,7 @@ import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.GestureType
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListener
+import org.fcitx.fcitx5.android.input.popup.PopupListener
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.*
@@ -31,15 +32,7 @@ abstract class BaseKeyboard(
 
     private var popupOnKeyPress by AppPrefs.getInstance().keyboard.popupOnKeyPress
 
-    interface KeyPopupListener {
-        fun onPreview(viewId: Int, content: String, bounds: Rect)
-        fun onDismiss(viewId: Int)
-        fun onShowKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect)
-        fun onChangeFocus(viewId: Int, deltaX: Int, deltaY: Int): Boolean
-        fun onKeyAction(viewId: Int): KeyAction?
-    }
-
-    var keyPopupListener: KeyPopupListener? = null
+    var keyPopupListener: PopupListener? = null
 
     private val selectionSwipeThreshold = dp(10f)
     private val inputSwipeThreshold = dp(36f)
@@ -189,17 +182,10 @@ abstract class BaseKeyboard(
                             view as KeyView
                             when (event.type) {
                                 GestureType.Move -> {
-                                    keyPopupListener
-                                        ?.onChangeFocus(view.id, event.countX, event.countY)
-                                        ?: false
+                                    onPopupKeyboardChangeFocus(view.id, event.x, event.y)
                                 }
                                 GestureType.Up -> {
-                                    // ask popup keyboard whether there's a pending KeyAction
-                                    keyPopupListener?.onKeyAction(view.id)?.let { act ->
-                                        onAction(act, KeyActionSource.Popup)
-                                        onPopupDismiss(view.id)
-                                        true
-                                    } ?: false
+                                    onPopupKeyboardTrigger(view.id)
                                 }
                                 else -> false
                             } || oldOnGestureListener.onGesture(view, event)
@@ -215,7 +201,7 @@ abstract class BaseKeyboard(
                                 }
                                 GestureType.Move -> {
                                     val text = if (event.totalY > 0) it.alternative else it.content
-                                    onPopupPreview(view.id, text, view.bounds)
+                                    onPopupPreviewUpdate(view.id, text)
                                 }
                                 GestureType.Up -> {
                                     onPopupDismiss(view.id)
@@ -297,6 +283,12 @@ abstract class BaseKeyboard(
     }
 
     @CallSuper
+    open fun onPopupPreviewUpdate(viewId: Int, content: String) {
+        if (!popupOnKeyPress) return
+        keyPopupListener?.onPreviewUpdate(viewId, content)
+    }
+
+    @CallSuper
     open fun onPopupDismiss(viewId: Int) {
         keyPopupListener?.onDismiss(viewId)
     }
@@ -304,6 +296,20 @@ abstract class BaseKeyboard(
     @CallSuper
     open fun onPopupKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
         keyPopupListener?.onShowKeyboard(viewId, keyboard, bounds)
+    }
+
+    @CallSuper
+    open fun onPopupKeyboardChangeFocus(viewId: Int, x: Float, y: Float): Boolean {
+        return keyPopupListener?.onChangeFocus(viewId, x, y) ?: false
+    }
+
+    @CallSuper
+    fun onPopupKeyboardTrigger(viewId: Int): Boolean {
+        // ask popup keyboard whether there's a pending KeyAction
+        val action = keyPopupListener?.onTriggerKeyboard(viewId) ?: return false
+        onAction(action, KeyActionListener.Source.Popup)
+        onPopupDismiss(viewId)
+        return true
     }
 
     open fun onAttach(info: EditorInfo? = null) {

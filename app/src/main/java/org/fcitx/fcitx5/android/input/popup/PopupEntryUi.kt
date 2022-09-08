@@ -15,7 +15,7 @@ import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.textView
 import splitties.views.gravityCenter
 
-class PopupEntryUi(override val ctx: Context, theme: Theme, radius: Float) : Ui {
+class PopupEntryUi(override val ctx: Context, theme: Theme, keyHeight: Int, radius: Float) : Ui {
 
     var lastShowTime = -1L
 
@@ -32,7 +32,7 @@ class PopupEntryUi(override val ctx: Context, theme: Theme, radius: Float) : Ui 
         }
         outlineProvider = ViewOutlineProvider.BACKGROUND
         elevation = dp(2f)
-        add(textView, lParams(matchParent, dp(48)) {
+        add(textView, lParams(matchParent, keyHeight) {
             topOfParent()
             centerHorizontally()
         })

@@ -160,13 +160,15 @@ class PopupKeyboardUi(
         }
     }
 
-    fun moveFocus(deltaX: Int, deltaY: Int) {
+    fun changeFocus(x: Float, y: Float): Boolean {
+        // TODO: change key focus by key coordinate
+        focusRow = (x / keyWidth).roundToInt()
+        focusColumn = (y / keyHeight).roundToInt()
         markInactive(focusedIndex)
-        focusRow = limitIndex(focusRow - deltaY, rowCount)
-        focusColumn = limitIndex(focusColumn + deltaX, columnCount)
         focusedIndex = keyOrders[focusRow][focusColumn]
         // TODO: handle missing keys in grid, fallback to existing ones
         markFocus(focusedIndex)
+        return true
     }
 
     fun trigger() = keys.getOrNull(focusedIndex)?.let { KeyAction.FcitxKeyAction(it) }

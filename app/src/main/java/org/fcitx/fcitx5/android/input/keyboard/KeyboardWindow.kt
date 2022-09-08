@@ -1,6 +1,5 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
-import android.graphics.Rect
 import android.text.InputType
 import android.view.Gravity
 import android.view.View
@@ -18,6 +17,7 @@ import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
+import org.fcitx.fcitx5.android.input.popup.PopupListener
 import org.fcitx.fcitx5.android.input.wm.EssentialWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.mechdancer.dependency.manager.must
@@ -72,26 +72,8 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
         }
     }
 
-    private val keyPopupListener = object : BaseKeyboard.KeyPopupListener {
-        override fun onPreview(viewId: Int, content: String, bounds: Rect) {
-            popup.showPopup(viewId, content, bounds)
-        }
-
-        override fun onDismiss(viewId: Int) {
-            popup.dismissPopup(viewId)
-        }
-
-        override fun onShowKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
-            popup.showKeyboard(viewId, keyboard, bounds)
-        }
-
-        override fun onChangeFocus(viewId: Int, deltaX: Int, deltaY: Int): Boolean {
-            return popup.changeFocus(viewId, deltaX, deltaY)
-        }
-
-        override fun onKeyAction(viewId: Int): KeyAction? {
-            return popup.triggerFocusedKeyboard(viewId)
-        }
+    private val popupListener: PopupListener by lazy {
+        popup.listener
     }
 
     // This will be called EXACTLY ONCE
@@ -117,7 +99,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
         }
         currentKeyboard?.let {
             it.keyActionListener = keyActionListener
-            it.keyPopupListener = keyPopupListener
+            it.keyPopupListener = popupListener
             keyboardView.apply { add(it, lParams(matchParent, matchParent)) }
             it.onAttach(service.editorInfo)
             it.onInputMethodChange(currentIme)
@@ -155,7 +137,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
     override fun onAttached() {
         currentKeyboard?.let {
             it.keyActionListener = keyActionListener
-            it.keyPopupListener = keyPopupListener
+            it.keyPopupListener = popupListener
         }
     }
 

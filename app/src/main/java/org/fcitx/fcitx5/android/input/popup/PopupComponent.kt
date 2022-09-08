@@ -44,6 +44,9 @@ class PopupComponent :
     private val popupHeight by lazy {
         context.dp(116)
     }
+    private val popupKeyHeight by lazy {
+        context.dp(48)
+    }
     private val popupRadius by lazy {
         context.dp(ThemeManager.prefs.keyRadius.getValue()).toFloat()
     }
@@ -66,7 +69,8 @@ class PopupComponent :
             setText(content)
             return
         }
-        val popup = (freeEntryUi.poll() ?: PopupEntryUi(context, theme, popupRadius)).apply {
+        val popup = (freeEntryUi.poll()
+            ?: PopupEntryUi(context, theme, popupKeyHeight, popupRadius)).apply {
             lastShowTime = System.currentTimeMillis()
             setText(content)
         }
@@ -79,13 +83,18 @@ class PopupComponent :
         showingEntryUi[viewId] = popup
     }
 
+    fun updatePopup(viewId: Int, content: String) {
+        showingEntryUi[viewId]?.setText(content)
+    }
+
     fun showKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
         val keys = PopupPreset[keyboard.label] ?: return
         val entryUi = showingEntryUi[viewId]
         if (entryUi != null) {
+            entryUi.setText("")
             reallyShowKeyboard(viewId, entryUi, keys, bounds)
         } else {
-            showPopup(viewId, keyboard.label, bounds)
+            showPopup(viewId, "", bounds)
             // in case popup preview is disabled, wait newly created popup entry to layout
             ContextCompat.getMainExecutor(service).execute {
                 reallyShowKeyboard(viewId, showingEntryUi.getValue(viewId), keys, bounds)
@@ -110,12 +119,8 @@ class PopupComponent :
         showingKeyboardUi[viewId] = keyboardUi
     }
 
-    fun changeFocus(viewId: Int, deltaX: Int, deltaY: Int): Boolean {
-        showingKeyboardUi[viewId]?.apply {
-            moveFocus(deltaX, deltaY)
-            return true
-        }
-        return false
+    fun changeFocus(viewId: Int, x: Float, y: Float): Boolean {
+        return showingKeyboardUi[viewId]?.changeFocus(x, y) ?: false
     }
 
     fun triggerFocusedKeyboard(viewId: Int): KeyAction? {
@@ -154,6 +159,32 @@ class PopupComponent :
                 dismissJobs.remove(it.key)
             }
             reallyDismissPopup(it.key, it.value)
+        }
+    }
+
+    val listener: PopupListener = object : PopupListener {
+        override fun onPreview(viewId: Int, content: String, bounds: Rect) {
+            showPopup(viewId, content, bounds)
+        }
+
+        override fun onPreviewUpdate(viewId: Int, content: String) {
+            updatePopup(viewId, content)
+        }
+
+        override fun onDismiss(viewId: Int) {
+            dismissPopup(viewId)
+        }
+
+        override fun onShowKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
+            showKeyboard(viewId, keyboard, bounds)
+        }
+
+        override fun onChangeFocus(viewId: Int, x: Float, y: Float): Boolean {
+            return changeFocus(viewId, x, y)
+        }
+
+        override fun onTriggerKeyboard(viewId: Int): KeyAction? {
+            return triggerFocusedKeyboard(viewId)
         }
     }
 }
