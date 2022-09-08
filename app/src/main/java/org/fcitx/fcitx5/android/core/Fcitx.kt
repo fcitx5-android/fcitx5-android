@@ -296,6 +296,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
             getFcitxAddonConfig("pinyin")?.get("cfg")?.run {
                 get("PreeditInApplication").value = "False"
                 get("PreeditCursorPositionAtBeginning").value = "False"
+                get("QuickPhraseKey").value = ""
                 setFcitxAddonConfig("pinyin", this)
             }
             firstRun = false
