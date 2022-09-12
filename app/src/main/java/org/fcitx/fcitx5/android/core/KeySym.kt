@@ -16,6 +16,7 @@ data class KeySym(val sym: UInt) {
         fun fromKeyEvent(event: KeyEvent) = Sym[event.keyCode]?.let { KeySym(it.toUInt()) }
 
         val KeyCode: HashMap<Int, Int> = hashMapOf(
+            0x0009 to KeyEvent.KEYCODE_TAB, /* U+0009 CHARACTER TABULATION */
             0x0020 to KeyEvent.KEYCODE_SPACE, /* U+0020 SPACE */
 //            0x0021 to KeyEvent.KEYCODE_EXCLAM, /* U+0021 EXCLAMATION MARK */
 //            0x0022 to KeyEvent.KEYCODE_QUOTEDBL, /* U+0022 QUOTATION MARK */

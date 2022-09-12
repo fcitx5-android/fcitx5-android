@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.ui.main.settings
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,6 +8,7 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import org.fcitx.fcitx5.android.core.Key
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.DynamicListUi
@@ -65,6 +67,40 @@ class ListFragment : Fragment() {
                             (cfg.subItems?.map { it.value } ?: listOf())
                         ) { it }
                     }
+                    ConfigType.TyKey -> {
+                        object : BaseDynamicListUi<Key>(
+                            requireContext(),
+                            Mode.FreeAdd(
+                                hint = "",
+                                converter = { Key.parse(it) }
+                            ),
+                            (cfg.subItems?.map { Key.parse(it.value) } ?: listOf())
+                        ) {
+                            override fun showEntry(x: Key) = x.localizedString
+                            override fun showEditDialog(
+                                title: String,
+                                entry: Key?,
+                                block: (Key) -> Unit
+                            ) {
+                                val ui = KeyPreferenceUi(requireContext()).apply {
+                                    setKey(entry ?: Key.None)
+                                }
+                                AlertDialog.Builder(context)
+                                    .setTitle(title)
+                                    .setView(ui.root)
+                                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                                        val newKey = ui.lastKey
+                                        if (newKey.sym == Key.None.sym) {
+                                            entry?.let { removeItem(indexItem(it)) }
+                                        } else {
+                                            block(ui.lastKey)
+                                        }
+                                    }
+                                    .setNegativeButton(android.R.string.cancel, null)
+                                    .show()
+                            }
+                        }
+                    }
                     ConfigType.TyEnum -> error("Impossible!")
                     else -> throw IllegalArgumentException("List of ${ConfigType.pretty(ty.subtype)} is unsupported")
                 }
@@ -94,8 +130,13 @@ class ListFragment : Fragment() {
     companion object {
         const val ARG_DESC = "desc"
         const val ARG_CFG = "cfg"
-        val supportedSubtypes =
-            listOf(ConfigType.TyEnum, ConfigType.TyString, ConfigType.TyInt, ConfigType.TyBool)
+        val supportedSubtypes = listOf(
+            ConfigType.TyEnum,
+            ConfigType.TyString,
+            ConfigType.TyInt,
+            ConfigType.TyBool,
+            ConfigType.TyKey
+        )
     }
 
 }
