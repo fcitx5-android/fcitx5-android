@@ -112,8 +112,8 @@ object PreferenceScreenFactory {
             }
         }
 
-        fun listPreference() = Preference(context).apply {
-            setOnPreferenceClickListener {
+        fun listPreference(subtype: ConfigType<*>): Preference = object : Preference(context) {
+            override fun onClick() {
                 val currentFragment = fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
                 val action = when (currentFragment) {
                     is GlobalConfigFragment -> R.id.action_globalConfigFragment_to_listFragment
@@ -132,10 +132,14 @@ object PreferenceScreenFactory {
                     descriptor.name,
                     currentFragment
                 ) { _, v ->
-                    cfg[descriptor.name].subItems = (v[descriptor.name] as RawConfig).subItems
+                    @Suppress("UNCHECKED_CAST")
+                    cfg[descriptor.name].subItems = v[descriptor.name] as? Array<RawConfig>
+                    if (callChangeListener(null)) {
+                        notifyChanged()
+                    }
                 }
-                true
             }
+        }.apply {
             if (subtype == ConfigType.TyKey) {
                 summaryProvider = SummaryProvider<Preference> {
                     cfg[descriptor.name].subItems?.joinToString("\n") { Key.parse(it.value).localizedString }
