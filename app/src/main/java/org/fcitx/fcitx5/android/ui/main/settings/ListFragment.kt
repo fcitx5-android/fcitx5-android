@@ -120,10 +120,8 @@ class ListFragment : Fragment() {
     }
 
     override fun onDestroy() {
-        cfg.subItems = ui.entries.mapIndexed { index, it ->
-            RawConfig(index.toString(), it.toString())
-        }.toTypedArray()
-        parentFragmentManager.setFragmentResult(descriptor.name, bundleOf(descriptor.name to cfg))
+        val items = Array(ui.entries.size) { RawConfig("$it", ui.entries[it]!!.toString()) }
+        parentFragmentManager.setFragmentResult(descriptor.name, bundleOf(descriptor.name to items))
         super.onDestroy()
     }
 
