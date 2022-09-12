@@ -1,6 +1,7 @@
-package org.fcitx.fcitx5.android.ui.common
+package org.fcitx.fcitx5.android.ui.main.settings
 
 import android.content.Context
+import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.widget.SeekBar
 import androidx.appcompat.app.AlertDialog
@@ -15,7 +16,6 @@ import splitties.views.gravityHorizontalCenter
  * value can be changed by clicking on the preference, which brings up a dialog which a seek bar.
  * This implementation also allows for a min / max step value, while being backwards compatible.
  *
- * @property defaultValue The default value of this preference.
  * @property min The minimum value of the seek bar. Must not be greater or equal than [max].
  * @property max The maximum value of the seek bar. Must not be lesser or equal than [min].
  * @property step The step in which the seek bar increases per move. If the provided value is less
@@ -23,7 +23,7 @@ import splitties.views.gravityHorizontalCenter
  * @property unit The unit to show after the value. Set to an empty string to disable this feature.
  */
 class DialogSeekBarPreference : Preference {
-    var defaultValue: Int
+    private var value = 0
     var min: Int
     var max: Int
     var step: Int
@@ -36,7 +36,6 @@ class DialogSeekBarPreference : Preference {
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         context.theme.obtainStyledAttributes(attrs, R.styleable.DialogSeekBarPreference, 0, 0).run {
             try {
-                defaultValue = getInteger(R.styleable.DialogSeekBarPreference_android_defaultValue, 0)
                 min = getInteger(R.styleable.DialogSeekBarPreference_min, 0)
                 max = getInteger(R.styleable.DialogSeekBarPreference_max, 100)
                 step = getInteger(R.styleable.DialogSeekBarPreference_step, 1)
@@ -51,7 +50,15 @@ class DialogSeekBarPreference : Preference {
     }
 
     private val currentValue: Int
-        get() = getPersistedInt(defaultValue)
+        get() = getPersistedInt(value)
+
+    override fun onGetDefaultValue(a: TypedArray, index: Int): Any {
+        return a.getInteger(index, 0)
+    }
+
+    override fun onSetInitialValue(defaultValue: Any?) {
+        value = defaultValue as? Int ?: getPersistedInt(0)
+    }
 
     override fun onClick() {
         showSeekBarDialog()

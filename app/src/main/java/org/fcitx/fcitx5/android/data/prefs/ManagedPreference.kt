@@ -6,7 +6,7 @@ import androidx.core.content.edit
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.SwitchPreference
-import org.fcitx.fcitx5.android.ui.common.DialogSeekBarPreference
+import org.fcitx.fcitx5.android.ui.main.settings.DialogSeekBarPreference
 import org.fcitx.fcitx5.android.utils.WeakHashSet
 import timber.log.Timber
 import kotlin.properties.ReadWriteProperty
@@ -175,7 +175,7 @@ abstract class ManagedPreference<T : Any, P : Preference>(
                 isIconSpaceReserved = false
                 isSingleLineTitle = false
                 summaryProvider = DialogSeekBarPreference.SimpleSummaryProvider
-                defaultValue = this@SeekBarInt.defaultValue
+                setDefaultValue(this@SeekBarInt.defaultValue)
             }
 
         override fun setValue(value: Int) = sharedPreferences.edit { putInt(key, value) }
