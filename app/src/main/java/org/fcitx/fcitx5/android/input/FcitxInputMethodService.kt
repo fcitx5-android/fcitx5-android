@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.input
 
 import android.content.Intent
 import android.content.res.Configuration
+import android.os.Build
 import android.os.SystemClock
 import android.text.InputType
 import android.view.*
@@ -127,7 +128,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 if (it.states.virtual) {
                     // KeyEvent from virtual keyboard
                     when (it.unicode) {
-                        '\b'.code -> sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
+                        '\b'.code -> handleBackspaceKey()
                         '\r'.code -> handleReturnKey()
                         else -> inputConnection?.commitText(Char(it.unicode).toString(), 1)
                     }
@@ -159,6 +160,26 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             }
         }
         inputView.handleFcitxEvent(event)
+    }
+
+    private fun handleBackspaceKey() {
+        editorInfo?.apply {
+            if (inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL) {
+                sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
+                return
+            }
+            inputConnection?.apply {
+                if (selection.isEmpty()) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        deleteSurroundingTextInCodePoints(1, 0)
+                    } else {
+                        deleteSurroundingText(1, 0)
+                    }
+                } else {
+                    commitText("", 0)
+                }
+            }
+        } ?: sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
     }
 
     private fun handleReturnKey() {
