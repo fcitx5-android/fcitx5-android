@@ -6,9 +6,10 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Key(
-    val keyString: String,
     val sym: Int,
-    val states: Int
+    val states: Int,
+    val portableString: String,
+    val localizedString: String
 ) : Parcelable {
     @IgnoredOnParcel
     val keySym by lazy { KeySym.of(sym) }
@@ -17,8 +18,15 @@ data class Key(
     val keyStates by lazy { KeyStates.of(states) }
 
     companion object {
-        val none = Key("", 0, 0)
-    }
+        val None = Key( 0, 0, "", "")
 
-    fun showKeyString() = keyString.takeIf { it.isNotEmpty() } ?: "None"
+        @JvmStatic
+        external fun parse(raw: String): Key
+
+        @JvmStatic
+        private external fun create(sym: Int, states: Int): Key
+
+        @JvmStatic
+        fun create(sym: KeySym, states: KeyStates): Key = create(sym.toInt(), states.toInt())
+    }
 }
