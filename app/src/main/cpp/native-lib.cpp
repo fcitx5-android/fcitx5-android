@@ -646,7 +646,7 @@ JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxString(JNIEnv *env, jclass clazz, jstring key, jint state, jboolean up) {
     RETURN_IF_NOT_RUNNING
     fcitx::Key parsedKey{fcitx::Key::keySymFromString(CString(env, key)),
-                         fcitx::KeyState(static_cast<uint32_t>(state))};
+                         fcitx::KeyStates(static_cast<uint32_t>(state))};
     Fcitx::Instance().sendKey(parsedKey);
 }
 
@@ -655,7 +655,7 @@ JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxChar(JNIEnv *env, jclass clazz, jchar c, jint state, jboolean up) {
     RETURN_IF_NOT_RUNNING
     fcitx::Key parsedKey{fcitx::Key::keySymFromString((const char *) &c),
-                         fcitx::KeyState(static_cast<uint32_t>(state))};
+                         fcitx::KeyStates(static_cast<uint32_t>(state))};
     Fcitx::Instance().sendKey(parsedKey);
 }
 
@@ -664,7 +664,7 @@ JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeySymToFcitx(JNIEnv *env, jclass clazz, jint sym, jint state, jboolean up) {
     RETURN_IF_NOT_RUNNING
     fcitx::Key key{fcitx::KeySym(static_cast<uint32_t>(sym)),
-                   fcitx::KeyState(static_cast<uint32_t>(state))};
+                   fcitx::KeyStates(static_cast<uint32_t>(state))};
     Fcitx::Instance().sendKey(key, up);
 }
 
@@ -1014,25 +1014,29 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_scheduleEmpty(JNIEnv *env, jclass clazz
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_org_fcitx_fcitx5_android_utils_KeyUtils_parseKey(JNIEnv *env, jclass clazz, jstring raw) {
+Java_org_fcitx_fcitx5_android_core_Key_parse(JNIEnv *env, jclass clazz, jstring raw) {
     fcitx::Key key(*CString(env, raw));
     return env->NewObject(
             GlobalRef->Key,
             GlobalRef->KeyInit,
-            *JString(env, key.toString()),
             key.sym(),
-            key.states()
+            key.states(),
+            *JString(env, key.toString(fcitx::KeyStringFormat::Portable)),
+            *JString(env, key.toString(fcitx::KeyStringFormat::Localized))
     );
 }
+
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_org_fcitx_fcitx5_android_utils_KeyUtils_createKey(JNIEnv *env, jclass clazz, jint sym, jint states) {
-    fcitx::Key key((fcitx::KeySym(sym)), fcitx::KeyStates(states));
+Java_org_fcitx_fcitx5_android_core_Key_create(JNIEnv *env, jclass clazz, jint sym, jint states) {
+    fcitx::Key key{fcitx::KeySym(static_cast<uint32_t>(sym)),
+                   fcitx::KeyStates(static_cast<uint32_t>(states))};
     return env->NewObject(
             GlobalRef->Key,
             GlobalRef->KeyInit,
-            *JString(env, key.toString()),
             key.sym(),
-            key.states()
+            key.states(),
+            *JString(env, key.toString(fcitx::KeyStringFormat::Portable)),
+            *JString(env, key.toString(fcitx::KeyStringFormat::Localized))
     );
 }

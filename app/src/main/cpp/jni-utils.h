@@ -153,7 +153,7 @@ public:
         ActionInit = env->GetMethodID(Action, "<init>", "(IZZZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lorg/fcitx/fcitx5/android/core/Action;)V");
 
         Key = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("org/fcitx/fcitx5/android/core/Key")));
-        KeyInit = env->GetMethodID(Key, "<init>", "(Ljava/lang/String;II)V");
+        KeyInit = env->GetMethodID(Key, "<init>", "(IILjava/lang/String;Ljava/lang/String;)V");
     }
 
     const JEnv AttachEnv() const { return JEnv(jvm); }
