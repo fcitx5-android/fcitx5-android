@@ -5,11 +5,14 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.findNavController
 import androidx.preference.*
+import androidx.preference.Preference.SummaryProvider
 import arrow.core.redeem
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.Key
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.ui.main.settings.addon.AddonConfigFragment
+import org.fcitx.fcitx5.android.ui.main.settings.global.GlobalConfigFragment
 import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.*
@@ -113,8 +116,9 @@ object PreferenceScreenFactory {
             setOnPreferenceClickListener {
                 val currentFragment = fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
                 val action = when (currentFragment) {
-                    is AddonConfigFragment -> R.id.action_addonConfigFragment_to_listFragment
+                    is GlobalConfigFragment -> R.id.action_globalConfigFragment_to_listFragment
                     is InputMethodConfigFragment -> R.id.action_imConfigFragment_to_listFragment
+                    is AddonConfigFragment -> R.id.action_addonConfigFragment_to_listFragment
                     else -> throw IllegalStateException("Can not navigate to listFragment from current fragment")
                 }
                 currentFragment.findNavController().navigate(
@@ -131,6 +135,11 @@ object PreferenceScreenFactory {
                     cfg[descriptor.name].subItems = (v[descriptor.name] as RawConfig).subItems
                 }
                 true
+            }
+            if (subtype == ConfigType.TyKey) {
+                summaryProvider = SummaryProvider<Preference> {
+                    cfg[descriptor.name].subItems?.joinToString("\n") { Key.parse(it.value).localizedString }
+                }
             }
         }
 
@@ -164,7 +173,7 @@ object PreferenceScreenFactory {
                 summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
                 setDefaultValue(descriptor.defaultValue)
             }
-            is ConfigEnumList -> listPreference()
+            is ConfigEnumList -> listPreference(ConfigType.TyEnum)
             is ConfigExternal -> when (descriptor.knownType) {
                 ConfigExternal.ETy.PinyinDict -> pinyinDictionary()
                 ConfigExternal.ETy.Punctuation -> punctuationEditor(
@@ -186,7 +195,7 @@ object PreferenceScreenFactory {
                 descriptor.defaultValue?.let { setDefaultValue(it) }
             }
             is ConfigList -> if (descriptor.type.subtype in ListFragment.supportedSubtypes)
-                listPreference()
+                listPreference(descriptor.type.subtype)
             else
                 stubPreference()
             is ConfigString -> EditTextPreference(context).apply {

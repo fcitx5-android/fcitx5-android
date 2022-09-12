@@ -76,7 +76,15 @@
 
     <fragment
         android:id="@+id/globalConfigFragment"
-        android:name="org.fcitx.fcitx5.android.ui.main.settings.global.GlobalConfigFragment" />
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.global.GlobalConfigFragment">
+        <action
+            android:id="@+id/action_globalConfigFragment_to_listFragment"
+            app:destination="@id/listFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
 
     <fragment
         android:id="@+id/imListFragment"

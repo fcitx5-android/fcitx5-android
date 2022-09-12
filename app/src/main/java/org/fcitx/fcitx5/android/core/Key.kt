@@ -17,6 +17,8 @@ data class Key(
     @IgnoredOnParcel
     val keyStates by lazy { KeyStates.of(states) }
 
+    override fun toString() = portableString
+
     companion object {
         val None = Key( 0, 0, "", "")
 
