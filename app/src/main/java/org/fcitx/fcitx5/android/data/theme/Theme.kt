@@ -34,9 +34,16 @@ sealed class Theme : Parcelable {
     abstract val keyPressHighlightColor: ColorInt
     abstract val keyShadowColor: ColorInt
 
+    abstract val popupBackgroundColor: ColorInt
+    abstract val popupTextColor: ColorInt
+
     abstract val spaceBarColor: ColorInt
     abstract val dividerColor: ColorInt
     abstract val clipboardEntryColor: ColorInt
+
+    abstract val genericActiveBackgroundColor: ColorInt
+    abstract val genericActiveForegroundColor: ColorInt
+
     abstract val isDark: Boolean
 
     open fun backgroundDrawable(keyBorder: Boolean = false): Drawable {
@@ -60,9 +67,13 @@ sealed class Theme : Parcelable {
         override val accentKeyTextColor: ColorInt,
         override val keyPressHighlightColor: ColorInt,
         override val keyShadowColor: ColorInt,
+        override val popupBackgroundColor: ColorInt,
+        override val popupTextColor: ColorInt,
         override val spaceBarColor: ColorInt,
         override val dividerColor: ColorInt,
         override val clipboardEntryColor: ColorInt,
+        override val genericActiveBackgroundColor: ColorInt,
+        override val genericActiveForegroundColor: ColorInt,
         override val isDark: Boolean
     ) : Theme() {
         @Parcelize
@@ -99,9 +110,13 @@ sealed class Theme : Parcelable {
         override val accentKeyTextColor: ColorInt,
         override val keyPressHighlightColor: ColorInt,
         override val keyShadowColor: ColorInt,
+        override val popupBackgroundColor: ColorInt,
+        override val popupTextColor: ColorInt,
         override val spaceBarColor: ColorInt,
         override val dividerColor: ColorInt,
         override val clipboardEntryColor: ColorInt,
+        override val genericActiveBackgroundColor: ColorInt,
+        override val genericActiveForegroundColor: ColorInt,
         override val isDark: Boolean
     ) : Theme() {
         fun deriveCustomNoBackground(name: String) = Custom(
@@ -118,9 +133,13 @@ sealed class Theme : Parcelable {
             accentKeyTextColor,
             keyPressHighlightColor,
             keyShadowColor,
+            popupBackgroundColor,
+            popupTextColor,
             spaceBarColor,
             dividerColor,
             clipboardEntryColor,
+            genericActiveBackgroundColor,
+            genericActiveForegroundColor,
             isDark
         )
 
@@ -149,9 +168,13 @@ sealed class Theme : Parcelable {
             accentKeyTextColor,
             keyPressHighlightColor,
             keyShadowColor,
+            popupBackgroundColor,
+            popupTextColor,
             spaceBarColor,
             dividerColor,
             clipboardEntryColor,
+            genericActiveBackgroundColor,
+            genericActiveForegroundColor,
             isDark
         )
     }

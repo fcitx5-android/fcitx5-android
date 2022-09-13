@@ -54,11 +54,11 @@ class StatusAreaEntryUi(override val ctx: Context, private val inputTheme: Theme
     fun setEntry(entry: StatusAreaEntry) = with(ctx) {
         icon.setImageDrawable(drawable(entry.icon))
         icon.colorFilter = PorterDuffColorFilter(
-            (if (entry.active) inputTheme.accentKeyTextColor else inputTheme.keyTextColor).color,
+            (if (entry.active) inputTheme.genericActiveForegroundColor else inputTheme.keyTextColor).color,
             PorterDuff.Mode.SRC_IN
         )
         bkgDrawable.paint.color =
-            (if (entry.active) inputTheme.accentKeyBackgroundColor else inputTheme.keyBackgroundColor).color
+            (if (entry.active) inputTheme.genericActiveBackgroundColor else inputTheme.keyBackgroundColor).color
         label.text = entry.label
     }
 }

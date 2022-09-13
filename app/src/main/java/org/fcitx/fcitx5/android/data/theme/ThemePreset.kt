@@ -19,9 +19,13 @@ object ThemePreset {
         accentKeyTextColor = 0xffffffff.color,
         keyPressHighlightColor = 0x1f000000.color,
         keyShadowColor = 0xffc0c3c4.color,
+        popupBackgroundColor = 0xffd9dbdd.color,
+        popupTextColor = 0xff37474f.color,
         spaceBarColor = 0xffc9ced1.color,
         dividerColor = 0x1f000000.color,
         clipboardEntryColor = 0xfffbfbfc.color,
+        genericActiveBackgroundColor = 0xff80cbc4.color,
+        genericActiveForegroundColor = 0xff37474f.color,
         isDark = false
     )
 
@@ -39,9 +43,13 @@ object ThemePreset {
         accentKeyTextColor = 0xffffffff.color,
         keyPressHighlightColor = 0x33ffffff.color,
         keyShadowColor = 0xff1f292e.color,
+        popupBackgroundColor = 0xff3c474c.color,
+        popupTextColor = 0xffffffff.color,
         spaceBarColor = 0xff3b464c.color,
         dividerColor = 0x1fffffff.color,
         clipboardEntryColor = 0xff404a50.color,
+        genericActiveBackgroundColor = 0xff4db6ac.color,
+        genericActiveForegroundColor = 0xffffffff.color,
         isDark = true
     )
 
@@ -59,9 +67,13 @@ object ThemePreset {
         accentKeyTextColor = 0xffffffff.color,
         keyPressHighlightColor = 0x1f000000.color,
         keyShadowColor = 0xffc2c2c2.color,
+        popupBackgroundColor = 0xffeeeeee.color,
+        popupTextColor = 0xff212121.color,
         spaceBarColor = 0xffdbdbdb.color,
         dividerColor = 0x1f000000.color,
         clipboardEntryColor = 0xffffffff.color,
+        genericActiveBackgroundColor = 0xff5e97f6.color,
+        genericActiveForegroundColor = 0xffffffff.color,
         isDark = false
     )
 
@@ -79,9 +91,13 @@ object ThemePreset {
         accentKeyTextColor = 0xffffffff.color,
         keyPressHighlightColor = 0x33ffffff.color,
         keyShadowColor = 0xff252525.color,
+        popupBackgroundColor = 0xff373737.color,
+        popupTextColor = 0xfffafafa.color,
         spaceBarColor = 0xff4a4a4a.color,
         dividerColor = 0x1fffffff.color,
         clipboardEntryColor = 0xff464646.color,
+        genericActiveBackgroundColor = 0xff5e97f6.color,
+        genericActiveForegroundColor = 0xfffafafa.color,
         isDark = true
     )
 
@@ -99,9 +115,13 @@ object ThemePreset {
         accentKeyTextColor = 0xffffffff.color,
         keyPressHighlightColor = 0x33ffffff.color,
         keyShadowColor = 0xff1255a1.color,
+        popupBackgroundColor = 0xff0d47a1.color,
+        popupTextColor = 0xffffffff.color,
         spaceBarColor = 0xff7eaadc.color,
         dividerColor = 0x1fffffff.color,
         clipboardEntryColor = 0xff3f80cb.color,
+        genericActiveBackgroundColor = 0xff094cea.color,
+        genericActiveForegroundColor = 0xffffffff.color,
         isDark = true
     )
 
@@ -119,9 +139,13 @@ object ThemePreset {
         accentKeyTextColor = 0xffffffff.color,
         keyPressHighlightColor = 0x33ffffff.color,
         keyShadowColor = 0xff000000.color,
+        popupBackgroundColor = 0xff373737.color,
+        popupTextColor = 0xffffffff.color,
         spaceBarColor = 0xff727272.color,
         dividerColor = 0x1fffffff.color,
         clipboardEntryColor = 0xff2e2e2e.color,
+        genericActiveBackgroundColor = 0xff26a69a.color,
+        genericActiveForegroundColor = 0xffffffff.color,
         isDark = true
     )
 
@@ -138,9 +162,13 @@ object ThemePreset {
         accentKeyTextColor = 0xffECEFF4.color,
         keyPressHighlightColor = 0x1f000000.color,
         keyShadowColor = 0x1f000000.color,
+        popupBackgroundColor = 0xffE5E9F0.color,
+        popupTextColor = 0xff2E3440.color,
         spaceBarColor = 0xffD8DEE9.color,
         dividerColor = 0x1f000000.color,
         clipboardEntryColor = 0xffECEFF4.color,
+        genericActiveBackgroundColor = 0xff5E81AC.color,
+        genericActiveForegroundColor = 0xffECEFF4.color,
         isDark = false
     )
 
@@ -157,9 +185,13 @@ object ThemePreset {
         accentKeyTextColor = 0xff2E3440.color,
         keyPressHighlightColor = 0x33ffffff.color,
         keyShadowColor = 0xff434C5E.color,
+        popupBackgroundColor = 0xff434C5E.color,
+        popupTextColor = 0xffECEFF4.color,
         spaceBarColor = 0xff4C566A.color,
         dividerColor = 0x1fffffff.color,
         clipboardEntryColor = 0xff4C566A.color,
+        genericActiveBackgroundColor = 0xff88C0D0.color,
+        genericActiveForegroundColor = 0xff2E3440.color,
         isDark = true
     )
 
@@ -176,9 +208,13 @@ object ThemePreset {
         accentKeyTextColor = 0xffd6d6d6.color,
         keyPressHighlightColor = 0x33ffffff.color,
         keyShadowColor = 0xff171813.color,
+        popupBackgroundColor = 0xff1f201b.color,
+        popupTextColor = 0xffd6d6d6.color,
         spaceBarColor = 0xff373830.color,
         dividerColor = 0x1fffffff.color,
         clipboardEntryColor = 0xff33342c.color,
+        genericActiveBackgroundColor = 0xffb05279.color,
+        genericActiveForegroundColor = 0xffd6d6d6.color,
         isDark = true
     )
 
@@ -198,9 +234,13 @@ object ThemePreset {
         accentKeyTextColor = 0xffffffff.color,
         keyPressHighlightColor = 0x1f000000.color,
         keyShadowColor = Color.TRANSPARENT.color,
+        popupBackgroundColor = 0xff373737.color,
+        popupTextColor = 0xfffafafa.color,
         spaceBarColor = 0x4bffffff.color,
         dividerColor = 0x1fffffff.color,
         clipboardEntryColor = 0x32ffffff.color,
+        genericActiveBackgroundColor = 0xff5e97f6.color,
+        genericActiveForegroundColor = 0xfffafafa.color,
         isDark = true
     )
 
@@ -220,9 +260,13 @@ object ThemePreset {
         accentKeyTextColor = 0xffffffff.color,
         keyPressHighlightColor = 0x1f000000.color,
         keyShadowColor = Color.TRANSPARENT.color,
+        popupBackgroundColor = 0xffeeeeee.color,
+        popupTextColor = 0xff212121.color,
         spaceBarColor = 0x5affffff.color,
         dividerColor = 0x1f000000.color,
         clipboardEntryColor = 0x4bffffff.color,
+        genericActiveBackgroundColor = 0xff5e97f6.color,
+        genericActiveForegroundColor = 0xffffffff.color,
         isDark = false
     )
 
