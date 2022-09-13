@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -107,12 +108,18 @@ class ThemeListFragment : Fragment() {
                             }
                         }.bindOnNotNull {
                             ThemeManager.importTheme(it)
-                        }?.onSuccess { (newCreated, theme) ->
+                        }?.onSuccess { (newCreated, theme, migrated) ->
                             withContext(Dispatchers.Main) {
                                 if (newCreated)
                                     adapter.prependTheme(theme)
                                 else
                                     adapter.replaceTheme(theme)
+                                if (migrated)
+                                    Toast.makeText(
+                                        requireContext(),
+                                        getString(R.string.theme_migrated),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                             }
                         }?.onFailure {
                             errorDialog(

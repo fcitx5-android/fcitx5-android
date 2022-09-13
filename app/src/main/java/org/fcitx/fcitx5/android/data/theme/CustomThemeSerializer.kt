@@ -1,12 +1,19 @@
 package org.fcitx.fcitx5.android.data.theme
 
 import arrow.core.compose
-import arrow.core.curried
 import kotlinx.serialization.json.*
+import org.fcitx.fcitx5.android.utils.NostalgicSerializer
 import org.fcitx.fcitx5.android.utils.identity
 import org.fcitx.fcitx5.android.utils.upcast
 
 object CustomThemeSerializer : JsonTransformingSerializer<Theme.Custom>(Theme.Custom.serializer()) {
+
+    val WithMigrationStatus = NostalgicSerializer(this) {
+        it.jsonObject[VERSION]?.let { o ->
+            o.jsonPrimitive.content != CURRENT_VERSION
+        } ?: false
+    }
+
     override fun transformSerialize(element: JsonElement): JsonElement =
         element.jsonObject.addVersion()
 
@@ -35,15 +42,13 @@ object CustomThemeSerializer : JsonTransformingSerializer<Theme.Custom>(Theme.Cu
 
     data class MigrationStrategy(
         val version: String,
-        val transformation: (String, JsonObject) -> JsonObject
-    ) : (JsonObject) -> JsonObject by transformation.curried()(version)
+        val transformation: (JsonObject) -> JsonObject
+    ) : (JsonObject) -> JsonObject by transformation
 
     private val strategies: List<MigrationStrategy> =
         // Add migrations here
         listOf(
-            // Nothing to do for the initial version...
-            MigrationStrategy("1.0") { _, it -> it },
-            MigrationStrategy("2.0") { ver, it ->
+            MigrationStrategy("2.0") {
                 JsonObject(it.toMutableMap().apply {
                     if (get("backgroundImage") != null) {
                         val popupBkgColor = if (getValue("isDark").jsonPrimitive.boolean) {
@@ -61,10 +66,10 @@ object CustomThemeSerializer : JsonTransformingSerializer<Theme.Custom>(Theme.Cu
                         put("genericActiveBackgroundColor", getValue("accentKeyBackgroundColor"))
                         put("genericActiveForegroundColor", getValue("accentKeyTextColor"))
                     }
-                    put(VERSION, JsonPrimitive(ver))
                 })
-            }
-        ).sortedByDescending { it.version }
+            },
+            MigrationStrategy("1.0", JsonObject::identity),
+        )
 
     private const val VERSION = "version"
 

@@ -86,12 +86,12 @@ object ThemeManager {
         dir.listFiles(FileFilter { it.extension == "json" })
             ?.sortedByDescending { it.lastModified() } // newest first
             ?.mapNotNull decode@{
-                val theme =
-                    runCatching { Json.decodeFromString(CustomThemeSerializer, it.readText()) }
-                        .getOrElse { e ->
-                            Timber.w("Failed to decode theme file ${it.absolutePath}: ${e.message}")
-                            return@decode null
-                        }
+                val (theme, migrated) = runCatching {
+                    Json.decodeFromString(CustomThemeSerializer.WithMigrationStatus, it.readText())
+                }.getOrElse { e ->
+                    Timber.w("Failed to decode theme file ${it.absolutePath}: ${e.message}")
+                    return@decode null
+                }
                 if (theme.backgroundImage != null) {
                     if (!File(theme.backgroundImage.croppedFilePath).exists() ||
                         !File(theme.backgroundImage.srcFilePath).exists()
@@ -100,6 +100,9 @@ object ThemeManager {
                         return@decode null
                     }
                 }
+                // Update the saved file if migration happens
+                if (migrated)
+                    saveTheme(theme)
                 return@decode theme
             }?.toMutableList() ?: mutableListOf()
 
@@ -145,9 +148,9 @@ object ThemeManager {
         }
 
     /**
-     * @return (newCreated, theme)
+     * @return (newCreated, theme, migrated)
      */
-    fun importTheme(src: InputStream): Result<Pair<Boolean, Theme.Custom>> = runCatching {
+    fun importTheme(src: InputStream): Result<Triple<Boolean, Theme.Custom, Boolean>> = runCatching {
         ZipInputStream(src).use { zipStream ->
             val tempDir = File(createTempDirectory().pathString)
             val extracted = mutableListOf<File>()
@@ -160,7 +163,7 @@ object ThemeManager {
             }
             val jsonFile = extracted.find { it.extension == "json" }
                 ?: errorRuntime(R.string.exception_theme_json)
-            val decoded = Json.decodeFromString(CustomThemeSerializer, jsonFile.readText())
+            val (decoded, migrated) = Json.decodeFromString(CustomThemeSerializer.WithMigrationStatus, jsonFile.readText())
             if (builtinThemes.find { it.name == decoded.name } != null)
                 errorRuntime(R.string.exception_theme_name_clash)
             val exists = customThemes.find { it.name == decoded.name } != null
@@ -180,7 +183,7 @@ object ThemeManager {
             } else
                 decoded
             saveTheme(newTheme)
-            !exists to newTheme
+            Triple(!exists, newTheme, migrated)
         }
     }
 
