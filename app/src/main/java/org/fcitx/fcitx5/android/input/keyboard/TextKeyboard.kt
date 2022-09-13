@@ -179,9 +179,15 @@ class TextKeyboard(
         }
     }
 
+    private var keyboardLettersRemainUppercase by AppPrefs.getInstance().keyboard.keyboardLettersRemainUppercase
+
     private fun updateAlphabetKeys() {
         alphabetKeys.forEach { (str, textKeyView) ->
-            textKeyView.mainText.text = transformAlphabet(str)
+            textKeyView.mainText.text = if (keyboardLettersRemainUppercase) {
+                str.uppercase()
+            } else {
+                transformAlphabet(str)
+            }
         }
     }
 
