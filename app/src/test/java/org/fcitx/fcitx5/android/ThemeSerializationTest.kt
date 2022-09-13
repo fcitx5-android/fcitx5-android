@@ -7,35 +7,29 @@ import org.fcitx.fcitx5.android.data.theme.ThemePreset
 import org.junit.Assert
 import org.junit.Test
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
 class ThemeSerializationTest {
 
     private fun Theme.Custom.toJson() = Json.encodeToString(CustomThemeSerializer, this)
-    private fun String.toCustomTheme() = Json.decodeFromString(CustomThemeSerializer, this)
-
-    private val json = Json {
-        prettyPrint = true
-    }
+    private fun String.toCustomTheme() =
+        Json.decodeFromString(CustomThemeSerializer.WithMigrationStatus, this)
 
     @Test
-    fun test() {
+    fun preservation() {
         val fakeCustomTheme =
             ThemePreset
                 .TransparentDark
                 .deriveCustomBackground("", "", "")
 
-        // Versioning preserves the original structure
-        Assert.assertEquals(
-            fakeCustomTheme,
-            fakeCustomTheme.toJson().toCustomTheme()
-        )
+        val (decoded, migrated) = fakeCustomTheme.toJson().toCustomTheme()
 
-        // Version 1.o
-        val raw1 = """
+        Assert.assertEquals("Migration shouldn't happen", false, migrated)
+        Assert.assertEquals("Versioning preserves the original structure", fakeCustomTheme, decoded)
+    }
+
+    @Test
+    fun version1() {
+        // Version 1.0, outdated
+        val raw = """
             {
                 "name": "",
                 "backgroundImage": {
@@ -61,8 +55,46 @@ class ThemeSerializationTest {
                 "version": "1.0"
             }
         """.trimIndent()
-        // No migration needed in version 1.0, just test deserialization
-        raw1.toCustomTheme()
+        val (decoded, migrated) = raw.toCustomTheme()
+        Assert.assertEquals("Migration should happen", true, migrated)
+        Assert.assertEquals("Round trip", decoded, decoded.toJson().toCustomTheme().first)
+    }
 
+    @Test
+    fun version2() {
+        // Version 2.0
+        val raw = """
+            {
+               "name":"",
+               "backgroundImage":{
+                  "croppedFilePath":"",
+                  "srcFilePath":"",
+                  "cropRect": null
+               },
+               "backgroundColor":-13816531,
+               "barColor":1275068416,
+               "keyboardColor":0,
+               "keyBackgroundColor":1275068415,
+               "keyTextColor":-1,
+               "altKeyBackgroundColor":218103807,
+               "altKeyTextColor":-905969665,
+               "accentKeyBackgroundColor":-10577930,
+               "accentKeyTextColor":-1,
+               "keyPressHighlightColor":520093696,
+               "keyShadowColor":0,
+               "popupBackgroundColor":-13158601,
+               "popupTextColor":-1,
+               "spaceBarColor":1275068415,
+               "dividerColor":536870911,
+               "clipboardEntryColor":855638015,
+               "genericActiveBackgroundColor":-10577930,
+               "genericActiveForegroundColor":-1,
+               "isDark":true,
+               "version":"2.0"
+            }
+        """.trimIndent()
+        val (decoded, migrated) = raw.toCustomTheme()
+        Assert.assertEquals("Migration shouldn't happen", false, migrated)
+        Assert.assertEquals("Round trip", decoded, decoded.toJson().toCustomTheme().first)
     }
 }

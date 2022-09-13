@@ -146,4 +146,5 @@
     <string name="horizontal_candidate_growth">Stretch horizontal candidates to fill the remaining width</string>
     <string name="system_touch_sounds">System touch sounds on keypress</string>
     <string name="none">None</string>
+    <string name="theme_migrated">Theme has been migrated to the current version</string>
 </resources>
