@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.data.theme
 
 import arrow.core.compose
+import arrow.core.curried
 import kotlinx.serialization.json.*
 import org.fcitx.fcitx5.android.utils.identity
 import org.fcitx.fcitx5.android.utils.upcast
@@ -10,7 +11,7 @@ object CustomThemeSerializer : JsonTransformingSerializer<Theme.Custom>(Theme.Cu
         element.jsonObject.addVersion()
 
     override fun transformDeserialize(element: JsonElement): JsonElement {
-        val version = element.jsonObject["version"]?.let {
+        val version = element.jsonObject[VERSION]?.let {
             val version = it.jsonPrimitive.content
             if (version !in knownVersions)
                 error("$version is not in known versions: $knownVersions")
@@ -20,10 +21,10 @@ object CustomThemeSerializer : JsonTransformingSerializer<Theme.Custom>(Theme.Cu
     }
 
     private fun JsonObject.addVersion() =
-        JsonObject(this + ("version" to JsonPrimitive(CURRENT_VERSION)))
+        JsonObject(this + (VERSION to JsonPrimitive(CURRENT_VERSION)))
 
     private fun JsonObject.removeVersion() =
-        JsonObject(this - "version")
+        JsonObject(this - VERSION)
 
 
     private fun applyStrategy(oldVersion: String, obj: JsonObject) =
@@ -34,18 +35,40 @@ object CustomThemeSerializer : JsonTransformingSerializer<Theme.Custom>(Theme.Cu
 
     data class MigrationStrategy(
         val version: String,
-        val transformation: (JsonObject) -> JsonObject
-    ) : (JsonObject) -> JsonObject by transformation
+        val transformation: (String, JsonObject) -> JsonObject
+    ) : (JsonObject) -> JsonObject by transformation.curried()(version)
 
     private val strategies: List<MigrationStrategy> =
         // Add migrations here
         listOf(
             // Nothing to do for the initial version...
-            MigrationStrategy("1.0", JsonObject::identity)
+            MigrationStrategy("1.0") { _, it -> it },
+            MigrationStrategy("2.0") { ver, it ->
+                JsonObject(it.toMutableMap().apply {
+                    if (get("backgroundImage") != null) {
+                        val popupBkgColor = if (getValue("isDark").jsonPrimitive.boolean) {
+                            ThemePreset.PixelDark.popupBackgroundColor.color
+                        } else {
+                            ThemePreset.PixelLight.popupBackgroundColor.color
+                        }
+                        put("popupBackgroundColor", JsonPrimitive(popupBkgColor))
+                        put("popupTextColor", getValue("keyTextColor"))
+                        put("genericActiveBackgroundColor", getValue("accentKeyBackgroundColor"))
+                        put("genericActiveForegroundColor", getValue("accentKeyTextColor"))
+                    } else {
+                        put("popupBackgroundColor", getValue("barColor"))
+                        put("popupTextColor", getValue("keyTextColor"))
+                        put("genericActiveBackgroundColor", getValue("accentKeyBackgroundColor"))
+                        put("genericActiveForegroundColor", getValue("accentKeyTextColor"))
+                    }
+                    put(VERSION, JsonPrimitive(ver))
+                })
+            }
         ).sortedByDescending { it.version }
 
+    private const val VERSION = "version"
 
-    private const val CURRENT_VERSION = "1.0"
+    private const val CURRENT_VERSION = "2.0"
     private const val FALLBACK_VERSION = "1.0"
 
     private val knownVersions = strategies.map { it.version }
