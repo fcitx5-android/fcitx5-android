@@ -142,7 +142,10 @@ object PreferenceScreenFactory {
         }.apply {
             if (subtype == ConfigType.TyKey) {
                 summaryProvider = SummaryProvider<Preference> {
-                    cfg[descriptor.name].subItems?.joinToString("\n") { Key.parse(it.value).localizedString }
+                    val str = cfg[descriptor.name].subItems?.joinToString("\n") {
+                        Key.parse(it.value).localizedString
+                    } ?: ""
+                    str.ifEmpty { context.getString(R.string.none) }
                 }
             }
         }

@@ -118,7 +118,6 @@ inline val ConstraintLayout.LayoutParams.unset
 @Suppress("NOTHING_TO_INLINE")
 inline fun <T, U> kotlin.reflect.KFunction1<T, U>.upcast(): (T) -> U = this
 
-
 @Suppress("NOTHING_TO_INLINE")
 inline fun <T> T.identity() = arrow.core.identity(this)
 

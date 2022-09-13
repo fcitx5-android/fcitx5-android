@@ -20,6 +20,7 @@ import com.google.android.material.snackbar.Snackbar
 import org.fcitx.fcitx5.android.R
 import splitties.dimensions.dp
 import splitties.resources.styledColor
+import splitties.views.backgroundColor
 import splitties.views.bottomPadding
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.coordinatorlayout.coordinatorLayout
@@ -239,6 +240,7 @@ abstract class BaseDynamicListUi<T>(
     }
 
     override val root = coordinatorLayout {
+        backgroundColor = styledColor(android.R.attr.colorBackground)
         add(recyclerView, defaultLParams {
             height = matchParent
             width = matchParent

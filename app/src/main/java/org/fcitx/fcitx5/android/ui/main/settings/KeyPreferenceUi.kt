@@ -47,7 +47,7 @@ class KeyPreferenceUi(override val ctx: Context) : Ui {
 
         fun applyStyles() = root.apply {
             backgroundTintList = ctx.styledColorSL(
-                if (checked) android.R.attr.colorAccent else android.R.attr.colorBackground
+                if (checked) android.R.attr.colorAccent else android.R.attr.colorBackgroundFloating
             )
             setTextColor(
                 ctx.styledColor(
@@ -129,12 +129,11 @@ class KeyPreferenceUi(override val ctx: Context) : Ui {
     fun setKey(key: Key) {
         lastKey = key
         keySym = key.keySym
-        val keyString = key.localizedString.ifEmpty { ctx.getString(R.string.none) }
-        textView.text = keyString
+        textView.text = key.localizedString.ifEmpty { ctx.getString(R.string.none) }
         modifierButtons.forEach {
             it.checked = key.keyStates.has(it.modifier)
         }
-        val symText = keyString.substringAfterLast('+')
+        val symText = key.localizedString.substringAfterLast('+')
         input.hint = if (ModifierRegex.containsMatchIn(symText)) "" else symText
     }
 

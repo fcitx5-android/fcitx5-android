@@ -18,7 +18,7 @@ import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
 import splitties.views.horizontalPadding
 
-class PreeditUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
+class PreeditUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     class CursorSpan(ctx: Context, @ColorInt color: Int, metrics: Paint.FontMetricsInt) :
         DynamicDrawableSpan() {
@@ -31,20 +31,20 @@ class PreeditUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
     }
 
     private val cursorSpan by lazy {
-        CursorSpan(ctx, inputTheme.keyTextColor.color, upView.paint.fontMetricsInt)
+        CursorSpan(ctx, theme.keyTextColor.color, upView.paint.fontMetricsInt)
     }
 
     private val keyBorder by ThemeManager.prefs.keyBorder
 
-    private val barBackground = when (inputTheme) {
-        is Theme.Builtin -> if (keyBorder) inputTheme.backgroundColor else inputTheme.barColor
-        is Theme.Custom -> inputTheme.backgroundColor
+    private val barBackground = when (theme) {
+        is Theme.Builtin -> if (keyBorder) theme.backgroundColor else theme.barColor
+        is Theme.Custom -> theme.backgroundColor
     }
 
     private fun createTextView() = textView {
         backgroundColor = barBackground.color
         horizontalPadding = dp(8)
-        setTextColor(inputTheme.keyTextColor.color)
+        setTextColor(theme.keyTextColor.color)
         textSize = 16f
     }
 
@@ -89,16 +89,15 @@ class PreeditUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
         val hasDown = downText.isNotEmpty()
         visible = hasUp || hasDown
         if (!visible) return
-        updateTextView(upView, if (upCursor < 0 || upCursor == upText.length) {
+        val upSequence: CharSequence = if (upCursor < 0 || upCursor == upText.length) {
             upText
-        } else {
-            buildSpannedString {
-                append(upText, 0, upCursor)
-                append('|')
-                setSpan(cursorSpan, upCursor, upCursor + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-                append(upText, upCursor, upText.length)
-            }
-        }, hasUp)
+        } else buildSpannedString {
+            append(upText, 0, upCursor)
+            append('|')
+            setSpan(cursorSpan, upCursor, upCursor + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            append(upText, upCursor, upText.length)
+        }
+        updateTextView(upView, upSequence, hasUp)
         updateTextView(downView, downText, hasDown)
     }
 }
