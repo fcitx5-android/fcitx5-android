@@ -205,9 +205,12 @@ class PopupKeyboardUi(
      * be dispatched to the trigger view.
      */
     fun changeFocus(x: Float, y: Float): Boolean {
-        var newRow = floor((-y - gestureOffsetY) / keyHeight).toInt() + focusRow
+        // round(position / height + 0.2): move to next row when gesture moves above 30% of current row
+        var newRow = ((-y - gestureOffsetY) / keyHeight + 0.2).roundToInt() + focusRow
+        // floor(position / width): move to next column when gesture moves out of current column
         var newColumn = floor((x + gestureOffsetX) / keyWidth).toInt() + focusColumn
-        if (newRow < -2 || newRow > rowCount || newColumn < -1 || newColumn > columnCount) {
+        // retain focus when gesture moves between ±2 rows/columns of range
+        if (newRow < -2 || newRow > rowCount + 1 || newColumn < -2 || newColumn > columnCount + 1) {
             onDismissSelf(this)
             return true
         }
