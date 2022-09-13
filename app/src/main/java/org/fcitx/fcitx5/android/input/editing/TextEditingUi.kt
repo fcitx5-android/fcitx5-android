@@ -89,7 +89,7 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
                     intArrayOf(android.R.attr.state_activated),
                     intArrayOf(android.R.attr.state_enabled)
                 ),
-                intArrayOf(theme.accentKeyTextColor.color, theme.keyTextColor.color)
+                intArrayOf(theme.genericActiveForegroundColor.color, theme.keyTextColor.color)
             )
         )
         background = StateListDrawable().apply {
@@ -98,7 +98,7 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
                 borderDrawable(
                     borderWidth,
                     theme.dividerColor.color,
-                    theme.accentKeyBackgroundColor.color
+                    theme.genericActiveBackgroundColor.color
                 )
             )
             addState(

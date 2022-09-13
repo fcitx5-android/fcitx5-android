@@ -173,7 +173,7 @@ object ThemeManager {
                     ?: errorRuntime(R.string.exception_theme_cropped_image)
                 decoded.copy(
                     backgroundImage = decoded.backgroundImage.copy(
-                        croppedFilePath = srcFile.path,
+                        croppedFilePath = croppedFile.path,
                         srcFilePath = srcFile.path
                     )
                 )
