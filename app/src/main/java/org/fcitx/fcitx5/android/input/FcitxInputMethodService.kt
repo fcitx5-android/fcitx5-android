@@ -170,6 +170,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             }
             inputConnection?.apply {
                 if (selection.isEmpty()) {
+                    if (selection.start <= 0) {
+                        sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
+                        return
+                    }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         deleteSurroundingTextInCodePoints(1, 0)
                     } else {
