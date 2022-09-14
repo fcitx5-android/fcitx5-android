@@ -52,7 +52,6 @@ object ThemeManager {
     private fun themeFile(theme: Theme.Custom) = File(dir, theme.name + ".json")
 
     fun saveTheme(theme: Theme.Custom) {
-        themeFile(theme).writeText(Json.encodeToString(CustomThemeSerializer, theme))
         val old = customThemes.indexOfFirst { it.name == theme.name }.takeIf { it != -1 }
         old?.let { customThemes[it] = theme } ?: run {
             customThemes.add(0, theme)
@@ -101,8 +100,10 @@ object ThemeManager {
                     }
                 }
                 // Update the saved file if migration happens
-                if (migrated)
-                    saveTheme(theme)
+                if (migrated) {
+                    // We can't use saveTheme here, since customThemes might have not been initialized
+                    themeFile(theme).writeText(Json.encodeToString(CustomThemeSerializer, theme))
+                }
                 return@decode theme
             }?.toMutableList() ?: mutableListOf()
 
@@ -150,42 +151,46 @@ object ThemeManager {
     /**
      * @return (newCreated, theme, migrated)
      */
-    fun importTheme(src: InputStream): Result<Triple<Boolean, Theme.Custom, Boolean>> = runCatching {
-        ZipInputStream(src).use { zipStream ->
-            val tempDir = File(createTempDirectory().pathString)
-            val extracted = mutableListOf<File>()
-            var entry = zipStream.nextEntry
-            while (entry != null && !entry.isDirectory) {
-                val file = File(tempDir, entry.name)
-                zipStream.copyTo(file.outputStream())
-                extracted.add(file)
-                entry = zipStream.nextEntry
-            }
-            val jsonFile = extracted.find { it.extension == "json" }
-                ?: errorRuntime(R.string.exception_theme_json)
-            val (decoded, migrated) = Json.decodeFromString(CustomThemeSerializer.WithMigrationStatus, jsonFile.readText())
-            if (builtinThemes.find { it.name == decoded.name } != null)
-                errorRuntime(R.string.exception_theme_name_clash)
-            val exists = customThemes.find { it.name == decoded.name } != null
-            val newTheme = if (decoded.backgroundImage != null) {
-                val srcFile = File(dir, decoded.backgroundImage.srcFilePath)
-                val croppedFile = File(dir, decoded.backgroundImage.croppedFilePath)
-                extracted.find { it.name == srcFile.name }?.copyTo(srcFile)
-                    ?: errorRuntime(R.string.exception_theme_src_image)
-                extracted.find { it.name == croppedFile.name }?.copyTo(croppedFile)
-                    ?: errorRuntime(R.string.exception_theme_cropped_image)
-                decoded.copy(
-                    backgroundImage = decoded.backgroundImage.copy(
-                        croppedFilePath = croppedFile.path,
-                        srcFilePath = srcFile.path
-                    )
+    fun importTheme(src: InputStream): Result<Triple<Boolean, Theme.Custom, Boolean>> =
+        runCatching {
+            ZipInputStream(src).use { zipStream ->
+                val tempDir = File(createTempDirectory().pathString)
+                val extracted = mutableListOf<File>()
+                var entry = zipStream.nextEntry
+                while (entry != null && !entry.isDirectory) {
+                    val file = File(tempDir, entry.name)
+                    zipStream.copyTo(file.outputStream())
+                    extracted.add(file)
+                    entry = zipStream.nextEntry
+                }
+                val jsonFile = extracted.find { it.extension == "json" }
+                    ?: errorRuntime(R.string.exception_theme_json)
+                val (decoded, migrated) = Json.decodeFromString(
+                    CustomThemeSerializer.WithMigrationStatus,
+                    jsonFile.readText()
                 )
-            } else
-                decoded
-            saveTheme(newTheme)
-            Triple(!exists, newTheme, migrated)
+                if (builtinThemes.find { it.name == decoded.name } != null)
+                    errorRuntime(R.string.exception_theme_name_clash)
+                val exists = customThemes.find { it.name == decoded.name } != null
+                val newTheme = if (decoded.backgroundImage != null) {
+                    val srcFile = File(dir, decoded.backgroundImage.srcFilePath)
+                    val croppedFile = File(dir, decoded.backgroundImage.croppedFilePath)
+                    extracted.find { it.name == srcFile.name }?.copyTo(srcFile)
+                        ?: errorRuntime(R.string.exception_theme_src_image)
+                    extracted.find { it.name == croppedFile.name }?.copyTo(croppedFile)
+                        ?: errorRuntime(R.string.exception_theme_cropped_image)
+                    decoded.copy(
+                        backgroundImage = decoded.backgroundImage.copy(
+                            croppedFilePath = croppedFile.path,
+                            srcFilePath = srcFile.path
+                        )
+                    )
+                } else
+                    decoded
+                saveTheme(newTheme)
+                Triple(!exists, newTheme, migrated)
+            }
         }
-    }
 
     class Prefs(sharedPreferences: SharedPreferences) :
         ManagedPreferenceCategory(R.string.theme, sharedPreferences) {
