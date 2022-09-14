@@ -3,6 +3,7 @@ package org.fcitx.fcitx5.android.provider
 import android.content.res.AssetFileDescriptor
 import android.database.MatrixCursor
 import android.graphics.Point
+import android.os.Build
 import android.os.CancellationSignal
 import android.os.ParcelFileDescriptor
 import android.provider.DocumentsContract.Document
@@ -24,7 +25,8 @@ class FcitxDataProvider : DocumentsProvider() {
 
         private val TEXT_EXTENSIONS = arrayOf(
             "conf",
-            "mb"
+            "mb",
+            "lua"
         )
 
         // path relative to baseDir that should be recognize as text files
@@ -263,7 +265,8 @@ class FcitxDataProvider : DocumentsProvider() {
         }
 
         val mimeType = file.mimeType
-        var flags = Document.FLAG_SUPPORTS_COPY
+        var flags =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) Document.FLAG_SUPPORTS_COPY else 0
         if (file.canWrite()) {
             flags = flags or if (file.isDirectory) {
                 Document.FLAG_DIR_SUPPORTS_CREATE
@@ -274,8 +277,10 @@ class FcitxDataProvider : DocumentsProvider() {
         if (file.parentFile?.canWrite() == true) {
             flags = flags or
                     Document.FLAG_SUPPORTS_DELETE or
-                    Document.FLAG_SUPPORTS_RENAME or
-                    Document.FLAG_SUPPORTS_MOVE
+                    Document.FLAG_SUPPORTS_RENAME
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                flags = flags or Document.FLAG_SUPPORTS_MOVE
+            }
         }
         if (mimeType.startsWith("image/")) {
             flags = flags or Document.FLAG_SUPPORTS_THUMBNAIL
