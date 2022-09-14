@@ -9,9 +9,7 @@ import org.fcitx.fcitx5.android.utils.upcast
 object CustomThemeSerializer : JsonTransformingSerializer<Theme.Custom>(Theme.Custom.serializer()) {
 
     val WithMigrationStatus = NostalgicSerializer(this) {
-        it.jsonObject[VERSION]?.let { o ->
-            o.jsonPrimitive.content != CURRENT_VERSION
-        } ?: false
+        it.jsonObject[VERSION]?.jsonPrimitive?.content != CURRENT_VERSION
     }
 
     override fun transformSerialize(element: JsonElement): JsonElement =
