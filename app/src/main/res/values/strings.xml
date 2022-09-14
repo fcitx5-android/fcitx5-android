@@ -147,4 +147,5 @@
     <string name="system_touch_sounds">System touch sounds on keypress</string>
     <string name="none">None</string>
     <string name="theme_migrated">Theme has been migrated to the current version</string>
+    <string name="keep_keyboard_letters_uppercase">Keep keyboard letters uppercase</string>
 </resources>

@@ -42,6 +42,8 @@ class AppPrefs(
         val systemTouchSounds =
             switch(R.string.system_touch_sounds, "system_touch_sounds", true)
         val popupOnKeyPress = switch(R.string.popup_on_key_press, "popup_on_key_press", true)
+        val keepLettersUppercase =
+            switch(R.string.keep_keyboard_letters_uppercase, "keep_keyboard_letters_uppercase", false)
         val horizontalCandidateGrowth =
             switch(R.string.horizontal_candidate_growth, "horizontal_candidate_growth", true)
         val expandedCandidateStyle =

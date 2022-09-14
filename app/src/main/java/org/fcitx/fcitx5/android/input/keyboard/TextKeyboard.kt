@@ -8,6 +8,7 @@ import androidx.core.view.allViews
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import splitties.resources.drawable
 import splitties.views.imageDrawable
@@ -179,9 +180,15 @@ class TextKeyboard(
         }
     }
 
+    private val keepLettersUppercase by AppPrefs.getInstance().keyboard.keepLettersUppercase
+
     private fun updateAlphabetKeys() {
         alphabetKeys.forEach { (str, textKeyView) ->
-            textKeyView.mainText.text = transformAlphabet(str)
+            textKeyView.mainText.text = if (keepLettersUppercase) {
+                str.uppercase()
+            } else {
+                transformAlphabet(str)
+            }
         }
     }
 
