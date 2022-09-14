@@ -66,17 +66,11 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
             requireContext(),
             Mode.Custom(),
             PinyinDictManager.libIMEDictionaries(),
-            initCheckBox = { idx ->
-                val entry = entries[idx]
+            initCheckBox = { entry ->
                 isChecked = entry.isEnabled
-                setOnClickListener {
-                    ui.updateItem(
-                        ui.indexItem(entry),
-                        entry.also {
-                            if (isChecked)
-                                it.enable()
-                            else it.disable()
-                        })
+                setOnCheckedChangeListener { _, isChecked ->
+                    if (isChecked) entry.enable() else entry.disable()
+                    ui.updateItem(ui.indexItem(entry), entry)
                 }
             }
         ) {

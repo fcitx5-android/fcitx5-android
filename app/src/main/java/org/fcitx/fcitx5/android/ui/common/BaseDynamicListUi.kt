@@ -38,8 +38,8 @@ abstract class BaseDynamicListUi<T>(
     private val mode: Mode<T>,
     initialEntries: List<T>,
     enableOrder: Boolean = false,
-    initCheckBox: (CheckBox.(Int) -> Unit) = { visibility = View.GONE },
-    initSettingsButton: (ImageButton.(Int) -> Unit) = { visibility = View.GONE },
+    initCheckBox: (CheckBox.(T) -> Unit) = { visibility = View.GONE },
+    initSettingsButton: (ImageButton.(T) -> Unit) = { visibility = View.GONE },
 ) : Ui,
     DynamicListAdapter<T>(
         initialEntries,
@@ -92,12 +92,11 @@ abstract class BaseDynamicListUi<T>(
     init {
         initEditButton = when (mode) {
             is Mode.ChooseOne -> { _ -> visibility = View.GONE }
-            is Mode.FreeAdd -> { idx ->
+            is Mode.FreeAdd -> { entry ->
                 visibility = View.VISIBLE
                 setOnClickListener {
-                    val entry = entries[idx]
                     showEditDialog(ctx.getString(R.string.edit), entry) {
-                        if (it != entry) updateItem(idx, it)
+                        if (it != entry) updateItem(indexItem(entry), it)
                     }
                 }
             }

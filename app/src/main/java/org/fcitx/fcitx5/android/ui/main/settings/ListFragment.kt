@@ -11,6 +11,7 @@ import androidx.fragment.app.activityViewModels
 import org.fcitx.fcitx5.android.core.Key
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
+import org.fcitx.fcitx5.android.ui.common.DynamicListTouchCallback
 import org.fcitx.fcitx5.android.ui.common.DynamicListUi
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor
@@ -29,16 +30,22 @@ class ListFragment : Fragment() {
     private val viewModel: MainViewModel by activityViewModels()
 
     private val ui: BaseDynamicListUi<*> by lazy {
+
+        val ctx = requireContext()
+
         when (descriptor) {
 
             is ConfigDescriptor.ConfigEnumList -> {
                 val d = descriptor as ConfigDescriptor.ConfigEnumList
-                requireContext().DynamicListUi(
-                    BaseDynamicListUi.Mode.ChooseOne { d.entries.toTypedArray() },
-                    cfg.subItems?.map { it.value } ?: listOf()
-                ) {
-                    d.entriesI18n?.get(d.entries.indexOf(it)) ?: it
-                }
+                val available = d.entries.toSet()
+                ctx.DynamicListUi(
+                    BaseDynamicListUi.Mode.ChooseOne {
+                        (available - entries.toSet()).toTypedArray()
+                    },
+                    initialEntries = cfg.subItems?.map { it.value } ?: listOf(),
+                    enableOrder = true,
+                    show = { d.entriesI18n?.get(d.entries.indexOf(it)) ?: it }
+                )
             }
 
             is ConfigDescriptor.ConfigList -> {
@@ -46,35 +53,42 @@ class ListFragment : Fragment() {
                 when (ty.subtype) {
                     // does a list of booleans make sense?
                     ConfigType.TyBool -> {
-                        requireContext().DynamicListUi(
+                        ctx.DynamicListUi(
                             BaseDynamicListUi.Mode.ChooseOne { arrayOf(true, false) },
-                            (cfg.subItems?.map { it.value.toBoolean() } ?: listOf()),
-                        ) { it.toString() }
+                            initialEntries = cfg.subItems?.map { it.value.toBoolean() } ?: listOf(),
+                            enableOrder = true,
+                            show = { it.toString() }
+                        )
                     }
                     ConfigType.TyInt -> {
-                        requireContext().DynamicListUi(
+                        ctx.DynamicListUi(
                             BaseDynamicListUi.Mode.FreeAdd(
-                                "integer",
-                                { it.toInt() },
-                                { it.toIntOrNull() != null }),
-                            (cfg.subItems?.map { it.value.toInt() } ?: listOf()),
-
-                            ) { it.toString() }
+                                hint = "integer",
+                                converter = { it.toInt() },
+                                validator = { it.toIntOrNull() != null }
+                            ),
+                            initialEntries = cfg.subItems?.map { it.value.toInt() } ?: listOf(),
+                            enableOrder = true,
+                            show = { it.toString() }
+                        )
                     }
                     ConfigType.TyString -> {
-                        requireContext().DynamicListUi(
+                        ctx.DynamicListUi(
                             BaseDynamicListUi.Mode.FreeAddString(),
-                            (cfg.subItems?.map { it.value } ?: listOf())
-                        ) { it }
+                            initialEntries = cfg.subItems?.map { it.value } ?: listOf(),
+                            enableOrder = true,
+                            show = { it }
+                        )
                     }
                     ConfigType.TyKey -> {
                         object : BaseDynamicListUi<Key>(
-                            requireContext(),
+                            ctx,
                             Mode.FreeAdd(
                                 hint = "",
                                 converter = { Key.parse(it) }
                             ),
-                            (cfg.subItems?.map { Key.parse(it.value) } ?: listOf())
+                            initialEntries = cfg.subItems?.map { Key.parse(it.value) } ?: listOf(),
+                            enableOrder = true
                         ) {
                             override fun showEntry(x: Key) = x.localizedString
                             override fun showEditDialog(
@@ -82,9 +96,7 @@ class ListFragment : Fragment() {
                                 entry: Key?,
                                 block: (Key) -> Unit
                             ) {
-                                val ui = KeyPreferenceUi(requireContext()).apply {
-                                    setKey(entry ?: Key.None)
-                                }
+                                val ui = KeyPreferenceUi(ctx).apply { setKey(entry ?: Key.None) }
                                 AlertDialog.Builder(context)
                                     .setTitle(title)
                                     .setView(ui.root)
@@ -99,6 +111,8 @@ class ListFragment : Fragment() {
                                     .setNegativeButton(android.R.string.cancel, null)
                                     .show()
                             }
+                        }.apply {
+                            addTouchCallback(DynamicListTouchCallback(this))
                         }
                     }
                     ConfigType.TyEnum -> error("Impossible!")

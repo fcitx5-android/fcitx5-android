@@ -31,16 +31,14 @@ class InputMethodListFragment : ProgressFragment(), OnItemChangedListener<InputM
 
     override suspend fun initialize(): View {
         val available = fcitx.availableIme().toSet()
-        val enabled = fcitx.enabledIme().toList()
+        val initialEnabled = fcitx.enabledIme().toList()
         ui = requireContext().DynamicListUi(
             mode = BaseDynamicListUi.Mode.ChooseOne {
-                val unEnabled = available - entries.toSet()
-                unEnabled.toTypedArray()
+                (available - entries.toSet()).toTypedArray()
             },
-            initialEntries = enabled,
+            initialEntries = initialEnabled,
             enableOrder = true,
-            initSettingsButton = { idx ->
-                val entry = entries[idx]
+            initSettingsButton = { entry ->
                 setOnClickListener {
                     it.findNavController().navigate(
                         R.id.action_imListFragment_to_imConfigFragment,

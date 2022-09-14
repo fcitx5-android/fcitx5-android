@@ -19,8 +19,8 @@ fun <T> Context.DynamicListUi(
     mode: BaseDynamicListUi.Mode<T>,
     initialEntries: List<T>,
     enableOrder: Boolean = false,
-    initCheckBox: (CheckBox.(Int) -> Unit) = { visibility = View.GONE },
-    initSettingsButton: (ImageButton.(Int) -> Unit) = { visibility = View.GONE },
+    initCheckBox: (CheckBox.(T) -> Unit) = { visibility = View.GONE },
+    initSettingsButton: (ImageButton.(T) -> Unit) = { visibility = View.GONE },
     useCustomTouchCallback: Boolean = false,
     show: (T) -> String
 ): BaseDynamicListUi<T> = object :
@@ -43,8 +43,8 @@ fun <T> Context.DynamicListUi(
 @Suppress("FunctionName")
 fun <T> Context.CheckBoxListUi(
     initialEntries: List<T>,
-    initCheckBox: (CheckBox.(Int) -> Unit),
-    initSettingsButton: (ImageButton.(Int) -> Unit),
+    initCheckBox: (CheckBox.(T) -> Unit),
+    initSettingsButton: (ImageButton.(T) -> Unit),
     show: (T) -> String
 ) = DynamicListUi(
     BaseDynamicListUi.Mode.Immutable(),

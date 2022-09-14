@@ -34,27 +34,27 @@ class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
     override suspend fun initialize(): View {
         ui = requireContext().CheckBoxListUi(
             initialEntries = fcitx.addons().sortedBy { it.uniqueName },
-            initCheckBox = {
+            initCheckBox = { entry ->
                 // our addon shouldn't be disabled
-                isEnabled = entries[it].uniqueName != "androidfrontend"
-                isChecked = entries[it].enabled
-                setOnClickListener { _ ->
-                    ui.updateItem(it, entries[it].copy(enabled = isChecked))
+                isEnabled = entry.uniqueName != "androidfrontend"
+                isChecked = entry.enabled
+                setOnCheckedChangeListener { _, isChecked ->
+                    ui.updateItem(ui.indexItem(entry), entry.copy(enabled = isChecked))
                 }
             },
-            initSettingsButton = { idx ->
+            initSettingsButton = { entry ->
                 visibility =
-                    if (entries[idx].isConfigurable
-                        && entries[idx].enabled
+                    if (entry.isConfigurable &&
+                        entry.enabled &&
                         // we disable clipboard addon config since we take over the control
-                        && entries[idx].uniqueName != "clipboard"
+                        entry.uniqueName != "clipboard"
                     ) View.VISIBLE else View.INVISIBLE
                 setOnClickListener {
                     it.findNavController().navigate(
                         R.id.action_addonListFragment_to_addonConfigFragment,
                         bundleOf(
-                            AddonConfigFragment.ARG_UNIQUE_NAME to entries[idx].uniqueName,
-                            AddonConfigFragment.ARG_NAME to entries[idx].displayName
+                            AddonConfigFragment.ARG_UNIQUE_NAME to entry.uniqueName,
+                            AddonConfigFragment.ARG_NAME to entry.displayName
                         )
                     )
                 }

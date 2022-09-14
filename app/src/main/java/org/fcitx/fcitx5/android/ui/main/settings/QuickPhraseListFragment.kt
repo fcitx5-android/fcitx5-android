@@ -78,25 +78,16 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
             requireContext(),
             Mode.Custom(),
             QuickPhraseManager.listQuickPhrase(),
-            initCheckBox = { idx ->
-                val entry = entries[idx]
+            initCheckBox = { entry ->
                 isEnabled = true
                 isChecked = entry.isEnabled
-                setOnClickListener {
-                    ui.updateItem(ui.indexItem(entry), entry.also {
-                        if (isChecked)
-                            it.enable()
-                        else
-                            it.disable()
-                    })
+                setOnCheckedChangeListener { _, isChecked ->
+                    if (isChecked) entry.enable() else entry.disable()
+                    ui.updateItem(ui.indexItem(entry), entry)
                 }
             },
-            initSettingsButton = { idx ->
-                val entry = entries[idx]
-                visibility = if (!entry.isEnabled)
-                    View.GONE
-                else
-                    View.VISIBLE
+            initSettingsButton = { entry ->
+                visibility = if (!entry.isEnabled) View.GONE else View.VISIBLE
                 fun edit() {
                     findNavController().navigate(
                         R.id.action_quickPhraseListFragment_to_quickPhraseEditFragment,
@@ -106,7 +97,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                         QuickPhraseEditFragment.RESULT,
                         this@QuickPhraseListFragment
                     ) { _, _ ->
-                        ui.updateItem(idx, entry)
+                        ui.updateItem(ui.indexItem(entry), entry)
                         // editor changed file content
                         dustman.forceDirty()
                     }
@@ -124,7 +115,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                                             0 -> edit()
                                             1 -> {
                                                 entry.deleteOverride()
-                                                ui.updateItem(idx, entry)
+                                                ui.updateItem(ui.indexItem(entry), entry)
                                                 // not sure if the content changes
                                                 dustman.forceDirty()
                                             }

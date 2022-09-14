@@ -12,9 +12,9 @@ abstract class DynamicListAdapter<T>(
     initialEntries: List<T>,
     val enableAddAndDelete: Boolean = true,
     val enableOrder: Boolean = false,
-    val initCheckBox: (CheckBox.(Int) -> Unit) = { visibility = View.GONE },
-    var initEditButton: (ImageButton.(Int) -> Unit) = { visibility = View.GONE },
-    var initSettingsButton: (ImageButton.(Int) -> Unit) = { visibility = View.GONE }
+    val initCheckBox: (CheckBox.(T) -> Unit) = { visibility = View.GONE },
+    var initEditButton: (ImageButton.(T) -> Unit) = { visibility = View.GONE },
+    var initSettingsButton: (ImageButton.(T) -> Unit) = { visibility = View.GONE }
 ) :
     RecyclerView.Adapter<DynamicListAdapter<T>.ViewHolder>() {
 
@@ -52,9 +52,9 @@ abstract class DynamicListAdapter<T>(
         with(holder) {
             handleImage.visibility = if (enableOrder) View.VISIBLE else View.GONE
             nameText.text = showEntry(item)
-            initCheckBox(checkBox, position)
-            initSettingsButton(settingsButton, position)
-            initEditButton(editButton, position)
+            initCheckBox(checkBox, item)
+            initSettingsButton(settingsButton, item)
+            initEditButton(editButton, item)
         }
     }
 
