@@ -9,6 +9,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import splitties.resources.drawable
 import splitties.views.imageDrawable
 import splitties.views.imageResource
