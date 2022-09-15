@@ -124,8 +124,6 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
         }
     }
 
-    override val title: String = ""
-
     private val settingsButton by lazy {
         ToolButton(context, R.drawable.ic_baseline_settings_24, theme)
     }

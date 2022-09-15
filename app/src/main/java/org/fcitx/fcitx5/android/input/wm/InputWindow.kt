@@ -56,7 +56,9 @@ sealed class InputWindow : Dependent {
     abstract class ExtendedInputWindow<T : ExtendedInputWindow<T>> : IUniqueComponent<T>,
         InputWindow() {
 
-        abstract val title: String
+        open val showTitle: Boolean = true
+
+        open val title: String = ""
 
         open fun onCreateBarExtension(): View? {
             return null

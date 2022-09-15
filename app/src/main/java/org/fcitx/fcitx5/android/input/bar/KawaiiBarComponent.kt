@@ -247,7 +247,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         when (window) {
             is InputWindow.ExtendedInputWindow<*> -> {
                 titleUi.setTitle(window.title)
-                window.onCreateBarExtension()?.let { titleUi.addExtension(it) }
+                window.onCreateBarExtension()?.let { titleUi.addExtension(it, window.showTitle) }
                 titleUi.setReturnButtonOnClickListener {
                     windowManager.attachWindow(KeyboardWindow)
                 }
