@@ -28,6 +28,7 @@ import org.fcitx.fcitx5.android.input.candidates.CandidateViewBuilder
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
+import org.fcitx.fcitx5.android.input.picker.PickerWindow
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
@@ -70,6 +71,8 @@ class InputView(
 
     private val keyboardWindow = KeyboardWindow()
 
+    private val pickerWindow = PickerWindow()
+
     private val windowManager = InputWindowManager()
 
     private val candidateViewBuilder: CandidateViewBuilder = CandidateViewBuilder()
@@ -91,6 +94,7 @@ class InputView(
         scope += this.wrapToUniqueComponent()
         scope += windowManager
         scope += keyboardWindow
+        scope += pickerWindow
         scope += commonKeyActionListener
         scope += popup
         scope += horizontalCandidate
@@ -233,6 +237,7 @@ class InputView(
         // We cannot use the key for keyboard window,
         // as this is the only place where the window manager gets keyboard window instance
         windowManager.attachWindow(keyboardWindow)
+        windowManager.addEssentialWindow(pickerWindow)
         broadcaster.onEditorInfoUpdate(service.editorInfo)
     }
 
