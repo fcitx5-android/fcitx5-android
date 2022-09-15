@@ -52,6 +52,8 @@ class ExpandedCandidateLayout(
             )
         }
 
+        val pageUpBtn: ImageKeyView by lazy { findViewById(UpBtnId) }
+        val pageDnBtn: ImageKeyView by lazy { findViewById(DownBtnId) }
         val backspace: ImageKeyView by lazy { findViewById(R.id.button_backspace) }
         val `return`: ImageKeyView by lazy { findViewById(R.id.button_return) }
     }
@@ -63,12 +65,11 @@ class ExpandedCandidateLayout(
     }
 
     var pageUpBtn: ImageKeyView
-
     var pageDnBtn: ImageKeyView
 
-    val embeddedKeyboard = Keyboard(context, inputTheme).apply {
-        pageUpBtn = findViewById(Keyboard.UpBtnId)
-        pageDnBtn = findViewById(Keyboard.DownBtnId)
+    val embeddedKeyboard = Keyboard(context, inputTheme).also {
+        pageUpBtn = it.pageUpBtn
+        pageDnBtn = it.pageDnBtn
     }
 
     init {
