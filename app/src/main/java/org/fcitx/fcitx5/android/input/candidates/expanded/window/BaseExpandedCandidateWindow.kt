@@ -1,6 +1,5 @@
 package org.fcitx.fcitx5.android.input.candidates.expanded.window
 
-import android.view.View
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -45,10 +44,7 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
 
     abstract fun onCreateCandidateLayout(): ExpandedCandidateLayout
 
-    final override fun onCreateView(): View {
-        candidateLayout = onCreateCandidateLayout()
-        return candidateLayout
-    }
+    final override fun onCreateView() = onCreateCandidateLayout().also { candidateLayout = it }
 
     private val keyActionListener = KeyActionListener { it, source ->
         if (it is KeyAction.LayoutSwitchAction) {
