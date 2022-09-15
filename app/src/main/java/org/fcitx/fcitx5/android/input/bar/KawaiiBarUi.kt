@@ -13,6 +13,7 @@ import android.view.animation.TranslateAnimation
 import android.widget.ViewAnimator
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
@@ -292,16 +293,21 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
             titleText.text = title
         }
 
-        fun addExtension(view: View) {
+        fun addExtension(view: View, showTitle: Boolean) {
             if (extension != null) {
                 throw IllegalStateException("TitleBar extension is already present")
             }
+            backButton.isVisible = showTitle
+            titleText.isVisible = showTitle
             extension = view
             root.run {
-                add(view, lParams(wrapContent, dp(40)) {
-                    topOfParent()
-                    endOfParent(dp(5))
-                    bottomOfParent()
+                add(view, lParams(matchConstraints, dp(40)) {
+                    centerVertically()
+                    if (showTitle) {
+                        endOfParent(dp(5))
+                    } else {
+                        centerHorizontally()
+                    }
                 })
             }
         }
