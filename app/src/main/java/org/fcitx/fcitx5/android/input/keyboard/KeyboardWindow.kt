@@ -16,10 +16,12 @@ import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
+import org.fcitx.fcitx5.android.input.picker.PickerWindow
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.popup.PopupListener
 import org.fcitx.fcitx5.android.input.wm.EssentialWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
+import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.mechdancer.dependency.manager.must
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.frameLayout
@@ -31,6 +33,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
 
     private val service: FcitxInputMethodService by manager.inputMethodService()
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
+    private val windowManager: InputWindowManager by manager.must()
     private val popup: PopupComponent by manager.must()
     private val theme by manager.theme()
 
@@ -54,9 +57,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
     private val keyboards: HashMap<String, BaseKeyboard> by lazy {
         hashMapOf(
             TextKeyboard.Name to TextKeyboard(context, theme),
-            NumberKeyboard.Name to NumberKeyboard(context, theme),
-            NumSymKeyboard.Name to NumSymKeyboard(context, theme),
-            SymbolKeyboard.Name to SymbolKeyboard(context, theme)
+            NumberKeyboard.Name to NumberKeyboard(context, theme)
         )
     }
     private var currentKeyboardName = ""
@@ -108,9 +109,16 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
 
     private fun switchLayout(to: String) {
         if (to == currentKeyboardName) return
+        if (to.isEmpty()) {
+            windowManager.attachWindow(PickerWindow)
+            return
+        }
+        if (!keyboards.containsKey(to)) {
+            return
+        }
         ContextCompat.getMainExecutor(service).execute {
             detachCurrentLayout()
-            attachLayout(to.ifEmpty { lastSymbolType })
+            attachLayout(to)
         }
     }
 
