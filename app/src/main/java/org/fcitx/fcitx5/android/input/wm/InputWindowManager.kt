@@ -30,7 +30,7 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
     private val broadcaster: InputBroadcaster by manager.must()
     private lateinit var scope: DynamicScope
 
-    private val essentialWindows = mutableMapOf<EssentialWindow.Key, Pair<InputWindow, View>>()
+    private val essentialWindows = mutableMapOf<EssentialWindow.Key, Pair<InputWindow, View?>>()
 
     private var currentWindow: InputWindow? = null
     private var currentView: View? = null
@@ -52,10 +52,22 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
     }
 
     /**
+     * Associate essential window with its key
+     * This function does not create any view nor set up the scope
+     */
+    @Suppress("BOUNDS_NOT_ALLOWED_IF_BOUNDED_BY_TYPE_PARAMETER")
+    fun <W : InputWindow, E : EssentialWindow, R> addEssentialWindow(window: R) where R : W, R : E {
+        ensureThread()
+        if (window.key in essentialWindows)
+            throw IllegalStateException("${window.key} is already added")
+        essentialWindows[window.key] = window to null
+    }
+
+    /**
      * Attach an essential window by key
-     * IMPORTANT: the view of this essential window must have been initialized,
-     * i.e. another [attachWindow] that accepts the window instance should have been used at least once
-     * before using this function
+     * IMPORTANT: the window key must be known,
+     * i.e. the essential window should be added first via [addEssentialWindow].
+     * Moreover, [attachWindow] can also add the essential window with key.
      */
     fun attachWindow(windowKey: EssentialWindow.Key) {
         ensureThread()
@@ -80,7 +92,8 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
 
     /**
      * Attach a new window, removing the old one
-     * This function initialize the view for windows and save it for essential windows
+     * This function initialize the view for windows and save it for essential windows.
+     * [attachWindow] includes the operation done by [addEssentialWindow].
      */
     fun attachWindow(window: InputWindow) {
         ensureThread()
