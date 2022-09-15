@@ -79,6 +79,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
             Mode.Custom(),
             QuickPhraseManager.listQuickPhrase(),
             initCheckBox = { entry ->
+                setOnCheckedChangeListener(null)
                 isEnabled = true
                 isChecked = entry.isEnabled
                 setOnCheckedChangeListener { _, isChecked ->

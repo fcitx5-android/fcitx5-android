@@ -35,6 +35,8 @@ class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
         ui = requireContext().CheckBoxListUi(
             initialEntries = fcitx.addons().sortedBy { it.uniqueName },
             initCheckBox = { entry ->
+                // remove old listener before change checked state
+                setOnCheckedChangeListener(null)
                 // our addon shouldn't be disabled
                 isEnabled = entry.uniqueName != "androidfrontend"
                 isChecked = entry.enabled
