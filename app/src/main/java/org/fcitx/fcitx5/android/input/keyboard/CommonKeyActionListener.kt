@@ -6,6 +6,9 @@ import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
+import org.fcitx.fcitx5.android.input.dependency.inputView
+import org.fcitx.fcitx5.android.input.dialog.AddMoreInputMethodsPrompt
+import org.fcitx.fcitx5.android.input.dialog.InputMethodSwitcherDialog
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener.BackspaceSwipeState.*
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction.*
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
@@ -16,7 +19,6 @@ import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
 import org.mechdancer.dependency.manager.managedHandler
 import org.mechdancer.dependency.manager.must
-import splitties.systemservices.inputMethodManager
 
 class CommonKeyActionListener :
     UniqueComponent<CommonKeyActionListener>(), Dependent, ManagedHandler by managedHandler() {
@@ -28,6 +30,7 @@ class CommonKeyActionListener :
     private val context by manager.context()
     private val fcitx by manager.fcitx()
     private val service by manager.inputMethodService()
+    private val inputView by manager.inputView()
     private val preedit: PreeditComponent by manager.must()
 
     private var backspaceSwipeState = Stopped
@@ -57,7 +60,11 @@ class CommonKeyActionListener :
                             fcitx.enumerateIme()
                         }
                     }
-                    is InputMethodSwitchAction -> inputMethodManager.showInputMethodPicker()
+                    is InputMethodSwitchAction -> {
+                        inputView.showDialog(
+                            InputMethodSwitcherDialog.build(fcitx, service, context)
+                        )
+                    }
                     is MoveSelectionAction -> when (backspaceSwipeState) {
                         Stopped -> backspaceSwipeState = preedit.content.preedit.let {
                             if (it.preedit.isEmpty() && it.clientPreedit.isEmpty()) {

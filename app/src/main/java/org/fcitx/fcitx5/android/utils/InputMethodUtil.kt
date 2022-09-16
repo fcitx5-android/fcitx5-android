@@ -22,7 +22,9 @@ object InputMethodUtil {
     )
 
     fun startSettingsActivity(context: Context) =
-        context.startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
+        context.startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        })
 
     fun showSelector(context: Context) =
         (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
