@@ -139,6 +139,8 @@ class MainActivity : AppCompatActivity() {
             val target = when (it) {
                 INTENT_DATA_CONFIG_GLOBAL ->
                     R.id.action_mainFragment_to_globalConfigFragment to null
+                INTENT_DATA_CONFIG_IM_LIST ->
+                    R.id.action_mainFragment_to_imListFragment to null
                 INTENT_DATA_CONFIG_IM ->
                     R.id.action_mainFragment_to_imConfigFragment to
                             (intent.getBundleExtra(INTENT_DATA_CONFIG_IM) ?: return false)
@@ -206,6 +208,7 @@ class MainActivity : AppCompatActivity() {
         const val INTENT_DATA_ADD_IM = "add_im"
         const val INTENT_DATA_CONFIG = "config"
         const val INTENT_DATA_CONFIG_GLOBAL = "global"
+        const val INTENT_DATA_CONFIG_IM_LIST = "im_list"
         const val INTENT_DATA_CONFIG_IM = "im"
         const val INTENT_DATA_CONFIG_BEHAVIOR = "behavior"
         const val INTENT_DATA_CONFIG_THEME = "theme"

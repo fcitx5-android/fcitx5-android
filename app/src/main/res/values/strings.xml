@@ -148,4 +148,6 @@
     <string name="none">None</string>
     <string name="theme_migrated">Theme has been migrated to the current version</string>
     <string name="keep_keyboard_letters_uppercase">Keep keyboard letters uppercase</string>
+    <string name="choose_input_method">Choose input method</string>
+    <string name="language_settings">Language and input settings</string>
 </resources>

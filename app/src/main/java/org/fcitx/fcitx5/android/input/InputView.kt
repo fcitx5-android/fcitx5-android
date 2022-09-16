@@ -1,10 +1,12 @@
 package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.view.View
+import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.Space
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -234,6 +236,10 @@ class InputView(
         broadcaster.onEditorInfoUpdate(service.editorInfo)
     }
 
+    fun onHide() {
+        showingDialog?.dismiss()
+    }
+
     fun handleFcitxEvent(it: FcitxEvent<*>) {
         when (it) {
             is FcitxEvent.CandidateListEvent -> {
@@ -258,6 +264,24 @@ class InputView(
 
     fun onSelectionUpdate(start: Int, end: Int) {
         broadcaster.onSelectionUpdate(start, end)
+    }
+
+    private var showingDialog: Dialog? = null
+
+    fun showDialog(dialog: Dialog) {
+        showingDialog?.dismiss()
+        val windowToken = windowToken
+        check(windowToken != null) { "InputView Token is null." }
+        val window = dialog.window!!
+        window.attributes.apply {
+            token = windowToken
+            type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
+        }
+        window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
+        showingDialog = dialog.apply {
+            setOnDismissListener { this@InputView.showingDialog = null }
+            show()
+        }
     }
 
 }

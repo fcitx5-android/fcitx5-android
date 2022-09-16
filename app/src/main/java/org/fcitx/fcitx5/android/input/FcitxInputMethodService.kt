@@ -533,6 +533,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         lifecycleScope.launch {
             fcitx.focus(false)
         }
+        inputView.onHide()
     }
 
     override fun onFinishInput() {
