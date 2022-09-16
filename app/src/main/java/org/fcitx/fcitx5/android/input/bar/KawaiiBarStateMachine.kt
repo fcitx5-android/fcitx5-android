@@ -14,15 +14,18 @@ object KawaiiBarStateMachine {
         PreeditUpdatedNonEmpty,
         CandidateUpdateNonEmpty,
         ExtendedWindowAttached,
-        WindowDetached
+        WindowDetachedWithCandidatesEmpty,
+        WindowDetachedWithCandidatesNonEmpty
     }
 
-    fun new(block: (State) -> Unit) = eventStateMachine<State, TransitionEvent>(Idle) {
+    fun new(block: (State) -> Unit) = eventStateMachine(Idle) {
         from(Idle) transitTo Title on ExtendedWindowAttached
         from(Idle) transitTo Candidate on PreeditUpdatedNonEmpty
         from(Idle) transitTo Candidate on CandidateUpdateNonEmpty
-        from(Title) transitTo Idle on WindowDetached
+        from(Title) transitTo Idle on WindowDetachedWithCandidatesEmpty
+        from(Title) transitTo Candidate on WindowDetachedWithCandidatesNonEmpty
         from(Candidate) transitTo Idle on PreeditUpdatedEmpty
+        from(Candidate) transitTo Title on ExtendedWindowAttached
         onNewState(block)
     }
 }
