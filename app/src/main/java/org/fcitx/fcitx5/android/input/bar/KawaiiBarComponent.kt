@@ -259,6 +259,11 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     }
 
     override fun onWindowDetached(window: InputWindow) {
-        barStateMachine.push(WindowDetached)
+        barStateMachine.push(
+            if (horizontalCandidate.adapter.candidates.isEmpty())
+                WindowDetachedWithCandidatesEmpty
+            else
+                WindowDetachedWithCandidatesNonEmpty
+        )
     }
 }
