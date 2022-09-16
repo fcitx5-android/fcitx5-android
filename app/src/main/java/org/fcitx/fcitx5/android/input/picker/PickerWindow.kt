@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.input.picker
 
 import android.view.Gravity
+import androidx.core.content.ContextCompat
 import androidx.transition.Slide
 import com.google.android.material.tabs.TabLayoutMediator
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
@@ -43,9 +44,14 @@ class PickerWindow : InputWindow.ExtendedInputWindow<PickerWindow>(), EssentialW
         when (it) {
             is KeyAction.LayoutSwitchAction -> when (it.act) {
                 NumberKeyboard.Name -> {
-                    windowManager.attachWindow(KeyboardWindow).also {
-                        // TODO: switch to NumberKeyboard directly
-                        (it as KeyboardWindow)
+                    // Switch to NumberKeyboard before attaching KeyboardWindow
+                    (windowManager.getEssentialWindow(KeyboardWindow) as KeyboardWindow).switchLayout(
+                        NumberKeyboard.Name
+                    )
+                    // The real switchLayout (detachCurrentLayout and attachLayout) in KeyboardWindow is postponed,
+                    // so we have to postpone attachWindow as well
+                    ContextCompat.getMainExecutor(context).execute {
+                        windowManager.attachWindow(KeyboardWindow)
                     }
                 }
                 else -> {

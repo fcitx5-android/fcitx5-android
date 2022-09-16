@@ -114,7 +114,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
         }
     }
 
-    private fun switchLayout(to: String) {
+    fun switchLayout(to: String) {
         if (to == currentKeyboardName) return
         if (to.isEmpty()) {
             windowManager.attachWindow(PickerWindow)

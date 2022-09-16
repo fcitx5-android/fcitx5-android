@@ -69,17 +69,20 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
         essentialWindows[window.key] = window to null
     }
 
+    fun getEssentialWindow(windowKey: EssentialWindow.Key) =
+        essentialWindows[windowKey]?.first
+            ?: throw IllegalArgumentException("Unable to find essential window associated with $windowKey")
+
     /**
      * Attach an essential window by key
      * IMPORTANT: the window key must be known,
      * i.e. the essential window should be added first via [addEssentialWindow].
      * Moreover, [attachWindow] can also add the essential window with key.
      */
-    fun attachWindow(windowKey: EssentialWindow.Key): InputWindow {
+    fun attachWindow(windowKey: EssentialWindow.Key) {
         ensureThread()
-        return essentialWindows[windowKey]?.let { (window, _) ->
+        essentialWindows[windowKey]?.let { (window, _) ->
             attachWindow(window)
-            window
         } ?: throw IllegalStateException("$windowKey is not a known essential window key")
     }
 
