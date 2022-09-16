@@ -2,7 +2,6 @@ package org.fcitx.fcitx5.android.input.wm
 
 import android.view.View
 import android.widget.FrameLayout
-import androidx.transition.Fade
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
@@ -37,16 +36,19 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
 
     private val disableAnimation by AppPrefs.getInstance().advanced.disableAnimation
 
-    private fun prepareAnimation(enterAnimation: Transition?, remove: View, add: View) {
+    private fun prepareAnimation(
+        exitAnimation: Transition?,
+        enterAnimation: Transition?,
+        remove: View,
+        add: View
+    ) {
         if (disableAnimation)
             return
         enterAnimation?.addTarget(add)
-        val fade = Fade().apply {
-            addTarget(remove)
-        }
+        exitAnimation?.addTarget(remove)
         TransitionManager.beginDelayedTransition(view, TransitionSet().apply {
             enterAnimation?.let { addTransition(it) }
-            addTransition(fade)
+            exitAnimation?.let { addTransition(it) }
             duration = 100
         })
     }
@@ -58,8 +60,12 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
     @Suppress("BOUNDS_NOT_ALLOWED_IF_BOUNDED_BY_TYPE_PARAMETER")
     fun <W : InputWindow, E : EssentialWindow, R> addEssentialWindow(window: R) where R : W, R : E {
         ensureThread()
-        if (window.key in essentialWindows)
-            throw IllegalStateException("${window.key} is already added")
+        if (window.key in essentialWindows) {
+            if (essentialWindows[window.key] === window)
+                Timber.d("Skip adding essential window $window")
+            else
+                throw IllegalStateException("${window.key} is already occupied")
+        }
         essentialWindows[window.key] = window to null
     }
 
@@ -69,10 +75,11 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
      * i.e. the essential window should be added first via [addEssentialWindow].
      * Moreover, [attachWindow] can also add the essential window with key.
      */
-    fun attachWindow(windowKey: EssentialWindow.Key) {
+    fun attachWindow(windowKey: EssentialWindow.Key): InputWindow {
         ensureThread()
-        essentialWindows[windowKey]?.let { (window, _) ->
+        return essentialWindows[windowKey]?.let { (window, _) ->
             attachWindow(window)
+            window
         } ?: throw IllegalStateException("$windowKey is not a known essential window key")
     }
 
@@ -111,7 +118,12 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
         if (currentWindow != null) {
             val oldWindow = currentWindow!!
             val oldView = currentView!!
-            prepareAnimation(window.enterAnimation, oldView, newView)
+            prepareAnimation(
+                oldWindow.exitAnimation(window),
+                window.enterAnimation(oldWindow),
+                oldView,
+                newView
+            )
             // notify the window that it will be detached
             oldWindow.onDetached()
             // remove the old window from layout
