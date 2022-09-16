@@ -7,7 +7,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import androidx.transition.Slide
-import androidx.transition.Transition
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
@@ -42,9 +41,17 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
     override val key: EssentialWindow.Key
         get() = KeyboardWindow
 
-    override val enterAnimation: Transition
-        get() = Slide().apply {
-            slideEdge = Gravity.BOTTOM
+    override fun enterAnimation(lastWindow: InputWindow) = Slide().apply {
+        slideEdge = Gravity.BOTTOM
+    }.takeIf {
+        // disable animation switching between picker
+        lastWindow !is PickerWindow
+    }
+
+    override fun exitAnimation(nextWindow: InputWindow) =
+        super.exitAnimation(nextWindow).takeIf {
+            // disable animation switching between picker
+            nextWindow !is PickerWindow
         }
 
     private var _currentIme: InputMethodEntry? = null

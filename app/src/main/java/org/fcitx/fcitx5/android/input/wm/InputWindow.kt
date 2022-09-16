@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.input.wm
 
 import android.view.Gravity
 import android.view.View
+import androidx.transition.Fade
 import androidx.transition.Slide
 import androidx.transition.Transition
 import org.fcitx.fcitx5.android.input.dependency.context
@@ -20,9 +21,14 @@ sealed class InputWindow : Dependent {
     /**
      * Animation when the window is added to the layout
      */
-    open val enterAnimation: Transition? = Slide().apply {
+    open fun enterAnimation(lastWindow: InputWindow): Transition? = Slide().apply {
         slideEdge = Gravity.TOP
     }
+
+    /**
+     * Animation when the window is removed from the layout
+     */
+    open fun exitAnimation(nextWindow: InputWindow): Transition? = Fade()
 
     /**
      * After the window was set up in dynamic scope

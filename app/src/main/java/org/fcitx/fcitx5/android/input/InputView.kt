@@ -167,6 +167,7 @@ class InputView(
                     }
                 }
             }
+            windowManager.addEssentialWindow(pickerWindow)
         }
 
         customBackground.imageDrawable = theme.backgroundDrawable(keyBorder)
@@ -237,7 +238,6 @@ class InputView(
         // We cannot use the key for keyboard window,
         // as this is the only place where the window manager gets keyboard window instance
         windowManager.attachWindow(keyboardWindow)
-        windowManager.addEssentialWindow(pickerWindow)
         broadcaster.onEditorInfoUpdate(service.editorInfo)
     }
 

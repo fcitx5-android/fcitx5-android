@@ -1,7 +1,7 @@
 package org.fcitx.fcitx5.android.input.picker
 
-import androidx.transition.Fade
-import androidx.transition.Transition
+import android.view.Gravity
+import androidx.transition.Slide
 import com.google.android.material.tabs.TabLayoutMediator
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.theme
@@ -11,8 +11,8 @@ import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.mechdancer.dependency.manager.must
 
-class PickerWindow() :
-    InputWindow.ExtendedInputWindow<PickerWindow>(), EssentialWindow, InputBroadcastReceiver {
+class PickerWindow : InputWindow.ExtendedInputWindow<PickerWindow>(), EssentialWindow,
+    InputBroadcastReceiver {
 
     private val theme by manager.theme()
     private val windowManager: InputWindowManager by manager.must()
@@ -23,19 +23,30 @@ class PickerWindow() :
     override val key: EssentialWindow.Key
         get() = PickerWindow
 
-    override val enterAnimation: Transition
-        get() = Fade()
-
     private lateinit var pickerLayout: PickerLayout
     private lateinit var pickerPagesAdapter: PickerPagesAdapter
     private lateinit var tabLayoutMediator: TabLayoutMediator
+
+    override fun enterAnimation(lastWindow: InputWindow) = Slide().apply {
+        slideEdge = Gravity.BOTTOM
+    }.takeIf {
+        // disable animation switching between keyboard
+        lastWindow !is KeyboardWindow
+    }
+
+    override fun exitAnimation(nextWindow: InputWindow) = super.exitAnimation(nextWindow).takeIf {
+        // disable animation switching between keyboard
+        nextWindow !is KeyboardWindow
+    }
 
     private val keyActionListener = KeyActionListener { it, source ->
         when (it) {
             is KeyAction.LayoutSwitchAction -> when (it.act) {
                 NumberKeyboard.Name -> {
-                    // TODO: switch to NumberKeyboard directly
-                    windowManager.attachWindow(KeyboardWindow)
+                    windowManager.attachWindow(KeyboardWindow).also {
+                        // TODO: switch to NumberKeyboard directly
+                        (it as KeyboardWindow)
+                    }
                 }
                 else -> {
                     windowManager.attachWindow(KeyboardWindow)
