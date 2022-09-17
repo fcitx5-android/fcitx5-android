@@ -7,32 +7,19 @@ import arrow.core.redeem
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
-import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.core.getPunctuationConfig
-import org.fcitx.fcitx5.android.core.savePunctuationConfig
+import org.fcitx.fcitx5.android.data.punctuation.PunctuationManager
+import org.fcitx.fcitx5.android.data.punctuation.PunctuationMapEntry
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.utils.NaiveDustman
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor
 import org.fcitx.fcitx5.android.utils.str
-import splitties.dimensions.dp
 import splitties.views.dsl.core.*
 import splitties.views.setPaddingDp
 
 class PunctuationEditorFragment : ProgressFragment(),
-    OnItemChangedListener<PunctuationEditorFragment.PunctuationMapEntry> {
-
-    data class PunctuationMapEntry(val key: String, val mapping: String, val altMapping: String) {
-        constructor(it: RawConfig) : this(it[KEY].value, it[MAPPING].value, it[ALT_MAPPING].value)
-
-        fun toRawConfig(idx: Int) = RawConfig(
-            idx.toString(), arrayOf(
-                RawConfig(KEY, key),
-                RawConfig(MAPPING, mapping),
-                RawConfig(ALT_MAPPING, altMapping),
-            )
-        )
-    }
+    OnItemChangedListener<PunctuationMapEntry> {
 
     private lateinit var keyDesc: String
     private lateinit var mappingDesc: String
@@ -51,37 +38,28 @@ class PunctuationEditorFragment : ProgressFragment(),
     private val entries
         get() = ui.entries
 
-    private suspend fun loadEntries(lang: String = "zh_CN"): List<PunctuationMapEntry> {
-        val raw = viewModel.fcitx.getPunctuationConfig(lang)
-        val cfg = raw["cfg"]
-        val desc = raw["desc"]
+    private suspend fun findDesc(lang: String = "zh_CN") {
+        val desc = viewModel.fcitx.getPunctuationConfig(lang)["desc"]
         // parse config desc to get description text of the options
         ConfigDescriptor.parseTopLevel(desc)
             .redeem({ throw it }) {
                 it.customTypes.first().values.forEach { descriptor ->
                     when (descriptor.name) {
-                        KEY -> keyDesc = descriptor.description ?: descriptor.name
-                        MAPPING -> mappingDesc = descriptor.description ?: descriptor.name
-                        ALT_MAPPING -> altMappingDesc = descriptor.description ?: descriptor.name
+                        PunctuationManager.KEY -> keyDesc = descriptor.description ?: descriptor.name
+                        PunctuationManager.MAPPING -> mappingDesc =
+                            descriptor.description ?: descriptor.name
+                        PunctuationManager.ALT_MAPPING -> altMappingDesc =
+                            descriptor.description ?: descriptor.name
                     }
                 }
             }
-        return cfg[ENTRIES].subItems?.map { PunctuationMapEntry(it) } ?: listOf()
     }
 
     private fun saveConfig(lang: String = "zh_CN") {
         if (!dustman.dirty)
             return
-        val cfg = RawConfig(
-            arrayOf(
-                RawConfig(
-                    ENTRIES,
-                    ui.entries.mapIndexed { i, it -> it.toRawConfig(i) }.toTypedArray()
-                )
-            )
-        )
         lifecycleScope.launch {
-            viewModel.fcitx.savePunctuationConfig(lang, cfg)
+            PunctuationManager.save(viewModel.fcitx, lang, ui.entries)
             resetDustman()
         }
     }
@@ -95,7 +73,8 @@ class PunctuationEditorFragment : ProgressFragment(),
     override suspend fun initialize(): View {
         viewModel.disableToolbarSaveButton()
         viewModel.setToolbarTitle(requireArguments().getString(TITLE)!!)
-        val initialEntries = loadEntries()
+        findDesc()
+        val initialEntries = PunctuationManager.load(viewModel.fcitx)
         ui = object : BaseDynamicListUi<PunctuationMapEntry>(
             requireContext(),
             Mode.FreeAdd(
@@ -180,9 +159,5 @@ class PunctuationEditorFragment : ProgressFragment(),
 
     companion object {
         const val TITLE = "title"
-        const val ENTRIES = "Entries"
-        const val KEY = "Key"
-        const val MAPPING = "Mapping"
-        const val ALT_MAPPING = "AltMapping"
     }
 }
