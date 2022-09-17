@@ -1,7 +1,7 @@
 package org.fcitx.fcitx5.android.input.picker
 
 object PickerPreset {
-    val Symbols: Map<String, Array<String>> = mapOf(
+    val Symbols: List<Pair<String, Array<String>>> = listOf(
         "1?#" to arrayOf(
             "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
             "!", "@", "#", "$", "%", "^", "&", "*", "(", ")",
@@ -11,7 +11,8 @@ object PickerPreset {
             "€", "£", "¢", "©", "®", "™", "℃", "℉",
             "°", "§", "№", "†", "‡", "‥", "…", "‰", "※", "‾",
             "⁄", "‼", "⁇", "⁈", "⁉", "√", "π", "±", "×", "÷",
-            "¶", "∆", "¤", "µ", "‹", "›", "«", "»"
+            "¶", "∆", "¤", "µ", "‹", "›", "«", "»",
+            "qwq"
         ),
         "( )" to arrayOf(
             "(", ")", "[", "]", "{", "}", "（", "）", "［", "］",

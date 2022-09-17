@@ -12,7 +12,7 @@ import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.mechdancer.dependency.manager.must
 
-class PickerWindow(val data: Map<String, Array<String>>) :
+class PickerWindow(val data: List<Pair<String, Array<String>>>) :
     InputWindow.ExtendedInputWindow<PickerWindow>(), EssentialWindow, InputBroadcastReceiver {
 
     private val theme by manager.theme()
@@ -68,14 +68,14 @@ class PickerWindow(val data: Map<String, Array<String>>) :
         tabsUi.apply {
             setTabs(pickerPagesAdapter.categories)
             setOnTabClickListener { i ->
-                pager.setCurrentItem(pickerPagesAdapter.positionOfCategory[i], false)
+                pager.setCurrentItem(pickerPagesAdapter.getStartPageOfCategory(i), false)
             }
         }
         pager.apply {
             adapter = pickerPagesAdapter
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
-                    tabsUi.activateTab(pickerPagesAdapter.categoryOfPosition[position])
+                    tabsUi.activateTab(pickerPagesAdapter.getCategoryOfPage(position))
                 }
             })
         }
