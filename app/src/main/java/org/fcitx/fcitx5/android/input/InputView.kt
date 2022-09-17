@@ -28,6 +28,7 @@ import org.fcitx.fcitx5.android.input.candidates.CandidateViewBuilder
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
+import org.fcitx.fcitx5.android.input.picker.PickerPreset
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
@@ -71,7 +72,7 @@ class InputView(
 
     private val keyboardWindow = KeyboardWindow()
 
-    private val pickerWindow = PickerWindow()
+    private val pickerWindow = PickerWindow(PickerPreset.Symbols)
 
     private val windowManager = InputWindowManager()
 

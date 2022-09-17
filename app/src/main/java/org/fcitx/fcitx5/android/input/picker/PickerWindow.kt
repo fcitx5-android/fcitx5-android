@@ -12,8 +12,8 @@ import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.mechdancer.dependency.manager.must
 
-class PickerWindow : InputWindow.ExtendedInputWindow<PickerWindow>(), EssentialWindow,
-    InputBroadcastReceiver {
+class PickerWindow(val data: Map<String, Array<String>>) :
+    InputWindow.ExtendedInputWindow<PickerWindow>(), EssentialWindow, InputBroadcastReceiver {
 
     private val theme by manager.theme()
     private val windowManager: InputWindowManager by manager.must()
@@ -45,9 +45,8 @@ class PickerWindow : InputWindow.ExtendedInputWindow<PickerWindow>(), EssentialW
             is KeyAction.LayoutSwitchAction -> when (it.act) {
                 NumberKeyboard.Name -> {
                     // Switch to NumberKeyboard before attaching KeyboardWindow
-                    (windowManager.getEssentialWindow(KeyboardWindow) as KeyboardWindow).switchLayout(
-                        NumberKeyboard.Name
-                    )
+                    (windowManager.getEssentialWindow(KeyboardWindow) as KeyboardWindow)
+                        .switchLayout(NumberKeyboard.Name)
                     // The real switchLayout (detachCurrentLayout and attachLayout) in KeyboardWindow is postponed,
                     // so we have to postpone attachWindow as well
                     ContextCompat.getMainExecutor(context).execute {
@@ -66,7 +65,7 @@ class PickerWindow : InputWindow.ExtendedInputWindow<PickerWindow>(), EssentialW
 
     override fun onCreateView() = PickerLayout(context, theme).apply {
         pickerLayout = this
-        pickerPagesAdapter = PickerPagesAdapter(theme)
+        pickerPagesAdapter = PickerPagesAdapter(theme, keyActionListener, data)
         pager.adapter = pickerPagesAdapter
         // TODO: show tabs for symbol categories, not pages
         tabLayoutMediator = TabLayoutMediator(tab, pager) { tab, position ->
