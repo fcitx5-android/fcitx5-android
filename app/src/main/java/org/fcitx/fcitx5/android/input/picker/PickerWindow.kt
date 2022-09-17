@@ -3,7 +3,7 @@ package org.fcitx.fcitx5.android.input.picker
 import android.view.Gravity
 import androidx.core.content.ContextCompat
 import androidx.transition.Slide
-import com.google.android.material.tabs.TabLayoutMediator
+import androidx.viewpager2.widget.ViewPager2
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.keyboard.*
@@ -26,7 +26,6 @@ class PickerWindow(val data: Map<String, Array<String>>) :
 
     private lateinit var pickerLayout: PickerLayout
     private lateinit var pickerPagesAdapter: PickerPagesAdapter
-    private lateinit var tabLayoutMediator: TabLayoutMediator
 
     override fun enterAnimation(lastWindow: InputWindow) = Slide().apply {
         slideEdge = Gravity.BOTTOM
@@ -66,14 +65,23 @@ class PickerWindow(val data: Map<String, Array<String>>) :
     override fun onCreateView() = PickerLayout(context, theme).apply {
         pickerLayout = this
         pickerPagesAdapter = PickerPagesAdapter(theme, keyActionListener, data)
-        pager.adapter = pickerPagesAdapter
-        // TODO: show tabs for symbol categories, not pages
-        tabLayoutMediator = TabLayoutMediator(tab, pager) { tab, position ->
-            tab.text = "$position"
-        }.apply { attach() }
+        tabsUi.apply {
+            setTabs(pickerPagesAdapter.categories)
+            setOnTabClickListener { i ->
+                pager.setCurrentItem(pickerPagesAdapter.positionOfCategory[i], false)
+            }
+        }
+        pager.apply {
+            adapter = pickerPagesAdapter
+            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    tabsUi.activateTab(pickerPagesAdapter.categoryOfPosition[position])
+                }
+            })
+        }
     }
 
-    override fun onCreateBarExtension() = pickerLayout.tab
+    override fun onCreateBarExtension() = pickerLayout.tabsUi.root
 
     override fun onAttached() {
         pickerLayout.embeddedKeyboard.keyActionListener = keyActionListener
