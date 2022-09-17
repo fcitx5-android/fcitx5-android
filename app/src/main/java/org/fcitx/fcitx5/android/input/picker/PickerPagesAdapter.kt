@@ -8,35 +8,48 @@ import org.fcitx.fcitx5.android.input.keyboard.KeyActionListener
 class PickerPagesAdapter(
     val theme: Theme,
     private val keyActionListener: KeyActionListener,
-    data: Map<String, Array<String>>
+    data: List<Pair<String, Array<String>>>
 ) :
     RecyclerView.Adapter<PickerPagesAdapter.ViewHolder>() {
     class ViewHolder(val ui: PickerPageUi) : RecyclerView.ViewHolder(ui.root)
 
-    val categories = data.keys.toList()
-    val categoryOfPosition: List<Int>
-    val positionOfCategory: List<Int>
-
-    // TODO: configurable page size
+    private val cats: Array<Pair<Int, Int>>
+    private val ranges: List<IntRange>
     val pages: List<List<String>>
 
+    val categories: List<String>
+
     init {
-        val _categoryOfPosition = ArrayList<Int>(categories.size)
-        val _positionOfCategory = ArrayList<Int>(categories.size)
-        val _pages = ArrayList<List<String>>(categories.size)
-        var categoryCount = 0
-        data.forEach { (category, items) ->
-            items.toList().chunked(28).let {
-                repeat(it.size) { _categoryOfPosition.add(categoryCount) }
-                _positionOfCategory.add(_pages.size)
-                _pages.addAll(it)
-                categoryCount++
+        categories = data.map { it.first }
+        val concat = data.flatMap { it.second.toList() }
+        var start = 0
+        var p = 0
+        pages = ArrayList()
+        cats = Array(data.size) { i ->
+            val v = data[i].second
+            val filled = v.size / ITEMS_PER_PAGE
+            val rest = v.size % ITEMS_PER_PAGE
+            val pageNum = filled + if (rest != 0) 1 else 0
+            for (j in start until start + filled) {
+                pages.add(j, (p until p + ITEMS_PER_PAGE).map { concat[it] })
+                p += ITEMS_PER_PAGE
             }
+            if (rest != 0) {
+                pages.add(start + pageNum - 1, (p until p + rest).map { concat[it] })
+                p += rest
+            }
+            (start to pageNum).also { start += pageNum }
         }
-        pages = _pages
-        categoryOfPosition = _categoryOfPosition
-        positionOfCategory = _positionOfCategory
+        ranges = cats.map { (start, pageNum) ->
+            start until start + pageNum
+        }
     }
+
+    fun getCategoryOfPage(page: Int) =
+        ranges.indexOfFirst { page in it }
+
+    fun getStartPageOfCategory(cat: Int) =
+        cats[cat].first
 
     override fun getItemCount() = pages.size
 
@@ -54,5 +67,9 @@ class PickerPagesAdapter(
 
     override fun onViewDetachedFromWindow(holder: ViewHolder) {
         holder.ui.keyActionListener = null
+    }
+
+    companion object {
+        private const val ITEMS_PER_PAGE = 28
     }
 }
