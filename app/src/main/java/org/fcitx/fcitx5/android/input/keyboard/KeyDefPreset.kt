@@ -5,13 +5,15 @@ import androidx.annotation.DrawableRes
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.core.KeyStates
+import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Border
+import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Variant
 
 val NumLockState = KeyStates(KeyState.NumLock, KeyState.Virtual)
 
 class SymbolKey(
     val symbol: String,
     percentWidth: Float = 0.1f,
-    variant: Appearance.Variant = Appearance.Variant.Normal,
+    variant: Variant = Variant.Normal,
     popup: Array<Popup>? = null
 ) : KeyDef(
     Appearance.Text(
@@ -33,7 +35,7 @@ class SymbolKey(
 class AlphabetKey(
     val character: String,
     val punctuation: String,
-    variant: Appearance.Variant = Appearance.Variant.Normal,
+    variant: Variant = Variant.Normal,
     popup: Array<Popup>? = null
 ) : KeyDef(
     Appearance.AltText(
@@ -91,7 +93,7 @@ class CapsKey : KeyDef(
         src = R.drawable.ic_capslock_none,
         viewId = R.id.button_caps,
         percentWidth = 0.15f,
-        variant = Appearance.Variant.Alternative
+        variant = Variant.Alternative
     ),
     setOf(
         Behavior.Press(action = KeyAction.CapsAction(false)),
@@ -104,7 +106,7 @@ class LayoutSwitchKey(
     displayText: String,
     val to: String = "",
     percentWidth: Float = 0.15f,
-    variant: Appearance.Variant = Appearance.Variant.Alternative
+    variant: Variant = Variant.Alternative
 ) : KeyDef(
     Appearance.Text(
         displayText,
@@ -120,7 +122,7 @@ class LayoutSwitchKey(
 
 class BackspaceKey(
     percentWidth: Float = 0.15f,
-    variant: Appearance.Variant = Appearance.Variant.Alternative
+    variant: Variant = Variant.Alternative
 ) : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_backspace_24,
@@ -137,7 +139,7 @@ class BackspaceKey(
 class QuickPhraseKey : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_format_quote_24,
-        variant = Appearance.Variant.Alternative,
+        variant = Variant.Alternative,
         viewId = R.id.button_quickphrase
     ),
     setOf(
@@ -149,7 +151,7 @@ class QuickPhraseKey : KeyDef(
 class LanguageKey : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_language_24,
-        variant = Appearance.Variant.AltForeground,
+        variant = Variant.AltForeground,
         viewId = R.id.button_lang
     ),
     setOf(
@@ -164,7 +166,7 @@ class SpaceKey : KeyDef(
         textSize = 13f,
         typeface = Typeface.NORMAL,
         percentWidth = 0f,
-        forceBordered = true,
+        border = Border.Special,
         viewId = R.id.button_space
     ),
     setOf(
@@ -177,8 +179,8 @@ class ReturnKey(percentWidth: Float = 0.15f) : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_keyboard_return_24,
         percentWidth = percentWidth,
-        variant = Appearance.Variant.Accent,
-        forceBordered = true,
+        variant = Variant.Accent,
+        border = Border.Special,
         viewId = R.id.button_return
     ),
     setOf(
@@ -191,7 +193,7 @@ class ImageLayoutSwitchKey(
     icon: Int,
     to: String,
     percentWidth: Float = 0.1f,
-    variant: Appearance.Variant = Appearance.Variant.AltForeground,
+    variant: Variant = Variant.AltForeground,
     viewId: Int = -1
 ) : KeyDef(
     Appearance.Image(
@@ -209,7 +211,7 @@ class MiniSpaceKey : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_space_bar_24,
         percentWidth = 0.15f,
-        variant = Appearance.Variant.Alternative,
+        variant = Variant.Alternative,
         viewId = R.id.button_mini_space
     ),
     setOf(
@@ -222,7 +224,7 @@ class NumPadKey(
     val sym: UInt,
     textSize: Float = 16f,
     percentWidth: Float = 0.1f,
-    variant: Appearance.Variant = Appearance.Variant.Normal
+    variant: Variant = Variant.Normal
 ) : KeyDef(
     Appearance.Text(
         displayText,

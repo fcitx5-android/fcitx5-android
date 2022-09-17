@@ -13,6 +13,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.data.theme.ThemeManager.Prefs.PunctuationPosition
+import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Border
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Variant
 import org.fcitx.fcitx5.android.utils.styledFloat
 import org.fcitx.fcitx5.android.utils.unset
@@ -53,7 +54,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
             id = def.viewId
         }
         // key border
-        if (bordered) {
+        if ((bordered && def.border != Border.Off) || def.border == Border.On) {
             // background: key border
             background = LayerDrawable(
                 arrayOf(
@@ -82,7 +83,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
         } else {
             // normal press highlight for keys without special background
             // special background is handled in `onSizeChanged()`
-            if (!def.forceBordered) {
+            if (def.border != Border.Special) {
                 setupPressHighlight()
             }
         }

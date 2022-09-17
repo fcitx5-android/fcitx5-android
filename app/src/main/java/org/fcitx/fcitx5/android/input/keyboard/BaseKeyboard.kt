@@ -19,6 +19,7 @@ import org.fcitx.fcitx5.android.input.popup.PopupListener
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.*
+import splitties.views.dsl.core.add
 import splitties.views.imageResource
 import kotlin.math.absoluteValue
 
@@ -45,7 +46,7 @@ abstract class BaseKeyboard(
                 }
                 constraintLayout Row@{
                     keyViews.forEachIndexed { index, view ->
-                        addView(view, lParams {
+                        add(view, lParams {
                             topOfParent()
                             bottomOfParent()
                             if (index == 0) {
@@ -61,7 +62,7 @@ abstract class BaseKeyboard(
                 }
             }
             keyRows.forEachIndexed { index, row ->
-                addView(row, lParams {
+                add(row, lParams {
                     if (index == 0) topOfParent()
                     else below(keyRows[index - 1])
                     if (index == keyRows.size - 1) bottomOfParent()
