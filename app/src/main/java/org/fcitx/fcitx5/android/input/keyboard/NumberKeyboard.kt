@@ -41,7 +41,7 @@ class NumberKeyboard(
             listOf(
                 LayoutSwitchKey("ABC", TextKeyboard.Name),
                 SymbolKey(",", variant = KeyDef.Appearance.Variant.Alternative),
-                LayoutSwitchKey("!?#", "", 0.13333f, KeyDef.Appearance.Variant.AltForeground),
+                LayoutSwitchKey("!?#", "Picker", 0.13333f, KeyDef.Appearance.Variant.AltForeground),
                 NumPadKey("0", 0xffb0u, 30f, 0.23334f),
                 SymbolKey("=", 0.13333f),
                 NumPadKey(".", 0xffaeu, 23f, 0.1f, KeyDef.Appearance.Variant.Alternative),

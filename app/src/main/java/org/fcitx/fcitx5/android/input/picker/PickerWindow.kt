@@ -6,7 +6,10 @@ import androidx.transition.Slide
 import androidx.viewpager2.widget.ViewPager2
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.theme
-import org.fcitx.fcitx5.android.input.keyboard.*
+import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
+import org.fcitx.fcitx5.android.input.keyboard.KeyAction
+import org.fcitx.fcitx5.android.input.keyboard.KeyActionListener
+import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
 import org.fcitx.fcitx5.android.input.wm.EssentialWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
@@ -41,18 +44,13 @@ class PickerWindow(val data: List<Pair<String, Array<String>>>) :
 
     private val keyActionListener = KeyActionListener { it, source ->
         when (it) {
-            is KeyAction.LayoutSwitchAction -> when (it.act) {
-                NumberKeyboard.Name -> {
-                    // Switch to NumberKeyboard before attaching KeyboardWindow
-                    (windowManager.getEssentialWindow(KeyboardWindow) as KeyboardWindow)
-                        .switchLayout(NumberKeyboard.Name)
-                    // The real switchLayout (detachCurrentLayout and attachLayout) in KeyboardWindow is postponed,
-                    // so we have to postpone attachWindow as well
-                    ContextCompat.getMainExecutor(context).execute {
-                        windowManager.attachWindow(KeyboardWindow)
-                    }
-                }
-                else -> {
+            is KeyAction.LayoutSwitchAction -> {
+                // Switch to NumberKeyboard before attaching KeyboardWindow
+                (windowManager.getEssentialWindow(KeyboardWindow) as KeyboardWindow)
+                    .switchLayout(it.act)
+                // The real switchLayout (detachCurrentLayout and attachLayout) in KeyboardWindow is postponed,
+                // so we have to postpone attachWindow as well
+                ContextCompat.getMainExecutor(context).execute {
                     windowManager.attachWindow(KeyboardWindow)
                 }
             }
