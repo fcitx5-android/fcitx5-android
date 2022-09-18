@@ -78,15 +78,8 @@ class TextKeyboard(
     val space: TextKeyView by lazy { findViewById(R.id.button_space) }
     val `return`: ImageKeyView by lazy { findViewById(R.id.button_return) }
 
-    private val alphabetKeys by lazy {
-        HashMap<String, TextKeyView>().apply {
-            allViews.forEach {
-                if (it is TextKeyView) {
-                    val str = it.mainText.text.toString()
-                    if (str.length == 1 && str[0].isLetter()) put(str, it)
-                }
-            }
-        }
+    private val textKeys: List<AltTextKeyView> by lazy {
+        allViews.filterIsInstance(AltTextKeyView::class.java).toList()
     }
 
     private var capsState: CapsState = CapsState.None
@@ -96,6 +89,16 @@ class TextKeyboard(
             CapsState.None -> c.lowercase()
             else -> c.uppercase()
         }
+    }
+
+    private var punctuationMapping: Map<String, String> = emptyMap()
+
+    private fun transformPunctuation(p: String) = punctuationMapping.getOrDefault(p, p)
+
+    private fun transformDisplayChar(c: String): String {
+        if (c.length != 1) return c
+        if (c[0].isLetter()) return transformAlphabet(c)
+        return transformPunctuation(c)
     }
 
     override fun onAction(action: KeyAction, source: KeyActionListener.Source) {
@@ -133,19 +136,18 @@ class TextKeyboard(
     }
 
     override fun onInputMethodChange(ime: InputMethodEntry) {
-        val s = StringBuilder(ime.displayName)
-        ime.subMode
-            .run { label.ifEmpty { name.ifEmpty { null } } }
-            ?.let { s.append(" ($it)") }
-        space.mainText.text = s
+        space.mainText.text = buildString {
+            append(ime.displayName)
+            ime.subMode.run { label.ifEmpty { name.ifEmpty { null } } }?.let { append(" ($it)") }
+        }
     }
 
     override fun onPopupPreview(viewId: Int, content: String, bounds: Rect) {
-        super.onPopupPreview(viewId, transformAlphabet(content), bounds)
+        super.onPopupPreview(viewId, transformDisplayChar(content), bounds)
     }
 
     override fun onPopupPreviewUpdate(viewId: Int, content: String) {
-        super.onPopupPreviewUpdate(viewId, transformAlphabet(content))
+        super.onPopupPreviewUpdate(viewId, transformDisplayChar(content))
     }
 
     override fun onPopupKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
@@ -183,11 +185,25 @@ class TextKeyboard(
     private val keepLettersUppercase by AppPrefs.getInstance().keyboard.keepLettersUppercase
 
     private fun updateAlphabetKeys() {
-        alphabetKeys.forEach { (str, textKeyView) ->
-            textKeyView.mainText.text = if (keepLettersUppercase) {
-                str.uppercase()
-            } else {
-                transformAlphabet(str)
+        textKeys.forEach {
+            it.def as KeyDef.Appearance.AltText
+            it.mainText.text = it.def.displayText.let { str ->
+                if (str.length != 1 || !str[0].isLetter()) return@forEach
+                if (keepLettersUppercase) str.uppercase() else transformAlphabet(str)
+            }
+        }
+    }
+
+    fun updatePunctuationKeys(newMapping: Map<String, String>? = null) {
+        if (newMapping != null) {
+            punctuationMapping = newMapping
+        }
+        textKeys.forEach {
+            it.def as KeyDef.Appearance.AltText
+            it.altText.text = transformPunctuation(it.def.altText)
+            it.mainText.text = it.def.displayText.let { str ->
+                if (str[0].isLetter()) return@forEach
+                transformPunctuation(str)
             }
         }
     }
