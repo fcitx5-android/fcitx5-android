@@ -7,6 +7,7 @@ import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener.BackspaceSwipeState.*
+import org.fcitx.fcitx5.android.input.keyboard.KeyAction.*
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
 import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.inputConnection
@@ -35,25 +36,29 @@ class CommonKeyActionListener :
         KeyActionListener { action, _ ->
             service.lifecycleScope.launch {
                 when (action) {
-                    is KeyAction.FcitxKeyAction -> fcitx.sendKey(action.act, KeyState.Virtual.state)
-                    is KeyAction.SymAction -> fcitx.sendKey(action.sym, action.states)
-                    is KeyAction.QuickPhraseAction -> {
+                    is FcitxKeyAction -> fcitx.sendKey(action.act, KeyState.Virtual.state)
+                    is SymAction -> fcitx.sendKey(action.sym, action.states)
+                    is CommitAction -> {
+                        if (!fcitx.select(0)) fcitx.reset()
+                        service.inputConnection?.commitText(action.text, 1)
+                    }
+                    is QuickPhraseAction -> {
                         fcitx.reset()
                         fcitx.triggerQuickPhrase()
                     }
-                    is KeyAction.UnicodeAction -> {
+                    is UnicodeAction -> {
                         fcitx.reset()
                         fcitx.triggerUnicode()
                     }
-                    is KeyAction.LangSwitchAction -> {
+                    is LangSwitchAction -> {
                         if (fcitx.enabledIme().size < 2) {
                             AppUtil.launchMainToAddInputMethods(context)
                         } else {
                             fcitx.enumerateIme()
                         }
                     }
-                    is KeyAction.InputMethodSwitchAction -> inputMethodManager.showInputMethodPicker()
-                    is KeyAction.MoveSelectionAction -> when (backspaceSwipeState) {
+                    is InputMethodSwitchAction -> inputMethodManager.showInputMethodPicker()
+                    is MoveSelectionAction -> when (backspaceSwipeState) {
                         Stopped -> backspaceSwipeState = preedit.content.preedit.let {
                             if (it.preedit.isEmpty() && it.clientPreedit.isEmpty()) {
                                 // update state to `Selection` and apply first offset
@@ -68,7 +73,7 @@ class CommonKeyActionListener :
                         }
                         Reset -> {}
                     }
-                    is KeyAction.DeleteSelectionAction -> {
+                    is DeleteSelectionAction -> {
                         when (backspaceSwipeState) {
                             Stopped -> {}
                             Selection -> if (service.selection.isNotEmpty()) {

@@ -16,6 +16,8 @@ sealed class KeyAction {
         }
     }
 
+    data class CommitAction(var text: String) : KeyAction()
+
     data class CapsAction(val lock: Boolean) : KeyAction()
 
     object QuickPhraseAction : KeyAction()
