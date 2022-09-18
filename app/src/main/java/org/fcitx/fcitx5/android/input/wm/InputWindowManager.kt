@@ -138,6 +138,9 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
             if (oldWindow !is EssentialWindow)
                 scope -= oldWindow
         }
+        // call before attached for essential window
+        if (window is EssentialWindow)
+            window.beforeAttached()
         // add the new window to layout
         view.apply { add(newView, lParams(matchParent, matchParent)) }
         currentView = newView
