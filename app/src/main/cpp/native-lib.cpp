@@ -92,8 +92,8 @@ public:
         p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(key, up, timestamp);
     }
 
-    void select(int idx) {
-        p_frontend->call<fcitx::IAndroidFrontend::selectCandidate>(idx);
+    bool select(int idx) {
+        return p_frontend->call<fcitx::IAndroidFrontend::selectCandidate>(idx);
     }
 
     bool isInputPanelEmpty() {
@@ -681,11 +681,11 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeySymToFcitx(JNIEnv *env, jclass c
 }
 
 extern "C"
-JNIEXPORT void JNICALL
+JNIEXPORT jboolean JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_selectCandidate(JNIEnv *env, jclass clazz, jint idx) {
-    RETURN_IF_NOT_RUNNING
+    RETURN_VALUE_IF_NOT_RUNNING(false)
     FCITX_DEBUG() << "selectCandidate: #" << idx;
-    Fcitx::Instance().select(idx);
+    return Fcitx::Instance().select(idx);
 }
 
 extern "C"
