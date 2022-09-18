@@ -39,8 +39,8 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
     suspend fun sendKey(sym: KeySym, states: KeyStates, up: Boolean = false, timestamp: Long = 0L) =
         withFcitxContext { sendKeySymToFcitx(sym.toInt(), states.toInt(), up, timestamp) }
 
-    suspend fun select(idx: Int) = withFcitxContext { selectCandidate(idx) }
-    suspend fun isEmpty() = withFcitxContext { isInputPanelEmpty() }
+    suspend fun select(idx: Int): Boolean = withFcitxContext { selectCandidate(idx) }
+    suspend fun isEmpty(): Boolean = withFcitxContext { isInputPanelEmpty() }
     suspend fun reset() = withFcitxContext { resetInputContext() }
     suspend fun moveCursor(position: Int) = withFcitxContext { repositionCursor(position) }
     suspend fun availableIme() =
@@ -178,7 +178,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         external fun sendKeySymToFcitx(sym: Int, state: Int, up: Boolean, timestamp: Long)
 
         @JvmStatic
-        external fun selectCandidate(idx: Int)
+        external fun selectCandidate(idx: Int): Boolean
 
         @JvmStatic
         external fun isInputPanelEmpty(): Boolean

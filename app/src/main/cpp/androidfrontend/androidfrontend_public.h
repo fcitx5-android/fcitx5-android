@@ -15,7 +15,7 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, keyEvent,
                              void(const Key &, bool isRelease, const int64_t timestamp))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, selectCandidate,
-                             void(int idx))
+                             bool(int idx))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, isInputPanelEmpty,
                              bool())

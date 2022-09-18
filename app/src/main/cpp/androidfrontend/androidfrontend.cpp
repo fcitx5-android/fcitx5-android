@@ -74,10 +74,10 @@ public:
         frontend_->updateCandidateList(candidates);
     }
 
-    void selectCandidate(int idx) {
+    bool selectCandidate(int idx) {
         const auto &list = inputPanel().candidateList();
         if (!list) {
-            return;
+            return false;
         }
         const auto &bulk = list->toBulk();
         try {
@@ -88,7 +88,9 @@ public:
             }
         } catch (const std::invalid_argument &e) {
             FCITX_WARN() << "selectCandidate index out of range";
+            return false;
         }
+        return true;
     }
 
 private:
@@ -159,10 +161,10 @@ void AndroidFrontend::releaseInputContext(const int uid) {
     icCache_.release(uid);
 }
 
-void AndroidFrontend::selectCandidate(int idx) {
+bool AndroidFrontend::selectCandidate(int idx) {
     auto *ic = dynamic_cast<AndroidInputContext *>(focusGroup_.focusedInputContext());
-    if (!ic) return;
-    ic->selectCandidate(idx);
+    if (!ic) return false;
+    return ic->selectCandidate(idx);
 }
 
 bool AndroidFrontend::isInputPanelEmpty() {

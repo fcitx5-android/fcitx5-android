@@ -22,7 +22,7 @@ public:
 
     void keyEvent(const Key &key, bool isRelease, const int64_t timestamp);
     void forwardKey(const Key &key, bool isRelease);
-    void selectCandidate(int idx);
+    bool selectCandidate(int idx);
     bool isInputPanelEmpty();
     void resetInputContext();
     void repositionCursor(int idx);
