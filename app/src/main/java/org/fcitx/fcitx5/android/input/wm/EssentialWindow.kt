@@ -13,4 +13,9 @@ interface EssentialWindow {
      * we need a key to discriminate between other essential windows
      */
     val key: Key
+
+    /**
+     * Before the window was added to window manager's layout
+     */
+    fun beforeAttached() {}
 }

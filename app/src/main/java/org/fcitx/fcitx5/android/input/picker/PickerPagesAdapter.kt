@@ -15,7 +15,9 @@ class PickerPagesAdapter(
 
     private val cats: Array<Pair<Int, Int>>
     private val ranges: List<IntRange>
-    val pages: List<List<String>>
+
+    // (key, display)
+    val pages: List<Array<Pair<String, String>>>
 
     val categories: List<String>
 
@@ -31,17 +33,43 @@ class PickerPagesAdapter(
             val rest = v.size % ITEMS_PER_PAGE
             val pageNum = filled + if (rest != 0) 1 else 0
             for (j in start until start + filled) {
-                pages.add(j, (p until p + ITEMS_PER_PAGE).map { concat[it] })
+                pages.add(j, (p until p + ITEMS_PER_PAGE).map {
+                    val s = concat[it]
+                    s to s
+                }.toTypedArray())
                 p += ITEMS_PER_PAGE
             }
             if (rest != 0) {
-                pages.add(start + pageNum - 1, (p until p + rest).map { concat[it] })
+                pages.add(start + pageNum - 1, (p until p + rest).map {
+                    val s = concat[it]
+                    s to s
+                }.toTypedArray())
                 p += rest
             }
             (start to pageNum).also { start += pageNum }
         }
         ranges = cats.map { (start, pageNum) ->
             start until start + pageNum
+        }
+    }
+
+    fun applyTransformation(f: (String) -> String?) {
+        pages.forEachIndexed { pIdx, p ->
+            val mapped = p.map { (key, display) ->
+                val newDisplay = f(key) ?: key
+                if (newDisplay == display)
+                    null
+                else
+                    newDisplay
+            }
+            val needsUpdate = mapped.any { it != null }
+            if (needsUpdate) {
+                mapped.forEachIndexed { sIdx, s ->
+                    if (s != null)
+                        p[sIdx] = p[sIdx].first to s
+                }
+                notifyItemChanged(pIdx)
+            }
         }
     }
 

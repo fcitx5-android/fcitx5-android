@@ -111,16 +111,16 @@ class PickerPageUi(override val ctx: Context, val theme: Theme) : Ui {
         keyActionListener?.onKeyAction(KeyAction.FcitxKeyAction(str), Source.Keyboard)
     }
 
-    fun setItems(items: List<String>) {
+    fun setItems(items: Array<Pair<String, String>>) {
         keyViews.forEachIndexed { i, keyView ->
             keyView.apply {
                 if (i >= items.size) {
                     mainText.text = ""
                     setOnClickListener(null)
                 } else {
-                    val text = items[i]
+                    val (key, text) = items[i]
                     mainText.text = text
-                    setOnClickListener { onSymbolClick(text) }
+                    setOnClickListener { onSymbolClick(key) }
                 }
             }
         }
