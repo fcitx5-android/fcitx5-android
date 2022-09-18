@@ -6,13 +6,18 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.transition.Slide
+import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.data.punctuation.PunctuationManager
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
+import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
@@ -30,6 +35,7 @@ import splitties.views.dsl.core.matchParent
 class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), EssentialWindow,
     InputBroadcastReceiver {
 
+    private val fcitx by manager.fcitx()
     private val service: FcitxInputMethodService by manager.inputMethodService()
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
     private val windowManager: InputWindowManager by manager.must()
@@ -53,11 +59,6 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
             // disable animation switching between picker
             nextWindow !is PickerWindow
         }
-
-    private var _currentIme: InputMethodEntry? = null
-
-    val currentIme
-        get() = _currentIme ?: InputMethodEntry(context.getString(R.string._not_available_))
 
     private lateinit var keyboardView: FrameLayout
 
@@ -110,7 +111,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
             it.keyPopupListener = popupListener
             keyboardView.apply { add(it, lParams(matchParent, matchParent)) }
             it.onAttach(service.editorInfo)
-            it.onInputMethodChange(currentIme)
+            it.onInputMethodChange(fcitx.inputMethodEntryCached)
         }
     }
 
@@ -129,6 +130,12 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
         }
     }
 
+    private suspend fun notifyPunctuationUpdate(ime: InputMethodEntry) {
+        (currentKeyboard as? TextKeyboard)?.updatePunctuationKeys(
+            PunctuationManager.load(fcitx, ime.languageCode).associate { it.key to it.mapping }
+        )
+    }
+
     override fun onEditorInfoUpdate(info: EditorInfo?) {
         switchLayout(service.editorInfo?.inputType?.let {
             when (it and InputType.TYPE_MASK_CLASS) {
@@ -141,12 +148,20 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
     }
 
     override fun onImeUpdate(ime: InputMethodEntry) {
-        _currentIme = ime
-        currentKeyboard?.onInputMethodChange(currentIme)
+        service.lifecycleScope.launch {
+            notifyPunctuationUpdate(ime)
+            currentKeyboard?.onInputMethodChange(ime)
+        }
     }
 
     override fun onPreeditUpdate(data: FcitxEvent.PreeditEvent.Data) {
         currentKeyboard?.onPreeditChange(service.editorInfo, data)
+    }
+
+    override fun onStatusAreaUpdate(actions: Array<Action>) {
+        service.lifecycleScope.launch {
+            notifyPunctuationUpdate(fcitx.inputMethodEntryCached)
+        }
     }
 
     override fun onAttached() {

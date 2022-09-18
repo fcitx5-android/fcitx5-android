@@ -53,26 +53,6 @@ class PickerPagesAdapter(
         }
     }
 
-    fun applyTransformation(f: (String) -> String?) {
-        pages.forEachIndexed { pIdx, p ->
-            val mapped = p.map { (key, display) ->
-                val newDisplay = f(key) ?: key
-                if (newDisplay == display)
-                    null
-                else
-                    newDisplay
-            }
-            val needsUpdate = mapped.any { it != null }
-            if (needsUpdate) {
-                mapped.forEachIndexed { sIdx, s ->
-                    if (s != null)
-                        p[sIdx] = p[sIdx].first to s
-                }
-                notifyItemChanged(pIdx)
-            }
-        }
-    }
-
     fun getCategoryOfPage(page: Int) =
         ranges.indexOfFirst { page in it }
 

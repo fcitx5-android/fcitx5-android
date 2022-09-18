@@ -6,7 +6,8 @@ import android.view.ViewGroup
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.ImageKeyView
-import org.fcitx.fcitx5.android.input.keyboard.KeyAction
+import org.fcitx.fcitx5.android.input.keyboard.KeyAction.CommitAction
+import org.fcitx.fcitx5.android.input.keyboard.KeyAction.SymAction
 import org.fcitx.fcitx5.android.input.keyboard.KeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyActionListener.Source
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance
@@ -36,7 +37,7 @@ class PickerPageUi(override val ctx: Context, val theme: Theme) : Ui {
             viewId = R.id.button_backspace
         )
 
-        val BackspaceAction = KeyAction.SymAction(0xff08u)
+        val BackspaceAction = SymAction(0xff08u)
 
         // TODO: configurable grid size
         const val RowCount = 3
@@ -108,16 +109,18 @@ class PickerPageUi(override val ctx: Context, val theme: Theme) : Ui {
     }
 
     private fun onSymbolClick(str: String) {
-        keyActionListener?.onKeyAction(KeyAction.FcitxKeyAction(str), Source.Keyboard)
+        keyActionListener?.onKeyAction(CommitAction(str), Source.Keyboard)
     }
 
     fun setItems(items: Array<Pair<String, String>>) {
         keyViews.forEachIndexed { i, keyView ->
             keyView.apply {
                 if (i >= items.size) {
+                    isEnabled = false
                     mainText.text = ""
                     setOnClickListener(null)
                 } else {
+                    isEnabled = true
                     val (key, text) = items[i]
                     mainText.text = text
                     setOnClickListener { onSymbolClick(key) }
