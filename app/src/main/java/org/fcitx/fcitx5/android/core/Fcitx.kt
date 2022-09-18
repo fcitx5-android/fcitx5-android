@@ -97,11 +97,6 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         withFcitxContext { setFcitxAddonState(name, state) }
 
     suspend fun triggerQuickPhrase() = withFcitxContext { triggerQuickPhraseInput() }
-    suspend fun punctuation(c: Char, language: String = "zh_CN"): Pair<String, String> =
-        withFcitxContext {
-            queryPunctuation(c, language)?.let { it[0] to it[1] } ?: "$c".let { it to it }
-        }
-
     suspend fun triggerUnicode() = withFcitxContext { triggerUnicodeInput() }
     private suspend fun setClipboard(string: String) =
         withFcitxContext { setFcitxClipboard(string) }
@@ -239,9 +234,6 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
         @JvmStatic
         external fun triggerQuickPhraseInput()
-
-        @JvmStatic
-        external fun queryPunctuation(c: Char, language: String): Array<String>?
 
         @JvmStatic
         external fun triggerUnicodeInput()

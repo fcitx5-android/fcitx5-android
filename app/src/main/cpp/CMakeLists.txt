@@ -94,7 +94,6 @@ target_link_libraries(native-lib
         Fcitx5::Core
         libevent::core
         Fcitx5::Module::QuickPhrase
-        Fcitx5::Module::Punctuation
         Fcitx5::Module::Unicode
         Fcitx5::Module::Clipboard)
 

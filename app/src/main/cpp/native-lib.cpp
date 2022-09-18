@@ -21,7 +21,6 @@
 #include <fcitx-utils/stringutils.h>
 
 #include <quickphrase_public.h>
-#include <punctuation_public.h>
 #include <unicode_public.h>
 #include <clipboard_public.h>
 
@@ -66,7 +65,6 @@ public:
         auto &addonMgr = p_instance->addonManager();
         p_frontend = addonMgr.addon("androidfrontend");
         p_quickphrase = addonMgr.addon("quickphrase");
-        p_punctuation = addonMgr.addon("punctuation", true);
         p_unicode = addonMgr.addon("unicode");
         p_clipboard = addonMgr.addon("clipboard", true);
         setupCallback(p_frontend);
@@ -333,14 +331,6 @@ public:
         );
     }
 
-    std::pair<std::string, std::string> queryPunctuation(uint16_t unicode, const std::string &language) {
-        if (!p_punctuation) {
-            std::string s(1, static_cast<char>(unicode));
-            return std::make_pair(s, s);
-        }
-        return p_punctuation->call<fcitx::IPunctuation::getPunctuation>(language, unicode);
-    }
-
     void triggerUnicode() {
         if (!p_unicode) return;
         auto *ic = p_instance->inputContextManager().lastFocusedInputContext();
@@ -413,7 +403,6 @@ private:
     std::unique_ptr<fcitx::EventDispatcher> p_dispatcher;
     fcitx::AddonInstance *p_frontend = nullptr;
     fcitx::AddonInstance *p_quickphrase = nullptr;
-    fcitx::AddonInstance *p_punctuation = nullptr;
     fcitx::AddonInstance *p_unicode = nullptr;
     fcitx::AddonInstance *p_clipboard = nullptr;
 
@@ -422,7 +411,6 @@ private:
         p_dispatcher.reset();
         p_frontend = nullptr;
         p_quickphrase = nullptr;
-        p_punctuation = nullptr;
         p_unicode = nullptr;
         p_clipboard = nullptr;
     }
@@ -951,17 +939,6 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_triggerQuickPhraseInput(JNIEnv *env, jclass clazz) {
     Fcitx::Instance().triggerQuickPhrase();
-}
-
-extern "C"
-JNIEXPORT jobjectArray JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_queryPunctuation(JNIEnv *env, jclass clazz, jchar c, jstring language) {
-    RETURN_VALUE_IF_NOT_RUNNING(nullptr)
-    const auto pair = Fcitx::Instance().queryPunctuation(c, CString(env, language));
-    jobjectArray array = env->NewObjectArray(2, GlobalRef->String, nullptr);
-    env->SetObjectArrayElement(array, 0, JString(env, pair.first));
-    env->SetObjectArrayElement(array, 1, JString(env, pair.second));
-    return array;
 }
 
 extern "C"
