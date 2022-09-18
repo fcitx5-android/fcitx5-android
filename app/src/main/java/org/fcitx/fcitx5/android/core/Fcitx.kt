@@ -5,6 +5,8 @@ import android.os.Build
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
@@ -18,10 +20,24 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
     /**
      * Subscribe this flow to receive event sent from fcitx
      */
-    val eventFlow = eventFlow_.asSharedFlow()
+    val eventFlow = eventFlow_.asSharedFlow().apply {
+        onEach {
+            when (it) {
+                is FcitxEvent.IMChangeEvent -> inputMethodEntryCached = it.data
+                is FcitxEvent.StatusAreaEvent -> statusAreaActionsCached = it.data
+                else -> {}
+            }
+        }.launchIn(lifecycle.lifecycleScope)
+    }
 
     val isReady
         get() = lifecycle.currentState == FcitxLifecycle.State.READY
+
+    var inputMethodEntryCached = InputMethodEntry(context.getString(R.string._not_available_))
+        private set
+
+    var statusAreaActionsCached: Array<Action> = arrayOf()
+        private set
 
     fun translate(str: String, domain: String = "fcitx5") = getFcitxTranslation(domain, str)
 
@@ -56,10 +72,7 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
     suspend fun enumerateIme(forward: Boolean = true) =
         withFcitxContext { nextInputMethod(forward) }
 
-    suspend fun currentIme() =
-        withFcitxContext {
-            inputMethodStatus() ?: InputMethodEntry(context.getString(R.string._not_available_))
-        }
+    suspend fun currentIme() = withFcitxContext { inputMethodStatus() ?: inputMethodEntryCached }
 
     suspend fun getGlobalConfig() = withFcitxContext {
         getFcitxGlobalConfig() ?: RawConfig(arrayOf())
