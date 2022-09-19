@@ -9,6 +9,7 @@ import org.fcitx.fcitx5.android.core.Key
 import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
+import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import splitties.dimensions.dp
 import splitties.resources.styledColor
 import splitties.resources.styledColorSL
@@ -68,6 +69,7 @@ class KeyPreferenceUi(override val ctx: Context) : Ui {
         minWidth = dp(100)
         inputType = EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS
         imeOptions = EditorInfo.IME_FLAG_FORCE_ASCII
+        privateImeOptions = FcitxInputMethodService.DeleteSurroundingFlag
         setOnKeyListener { _, _, event ->
             if (event.action != KeyEvent.ACTION_DOWN)
                 return@setOnKeyListener false

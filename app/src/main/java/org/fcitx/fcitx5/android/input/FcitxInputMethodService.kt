@@ -164,7 +164,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     private fun handleBackspaceKey() {
         editorInfo?.apply {
-            if (inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL) {
+            // In practice nobody (apart form us) would set `privateImeOptions` to our
+            // `DeleteSurroundingFlag`, leading to a behavior of simulating backspace key pressing
+            // in almost every EditText.
+            if (privateImeOptions != DeleteSurroundingFlag ||
+                inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL
+            ) {
                 sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
                 return
             }
@@ -286,13 +291,14 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     private fun createInputView(theme: Theme = ThemeManager.getActiveTheme()) {
-        if (eventHandlerJob == null)
-            eventHandlerJob = fcitx
-                .eventFlow
+        if (eventHandlerJob == null) {
+            eventHandlerJob = fcitx.eventFlow
                 .onEach { handleFcitxEvent(it) }
                 .launchIn(lifecycleScope)
-        if (::inputView.isInitialized)
+        }
+        if (::inputView.isInitialized) {
             inputView.scope.clear()
+        }
         inputView = InputView(this, fcitx, theme)
     }
 
@@ -536,6 +542,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     companion object {
+        const val DeleteSurroundingFlag = "org.fcitx.fcitx5.android.DELETE_SURROUNDING"
+
         val isBoundToFcitxDaemon: Boolean
             get() = FcitxDaemonManager.hasConnection(FcitxInputMethodService::javaClass.name)
     }
