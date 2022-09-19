@@ -124,7 +124,7 @@ void AndroidFrontend::destroyInputContext(ICUUID uuid) {
     delete ic;
 }
 
-void AndroidFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
+void AndroidFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease, const int64_t timestamp) {
     auto *ic = instance_->inputContextManager().findByUUID(uuid);
     if (!ic) {
         return;
@@ -133,13 +133,13 @@ void AndroidFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
     ic->keyEvent(keyEvent);
     if (!keyEvent.accepted()) {
         auto sym = key.sym();
-        keyEventCallback(sym, key.states(), fcitx::Key::keySymToUnicode(sym), isRelease);
+        keyEventCallback(sym, key.states(), fcitx::Key::keySymToUnicode(sym), isRelease, timestamp);
     }
 }
 
 void AndroidFrontend::forwardKey(const Key &key, bool isRelease) {
     auto sym = key.sym();
-    keyEventCallback(sym, key.states(), fcitx::Key::keySymToUnicode(sym), isRelease);
+    keyEventCallback(sym, key.states(), fcitx::Key::keySymToUnicode(sym), isRelease, 0);
 }
 
 void AndroidFrontend::commitString(const std::string &str) {

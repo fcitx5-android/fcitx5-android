@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.os.Build
 import android.os.SystemClock
 import android.text.InputType
+import android.util.LruCache
 import android.view.*
 import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
@@ -63,6 +64,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             return start <= other.start && other.end <= end
         }
     }
+
+    private val cachedKeyEvents = LruCache<Long, KeyEvent>(26)
 
     private lateinit var inputView: InputView
     private lateinit var fcitx: Fcitx
@@ -124,7 +127,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 // see [^1] for explanation
                 composing.update(selection.start)
             }
-            is FcitxEvent.KeyEvent -> event.data.also {
+            is FcitxEvent.KeyEvent -> event.data.let {
                 if (it.states.virtual) {
                     // KeyEvent from virtual keyboard
                     when (it.unicode) {
@@ -134,6 +137,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     }
                 } else {
                     // KeyEvent from hardware keyboard (or input method engine forwardKey)
+                    // use cached first event if available
+                    cachedKeyEvents.get(it.timestamp)?.let { keyEvent ->
+                        inputConnection?.sendKeyEvent(keyEvent)
+                        return
+                    }
+                    // simulate key event
                     val keyCode = it.sym.keyCode
                     if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
                         // recognized keyCode
@@ -331,19 +340,22 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onEvaluateFullscreenMode() = false
 
-    private fun forwardKeyEvent(event: KeyEvent, up: Boolean = false): Boolean {
+    private fun forwardKeyEvent(event: KeyEvent): Boolean {
+        val timestamp = event.eventTime
+        cachedKeyEvents.put(timestamp, event)
+        val up = event.action == KeyEvent.ACTION_UP
         val states = KeyStates.fromKeyEvent(event)
         val charCode = event.unicodeChar
         // try send charCode first, allow upper case and lower case character
         // generating different KeySym
         // skip \n, because fcitx wants \r for return
         if (charCode > 0 && charCode != '\n'.code) {
-            lifecycleScope.launch { fcitx.sendKey(charCode.toUInt(), states.states, up) }
+            lifecycleScope.launch { fcitx.sendKey(charCode.toUInt(), states.states, up, timestamp) }
             return true
         }
         val keySym = KeySym.fromKeyEvent(event)
         if (keySym != null) {
-            lifecycleScope.launch { fcitx.sendKey(keySym, states, up) }
+            lifecycleScope.launch { fcitx.sendKey(keySym, states, up, timestamp) }
             return true
         }
         Timber.d("Skipped KeyEvent: $event")
@@ -351,11 +363,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        return forwardKeyEvent(event, false) || super.onKeyDown(keyCode, event)
+        return forwardKeyEvent(event) || super.onKeyDown(keyCode, event)
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
-        return forwardKeyEvent(event, true) || super.onKeyUp(keyCode, event)
+        return forwardKeyEvent(event) || super.onKeyUp(keyCode, event)
     }
 
     override fun onStartInput(attribute: EditorInfo, restarting: Boolean) {

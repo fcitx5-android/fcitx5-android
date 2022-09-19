@@ -92,6 +92,9 @@ public:
     jclass Integer;
     jmethodID IntegerInit;
 
+    jclass Long;
+    jmethodID LongInit;
+
     jclass Boolean;
     jmethodID BooleanInit;
 
@@ -128,6 +131,9 @@ public:
 
         Integer = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("java/lang/Integer")));
         IntegerInit = env->GetMethodID(Integer, "<init>", "(I)V");
+
+        Long = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("java/lang/Long")));
+        LongInit = env->GetMethodID(Long, "<init>", "(J)V");
 
         Boolean = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("java/lang/Boolean")));
         BooleanInit = env->GetMethodID(Boolean, "<init>", "(Z)V");

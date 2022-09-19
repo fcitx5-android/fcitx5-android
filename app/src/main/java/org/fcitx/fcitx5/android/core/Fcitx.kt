@@ -27,17 +27,17 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
     suspend fun save() = withFcitxContext { saveFcitxState() }
     suspend fun reloadConfig() = withFcitxContext { reloadFcitxConfig() }
-    suspend fun sendKey(key: String, state: UInt = 0u, up: Boolean = false) =
-        withFcitxContext { sendKeyToFcitxString(key, state.toInt(), up) }
+    suspend fun sendKey(key: String, state: UInt = 0u, up: Boolean = false, timestamp: Long = 0L) =
+        withFcitxContext { sendKeyToFcitxString(key, state.toInt(), up, timestamp) }
 
-    suspend fun sendKey(c: Char, state: UInt = 0u, up: Boolean = false) =
-        withFcitxContext { sendKeyToFcitxChar(c, state.toInt(), up) }
+    suspend fun sendKey(c: Char, state: UInt = 0u, up: Boolean = false, timestamp: Long = 0L) =
+        withFcitxContext { sendKeyToFcitxChar(c, state.toInt(), up, timestamp) }
 
-    suspend fun sendKey(sym: UInt, state: UInt = 0u, up: Boolean = false) =
-        withFcitxContext { sendKeySymToFcitx(sym.toInt(), state.toInt(), up) }
+    suspend fun sendKey(sym: UInt, state: UInt = 0u, up: Boolean = false, timestamp: Long = 0L) =
+        withFcitxContext { sendKeySymToFcitx(sym.toInt(), state.toInt(), up, timestamp) }
 
-    suspend fun sendKey(sym: KeySym, states: KeyStates? = null, up: Boolean = false) =
-        withFcitxContext { sendKeySymToFcitx(sym.toInt(), states?.toInt() ?: 0, up) }
+    suspend fun sendKey(sym: KeySym, states: KeyStates, up: Boolean = false, timestamp: Long = 0L) =
+        withFcitxContext { sendKeySymToFcitx(sym.toInt(), states.toInt(), up, timestamp) }
 
     suspend fun select(idx: Int) = withFcitxContext { selectCandidate(idx) }
     suspend fun isEmpty() = withFcitxContext { isInputPanelEmpty() }
@@ -167,13 +167,13 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         external fun reloadFcitxConfig()
 
         @JvmStatic
-        external fun sendKeyToFcitxString(key: String, state: Int, up: Boolean)
+        external fun sendKeyToFcitxString(key: String, state: Int, up: Boolean, timestamp: Long)
 
         @JvmStatic
-        external fun sendKeyToFcitxChar(c: Char, state: Int, up: Boolean)
+        external fun sendKeyToFcitxChar(c: Char, state: Int, up: Boolean, timestamp: Long)
 
         @JvmStatic
-        external fun sendKeySymToFcitx(sym: Int, state: Int, up: Boolean)
+        external fun sendKeySymToFcitx(sym: Int, state: Int, up: Boolean, timestamp: Long)
 
         @JvmStatic
         external fun selectCandidate(idx: Int)

@@ -40,7 +40,12 @@ sealed class FcitxEvent<T>(open val data: T) {
         override val eventType: EventType
             get() = EventType.Preedit
 
-        data class Data(val preedit: String, val cursor: Int, val clientPreedit: String, val clientCursor: Int)
+        data class Data(
+            val preedit: String,
+            val cursor: Int,
+            val clientPreedit: String,
+            val clientCursor: Int
+        )
 
         companion object {
             private fun strCursor(str: String, byteCursor: Int): Int {
@@ -51,8 +56,20 @@ sealed class FcitxEvent<T>(open val data: T) {
                 }
             }
 
-            fun fromByteCursor(preedit: String, cursor: Int, clientPreedit: String, clientCursor: Int) : PreeditEvent {
-                return PreeditEvent(Data(preedit, strCursor(preedit, cursor), clientPreedit, strCursor(clientPreedit, clientCursor)))
+            fun fromByteCursor(
+                preedit: String,
+                cursor: Int,
+                clientPreedit: String,
+                clientCursor: Int
+            ): PreeditEvent {
+                return PreeditEvent(
+                    Data(
+                        preedit,
+                        strCursor(preedit, cursor),
+                        clientPreedit,
+                        strCursor(clientPreedit, clientCursor)
+                    )
+                )
             }
         }
     }
@@ -77,7 +94,13 @@ sealed class FcitxEvent<T>(open val data: T) {
         override val eventType: EventType
             get() = EventType.Key
 
-        data class Data(val sym: KeySym, val states: KeyStates, val unicode: Int, val up: Boolean)
+        data class Data(
+            val sym: KeySym,
+            val states: KeyStates,
+            val unicode: Int,
+            val up: Boolean,
+            val timestamp: Long
+        )
     }
 
     data class IMChangeEvent(override val data: InputMethodEntry) :
@@ -157,7 +180,13 @@ sealed class FcitxEvent<T>(open val data: T) {
                 )
                 EventType.Ready -> ReadyEvent()
                 EventType.Key -> KeyEvent(
-                    KeyEvent.Data(KeySym.of(params[0] as Int), KeyStates.of(params[1] as Int), params[2] as Int, params[3] as Boolean)
+                    KeyEvent.Data(
+                        KeySym.of(params[0] as Int),
+                        KeyStates.of(params[1] as Int),
+                        params[2] as Int,
+                        params[3] as Boolean,
+                        params[4] as Long
+                    )
                 )
                 EventType.Change -> IMChangeEvent(params[0] as InputMethodEntry)
                 EventType.StatusArea -> StatusAreaEvent(params as Array<Action>)

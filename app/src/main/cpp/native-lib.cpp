@@ -89,8 +89,8 @@ public:
         }
     }
 
-    void sendKey(fcitx::Key key, bool up = false) {
-        p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, key, up);
+    void sendKey(fcitx::Key key, bool up = false, int64_t timestamp = 0) {
+        p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, key, up, timestamp);
     }
 
     void select(int idx) {
@@ -505,12 +505,12 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
             fcitx::stringutils::joinPath(usr_share, "lua", "5.4", "?.lua"), ";",
             fcitx::stringutils::joinPath(usr_share, "lua", "5.4", "?", "init.lua"), ";",
             ";" // double semicolon, for default path defined in luaconf.h
-            );
+    );
     std::string lua_cpath = fcitx::stringutils::concat(
             fcitx::stringutils::joinPath(data_home, "lua", "?.so"), ";",
             fcitx::stringutils::joinPath(usr_share, "lua", "5.4", "?.so"), ";",
             ";"
-            );
+    );
 
     // for fcitx default profile [DefaultInputMethod]
     setenv("LANG", lang_.c_str(), 1);
@@ -570,13 +570,14 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
         auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(0, GlobalRef->Object, nullptr));
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 4, *vararg);
     };
-    auto keyEventCallback = [](const uint32_t sym, const uint32_t states, const uint32_t unicode, const bool up) {
+    auto keyEventCallback = [](const uint32_t sym, const uint32_t states, const uint32_t unicode, const bool up, const int64_t timestamp) {
         auto env = GlobalRef->AttachEnv();
-        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(4, GlobalRef->Object, nullptr));
+        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(5, GlobalRef->Object, nullptr));
         env->SetObjectArrayElement(vararg, 0, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, sym));
         env->SetObjectArrayElement(vararg, 1, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, states));
         env->SetObjectArrayElement(vararg, 2, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, unicode));
         env->SetObjectArrayElement(vararg, 3, env->NewObject(GlobalRef->Boolean, GlobalRef->BooleanInit, up));
+        env->SetObjectArrayElement(vararg, 4, env->NewObject(GlobalRef->Long, GlobalRef->LongInit, timestamp));
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 5, *vararg);
     };
     auto imChangeCallback = []() {
@@ -643,29 +644,29 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_reloadFcitxConfig(JNIEnv *env, jclass c
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxString(JNIEnv *env, jclass clazz, jstring key, jint state, jboolean up) {
+Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxString(JNIEnv *env, jclass clazz, jstring key, jint state, jboolean up, jlong timestamp) {
     RETURN_IF_NOT_RUNNING
     fcitx::Key parsedKey{fcitx::Key::keySymFromString(CString(env, key)),
                          fcitx::KeyStates(static_cast<uint32_t>(state))};
-    Fcitx::Instance().sendKey(parsedKey);
+    Fcitx::Instance().sendKey(parsedKey, up, timestamp);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxChar(JNIEnv *env, jclass clazz, jchar c, jint state, jboolean up) {
+Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxChar(JNIEnv *env, jclass clazz, jchar c, jint state, jboolean up, jlong timestamp) {
     RETURN_IF_NOT_RUNNING
     fcitx::Key parsedKey{fcitx::Key::keySymFromString((const char *) &c),
                          fcitx::KeyStates(static_cast<uint32_t>(state))};
-    Fcitx::Instance().sendKey(parsedKey);
+    Fcitx::Instance().sendKey(parsedKey, up, timestamp);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeySymToFcitx(JNIEnv *env, jclass clazz, jint sym, jint state, jboolean up) {
+Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeySymToFcitx(JNIEnv *env, jclass clazz, jint sym, jint state, jboolean up, jlong timestamp) {
     RETURN_IF_NOT_RUNNING
     fcitx::Key key{fcitx::KeySym(static_cast<uint32_t>(sym)),
                    fcitx::KeyStates(static_cast<uint32_t>(state))};
-    Fcitx::Instance().sendKey(key, up);
+    Fcitx::Instance().sendKey(key, up, timestamp);
 }
 
 extern "C"

@@ -21,7 +21,7 @@ public:
 
     ICUUID createInputContext(const std::string &program);
     void destroyInputContext(ICUUID uuid);
-    void keyEvent(ICUUID uuid, const Key &key, bool isRelease);
+    void keyEvent(ICUUID uuid, const Key &key, bool isRelease, const int64_t timestamp);
     void forwardKey(const Key &key, bool isRelease);
     void selectCandidate(ICUUID uuid, int idx);
     bool isInputPanelEmpty(ICUUID uuid);
@@ -62,7 +62,7 @@ private:
     CommitStringCallback commitStringCallback = [](const std::string &) {};
     PreeditCallback preeditCallback = [](const std::string &, const int, const std::string &, const int) {};
     InputPanelAuxCallback inputPanelAuxCallback = [](const std::string &, const std::string &) {};
-    KeyEventCallback keyEventCallback = [](const uint32_t, const uint32_t, const uint32_t, const bool) {};
+    KeyEventCallback keyEventCallback = [](const uint32_t, const uint32_t, const uint32_t, const bool, const int64_t) {};
     InputMethodChangeCallback imChangeCallback = [] {};
     StatusAreaUpdateCallback statusAreaUpdateCallback = [] {};
 };
