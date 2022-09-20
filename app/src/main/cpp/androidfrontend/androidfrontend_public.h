@@ -11,31 +11,32 @@ typedef std::function<void(const uint32_t, const uint32_t, const uint32_t, const
 typedef std::function<void()> InputMethodChangeCallback;
 typedef std::function<void()> StatusAreaUpdateCallback;
 
-FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, createInputContext,
-                             ICUUID(const std::string &))
-
-FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, destroyInputContext, void(ICUUID))
-
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, keyEvent,
-                             void(ICUUID, const Key &, bool isRelease, const int64_t timestamp))
+                             void(const Key &, bool isRelease, const int64_t timestamp))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, selectCandidate,
-                             void(ICUUID, int idx))
+                             void(int idx))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, isInputPanelEmpty,
-                             bool(ICUUID))
+                             bool())
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, resetInputContext,
-                             void(ICUUID))
+                             void())
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, repositionCursor,
-                             void(ICUUID, int))
+                             void(int))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, focusInputContext,
-                             void(ICUUID, bool))
+                             void(bool))
+
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, activateInputContext,
+                             void(const int))
+
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, deactivateInputContext,
+                             void(const int))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setCapabilityFlags,
-                             void(ICUUID, uint64_t))
+                             void(uint64_t))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setCandidateListCallback,
                              void(const CandidateListCallback &))

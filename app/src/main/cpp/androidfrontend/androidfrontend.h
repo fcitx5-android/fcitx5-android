@@ -10,7 +10,6 @@ namespace fcitx {
 class AndroidFrontend : public AddonInstance {
 public:
     AndroidFrontend(Instance *instance);
-    ~AndroidFrontend();
 
     Instance *instance() { return instance_; }
 
@@ -19,16 +18,16 @@ public:
     void updatePreedit(const Text &preedit, const Text &clientPreedit);
     void updateInputPanelAux(const std::string &auxUp, const std::string &auxDown);
 
-    ICUUID createInputContext(const std::string &program);
-    void destroyInputContext(ICUUID uuid);
-    void keyEvent(ICUUID uuid, const Key &key, bool isRelease, const int64_t timestamp);
+    void keyEvent(const Key &key, bool isRelease, const int64_t timestamp);
     void forwardKey(const Key &key, bool isRelease);
-    void selectCandidate(ICUUID uuid, int idx);
-    bool isInputPanelEmpty(ICUUID uuid);
-    void resetInputContext(ICUUID uuid);
-    void repositionCursor(ICUUID uuid, int idx);
-    void focusInputContext(ICUUID uuid, bool focus);
-    void setCapabilityFlags(ICUUID uuid, uint64_t flag);
+    void selectCandidate(int idx);
+    bool isInputPanelEmpty();
+    void resetInputContext();
+    void repositionCursor(int idx);
+    void focusInputContext(bool focus);
+    void activateInputContext(const int uid);
+    void deactivateInputContext(const int uid);
+    void setCapabilityFlags(uint64_t flag);
     void setCandidateListCallback(const CandidateListCallback &callback);
     void setCommitStringCallback(const CommitStringCallback &callback);
     void setPreeditCallback(const PreeditCallback &callback);
@@ -38,14 +37,14 @@ public:
     void setStatusAreaUpdateCallback(const StatusAreaUpdateCallback &callback);
 
 private:
-    FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, createInputContext);
-    FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, destroyInputContext);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, keyEvent);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, selectCandidate);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, isInputPanelEmpty);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, resetInputContext);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, repositionCursor);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, focusInputContext);
+    FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, activateInputContext);
+    FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, deactivateInputContext);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCapabilityFlags);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCandidateListCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCommitStringCallback);
@@ -56,7 +55,8 @@ private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setStatusAreaUpdateCallback);
 
     Instance *instance_;
-    std::vector<std::unique_ptr<fcitx::HandlerTableEntry<fcitx::EventHandler>>> eventHandlers_;
+    FocusGroup focusGroup_;
+    std::vector<std::unique_ptr<HandlerTableEntry<EventHandler>>> eventHandlers_;
 
     CandidateListCallback candidateListCallback = [](const std::vector<std::string> &) {};
     CommitStringCallback commitStringCallback = [](const std::string &) {};

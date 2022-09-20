@@ -370,15 +370,23 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         return forwardKeyEvent(event) || super.onKeyUp(keyCode, event)
     }
 
+    override fun onBindInput() {
+        val uid = currentInputBinding.uid
+        Timber.d("onBindInput: uid=$uid")
+        lifecycleScope.launch {
+            fcitx.activate(uid)
+        }
+    }
+
     override fun onStartInput(attribute: EditorInfo, restarting: Boolean) {
         // update selection as soon as possible
         selection.update(attribute.initialSelStart, attribute.initialSelEnd)
         composing.clear()
         composingText = ""
         editorInfo = attribute
-        Timber.d("onStartInput: initialSel=$selection")
+        Timber.d("onStartInput: initialSel=$selection, restarting=$restarting")
         if (!restarting) {
-            inputConnection?.apply {
+            currentInputConnection.apply {
                 cursorAnchorAvailable = requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
             }
         }
@@ -393,6 +401,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onStartInputView(info: EditorInfo, restarting: Boolean) {
+        Timber.d("onStartInputView: restarting=$restarting")
         lifecycleScope.launch {
             if (restarting) {
                 // when input restarts in the same editor, unfocus it to clear previous state
@@ -520,20 +529,30 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
-        inputConnection?.finishComposingText()
+        Timber.d("onFinishInputView: finishingInput=$finishingInput")
+        currentInputConnection.finishComposingText()
         lifecycleScope.launch {
             fcitx.focus(false)
         }
     }
 
     override fun onFinishInput() {
+        Timber.d("onFinishInput")
         if (cursorAnchorAvailable) {
             cursorAnchorAvailable = false
-            inputConnection?.requestCursorUpdates(0)
+            currentInputConnection.requestCursorUpdates(0)
         }
         editorInfo = null
         lifecycleScope.launch {
             fcitx.setCapFlags(CapabilityFlags.DefaultFlags)
+        }
+    }
+
+    override fun onUnbindInput() {
+        val uid = currentInputBinding.uid
+        Timber.d("onUnbindInput: uid=$uid")
+        lifecycleScope.launch {
+            fcitx.deactivate(uid)
         }
     }
 

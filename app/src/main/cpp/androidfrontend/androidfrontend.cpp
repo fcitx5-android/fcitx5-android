@@ -2,6 +2,7 @@
 #include <fcitx/addonmanager.h>
 #include <fcitx/inputcontextmanager.h>
 #include <fcitx/inputmethodengine.h>
+#include <fcitx/focusgroup.h>
 #include <fcitx/inputpanel.h>
 #include <fcitx/instance.h>
 
@@ -13,8 +14,10 @@ class AndroidInputContext : public InputContext {
 public:
     AndroidInputContext(AndroidFrontend *frontend,
                         InputContextManager &inputContextManager,
-                        const std::string &program)
-            : InputContext(inputContextManager, program), frontend_(frontend) {
+                        int uid)
+            : InputContext(inputContextManager, std::to_string(uid)),
+              frontend_(frontend),
+              uid_(uid) {
         created();
     }
 
@@ -56,12 +59,12 @@ public:
                     auto &candidate = bulk->candidateFromAll(i);
                     // maybe unnecessary; I don't see anywhere using `CandidateWord::setPlaceHolder`
                     // if (candidate.isPlaceHolder()) continue;
-                    candidates.emplace_back(std::move(filterText(candidate.text())));
+                    candidates.emplace_back(filterText(candidate.text()));
                 }
             } else {
                 const int size = list->size();
                 for (int i = 0; i < size; i++) {
-                    candidates.emplace_back(std::move(filterText(list->candidate(i).text())));
+                    candidates.emplace_back(filterText(list->candidate(i).text()));
                 }
             }
         }
@@ -87,14 +90,17 @@ public:
 
 private:
     AndroidFrontend *frontend_;
+    int uid_;
 
-    std::string filterText(const fcitx::Text &orig) {
+    std::string filterText(const Text &orig) {
         return frontend_->instance()->outputFilter(this, orig).toString();
     }
 };
 
 AndroidFrontend::AndroidFrontend(Instance *instance)
-        : instance_(instance) {
+        : instance_(instance),
+          focusGroup_("android", instance->inputContextManager()),
+          eventHandlers_() {
     eventHandlers_.emplace_back(instance_->watchEvent(
             EventType::InputContextInputMethodActivated,
             EventWatcherPhase::Default,
@@ -112,34 +118,20 @@ AndroidFrontend::AndroidFrontend(Instance *instance)
     ));
 }
 
-AndroidFrontend::~AndroidFrontend() = default;
-
-ICUUID AndroidFrontend::createInputContext(const std::string &program) {
-    auto *ic = new AndroidInputContext(this, instance_->inputContextManager(), program);
-    return ic->uuid();
-}
-
-void AndroidFrontend::destroyInputContext(ICUUID uuid) {
-    auto *ic = instance_->inputContextManager().findByUUID(uuid);
-    delete ic;
-}
-
-void AndroidFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease, const int64_t timestamp) {
-    auto *ic = instance_->inputContextManager().findByUUID(uuid);
-    if (!ic) {
-        return;
-    }
+void AndroidFrontend::keyEvent(const Key &key, bool isRelease, const int64_t timestamp) {
+    auto *ic = focusGroup_.focusedInputContext();
+    if (!ic) return;
     KeyEvent keyEvent(ic, key, isRelease);
     ic->keyEvent(keyEvent);
     if (!keyEvent.accepted()) {
         auto sym = key.sym();
-        keyEventCallback(sym, key.states(), fcitx::Key::keySymToUnicode(sym), isRelease, timestamp);
+        keyEventCallback(sym, key.states(), Key::keySymToUnicode(sym), isRelease, timestamp);
     }
 }
 
 void AndroidFrontend::forwardKey(const Key &key, bool isRelease) {
     auto sym = key.sym();
-    keyEventCallback(sym, key.states(), fcitx::Key::keySymToUnicode(sym), isRelease, 0);
+    keyEventCallback(sym, key.states(), Key::keySymToUnicode(sym), isRelease, 0);
 }
 
 void AndroidFrontend::commitString(const std::string &str) {
@@ -158,40 +150,60 @@ void AndroidFrontend::updateInputPanelAux(const std::string &auxUp, const std::s
     inputPanelAuxCallback(auxUp, auxDown);
 }
 
-void AndroidFrontend::selectCandidate(ICUUID uuid, int idx) {
-    auto *ic = dynamic_cast<AndroidInputContext *>(instance_->inputContextManager().findByUUID(uuid));
+void AndroidFrontend::selectCandidate(int idx) {
+    auto *ic = dynamic_cast<AndroidInputContext *>(focusGroup_.focusedInputContext());
+    if (!ic) return;
     ic->selectCandidate(idx);
 }
 
-bool AndroidFrontend::isInputPanelEmpty(ICUUID uuid) {
-    auto *ic = instance_->inputContextManager().findByUUID(uuid);
+bool AndroidFrontend::isInputPanelEmpty() {
+    auto *ic = focusGroup_.focusedInputContext();
+    if (!ic) return true;
     return ic->inputPanel().empty();
 }
 
-void AndroidFrontend::resetInputContext(ICUUID uuid) {
-    auto *ic = instance_->inputContextManager().findByUUID(uuid);
+void AndroidFrontend::resetInputContext() {
+    auto *ic = focusGroup_.focusedInputContext();
+    if (!ic) return;
     ic->reset();
 }
 
-void AndroidFrontend::repositionCursor(ICUUID uuid, int position) {
-    auto ic = instance_->inputContextManager().findByUUID(uuid);
+void AndroidFrontend::repositionCursor(int position) {
+    auto *ic = focusGroup_.focusedInputContext();
+    if (!ic) return;
     auto engine = instance_->inputMethodEngine(ic);
     InvokeActionEvent event(InvokeActionEvent::Action::LeftClick, position, ic);
     engine->invokeAction(*(instance_->inputMethodEntry(ic)), event);
 }
 
-void AndroidFrontend::focusInputContext(ICUUID uuid, bool focus) {
-    auto ic = instance_->inputContextManager().findByUUID(uuid);
-    bool focused = ic->hasFocus();
-    if (focus && !focused) {
+void AndroidFrontend::focusInputContext(bool focus) {
+    if (focus) {
+        auto *ic = instance_->inputContextManager().mostRecentInputContext();
+        if (!ic) return;
         ic->focusIn();
-    } else if (!focus && focused) {
+    } else {
+        auto *ic = focusGroup_.focusedInputContext();
+        if (!ic) return;
         ic->focusOut();
     }
 }
 
-void AndroidFrontend::setCapabilityFlags(ICUUID uuid, uint64_t flag) {
-    auto ic = instance_->inputContextManager().findByUUID(uuid);
+void AndroidFrontend::activateInputContext(const int uid) {
+    // TODO: reuse previous InputContext, and destroy too old ones
+    auto *ic = new AndroidInputContext(this, instance_->inputContextManager(), uid);
+    ic->setFocusGroup(&focusGroup_);
+    focusGroup_.setFocusedInputContext(ic);
+}
+
+void AndroidFrontend::deactivateInputContext(const int uid) {
+    auto *ic = instance_->inputContextManager().lastFocusedInputContext();
+    if (!ic) return;
+    ic->focusOut();
+}
+
+void AndroidFrontend::setCapabilityFlags(uint64_t flag) {
+    auto *ic = focusGroup_.focusedInputContext();
+    if (!ic) return;
     ic->setCapabilityFlags(CapabilityFlags{flag});
 }
 

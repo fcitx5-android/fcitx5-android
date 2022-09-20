@@ -107,6 +107,8 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         withFcitxContext { setFcitxClipboard(string) }
 
     suspend fun focus(focus: Boolean = true) = withFcitxContext { focusInputContext(focus) }
+    suspend fun activate(uid: Int) = withFcitxContext { activateInputContext(uid) }
+    suspend fun deactivate(uid: Int) = withFcitxContext { deactivateInputContext(uid) }
     suspend fun setCapFlags(flags: CapabilityFlags) =
         withFcitxContext { setCapabilityFlags(flags.toLong()) }
 
@@ -249,6 +251,12 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
         @JvmStatic
         external fun focusInputContext(focus: Boolean)
+
+        @JvmStatic
+        external fun activateInputContext(uid: Int)
+
+        @JvmStatic
+        external fun deactivateInputContext(uid: Int)
 
         @JvmStatic
         external fun setCapabilityFlags(flags: Long)

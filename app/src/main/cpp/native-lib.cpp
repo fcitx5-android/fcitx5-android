@@ -69,7 +69,6 @@ public:
         p_punctuation = addonMgr.addon("punctuation", true);
         p_unicode = addonMgr.addon("unicode");
         p_clipboard = addonMgr.addon("clipboard", true);
-        p_uuid = p_frontend->call<fcitx::IAndroidFrontend::createInputContext>("fcitx5-android");
         setupCallback(p_frontend);
     }
 
@@ -90,23 +89,23 @@ public:
     }
 
     void sendKey(fcitx::Key key, bool up = false, int64_t timestamp = 0) {
-        p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(p_uuid, key, up, timestamp);
+        p_frontend->call<fcitx::IAndroidFrontend::keyEvent>(key, up, timestamp);
     }
 
     void select(int idx) {
-        p_frontend->call<fcitx::IAndroidFrontend::selectCandidate>(p_uuid, idx);
+        p_frontend->call<fcitx::IAndroidFrontend::selectCandidate>(idx);
     }
 
     bool isInputPanelEmpty() {
-        return p_frontend->call<fcitx::IAndroidFrontend::isInputPanelEmpty>(p_uuid);
+        return p_frontend->call<fcitx::IAndroidFrontend::isInputPanelEmpty>();
     }
 
     void resetInputContext() {
-        p_frontend->call<fcitx::IAndroidFrontend::resetInputContext>(p_uuid);
+        p_frontend->call<fcitx::IAndroidFrontend::resetInputContext>();
     }
 
     void repositionCursor(int position) {
-        p_frontend->call<fcitx::IAndroidFrontend::repositionCursor>(p_uuid, position);
+        p_frontend->call<fcitx::IAndroidFrontend::repositionCursor>(position);
     }
 
     void nextInputMethod(bool forward) {
@@ -127,7 +126,7 @@ public:
     typedef std::tuple<const fcitx::InputMethodEntry *, const std::vector<std::string>> IMStatus;
 
     IMStatus inputMethodStatus() {
-        auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
+        auto *ic = p_instance->inputContextManager().mostRecentInputContext();
         auto *engine = p_instance->inputMethodEngine(ic);
         const auto *entry = p_instance->inputMethodEntry(ic);
         if (engine) {
@@ -327,7 +326,8 @@ public:
 
     void triggerQuickPhrase() {
         if (!p_quickphrase) return;
-        auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
+        auto *ic = p_instance->inputContextManager().mostRecentInputContext();
+        if (!ic) return;
         p_quickphrase->call<fcitx::IQuickPhrase::trigger>(
                 ic, "", "", "", "", fcitx::Key{FcitxKey_None}
         );
@@ -343,7 +343,8 @@ public:
 
     void triggerUnicode() {
         if (!p_unicode) return;
-        auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
+        auto *ic = p_instance->inputContextManager().mostRecentInputContext();
+        if (!ic) return;
         p_unicode->call<fcitx::IUnicode::trigger>(ic);
     }
 
@@ -354,17 +355,27 @@ public:
 
     void focusInputContext(bool focus) {
         if (!p_frontend) return;
-        p_frontend->call<fcitx::IAndroidFrontend::focusInputContext>(p_uuid, focus);
+        p_frontend->call<fcitx::IAndroidFrontend::focusInputContext>(focus);
+    }
+
+    void activateInputContext(int uid) {
+        if (!p_frontend) return;
+        p_frontend->call<fcitx::IAndroidFrontend::activateInputContext>(uid);
+    }
+
+    void deactivateInputContext(int uid) {
+        if (!p_frontend) return;
+        p_frontend->call<fcitx::IAndroidFrontend::deactivateInputContext>(uid);
     }
 
     void setCapabilityFlags(uint64_t flags) {
         if (!p_frontend) return;
-        p_frontend->call<fcitx::IAndroidFrontend::setCapabilityFlags>(p_uuid, flags);
+        p_frontend->call<fcitx::IAndroidFrontend::setCapabilityFlags>(flags);
     }
 
     std::vector<ActionEntity> statusAreaActions() {
         auto actions = std::vector<ActionEntity>();
-        auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
+        auto *ic = p_instance->inputContextManager().mostRecentInputContext();
         for (auto group: {fcitx::StatusGroup::BeforeInputMethod,
                           fcitx::StatusGroup::InputMethod,
                           fcitx::StatusGroup::AfterInputMethod}) {
@@ -376,7 +387,8 @@ public:
     }
 
     void activateAction(int id) {
-        auto *ic = p_instance->inputContextManager().findByUUID(p_uuid);
+        auto *ic = p_instance->inputContextManager().mostRecentInputContext();
+        if (!ic) return;
         auto action = p_instance->userInterfaceManager().lookupActionById(id);
         if (!action) return;
         action->activate(ic);
@@ -403,7 +415,6 @@ private:
     fcitx::AddonInstance *p_punctuation = nullptr;
     fcitx::AddonInstance *p_unicode = nullptr;
     fcitx::AddonInstance *p_clipboard = nullptr;
-    fcitx::ICUUID p_uuid{};
 
     void resetGlobalPointers() {
         p_instance.reset();
@@ -413,7 +424,6 @@ private:
         p_punctuation = nullptr;
         p_unicode = nullptr;
         p_clipboard = nullptr;
-        p_uuid = {};
     }
 };
 
@@ -972,6 +982,20 @@ JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_focusInputContext(JNIEnv *env, jclass clazz, jboolean focus) {
     RETURN_IF_NOT_RUNNING
     Fcitx::Instance().focusInputContext(focus == JNI_TRUE);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_activateInputContext(JNIEnv *env, jclass clazz, jint uid) {
+    RETURN_IF_NOT_RUNNING
+    Fcitx::Instance().activateInputContext(uid);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_deactivateInputContext(JNIEnv *env, jclass clazz, jint uid) {
+    RETURN_IF_NOT_RUNNING
+    Fcitx::Instance().deactivateInputContext(uid);
 }
 
 extern "C"
