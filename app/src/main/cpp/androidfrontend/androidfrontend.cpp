@@ -21,7 +21,10 @@ public:
         created();
     }
 
-    ~AndroidInputContext() override { destroy(); }
+    ~AndroidInputContext() override {
+        frontend_->releaseInputContext(uid_);
+        destroy();
+    }
 
     [[nodiscard]] const char *frontend() const override { return "androidfrontend"; }
 
@@ -100,6 +103,7 @@ private:
 AndroidFrontend::AndroidFrontend(Instance *instance)
         : instance_(instance),
           focusGroup_("android", instance->inputContextManager()),
+          icCache_(),
           eventHandlers_() {
     eventHandlers_.emplace_back(instance_->watchEvent(
             EventType::InputContextInputMethodActivated,
@@ -150,6 +154,10 @@ void AndroidFrontend::updateInputPanelAux(const std::string &auxUp, const std::s
     inputPanelAuxCallback(auxUp, auxDown);
 }
 
+void AndroidFrontend::releaseInputContext(const int uid) {
+    icCache_.release(uid);
+}
+
 void AndroidFrontend::selectCandidate(int idx) {
     auto *ic = dynamic_cast<AndroidInputContext *>(focusGroup_.focusedInputContext());
     if (!ic) return;
@@ -189,16 +197,21 @@ void AndroidFrontend::focusInputContext(bool focus) {
 }
 
 void AndroidFrontend::activateInputContext(const int uid) {
-    // TODO: reuse previous InputContext, and destroy too old ones
-    auto *ic = new AndroidInputContext(this, instance_->inputContextManager(), uid);
-    ic->setFocusGroup(&focusGroup_);
-    focusGroup_.setFocusedInputContext(ic);
+    auto *ptr = icCache_.find(uid);
+    if (ptr) {
+        focusGroup_.setFocusedInputContext(ptr->get());
+    } else {
+        auto *ic = new AndroidInputContext(this, instance_->inputContextManager(), uid);
+        icCache_.insert(uid, ic);
+        ic->setFocusGroup(&focusGroup_);
+        focusGroup_.setFocusedInputContext(ic);
+    }
 }
 
 void AndroidFrontend::deactivateInputContext(const int uid) {
-    auto *ic = instance_->inputContextManager().lastFocusedInputContext();
-    if (!ic) return;
-    ic->focusOut();
+    auto *ptr = icCache_.find(uid);
+    if (!ptr) return;
+    ptr->get()->focusOut();
 }
 
 void AndroidFrontend::setCapabilityFlags(uint64_t flag) {

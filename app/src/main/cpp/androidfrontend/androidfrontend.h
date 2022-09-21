@@ -4,6 +4,7 @@
 #include <fcitx-utils/i18n.h>
 
 #include "androidfrontend_public.h"
+#include "inputcontextcache.h"
 
 namespace fcitx {
 
@@ -17,6 +18,7 @@ public:
     void commitString(const std::string &str);
     void updatePreedit(const Text &preedit, const Text &clientPreedit);
     void updateInputPanelAux(const std::string &auxUp, const std::string &auxDown);
+    void releaseInputContext(const int uid);
 
     void keyEvent(const Key &key, bool isRelease, const int64_t timestamp);
     void forwardKey(const Key &key, bool isRelease);
@@ -56,6 +58,7 @@ private:
 
     Instance *instance_;
     FocusGroup focusGroup_;
+    InputContextCache icCache_;
     std::vector<std::unique_ptr<HandlerTableEntry<EventHandler>>> eventHandlers_;
 
     CandidateListCallback candidateListCallback = [](const std::vector<std::string> &) {};
