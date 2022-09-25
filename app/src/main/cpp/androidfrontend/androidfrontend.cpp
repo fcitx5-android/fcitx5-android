@@ -103,6 +103,7 @@ private:
 AndroidFrontend::AndroidFrontend(Instance *instance)
         : instance_(instance),
           focusGroup_("android", instance->inputContextManager()),
+          activeIC_(nullptr),
           icCache_(),
           eventHandlers_() {
     eventHandlers_.emplace_back(instance_->watchEvent(
@@ -186,9 +187,8 @@ void AndroidFrontend::repositionCursor(int position) {
 
 void AndroidFrontend::focusInputContext(bool focus) {
     if (focus) {
-        auto *ic = instance_->inputContextManager().mostRecentInputContext();
-        if (!ic) return;
-        ic->focusIn();
+        if (!activeIC_) return;
+        activeIC_->focusIn();
     } else {
         auto *ic = focusGroup_.focusedInputContext();
         if (!ic) return;
@@ -199,25 +199,29 @@ void AndroidFrontend::focusInputContext(bool focus) {
 void AndroidFrontend::activateInputContext(const int uid) {
     auto *ptr = icCache_.find(uid);
     if (ptr) {
-        focusGroup_.setFocusedInputContext(ptr->get());
+        activeIC_ = ptr->get();
     } else {
         auto *ic = new AndroidInputContext(this, instance_->inputContextManager(), uid);
+        activeIC_ = ic;
         icCache_.insert(uid, ic);
         ic->setFocusGroup(&focusGroup_);
-        focusGroup_.setFocusedInputContext(ic);
     }
+}
+
+InputContext *AndroidFrontend::activeInputContext() const {
+    return activeIC_;
 }
 
 void AndroidFrontend::deactivateInputContext(const int uid) {
     auto *ptr = icCache_.find(uid);
     if (!ptr) return;
-    ptr->get()->focusOut();
+    focusGroup_.setFocusedInputContext(nullptr);
+    activeIC_ = nullptr;
 }
 
 void AndroidFrontend::setCapabilityFlags(uint64_t flag) {
-    auto *ic = focusGroup_.focusedInputContext();
-    if (!ic) return;
-    ic->setCapabilityFlags(CapabilityFlags{flag});
+    if (!activeIC_) return;
+    activeIC_->setCapabilityFlags(CapabilityFlags(flag));
 }
 
 void AndroidFrontend::setCandidateListCallback(const CandidateListCallback &callback) {

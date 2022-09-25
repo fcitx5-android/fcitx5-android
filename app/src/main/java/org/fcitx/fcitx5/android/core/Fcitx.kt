@@ -313,7 +313,6 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         // will be called in fcitx main thread
         private fun onReady() {
             lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_READY)
-            setCapabilityFlags(CapabilityFlags.DefaultFlags.toLong())
         }
 
         override val lifecycle: FcitxLifecycle

@@ -126,7 +126,7 @@ public:
     typedef std::tuple<const fcitx::InputMethodEntry *, const std::vector<std::string>> IMStatus;
 
     IMStatus inputMethodStatus() {
-        auto *ic = p_instance->inputContextManager().mostRecentInputContext();
+        auto *ic = p_frontend->call<fcitx::IAndroidFrontend::activeInputContext>();
         auto *engine = p_instance->inputMethodEngine(ic);
         const auto *entry = p_instance->inputMethodEntry(ic);
         if (engine) {
@@ -326,7 +326,7 @@ public:
 
     void triggerQuickPhrase() {
         if (!p_quickphrase) return;
-        auto *ic = p_instance->inputContextManager().mostRecentInputContext();
+        auto *ic = p_instance->inputContextManager().lastFocusedInputContext();
         if (!ic) return;
         p_quickphrase->call<fcitx::IQuickPhrase::trigger>(
                 ic, "", "", "", "", fcitx::Key{FcitxKey_None}
@@ -343,7 +343,7 @@ public:
 
     void triggerUnicode() {
         if (!p_unicode) return;
-        auto *ic = p_instance->inputContextManager().mostRecentInputContext();
+        auto *ic = p_instance->inputContextManager().lastFocusedInputContext();
         if (!ic) return;
         p_unicode->call<fcitx::IUnicode::trigger>(ic);
     }
@@ -375,7 +375,8 @@ public:
 
     std::vector<ActionEntity> statusAreaActions() {
         auto actions = std::vector<ActionEntity>();
-        auto *ic = p_instance->inputContextManager().mostRecentInputContext();
+        auto *ic = p_frontend->call<fcitx::IAndroidFrontend::activeInputContext>();
+        if (!ic) return actions;
         for (auto group: {fcitx::StatusGroup::BeforeInputMethod,
                           fcitx::StatusGroup::InputMethod,
                           fcitx::StatusGroup::AfterInputMethod}) {
@@ -387,7 +388,7 @@ public:
     }
 
     void activateAction(int id) {
-        auto *ic = p_instance->inputContextManager().mostRecentInputContext();
+        auto *ic = p_frontend->call<fcitx::IAndroidFrontend::activeInputContext>();
         if (!ic) return;
         auto action = p_instance->userInterfaceManager().lookupActionById(id);
         if (!action) return;

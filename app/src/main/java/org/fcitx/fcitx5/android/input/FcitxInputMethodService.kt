@@ -385,10 +385,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         composingText = ""
         editorInfo = attribute
         Timber.d("onStartInput: initialSel=$selection, restarting=$restarting")
-        if (!restarting) {
-            currentInputConnection.apply {
-                cursorAnchorAvailable = requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
-            }
+        if (restarting) return
+        currentInputConnection.apply {
+            cursorAnchorAvailable = requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
         }
         // fcitx might not be initialized yet, so we do setCapFlags later
         val setCapFlags = suspend {
@@ -543,9 +542,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             currentInputConnection.requestCursorUpdates(0)
         }
         editorInfo = null
-        lifecycleScope.launch {
-            fcitx.setCapFlags(CapabilityFlags.DefaultFlags)
-        }
     }
 
     override fun onUnbindInput() {

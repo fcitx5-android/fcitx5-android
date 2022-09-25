@@ -29,6 +29,7 @@ public:
     void focusInputContext(bool focus);
     void activateInputContext(const int uid);
     void deactivateInputContext(const int uid);
+    InputContext *activeInputContext() const;
     void setCapabilityFlags(uint64_t flag);
     void setCandidateListCallback(const CandidateListCallback &callback);
     void setCommitStringCallback(const CommitStringCallback &callback);
@@ -46,6 +47,7 @@ private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, repositionCursor);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, focusInputContext);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, activateInputContext);
+    FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, activeInputContext);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, deactivateInputContext);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCapabilityFlags);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCandidateListCallback);
@@ -58,6 +60,7 @@ private:
 
     Instance *instance_;
     FocusGroup focusGroup_;
+    InputContext *activeIC_;
     InputContextCache icCache_;
     std::vector<std::unique_ptr<HandlerTableEntry<EventHandler>>> eventHandlers_;
 
