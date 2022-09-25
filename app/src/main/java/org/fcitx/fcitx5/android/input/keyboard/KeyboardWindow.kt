@@ -6,15 +6,12 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
 import androidx.transition.Slide
-import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
-import org.fcitx.fcitx5.android.data.punctuation.PunctuationManager
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.fcitx
@@ -23,6 +20,7 @@ import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.popup.PopupListener
+import org.fcitx.fcitx5.android.input.punctuation.PunctuationComponent
 import org.fcitx.fcitx5.android.input.wm.EssentialWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
@@ -35,12 +33,13 @@ import splitties.views.dsl.core.matchParent
 class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), EssentialWindow,
     InputBroadcastReceiver {
 
-    private val fcitx by manager.fcitx()
     private val service: FcitxInputMethodService by manager.inputMethodService()
+    private val fcitx by manager.fcitx()
+    private val theme by manager.theme()
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
     private val windowManager: InputWindowManager by manager.must()
     private val popup: PopupComponent by manager.must()
-    private val theme by manager.theme()
+    private val punctuation: PunctuationComponent by manager.must()
 
     companion object : EssentialWindow.Key
 
@@ -98,6 +97,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
             keyboardView.removeView(it)
             it.keyActionListener = null
             it.keyPopupListener = null
+            it.punctuation = null
         }
     }
 
@@ -109,6 +109,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
         currentKeyboard?.let {
             it.keyActionListener = keyActionListener
             it.keyPopupListener = popupListener
+            it.punctuation = punctuation
             keyboardView.apply { add(it, lParams(matchParent, matchParent)) }
             it.onAttach(service.editorInfo)
             it.onInputMethodChange(fcitx.inputMethodEntryCached)
@@ -129,12 +130,6 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
         }
     }
 
-    private suspend fun notifyPunctuationUpdate(ime: InputMethodEntry) {
-        (currentKeyboard as? TextKeyboard)?.updatePunctuationKeys(
-            PunctuationManager.load(fcitx, ime.languageCode).associate { it.key to it.mapping }
-        )
-    }
-
     override fun onEditorInfoUpdate(info: EditorInfo?) {
         switchLayout(service.editorInfo?.inputType?.let {
             when (it and InputType.TYPE_MASK_CLASS) {
@@ -147,10 +142,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
     }
 
     override fun onImeUpdate(ime: InputMethodEntry) {
-        service.lifecycleScope.launch {
-            notifyPunctuationUpdate(ime)
-            currentKeyboard?.onInputMethodChange(ime)
-        }
+        currentKeyboard?.onInputMethodChange(ime)
     }
 
     override fun onPreeditUpdate(data: FcitxEvent.PreeditEvent.Data) {
@@ -158,9 +150,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
     }
 
     override fun onStatusAreaUpdate(actions: Array<Action>) {
-        service.lifecycleScope.launch {
-            notifyPunctuationUpdate(fcitx.inputMethodEntryCached)
-        }
+        currentKeyboard?.onStatusAreaUpdate(actions)
     }
 
     override fun onAttached() {

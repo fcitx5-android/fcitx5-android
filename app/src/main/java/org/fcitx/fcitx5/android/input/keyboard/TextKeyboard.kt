@@ -6,6 +6,7 @@ import android.graphics.Rect
 import android.view.inputmethod.EditorInfo
 import androidx.core.view.allViews
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
@@ -91,11 +92,9 @@ class TextKeyboard(
         }
     }
 
-    private var punctuationMapping: Map<String, String> = emptyMap()
+    private fun transformPunctuation(p: String) = punctuation?.transform(p) ?: p
 
-    private fun transformPunctuation(p: String) = punctuationMapping.getOrDefault(p, p)
-
-    private fun transformDisplayChar(c: String): String {
+    private fun transformInputString(c: String): String {
         if (c.length != 1) return c
         if (c[0].isLetter()) return transformAlphabet(c)
         return transformPunctuation(c)
@@ -135,19 +134,24 @@ class TextKeyboard(
         updateReturnButton(`return`, info, data)
     }
 
+    override fun onStatusAreaUpdate(actions: Array<Action>) {
+        updatePunctuationKeys()
+    }
+
     override fun onInputMethodChange(ime: InputMethodEntry) {
         space.mainText.text = buildString {
             append(ime.displayName)
             ime.subMode.run { label.ifEmpty { name.ifEmpty { null } } }?.let { append(" ($it)") }
         }
+        updatePunctuationKeys()
     }
 
     override fun onPopupPreview(viewId: Int, content: String, bounds: Rect) {
-        super.onPopupPreview(viewId, transformDisplayChar(content), bounds)
+        super.onPopupPreview(viewId, transformInputString(content), bounds)
     }
 
     override fun onPopupPreviewUpdate(viewId: Int, content: String) {
-        super.onPopupPreviewUpdate(viewId, transformDisplayChar(content))
+        super.onPopupPreviewUpdate(viewId, transformInputString(content))
     }
 
     override fun onPopupKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
@@ -194,10 +198,7 @@ class TextKeyboard(
         }
     }
 
-    fun updatePunctuationKeys(newMapping: Map<String, String>? = null) {
-        if (newMapping != null) {
-            punctuationMapping = newMapping
-        }
+    private fun updatePunctuationKeys() {
         textKeys.forEach {
             it.def as KeyDef.Appearance.AltText
             it.altText.text = transformPunctuation(it.def.altText)
