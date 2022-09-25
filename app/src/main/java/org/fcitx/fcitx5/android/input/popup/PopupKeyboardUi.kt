@@ -36,6 +36,7 @@ class PopupKeyboardUi(
     radius: Float,
     bounds: Rect,
     private val keys: Array<String>,
+    labels: Array<String>,
     private val onDismissSelf: PopupKeyboardUi.() -> Unit = {}
 ) : Ui {
 
@@ -121,7 +122,7 @@ class PopupKeyboardUi(
 
     private var focusedIndex = keyOrders[focusRow][focusColumn]
 
-    private val keyViews = keys.map {
+    private val keyViews = labels.map {
         textView {
             text = it
             textSize = 23f

@@ -12,10 +12,12 @@ import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef
+import org.fcitx.fcitx5.android.input.punctuation.PunctuationComponent
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
 import org.mechdancer.dependency.manager.managedHandler
+import org.mechdancer.dependency.manager.must
 import splitties.dimensions.dp
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.frameLayout
@@ -28,6 +30,7 @@ class PopupComponent :
     private val service by manager.inputMethodService()
     private val context by manager.context()
     private val theme by manager.theme()
+    private val punctuation: PunctuationComponent by manager.must()
 
     private val showingEntryUi = HashMap<Int, PopupEntryUi>()
     private val dismissJobs = HashMap<Int, Job>()
@@ -108,6 +111,9 @@ class PopupComponent :
         keys: Array<String>,
         bounds: Rect
     ) {
+        val labels = if (punctuation.enabled) {
+            Array(keys.size) { punctuation.transform(keys[it]) }
+        } else keys
         val keyboardUi = PopupKeyboardUi(
             context,
             theme,
@@ -117,6 +123,7 @@ class PopupComponent :
             popupRadius,
             bounds,
             keys,
+            labels,
             onDismissSelf = { dismissPopup(viewId) }
         )
         val (x, y) = intArrayOf(0, 0).also { entryUi.root.getLocationInWindow(it) }
