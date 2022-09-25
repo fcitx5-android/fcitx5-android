@@ -32,6 +32,7 @@ import org.fcitx.fcitx5.android.input.picker.PickerPreset
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
+import org.fcitx.fcitx5.android.input.punctuation.PunctuationComponent
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.wrapToUniqueComponent
@@ -60,46 +61,37 @@ class InputView(
 
     private val bottomPaddingSpace = view(::Space)
 
+    val scope = DynamicScope()
     private val themedContext = context.withTheme(R.style.Theme_InputViewTheme)
-
     private val broadcaster = InputBroadcaster()
-
+    private val popup = PopupComponent()
+    private val punctuation = PunctuationComponent()
     private val preedit = PreeditComponent()
-
+    private val commonKeyActionListener = CommonKeyActionListener()
+    private val candidateViewBuilder = CandidateViewBuilder()
+    private val windowManager = InputWindowManager()
     private val kawaiiBar = KawaiiBarComponent()
-
     private val horizontalCandidate = HorizontalCandidateComponent()
-
     private val keyboardWindow = KeyboardWindow()
-
     private val pickerWindow = PickerWindow(PickerPreset.Symbols)
 
-    private val windowManager = InputWindowManager()
-
-    private val candidateViewBuilder: CandidateViewBuilder = CandidateViewBuilder()
-
-    private val commonKeyActionListener = CommonKeyActionListener()
-
-    private val popup = PopupComponent()
-
-    val scope = DynamicScope()
-
     private fun setupScope() {
+        scope += this@InputView.wrapToUniqueComponent()
         scope += service.wrapToUniqueComponent()
-        scope += themedContext.wrapToUniqueComponent()
         scope += fcitx.wrapToUniqueComponent()
-        scope += candidateViewBuilder
-        scope += preedit
-        scope += kawaiiBar
+        scope += theme.wrapToUniqueComponent()
+        scope += themedContext.wrapToUniqueComponent()
         scope += broadcaster
-        scope += this.wrapToUniqueComponent()
+        scope += popup
+        scope += punctuation
+        scope += preedit
+        scope += commonKeyActionListener
+        scope += candidateViewBuilder
         scope += windowManager
+        scope += kawaiiBar
+        scope += horizontalCandidate
         scope += keyboardWindow
         scope += pickerWindow
-        scope += commonKeyActionListener
-        scope += popup
-        scope += horizontalCandidate
-        scope += theme.wrapToUniqueComponent()
         broadcaster.onScopeSetupFinished(scope)
     }
 
