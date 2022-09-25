@@ -58,7 +58,7 @@ class InputView(
 
     private val bottomPaddingSpace = view(::Space)
 
-    private val themedContext = context.withTheme(R.style.Theme_FcitxAppTheme)
+    private val themedContext = context.withTheme(R.style.Theme_InputViewTheme)
 
     private val broadcaster = InputBroadcaster()
 

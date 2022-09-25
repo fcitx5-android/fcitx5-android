@@ -14,4 +14,6 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
     </style>
+
+    <style name="Theme.InputViewTheme" parent="Theme.AppCompat.Light.NoActionBar" />
 </resources>
