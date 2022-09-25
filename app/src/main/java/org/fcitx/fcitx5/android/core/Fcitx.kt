@@ -143,18 +143,11 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
         init {
             System.loadLibrary("native-lib")
-            NativeLib.instance.setup_log_stream(AppPrefs.getInstance().internal.verboseLog.getValue()) {
-                if (it.isEmpty()) return@setup_log_stream
-                when (it.first()) {
-                    'F' -> Timber.wtf(it.drop(1))
-                    'D' -> Timber.d(it.drop(1))
-                    'I' -> Timber.i(it.drop(1))
-                    'W' -> Timber.w(it.drop(1))
-                    'E' -> Timber.e(it.drop(1))
-                    else -> Timber.d(it)
-                }
-            }
+            setupLogStream(AppPrefs.getInstance().internal.verboseLog.getValue())
         }
+
+        @JvmStatic
+        external fun setupLogStream(verbose: Boolean)
 
         @JvmStatic
         external fun startupFcitx(

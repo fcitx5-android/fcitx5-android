@@ -434,11 +434,11 @@ JNI_OnLoad(JavaVM *jvm, void * /* reserved */) {
     return JNI_VERSION_1_6;
 }
 
-typedef void (*log_callback_t)(const char *);
-
-extern "C" void setup_log_stream(bool verbose, log_callback_t callback) {
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_setupLogStream(JNIEnv *env, jclass clazz, jboolean verbose) {
+    static char tag[] = "fcitx5";
     static native_streambuf log_streambuf;
-    log_streambuf.set_callback(callback);
     static std::ostream stream(&log_streambuf);
     fcitx::Log::setLogStream(stream);
     if (verbose) {
