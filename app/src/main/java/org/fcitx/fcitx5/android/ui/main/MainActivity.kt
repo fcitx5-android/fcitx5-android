@@ -110,7 +110,6 @@ class MainActivity : AppCompatActivity() {
         listOf(
             ::processAddDictIntent,
             ::processConfigIntent,
-            ::processAddInputMethodIntent
         ).firstOrNull { it(intent) }
     }
 
@@ -158,21 +157,6 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-    private fun processAddInputMethodIntent(intent: Intent?): Boolean {
-        if (intent != null && intent.hasExtra(INTENT_DATA_ADD_IM)) {
-            AlertDialog.Builder(this)
-                .setTitle(R.string.no_more_input_methods)
-                .setMessage(R.string.add_more_input_methods)
-                .setPositiveButton(R.string.add) { _, _ ->
-                    navHostFragment.navController.navigateFromMain(R.id.action_mainFragment_to_imListFragment)
-                }
-                .setNegativeButton(android.R.string.cancel) { _, _ -> }
-                .show()
-            return true
-        }
-        return false
-    }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.activity_main_menu, menu)
         menu.apply {
@@ -205,7 +189,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val INTENT_DATA_ADD_IM = "add_im"
         const val INTENT_DATA_CONFIG = "config"
         const val INTENT_DATA_CONFIG_GLOBAL = "global"
         const val INTENT_DATA_CONFIG_IM_LIST = "im_list"

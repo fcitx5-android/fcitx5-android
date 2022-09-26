@@ -24,12 +24,6 @@ object AppUtil {
         )
     }
 
-    fun launchMainToAddInputMethods(context: Context) {
-        launchMain(context) {
-            putExtra(MainActivity.INTENT_DATA_ADD_IM, 0)
-        }
-    }
-
     fun launchMainToConfig(context: Context, category: String, arguments: Bundle? = null) {
         launchMain(context) {
             putExtra(MainActivity.INTENT_DATA_CONFIG, category)
