@@ -55,7 +55,7 @@ class CommonKeyActionListener :
                     }
                     is LangSwitchAction -> {
                         if (fcitx.enabledIme().size < 2) {
-                            AppUtil.launchMainToAddInputMethods(context)
+                            inputView.showDialog(AddMoreInputMethodsPrompt.build(service, context))
                         } else {
                             fcitx.enumerateIme()
                         }
