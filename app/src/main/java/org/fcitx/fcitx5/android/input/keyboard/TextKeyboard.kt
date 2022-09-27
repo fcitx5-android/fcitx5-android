@@ -6,7 +6,6 @@ import android.graphics.Rect
 import android.view.inputmethod.EditorInfo
 import androidx.core.view.allViews
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
@@ -92,7 +91,8 @@ class TextKeyboard(
         }
     }
 
-    private fun transformPunctuation(p: String) = punctuation?.transform(p) ?: p
+    private var punctuationMapping: Map<String, String> = mapOf()
+    private fun transformPunctuation(p: String) = punctuationMapping.getOrDefault(p, p)
 
     private fun transformInputString(c: String): String {
         if (c.length != 1) return c
@@ -134,7 +134,8 @@ class TextKeyboard(
         updateReturnButton(`return`, info, data)
     }
 
-    override fun onStatusAreaUpdate(actions: Array<Action>) {
+    override fun onPunctuationUpdate(mapping: Map<String, String>) {
+        punctuationMapping = mapping
         updatePunctuationKeys()
     }
 
@@ -143,7 +144,6 @@ class TextKeyboard(
             append(ime.displayName)
             ime.subMode.run { label.ifEmpty { name.ifEmpty { null } } }?.let { append(" ($it)") }
         }
-        updatePunctuationKeys()
     }
 
     override fun onPopupPreview(viewId: Int, content: String, bounds: Rect) {

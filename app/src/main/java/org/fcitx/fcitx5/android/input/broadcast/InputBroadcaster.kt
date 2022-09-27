@@ -71,4 +71,8 @@ class InputBroadcaster : UniqueComponent<InputBroadcaster>(), Dependent, InputBr
         receivers.forEach { it.onScopeSetupFinished(scope) }
     }
 
+    override fun onPunctuationUpdate(mapping: Map<String, String>) {
+        receivers.forEach { it.onPunctuationUpdate(mapping) }
+    }
+
 }

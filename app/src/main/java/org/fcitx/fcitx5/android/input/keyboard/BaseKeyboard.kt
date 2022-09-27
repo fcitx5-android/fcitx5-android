@@ -7,13 +7,15 @@ import androidx.annotation.CallSuper
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.core.*
+import org.fcitx.fcitx5.android.core.FcitxEvent
+import org.fcitx.fcitx5.android.core.InputMethodEntry
+import org.fcitx.fcitx5.android.core.KeyStates
+import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.GestureType
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListener
 import org.fcitx.fcitx5.android.input.popup.PopupListener
-import org.fcitx.fcitx5.android.input.punctuation.PunctuationComponent
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.*
@@ -32,8 +34,6 @@ abstract class BaseKeyboard(
     private var popupOnKeyPress by AppPrefs.getInstance().keyboard.popupOnKeyPress
 
     var keyPopupListener: PopupListener? = null
-
-    var punctuation: PunctuationComponent? = null
 
     private val selectionSwipeThreshold = dp(10f)
     private val inputSwipeThreshold = dp(36f)
@@ -323,7 +323,7 @@ abstract class BaseKeyboard(
         // do nothing by default
     }
 
-    open fun onStatusAreaUpdate(actions: Array<Action>) {
+    open fun onPunctuationUpdate(mapping: Map<String, String>) {
         // do nothing by default
     }
 

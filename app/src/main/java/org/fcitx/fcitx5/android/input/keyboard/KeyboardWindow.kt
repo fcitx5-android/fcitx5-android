@@ -8,7 +8,6 @@ import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import androidx.transition.Slide
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
@@ -20,7 +19,6 @@ import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.popup.PopupListener
-import org.fcitx.fcitx5.android.input.punctuation.PunctuationComponent
 import org.fcitx.fcitx5.android.input.wm.EssentialWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
@@ -39,7 +37,6 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
     private val windowManager: InputWindowManager by manager.must()
     private val popup: PopupComponent by manager.must()
-    private val punctuation: PunctuationComponent by manager.must()
 
     companion object : EssentialWindow.Key
 
@@ -97,7 +94,6 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
             keyboardView.removeView(it)
             it.keyActionListener = null
             it.keyPopupListener = null
-            it.punctuation = null
         }
     }
 
@@ -109,7 +105,6 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
         currentKeyboard?.let {
             it.keyActionListener = keyActionListener
             it.keyPopupListener = popupListener
-            it.punctuation = punctuation
             keyboardView.apply { add(it, lParams(matchParent, matchParent)) }
             it.onAttach(service.editorInfo)
             it.onInputMethodChange(fcitx.inputMethodEntryCached)
@@ -149,8 +144,8 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
         currentKeyboard?.onPreeditChange(service.editorInfo, data)
     }
 
-    override fun onStatusAreaUpdate(actions: Array<Action>) {
-        currentKeyboard?.onStatusAreaUpdate(actions)
+    override fun onPunctuationUpdate(mapping: Map<String, String>) {
+        currentKeyboard?.onPunctuationUpdate(mapping)
     }
 
     override fun onAttached() {

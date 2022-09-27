@@ -1,21 +1,27 @@
 package org.fcitx.fcitx5.android.input.punctuation
 
-import kotlinx.coroutines.runBlocking
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.punctuation.PunctuationManager
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
+import org.fcitx.fcitx5.android.input.broadcast.InputBroadcaster
 import org.fcitx.fcitx5.android.input.dependency.fcitx
+import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
 import org.mechdancer.dependency.manager.managedHandler
+import org.mechdancer.dependency.manager.must
 
-class PunctuationComponent :
-    UniqueComponent<PunctuationComponent>(), InputBroadcastReceiver,
-    Dependent, ManagedHandler by managedHandler() {
+class PunctuationComponent : InputBroadcastReceiver,
+    UniqueComponent<PunctuationComponent>(), Dependent, ManagedHandler by managedHandler() {
 
     private val fcitx by manager.fcitx()
+    private val service by manager.inputMethodService()
+    private val broadcaster: InputBroadcaster by manager.must()
 
     private var mapping: Map<String, String> = mapOf()
 
@@ -24,13 +30,17 @@ class PunctuationComponent :
 
     fun transform(p: String) = mapping.getOrDefault(p, p)
 
+    private var updateJob: Job? = null
+
     private fun updateMapping() {
-        mapping = if (enabled) {
-            runBlocking {
+        updateJob = service.lifecycleScope.launch {
+            updateJob?.cancel()
+            mapping = if (enabled) {
                 PunctuationManager.load(fcitx, fcitx.inputMethodEntryCached.languageCode)
                     .associate { it.key to it.mapping }
-            }
-        } else mapOf()
+            } else mapOf()
+            broadcaster.onPunctuationUpdate(mapping)
+        }
     }
 
     override fun onStatusAreaUpdate(actions: Array<Action>) {

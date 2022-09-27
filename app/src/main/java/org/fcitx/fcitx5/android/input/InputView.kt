@@ -14,8 +14,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Fcitx
 import org.fcitx.fcitx5.android.core.FcitxEvent
@@ -122,9 +120,7 @@ class InputView(
         AppPrefs.getInstance().keyboard.keyboardHeightPercent
             .registerOnChangeListener(onWindowHeightChangeListener)
 
-        service.lifecycleScope.launch {
-            broadcaster.onImeUpdate(fcitx.currentIme())
-        }
+        broadcaster.onImeUpdate(fcitx.inputMethodEntryCached)
 
         service.window.window!!.also {
             when (navbarBackground) {

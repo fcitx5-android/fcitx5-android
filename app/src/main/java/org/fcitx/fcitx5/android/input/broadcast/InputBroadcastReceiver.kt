@@ -30,4 +30,6 @@ interface InputBroadcastReceiver {
 
     fun onWindowDetached(window: InputWindow) {}
 
+    fun onPunctuationUpdate(mapping: Map<String, String>) {}
+
 }
