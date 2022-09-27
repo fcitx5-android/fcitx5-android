@@ -76,10 +76,16 @@ class PickerWindow(val data: List<Pair<String, Array<String>>>) :
                     tabsUi.activateTab(pickerPagesAdapter.getCategoryOfPage(position))
                 }
             })
+            // show first symbol category by default, rather than recently used
+            setCurrentItem(pickerPagesAdapter.getStartPageOfCategory(1), false)
         }
     }
 
     override fun onCreateBarExtension() = pickerLayout.tabsUi.root
+
+    override fun beforeAttached() {
+        pickerPagesAdapter.updateRecent()
+    }
 
     override fun onAttached() {
         pickerLayout.embeddedKeyboard.keyActionListener = keyActionListener
@@ -87,6 +93,7 @@ class PickerWindow(val data: List<Pair<String, Array<String>>>) :
 
     override fun onDetached() {
         pickerLayout.embeddedKeyboard.keyActionListener = null
+        pickerPagesAdapter.saveRecent()
     }
 
     override val showTitle = false

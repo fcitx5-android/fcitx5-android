@@ -112,7 +112,7 @@ class PickerPageUi(override val ctx: Context, val theme: Theme) : Ui {
         keyActionListener?.onKeyAction(CommitAction(str), Source.Keyboard)
     }
 
-    fun setItems(items: Array<Pair<String, String>>) {
+    fun setItems(items: Array<String>, insertRecentlyUsed: (String) -> Unit) {
         keyViews.forEachIndexed { i, keyView ->
             keyView.apply {
                 if (i >= items.size) {
@@ -121,9 +121,12 @@ class PickerPageUi(override val ctx: Context, val theme: Theme) : Ui {
                     setOnClickListener(null)
                 } else {
                     isEnabled = true
-                    val (key, text) = items[i]
+                    val text = items[i]
                     mainText.text = text
-                    setOnClickListener { onSymbolClick(key) }
+                    setOnClickListener {
+                        insertRecentlyUsed(text)
+                        onSymbolClick(text)
+                    }
                 }
             }
         }
