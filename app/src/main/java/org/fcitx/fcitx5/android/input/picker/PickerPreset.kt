@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.input.picker
 
 object PickerPreset {
+    const val RecentlyUsedSymbol = "R"
     val Symbols: List<Pair<String, Array<String>>> = listOf(
         "1?#" to arrayOf(
             "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
