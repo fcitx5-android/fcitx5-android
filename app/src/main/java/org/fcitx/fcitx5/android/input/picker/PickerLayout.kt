@@ -2,11 +2,11 @@ package org.fcitx.fcitx5.android.input.picker
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Typeface
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.viewpager2.widget.ViewPager2
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.keyboard.*
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.add
@@ -16,14 +16,32 @@ import splitties.views.dsl.core.view
 class PickerLayout(context: Context, theme: Theme) : ConstraintLayout(context) {
 
     class Keyboard(context: Context, theme: Theme) : BaseKeyboard(context, theme, Layout) {
+
+        class SymbolKey(
+            val symbol: String,
+            percentWidth: Float = 0.1f,
+            variant: Appearance.Variant = Appearance.Variant.Alternative,
+        ) : KeyDef(
+            Appearance.Text(
+                displayText = symbol,
+                textSize = 23f,
+                typeface = Typeface.NORMAL,
+                percentWidth = percentWidth,
+                variant = variant
+            ),
+            setOf(
+                Behavior.Press(action = KeyAction.CommitAction(symbol))
+            )
+        )
+
         companion object {
             val Layout: List<List<KeyDef>> = listOf(
                 listOf(
                     LayoutSwitchKey("ABC", TextKeyboard.Name),
-                    SymbolKey(",", 0.1f, KeyDef.Appearance.Variant.Alternative),
+                    SymbolKey(","),
                     ImageLayoutSwitchKey(R.drawable.ic_number_pad, NumberKeyboard.Name),
                     SpaceKey(),
-                    SymbolKey(".", 0.1f, KeyDef.Appearance.Variant.Alternative),
+                    SymbolKey("."),
                     ReturnKey()
                 )
             )
