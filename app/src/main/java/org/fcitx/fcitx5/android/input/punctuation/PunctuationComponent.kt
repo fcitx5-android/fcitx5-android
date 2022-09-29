@@ -40,6 +40,7 @@ class PunctuationComponent : InputBroadcastReceiver,
                     .associate { it.key to it.mapping }
             } else mapOf()
             broadcaster.onPunctuationUpdate(mapping)
+            updateJob = null
         }
     }
 
