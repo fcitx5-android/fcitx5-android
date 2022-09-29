@@ -52,9 +52,10 @@ object ThemeManager {
     private fun themeFile(theme: Theme.Custom) = File(dir, theme.name + ".json")
 
     fun saveTheme(theme: Theme.Custom) {
-        val old = customThemes.indexOfFirst { it.name == theme.name }.takeIf { it != -1 }
-        old?.let { customThemes[it] = theme } ?: run {
-            customThemes.add(0, theme)
+        themeFile(theme).writeText(Json.encodeToString(CustomThemeSerializer, theme))
+        customThemes.indexOfFirst { it.name == theme.name }.let {
+            if (it >= 0) customThemes[it] = theme
+            else customThemes.add(0, theme)
         }
         if (getActiveTheme().name == theme.name) {
             currentTheme = theme
