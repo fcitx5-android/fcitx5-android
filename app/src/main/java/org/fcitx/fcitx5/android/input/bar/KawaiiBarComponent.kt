@@ -119,7 +119,9 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                 windowManager.attachWindow(StatusAreaWindow())
             }
             clipboardSuggestionItem.setOnClickListener {
-                service.inputConnection?.performContextMenuAction(android.R.id.paste)
+                ClipboardManager.lastEntry?.let {
+                    service.inputConnection?.commitText(it.text, 1)
+                }
                 clipboardTimeoutJob?.cancel()
                 clipboardTimeoutJob = null
                 idleUiStateMachine.push(Pasted)
