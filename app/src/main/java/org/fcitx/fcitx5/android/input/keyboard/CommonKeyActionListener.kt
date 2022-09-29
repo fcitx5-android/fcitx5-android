@@ -12,7 +12,6 @@ import org.fcitx.fcitx5.android.input.dialog.InputMethodSwitcherDialog
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener.BackspaceSwipeState.*
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction.*
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
-import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.inputConnection
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
@@ -42,7 +41,12 @@ class CommonKeyActionListener :
                     is FcitxKeyAction -> fcitx.sendKey(action.act, KeyState.Virtual.state)
                     is SymAction -> fcitx.sendKey(action.sym, action.states)
                     is CommitAction -> {
-                        if (!fcitx.select(0)) fcitx.reset()
+                        if (preedit.content.preedit.run { preedit.isEmpty() && clientPreedit.isEmpty() }) {
+                            // preedit is empty, there can be prediction candidates
+                            fcitx.reset()
+                        } else {
+                            if (!fcitx.select(0)) fcitx.reset()
+                        }
                         service.inputConnection?.commitText(action.text, 1)
                     }
                     is QuickPhraseAction -> {
