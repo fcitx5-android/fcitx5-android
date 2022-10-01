@@ -85,6 +85,9 @@ class PickerPagesAdapter(
     fun getCategoryOfPage(page: Int) =
         ranges.indexOfFirst { page in it }
 
+    fun getCategoryRangeOfPage(page: Int) =
+        ranges.find { page in it } ?: (0..0)
+
     fun getStartPageOfCategory(cat: Int) =
         // Recently used category only has one page which must be the first page
         if (cat == 0)

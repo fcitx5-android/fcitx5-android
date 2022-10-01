@@ -72,12 +72,34 @@ class PickerWindow(val data: List<Pair<String, Array<String>>>) :
         pager.apply {
             adapter = pickerPagesAdapter
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageScrolled(
+                    position: Int,
+                    positionOffset: Float,
+                    positionOffsetPixels: Int
+                ) {
+                    val range = pickerPagesAdapter.getCategoryRangeOfPage(position)
+                    val start = range.first
+                    val total = range.last - start + 1
+                    val current = position - start
+                    paginationUi.apply {
+                        pageCount = total
+                        currentPage = current
+                        scrollProgress = positionOffset
+                    }
+                }
+
                 override fun onPageSelected(position: Int) {
                     tabsUi.activateTab(pickerPagesAdapter.getCategoryOfPage(position))
                 }
             })
             // show first symbol category by default, rather than recently used
-            setCurrentItem(pickerPagesAdapter.getStartPageOfCategory(1), false)
+            val initialPage = pickerPagesAdapter.getStartPageOfCategory(1)
+            setCurrentItem(initialPage, false)
+            // wait paginationUi layout
+            ContextCompat.getMainExecutor(context).execute {
+                paginationUi.pageCount =
+                    pickerPagesAdapter.getCategoryRangeOfPage(initialPage).run { last - first + 1 }
+            }
         }
     }
 

@@ -8,6 +8,7 @@ import androidx.viewpager2.widget.ViewPager2
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.*
+import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.view
@@ -57,6 +58,8 @@ class PickerLayout(context: Context, theme: Theme) : ConstraintLayout(context) {
 
     val tabsUi = PickerTabsUi(context, theme)
 
+    val paginationUi = PickerPaginationUi(context, theme)
+
     init {
         add(pager, lParams {
             topOfParent()
@@ -68,6 +71,10 @@ class PickerLayout(context: Context, theme: Theme) : ConstraintLayout(context) {
             centerHorizontally()
             bottomOfParent()
             matchConstraintPercentHeight = 0.25f
+        })
+        add(paginationUi.root, lParams(matchConstraints, dp(2)) {
+            centerHorizontally()
+            below(pager, dp(-1))
         })
     }
 }
