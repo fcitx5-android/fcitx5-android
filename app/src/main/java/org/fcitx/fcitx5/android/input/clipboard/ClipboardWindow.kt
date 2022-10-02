@@ -15,6 +15,7 @@ import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.Transition
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.wm.InputWindow
+import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.EventStateMachine
 import org.fcitx.fcitx5.android.utils.inputConnection
 import kotlin.properties.Delegates
@@ -61,6 +62,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         object : ClipboardAdapter() {
             override suspend fun onPin(id: Int) = ClipboardManager.pin(id)
             override suspend fun onUnpin(id: Int) = ClipboardManager.unpin(id)
+            override fun onEdit(id: Int) = AppUtil.launchClipboardEdit(context, id)
             override suspend fun onDelete(id: Int) = ClipboardManager.delete(id)
             override fun onPaste(id: Int) {
                 service.inputConnection?.commitText(getEntryById(id).text, 1)

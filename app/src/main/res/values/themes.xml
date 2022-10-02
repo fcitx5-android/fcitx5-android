@@ -16,4 +16,9 @@
     </style>
 
     <style name="Theme.InputViewTheme" parent="Theme.AppCompat.Light.NoActionBar" />
+
+    <style name="Theme.DialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+    </style>
 </resources>

@@ -35,6 +35,7 @@ import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
 import org.fcitx.fcitx5.android.input.status.StatusAreaWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
+import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.inputConnection
 import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.must
@@ -125,6 +126,12 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                 clipboardTimeoutJob?.cancel()
                 clipboardTimeoutJob = null
                 idleUiStateMachine.push(Pasted)
+            }
+            clipboardSuggestionItem.setOnLongClickListener {
+                ClipboardManager.lastEntry?.let {
+                    AppUtil.launchClipboardEdit(context, it.id)
+                }
+                true
             }
             hideKeyboardButton.setOnClickListener {
                 service.requestHideSelf(0)

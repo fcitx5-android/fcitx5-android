@@ -67,6 +67,15 @@ abstract class ClipboardAdapter :
                             true
                         }
                     }
+                    add(R.string.edit).apply {
+                        setIcon(R.drawable.ic_baseline_edit_24)
+                        setOnMenuItemClickListener {
+                            scope.launch {
+                                onEdit(entry.id)
+                            }
+                            true
+                        }
+                    }
                     add(R.string.delete).apply {
                         setIcon(R.drawable.ic_baseline_delete_24)
                         setOnMenuItemClickListener {
@@ -134,6 +143,8 @@ abstract class ClipboardAdapter :
     abstract suspend fun onPin(id: Int)
 
     abstract suspend fun onUnpin(id: Int)
+
+    abstract fun onEdit(id: Int)
 
     abstract suspend fun onDelete(id: Int)
 

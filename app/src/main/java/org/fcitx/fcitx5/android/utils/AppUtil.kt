@@ -3,6 +3,7 @@ package org.fcitx.fcitx5.android.utils
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import org.fcitx.fcitx5.android.ui.main.ClipboardEditActivity
 import org.fcitx.fcitx5.android.ui.main.LogActivity
 import org.fcitx.fcitx5.android.ui.main.MainActivity
 
@@ -29,6 +30,15 @@ object AppUtil {
             putExtra(MainActivity.INTENT_DATA_CONFIG, category)
             putExtra(category, arguments)
         }
+    }
+
+    fun launchClipboardEdit(context: Context, id: Int) {
+        context.startActivity(
+            Intent(context, ClipboardEditActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                putExtra(ClipboardEditActivity.ENTRY_ID, id)
+            }
+        )
     }
 
 }

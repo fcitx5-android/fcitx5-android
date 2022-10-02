@@ -59,11 +59,15 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
         launch { updateItemCount() }
     }
 
+    suspend fun get(id: Int) = clbDao.get(id)
+
     suspend fun getAll() = clbDao.getAll()
 
     suspend fun pin(id: Int) = clbDao.updatePinStatus(id, true)
 
     suspend fun unpin(id: Int) = clbDao.updatePinStatus(id, false)
+
+    suspend fun updateText(id: Int, text: String) = clbDao.updateText(id, text)
 
     suspend fun delete(id: Int) {
         clbDao.delete(id)
@@ -94,8 +98,6 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
             ?.takeIf { it.text.isNotBlank() && UTF8Utils.instance.validateUTF8(it.text) }
             ?.let { e ->
                 Timber.d("Accept $e")
-                lastEntry = e
-                lastEntryTimestamp = System.currentTimeMillis()
                 launch {
                     mutex.withLock {
                         val all = clbDao.getAll()
@@ -104,11 +106,15 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
                             clbDao.delete(it.id)
                             pinned = it.pinned
                         }
-                        clbDao.insertAll(e.copy(pinned = pinned))
+                        val rowId = clbDao.insert(e.copy(pinned = pinned))
                         removeOutdated()
                         updateItemCount()
-                        onUpdateListeners.forEach { listener ->
-                            listener.onUpdate(e.text)
+                        clbDao.get(rowId)?.let { newEntry ->
+                            lastEntry = newEntry
+                            lastEntryTimestamp = System.currentTimeMillis()
+                            onUpdateListeners.forEach { listener ->
+                                listener.onUpdate(newEntry.text)
+                            }
                         }
                     }
                 }

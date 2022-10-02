@@ -136,7 +136,8 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
 
         val clipboardSuggestionItem = object : CustomGestureView(ctx) {
             init {
-                visibility = View.INVISIBLE
+                visibility = View.GONE
+                isHapticFeedbackEnabled = false
                 background = rippleDrawable(inputTheme.keyPressHighlightColor.color)
                 add(clipboardSuggestionLayout, lParams(wrapContent, matchParent))
             }
@@ -249,7 +250,7 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
         }
 
         private fun disableClipboardItem() {
-            clipboardSuggestionItem.visibility = View.INVISIBLE
+            clipboardSuggestionItem.visibility = View.GONE
         }
 
         fun setClipboardItemText(text: String) {
