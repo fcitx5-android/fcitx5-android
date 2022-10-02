@@ -47,35 +47,35 @@ abstract class ClipboardAdapter :
             root.setOnLongClickListener {
                 val menu = PopupMenu(root.context, root)
                 val scope = root.findViewTreeLifecycleOwner()!!.lifecycleScope
-                menu.menuInflater.inflate(R.menu.clipboard_management_menu, menu.menu)
-                menu.menu.findItem(R.id.clipboard_management_pin).apply {
-                    isVisible = !entry.pinned
-                    setOnMenuItemClickListener {
-                        scope.launch {
-                            onPin(entry.id)
-                            setPinStatus(entry.id, true)
+                menu.menu.apply {
+                    if (entry.pinned) add(R.string.unpin).apply {
+                        setIcon(R.drawable.ic_outline_push_pin_24)
+                        setOnMenuItemClickListener {
+                            scope.launch {
+                                onUnpin(entry.id)
+                                setPinStatus(entry.id, false)
+                            }
+                            true
                         }
-                        true
+                    } else add(R.string.pin).apply {
+                        setIcon(R.drawable.ic_baseline_push_pin_24)
+                        setOnMenuItemClickListener {
+                            scope.launch {
+                                onPin(entry.id)
+                                setPinStatus(entry.id, true)
+                            }
+                            true
+                        }
                     }
-                }
-                menu.menu.findItem(R.id.clipboard_management_unpin).apply {
-                    isVisible = entry.pinned
-                    setOnMenuItemClickListener {
-                        scope.launch {
-                            onUnpin(entry.id)
-                            setPinStatus(entry.id, false)
+                    add(R.string.delete).apply {
+                        setIcon(R.drawable.ic_baseline_delete_24)
+                        setOnMenuItemClickListener {
+                            scope.launch {
+                                onDelete(entry.id)
+                                delete(entry.id)
+                            }
+                            true
                         }
-                        true
-                    }
-                }
-                menu.menu.findItem(R.id.clipboard_management_delete).apply {
-                    isVisible = true
-                    setOnMenuItemClickListener {
-                        scope.launch {
-                            onDelete(entry.id)
-                            delete(entry.id)
-                        }
-                        true
                     }
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

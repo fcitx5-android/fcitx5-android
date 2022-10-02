@@ -90,12 +90,6 @@ class MainActivity : AppCompatActivity() {
                 else -> viewModel.enableAppbarShadow()
             }
         }
-        viewModel.toolbarSaveButtonOnClickListener.observe(this) {
-            binding.toolbar.menu.findItem(R.id.activity_main_menu_save).isVisible = it != null
-        }
-        viewModel.aboutButton.observe(this) {
-            binding.toolbar.menu.findItem(R.id.activity_main_menu_about).isVisible = it
-        }
         if (SetupActivity.shouldShowUp() && intent.action == Intent.ACTION_MAIN)
             startActivity(Intent(this, SetupActivity::class.java))
         processIntent(intent)
@@ -157,26 +151,30 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.activity_main_menu, menu)
-        menu.apply {
-            findItem(R.id.activity_main_menu_about).isVisible = viewModel.aboutButton.value ?: true
-            findItem(R.id.activity_main_menu_save).isVisible =
-                viewModel.toolbarSaveButtonOnClickListener.value != null
+    override fun onCreateOptionsMenu(menu: Menu): Boolean = menu.run {
+        add(R.string.save).apply {
+            setIcon(R.drawable.ic_baseline_save_24)
+            setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
+            viewModel.toolbarSaveButtonOnClickListener.also {
+                isVisible = it.value != null
+                it.observe(this@MainActivity) { listener -> isVisible = listener != null }
+            }
+            setOnMenuItemClickListener {
+                viewModel.toolbarSaveButtonOnClickListener.value?.invoke()
+                true
+            }
         }
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
-        R.id.activity_main_menu_about -> {
-            navHostFragment.navController.navigate(R.id.action_mainFragment_to_aboutFragment)
-            true
+        add(R.string.about).apply {
+            viewModel.aboutButton.also {
+                isVisible = it.value ?: true
+                it.observe(this@MainActivity) { enabled -> isVisible = enabled }
+            }
+            setOnMenuItemClickListener {
+                navHostFragment.navController.navigate(R.id.action_mainFragment_to_aboutFragment)
+                true
+            }
         }
-        R.id.activity_main_menu_save -> {
-            viewModel.toolbarSaveButtonOnClickListener.value?.invoke()
-            true
-        }
-        else -> super.onOptionsItemSelected(item)
+        true
     }
 
     override fun onStop() {
