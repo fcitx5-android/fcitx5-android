@@ -75,7 +75,7 @@ class PickerPagesAdapter(
 
     fun updateRecent() {
         pages[0] = recentlyUsed.toOrderedList().toTypedArray()
-        notifyItemChanged(0)
+        notifyItemChanged(0, Unit)
     }
 
     fun saveRecent() {
@@ -104,7 +104,10 @@ class PickerPagesAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.ui.setItems(pages[position]) {
-            recentlyUsed.insert(it)
+            if (it !in "0123456789１２３４５６７８９０") {
+                recentlyUsed.insert(it)
+                updateRecent()
+            }
         }
     }
 
