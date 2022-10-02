@@ -3,11 +3,8 @@ package org.fcitx.fcitx5.android.input.dialog
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewGroup.MarginLayoutParams
-import android.widget.FrameLayout
 import android.widget.Space
 import androidx.appcompat.app.AlertDialog
-import androidx.core.view.marginTop
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
@@ -15,7 +12,6 @@ import org.fcitx.fcitx5.android.core.Fcitx
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.ui.main.MainActivity
 import org.fcitx.fcitx5.android.utils.AppUtil
-import splitties.dimensions.dp
 import splitties.resources.dimenPxSize
 import splitties.resources.styledDrawable
 import splitties.views.dsl.core.matchParent
@@ -50,7 +46,7 @@ object InputMethodSwitcherDialog {
                     dialog.dismiss()
                 }
                 styledDrawable(androidx.appcompat.R.attr.dividerHorizontal)?.let {
-                    addItemDecoration(DividerDecoration(it, dividerIndex))
+                    addItemDecoration(SingleDividerDecoration(it, dividerIndex))
                 }
             })
             .setNeutralButton(R.string.input_methods) { _, _ ->

@@ -18,7 +18,7 @@ class GridDecoration(val drawable: Drawable) : RecyclerView.ItemDecoration() {
     ) {
         val lp = view.layoutParams as GridLayoutManager.LayoutParams
         val layoutManager = parent.layoutManager as GridLayoutManager
-        // add space for the last item in each row
+        // add space for items except last in each row
         if (lp.spanIndex + lp.spanSize != layoutManager.spanCount) {
             outRect.right = drawable.intrinsicWidth
         } else {
