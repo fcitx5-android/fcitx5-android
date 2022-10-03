@@ -17,6 +17,7 @@ import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.*
 import org.fcitx.fcitx5.android.utils.config.ConfigType
+import org.fcitx.fcitx5.android.utils.parcelableArray
 
 object PreferenceScreenFactory {
 
@@ -132,8 +133,7 @@ object PreferenceScreenFactory {
                     descriptor.name,
                     currentFragment
                 ) { _, v ->
-                    @Suppress("UNCHECKED_CAST")
-                    cfg[descriptor.name].subItems = v[descriptor.name] as? Array<RawConfig>
+                    cfg[descriptor.name].subItems = v.parcelableArray(descriptor.name)
                     if (callChangeListener(null)) {
                         notifyChanged()
                     }

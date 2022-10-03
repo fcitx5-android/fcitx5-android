@@ -13,6 +13,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Looper
+import android.os.Parcelable
 import android.provider.OpenableColumns
 import android.util.TypedValue
 import android.view.View
@@ -41,12 +42,12 @@ import org.fcitx.fcitx5.android.R
 import splitties.experimental.InternalSplittiesApi
 import splitties.resources.withResolvedThemeAttribute
 import splitties.views.bottomPadding
+import java.io.Serializable
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-
 
 val InputMethodService.inputConnection: InputConnection?
     get() = currentInputConnection
@@ -178,5 +179,32 @@ suspend fun errorDialog(context: Context, title: String, message: String) {
             .setPositiveButton(android.R.string.ok) { _, _ -> }
             .setIcon(R.drawable.ic_baseline_error_24)
             .show()
+    }
+}
+
+inline fun <reified T : Serializable> Bundle.serializable(key: String): T? {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        getSerializable(key, T::class.java)
+    } else {
+        @Suppress("DEPRECATION")
+        getSerializable(key) as? T
+    }
+}
+
+inline fun <reified T : Parcelable> Bundle.parcelable(key: String): T? {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        getParcelable(key, T::class.java)
+    } else {
+        @Suppress("DEPRECATION")
+        getParcelable(key) as? T
+    }
+}
+
+inline fun <reified T : Parcelable> Bundle.parcelableArray(key: String): Array<T>? {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        getParcelableArray(key, T::class.java)
+    } else {
+        @Suppress("DEPRECATION", "UNCHECKED_CAST")
+        getParcelableArray(key) as? Array<T>
     }
 }

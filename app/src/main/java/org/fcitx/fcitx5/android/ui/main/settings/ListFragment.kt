@@ -16,15 +16,15 @@ import org.fcitx.fcitx5.android.ui.common.DynamicListUi
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor
 import org.fcitx.fcitx5.android.utils.config.ConfigType
+import org.fcitx.fcitx5.android.utils.parcelable
 
 class ListFragment : Fragment() {
 
-    @Suppress("UNCHECKED_CAST")
     private val descriptor: ConfigDescriptor<*, out List<*>> by lazy {
-        requireArguments().get(ARG_DESC) as ConfigDescriptor<*, List<*>>
+        requireArguments().parcelable(ARG_DESC)!!
     }
     private val cfg: RawConfig by lazy {
-        requireArguments().get(ARG_CFG) as RawConfig
+        requireArguments().parcelable(ARG_CFG)!!
     }
 
     private val viewModel: MainViewModel by activityViewModels()

@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.ui.main.settings.theme
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
@@ -75,6 +76,7 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
      * https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-11.0.0_r48/services/core/java/com/android/server/wm/DisplayPolicy.java#3059
      */
     private fun navbarHeight() = ctx.resources.run {
+        @SuppressLint("DiscouragedApi")
         val id = getIdentifier("navigation_bar_frame_height", "dimen", "android")
         if (id > 0) getDimensionPixelSize(id) else 0
     }

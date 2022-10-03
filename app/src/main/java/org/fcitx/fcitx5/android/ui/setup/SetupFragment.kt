@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import org.fcitx.fcitx5.android.databinding.FragmentSetupBinding
 import org.fcitx.fcitx5.android.ui.setup.SetupPage.Companion.isLastPage
+import org.fcitx.fcitx5.android.utils.serializable
 
 class SetupFragment : Fragment() {
 
@@ -15,7 +16,7 @@ class SetupFragment : Fragment() {
 
     private lateinit var binding: FragmentSetupBinding
 
-    private val page: SetupPage by lazy { requireArguments().get("page") as SetupPage }
+    private val page: SetupPage by lazy { requireArguments().serializable(PAGE)!! }
 
     private var isDone: Boolean = false
         set(new) {
@@ -49,6 +50,10 @@ class SetupFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         sync()
+    }
+
+    companion object {
+        const val PAGE = "page"
     }
 
 }

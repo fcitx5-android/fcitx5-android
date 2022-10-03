@@ -31,6 +31,7 @@ import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import org.fcitx.fcitx5.android.utils.NaiveDustman
 import org.fcitx.fcitx5.android.utils.errorDialog
+import org.fcitx.fcitx5.android.utils.parcelable
 import org.fcitx.fcitx5.android.utils.queryFileName
 import splitties.systemservices.notificationManager
 import timber.log.Timber
@@ -105,8 +106,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        arguments?.get(INTENT_DATA_URI)
-            ?.let { it as? Uri }
+        arguments?.parcelable<Uri>(INTENT_DATA_URI)
             ?.let { importFromUri(it) }
         super.onViewCreated(view, savedInstanceState)
     }

@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.input.keyboard
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
 import android.os.SystemClock
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
@@ -93,10 +94,7 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
 
     private fun hapticFeedback(feedback: Int = HapticFeedbackConstants.KEYBOARD_TAP) {
         if (buttonHapticFeedback) {
-            performHapticFeedback(
-                feedback,
-                HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING or HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
-            )
+            performHapticFeedback(feedback, HapticFeedbackFlags)
         }
     }
 
@@ -299,5 +297,12 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
         val buttonHapticFeedback by AppPrefs.getInstance().keyboard.buttonHapticFeedback
 
         const val RepeatInterval = 50L
+
+        val HapticFeedbackFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
+        } else {
+            @Suppress("DEPRECATION")
+            HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING or HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
+        }
     }
 }

@@ -16,6 +16,7 @@ import android.view.View
 import android.view.ViewOutlineProvider
 import android.webkit.MimeTypeMap
 import android.widget.SeekBar
+import androidx.activity.addCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.StringRes
@@ -35,6 +36,7 @@ import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.data.theme.ThemePreset
 import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
 import org.fcitx.fcitx5.android.utils.darkenColorFilter
+import org.fcitx.fcitx5.android.utils.parcelable
 import splitties.dimensions.dp
 import splitties.resources.color
 import splitties.resources.resolveThemeAttribute
@@ -67,7 +69,7 @@ class CustomThemeActivity : AppCompatActivity() {
             }
 
         override fun parseResult(resultCode: Int, intent: Intent?): BackgroundResult? =
-            intent?.getParcelableExtra(RESULT)
+            intent?.extras?.parcelable(RESULT)
     }
 
     private lateinit var previewUi: KeyboardPreviewUi
@@ -265,7 +267,7 @@ class CustomThemeActivity : AppCompatActivity() {
             done()
         }
         // recover from bundle
-        val originTheme = intent?.getParcelableExtra<Theme.Custom>(ORIGIN_THEME)?.also { t ->
+        val originTheme = intent?.extras?.parcelable<Theme.Custom>(ORIGIN_THEME)?.also { t ->
             theme = t
             whenHasBackground {
                 croppedImageFile = File(it.croppedFilePath)
@@ -362,6 +364,10 @@ class CustomThemeActivity : AppCompatActivity() {
                 updateState()
             }
         }
+
+        onBackPressedDispatcher.addCallback {
+            cancel()
+        }
     }
 
     private fun BackgroundStates.launchCrop(w: Int, h: Int) {
@@ -455,11 +461,6 @@ class CustomThemeActivity : AppCompatActivity() {
             }
         )
         finish()
-    }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
-        cancel()
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {

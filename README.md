@@ -13,13 +13,13 @@ An attempt to run fcitx5 on Android.
 - Clipboard management (plain text only)
 - Themeing (custom color scheme and background image)
 - Popup preview on key press
+- Long press popup keyboard for convenient symbol input
+- User-friendly symbol selector
 
 ### Work in progress
 
 - Customiziable keyboard layout
 - More input methods
-- Long press popup keyboard for convenient symbol input
-- User-friendly symbol / emoji selector
 
 ## Screenshots
 
@@ -39,7 +39,7 @@ Discuss on Telegram: https://t.me/+hci-DrFVWUM3NTUx ([@fcitx5_android](https://t
 
 ### Dependencies
 
-- Android SDK Platform & Build-Tools 31 or newer version
+- Android SDK Platform & Build-Tools 33 or newer version
 - Android NDK (Side by side) 25 & CMake 3.22.1, they can be installed using SDK Manager in Android Studio or `sdkmanager` command line. **Note:** NDK 21 & 22 are confirmed not working with this project.
 - [KDE/extra-cmake-modules](https://github.com/KDE/extra-cmake-modules)
 - GNU Gettext >= 0.20 (for `msgfmt` binary; or install `appstream` if you really have to use gettext <= 0.19.)

@@ -18,8 +18,8 @@ import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseEntry
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.utils.NaiveDustman
+import org.fcitx.fcitx5.android.utils.parcelable
 import org.fcitx.fcitx5.android.utils.str
-import splitties.dimensions.dp
 import splitties.views.dsl.core.*
 import splitties.views.setPaddingDp
 
@@ -44,7 +44,7 @@ class QuickPhraseEditFragment : ProgressFragment(),
     }
 
     override suspend fun initialize(): View {
-        quickPhrase = requireArguments().get(ARG) as QuickPhrase
+        quickPhrase = requireArguments().parcelable(ARG)!!
         viewModel.disableToolbarSaveButton()
         viewModel.setToolbarTitle(quickPhrase.name)
         val initialEntries = withContext(Dispatchers.IO) {

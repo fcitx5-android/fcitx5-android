@@ -138,7 +138,7 @@ class SetupActivity : FragmentActivity() {
 
         override fun createFragment(position: Int): Fragment =
             SetupFragment().apply {
-                arguments = bundleOf("page" to SetupPage.values()[position])
+                arguments = bundleOf(SetupFragment.PAGE to SetupPage.valueOf(position))
             }
     }
 
