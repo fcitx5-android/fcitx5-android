@@ -44,6 +44,10 @@ class CommonKeyActionListener :
                         if (preedit.content.preedit.run { preedit.isEmpty() && clientPreedit.isEmpty() }) {
                             // preedit is empty, there can be prediction candidates
                             fcitx.reset()
+                        } else if (fcitx.inputMethodEntryCached.uniqueName == "keyboard-us") {
+                            // androidkeyboard clears composing on reset, but we want to commit it as-is
+                            service.inputConnection?.finishComposingText()
+                            fcitx.reset()
                         } else {
                             if (!fcitx.select(0)) fcitx.reset()
                         }
