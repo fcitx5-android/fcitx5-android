@@ -892,6 +892,15 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_setFcitxInputMethodConfig(JNIEnv *env, 
     Fcitx::Instance().setInputMethodConfig(CString(env, im), rawConfig);
 }
 
+jobjectArray stringVectorToJStringArray(JNIEnv *env, const std::vector<std::string> &strings) {
+    jobjectArray array = env->NewObjectArray(static_cast<int>(strings.size()),  GlobalRef->String, nullptr);
+    int i = 0;
+    for (const auto &s : strings) {
+        env->SetObjectArrayElement(array, i++, JString(env, s));
+    }
+    return array;
+}
+
 extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_getFcitxAddons(JNIEnv *env, jclass clazz) {
@@ -908,7 +917,10 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_getFcitxAddons(JNIEnv *env, jclass claz
                                             static_cast<int32_t>(info->category()),
                                             info->isConfigurable(),
                                             addon.second,
-                                            info->onDemand()
+                                            info->isDefaultEnabled(),
+                                            info->onDemand(),
+                                            stringVectorToJStringArray(env, info->dependencies()),
+                                            stringVectorToJStringArray(env, info->optionalDependencies())
         ));
         env->SetObjectArrayElement(array, i++, obj);
     }
