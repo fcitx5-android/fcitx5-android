@@ -3,6 +3,7 @@ package org.fcitx.fcitx5.android.ui.main.settings
 import android.content.Context
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
+import androidx.appcompat.widget.AppCompatButton
 import androidx.core.widget.addTextChangedListener
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Key
@@ -29,11 +30,14 @@ class KeyPreferenceUi(override val ctx: Context) : Ui {
         override val ctx: Context
             get() = this@KeyPreferenceUi.ctx
 
-        override val root = button {
+        // we use AppCompatButton here, because MaterialComponents' Bridge Theme would convert
+        // normal button to MaterialButton
+        override val root = view(::AppCompatButton) {
             text = label
             isAllCaps = false
-            // somehow it does not work ´_>`
+            // those 2 are both necessary, don't ask me why ´_>`
             minWidth = 0
+            minimumWidth = 0
             setOnClickListener {
                 checked = !checked
                 setKey(Key.create(keySym, keyStates))
@@ -65,8 +69,7 @@ class KeyPreferenceUi(override val ctx: Context) : Ui {
     )
 
     private val input = editText {
-        // because button's minWidth does not work, set editText's minWidth to compete
-        minWidth = dp(100)
+        textSize = 16f // sp
         inputType = EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS
         imeOptions = EditorInfo.IME_FLAG_FORCE_ASCII
         privateImeOptions = FcitxInputMethodService.DeleteSurroundingFlag
@@ -116,7 +119,6 @@ class KeyPreferenceUi(override val ctx: Context) : Ui {
             add(btn.root, lParams(matchConstraints, wrapContent) {
                 below(textView, vMargin)
                 if (i == 0) startOfParent(hMargin) else after(modifierButtons[i - 1].root)
-                before(modifierButtons.getOrNull(i + 1)?.root ?: input)
                 bottomOfParent(vMargin)
             })
         }
