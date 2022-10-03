@@ -17,7 +17,7 @@
     <string name="_not_available_">（不可用）</string>
     <string name="button_haptic_feedback">按键时振动</string>
     <string name="add">添加</string>
-    <string name="edit">修改</string>
+    <string name="edit">编辑</string>
     <string name="undo">撤销</string>
     <string name="delete_and_sync_data">删除并同步运行数据</string>
     <string name="delete_and_sync_data_message">删除当前的数据文件夹并从应用附带的资源中同步</string>
@@ -148,4 +148,7 @@
     <string name="none">无</string>
     <string name="theme_migrated">主题已迁移到当前版本</string>
     <string name="keep_keyboard_letters_uppercase">键盘字母保持大写</string>
+    <string name="choose_input_method">选择输入法</string>
+    <string name="edit_clipboard">编辑剪贴板</string>
+    <string name="clipboard_edit_text_hint">剪贴板内容</string>
 </resources>
