@@ -151,4 +151,5 @@
     <string name="choose_input_method">Choose input method</string>
     <string name="edit_clipboard">Edit clipboard</string>
     <string name="clipboard_edit_text_hint">Clipboard content</string>
+    <string name="config_addon_not_loaded">No configuration options available, maybe this addon is disabled when fcitx start?</string>
 </resources>

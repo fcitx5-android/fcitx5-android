@@ -20,6 +20,7 @@ abstract class FcitxPreferenceFragment : PaddingPreferenceFragment() {
     abstract suspend fun saveConfig(fcitx: Fcitx, newConfig: RawConfig)
 
     private lateinit var raw: RawConfig
+    private var configLoaded = false
 
     private val viewModel: MainViewModel by activityViewModels()
 
@@ -31,6 +32,7 @@ abstract class FcitxPreferenceFragment : PaddingPreferenceFragment() {
             ?: throw IllegalStateException("No $key found in bundle")
 
     private fun save() {
+        if (!configLoaded) return
         lifecycleScope.launch {
             saveConfig(fcitx, raw["cfg"])
         }
@@ -42,15 +44,27 @@ abstract class FcitxPreferenceFragment : PaddingPreferenceFragment() {
     }
 
     final override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        lifecycleScope.withLoadingDialog(requireContext()) {
+        val context = requireContext()
+        lifecycleScope.withLoadingDialog(context) {
             raw = obtainConfig(fcitx)
+            if (raw.findByName("cfg") != null && raw.findByName("desc") != null) {
+                configLoaded = true
+            } else {
+                preferenceScreen = preferenceManager.createPreferenceScreen(context).apply {
+                    addPreference(Preference(context).apply {
+                        setTitle(R.string.config_addon_not_loaded)
+                        isIconSpaceReserved = false
+                    })
+                }
+                return@withLoadingDialog
+            }
             val screen =
                 PreferenceScreenFactory.create(preferenceManager, parentFragmentManager, raw)
             screen.forEach {
                 it.onPreferenceChangeListener = onPreferenceChangeListener
             }
             if (screen.isEmpty()) {
-                screen.addPreference(Preference(requireContext()).apply {
+                screen.addPreference(Preference(context).apply {
                     setTitle(R.string.no_config_options)
                     isIconSpaceReserved = false
                 })
