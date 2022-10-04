@@ -8,11 +8,13 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.DataManager
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.utils.ImmutableGraph
 import timber.log.Timber
 
 class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
@@ -38,6 +40,28 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
     var statusAreaActionsCached: Array<Action> = arrayOf()
         private set
+
+    enum class AddonDep {
+        Required,
+        Optional
+    }
+
+    private val addonGraph: ImmutableGraph<String, AddonDep> by lazy {
+        runBlocking {
+            addons().flatMap { a ->
+                a.dependencies.map {
+                    ImmutableGraph.Edge(it, a.uniqueName, AddonDep.Required)
+                } + a.optionalDependencies.map {
+                    ImmutableGraph.Edge(it, a.uniqueName, AddonDep.Optional)
+                }
+            }.let { ImmutableGraph(it) }
+        }
+    }
+
+    private val addonReversedDependencies = mutableMapOf<String, List<Pair<String, AddonDep>>>()
+
+    fun getAddonReverseDependencies(addon: String) =
+        addonReversedDependencies.computeIfAbsent(addon) { addonGraph.bfs(it) }
 
     fun translate(str: String, domain: String = "fcitx5") = getFcitxTranslation(domain, str)
 

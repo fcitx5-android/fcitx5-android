@@ -44,9 +44,9 @@
       overlays.default = final: prev: {
         fcitx5-android-sdk = rec {
           cmakeVersion = "3.22.1";
-          buildToolsVersion = "31.0.0";
+          buildToolsVersion = "33.0.0";
           platformToolsVersion = "33.0.2";
-          platformVersion = "31";
+          platformVersion = "33";
           ndkVersion = "24.0.8215888";
           abiVersions = [ "arm64-v8a" "armeabi-v7a" ];
           androidComposition = prev.androidenv.composeAndroidPackages {

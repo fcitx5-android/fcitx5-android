@@ -1,5 +1,7 @@
 package org.fcitx.fcitx5.android.utils
 
+import java.util.*
+
 class ImmutableGraph<V, L>(
     edges: List<Edge<V, L>>
 ) {
@@ -29,4 +31,27 @@ class ImmutableGraph<V, L>(
                 (v2Idx to labelIdx) to Edge(vertex, vertices[v2Idx], labels[labelIdx])
             }
         }
+
+    fun bfs(vertex: V): List<Pair<V, L>> {
+        val start = vertices.indexOf(vertex).takeIf { it != -1 } ?: return emptyList()
+        val visited = BooleanArray(vertices.size)
+        val queue: Queue<Pair<Int, Int>> = LinkedList()
+        val result = mutableListOf<Pair<Int, Int>>()
+        visited[start] = true
+        queue.add(start to -1)
+        while (queue.isNotEmpty()) {
+            val (x, v) = queue.remove()
+            if (start != x)
+                result.add(x to v)
+            visited.indices.forEach { i ->
+                val l = adjacencyMatrix[x][i].takeIf { it != -1 }
+                if (l != null && !visited[i]) {
+                    queue.add(i to l)
+                    visited[i] = true
+                }
+            }
+        }
+        return result.map { (v, l) -> vertices[v] to labels[l] }
+    }
+
 }
