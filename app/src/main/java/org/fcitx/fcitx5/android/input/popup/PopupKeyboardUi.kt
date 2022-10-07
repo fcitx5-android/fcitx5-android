@@ -126,6 +126,7 @@ class PopupKeyboardUi(
         textView {
             text = it
             textSize = 23f
+            isSingleLine = true
             gravity = gravityCenter
             setTextColor(theme.keyTextColor.color)
         }
