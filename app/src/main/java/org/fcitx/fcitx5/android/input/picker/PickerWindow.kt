@@ -1,15 +1,15 @@
 package org.fcitx.fcitx5.android.input.picker
 
+import android.graphics.Rect
 import android.view.Gravity
 import androidx.core.content.ContextCompat
 import androidx.transition.Slide
 import androidx.viewpager2.widget.ViewPager2
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.theme
-import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
-import org.fcitx.fcitx5.android.input.keyboard.KeyAction
-import org.fcitx.fcitx5.android.input.keyboard.KeyActionListener
-import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
+import org.fcitx.fcitx5.android.input.keyboard.*
+import org.fcitx.fcitx5.android.input.popup.PopupComponent
+import org.fcitx.fcitx5.android.input.popup.PopupListener
 import org.fcitx.fcitx5.android.input.wm.EssentialWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
@@ -21,6 +21,7 @@ class PickerWindow(val data: List<Pair<String, Array<String>>>) :
     private val theme by manager.theme()
     private val windowManager: InputWindowManager by manager.must()
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
+    private val popup: PopupComponent by manager.must()
 
     companion object : EssentialWindow.Key
 
@@ -55,14 +56,33 @@ class PickerWindow(val data: List<Pair<String, Array<String>>>) :
                 }
             }
             else -> {
+                if (it is KeyAction.CommitAction) {
+                    pickerPagesAdapter.insertRecent(it.text)
+                }
                 commonKeyActionListener.listener.onKeyAction(it, source)
+            }
+        }
+    }
+
+    private val popupListener: PopupListener by lazy {
+        object : PopupListener by popup.listener {
+            override fun onShowKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
+                // prevent ViewPager from consuming swipe gesture when popup keyboard shown
+                pickerLayout.pager.isUserInputEnabled = false
+                popup.listener.onShowKeyboard(viewId, keyboard, bounds)
+            }
+
+            override fun onDismiss(viewId: Int) {
+                popup.listener.onDismiss(viewId)
+                // restore ViewPager scrolling
+                pickerLayout.pager.isUserInputEnabled = true
             }
         }
     }
 
     override fun onCreateView() = PickerLayout(context, theme).apply {
         pickerLayout = this
-        pickerPagesAdapter = PickerPagesAdapter(theme, keyActionListener, data)
+        pickerPagesAdapter = PickerPagesAdapter(theme, keyActionListener, popupListener, data)
         tabsUi.apply {
             setTabs(pickerPagesAdapter.categories)
             setOnTabClickListener { i ->
@@ -90,6 +110,7 @@ class PickerWindow(val data: List<Pair<String, Array<String>>>) :
 
                 override fun onPageSelected(position: Int) {
                     tabsUi.activateTab(pickerPagesAdapter.getCategoryOfPage(position))
+                    popup.dismissAll()
                 }
             })
             // show first symbol category by default, rather than recently used
@@ -114,6 +135,7 @@ class PickerWindow(val data: List<Pair<String, Array<String>>>) :
     }
 
     override fun onDetached() {
+        popup.dismissAll()
         pickerLayout.embeddedKeyboard.keyActionListener = null
         pickerPagesAdapter.saveRecent()
     }

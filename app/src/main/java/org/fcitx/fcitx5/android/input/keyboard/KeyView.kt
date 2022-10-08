@@ -121,9 +121,13 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
         layout.alpha = if (enabled) 1f else styledFloat(android.R.attr.disabledAlpha)
     }
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+    fun updateBounds(w: Int = width, h: Int = height) {
         val (x, y) = intArrayOf(0, 0).also { getLocationInWindow(it) }
         bounds.set(x, y, x + w, y + h)
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        updateBounds()
         if (bordered) return
         when (def.viewId) {
             R.id.button_space -> {

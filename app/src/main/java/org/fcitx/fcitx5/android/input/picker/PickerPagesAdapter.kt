@@ -5,15 +5,16 @@ import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.data.RecentlyUsed
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.KeyActionListener
+import org.fcitx.fcitx5.android.input.popup.PopupListener
 
 class PickerPagesAdapter(
     val theme: Theme,
     private val keyActionListener: KeyActionListener,
+    private val popupListener: PopupListener,
     data: List<Pair<String, Array<String>>>
-) :
-    RecyclerView.Adapter<PickerPagesAdapter.ViewHolder>() {
-    class ViewHolder(val ui: PickerPageUi) : RecyclerView.ViewHolder(ui.root)
+) : RecyclerView.Adapter<PickerPagesAdapter.ViewHolder>() {
 
+    class ViewHolder(val ui: PickerPageUi) : RecyclerView.ViewHolder(ui.root)
 
     /**
      * calculated layout of data in the form of
@@ -73,6 +74,12 @@ class PickerPagesAdapter(
         recentlyUsed.load()
     }
 
+    fun insertRecent(text: String) {
+        if (text.length == 1 && text[0].code.let { it in Digit || it in FullWidthDigit }) return
+        recentlyUsed.insert(text)
+        updateRecent()
+    }
+
     fun updateRecent() {
         pages[0] = recentlyUsed.toOrderedList().toTypedArray()
         notifyItemChanged(0, Unit)
@@ -103,23 +110,23 @@ class PickerPagesAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.ui.setItems(pages[position]) {
-            if (it !in "0123456789１２３４５６７８９０") {
-                recentlyUsed.insert(it)
-                updateRecent()
-            }
-        }
+        holder.ui.setItems(pages[position])
     }
 
     override fun onViewAttachedToWindow(holder: ViewHolder) {
         holder.ui.keyActionListener = keyActionListener
+        holder.ui.popupListener = popupListener
     }
 
     override fun onViewDetachedFromWindow(holder: ViewHolder) {
         holder.ui.keyActionListener = null
+        holder.ui.popupListener = null
     }
 
     companion object {
+        private val Digit = IntRange('0'.code, '9'.code)
+        private val FullWidthDigit = IntRange('０'.code, '９'.code)
+
         private const val ITEMS_PER_PAGE = 28
     }
 }
