@@ -65,7 +65,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    private val cachedKeyEvents = LruCache<Long, KeyEvent>(26)
+    private val cachedKeyEvents = LruCache<Long, KeyEvent>(78)
+    private var cachedKeyEventIndex = 0L
 
     private lateinit var inputView: InputView
     private lateinit var fcitx: Fcitx
@@ -341,7 +342,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     override fun onEvaluateFullscreenMode() = false
 
     private fun forwardKeyEvent(event: KeyEvent): Boolean {
-        val timestamp = event.eventTime
+        // reason to use a self increment index rather than timestamp:
+        // KeyUp and KeyDown events actually can happen on the same time
+        val timestamp = cachedKeyEventIndex++
         cachedKeyEvents.put(timestamp, event)
         val up = event.action == KeyEvent.ACTION_UP
         val states = KeyStates.fromKeyEvent(event)
@@ -546,6 +549,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onUnbindInput() {
+        cachedKeyEvents.evictAll()
+        cachedKeyEventIndex = 0L
         val uid = currentInputBinding.uid
         Timber.d("onUnbindInput: uid=$uid")
         lifecycleScope.launch {
