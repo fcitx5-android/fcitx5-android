@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.input
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
@@ -338,6 +339,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             visibleTopInsets = y
         }
     }
+
+    // TODO: candidate view for physical keyboard input
+    // always show InputView since we do not support physical keyboard input without it yet
+    @SuppressLint("MissingSuperCall")
+    override fun onEvaluateInputViewShown() = true
 
     override fun onEvaluateFullscreenMode() = false
 
