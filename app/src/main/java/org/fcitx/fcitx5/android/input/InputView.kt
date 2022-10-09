@@ -218,10 +218,10 @@ class InputView(
                         .isAppearanceLightNavigationBars = !theme.isDark
                 }
                 if (shouldUpdateNavbarBackground) {
-                    it.navigationBarColor = (when (theme) {
+                    it.navigationBarColor = when (theme) {
                         is Theme.Builtin -> if (keyBorder) theme.backgroundColor else theme.keyboardColor
                         is Theme.Custom -> theme.backgroundColor
-                    }).color
+                    }
                 }
             }
         }

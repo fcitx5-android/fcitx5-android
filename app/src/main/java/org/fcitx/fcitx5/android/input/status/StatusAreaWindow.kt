@@ -104,7 +104,7 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
     val view by lazy {
         context.recyclerView {
             if (!keyBorder) {
-                backgroundColor = theme.barColor.color
+                backgroundColor = theme.barColor
             }
             layoutManager = gridLayoutManager(4)
             adapter = this@StatusAreaWindow.adapter

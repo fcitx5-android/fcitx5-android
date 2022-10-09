@@ -60,7 +60,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                 arrayOf(
                     GradientDrawable().apply {
                         cornerRadius = radius
-                        setColor(theme.keyShadowColor.color)
+                        setColor(theme.keyShadowColor)
                     },
                     GradientDrawable().apply {
                         cornerRadius = radius
@@ -69,7 +69,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                                 Variant.Normal, Variant.AltForeground -> theme.keyBackgroundColor
                                 Variant.Alternative -> theme.altKeyBackgroundColor
                                 Variant.Accent -> theme.accentKeyBackgroundColor
-                            }.color
+                            }
                         )
                     }
                 )
@@ -93,7 +93,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
     private fun setupPressHighlight(mask: Drawable? = null) {
         foreground = if (rippled)
             RippleDrawable(
-                ColorStateList.valueOf(theme.keyPressHighlightColor.color), null,
+                ColorStateList.valueOf(theme.keyPressHighlightColor), null,
                 // ripple should be masked with an opaque color
                 mask ?: highlightMaskDrawable(Color.WHITE)
             )
@@ -102,7 +102,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                 addState(
                     intArrayOf(android.R.attr.state_pressed),
                     // use mask drawable as highlight directly
-                    mask ?: highlightMaskDrawable(theme.keyPressHighlightColor.color)
+                    mask ?: highlightMaskDrawable(theme.keyPressHighlightColor)
                 )
             }
     }
@@ -138,7 +138,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                 background = InsetDrawable(
                     GradientDrawable().apply {
                         cornerRadius = bkgRadius
-                        setColor(theme.spaceBarColor.color)
+                        setColor(theme.spaceBarColor)
                     },
                     hInset, vInset, hInset, vInset
                 )
@@ -149,7 +149,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                     InsetDrawable(
                         GradientDrawable().apply {
                             cornerRadius = bkgRadius
-                            setColor(if (rippled) Color.WHITE else theme.keyPressHighlightColor.color)
+                            setColor(if (rippled) Color.WHITE else theme.keyPressHighlightColor)
                         },
                         hInset, vInset, hInset, vInset
                     )
@@ -162,7 +162,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                 background = InsetDrawable(
                     GradientDrawable().apply {
                         shape = GradientDrawable.OVAL
-                        setColor(theme.accentKeyBackgroundColor.color)
+                        setColor(theme.accentKeyBackgroundColor)
                     },
                     hInset, vInset, hInset, vInset
                 )
@@ -171,7 +171,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                     InsetDrawable(
                         GradientDrawable().apply {
                             shape = GradientDrawable.OVAL
-                            setColor(if (rippled) Color.WHITE else theme.keyPressHighlightColor.color)
+                            setColor(if (rippled) Color.WHITE else theme.keyPressHighlightColor)
                         },
                         hInset, vInset, hInset, vInset
                     )
@@ -196,7 +196,7 @@ open class TextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Text) 
                 Variant.Normal -> theme.keyTextColor
                 Variant.AltForeground, Variant.Alternative -> theme.altKeyTextColor
                 Variant.Accent -> theme.accentKeyTextColor
-            }.color
+            }
         )
     }
 
@@ -224,7 +224,7 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
             when (def.variant) {
                 Variant.Normal, Variant.AltForeground, Variant.Alternative -> theme.altKeyTextColor
                 Variant.Accent -> theme.accentKeyTextColor
-            }.color
+            }
         )
     }
 
@@ -302,7 +302,7 @@ class ImageKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Image) :
                 Variant.Normal -> theme.keyTextColor
                 Variant.AltForeground, Variant.Alternative -> theme.altKeyTextColor
                 Variant.Accent -> theme.accentKeyTextColor
-            }.color,
+            },
             PorterDuff.Mode.SRC_IN
         )
     }

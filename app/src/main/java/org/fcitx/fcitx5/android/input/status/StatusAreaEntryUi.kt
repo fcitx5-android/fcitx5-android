@@ -14,8 +14,9 @@ import splitties.resources.drawable
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.gravityCenter
+import splitties.views.imageDrawable
 
-class StatusAreaEntryUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
+class StatusAreaEntryUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     private val bkgDrawable = ShapeDrawable(OvalShape())
 
@@ -27,7 +28,7 @@ class StatusAreaEntryUi(override val ctx: Context, private val inputTheme: Theme
     val label = textView {
         textSize = 12f
         gravity = gravityCenter
-        setTextColor(inputTheme.keyTextColor.color)
+        setTextColor(theme.keyTextColor)
     }
 
     override val root = object : CustomGestureView(ctx) {
@@ -51,14 +52,14 @@ class StatusAreaEntryUi(override val ctx: Context, private val inputTheme: Theme
         }
     }
 
-    fun setEntry(entry: StatusAreaEntry) = with(ctx) {
-        icon.setImageDrawable(drawable(entry.icon))
+    fun setEntry(entry: StatusAreaEntry) {
+        icon.imageDrawable = ctx.drawable(entry.icon)
         icon.colorFilter = PorterDuffColorFilter(
-            (if (entry.active) inputTheme.genericActiveForegroundColor else inputTheme.keyTextColor).color,
+            if (entry.active) theme.genericActiveForegroundColor else theme.keyTextColor,
             PorterDuff.Mode.SRC_IN
         )
         bkgDrawable.paint.color =
-            (if (entry.active) inputTheme.genericActiveBackgroundColor else inputTheme.keyBackgroundColor).color
+            if (entry.active) theme.genericActiveBackgroundColor else theme.keyBackgroundColor
         label.text = entry.label
     }
 }

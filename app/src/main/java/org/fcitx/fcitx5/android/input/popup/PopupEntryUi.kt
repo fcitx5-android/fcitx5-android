@@ -22,13 +22,13 @@ class PopupEntryUi(override val ctx: Context, theme: Theme, keyHeight: Int, radi
     val textView = textView {
         textSize = 23f
         gravity = gravityCenter
-        setTextColor(theme.popupTextColor.color)
+        setTextColor(theme.popupTextColor)
     }
 
     override val root = constraintLayout {
         background = GradientDrawable().apply {
             cornerRadius = radius
-            setColor(theme.popupBackgroundColor.color)
+            setColor(theme.popupBackgroundColor)
         }
         outlineProvider = ViewOutlineProvider.BACKGROUND
         elevation = dp(2f)

@@ -38,8 +38,8 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
     protected fun toolButton(@DrawableRes icon: Int, initView: ToolButton.() -> Unit = {}) =
         ToolButton(ctx, icon, theme).apply(initView)
 
-    class Candidate(ctx: Context, inputTheme: Theme, private val horizontalView: View) :
-        KawaiiBarUi(ctx, inputTheme) {
+    class Candidate(ctx: Context, theme: Theme, private val horizontalView: View) :
+        KawaiiBarUi(ctx, theme) {
 
         val expandButton = toolButton(R.drawable.ic_baseline_expand_more_24) {
             id = R.id.expand_candidate_btn
@@ -61,9 +61,9 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
 
     class Idle(
         ctx: Context,
-        inputTheme: Theme,
+        theme: Theme,
         private val getCurrentState: () -> IdleUiStateMachine.State,
-    ) : KawaiiBarUi(ctx, inputTheme) {
+    ) : KawaiiBarUi(ctx, theme) {
 
         private val IdleUiStateMachine.State.menuButtonRotation
             get() =
@@ -114,15 +114,14 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
 
         private val clipboardIcon = imageView {
             imageResource = R.drawable.ic_clipboard
-            colorFilter =
-                PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
+            colorFilter = PorterDuffColorFilter(theme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
         }
 
         private val clipboardText = textView {
             isSingleLine = true
             maxWidth = dp(120)
             ellipsize = TextUtils.TruncateAt.END
-            setTextColor(inputTheme.altKeyTextColor.color)
+            setTextColor(theme.altKeyTextColor)
         }
 
         private val clipboardSuggestionLayout = horizontalLayout {
@@ -138,7 +137,7 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
             init {
                 visibility = View.GONE
                 isHapticFeedbackEnabled = false
-                background = rippleDrawable(inputTheme.keyPressHighlightColor.color)
+                background = rippleDrawable(theme.keyPressHighlightColor)
                 add(clipboardSuggestionLayout, lParams(wrapContent, matchParent))
             }
         }
@@ -258,13 +257,13 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
         }
     }
 
-    class Title(ctx: Context, inputTheme: Theme) : KawaiiBarUi(ctx, inputTheme) {
+    class Title(ctx: Context, theme: Theme) : KawaiiBarUi(ctx, theme) {
 
         private val backButton = toolButton(R.drawable.ic_baseline_arrow_back_24)
 
         private val titleText = textView {
             typeface = Typeface.defaultFromStyle(Typeface.BOLD)
-            setTextColor(inputTheme.altKeyTextColor.color)
+            setTextColor(theme.altKeyTextColor)
             gravity = gravityVerticalCenter
             textSize = 16f
         }

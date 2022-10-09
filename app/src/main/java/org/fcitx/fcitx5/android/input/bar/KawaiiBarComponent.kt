@@ -225,7 +225,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         ViewAnimator(context).apply {
             backgroundColor =
                 if (ThemeManager.prefs.keyBorder.getValue()) Color.TRANSPARENT
-                else theme.barColor.color
+                else theme.barColor
             add(idleUi.root, lParams(matchParent, matchParent))
             add(candidateUi.root, lParams(matchParent, matchParent))
             add(titleUi.root, lParams(matchParent, matchParent))

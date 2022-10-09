@@ -16,7 +16,7 @@ import splitties.views.dsl.recyclerview.recyclerView
 @SuppressLint("ViewConstructor")
 class ExpandedCandidateLayout(
     context: Context,
-    inputTheme: Theme,
+    theme: Theme,
     initRecyclerView: RecyclerView.() -> Unit = {}
 ) : ConstraintLayout(context) {
 
@@ -67,7 +67,7 @@ class ExpandedCandidateLayout(
     var pageUpBtn: ImageKeyView
     var pageDnBtn: ImageKeyView
 
-    val embeddedKeyboard = Keyboard(context, inputTheme).also {
+    val embeddedKeyboard = Keyboard(context, theme).also {
         pageUpBtn = it.pageUpBtn
         pageDnBtn = it.pageDnBtn
     }
@@ -75,7 +75,7 @@ class ExpandedCandidateLayout(
     init {
         id = R.id.expanded_candidate_view
         if (!keyBorder) {
-            backgroundColor = inputTheme.barColor.color
+            backgroundColor = theme.barColor
         }
 
         add(recyclerView, lParams {

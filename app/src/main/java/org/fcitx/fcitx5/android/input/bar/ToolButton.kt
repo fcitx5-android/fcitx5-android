@@ -35,11 +35,11 @@ class ToolButton(context: Context, @DrawableRes icon: Int, val theme: Theme) :
         imageDrawable = context.drawable(icon)
         padding = dp(10)
         scaleType = ImageView.ScaleType.CENTER_INSIDE
-        colorFilter = PorterDuffColorFilter(theme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
+        colorFilter = PorterDuffColorFilter(theme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
     }
 
     init {
-        val color = theme.keyPressHighlightColor.color
+        val color = theme.keyPressHighlightColor
         background = if (disableAnimation) {
             circlePressHighlightDrawable(color)
         } else {

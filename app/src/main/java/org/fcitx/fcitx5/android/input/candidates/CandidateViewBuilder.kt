@@ -49,6 +49,6 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
     fun dividerDrawable() = ShapeDrawable(RectShape()).apply {
         intrinsicWidth = context.dp(1)
         intrinsicHeight = context.dp(1)
-        paint.color = theme.dividerColor.color
+        paint.color = theme.dividerColor
     }
 }

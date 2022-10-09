@@ -14,19 +14,19 @@ import splitties.views.dsl.core.*
 import splitties.views.imageResource
 import splitties.views.setPaddingDp
 
-class ClipboardEntryUi(override val ctx: Context, private val inputTheme: Theme) : Ui {
+class ClipboardEntryUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     val text = textView {
         maxLines = 4
         textSize = 14f
         setPaddingDp(8, 4, 8, 4)
         ellipsize = TextUtils.TruncateAt.END
-        setTextColor(inputTheme.keyTextColor.color)
+        setTextColor(theme.keyTextColor)
     }
 
     val pin = imageView {
         imageResource = R.drawable.ic_baseline_push_pin_24
-        colorFilter = PorterDuffColorFilter(inputTheme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
+        colorFilter = PorterDuffColorFilter(theme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
         alpha = 0.3f
     }
 
@@ -47,8 +47,8 @@ class ClipboardEntryUi(override val ctx: Context, private val inputTheme: Theme)
         minimumWidth = dp(40)
         minimumHeight = dp(30)
         isClickable = true
-        foreground = rippleDrawable(inputTheme.keyPressHighlightColor.color)
-        setCardBackgroundColor(inputTheme.clipboardEntryColor.color)
+        foreground = rippleDrawable(theme.keyPressHighlightColor)
+        setCardBackgroundColor(theme.clipboardEntryColor)
         cardElevation = 0f
         add(wrapper, lParams(matchParent, wrapContent))
     }

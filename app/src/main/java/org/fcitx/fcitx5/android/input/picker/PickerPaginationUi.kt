@@ -3,9 +3,9 @@ package org.fcitx.fcitx5.android.input.picker
 import android.content.Context
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.graphics.ColorUtils
 import androidx.core.view.updateLayoutParams
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.utils.alpha
 import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
@@ -14,11 +14,11 @@ import kotlin.math.roundToInt
 class PickerPaginationUi(override val ctx: Context, val theme: Theme) : Ui {
 
     private val highlight = view(::View) {
-        backgroundColor = theme.keyTextColor.color
+        backgroundColor = theme.keyTextColor
     }
 
     override val root = constraintLayout {
-        backgroundColor = ColorUtils.setAlphaComponent(theme.keyTextColor.color, 0x4c)
+        backgroundColor = theme.keyTextColor.alpha(0.3f)
     }
 
     private var pageCount: Int = 0

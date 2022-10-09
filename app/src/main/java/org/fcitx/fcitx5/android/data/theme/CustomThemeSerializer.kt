@@ -50,9 +50,9 @@ object CustomThemeSerializer : JsonTransformingSerializer<Theme.Custom>(Theme.Cu
                 JsonObject(it.toMutableMap().apply {
                     if (get("backgroundImage") != null) {
                         val popupBkgColor = if (getValue("isDark").jsonPrimitive.boolean) {
-                            ThemePreset.PixelDark.popupBackgroundColor.color
+                            ThemePreset.PixelDark.popupBackgroundColor
                         } else {
-                            ThemePreset.PixelLight.popupBackgroundColor.color
+                            ThemePreset.PixelLight.popupBackgroundColor
                         }
                         put("popupBackgroundColor", JsonPrimitive(popupBkgColor))
                         put("popupTextColor", getValue("keyTextColor"))

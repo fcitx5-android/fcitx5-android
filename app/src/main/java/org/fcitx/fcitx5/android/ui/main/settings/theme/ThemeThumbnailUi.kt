@@ -68,23 +68,23 @@ class ThemeThumbnailUi(override val ctx: Context) : Ui {
 
     fun setTheme(theme: Theme, checked: Boolean = false) {
         root.apply {
-            foreground = rippleDrawable(theme.keyPressHighlightColor.color)
+            foreground = rippleDrawable(theme.keyPressHighlightColor)
         }
         bkg.imageDrawable = theme.backgroundDrawable()
-        bar.backgroundColor = theme.barColor.color
+        bar.backgroundColor = theme.barColor
         spaceBar.background = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadius = ctx.dp(2f)
-            setColor(theme.spaceBarColor.color)
+            setColor(theme.spaceBarColor)
         }
         returnKey.background = ShapeDrawable(OvalShape()).apply {
-            paint.color = theme.accentKeyBackgroundColor.color
+            paint.color = theme.accentKeyBackgroundColor
         }
-        val foreground = PorterDuffColorFilter(theme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
+        val foreground = PorterDuffColorFilter(theme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
         editButton.apply {
             visibility = if (theme is Theme.Custom) View.VISIBLE else View.GONE
             colorFilter = foreground
-            background = rippleDrawable(theme.keyPressHighlightColor.color)
+            background = rippleDrawable(theme.keyPressHighlightColor)
         }
         setChecked(checked)
         checkMark.colorFilter = foreground

@@ -20,14 +20,14 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
         textSize = 20f // sp
         isSingleLine = true
         gravity = gravityCenter
-        setTextColor(theme.keyTextColor.color)
+        setTextColor(theme.keyTextColor)
     }
 
     override val root = view(::CustomGestureView) {
         minimumWidth = dp(40)
         horizontalPadding = dp(8)
         isSoundEffectsEnabled = systemTouchSounds
-        background = pressHighlightDrawable(theme.keyPressHighlightColor.color)
+        background = pressHighlightDrawable(theme.keyPressHighlightColor)
 
         add(text, lParams(wrapContent, matchParent) {
             gravity = gravityCenter

@@ -31,7 +31,7 @@ class ClipboardUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     override val root = view(::ViewAnimator) {
         if (!keyBorder) {
-            backgroundColor = theme.barColor.color
+            backgroundColor = theme.barColor
         }
         add(recyclerView, lParams(matchParent, matchParent))
         add(emptyUi.root, lParams(matchParent, matchParent))

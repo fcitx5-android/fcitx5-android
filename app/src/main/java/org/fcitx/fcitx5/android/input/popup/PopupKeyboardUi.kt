@@ -42,12 +42,12 @@ class PopupKeyboardUi(
 
     private val inactiveBackground = GradientDrawable().apply {
         cornerRadius = radius
-        setColor(theme.popupBackgroundColor.color)
+        setColor(theme.popupBackgroundColor)
     }
 
     private val focusBackground = GradientDrawable().apply {
         cornerRadius = radius
-        setColor(theme.genericActiveBackgroundColor.color)
+        setColor(theme.genericActiveBackgroundColor)
     }
 
     private val rowCount: Int
@@ -128,7 +128,7 @@ class PopupKeyboardUi(
             textSize = 23f
             isSingleLine = true
             gravity = gravityCenter
-            setTextColor(theme.keyTextColor.color)
+            setTextColor(theme.keyTextColor)
         }
     }
 
@@ -162,14 +162,14 @@ class PopupKeyboardUi(
     private fun markFocus(index: Int) {
         keyViews.getOrNull(index)?.apply {
             background = focusBackground
-            setTextColor(theme.genericActiveForegroundColor.color)
+            setTextColor(theme.genericActiveForegroundColor)
         }
     }
 
     private fun markInactive(index: Int) {
         keyViews.getOrNull(index)?.apply {
             background = null
-            setTextColor(theme.popupTextColor.color)
+            setTextColor(theme.popupTextColor)
         }
     }
 

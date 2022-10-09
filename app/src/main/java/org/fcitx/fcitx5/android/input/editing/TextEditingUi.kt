@@ -30,10 +30,10 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
     private val borderWidth = ctx.dp(1) / 2
 
     private fun View.applyBorderedBackground() {
-        background = borderDrawable(borderWidth, theme.dividerColor.color)
+        background = borderDrawable(borderWidth, theme.dividerColor)
         foreground =
-            if (keyRippleEffect) rippleDrawable(theme.keyPressHighlightColor.color)
-            else pressHighlightDrawable(theme.keyPressHighlightColor.color)
+            if (keyRippleEffect) rippleDrawable(theme.keyPressHighlightColor)
+            else pressHighlightDrawable(theme.keyPressHighlightColor)
     }
 
     class GTextButton(context: Context) : CustomGestureView(context) {
@@ -61,15 +61,14 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     private fun textButton(@StringRes id: Int) = GTextButton(ctx).apply {
         text.setText(id)
-        text.setTextColor(theme.keyTextColor.color)
+        text.setTextColor(theme.keyTextColor)
         stateListAnimator = null
         applyBorderedBackground()
     }
 
     private fun iconButton(@DrawableRes icon: Int) = GImageButton(ctx).apply {
         image.imageResource = icon
-        image.colorFilter =
-            PorterDuffColorFilter(theme.altKeyTextColor.color, PorterDuff.Mode.SRC_IN)
+        image.colorFilter = PorterDuffColorFilter(theme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
         padding = dp(10)
         applyBorderedBackground()
     }
@@ -89,7 +88,7 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
                     intArrayOf(android.R.attr.state_activated),
                     intArrayOf(android.R.attr.state_enabled)
                 ),
-                intArrayOf(theme.genericActiveForegroundColor.color, theme.keyTextColor.color)
+                intArrayOf(theme.genericActiveForegroundColor, theme.keyTextColor)
             )
         )
         background = StateListDrawable().apply {
@@ -97,13 +96,13 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
                 intArrayOf(android.R.attr.state_activated),
                 borderDrawable(
                     borderWidth,
-                    theme.dividerColor.color,
-                    theme.genericActiveBackgroundColor.color
+                    theme.dividerColor,
+                    theme.genericActiveBackgroundColor
                 )
             )
             addState(
                 intArrayOf(android.R.attr.state_enabled),
-                borderDrawable(borderWidth, theme.dividerColor.color)
+                borderDrawable(borderWidth, theme.dividerColor)
             )
         }
     }

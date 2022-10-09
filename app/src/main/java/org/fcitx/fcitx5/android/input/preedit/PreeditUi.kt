@@ -31,7 +31,7 @@ class PreeditUi(override val ctx: Context, private val theme: Theme) : Ui {
     }
 
     private val cursorSpan by lazy {
-        CursorSpan(ctx, theme.keyTextColor.color, upView.paint.fontMetricsInt)
+        CursorSpan(ctx, theme.keyTextColor, upView.paint.fontMetricsInt)
     }
 
     private val keyBorder by ThemeManager.prefs.keyBorder
@@ -42,9 +42,9 @@ class PreeditUi(override val ctx: Context, private val theme: Theme) : Ui {
     }
 
     private fun createTextView() = textView {
-        backgroundColor = barBackground.color
+        backgroundColor = barBackground
         horizontalPadding = dp(8)
-        setTextColor(theme.keyTextColor.color)
+        setTextColor(theme.keyTextColor)
         textSize = 16f
     }
 

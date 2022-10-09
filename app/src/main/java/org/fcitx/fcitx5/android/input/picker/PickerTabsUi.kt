@@ -5,11 +5,11 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
 import androidx.annotation.DrawableRes
-import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
+import org.fcitx.fcitx5.android.utils.alpha
 import org.fcitx.fcitx5.android.utils.pressHighlightDrawable
 import org.fcitx.fcitx5.android.utils.rippleDrawable
 import splitties.resources.drawable
@@ -33,11 +33,11 @@ class PickerTabsUi(override val ctx: Context, val theme: Theme) : Ui {
         val label = textView {
             textSize = 14f // sp
             typeface = Typeface.DEFAULT_BOLD
-            setTextColor(theme.keyTextColor.color)
+            setTextColor(theme.keyTextColor)
         }
 
         val icon = imageView {
-            colorFilter = PorterDuffColorFilter(theme.keyTextColor.color, PorterDuff.Mode.SRC_IN)
+            colorFilter = PorterDuffColorFilter(theme.keyTextColor, PorterDuff.Mode.SRC_IN)
         }
 
         override val root = view(::CustomGestureView) {
@@ -48,9 +48,9 @@ class PickerTabsUi(override val ctx: Context, val theme: Theme) : Ui {
                 gravity = gravityCenter
             })
             if (keyRipple) {
-                background = rippleDrawable(theme.keyPressHighlightColor.color)
+                background = rippleDrawable(theme.keyPressHighlightColor)
             } else {
-                foreground = pressHighlightDrawable(theme.keyPressHighlightColor.color)
+                foreground = pressHighlightDrawable(theme.keyPressHighlightColor)
             }
             setOnClickListener {
                 onTabClick(this@TabUi)
@@ -70,8 +70,7 @@ class PickerTabsUi(override val ctx: Context, val theme: Theme) : Ui {
         }
 
         fun setActive(active: Boolean) {
-            var color = theme.keyTextColor.color
-            if (!active) color = ColorUtils.setAlphaComponent(color, 0x4c)
+            val color = theme.keyTextColor.alpha(if (active) 1f else 0.3f)
             label.setTextColor(color)
             icon.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
         }

@@ -8,7 +8,6 @@ import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
-import org.fcitx.fcitx5.android.utils.ColorInt
 import org.fcitx.fcitx5.android.utils.RectSerializer
 import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.darkenColorFilter
@@ -17,64 +16,65 @@ import org.fcitx.fcitx5.android.utils.darkenColorFilter
 sealed class Theme : Parcelable {
 
     abstract val name: String
-
-    abstract val backgroundColor: ColorInt
-    abstract val barColor: ColorInt
-    abstract val keyboardColor: ColorInt
-
-    abstract val keyBackgroundColor: ColorInt
-    abstract val keyTextColor: ColorInt
-
-    abstract val altKeyBackgroundColor: ColorInt
-    abstract val altKeyTextColor: ColorInt
-
-    abstract val accentKeyBackgroundColor: ColorInt
-    abstract val accentKeyTextColor: ColorInt
-
-    abstract val keyPressHighlightColor: ColorInt
-    abstract val keyShadowColor: ColorInt
-
-    abstract val popupBackgroundColor: ColorInt
-    abstract val popupTextColor: ColorInt
-
-    abstract val spaceBarColor: ColorInt
-    abstract val dividerColor: ColorInt
-    abstract val clipboardEntryColor: ColorInt
-
-    abstract val genericActiveBackgroundColor: ColorInt
-    abstract val genericActiveForegroundColor: ColorInt
-
     abstract val isDark: Boolean
 
+    abstract val backgroundColor: Int
+    abstract val barColor: Int
+    abstract val keyboardColor: Int
+
+    abstract val keyBackgroundColor: Int
+    abstract val keyTextColor: Int
+
+    abstract val altKeyBackgroundColor: Int
+    abstract val altKeyTextColor: Int
+
+    abstract val accentKeyBackgroundColor: Int
+    abstract val accentKeyTextColor: Int
+
+    abstract val keyPressHighlightColor: Int
+    abstract val keyShadowColor: Int
+
+    abstract val popupBackgroundColor: Int
+    abstract val popupTextColor: Int
+
+    abstract val spaceBarColor: Int
+    abstract val dividerColor: Int
+    abstract val clipboardEntryColor: Int
+
+    abstract val genericActiveBackgroundColor: Int
+    abstract val genericActiveForegroundColor: Int
+
     open fun backgroundDrawable(keyBorder: Boolean = false): Drawable {
-        return ColorDrawable(if (keyBorder) backgroundColor.color else keyboardColor.color)
+        return ColorDrawable(if (keyBorder) backgroundColor else keyboardColor)
     }
 
     @Serializable
     @Parcelize
     data class Custom(
         override val name: String,
-        // absolute file paths of cropped and src png files
+        override val isDark: Boolean,
+        /**
+         * absolute paths of cropped and src png files
+         */
         val backgroundImage: CustomBackground?,
-        override val backgroundColor: ColorInt,
-        override val barColor: ColorInt,
-        override val keyboardColor: ColorInt,
-        override val keyBackgroundColor: ColorInt,
-        override val keyTextColor: ColorInt,
-        override val altKeyBackgroundColor: ColorInt,
-        override val altKeyTextColor: ColorInt,
-        override val accentKeyBackgroundColor: ColorInt,
-        override val accentKeyTextColor: ColorInt,
-        override val keyPressHighlightColor: ColorInt,
-        override val keyShadowColor: ColorInt,
-        override val popupBackgroundColor: ColorInt,
-        override val popupTextColor: ColorInt,
-        override val spaceBarColor: ColorInt,
-        override val dividerColor: ColorInt,
-        override val clipboardEntryColor: ColorInt,
-        override val genericActiveBackgroundColor: ColorInt,
-        override val genericActiveForegroundColor: ColorInt,
-        override val isDark: Boolean
+        override val backgroundColor: Int,
+        override val barColor: Int,
+        override val keyboardColor: Int,
+        override val keyBackgroundColor: Int,
+        override val keyTextColor: Int,
+        override val altKeyBackgroundColor: Int,
+        override val altKeyTextColor: Int,
+        override val accentKeyBackgroundColor: Int,
+        override val accentKeyTextColor: Int,
+        override val keyPressHighlightColor: Int,
+        override val keyShadowColor: Int,
+        override val popupBackgroundColor: Int,
+        override val popupTextColor: Int,
+        override val spaceBarColor: Int,
+        override val dividerColor: Int,
+        override val clipboardEntryColor: Int,
+        override val genericActiveBackgroundColor: Int,
+        override val genericActiveForegroundColor: Int
     ) : Theme() {
         @Parcelize
         @Serializable
@@ -82,7 +82,7 @@ sealed class Theme : Parcelable {
             val croppedFilePath: String,
             val srcFilePath: String,
             val brightness: Int = 70,
-            val cropRect: @Serializable(with = RectSerializer::class) Rect?,
+            val cropRect: @Serializable(RectSerializer::class) Rect?,
         ) : Parcelable {
             fun toDrawable(): Drawable? {
                 val bitmap = BitmapFactory.decodeFile(croppedFilePath) ?: return null
@@ -92,35 +92,85 @@ sealed class Theme : Parcelable {
             }
         }
 
-        override fun backgroundDrawable(keyBorder: Boolean) =
-            backgroundImage?.toDrawable() ?: super.backgroundDrawable(keyBorder)
+        override fun backgroundDrawable(keyBorder: Boolean): Drawable {
+            return backgroundImage?.toDrawable() ?: super.backgroundDrawable(keyBorder)
+        }
+
     }
 
     @Parcelize
     data class Builtin(
         override val name: String,
-        override val backgroundColor: ColorInt,
-        override val barColor: ColorInt,
-        override val keyboardColor: ColorInt,
-        override val keyBackgroundColor: ColorInt,
-        override val keyTextColor: ColorInt,
-        override val altKeyBackgroundColor: ColorInt,
-        override val altKeyTextColor: ColorInt,
-        override val accentKeyBackgroundColor: ColorInt,
-        override val accentKeyTextColor: ColorInt,
-        override val keyPressHighlightColor: ColorInt,
-        override val keyShadowColor: ColorInt,
-        override val popupBackgroundColor: ColorInt,
-        override val popupTextColor: ColorInt,
-        override val spaceBarColor: ColorInt,
-        override val dividerColor: ColorInt,
-        override val clipboardEntryColor: ColorInt,
-        override val genericActiveBackgroundColor: ColorInt,
-        override val genericActiveForegroundColor: ColorInt,
-        override val isDark: Boolean
+        override val isDark: Boolean,
+        override val backgroundColor: Int,
+        override val barColor: Int,
+        override val keyboardColor: Int,
+        override val keyBackgroundColor: Int,
+        override val keyTextColor: Int,
+        override val altKeyBackgroundColor: Int,
+        override val altKeyTextColor: Int,
+        override val accentKeyBackgroundColor: Int,
+        override val accentKeyTextColor: Int,
+        override val keyPressHighlightColor: Int,
+        override val keyShadowColor: Int,
+        override val popupBackgroundColor: Int,
+        override val popupTextColor: Int,
+        override val spaceBarColor: Int,
+        override val dividerColor: Int,
+        override val clipboardEntryColor: Int,
+        override val genericActiveBackgroundColor: Int,
+        override val genericActiveForegroundColor: Int
     ) : Theme() {
+
+        // an alias to use 0xAARRGGBB color literal in code
+        // because kotlin compiler treats `0xff000000` as Long, not Int
+        constructor(
+            name: String,
+            isDark: Boolean,
+            backgroundColor: Number,
+            barColor: Number,
+            keyboardColor: Number,
+            keyBackgroundColor: Number,
+            keyTextColor: Number,
+            altKeyBackgroundColor: Number,
+            altKeyTextColor: Number,
+            accentKeyBackgroundColor: Number,
+            accentKeyTextColor: Number,
+            keyPressHighlightColor: Number,
+            keyShadowColor: Number,
+            popupBackgroundColor: Number,
+            popupTextColor: Number,
+            spaceBarColor: Number,
+            dividerColor: Number,
+            clipboardEntryColor: Number,
+            genericActiveBackgroundColor: Number,
+            genericActiveForegroundColor: Number
+        ) : this(
+            name,
+            isDark,
+            backgroundColor.toInt(),
+            barColor.toInt(),
+            keyboardColor.toInt(),
+            keyBackgroundColor.toInt(),
+            keyTextColor.toInt(),
+            altKeyBackgroundColor.toInt(),
+            altKeyTextColor.toInt(),
+            accentKeyBackgroundColor.toInt(),
+            accentKeyTextColor.toInt(),
+            keyPressHighlightColor.toInt(),
+            keyShadowColor.toInt(),
+            popupBackgroundColor.toInt(),
+            popupTextColor.toInt(),
+            spaceBarColor.toInt(),
+            dividerColor.toInt(),
+            clipboardEntryColor.toInt(),
+            genericActiveBackgroundColor.toInt(),
+            genericActiveForegroundColor.toInt()
+        )
+
         fun deriveCustomNoBackground(name: String) = Custom(
             name,
+            isDark,
             null,
             backgroundColor,
             barColor,
@@ -139,8 +189,7 @@ sealed class Theme : Parcelable {
             dividerColor,
             clipboardEntryColor,
             genericActiveBackgroundColor,
-            genericActiveForegroundColor,
-            isDark
+            genericActiveForegroundColor
         )
 
         fun deriveCustomBackground(
@@ -151,6 +200,7 @@ sealed class Theme : Parcelable {
             cropBackgroundRect: Rect? = null,
         ) = Custom(
             name,
+            isDark,
             Custom.CustomBackground(
                 croppedBackgroundImage,
                 originBackgroundImage,
@@ -174,8 +224,7 @@ sealed class Theme : Parcelable {
             dividerColor,
             clipboardEntryColor,
             genericActiveBackgroundColor,
-            genericActiveForegroundColor,
-            isDark
+            genericActiveForegroundColor
         )
     }
 

@@ -24,6 +24,7 @@ import androidx.annotation.AttrRes
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -48,6 +49,7 @@ import java.util.*
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.math.roundToInt
 
 val InputMethodService.inputConnection: InputConnection?
     get() = currentInputConnection
@@ -208,3 +210,5 @@ inline fun <reified T : Parcelable> Bundle.parcelableArray(key: String): Array<T
         getParcelableArray(key) as? Array<T>
     }
 }
+
+fun Int.alpha(a: Float) = ColorUtils.setAlphaComponent(this, (a * 0xff).roundToInt())
