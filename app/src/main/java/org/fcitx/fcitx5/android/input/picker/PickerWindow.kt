@@ -101,11 +101,8 @@ class PickerWindow(val data: List<Pair<String, Array<String>>>) :
                     val start = range.first
                     val total = range.last - start + 1
                     val current = position - start
-                    paginationUi.apply {
-                        pageCount = total
-                        currentPage = current
-                        scrollProgress = positionOffset
-                    }
+                    paginationUi.updatePageCount(total)
+                    paginationUi.updateScrollProgress(current, positionOffset)
                 }
 
                 override fun onPageSelected(position: Int) {
@@ -116,11 +113,11 @@ class PickerWindow(val data: List<Pair<String, Array<String>>>) :
             // show first symbol category by default, rather than recently used
             val initialPage = pickerPagesAdapter.getStartPageOfCategory(1)
             setCurrentItem(initialPage, false)
-            // wait paginationUi layout
-            ContextCompat.getMainExecutor(context).execute {
-                paginationUi.pageCount =
-                    pickerPagesAdapter.getCategoryRangeOfPage(initialPage).run { last - first + 1 }
-            }
+            // ViewPager2#setCurrentItem(Int, smoothScroll = false) won't trigger onPageScrolled
+            // need to call updatePageCount manually
+            paginationUi.updatePageCount(
+                pickerPagesAdapter.getCategoryRangeOfPage(initialPage).run { last - first + 1 }
+            )
         }
     }
 

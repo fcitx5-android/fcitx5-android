@@ -19,44 +19,36 @@ class PickerPaginationUi(override val ctx: Context, val theme: Theme) : Ui {
 
     override val root = constraintLayout {
         backgroundColor = ColorUtils.setAlphaComponent(theme.keyTextColor.color, 0x4c)
-        add(highlight, lParams(matchConstraints, matchParent) {
-            centerVertically()
-            startOfParent()
-            matchConstraintPercentWidth = 0f
-        })
     }
 
-    var pageCount: Int = 0
-        set(value) {
-            if (value == field) return
-            field = value
-            highlight.apply {
-                if (value > 1) {
-                    visibility = View.VISIBLE
-                    updateLayoutParams<ConstraintLayout.LayoutParams> {
-                        matchConstraintPercentWidth = 1f / value
-                    }
-                } else {
-                    visibility = View.GONE
-                }
-            }
-        }
+    private var pageCount: Int = 0
 
-    var currentPage: Int = 0
-        set(value) {
-            if (value == field) return
-            field = value
+    fun updatePageCount(value: Int) {
+        if (pageCount == value) return
+        if (value <= 1) {
+            // there will be only one page : remove highlight
+            root.removeView(highlight)
+        } else if (pageCount <= 1) {
+            // incoming count > 1 but current count <= 1 : add highlight
+            root.apply {
+                add(highlight, lParams(matchConstraints, matchParent) {
+                    centerVertically()
+                    startOfParent()
+                    matchConstraintPercentWidth = 1f / value
+                })
+            }
+        } else {
+            // both count >= 1 : update highlight width
             highlight.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                startMargin = ((value + scrollProgress) * highlight.width).roundToInt()
+                matchConstraintPercentWidth = 1f / value
             }
         }
+        pageCount = value
+    }
 
-    var scrollProgress: Float = 0f
-        set(value) {
-            if (value == field) return
-            field = value
-            highlight.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                startMargin = ((currentPage + value) * highlight.width).roundToInt()
-            }
+    fun updateScrollProgress(current: Int, progress: Float) {
+        highlight.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            startMargin = ((current + progress) * highlight.width).roundToInt()
         }
+    }
 }
