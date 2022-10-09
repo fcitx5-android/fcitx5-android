@@ -77,10 +77,9 @@ class PickerPagesAdapter(
     fun insertRecent(text: String) {
         if (text.length == 1 && text[0].code.let { it in Digit || it in FullWidthDigit }) return
         recentlyUsed.insert(text)
-        updateRecent()
     }
 
-    fun updateRecent() {
+    private fun updateRecent() {
         pages[0] = recentlyUsed.toOrderedList().toTypedArray()
     }
 
@@ -114,12 +113,14 @@ class PickerPagesAdapter(
 
     override fun onViewAttachedToWindow(holder: ViewHolder) {
         holder.ui.keyActionListener = keyActionListener
-        // prevent popup on RecentlyUsed page (at first position)
-        holder.ui.popupListener = if (holder.bindingAdapterPosition == 0) null else popupListener
-        // update RecentlyUsed when it's page attached
-        if (holder.absoluteAdapterPosition == 0) {
+        if (holder.bindingAdapterPosition == 0) {
+            // prevent popup on RecentlyUsed page
+            holder.ui.popupListener = null
+            // update RecentlyUsed when it's page attached
             updateRecent()
             holder.ui.setItems(pages[0])
+        } else {
+            holder.ui.popupListener = popupListener
         }
     }
 
