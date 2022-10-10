@@ -73,11 +73,16 @@ class KeyPreferenceUi(override val ctx: Context) : Ui {
         inputType = EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS
         imeOptions = EditorInfo.IME_FLAG_FORCE_ASCII
         privateImeOptions = FcitxInputMethodService.DeleteSurroundingFlag
+        requestFocus()
         setOnKeyListener { _, _, event ->
             if (event.action != KeyEvent.ACTION_DOWN)
                 return@setOnKeyListener false
-            val sym = KeySym.fromKeyEvent(event)
+            var sym = KeySym.fromKeyEvent(event)
                 ?: return@setOnKeyListener false
+            // convert lowercase latin to uppercase
+            if (sym.sym in 0x61..0x7a) {
+                sym = KeySym(sym.sym - 0x20)
+            }
             val states = KeyStates.fromKeyEvent(event)
             val newKey = Key.create(sym, states)
             if (newKey.sym == Key.None.sym)

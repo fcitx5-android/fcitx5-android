@@ -10,7 +10,7 @@ import org.fcitx.fcitx5.android.core.Key
 
 class FcitxKeyPreference : Preference {
 
-    var keyString = ""
+    private var keyString = ""
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) :
