@@ -105,6 +105,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         FcitxDaemonManager.bindFcitxDaemon(javaClass.name, this) {
             fcitx = getFcitxDaemon().fcitx
             onReady {
+                eventHandlerJob = fcitx.eventFlow
+                    .onEach(::handleFcitxEvent)
+                    .launchIn(lifecycleScope)
                 fcitxDelayedTask?.invoke()
                 fcitxDelayedTask = null
             }
@@ -302,11 +305,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     private fun createInputView(theme: Theme = ThemeManager.getActiveTheme()) {
-        if (eventHandlerJob == null) {
-            eventHandlerJob = fcitx.eventFlow
-                .onEach { handleFcitxEvent(it) }
-                .launchIn(lifecycleScope)
-        }
         if (::inputView.isInitialized) {
             inputView.scope.clear()
         }

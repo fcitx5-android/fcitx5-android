@@ -126,7 +126,7 @@ AndroidFrontend::AndroidFrontend(Instance *instance)
 }
 
 void AndroidFrontend::keyEvent(const Key &key, bool isRelease, const int timestamp) {
-    auto *ic = focusGroup_.focusedInputContext();
+    auto *ic = activeIC_;
     if (!ic) return;
     KeyEvent keyEvent(ic, key, isRelease);
     ic->keyEvent(keyEvent);
