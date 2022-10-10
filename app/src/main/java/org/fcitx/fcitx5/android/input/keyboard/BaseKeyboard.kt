@@ -90,7 +90,7 @@ abstract class BaseKeyboard(
                             0 -> false
                             else -> {
                                 val sym = if (count > 0) 0xff53u else 0xff51u
-                                val action = KeyAction.SymAction(KeySym(sym), KeyStates())
+                                val action = KeyAction.SymAction(KeySym(sym), KeyStates.Empty)
                                 repeat(count.absoluteValue) {
                                     onAction(action)
                                 }

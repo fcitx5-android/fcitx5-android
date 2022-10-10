@@ -9,6 +9,7 @@ infix fun UInt.or(other: KeyState): UInt = this or other.state;
  * translated from
  * [fcitx-utils/keysym.h](https://github.com/fcitx/fcitx5/blob/5.0.15/src/lib/fcitx-utils/keysym.h)
  */
+@Suppress("Unused", "EnumEntryName")
 enum class KeyState(val state: UInt) {
     NoState(0u),
     Shift(1u shl 0),
@@ -89,6 +90,8 @@ value class KeyStates constructor(val states: UInt) {
     fun toInt() = states.toInt()
 
     companion object {
+        val Empty = KeyStates(0u)
+
         fun of(v: Int) = KeyStates(v.toUInt())
 
         fun fromKeyEvent(event: KeyEvent): KeyStates {
