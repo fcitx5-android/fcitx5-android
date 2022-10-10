@@ -181,7 +181,7 @@ sealed class FcitxEvent<T>(open val data: T) {
                 EventType.Ready -> ReadyEvent()
                 EventType.Key -> KeyEvent(
                     KeyEvent.Data(
-                        KeySym.of(params[0] as Int),
+                        KeySym(params[0] as Int),
                         KeyStates.of(params[1] as Int),
                         params[2] as Int,
                         params[3] as Boolean,

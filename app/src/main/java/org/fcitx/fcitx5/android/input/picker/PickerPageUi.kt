@@ -38,7 +38,7 @@ class PickerPageUi(override val ctx: Context, val theme: Theme) : Ui {
             viewId = R.id.button_backspace
         )
 
-        val BackspaceAction = SymAction(0xff08u)
+        val BackspaceAction = SymAction(0xff08)
 
         // TODO: configurable grid size
         const val RowCount = 3

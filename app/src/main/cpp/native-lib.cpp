@@ -569,7 +569,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
         auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(0, GlobalRef->Object, nullptr));
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 4, *vararg);
     };
-    auto keyEventCallback = [](const uint32_t sym, const uint32_t states, const uint32_t unicode, const bool up, const int timestamp) {
+    auto keyEventCallback = [](const int sym, const uint32_t states, const uint32_t unicode, const bool up, const int timestamp) {
         auto env = GlobalRef->AttachEnv();
         auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(5, GlobalRef->Object, nullptr));
         env->SetObjectArrayElement(vararg, 0, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, sym));

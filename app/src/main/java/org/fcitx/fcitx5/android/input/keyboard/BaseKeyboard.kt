@@ -89,7 +89,7 @@ abstract class BaseKeyboard(
                         GestureType.Move -> when (val count = event.countX) {
                             0 -> false
                             else -> {
-                                val sym = if (count > 0) 0xff53u else 0xff51u
+                                val sym = if (count > 0) 0xff53 else 0xff51
                                 val action = KeyAction.SymAction(KeySym(sym), KeyStates.Empty)
                                 repeat(count.absoluteValue) {
                                     onAction(action)

@@ -148,7 +148,7 @@ class KeyPreferenceUi(override val ctx: Context) : Ui {
                 .toTypedArray()
         )
 
-    private var keySym = KeySym(0u)
+    private var keySym = KeySym(0)
 
     var lastKey: Key = Key.None
         private set

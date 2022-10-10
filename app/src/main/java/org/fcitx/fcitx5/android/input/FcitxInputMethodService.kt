@@ -359,7 +359,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // generating different KeySym
         // skip \n, because fcitx wants \r for return
         if (charCode > 0 && charCode != '\n'.code) {
-            lifecycleScope.launch { fcitx.sendKey(charCode.toUInt(), states.states, up, timestamp) }
+            lifecycleScope.launch { fcitx.sendKey(charCode, states.states, up, timestamp) }
             return true
         }
         val keySym = KeySym.fromKeyEvent(event)

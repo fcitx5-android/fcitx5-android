@@ -12,7 +12,7 @@ data class Key(
     val localizedString: String
 ) : Parcelable {
     @IgnoredOnParcel
-    val keySym by lazy { KeySym.of(sym) }
+    val keySym by lazy { KeySym(sym) }
 
     @IgnoredOnParcel
     val keyStates by lazy { KeyStates.of(states) }
@@ -29,6 +29,6 @@ data class Key(
         private external fun create(sym: Int, states: Int): Key
 
         @JvmStatic
-        fun create(sym: KeySym, states: KeyStates): Key = create(sym.toInt(), states.toInt())
+        fun create(sym: KeySym, states: KeyStates): Key = create(sym.sym, states.toInt())
     }
 }

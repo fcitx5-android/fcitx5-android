@@ -9,7 +9,7 @@ sealed class KeyAction {
     data class FcitxKeyAction(var act: String) : KeyAction()
 
     data class SymAction(val sym: KeySym, val states: KeyStates = VirtualState) : KeyAction() {
-        constructor(sym: UInt, states: KeyStates = VirtualState) : this(KeySym(sym), states)
+        constructor(sym: Int, states: KeyStates = VirtualState) : this(KeySym(sym), states)
 
         companion object {
             val VirtualState = KeyStates(KeyState.Virtual)

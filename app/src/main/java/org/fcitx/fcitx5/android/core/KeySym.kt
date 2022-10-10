@@ -2,18 +2,14 @@ package org.fcitx.fcitx5.android.core
 
 import android.view.KeyEvent
 
-data class KeySym(val sym: UInt) {
+data class KeySym(val sym: Int) {
 
-    val keyCode get() = KeyCode[sym.toInt()] ?: KeyEvent.KEYCODE_UNKNOWN
-
-    fun toInt() = sym.toInt()
+    val keyCode get() = KeyCode[sym] ?: KeyEvent.KEYCODE_UNKNOWN
 
     override fun toString() = "0x" + sym.toString(16).padStart(4, '0')
 
     companion object {
-        fun of(v: Int) = KeySym(v.toUInt())
-
-        fun fromKeyEvent(event: KeyEvent) = Sym[event.keyCode]?.let { KeySym(it.toUInt()) }
+        fun fromKeyEvent(event: KeyEvent) = Sym[event.keyCode]?.let { KeySym(it) }
 
         val KeyCode: HashMap<Int, Int> = hashMapOf(
             0x0009 to KeyEvent.KEYCODE_TAB, /* U+0009 CHARACTER TABULATION */

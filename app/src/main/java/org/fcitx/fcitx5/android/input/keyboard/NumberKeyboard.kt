@@ -18,33 +18,33 @@ class NumberKeyboard(
 
         val Layout: List<List<KeyDef>> = listOf(
             listOf(
-                NumPadKey("+", 0xffabu, 23f, 0.15f, KeyDef.Appearance.Variant.Alternative),
-                NumPadKey("1", 0xffb1u, 30f, 0f),
-                NumPadKey("2", 0xffb2u, 30f, 0f),
-                NumPadKey("3", 0xffb3u, 30f, 0f),
-                NumPadKey("/", 0xffafu, 23f, 0.15f, KeyDef.Appearance.Variant.Alternative),
+                NumPadKey("+", 0xffab, 23f, 0.15f, KeyDef.Appearance.Variant.Alternative),
+                NumPadKey("1", 0xffb1, 30f, 0f),
+                NumPadKey("2", 0xffb2, 30f, 0f),
+                NumPadKey("3", 0xffb3, 30f, 0f),
+                NumPadKey("/", 0xffaf, 23f, 0.15f, KeyDef.Appearance.Variant.Alternative),
             ),
             listOf(
-                NumPadKey("-", 0xffadu, 23f, 0.15f, KeyDef.Appearance.Variant.Alternative),
-                NumPadKey("4", 0xffb4u, 30f, 0f),
-                NumPadKey("5", 0xffb5u, 30f, 0f),
-                NumPadKey("6", 0xffb6u, 30f, 0f),
+                NumPadKey("-", 0xffad, 23f, 0.15f, KeyDef.Appearance.Variant.Alternative),
+                NumPadKey("4", 0xffb4, 30f, 0f),
+                NumPadKey("5", 0xffb5, 30f, 0f),
+                NumPadKey("6", 0xffb6, 30f, 0f),
                 MiniSpaceKey()
             ),
             listOf(
-                NumPadKey("*", 0xffaau, 23f, 0.15f, KeyDef.Appearance.Variant.Alternative),
-                NumPadKey("7", 0xffb7u, 30f, 0f),
-                NumPadKey("8", 0xffb8u, 30f, 0f),
-                NumPadKey("9", 0xffb9u, 30f, 0f),
+                NumPadKey("*", 0xffaa, 23f, 0.15f, KeyDef.Appearance.Variant.Alternative),
+                NumPadKey("7", 0xffb7, 30f, 0f),
+                NumPadKey("8", 0xffb8, 30f, 0f),
+                NumPadKey("9", 0xffb9, 30f, 0f),
                 BackspaceKey()
             ),
             listOf(
                 LayoutSwitchKey("ABC", TextKeyboard.Name),
                 SymbolKey(",", variant = KeyDef.Appearance.Variant.Alternative),
                 LayoutSwitchKey("!?#", "Picker", 0.13333f, KeyDef.Appearance.Variant.AltForeground),
-                NumPadKey("0", 0xffb0u, 30f, 0.23334f),
+                NumPadKey("0", 0xffb0, 30f, 0.23334f),
                 SymbolKey("=", 0.13333f),
-                NumPadKey(".", 0xffaeu, 23f, 0.1f, KeyDef.Appearance.Variant.Alternative),
+                NumPadKey(".", 0xffae, 23f, 0.1f, KeyDef.Appearance.Variant.Alternative),
                 ReturnKey()
             ),
         )

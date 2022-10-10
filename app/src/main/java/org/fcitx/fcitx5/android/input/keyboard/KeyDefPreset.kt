@@ -58,7 +58,7 @@ class AlphabetKey(
 class AlphabetDigitKey(
     val character: String,
     altText: String,
-    val sym: UInt,
+    val sym: Int,
     popup: Array<Popup>? = null
 ) : KeyDef(
     Appearance.AltText(
@@ -83,7 +83,7 @@ class AlphabetDigitKey(
     ) : this(
         char,
         digit.toString(),
-        (0xffb0 + digit).toUInt(),
+        0xffb0 + digit,
         popup
     )
 }
@@ -131,8 +131,8 @@ class BackspaceKey(
         viewId = R.id.button_backspace
     ),
     setOf(
-        Behavior.Press(action = KeyAction.SymAction(0xff08u)),
-        Behavior.Repeat(action = KeyAction.SymAction(0xff08u))
+        Behavior.Press(action = KeyAction.SymAction(0xff08)),
+        Behavior.Repeat(action = KeyAction.SymAction(0xff08))
     )
 )
 
@@ -170,7 +170,7 @@ class SpaceKey : KeyDef(
         viewId = R.id.button_space
     ),
     setOf(
-        Behavior.Press(action = KeyAction.SymAction(0x0020u)),
+        Behavior.Press(action = KeyAction.SymAction(0x0020)),
         Behavior.LongPress(action = KeyAction.LangSwitchAction)
     )
 )
@@ -184,7 +184,7 @@ class ReturnKey(percentWidth: Float = 0.15f) : KeyDef(
         viewId = R.id.button_return
     ),
     setOf(
-        Behavior.Press(action = KeyAction.SymAction(0xff0du))
+        Behavior.Press(action = KeyAction.SymAction(0xff0d))
     )
 )
 
@@ -215,13 +215,13 @@ class MiniSpaceKey : KeyDef(
         viewId = R.id.button_mini_space
     ),
     setOf(
-        Behavior.Press(action = KeyAction.SymAction(0x0020u))
+        Behavior.Press(action = KeyAction.SymAction(0x0020))
     )
 )
 
 class NumPadKey(
     displayText: String,
-    val sym: UInt,
+    val sym: Int,
     textSize: Float = 16f,
     percentWidth: Float = 0.1f,
     variant: Variant = Variant.Normal
