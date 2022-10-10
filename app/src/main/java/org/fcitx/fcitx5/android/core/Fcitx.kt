@@ -67,17 +67,17 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
     suspend fun save() = withFcitxContext { saveFcitxState() }
     suspend fun reloadConfig() = withFcitxContext { reloadFcitxConfig() }
-    suspend fun sendKey(key: String, state: UInt = 0u, up: Boolean = false, timestamp: Long = 0L) =
+    suspend fun sendKey(key: String, state: UInt = 0u, up: Boolean = false, timestamp: Long = -1L) =
         withFcitxContext { sendKeyToFcitxString(key, state.toInt(), up, timestamp) }
 
-    suspend fun sendKey(c: Char, state: UInt = 0u, up: Boolean = false, timestamp: Long = 0L) =
+    suspend fun sendKey(c: Char, state: UInt = 0u, up: Boolean = false, timestamp: Long = -1L) =
         withFcitxContext { sendKeyToFcitxChar(c, state.toInt(), up, timestamp) }
 
-    suspend fun sendKey(sym: UInt, state: UInt = 0u, up: Boolean = false, timestamp: Long = 0L) =
+    suspend fun sendKey(sym: UInt, state: UInt = 0u, up: Boolean = false, timestamp: Long = -1L) =
         withFcitxContext { sendKeySymToFcitx(sym.toInt(), state.toInt(), up, timestamp) }
 
-    suspend fun sendKey(sym: KeySym, states: KeyStates, up: Boolean = false, timestamp: Long = 0L) =
-        withFcitxContext { sendKeySymToFcitx(sym.toInt(), states.toInt(), up, timestamp) }
+    suspend fun sendKey(sym: KeySym, state: KeyStates, up: Boolean = false, timestamp: Long = -1L) =
+        withFcitxContext { sendKeySymToFcitx(sym.toInt(), state.toInt(), up, timestamp) }
 
     suspend fun select(idx: Int): Boolean = withFcitxContext { selectCandidate(idx) }
     suspend fun isEmpty(): Boolean = withFcitxContext { isInputPanelEmpty() }
