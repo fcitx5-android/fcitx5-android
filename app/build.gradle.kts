@@ -20,9 +20,9 @@ val gitVersionName = exec("git describe --tags --long --always")
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("com.google.devtools.ksp") version "1.7.10-1.0.6"
-    id("com.cookpad.android.plugin.license-tools") version "1.2.0"
-    kotlin("plugin.serialization") version "1.7.10"
+    id("com.google.devtools.ksp") version "1.7.20-1.0.6"
+    id("com.cookpad.android.plugin.license-tools") version "1.2.8"
+    kotlin("plugin.serialization") version "1.7.20"
     id("kotlin-parcelize")
 }
 
