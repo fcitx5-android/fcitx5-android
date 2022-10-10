@@ -7,12 +7,12 @@ typedef std::function<void(const std::vector<std::string> &)> CandidateListCallb
 typedef std::function<void(const std::string &)> CommitStringCallback;
 typedef std::function<void(const std::string &, const int, const std::string &, const int)> PreeditCallback;
 typedef std::function<void(const std::string &, const std::string &)> InputPanelAuxCallback;
-typedef std::function<void(const uint32_t, const uint32_t, const uint32_t, const bool, const int64_t)> KeyEventCallback;
+typedef std::function<void(const uint32_t, const uint32_t, const uint32_t, const bool, const int)> KeyEventCallback;
 typedef std::function<void()> InputMethodChangeCallback;
 typedef std::function<void()> StatusAreaUpdateCallback;
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, keyEvent,
-                             void(const Key &, bool isRelease, const int64_t timestamp))
+                             void(const Key &, bool isRelease, const int timestamp))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, selectCandidate,
                              bool(int idx))

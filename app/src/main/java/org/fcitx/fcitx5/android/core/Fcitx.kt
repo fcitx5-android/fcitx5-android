@@ -67,16 +67,16 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
 
     suspend fun save() = withFcitxContext { saveFcitxState() }
     suspend fun reloadConfig() = withFcitxContext { reloadFcitxConfig() }
-    suspend fun sendKey(key: String, state: UInt = 0u, up: Boolean = false, timestamp: Long = -1L) =
+    suspend fun sendKey(key: String, state: UInt = 0u, up: Boolean = false, timestamp: Int = -1) =
         withFcitxContext { sendKeyToFcitxString(key, state.toInt(), up, timestamp) }
 
-    suspend fun sendKey(c: Char, state: UInt = 0u, up: Boolean = false, timestamp: Long = -1L) =
+    suspend fun sendKey(c: Char, state: UInt = 0u, up: Boolean = false, timestamp: Int = -1) =
         withFcitxContext { sendKeyToFcitxChar(c, state.toInt(), up, timestamp) }
 
-    suspend fun sendKey(sym: UInt, state: UInt = 0u, up: Boolean = false, timestamp: Long = -1L) =
+    suspend fun sendKey(sym: UInt, state: UInt = 0u, up: Boolean = false, timestamp: Int = -1) =
         withFcitxContext { sendKeySymToFcitx(sym.toInt(), state.toInt(), up, timestamp) }
 
-    suspend fun sendKey(sym: KeySym, state: KeyStates, up: Boolean = false, timestamp: Long = -1L) =
+    suspend fun sendKey(sym: KeySym, state: KeyStates, up: Boolean = false, timestamp: Int = -1) =
         withFcitxContext { sendKeySymToFcitx(sym.toInt(), state.toInt(), up, timestamp) }
 
     suspend fun select(idx: Int): Boolean = withFcitxContext { selectCandidate(idx) }
@@ -194,13 +194,13 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
         external fun reloadFcitxConfig()
 
         @JvmStatic
-        external fun sendKeyToFcitxString(key: String, state: Int, up: Boolean, timestamp: Long)
+        external fun sendKeyToFcitxString(key: String, state: Int, up: Boolean, timestamp: Int)
 
         @JvmStatic
-        external fun sendKeyToFcitxChar(c: Char, state: Int, up: Boolean, timestamp: Long)
+        external fun sendKeyToFcitxChar(c: Char, state: Int, up: Boolean, timestamp: Int)
 
         @JvmStatic
-        external fun sendKeySymToFcitx(sym: Int, state: Int, up: Boolean, timestamp: Long)
+        external fun sendKeySymToFcitx(sym: Int, state: Int, up: Boolean, timestamp: Int)
 
         @JvmStatic
         external fun selectCandidate(idx: Int): Boolean

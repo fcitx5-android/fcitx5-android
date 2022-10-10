@@ -20,7 +20,7 @@ public:
     void updateInputPanelAux(const std::string &auxUp, const std::string &auxDown);
     void releaseInputContext(const int uid);
 
-    void keyEvent(const Key &key, bool isRelease, const int64_t timestamp);
+    void keyEvent(const Key &key, bool isRelease, const int timestamp);
     void forwardKey(const Key &key, bool isRelease);
     bool selectCandidate(int idx);
     bool isInputPanelEmpty();
@@ -68,7 +68,7 @@ private:
     CommitStringCallback commitStringCallback = [](const std::string &) {};
     PreeditCallback preeditCallback = [](const std::string &, const int, const std::string &, const int) {};
     InputPanelAuxCallback inputPanelAuxCallback = [](const std::string &, const std::string &) {};
-    KeyEventCallback keyEventCallback = [](const uint32_t, const uint32_t, const uint32_t, const bool, const int64_t) {};
+    KeyEventCallback keyEventCallback = [](const uint32_t, const uint32_t, const uint32_t, const bool, const int) {};
     InputMethodChangeCallback imChangeCallback = [] {};
     StatusAreaUpdateCallback statusAreaUpdateCallback = [] {};
 };

@@ -99,7 +99,7 @@ sealed class FcitxEvent<T>(open val data: T) {
             val states: KeyStates,
             val unicode: Int,
             val up: Boolean,
-            val timestamp: Long
+            val timestamp: Int
         )
     }
 
@@ -185,7 +185,7 @@ sealed class FcitxEvent<T>(open val data: T) {
                         KeyStates.of(params[1] as Int),
                         params[2] as Int,
                         params[3] as Boolean,
-                        params[4] as Long
+                        params[4] as Int
                     )
                 )
                 EventType.Change -> IMChangeEvent(params[0] as InputMethodEntry)

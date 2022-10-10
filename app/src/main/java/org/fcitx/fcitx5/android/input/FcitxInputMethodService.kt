@@ -66,8 +66,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    private val cachedKeyEvents = LruCache<Long, KeyEvent>(78)
-    private var cachedKeyEventIndex = 0L
+    private val cachedKeyEvents = LruCache<Int, KeyEvent>(78)
+    private var cachedKeyEventIndex = 0
 
     private lateinit var inputView: InputView
     private lateinit var fcitx: Fcitx
@@ -138,9 +138,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                         else -> inputConnection?.commitText(Char(it.unicode).toString(), 1)
                     }
                 } else {
-                    // KeyEvent from hardware keyboard (or input method engine forwardKey)
-                    // use cached first event if available
-                    cachedKeyEvents.get(it.timestamp)?.let { keyEvent ->
+                    // KeyEvent from physical keyboard (or input method engine forwardKey)
+                    // use cached event if available
+                    cachedKeyEvents.remove(it.timestamp)?.let { keyEvent ->
                         inputConnection?.sendKeyEvent(keyEvent)
                         return
                     }
@@ -556,7 +556,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onUnbindInput() {
         cachedKeyEvents.evictAll()
-        cachedKeyEventIndex = 0L
+        cachedKeyEventIndex = 0
         val uid = currentInputBinding.uid
         Timber.d("onUnbindInput: uid=$uid")
         lifecycleScope.launch {

@@ -125,7 +125,7 @@ AndroidFrontend::AndroidFrontend(Instance *instance)
     ));
 }
 
-void AndroidFrontend::keyEvent(const Key &key, bool isRelease, const int64_t timestamp) {
+void AndroidFrontend::keyEvent(const Key &key, bool isRelease, const int timestamp) {
     auto *ic = focusGroup_.focusedInputContext();
     if (!ic) return;
     KeyEvent keyEvent(ic, key, isRelease);
@@ -138,7 +138,7 @@ void AndroidFrontend::keyEvent(const Key &key, bool isRelease, const int64_t tim
 
 void AndroidFrontend::forwardKey(const Key &key, bool isRelease) {
     auto sym = key.sym();
-    keyEventCallback(sym, key.states(), Key::keySymToUnicode(sym), isRelease, 0);
+    keyEventCallback(sym, key.states(), Key::keySymToUnicode(sym), isRelease, -1);
 }
 
 void AndroidFrontend::commitString(const std::string &str) {
