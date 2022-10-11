@@ -390,7 +390,15 @@ public:
     }
 
     void exit() {
+        // Make sure that the exec doesn't get blocked
+        event_base_loopexit(get_event_base(), nullptr);
+        // Normally, we would use exec to drive the event loop.
+        // Since we are calling loopOnce in JVM repeatedly, we shouldn't have used this function.
+        // However, exit events would lose chance to be called in this case.
+        // To fix that, we call exec on exit to execute exit events.
+        p_instance->eventLoop().exec();
         p_dispatcher->detach();
+        p_instance->exit();
         resetGlobalPointers();
     }
 
@@ -893,9 +901,9 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_setFcitxInputMethodConfig(JNIEnv *env, 
 }
 
 jobjectArray stringVectorToJStringArray(JNIEnv *env, const std::vector<std::string> &strings) {
-    jobjectArray array = env->NewObjectArray(static_cast<int>(strings.size()),  GlobalRef->String, nullptr);
+    jobjectArray array = env->NewObjectArray(static_cast<int>(strings.size()), GlobalRef->String, nullptr);
     int i = 0;
-    for (const auto &s : strings) {
+    for (const auto &s: strings) {
         env->SetObjectArrayElement(array, i++, JString(env, s));
     }
     return array;
