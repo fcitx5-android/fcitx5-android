@@ -389,7 +389,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onStartInputView(info: EditorInfo, restarting: Boolean) {
         Timber.d("onStartInputView: restarting=$restarting")
+        editorInfo = info
         lifecycleScope.launch {
+            // EditorInfo can be different in onStartInput and onStartInputView,
+            // especially in browsers
+            fcitx.setCapFlags(CapabilityFlags.fromEditorInfo(info))
             if (restarting) {
                 // when input restarts in the same editor, unfocus it to clear previous state
                 fcitx.focus(false)
