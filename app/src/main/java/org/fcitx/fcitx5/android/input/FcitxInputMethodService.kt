@@ -64,13 +64,13 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
     }
 
+    private lateinit var fcitx: Fcitx
+    private var eventHandlerJob: Job? = null
+
     private val cachedKeyEvents = LruCache<Int, KeyEvent>(78)
     private var cachedKeyEventIndex = 0
 
-    private lateinit var inputView: InputView
-    private lateinit var fcitx: Fcitx
-    private var eventHandlerJob: Job? = null
-    private var fcitxDelayedTask: (suspend () -> Unit)? = null
+    private var inputView: InputView? = null
 
     var editorInfo: EditorInfo? = null
 
@@ -84,31 +84,27 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private val ignoreSystemCursor by AppPrefs.getInstance().advanced.ignoreSystemCursor
 
     private val recreateInputViewListener = ManagedPreference.OnChangeListener<Any> {
-        recreateInputView()
+        recreateInputView(ThemeManager.getActiveTheme())
     }
 
     private val onThemeChangedListener = ThemeManager.OnThemeChangedListener {
         recreateInputView(it)
     }
 
-    private fun recreateInputView(theme: Theme = ThemeManager.getActiveTheme()) {
+    private fun recreateInputView(theme: Theme) {
         // InputView should be created first in onCreateInputView
         // setInputView should be used to 'replace' current InputView only
-        if (!::inputView.isInitialized) return
-        createInputView(theme)
-        setInputView(inputView)
+        inputView?.onDestroy() ?: return
+        InputView(this, fcitx, theme).also {
+            inputView = it
+            setInputView(it)
+        }
     }
 
     override fun onCreate() {
         FcitxDaemonManager.bindFcitxDaemon(javaClass.name, this) {
             fcitx = getFcitxDaemon().fcitx
-            onReady {
-                eventHandlerJob = fcitx.eventFlow
-                    .onEach(::handleFcitxEvent)
-                    .launchIn(lifecycleScope)
-                fcitxDelayedTask?.invoke()
-                fcitxDelayedTask = null
-            }
+            eventHandlerJob = fcitx.eventFlow.onEach(::handleFcitxEvent).launchIn(lifecycleScope)
         }
         AppPrefs.getInstance().apply {
             keyboard.buttonHapticFeedback.registerOnChangeListener(recreateInputViewListener)
@@ -130,7 +126,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 // see [^1] for explanation
                 composing.update(selection.start)
             }
-            is FcitxEvent.KeyEvent -> event.data.let {
+            is FcitxEvent.KeyEvent -> event.data.let event@{
                 if (it.states.virtual) {
                     // KeyEvent from virtual keyboard
                     when (it.unicode) {
@@ -143,7 +139,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     // use cached event if available
                     cachedKeyEvents.remove(it.timestamp)?.let { keyEvent ->
                         inputConnection?.sendKeyEvent(keyEvent)
-                        return
+                        return@event
                     }
                     // simulate key event
                     val keyCode = it.sym.keyCode
@@ -171,7 +167,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             else -> {
             }
         }
-        inputView.handleFcitxEvent(event)
     }
 
     private fun handleBackspaceKey() {
@@ -298,15 +293,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onCreateInputView(): View {
         super.onCreateInputView()
-        createInputView()
-        return inputView
-    }
-
-    private fun createInputView(theme: Theme = ThemeManager.getActiveTheme()) {
-        if (::inputView.isInitialized) {
-            inputView.scope.clear()
+        return InputView(this, fcitx, ThemeManager.getActiveTheme()).also {
+            inputView = it
         }
-        inputView = InputView(this, fcitx, theme)
     }
 
     override fun setInputView(view: View) {
@@ -326,8 +315,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onComputeInsets(outInsets: Insets) {
-        if (!this::inputView.isInitialized) return
-        val (_, y) = intArrayOf(0, 0).also { inputView.keyboardView.getLocationInWindow(it) }
+        val (_, y) = intArrayOf(0, 0).also { inputView?.keyboardView?.getLocationInWindow(it) }
         outInsets.apply {
             contentTopInsets = y
             touchableInsets = Insets.TOUCHABLE_INSETS_CONTENT
@@ -394,14 +382,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         currentInputConnection.apply {
             cursorAnchorAvailable = requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
         }
-        // fcitx might not be initialized yet, so we do setCapFlags later
-        val setCapFlags = suspend {
-            fcitx.setCapFlags(CapabilityFlags.fromEditorInfo(editorInfo))
+        lifecycleScope.launch {
+            fcitx.setCapFlags(CapabilityFlags.fromEditorInfo(attribute))
         }
-        if (::fcitx.isInitialized)
-            lifecycleScope.launch { setCapFlags() }
-        else
-            fcitxDelayedTask = setCapFlags
     }
 
     override fun onStartInputView(info: EditorInfo, restarting: Boolean) {
@@ -413,7 +396,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             }
             fcitx.focus()
         }
-        inputView.onShow()
+        inputView?.onShow()
     }
 
     override fun onUpdateSelection(
@@ -435,9 +418,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         if (!cursorAnchorAvailable) {
             handleCursorUpdate()
         }
-        if (this::inputView.isInitialized) {
-            inputView.onSelectionUpdate(newSelStart, newSelEnd)
-        }
+        inputView?.onSelectionUpdate(newSelStart, newSelEnd)
     }
 
     override fun onUpdateCursorAnchorInfo(info: CursorAnchorInfo) {
@@ -538,7 +519,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         lifecycleScope.launch {
             fcitx.focus(false)
         }
-        inputView.onHide()
+        inputView?.onHide()
     }
 
     override fun onFinishInput() {
@@ -562,7 +543,13 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onDestroy() {
         FcitxDaemonManager.unbind(javaClass.name)
+        AppPrefs.getInstance().apply {
+            keyboard.buttonHapticFeedback.unregisterOnChangeListener(recreateInputViewListener)
+            keyboard.systemTouchSounds.unregisterOnChangeListener(recreateInputViewListener)
+            advanced.disableAnimation.unregisterOnChangeListener(recreateInputViewListener)
+        }
         ThemeManager.removeOnChangedListener(onThemeChangedListener)
+        inputView?.onDestroy()
         eventHandlerJob?.cancel()
         eventHandlerJob = null
         super.onDestroy()

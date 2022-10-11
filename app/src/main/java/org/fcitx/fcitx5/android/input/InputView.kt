@@ -14,6 +14,9 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Fcitx
 import org.fcitx.fcitx5.android.core.FcitxEvent
@@ -61,7 +64,10 @@ class InputView(
 
     private val bottomPaddingSpace = view(::Space)
 
-    val scope = DynamicScope()
+    private val eventHandlerJob =
+        fcitx.eventFlow.onEach(::handleFcitxEvent).launchIn(service.lifecycleScope)
+
+    private val scope = DynamicScope()
     private val themedContext = context.withTheme(R.style.Theme_InputViewTheme)
     private val broadcaster = InputBroadcaster()
     private val popup = PopupComponent()
@@ -120,6 +126,7 @@ class InputView(
         AppPrefs.getInstance().keyboard.keyboardHeightPercent
             .registerOnChangeListener(onWindowHeightChangeListener)
 
+        windowManager.addEssentialWindow(pickerWindow)
         broadcaster.onImeUpdate(fcitx.inputMethodEntryCached)
 
         service.window.window!!.also {
@@ -158,7 +165,6 @@ class InputView(
                     }
                 }
             }
-            windowManager.addEssentialWindow(pickerWindow)
         }
 
         customBackground.imageDrawable = theme.backgroundDrawable(keyBorder)
@@ -236,7 +242,7 @@ class InputView(
         showingDialog?.dismiss()
     }
 
-    fun handleFcitxEvent(it: FcitxEvent<*>) {
+    private fun handleFcitxEvent(it: FcitxEvent<*>) {
         when (it) {
             is FcitxEvent.CandidateListEvent -> {
                 broadcaster.onCandidateUpdate(it.data)
@@ -278,6 +284,12 @@ class InputView(
             setOnDismissListener { this@InputView.showingDialog = null }
             show()
         }
+    }
+
+    fun onDestroy() {
+        showingDialog?.dismiss()
+        eventHandlerJob.cancel()
+        scope.clear()
     }
 
 }
