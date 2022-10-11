@@ -3,7 +3,7 @@ package org.fcitx.fcitx5.android.core
 import android.view.KeyEvent
 import splitties.bitflags.hasFlag
 
-infix fun UInt.or(other: KeyState): UInt = this or other.state;
+infix fun UInt.or(other: KeyState): UInt = this or other.state
 
 /**
  * translated from
@@ -58,7 +58,7 @@ operator fun UInt.plus(other: KeyState) = or(other.state)
 operator fun UInt.minus(other: KeyState) = and(other.state.inv())
 
 @JvmInline
-value class KeyStates constructor(val states: UInt) {
+value class KeyStates(val states: UInt) {
 
     constructor(vararg states: KeyState) : this(mergeStates(states))
 

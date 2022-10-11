@@ -5,6 +5,7 @@ import androidx.annotation.DrawableRes
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.core.KeyStates
+import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Border
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Variant
 
@@ -69,7 +70,7 @@ class AlphabetDigitKey(
     ),
     setOf(
         Behavior.Press(KeyAction.FcitxKeyAction(character)),
-        Behavior.SwipeDown(KeyAction.SymAction(sym, NumLockState))
+        Behavior.SwipeDown(KeyAction.SymAction(KeySym(sym), NumLockState))
     ),
     popup ?: arrayOf(
         Popup.AltPreview(character, altText),
@@ -131,8 +132,8 @@ class BackspaceKey(
         viewId = R.id.button_backspace
     ),
     setOf(
-        Behavior.Press(action = KeyAction.SymAction(0xff08)),
-        Behavior.Repeat(action = KeyAction.SymAction(0xff08))
+        Behavior.Press(action = KeyAction.SymAction(KeySym(0xff08))),
+        Behavior.Repeat(action = KeyAction.SymAction(KeySym(0xff08)))
     )
 )
 
@@ -170,7 +171,7 @@ class SpaceKey : KeyDef(
         viewId = R.id.button_space
     ),
     setOf(
-        Behavior.Press(action = KeyAction.SymAction(0x0020)),
+        Behavior.Press(action = KeyAction.SymAction(KeySym(0x0020))),
         Behavior.LongPress(action = KeyAction.LangSwitchAction)
     )
 )
@@ -184,7 +185,7 @@ class ReturnKey(percentWidth: Float = 0.15f) : KeyDef(
         viewId = R.id.button_return
     ),
     setOf(
-        Behavior.Press(action = KeyAction.SymAction(0xff0d))
+        Behavior.Press(action = KeyAction.SymAction(KeySym(0xff0d)))
     )
 )
 
@@ -215,7 +216,7 @@ class MiniSpaceKey : KeyDef(
         viewId = R.id.button_mini_space
     ),
     setOf(
-        Behavior.Press(action = KeyAction.SymAction(0x0020))
+        Behavior.Press(action = KeyAction.SymAction(KeySym(0x0020)))
     )
 )
 
@@ -234,6 +235,6 @@ class NumPadKey(
         variant = variant
     ),
     setOf(
-        Behavior.Press(action = KeyAction.SymAction(sym, NumLockState))
+        Behavior.Press(action = KeyAction.SymAction(KeySym(sym), NumLockState))
     )
 )

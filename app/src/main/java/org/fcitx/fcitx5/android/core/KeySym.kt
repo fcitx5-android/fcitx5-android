@@ -2,7 +2,8 @@ package org.fcitx.fcitx5.android.core
 
 import android.view.KeyEvent
 
-data class KeySym(val sym: Int) {
+@JvmInline
+value class KeySym(val sym: Int) {
 
     val keyCode get() = KeyCode[sym] ?: KeyEvent.KEYCODE_UNKNOWN
 
