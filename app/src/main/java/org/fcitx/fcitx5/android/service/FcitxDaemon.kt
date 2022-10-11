@@ -6,6 +6,7 @@ import android.os.IBinder
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.fcitx.fcitx5.android.core.Fcitx
 import org.fcitx.fcitx5.android.core.FcitxLifecycle
 import org.fcitx.fcitx5.android.core.FcitxLifecycleObserver
@@ -62,6 +63,9 @@ class FcitxDaemon : LifecycleService(), FcitxLifecycleObserver {
 
     override fun onDestroy() {
         Timber.d("onDestroy")
+        runBlocking {
+            fcitx.save()
+        }
         fcitx.stop()
         onReadyListeners.clear()
         onStoppedListeners.clear()

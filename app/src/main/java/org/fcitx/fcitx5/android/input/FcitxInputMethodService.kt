@@ -1,7 +1,6 @@
 package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
 import android.os.SystemClock
@@ -18,7 +17,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.fcitx.fcitx5.android.core.*
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
@@ -562,14 +560,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    override fun onUnbind(intent: Intent?): Boolean {
-        if (this::fcitx.isInitialized && fcitx.isReady)
-            runBlocking {
-                fcitx.save()
-            }
-        return false
-    }
-
     override fun onDestroy() {
         FcitxDaemonManager.unbind(javaClass.name)
         ThemeManager.removeOnChangedListener(onThemeChangedListener)
@@ -580,8 +570,5 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     companion object {
         const val DeleteSurroundingFlag = "org.fcitx.fcitx5.android.DELETE_SURROUNDING"
-
-        val isBoundToFcitxDaemon: Boolean
-            get() = FcitxDaemonManager.hasConnection(FcitxInputMethodService::javaClass.name)
     }
 }

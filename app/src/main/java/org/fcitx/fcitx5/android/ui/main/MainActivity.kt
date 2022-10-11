@@ -17,10 +17,8 @@ import androidx.core.view.updateLayoutParams
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
-import kotlinx.coroutines.runBlocking
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.databinding.ActivityMainBinding
-import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.ui.main.settings.PinyinDictionaryFragment
 import org.fcitx.fcitx5.android.ui.setup.SetupActivity
 import org.fcitx.fcitx5.android.utils.applyTranslucentSystemBars
@@ -175,15 +173,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
         true
-    }
-
-    override fun onStop() {
-        // nothing needs to be saved if keyboard is not running
-        if (FcitxInputMethodService.isBoundToFcitxDaemon && viewModel.isFcitxReady)
-            runBlocking {
-                viewModel.fcitx.save()
-            }
-        super.onStop()
     }
 
     companion object {
