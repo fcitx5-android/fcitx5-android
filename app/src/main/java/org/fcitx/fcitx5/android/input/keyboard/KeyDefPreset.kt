@@ -3,6 +3,7 @@ package org.fcitx.fcitx5.android.input.keyboard
 import android.graphics.Typeface
 import androidx.annotation.DrawableRes
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.FcitxKeyMapping
 import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
@@ -132,8 +133,8 @@ class BackspaceKey(
         viewId = R.id.button_backspace
     ),
     setOf(
-        Behavior.Press(action = KeyAction.SymAction(KeySym(0xff08))),
-        Behavior.Repeat(action = KeyAction.SymAction(KeySym(0xff08)))
+        Behavior.Press(action = KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_BackSpace))),
+        Behavior.Repeat(action = KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_BackSpace)))
     )
 )
 
@@ -171,7 +172,7 @@ class SpaceKey : KeyDef(
         viewId = R.id.button_space
     ),
     setOf(
-        Behavior.Press(action = KeyAction.SymAction(KeySym(0x0020))),
+        Behavior.Press(action = KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_space))),
         Behavior.LongPress(action = KeyAction.LangSwitchAction)
     )
 )
@@ -185,7 +186,7 @@ class ReturnKey(percentWidth: Float = 0.15f) : KeyDef(
         viewId = R.id.button_return
     ),
     setOf(
-        Behavior.Press(action = KeyAction.SymAction(KeySym(0xff0d)))
+        Behavior.Press(action = KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_Return)))
     )
 )
 
@@ -216,7 +217,7 @@ class MiniSpaceKey : KeyDef(
         viewId = R.id.button_mini_space
     ),
     setOf(
-        Behavior.Press(action = KeyAction.SymAction(KeySym(0x0020)))
+        Behavior.Press(action = KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_space)))
     )
 )
 

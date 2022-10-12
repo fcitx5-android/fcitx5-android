@@ -126,6 +126,11 @@ android {
         }
     }
 }
+kotlin {
+    sourceSets.configureEach {
+        kotlin.srcDir("$buildDir/generated/ksp/$name/kotlin/")
+    }
+}
 
 kotlin.sourceSets.all {
     languageSettings.optIn("kotlin.RequiresOptIn")
@@ -241,6 +246,7 @@ tasks.register<Delete>("cleanCxxIntermediates") {
 }.also { tasks.clean.dependsOn(it) }
 
 dependencies {
+    ksp(project(":codegen"))
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.2.2")
     val arrowVersion = "1.1.3"
     implementation("io.arrow-kt:arrow-core:$arrowVersion")

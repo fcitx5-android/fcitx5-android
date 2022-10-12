@@ -5,6 +5,7 @@ import android.graphics.Rect
 import android.graphics.Typeface
 import android.view.ViewGroup
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.FcitxKeyMapping
 import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
@@ -39,7 +40,7 @@ class PickerPageUi(override val ctx: Context, val theme: Theme) : Ui {
             viewId = R.id.button_backspace
         )
 
-        val BackspaceAction = SymAction(KeySym(0xff08))
+        val BackspaceAction = SymAction(KeySym(FcitxKeyMapping.FcitxKey_BackSpace))
 
         // TODO: configurable grid size
         const val RowCount = 3
