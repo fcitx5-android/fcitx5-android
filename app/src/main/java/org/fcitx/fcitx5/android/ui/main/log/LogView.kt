@@ -1,49 +1,40 @@
-package org.fcitx.fcitx5.android.ui.common
+package org.fcitx.fcitx5.android.ui.main.log
 
 import android.content.Context
-import android.graphics.Typeface
-import android.os.Build
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.util.AttributeSet
-import android.view.textclassifier.TextClassifier
 import android.widget.HorizontalScrollView
-import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.utils.Logcat
-import splitties.dimensions.dp
 import splitties.resources.styledColor
-import splitties.views.dsl.core.*
-import splitties.views.padding
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.wrapContent
+import splitties.views.dsl.recyclerview.recyclerView
+import splitties.views.recyclerview.verticalLayoutManager
 
 class LogView @JvmOverloads constructor(context: Context, attributeSet: AttributeSet? = null) :
-    NestedScrollView(context, attributeSet) {
+    HorizontalScrollView(context, attributeSet) {
 
     private var logcat: Logcat? = null
 
-    private val textView = textView {
-        padding = dp(4)
-        textSize = 12f
-        typeface = Typeface.MONOSPACE
-        setTextIsSelectable(true)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            setTextClassifier(object : TextClassifier {})
-        }
-    }
+    private val logAdapter = LogAdapter()
 
-    private val scrollView = view(::HorizontalScrollView) {
-        add(textView, lParams(matchParent, matchParent))
+    private val rv = recyclerView {
+        adapter = logAdapter
+        layoutManager = verticalLayoutManager()
     }
 
     init {
-        add(scrollView, lParams(matchParent, matchParent))
+        add(rv, lParams(wrapContent, matchParent))
     }
-
 
     override fun onDetachedFromWindow() {
         logcat?.shutdownLogFlow()
@@ -65,23 +56,21 @@ class LogView @JvmOverloads constructor(context: Context, attributeSet: Attribut
                     else -> android.R.attr.colorForeground
                 }
             )
-            val colored = SpannableString(it).apply {
+            logAdapter.append(SpannableString(it).apply {
                 setSpan(
                     ForegroundColorSpan(color),
                     0,
                     it.length,
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
-            }
-            textView.append(colored)
-            textView.append("\n")
+            })
         }.launchIn(findViewTreeLifecycleOwner()!!.lifecycleScope)
     }
 
-    val currentLog: CharSequence
-        get() = textView.text ?: ""
+    val currentLog: String
+        get() = logAdapter.fullLogString()
 
     fun clear() {
-        textView.text = ""
+        logAdapter.clear()
     }
 }

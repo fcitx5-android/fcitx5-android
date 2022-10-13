@@ -18,9 +18,8 @@ import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.FcitxApplication
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.databinding.ActivityLogBinding
-import org.fcitx.fcitx5.android.ui.common.LogView
+import org.fcitx.fcitx5.android.ui.main.log.LogView
 import org.fcitx.fcitx5.android.utils.*
-import java.io.OutputStreamWriter
 
 class LogActivity : AppCompatActivity() {
 
@@ -30,25 +29,12 @@ class LogActivity : AppCompatActivity() {
     private fun registerLauncher() {
         launcher = registerForActivityResult(CreateDocument("text/plain")) { uri ->
             lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
-                runCatching {
-                    if (uri != null)
-                        contentResolver.openOutputStream(uri)?.let { OutputStreamWriter(it) }
-                    else null
-                }.bindOnNotNull { x ->
-                    x.use {
-                        logView
-                            .currentLog
-                            .let { log ->
-                                runCatching {
-                                    it.write("--------- Build Info\n")
-                                    it.write("Build Time: ${iso8601UTCDateTime(Const.buildTime)}\n")
-                                    it.write("Build Git Hash: ${Const.buildGitHash}\n")
-                                    it.write("Build Version Name: ${Const.versionName}\n")
-                                    it.write("--------- Device Info\n")
-                                    it.write(DeviceInfo.get(this@LogActivity))
-                                    it.write(log.toString())
-                                }
-                            }
+                uri?.runCatching {
+                    contentResolver.openOutputStream(this)?.use { stream ->
+                        stream.bufferedWriter().use { writer ->
+                            writer.write(DeviceInfo.get(this@LogActivity))
+                            writer.write(logView.currentLog)
+                        }
                     }
                 }?.toast(this@LogActivity)
             }

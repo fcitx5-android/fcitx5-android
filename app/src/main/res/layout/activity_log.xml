@@ -20,11 +20,11 @@
             android:layout_height="wrap_content" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <org.fcitx.fcitx5.android.ui.common.LogView
+    <org.fcitx.fcitx5.android.ui.main.log.LogView
         android:id="@+id/logView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/clearButton"
+        app:layout_constraintBottom_toTopOf="@id/exportButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/appbar" />
