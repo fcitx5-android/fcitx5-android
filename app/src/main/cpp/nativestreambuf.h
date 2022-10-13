@@ -2,14 +2,14 @@
 #define FCITX5_ANDROID_NATIVESTREAMBUF_H
 
 #include <array>
-#include <iostream>
+#include <streambuf>
 
 #include <android/log.h>
 
-template<std::size_t SIZE = 128, class CharT = char>
-class native_streambuf : public std::basic_streambuf<CharT>, public std::ostream {
+template<std::size_t SIZE = 128>
+class native_streambuf : public std::streambuf {
 public:
-    using Base = std::basic_streambuf<CharT>;
+    using Base = std::streambuf;
     using char_type = typename Base::char_type;
     using int_type = typename Base::int_type;
 
