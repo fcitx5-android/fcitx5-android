@@ -7,6 +7,7 @@ import arrow.core.redeem
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
+import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.core.getPunctuationConfig
 import org.fcitx.fcitx5.android.data.punctuation.PunctuationManager
 import org.fcitx.fcitx5.android.data.punctuation.PunctuationMapEntry
@@ -21,6 +22,7 @@ import splitties.views.setPaddingDp
 
 class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<PunctuationMapEntry> {
 
+    private lateinit var lang: String
     private lateinit var keyDesc: String
     private lateinit var mappingDesc: String
     private lateinit var altMappingDesc: String
@@ -37,24 +39,25 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
     private val entries
         get() = ui.entries
 
-    private suspend fun findDesc(lang: String = "zh_CN") {
-        val desc = viewModel.fcitx.getPunctuationConfig(lang)["desc"]
+    private fun findDesc(raw: RawConfig) {
+        val desc = raw["desc"]
         // parse config desc to get description text of the options
         ConfigDescriptor.parseTopLevel(desc)
             .redeem({ throw it }) {
                 it.customTypes.first().values.forEach { descriptor ->
                     when (descriptor.name) {
-                        PunctuationManager.KEY -> keyDesc = descriptor.description ?: descriptor.name
-                        PunctuationManager.MAPPING -> mappingDesc =
-                            descriptor.description ?: descriptor.name
-                        PunctuationManager.ALT_MAPPING -> altMappingDesc =
-                            descriptor.description ?: descriptor.name
+                        PunctuationManager.KEY ->
+                            keyDesc = descriptor.description ?: descriptor.name
+                        PunctuationManager.MAPPING ->
+                            mappingDesc = descriptor.description ?: descriptor.name
+                        PunctuationManager.ALT_MAPPING ->
+                            altMappingDesc = descriptor.description ?: descriptor.name
                     }
                 }
             }
     }
 
-    private fun saveConfig(lang: String = "zh_CN") {
+    private fun saveConfig() {
         if (!dustman.dirty)
             return
         lifecycleScope.launch {
@@ -72,8 +75,10 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
     override suspend fun initialize(): View {
         viewModel.disableToolbarSaveButton()
         viewModel.setToolbarTitle(requireArguments().getString(TITLE)!!)
-        findDesc()
-        val initialEntries = PunctuationManager.load(viewModel.fcitx)
+        lang = requireArguments().getString(LANG, DEFAULT_LANG)
+        val raw = fcitx.getPunctuationConfig(lang)
+        findDesc(raw)
+        val initialEntries = PunctuationManager.parseRawConfig(raw)
         ui = object : BaseDynamicListUi<PunctuationMapEntry>(
             requireContext(),
             Mode.FreeAdd(hint = "", converter = { PunctuationMapEntry(it, "", "") }),
@@ -154,5 +159,7 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
 
     companion object {
         const val TITLE = "title"
+        const val LANG = "lang"
+        const val DEFAULT_LANG = "zh_CN"
     }
 }

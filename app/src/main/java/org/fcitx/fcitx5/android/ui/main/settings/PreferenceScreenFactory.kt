@@ -82,7 +82,7 @@ object PreferenceScreenFactory {
             }
         }
 
-        fun punctuationEditor(title: String) = Preference(context).apply {
+        fun punctuationEditor(title: String, lang: String?) = Preference(context).apply {
             setOnPreferenceClickListener {
                 val currentFragment = fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
                 val action = when (currentFragment) {
@@ -93,7 +93,8 @@ object PreferenceScreenFactory {
                 currentFragment.findNavController().navigate(
                     action,
                     bundleOf(
-                        PunctuationEditorFragment.TITLE to title
+                        PunctuationEditorFragment.TITLE to title,
+                        PunctuationEditorFragment.LANG to lang
                     )
                 )
                 true
@@ -184,7 +185,9 @@ object PreferenceScreenFactory {
             is ConfigExternal -> when (descriptor.knownType) {
                 ConfigExternal.ETy.PinyinDict -> pinyinDictionary()
                 ConfigExternal.ETy.Punctuation -> punctuationEditor(
-                    descriptor.description ?: descriptor.name
+                    descriptor.description ?: descriptor.name,
+                    // fcitx://config/addon/punctuation/punctuationmap/zh_CN
+                    descriptor.uri?.substringAfterLast('/')
                 )
                 ConfigExternal.ETy.QuickPhrase -> quickPhraseEditor()
                 ConfigExternal.ETy.Chttrans -> addonConfigPreference("chttrans")

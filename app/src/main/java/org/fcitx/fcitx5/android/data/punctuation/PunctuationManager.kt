@@ -7,21 +7,18 @@ import org.fcitx.fcitx5.android.core.savePunctuationConfig
 
 object PunctuationManager {
 
-    suspend fun load(
-        fcitx: Fcitx,
-        lang: String = "zh_CN"
-    ): List<PunctuationMapEntry> {
-        val raw = fcitx.getPunctuationConfig(lang)
-        return raw.findByName("cfg")?.run {
-            get(ENTRIES).subItems?.map { PunctuationMapEntry(it) }
-        } ?: listOf()
+    fun parseRawConfig(raw: RawConfig): List<PunctuationMapEntry> {
+        return raw.findByName("cfg")
+            ?.run { get(ENTRIES).subItems?.map { PunctuationMapEntry(it) } }
+            ?: listOf()
     }
 
-    suspend fun save(
-        fcitx: Fcitx,
-        lang: String = "zh_CN",
-        entries: List<PunctuationMapEntry>
-    ) {
+    suspend fun load(fcitx: Fcitx, lang: String): List<PunctuationMapEntry> {
+        val raw = fcitx.getPunctuationConfig(lang)
+        return parseRawConfig(raw)
+    }
+
+    suspend fun save(fcitx: Fcitx, lang: String, entries: List<PunctuationMapEntry>) {
         val cfg = RawConfig(
             arrayOf(
                 RawConfig(ENTRIES, entries.mapIndexed { i, it -> it.toRawConfig(i) }.toTypedArray())
