@@ -16,10 +16,10 @@ import org.fcitx.fcitx5.android.utils.NaiveDustman
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor
 import org.fcitx.fcitx5.android.utils.str
 import splitties.views.dsl.core.*
+import splitties.views.dsl.material.addInput
 import splitties.views.setPaddingDp
 
-class PunctuationEditorFragment : ProgressFragment(),
-    OnItemChangedListener<PunctuationMapEntry> {
+class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<PunctuationMapEntry> {
 
     private lateinit var keyDesc: String
     private lateinit var mappingDesc: String
@@ -28,7 +28,6 @@ class PunctuationEditorFragment : ProgressFragment(),
     private val dustman = NaiveDustman<PunctuationMapEntry>().apply {
         onDirty = {
             viewModel.enableToolbarSaveButton { saveConfig() }
-
         }
         onClean = {
             viewModel.disableToolbarSaveButton()
@@ -77,10 +76,7 @@ class PunctuationEditorFragment : ProgressFragment(),
         val initialEntries = PunctuationManager.load(viewModel.fcitx)
         ui = object : BaseDynamicListUi<PunctuationMapEntry>(
             requireContext(),
-            Mode.FreeAdd(
-                hint = "",
-                converter = { PunctuationMapEntry(it, "", "") }
-            ),
+            Mode.FreeAdd(hint = "", converter = { PunctuationMapEntry(it, "", "") }),
             initialEntries
         ) {
             init {
@@ -97,20 +93,20 @@ class PunctuationEditorFragment : ProgressFragment(),
                 entry: PunctuationMapEntry?,
                 block: (PunctuationMapEntry) -> Unit
             ) {
-                val keyField = view(::TextInputEditText)
+                val keyField: TextInputEditText
                 val keyLayout = view(::TextInputLayout) {
                     hint = keyDesc
-                    add(keyField, lParams(matchParent))
+                    keyField = addInput(View.NO_ID)
                 }
-                val mappingField = view(::TextInputEditText)
+                val mappingField: TextInputEditText
                 val mappingLayout = view(::TextInputLayout) {
                     hint = mappingDesc
-                    add(mappingField, lParams(matchParent))
+                    mappingField = addInput(View.NO_ID)
                 }
-                val altMappingField = view(::TextInputEditText)
+                val altMappingField: TextInputEditText
                 val altMappingLayout = view(::TextInputLayout) {
                     hint = altMappingDesc
-                    add(altMappingField, lParams(matchParent))
+                    altMappingField = addInput(View.NO_ID)
                 }
                 entry?.apply {
                     keyField.setText(key)
@@ -131,14 +127,13 @@ class PunctuationEditorFragment : ProgressFragment(),
                             PunctuationMapEntry(keyField.str, mappingField.str, altMappingField.str)
                         )
                     }
-                    .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.cancel() }
+                    .setNegativeButton(android.R.string.cancel, null)
                     .show()
             }
         }
         resetDustman()
         return ui.root
     }
-
 
     override fun onItemAdded(idx: Int, item: PunctuationMapEntry) {
         dustman.addOrUpdate(item.key, item)

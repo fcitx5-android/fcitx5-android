@@ -3,7 +3,6 @@ package org.fcitx.fcitx5.android.ui.main.settings
 import android.content.Context
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
-import androidx.appcompat.widget.AppCompatButton
 import androidx.core.widget.addTextChangedListener
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Key
@@ -30,9 +29,7 @@ class KeyPreferenceUi(override val ctx: Context) : Ui {
         override val ctx: Context
             get() = this@KeyPreferenceUi.ctx
 
-        // we use AppCompatButton here, because MaterialComponents' Bridge Theme would convert
-        // normal button to MaterialButton
-        override val root = view(::AppCompatButton) {
+        override val root = button {
             text = label
             isAllCaps = false
             // those 2 are both necessary, don't ask me why ´_>`

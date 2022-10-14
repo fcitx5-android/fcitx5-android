@@ -21,10 +21,10 @@ import org.fcitx.fcitx5.android.utils.NaiveDustman
 import org.fcitx.fcitx5.android.utils.serializable
 import org.fcitx.fcitx5.android.utils.str
 import splitties.views.dsl.core.*
+import splitties.views.dsl.material.addInput
 import splitties.views.setPaddingDp
 
-class QuickPhraseEditFragment : ProgressFragment(),
-    OnItemChangedListener<QuickPhraseEntry> {
+class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickPhraseEntry> {
 
     private lateinit var ui: BaseDynamicListUi<QuickPhraseEntry>
 
@@ -36,7 +36,6 @@ class QuickPhraseEditFragment : ProgressFragment(),
     private val dustman = NaiveDustman<QuickPhraseEntry>().apply {
         onDirty = {
             viewModel.enableToolbarSaveButton { saveConfig() }
-
         }
         onClean = {
             viewModel.disableToolbarSaveButton()
@@ -60,15 +59,15 @@ class QuickPhraseEditFragment : ProgressFragment(),
                 entry: QuickPhraseEntry?,
                 block: (QuickPhraseEntry) -> Unit
             ) {
-                val keywordField = view(::TextInputEditText)
+                val keywordField: TextInputEditText
                 val keywordLayout = view(::TextInputLayout).apply {
                     setHint(R.string.quickphrase_keyword)
-                    add(keywordField, lParams(matchParent))
+                    keywordField = addInput(View.NO_ID)
                 }
-                val phraseField = view(::TextInputEditText)
+                val phraseField: TextInputEditText
                 val phraseLayout = view(::TextInputLayout).apply {
                     setHint(R.string.quickphrase_phrase)
-                    add(phraseField, lParams(matchParent))
+                    phraseField = addInput(View.NO_ID)
                 }
                 entry?.apply {
                     keywordField.setText(keyword)
@@ -83,23 +82,15 @@ class QuickPhraseEditFragment : ProgressFragment(),
                     .setTitle(title)
                     .setView(layout)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
-                        block(
-                            QuickPhraseEntry(
-                                keywordField.str,
-                                phraseField.str
-                            )
-                        )
+                        block(QuickPhraseEntry(keywordField.str, phraseField.str))
                     }
-                    .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.cancel() }
+                    .setNegativeButton(android.R.string.cancel, null)
                     .show()
             }
-
 
             override fun showEntry(x: QuickPhraseEntry): String = x.run {
                 "$keyword\u2003→\u2003$phrase"
             }
-
-
         }
         ui.addOnItemChangedListener(this)
         ui.addTouchCallback()
