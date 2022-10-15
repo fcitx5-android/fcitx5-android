@@ -12,13 +12,12 @@ import com.squareup.kotlinpoet.ksp.writeTo
 private typealias FcitxKeyName = String
 private typealias FcitxKeySym = Int
 private typealias AndroidKeyCode = String
-private typealias KeyPair = Pair<Pair<FcitxKeyName?, FcitxKeySym>, AndroidKeyCode>
+private typealias KeyPair = Pair<Pair<FcitxKeyName, FcitxKeySym>, AndroidKeyCode>
 
 internal class GenKeyMappingProcessor(private val environment: SymbolProcessorEnvironment) :
     SymbolProcessor {
 
     private val pairs: List<KeyPair> = listOf(
-        null to 0x0009 to "KEYCODE_TAB", /* U+0009 CHARACTER TABULATION */
         "space" to 0x0020 to "KEYCODE_SPACE", /* U+0020 SPACE */
 //            0x0021 to KeyEvent.KEYCODE_EXCLAM, /* U+0021 EXCLAMATION MARK */
 //            0x0022 to KeyEvent.KEYCODE_QUOTEDBL, /* U+0022 QUOTATION MARK */
@@ -184,8 +183,7 @@ internal class GenKeyMappingProcessor(private val environment: SymbolProcessorEn
         return emptyList()
     }
 
-    private fun nameOrSym(p: Pair<FcitxKeyName?, FcitxKeySym>) =
-        p.first?.let { "FcitxKey_$it" } ?: p.second.toString()
+    private fun keyName(p: Pair<FcitxKeyName, FcitxKeySym>) = "FcitxKey_${p.first}"
 
     override fun finish() {
         val keyCodeFromSym = FunSpec
@@ -195,7 +193,7 @@ internal class GenKeyMappingProcessor(private val environment: SymbolProcessorEn
             .addCode(
                 """
                 | return when (sym) {
-                |     ${pairs.joinToString(separator = "\n|     ") { (f, code) -> "${nameOrSym(f)} -> KeyEvent.$code" }}
+                |     ${pairs.joinToString(separator = "\n|     ") { (f, code) -> "${keyName(f)} -> KeyEvent.$code" }}
                 |     else -> null
                 | }
                 """.trimMargin()
@@ -211,9 +209,15 @@ internal class GenKeyMappingProcessor(private val environment: SymbolProcessorEn
                 """
                     | return when (code) {
                     |     ${
-                    pairs.joinToString(separator = "\n|     ") { (f, code) ->
-                        "KeyEvent.$code -> ${nameOrSym(f)}"
-                    }
+                    // exclude uppercase latin letter range because:
+                    // - there is not separate KeyCode for upper and lower case characters
+                    // - ASCII printable characters have same KeySym value as their char code
+                    // - they should produce different KeySym when hold Shift
+                    // TODO: map (keyCode with metaState) to (KeySym with KeyStates) at once
+                    pairs.filter { it.first.second !in 0x41..0x5a }
+                        .joinToString(separator = "\n|     ") { (f, code) ->
+                            "KeyEvent.$code -> ${keyName(f)}"
+                        }
                 }
                     |     else -> null
                     | }
@@ -227,16 +231,14 @@ internal class GenKeyMappingProcessor(private val environment: SymbolProcessorEn
             .addFunction(keyCodeToSym)
             .apply {
                 pairs.forEach { (f, _) ->
-                    val (name, sym) = f
-                    if (name == null)
-                        return@forEach
+                    val (_, sym) = f
                     PropertySpec
                         .builder(
-                            nameOrSym(f),
+                            keyName(f),
                             Int::class,
                             KModifier.CONST
                         )
-                        .initializer(sym.toString())
+                        .initializer(String.format("0x%04x", sym))
                         .build()
                         .let { addProperty(it) }
                 }

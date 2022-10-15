@@ -339,10 +339,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         val up = event.action == KeyEvent.ACTION_UP
         val states = KeyStates.fromKeyEvent(event)
         val charCode = event.unicodeChar
-        // try send charCode first, allow upper case and lower case character
-        // generating different KeySym
+        // try send charCode first, allow upper case and lower case character generating different KeySym
+        // skip \t, because it's charCode is different from KeySym
         // skip \n, because fcitx wants \r for return
-        if (charCode > 0 && charCode != '\n'.code) {
+        if (charCode > 0 && charCode != '\t'.code && charCode != '\n'.code) {
             lifecycleScope.launch { fcitx.sendKey(charCode, states.states, up, timestamp) }
             return true
         }
