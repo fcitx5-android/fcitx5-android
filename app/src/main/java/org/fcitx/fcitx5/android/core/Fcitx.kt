@@ -17,19 +17,22 @@ import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.utils.ImmutableGraph
 import timber.log.Timber
 
-class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner by JNI {
+/**
+ * Do not use this class directly, accessing fcitx via daemon instead
+ */
+class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
 
-    /**
-     * Subscribe this flow to receive event sent from fcitx
-     */
+    private val lifecycleRegistry = FcitxLifecycleRegistry()
+
     override val eventFlow = eventFlow_.asSharedFlow().apply {
         onEach {
             when (it) {
+                is FcitxEvent.ReadyEvent -> lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_READY)
                 is FcitxEvent.IMChangeEvent -> inputMethodEntryCached = it.data
                 is FcitxEvent.StatusAreaEvent -> statusAreaActionsCached = it.data
                 else -> {}
             }
-        }.launchIn(lifecycle.lifecycleScope)
+        }.launchIn(lifeCycleScope)
     }
 
     override val isReady
@@ -42,24 +45,20 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner by JNI
     override var statusAreaActionsCached: Array<Action> = arrayOf()
         private set
 
-    enum class AddonDep {
-        Required,
-        Optional
-    }
-
-    private val addonGraph: ImmutableGraph<String, AddonDep> by lazy {
+    private val addonGraph: ImmutableGraph<String, FcitxAPI.AddonDep> by lazy {
         runBlocking {
             addons().flatMap { a ->
                 a.dependencies.map {
-                    ImmutableGraph.Edge(it, a.uniqueName, AddonDep.Required)
+                    ImmutableGraph.Edge(it, a.uniqueName, FcitxAPI.AddonDep.Required)
                 } + a.optionalDependencies.map {
-                    ImmutableGraph.Edge(it, a.uniqueName, AddonDep.Optional)
+                    ImmutableGraph.Edge(it, a.uniqueName, FcitxAPI.AddonDep.Optional)
                 }
             }.let { ImmutableGraph(it) }
         }
     }
 
-    private val addonReversedDependencies = mutableMapOf<String, List<Pair<String, AddonDep>>>()
+    private val addonReversedDependencies =
+        mutableMapOf<String, List<Pair<String, FcitxAPI.AddonDep>>>()
 
     override fun getAddonReverseDependencies(addon: String) =
         addonReversedDependencies.computeIfAbsent(addon) { addonGraph.bfs(it) }
@@ -158,9 +157,11 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner by JNI
             throw IllegalAccessException("Fcitx5 has already been created!")
     }
 
-    private companion object JNI : FcitxLifecycleOwner {
 
-        private val lifecycleRegistry by lazy { FcitxLifecycleRegistry() }
+    override val lifecycle: FcitxLifecycle
+        get() = lifecycleRegistry
+
+    private companion object JNI {
 
         private val eventFlow_ =
             MutableSharedFlow<FcitxEvent<*>>(
@@ -314,7 +315,6 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner by JNI
                     // block it will also block fcitx
                     onFirstRun()
                 }
-                onReady()
             }
             eventFlow_.tryEmit(event)
         }
@@ -335,13 +335,6 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner by JNI
             firstRun = false
         }
 
-        // will be called in fcitx main thread
-        private fun onReady() {
-            lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_READY)
-        }
-
-        override val lifecycle: FcitxLifecycle
-            get() = lifecycleRegistry
     }
 
     private val dispatcher = FcitxDispatcher(object : FcitxDispatcher.FcitxController {

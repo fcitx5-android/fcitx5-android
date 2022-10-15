@@ -2,8 +2,32 @@ package org.fcitx.fcitx5.android.daemon
 
 import org.fcitx.fcitx5.android.core.FcitxAPI
 
+/**
+ * Clients should use [FcitxConnection] to run fcitx operations.
+ */
 interface FcitxConnection {
+
+    /**
+     * Run an operation immediately
+     * The suspended [block] will be executed in caller's thread.
+     * Use this function only for non-blocking operations like
+     * accessing [FcitxAPI.eventFlow].
+     */
     fun <T> runImmediately(block: suspend FcitxAPI.() -> T): T
+
+    /**
+     * Run an operation immediately if fcitx is at ready state.
+     * Otherwise, caller will be suspended until fcitx is ready and operation is done.
+     * The suspended [block] will be executed in caller's thread.
+     * Client should use this function in most cases.
+     */
     suspend fun <T> runOnReady(block: suspend FcitxAPI.() -> T): T
-    suspend fun runIfReady(block: suspend FcitxAPI.() -> Unit)
+
+    /**
+     * Run an operation if fcitx is at ready state.
+     * Otherwise, do nothing.
+     * The suspended [block] will be executed in thread pool.
+     * This function does not block or suspend the caller.
+     */
+    fun runIfReady(block: suspend FcitxAPI.() -> Unit)
 }

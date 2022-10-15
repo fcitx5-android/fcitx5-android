@@ -2,8 +2,23 @@ package org.fcitx.fcitx5.android.core
 
 import kotlinx.coroutines.flow.SharedFlow
 
+/**
+ * API of fcitx that hides lifecycle stuffs from [Fcitx]
+ *
+ * Functions can be safely used in any coroutine,
+ * as the underlying operation is always dispatched in fcitx thread.
+ */
 interface FcitxAPI {
 
+
+    enum class AddonDep {
+        Required,
+        Optional
+    }
+
+    /**
+     * Subscribe this flow to receive event sent from fcitx
+     */
     val eventFlow: SharedFlow<FcitxEvent<*>>
 
     val isReady: Boolean
@@ -12,7 +27,7 @@ interface FcitxAPI {
 
     val statusAreaActionsCached: Array<Action>
 
-    fun getAddonReverseDependencies(addon: String): List<Pair<String, Fcitx.AddonDep>>
+    fun getAddonReverseDependencies(addon: String): List<Pair<String, AddonDep>>
 
     fun translate(str: String, domain: String = "fcitx5"): String
 
