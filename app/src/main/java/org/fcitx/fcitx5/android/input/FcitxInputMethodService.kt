@@ -567,7 +567,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onDestroy() {
-        FcitxDaemon.disconnect(javaClass.name)
         AppPrefs.getInstance().apply {
             keyboard.buttonHapticFeedback.unregisterOnChangeListener(recreateInputViewListener)
             keyboard.systemTouchSounds.unregisterOnChangeListener(recreateInputViewListener)
@@ -578,6 +577,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         eventHandlerJob?.cancel()
         eventHandlerJob = null
         super.onDestroy()
+        // Fcitx might be used in super.onDestroy()
+        FcitxDaemon.disconnect(javaClass.name)
     }
 
     companion object {
