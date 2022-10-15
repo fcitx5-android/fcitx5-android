@@ -18,8 +18,9 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.core.Fcitx
+import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.core.FcitxEvent
+import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
@@ -48,7 +49,7 @@ import splitties.views.imageDrawable
 @SuppressLint("ViewConstructor")
 class InputView(
     val service: FcitxInputMethodService,
-    val fcitx: Fcitx,
+    val fcitx: FcitxConnection,
     val theme: Theme
 ) : ConstraintLayout(service) {
 
@@ -65,7 +66,9 @@ class InputView(
     private val bottomPaddingSpace = view(::Space)
 
     private val eventHandlerJob =
-        fcitx.eventFlow.onEach(::handleFcitxEvent).launchIn(service.lifecycleScope)
+        fcitx.runImmediately {
+            eventFlow.onEach(::handleFcitxEvent).launchIn(service.lifecycleScope)
+        }
 
     private val scope = DynamicScope()
     private val themedContext = context.withTheme(R.style.Theme_InputViewTheme)
@@ -127,7 +130,10 @@ class InputView(
             .registerOnChangeListener(onWindowHeightChangeListener)
 
         windowManager.addEssentialWindow(pickerWindow)
-        broadcaster.onImeUpdate(fcitx.inputMethodEntryCached)
+
+        fcitx.runImmediately {
+            broadcaster.onImeUpdate(inputMethodEntryCached)
+        }
 
         service.window.window!!.also {
             when (navbarBackground) {

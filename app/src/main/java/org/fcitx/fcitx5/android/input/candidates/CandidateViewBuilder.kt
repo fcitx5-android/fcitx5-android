@@ -5,7 +5,7 @@ import android.graphics.drawable.shapes.RectShape
 import android.view.ContextThemeWrapper
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
-import org.fcitx.fcitx5.android.core.Fcitx
+import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.candidates.adapter.GridCandidateViewAdapter
@@ -25,12 +25,12 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
 
     private val service: FcitxInputMethodService by manager.inputMethodService()
     private val context: ContextThemeWrapper by manager.context()
-    private val fcitx: Fcitx by manager.fcitx()
+    private val fcitx: FcitxConnection by manager.fcitx()
     private val theme by manager.theme()
 
     fun gridAdapter() = object : GridCandidateViewAdapter() {
         override fun onSelect(idx: Int) {
-            service.lifecycleScope.launch { fcitx.select(idx) }
+            service.lifecycleScope.launch { fcitx.runOnReady { select(idx) } }
         }
 
         override val theme: Theme
@@ -39,7 +39,7 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
 
     fun simpleAdapter() = object : SimpleCandidateViewAdapter() {
         override fun onSelect(idx: Int) {
-            service.lifecycleScope.launch { fcitx.select(idx) }
+            service.lifecycleScope.launch { fcitx.runOnReady { select(idx) } }
         }
 
         override val theme: Theme

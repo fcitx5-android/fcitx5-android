@@ -26,14 +26,16 @@ class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
             val ids = map { it.uniqueName }.toTypedArray()
             val state = map { it.enabled }.toBooleanArray()
             lifecycleScope.launch {
-                fcitx.setAddonState(ids, state)
+                fcitx.runOnReady {
+                    setAddonState(ids, state)
+                }
             }
         }
     }
 
     override suspend fun initialize(): View {
         ui = requireContext().CheckBoxListUi(
-            initialEntries = fcitx.addons().sortedBy { it.uniqueName },
+            initialEntries = fcitx.runOnReady { addons().sortedBy { it.uniqueName } },
             initCheckBox = { entry ->
                 // remove old listener before change checked state
                 setOnCheckedChangeListener(null)

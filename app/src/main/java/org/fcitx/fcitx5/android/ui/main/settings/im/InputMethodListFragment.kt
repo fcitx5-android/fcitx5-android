@@ -23,15 +23,17 @@ class InputMethodListFragment : ProgressFragment(), OnItemChangedListener<InputM
     private fun updateIMState() {
         if (isInitialized)
             lifecycleScope.launch {
-                fcitx.setEnabledIme(entries.map { it.uniqueName }.toTypedArray())
+                fcitx.runOnReady {
+                    setEnabledIme(entries.map { it.uniqueName }.toTypedArray())
+                }
             }
     }
 
     private lateinit var ui: BaseDynamicListUi<InputMethodEntry>
 
     override suspend fun initialize(): View {
-        val available = fcitx.availableIme().toSet()
-        val initialEnabled = fcitx.enabledIme().toList()
+        val available = fcitx.runOnReady { availableIme().toSet() }
+        val initialEnabled = fcitx.runOnReady { enabledIme().toList() }
         ui = requireContext().DynamicListUi(
             mode = BaseDynamicListUi.Mode.ChooseOne {
                 (available - entries.toSet()).toTypedArray()

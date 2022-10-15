@@ -61,8 +61,10 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
         if (!dustman.dirty)
             return
         lifecycleScope.launch {
-            PunctuationManager.save(viewModel.fcitx, lang, ui.entries)
-            resetDustman()
+            fcitx.runOnReady {
+                PunctuationManager.save(this, lang, ui.entries)
+                resetDustman()
+            }
         }
     }
 
@@ -76,7 +78,7 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
         viewModel.disableToolbarSaveButton()
         viewModel.setToolbarTitle(requireArguments().getString(TITLE)!!)
         lang = requireArguments().getString(LANG, DEFAULT_LANG)
-        val raw = fcitx.getPunctuationConfig(lang)
+        val raw = fcitx.runOnReady { getPunctuationConfig(lang) }
         findDesc(raw)
         val initialEntries = PunctuationManager.parseRawConfig(raw)
         ui = object : BaseDynamicListUi<PunctuationMapEntry>(

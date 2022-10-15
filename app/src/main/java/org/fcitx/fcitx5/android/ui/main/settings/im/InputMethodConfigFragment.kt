@@ -1,13 +1,13 @@
 package org.fcitx.fcitx5.android.ui.main.settings.im
 
-import org.fcitx.fcitx5.android.core.Fcitx
+import org.fcitx.fcitx5.android.core.FcitxAPI
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.ui.main.settings.FcitxPreferenceFragment
 
 class InputMethodConfigFragment : FcitxPreferenceFragment() {
     override fun getPageTitle(): String = requireStringArg(ARG_NAME)
 
-    override suspend fun obtainConfig(fcitx: Fcitx): RawConfig {
+    override suspend fun obtainConfig(fcitx: FcitxAPI): RawConfig {
         val im = requireStringArg(ARG_UNIQUE_NAME)
         val raw = fcitx.getImConfig(im)
         if (im == "pinyin") {
@@ -23,7 +23,7 @@ class InputMethodConfigFragment : FcitxPreferenceFragment() {
         return raw
     }
 
-    override suspend fun saveConfig(fcitx: Fcitx, newConfig: RawConfig) {
+    override suspend fun saveConfig(fcitx: FcitxAPI, newConfig: RawConfig) {
         fcitx.setImConfig(requireStringArg(ARG_UNIQUE_NAME), newConfig)
     }
 

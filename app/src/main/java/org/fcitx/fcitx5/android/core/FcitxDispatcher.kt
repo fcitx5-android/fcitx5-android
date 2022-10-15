@@ -1,6 +1,5 @@
 package org.fcitx.fcitx5.android.core
 
-import android.os.Debug
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -45,43 +44,6 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
         fun nativeLoopOnce()
         fun nativeScheduleEmpty()
         fun nativeExit()
-    }
-
-    // not concurrent
-    inner class AliveChecker(private val period: Long) : CoroutineScope {
-        private var installed: Job? = null
-        private val dispatcher = Executors.newSingleThreadExecutor {
-            Thread(it).apply {
-                name = "alive-checker"
-            }
-        }.asCoroutineDispatcher()
-
-        fun install() {
-            if (installed != null)
-                throw IllegalStateException("AliveChecker has been installed!")
-            installed = launch {
-                if (Debug.isDebuggerConnected()) {
-                    Timber.w("Since debugger is connected, alive checker won't run anymore")
-                    return@launch
-                }
-                // delay at first
-                delay(10000L)
-                while (isActive) {
-                    val emptyRunnable = dispatchInternal(Runnable { })
-                    delay(period)
-                    if (!emptyRunnable.started)
-                        throw RuntimeException("Alive checking failed! The job didn't get run after $period ms!")
-                }
-            }
-        }
-
-        fun teardown() {
-            (installed
-                ?: throw IllegalStateException("AliveChecker has not been installed!")).cancel()
-            installed = null
-        }
-
-        override val coroutineContext: CoroutineContext = dispatcher
     }
 
     private val nativeLoopLock = Mutex()

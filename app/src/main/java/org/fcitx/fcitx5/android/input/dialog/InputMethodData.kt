@@ -1,7 +1,7 @@
 package org.fcitx.fcitx5.android.input.dialog
 
 import android.content.Context
-import org.fcitx.fcitx5.android.core.Fcitx
+import org.fcitx.fcitx5.android.core.FcitxAPI
 import splitties.systemservices.inputMethodManager
 
 data class InputMethodData(
@@ -10,7 +10,7 @@ data class InputMethodData(
     val ime: Boolean
 ) {
     companion object {
-        suspend fun resolve(fcitx: Fcitx, context: Context): List<InputMethodData> {
+        suspend fun resolve(fcitx: FcitxAPI, context: Context): List<InputMethodData> {
             val enabled = fcitx.enabledIme()
                 .map { InputMethodData(it.uniqueName, it.displayName, false) }
                 .toMutableList()

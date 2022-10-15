@@ -6,7 +6,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Action
-import org.fcitx.fcitx5.android.core.Fcitx
+import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
@@ -32,7 +32,7 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
     InputBroadcastReceiver {
 
     private val service: FcitxInputMethodService by manager.inputMethodService()
-    private val fcitx: Fcitx by manager.fcitx()
+    private val fcitx: FcitxConnection by manager.fcitx()
     private val theme by manager.theme()
 
     private val staticEntries by lazy {
@@ -64,31 +64,34 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
         object : StatusAreaAdapter() {
             override fun onItemClick(it: StatusAreaEntry) {
                 service.lifecycleScope.launch {
-                    when (it) {
-                        is StatusAreaEntry.Fcitx -> fcitx.activateAction(it.action.id)
-                        is StatusAreaEntry.Android -> when (it.type) {
-                            GlobalOptions -> AppUtil.launchMainToConfig(
-                                context, MainActivity.INTENT_DATA_CONFIG_GLOBAL
-                            )
-                            InputMethod -> fcitx.currentIme().let {
-                                AppUtil.launchMainToConfig(
-                                    context, MainActivity.INTENT_DATA_CONFIG_IM,
-                                    bundleOf(
-                                        InputMethodConfigFragment.ARG_NAME to it.displayName,
-                                        InputMethodConfigFragment.ARG_UNIQUE_NAME to it.uniqueName
+                    fcitx.runOnReady {
+                        when (it) {
+                            is StatusAreaEntry.Fcitx -> activateAction(it.action.id)
+                            is StatusAreaEntry.Android -> when (it.type) {
+                                GlobalOptions -> AppUtil.launchMainToConfig(
+                                    context, MainActivity.INTENT_DATA_CONFIG_GLOBAL
+                                )
+                                InputMethod -> currentIme().let {
+                                    AppUtil.launchMainToConfig(
+                                        context, MainActivity.INTENT_DATA_CONFIG_IM,
+                                        bundleOf(
+                                            InputMethodConfigFragment.ARG_NAME to it.displayName,
+                                            InputMethodConfigFragment.ARG_UNIQUE_NAME to it.uniqueName
+                                        )
                                     )
+                                }
+                                ReloadConfig -> {
+                                    reloadConfig()
+                                    Toast.makeText(service, R.string.done, Toast.LENGTH_SHORT)
+                                        .show()
+                                }
+                                Behavior -> AppUtil.launchMainToConfig(
+                                    context, MainActivity.INTENT_DATA_CONFIG_BEHAVIOR
+                                )
+                                ThemeList -> AppUtil.launchMainToConfig(
+                                    context, MainActivity.INTENT_DATA_CONFIG_THEME
                                 )
                             }
-                            ReloadConfig -> {
-                                fcitx.reloadConfig()
-                                Toast.makeText(service, R.string.done, Toast.LENGTH_SHORT).show()
-                            }
-                            Behavior -> AppUtil.launchMainToConfig(
-                                context, MainActivity.INTENT_DATA_CONFIG_BEHAVIOR
-                            )
-                            ThemeList -> AppUtil.launchMainToConfig(
-                                context, MainActivity.INTENT_DATA_CONFIG_THEME
-                            )
                         }
                     }
                 }
@@ -138,7 +141,9 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
 
     override fun onAttached() {
         service.lifecycleScope.launch {
-            onStatusAreaUpdate(fcitx.statusArea())
+            fcitx.runOnReady {
+                onStatusAreaUpdate(statusArea())
+            }
         }
     }
 
