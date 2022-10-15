@@ -26,7 +26,6 @@ import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.coordinatorlayout.coordinatorLayout
 import splitties.views.dsl.coordinatorlayout.defaultLParams
 import splitties.views.dsl.core.*
-import splitties.views.dsl.material.floatingActionButton
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.gravityEndBottom
 import splitties.views.imageResource
@@ -50,7 +49,7 @@ abstract class BaseDynamicListUi<T>(
         initSettingsButton
     ) {
 
-    protected val fab = floatingActionButton {
+    protected val fab = view(::FloatingActionButton) {
         imageResource = R.drawable.ic_baseline_plus_24
         colorFilter = PorterDuffColorFilter(
             styledColor(android.R.attr.colorForegroundInverse), PorterDuff.Mode.SRC_IN
@@ -131,7 +130,7 @@ abstract class BaseDynamicListUi<T>(
     private fun showUndoSnackbar(text: String, action: View.OnClickListener) {
         Snackbar.make(root, text, Snackbar.LENGTH_SHORT)
             .apply { if (enableUndo) setAction(R.string.undo, action) }
-            .addCallback(object: BaseTransientBottomBar.BaseCallback<Snackbar>() {
+            .addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                 override fun onShown(transientBottomBar: Snackbar) {
                     // snackbar is invisible when it attached to parent,
                     // but change visibility won't trigger `onDependentViewChanged`.
