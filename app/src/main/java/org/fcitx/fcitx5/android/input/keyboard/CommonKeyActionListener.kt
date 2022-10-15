@@ -1,8 +1,8 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.KeyState
+import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
@@ -36,78 +36,76 @@ class CommonKeyActionListener :
 
     val listener by lazy {
         KeyActionListener { action, _ ->
-            service.lifecycleScope.launch {
-                fcitx.runOnReady {
-                    when (action) {
-                        is FcitxKeyAction -> sendKey(action.act, KeyState.Virtual.state)
-                        is SymAction -> sendKey(action.sym, action.states)
-                        is CommitAction -> {
-                            if (preedit.content.preedit.run { preedit.isEmpty() && clientPreedit.isEmpty() }) {
-                                // preedit is empty, there can be prediction candidates
-                                reset()
-                            } else if (inputMethodEntryCached.uniqueName == "keyboard-us") {
-                                // androidkeyboard clears composing on reset, but we want to commit it as-is
-                                service.inputConnection?.finishComposingText()
-                                reset()
-                            } else {
-                                if (!select(0)) reset()
-                            }
-                            service.inputConnection?.commitText(action.text, 1)
+            service.lifecycleScope.launchOnFcitxReady(fcitx) {
+                when (action) {
+                    is FcitxKeyAction -> it.sendKey(action.act, KeyState.Virtual.state)
+                    is SymAction -> it.sendKey(action.sym, action.states)
+                    is CommitAction -> {
+                        if (preedit.content.preedit.run { preedit.isEmpty() && clientPreedit.isEmpty() }) {
+                            // preedit is empty, there can be prediction candidates
+                            it.reset()
+                        } else if (it.inputMethodEntryCached.uniqueName == "keyboard-us") {
+                            // androidkeyboard clears composing on reset, but we want to commit it as-is
+                            service.inputConnection?.finishComposingText()
+                            it.reset()
+                        } else {
+                            if (!it.select(0)) it.reset()
                         }
-                        is QuickPhraseAction -> {
-                            reset()
-                            triggerQuickPhrase()
-                        }
-                        is UnicodeAction -> {
-                            reset()
-                            triggerUnicode()
-                        }
-                        is LangSwitchAction -> {
-                            if (enabledIme().size < 2) {
-                                inputView.showDialog(
-                                    AddMoreInputMethodsPrompt.build(
-                                        service,
-                                        context
-                                    )
-                                )
-                            } else {
-                                enumerateIme()
-                            }
-                        }
-                        is InputMethodSwitchAction -> {
+                        service.inputConnection?.commitText(action.text, 1)
+                    }
+                    is QuickPhraseAction -> {
+                        it.reset()
+                        it.triggerQuickPhrase()
+                    }
+                    is UnicodeAction -> {
+                        it.reset()
+                        it.triggerUnicode()
+                    }
+                    is LangSwitchAction -> {
+                        if (it.enabledIme().size < 2) {
                             inputView.showDialog(
-                                InputMethodSwitcherDialog.build(this, service, context)
+                                AddMoreInputMethodsPrompt.build(
+                                    service,
+                                    context
+                                )
                             )
+                        } else {
+                            it.enumerateIme()
                         }
-                        is MoveSelectionAction -> when (backspaceSwipeState) {
-                            Stopped -> backspaceSwipeState = preedit.content.preedit.let {
-                                if (it.preedit.isEmpty() && it.clientPreedit.isEmpty()) {
-                                    // update state to `Selection` and apply first offset
-                                    service.applySelectionOffset(action.start, action.end)
-                                    Selection
-                                } else {
-                                    Reset
-                                }
-                            }
-                            Selection -> {
+                    }
+                    is InputMethodSwitchAction -> {
+                        inputView.showDialog(
+                            InputMethodSwitcherDialog.build(it, service, context)
+                        )
+                    }
+                    is MoveSelectionAction -> when (backspaceSwipeState) {
+                        Stopped -> backspaceSwipeState = preedit.content.preedit.let { p ->
+                            if (p.preedit.isEmpty() && p.clientPreedit.isEmpty()) {
+                                // update state to `Selection` and apply first offset
                                 service.applySelectionOffset(action.start, action.end)
+                                Selection
+                            } else {
+                                Reset
                             }
-                            Reset -> {}
                         }
-                        is DeleteSelectionAction -> {
-                            when (backspaceSwipeState) {
-                                Stopped -> {}
-                                Selection -> if (service.selection.isNotEmpty()) {
-                                    service.inputConnection?.commitText("", 1)
-                                }
-                                Reset -> if (action.totalCnt < 0) { // swipe left
-                                    reset()
-                                }
+                        Selection -> {
+                            service.applySelectionOffset(action.start, action.end)
+                        }
+                        Reset -> {}
+                    }
+                    is DeleteSelectionAction -> {
+                        when (backspaceSwipeState) {
+                            Stopped -> {}
+                            Selection -> if (service.selection.isNotEmpty()) {
+                                service.inputConnection?.commitText("", 1)
                             }
-                            backspaceSwipeState = Stopped
+                            Reset -> if (action.totalCnt < 0) { // swipe left
+                                it.reset()
+                            }
                         }
-                        else -> {
-                        }
+                        backspaceSwipeState = Stopped
+                    }
+                    else -> {
                     }
                 }
             }

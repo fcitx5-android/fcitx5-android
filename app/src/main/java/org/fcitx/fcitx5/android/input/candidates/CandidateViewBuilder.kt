@@ -4,8 +4,8 @@ import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RectShape
 import android.view.ContextThemeWrapper
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
+import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.candidates.adapter.GridCandidateViewAdapter
@@ -30,7 +30,7 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
 
     fun gridAdapter() = object : GridCandidateViewAdapter() {
         override fun onSelect(idx: Int) {
-            service.lifecycleScope.launch { fcitx.runOnReady { select(idx) } }
+            service.lifecycleScope.launchOnFcitxReady(fcitx) { it.select(idx) }
         }
 
         override val theme: Theme
@@ -39,7 +39,7 @@ class CandidateViewBuilder : UniqueComponent<CandidateViewBuilder>(), Dependent,
 
     fun simpleAdapter() = object : SimpleCandidateViewAdapter() {
         override fun onSelect(idx: Int) {
-            service.lifecycleScope.launch { fcitx.runOnReady { select(idx) } }
+            service.lifecycleScope.launchOnFcitxReady(fcitx) { it.select(idx) }
         }
 
         override val theme: Theme

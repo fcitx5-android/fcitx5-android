@@ -4,9 +4,9 @@ import android.view.View
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
-import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.AddonInfo
+import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.CheckBoxListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
@@ -25,10 +25,8 @@ class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
         with(entries) {
             val ids = map { it.uniqueName }.toTypedArray()
             val state = map { it.enabled }.toBooleanArray()
-            lifecycleScope.launch {
-                fcitx.runOnReady {
-                    setAddonState(ids, state)
-                }
+            lifecycleScope.launchOnFcitxReady(fcitx) {
+                it.setAddonState(ids, state)
             }
         }
     }

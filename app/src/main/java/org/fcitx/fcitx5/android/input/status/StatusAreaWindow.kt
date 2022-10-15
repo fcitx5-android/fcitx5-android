@@ -3,10 +3,10 @@ package org.fcitx.fcitx5.android.input.status
 import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
+import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
@@ -63,35 +63,33 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
     private val adapter: StatusAreaAdapter by lazy {
         object : StatusAreaAdapter() {
             override fun onItemClick(it: StatusAreaEntry) {
-                service.lifecycleScope.launch {
-                    fcitx.runOnReady {
-                        when (it) {
-                            is StatusAreaEntry.Fcitx -> activateAction(it.action.id)
-                            is StatusAreaEntry.Android -> when (it.type) {
-                                GlobalOptions -> AppUtil.launchMainToConfig(
-                                    context, MainActivity.INTENT_DATA_CONFIG_GLOBAL
-                                )
-                                InputMethod -> currentIme().let {
-                                    AppUtil.launchMainToConfig(
-                                        context, MainActivity.INTENT_DATA_CONFIG_IM,
-                                        bundleOf(
-                                            InputMethodConfigFragment.ARG_NAME to it.displayName,
-                                            InputMethodConfigFragment.ARG_UNIQUE_NAME to it.uniqueName
-                                        )
+                service.lifecycleScope.launchOnFcitxReady(fcitx) { f ->
+                    when (it) {
+                        is StatusAreaEntry.Fcitx -> f.activateAction(it.action.id)
+                        is StatusAreaEntry.Android -> when (it.type) {
+                            GlobalOptions -> AppUtil.launchMainToConfig(
+                                context, MainActivity.INTENT_DATA_CONFIG_GLOBAL
+                            )
+                            InputMethod -> f.currentIme().let {
+                                AppUtil.launchMainToConfig(
+                                    context, MainActivity.INTENT_DATA_CONFIG_IM,
+                                    bundleOf(
+                                        InputMethodConfigFragment.ARG_NAME to it.displayName,
+                                        InputMethodConfigFragment.ARG_UNIQUE_NAME to it.uniqueName
                                     )
-                                }
-                                ReloadConfig -> {
-                                    reloadConfig()
-                                    Toast.makeText(service, R.string.done, Toast.LENGTH_SHORT)
-                                        .show()
-                                }
-                                Behavior -> AppUtil.launchMainToConfig(
-                                    context, MainActivity.INTENT_DATA_CONFIG_BEHAVIOR
-                                )
-                                ThemeList -> AppUtil.launchMainToConfig(
-                                    context, MainActivity.INTENT_DATA_CONFIG_THEME
                                 )
                             }
+                            ReloadConfig -> {
+                                f.reloadConfig()
+                                Toast.makeText(service, R.string.done, Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                            Behavior -> AppUtil.launchMainToConfig(
+                                context, MainActivity.INTENT_DATA_CONFIG_BEHAVIOR
+                            )
+                            ThemeList -> AppUtil.launchMainToConfig(
+                                context, MainActivity.INTENT_DATA_CONFIG_THEME
+                            )
                         }
                     }
                 }
@@ -140,10 +138,8 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
     override fun onCreateBarExtension() = barExtension
 
     override fun onAttached() {
-        service.lifecycleScope.launch {
-            fcitx.runOnReady {
-                onStatusAreaUpdate(statusArea())
-            }
+        service.lifecycleScope.launchOnFcitxReady(fcitx) {
+            onStatusAreaUpdate(it.statusArea())
         }
     }
 

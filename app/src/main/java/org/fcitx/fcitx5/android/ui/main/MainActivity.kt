@@ -18,8 +18,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
-import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
 import org.fcitx.fcitx5.android.databinding.ActivityMainBinding
 import org.fcitx.fcitx5.android.ui.main.settings.PinyinDictionaryFragment
 import org.fcitx.fcitx5.android.ui.setup.SetupActivity
@@ -144,13 +144,12 @@ class MainActivity : AppCompatActivity() {
                 else -> return false
             }
             with(viewModel) {
-                viewModelScope.launch {
-                    fcitx.runOnReady {
-                        navHostFragment.navController.navigateFromMain(
-                            target.first,
-                            target.second
-                        )
-                    }
+                // we need fcitx ready
+                viewModelScope.launchOnFcitxReady(fcitx) {
+                    navHostFragment.navController.navigateFromMain(
+                        target.first,
+                        target.second
+                    )
                 }
             }
         }

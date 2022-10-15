@@ -16,10 +16,10 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.*
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.daemon.FcitxDaemon
+import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
@@ -286,7 +286,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        lifecycleScope.launch { fcitx.runOnReady { reset() } }
+        lifecycleScope.launchOnFcitxReady(fcitx) { it.reset() }
     }
 
     override fun onCreateInputView(): View {
@@ -341,21 +341,14 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // skip \t, because it's charCode is different from KeySym
         // skip \n, because fcitx wants \r for return
         if (charCode > 0 && charCode != '\t'.code && charCode != '\n'.code) {
-            lifecycleScope.launch {
-                fcitx.runOnReady {
-                    sendKey(
-                        charCode,
-                        states.states,
-                        up,
-                        timestamp
-                    )
-                }
+            lifecycleScope.launchOnFcitxReady(fcitx) {
+                it.sendKey(charCode, states.states, up, timestamp)
             }
             return true
         }
         val keySym = KeySym.fromKeyEvent(event)
         if (keySym != null) {
-            lifecycleScope.launch { fcitx.runOnReady { sendKey(keySym, states, up, timestamp) } }
+            lifecycleScope.launchOnFcitxReady(fcitx) { it.sendKey(keySym, states, up, timestamp) }
             return true
         }
         Timber.d("Skipped KeyEvent: $event")
@@ -373,10 +366,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     override fun onBindInput() {
         val uid = currentInputBinding.uid
         Timber.d("onBindInput: uid=$uid")
-        lifecycleScope.launch {
-            fcitx.runOnReady {
-                activate(uid)
-            }
+        lifecycleScope.launchOnFcitxReady(fcitx) {
+            it.activate(uid)
         }
     }
 
@@ -391,27 +382,23 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         currentInputConnection.apply {
             cursorAnchorAvailable = requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
         }
-        lifecycleScope.launch {
-            fcitx.runOnReady {
-                setCapFlags(CapabilityFlags.fromEditorInfo(attribute))
-            }
+        lifecycleScope.launchOnFcitxReady(fcitx) {
+            it.setCapFlags(CapabilityFlags.fromEditorInfo(attribute))
         }
     }
 
     override fun onStartInputView(info: EditorInfo, restarting: Boolean) {
         Timber.d("onStartInputView: restarting=$restarting")
         editorInfo = info
-        lifecycleScope.launch {
-            fcitx.runOnReady {
-                // EditorInfo can be different in onStartInput and onStartInputView,
-                // especially in browsers
-                setCapFlags(CapabilityFlags.fromEditorInfo(info))
-                if (restarting) {
-                    // when input restarts in the same editor, unfocus it to clear previous state
-                    focus(false)
-                }
-                focus()
+        lifecycleScope.launchOnFcitxReady(fcitx) {
+            // EditorInfo can be different in onStartInput and onStartInputView,
+            // especially in browsers
+            it.setCapFlags(CapabilityFlags.fromEditorInfo(info))
+            if (restarting) {
+                // when input restarts in the same editor, unfocus it to clear previous state
+                it.focus(false)
             }
+            it.focus()
         }
         inputView?.onShow()
     }
@@ -463,10 +450,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             // move fcitx cursor when cursor position changed
             if (codePointPosition != fcitxCursor) {
                 Timber.d("handleCursorUpdate: move fcitx cursor to $codePointPosition")
-                lifecycleScope.launch {
-                    fcitx.runOnReady {
-                        moveCursor(codePointPosition)
-                    }
+                lifecycleScope.launchOnFcitxReady(fcitx) {
+                    it.moveCursor(codePointPosition)
                 }
             }
         } else {
@@ -475,11 +460,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             inputConnection?.finishComposingText()
             // `fcitx.reset()` here would commit preedit after new cursor position
             // since we have `ClientUnfocusCommit`, focus out and in would do the trick
-            lifecycleScope.launch {
-                fcitx.runOnReady {
-                    focus(false)
-                    focus()
-                }
+            lifecycleScope.launchOnFcitxReady(fcitx) {
+                it.focus(false)
+                it.focus()
             }
         }
     }
@@ -537,10 +520,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     override fun onFinishInputView(finishingInput: Boolean) {
         Timber.d("onFinishInputView: finishingInput=$finishingInput")
         currentInputConnection.finishComposingText()
-        lifecycleScope.launch {
-            fcitx.runOnReady {
-                focus(false)
-            }
+        lifecycleScope.launchOnFcitxReady(fcitx) {
+            it.focus(false)
         }
         inputView?.onHide()
     }
@@ -559,10 +540,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         cachedKeyEventIndex = 0
         val uid = currentInputBinding.uid
         Timber.d("onUnbindInput: uid=$uid")
-        lifecycleScope.launch {
-            fcitx.runOnReady {
-                deactivate(uid)
-            }
+        lifecycleScope.launchOnFcitxReady(fcitx) {
+            it.deactivate(uid)
         }
     }
 

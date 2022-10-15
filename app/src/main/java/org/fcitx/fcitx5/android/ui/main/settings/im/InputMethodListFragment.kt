@@ -6,9 +6,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
+import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.DynamicListTouchCallback
 import org.fcitx.fcitx5.android.ui.common.DynamicListUi
@@ -22,10 +22,8 @@ class InputMethodListFragment : ProgressFragment(), OnItemChangedListener<InputM
 
     private fun updateIMState() {
         if (isInitialized)
-            lifecycleScope.launch {
-                fcitx.runOnReady {
-                    setEnabledIme(entries.map { it.uniqueName }.toTypedArray())
-                }
+            lifecycleScope.launchOnFcitxReady(fcitx) { f ->
+                f.setEnabledIme(entries.map { it.uniqueName }.toTypedArray())
             }
     }
 
