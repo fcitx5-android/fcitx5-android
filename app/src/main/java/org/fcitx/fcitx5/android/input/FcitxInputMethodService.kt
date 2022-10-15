@@ -14,6 +14,8 @@ import android.widget.FrameLayout
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.*
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
@@ -102,6 +104,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onCreate() {
         fcitx = FcitxDaemon.connect(javaClass.name)
+        eventHandlerJob =
+            fcitx.runImmediately { eventFlow.onEach(::handleFcitxEvent).launchIn(lifecycleScope) }
         AppPrefs.getInstance().apply {
             keyboard.buttonHapticFeedback.registerOnChangeListener(recreateInputViewListener)
             keyboard.systemTouchSounds.registerOnChangeListener(recreateInputViewListener)
