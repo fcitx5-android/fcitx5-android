@@ -6,9 +6,9 @@ import androidx.lifecycle.lifecycleScope
 import arrow.core.redeem
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.core.getPunctuationConfig
+import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
 import org.fcitx.fcitx5.android.data.punctuation.PunctuationManager
 import org.fcitx.fcitx5.android.data.punctuation.PunctuationMapEntry
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
@@ -60,8 +60,8 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
     private fun saveConfig() {
         if (!dustman.dirty)
             return
-        lifecycleScope.launch {
-            PunctuationManager.save(viewModel.fcitx, lang, ui.entries)
+        lifecycleScope.launchOnFcitxReady(fcitx) {
+            PunctuationManager.save(it, lang, ui.entries)
             resetDustman()
         }
     }
@@ -76,7 +76,7 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
         viewModel.disableToolbarSaveButton()
         viewModel.setToolbarTitle(requireArguments().getString(TITLE)!!)
         lang = requireArguments().getString(LANG, DEFAULT_LANG)
-        val raw = fcitx.getPunctuationConfig(lang)
+        val raw = fcitx.runOnReady { getPunctuationConfig(lang) }
         findDesc(raw)
         val initialEntries = PunctuationManager.parseRawConfig(raw)
         ui = object : BaseDynamicListUi<PunctuationMapEntry>(

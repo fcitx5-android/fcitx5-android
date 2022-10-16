@@ -1,8 +1,8 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.KeyState
+import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
@@ -36,46 +36,51 @@ class CommonKeyActionListener :
 
     val listener by lazy {
         KeyActionListener { action, _ ->
-            service.lifecycleScope.launch {
+            service.lifecycleScope.launchOnFcitxReady(fcitx) {
                 when (action) {
-                    is FcitxKeyAction -> fcitx.sendKey(action.act, KeyState.Virtual.state)
-                    is SymAction -> fcitx.sendKey(action.sym, action.states)
+                    is FcitxKeyAction -> it.sendKey(action.act, KeyState.Virtual.state)
+                    is SymAction -> it.sendKey(action.sym, action.states)
                     is CommitAction -> {
                         if (preedit.content.preedit.run { preedit.isEmpty() && clientPreedit.isEmpty() }) {
                             // preedit is empty, there can be prediction candidates
-                            fcitx.reset()
-                        } else if (fcitx.inputMethodEntryCached.uniqueName == "keyboard-us") {
+                            it.reset()
+                        } else if (it.inputMethodEntryCached.uniqueName == "keyboard-us") {
                             // androidkeyboard clears composing on reset, but we want to commit it as-is
                             service.inputConnection?.finishComposingText()
-                            fcitx.reset()
+                            it.reset()
                         } else {
-                            if (!fcitx.select(0)) fcitx.reset()
+                            if (!it.select(0)) it.reset()
                         }
                         service.inputConnection?.commitText(action.text, 1)
                     }
                     is QuickPhraseAction -> {
-                        fcitx.reset()
-                        fcitx.triggerQuickPhrase()
+                        it.reset()
+                        it.triggerQuickPhrase()
                     }
                     is UnicodeAction -> {
-                        fcitx.reset()
-                        fcitx.triggerUnicode()
+                        it.reset()
+                        it.triggerUnicode()
                     }
                     is LangSwitchAction -> {
-                        if (fcitx.enabledIme().size < 2) {
-                            inputView.showDialog(AddMoreInputMethodsPrompt.build(service, context))
+                        if (it.enabledIme().size < 2) {
+                            inputView.showDialog(
+                                AddMoreInputMethodsPrompt.build(
+                                    service,
+                                    context
+                                )
+                            )
                         } else {
-                            fcitx.enumerateIme()
+                            it.enumerateIme()
                         }
                     }
                     is InputMethodSwitchAction -> {
                         inputView.showDialog(
-                            InputMethodSwitcherDialog.build(fcitx, service, context)
+                            InputMethodSwitcherDialog.build(it, service, context)
                         )
                     }
                     is MoveSelectionAction -> when (backspaceSwipeState) {
-                        Stopped -> backspaceSwipeState = preedit.content.preedit.let {
-                            if (it.preedit.isEmpty() && it.clientPreedit.isEmpty()) {
+                        Stopped -> backspaceSwipeState = preedit.content.preedit.let { p ->
+                            if (p.preedit.isEmpty() && p.clientPreedit.isEmpty()) {
                                 // update state to `Selection` and apply first offset
                                 service.applySelectionOffset(action.start, action.end)
                                 Selection
@@ -95,7 +100,7 @@ class CommonKeyActionListener :
                                 service.inputConnection?.commitText("", 1)
                             }
                             Reset -> if (action.totalCnt < 0) { // swipe left
-                                fcitx.reset()
+                                it.reset()
                             }
                         }
                         backspaceSwipeState = Stopped

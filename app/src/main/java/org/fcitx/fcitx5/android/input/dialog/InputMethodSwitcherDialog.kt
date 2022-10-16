@@ -8,7 +8,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.core.Fcitx
+import org.fcitx.fcitx5.android.core.FcitxAPI
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.ui.main.MainActivity
 import org.fcitx.fcitx5.android.utils.AppUtil
@@ -22,7 +22,7 @@ import splitties.views.topPadding
 
 object InputMethodSwitcherDialog {
     suspend fun build(
-        fcitx: Fcitx,
+        fcitx: FcitxAPI,
         service: FcitxInputMethodService,
         context: Context
     ): AlertDialog {
@@ -37,7 +37,8 @@ object InputMethodSwitcherDialog {
                 layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
                 // add some padding because AlertDialog's `titleDividerNoCustom` won't show up...
                 // but why?
-                topPadding = dimenPxSize(androidx.appcompat.R.dimen.abc_dialog_title_divider_material)
+                topPadding =
+                    dimenPxSize(androidx.appcompat.R.dimen.abc_dialog_title_divider_material)
                 layoutManager = verticalLayoutManager()
                 adapter = InputMethodListAdapter(entries, enabledIndex) {
                     val (uniqueName, _, ime) = it

@@ -72,7 +72,6 @@
             android:theme="@style/Theme.DialogTheme"
             android:windowSoftInputMode="stateAlwaysVisible|adjustPan" />
 
-        <service android:name=".service.FcitxDaemon" />
         <service
             android:name=".input.FcitxInputMethodService"
             android:exported="false"

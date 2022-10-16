@@ -3,9 +3,10 @@ package org.fcitx.fcitx5.android.input.editing
 import android.view.KeyEvent
 import android.view.View
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.core.Fcitx
+import org.fcitx.fcitx5.android.core.FcitxKeyMapping
+import org.fcitx.fcitx5.android.daemon.FcitxConnection
+import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.clipboard.ClipboardWindow
@@ -23,7 +24,7 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
 
     private val service: FcitxInputMethodService by manager.inputMethodService()
     private val windowManager: InputWindowManager by manager.must()
-    private val fcitx: Fcitx by manager.fcitx()
+    private val fcitx: FcitxConnection by manager.fcitx()
     private val theme by manager.theme()
 
     private var hasSelection = false
@@ -81,7 +82,9 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
             }
             backspaceButton.onClickWithRepeating {
                 userSelection = false
-                service.lifecycleScope.launch { fcitx.sendKey("BackSpace") }
+                service.lifecycleScope.launchOnFcitxReady(fcitx) {
+                    it.sendKey(FcitxKeyMapping.FcitxKey_BackSpace)
+                }
             }
             clipboardButton.setOnClickListener {
                 windowManager.attachWindow(ClipboardWindow())

@@ -314,7 +314,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                 val id = RELOAD_ID++
                 builder.build().let { notificationManager.notify(id, it) }
                 measureTimeMillis {
-                    viewModel.fcitx.reloadQuickPhrase()
+                    viewModel.fcitx.runOnReady { reloadQuickPhrase() }
                 }.let { Timber.d("Took $it to reload quickphrase") }
                 notificationManager.cancel(id)
                 busy.set(false)

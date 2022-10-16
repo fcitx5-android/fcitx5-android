@@ -1,9 +1,6 @@
 package org.fcitx.fcitx5.android.data.punctuation
 
-import org.fcitx.fcitx5.android.core.Fcitx
-import org.fcitx.fcitx5.android.core.RawConfig
-import org.fcitx.fcitx5.android.core.getPunctuationConfig
-import org.fcitx.fcitx5.android.core.savePunctuationConfig
+import org.fcitx.fcitx5.android.core.*
 
 object PunctuationManager {
 
@@ -13,12 +10,12 @@ object PunctuationManager {
             ?: listOf()
     }
 
-    suspend fun load(fcitx: Fcitx, lang: String): List<PunctuationMapEntry> {
+    suspend fun load(fcitx: FcitxAPI, lang: String): List<PunctuationMapEntry> {
         val raw = fcitx.getPunctuationConfig(lang)
         return parseRawConfig(raw)
     }
 
-    suspend fun save(fcitx: Fcitx, lang: String, entries: List<PunctuationMapEntry>) {
+    suspend fun save(fcitx: FcitxAPI, lang: String, entries: List<PunctuationMapEntry>) {
         val cfg = RawConfig(
             arrayOf(
                 RawConfig(ENTRIES, entries.mapIndexed { i, it -> it.toRawConfig(i) }.toTypedArray())

@@ -107,7 +107,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
             it.keyPopupListener = popupListener
             keyboardView.apply { add(it, lParams(matchParent, matchParent)) }
             it.onAttach(service.editorInfo)
-            it.onInputMethodChange(fcitx.inputMethodEntryCached)
+            it.onInputMethodChange(fcitx.runImmediately { inputMethodEntryCached })
         }
     }
 

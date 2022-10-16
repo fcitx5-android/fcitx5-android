@@ -85,6 +85,9 @@ interface FcitxLifecycleOwner {
     val lifecycle: FcitxLifecycle
 }
 
+val FcitxLifecycleOwner.lifeCycleScope
+    get() = lifecycle.lifecycleScope
+
 fun interface FcitxLifecycleObserver {
     fun onStateChanged(event: FcitxLifecycle.Event)
 }
@@ -137,7 +140,7 @@ private class AtStateHelper(val lifecycle: FcitxLifecycle, val state: FcitxLifec
     private var continuation: Continuation<Unit>? = null
 
     suspend fun <T> run(block: suspend CoroutineScope.() -> T): T {
-        suspendCoroutine<Unit> { continuation = it }
+        suspendCoroutine { continuation = it }
         lifecycle.removeObserver(observer)
         return block(lifecycle.lifecycleScope)
     }

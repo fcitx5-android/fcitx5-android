@@ -201,7 +201,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                 val id = RELOAD_ID++
                 builder.build().let { notificationManager.notify(id, it) }
                 measureTimeMillis {
-                    viewModel.fcitx.reloadPinyinDict()
+                    viewModel.fcitx.runOnReady { reloadPinyinDict() }
                 }.let { Timber.d("Took $it to reload dict") }
                 notificationManager.cancel(id)
                 busy.set(false)

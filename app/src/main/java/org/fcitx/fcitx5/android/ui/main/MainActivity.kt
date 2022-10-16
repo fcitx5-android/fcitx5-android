@@ -14,10 +14,12 @@ import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
 import org.fcitx.fcitx5.android.databinding.ActivityMainBinding
 import org.fcitx.fcitx5.android.ui.main.settings.PinyinDictionaryFragment
 import org.fcitx.fcitx5.android.ui.setup.SetupActivity
@@ -141,9 +143,14 @@ class MainActivity : AppCompatActivity() {
                     R.id.action_mainFragment_to_themeListFragment to null
                 else -> return false
             }
-            // we need fcitx instance
-            viewModel.onBindFcitxInstance {
-                navHostFragment.navController.navigateFromMain(target.first, target.second)
+            with(viewModel) {
+                // we need fcitx ready
+                viewModelScope.launchOnFcitxReady(fcitx) {
+                    navHostFragment.navController.navigateFromMain(
+                        target.first,
+                        target.second
+                    )
+                }
             }
         }
         return false

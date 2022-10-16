@@ -36,8 +36,10 @@ class PunctuationComponent : InputBroadcastReceiver,
         updateJob = service.lifecycleScope.launch {
             updateJob?.cancel()
             mapping = if (enabled) {
-                PunctuationManager.load(fcitx, fcitx.inputMethodEntryCached.languageCode)
-                    .associate { it.key to it.mapping }
+                fcitx.runOnReady {
+                    PunctuationManager.load(this, inputMethodEntryCached.languageCode)
+                        .associate { it.key to it.mapping }
+                }
             } else mapOf()
             broadcaster.onPunctuationUpdate(mapping)
             updateJob = null

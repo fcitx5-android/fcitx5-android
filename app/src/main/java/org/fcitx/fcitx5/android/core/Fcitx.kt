@@ -17,138 +17,139 @@ import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.utils.ImmutableGraph
 import timber.log.Timber
 
-class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
+/**
+ * Do not use this class directly, accessing fcitx via daemon instead
+ */
+class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
 
-    /**
-     * Subscribe this flow to receive event sent from fcitx
-     */
-    val eventFlow = eventFlow_.asSharedFlow().apply {
+    private val lifecycleRegistry = FcitxLifecycleRegistry()
+
+    override val eventFlow = eventFlow_.asSharedFlow().apply {
         onEach {
             when (it) {
+                is FcitxEvent.ReadyEvent -> lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_READY)
                 is FcitxEvent.IMChangeEvent -> inputMethodEntryCached = it.data
                 is FcitxEvent.StatusAreaEvent -> statusAreaActionsCached = it.data
                 else -> {}
             }
-        }.launchIn(lifecycle.lifecycleScope)
+        }.launchIn(lifeCycleScope)
     }
 
-    val isReady
+    override val isReady
         get() = lifecycle.currentState == FcitxLifecycle.State.READY
 
-    var inputMethodEntryCached = InputMethodEntry(context.getString(R.string._not_available_))
+    override var inputMethodEntryCached =
+        InputMethodEntry(context.getString(R.string._not_available_))
         private set
 
-    var statusAreaActionsCached: Array<Action> = arrayOf()
+    override var statusAreaActionsCached: Array<Action> = arrayOf()
         private set
 
-    enum class AddonDep {
-        Required,
-        Optional
-    }
-
-    private val addonGraph: ImmutableGraph<String, AddonDep> by lazy {
+    private val addonGraph: ImmutableGraph<String, FcitxAPI.AddonDep> by lazy {
         runBlocking {
             addons().flatMap { a ->
                 a.dependencies.map {
-                    ImmutableGraph.Edge(it, a.uniqueName, AddonDep.Required)
+                    ImmutableGraph.Edge(it, a.uniqueName, FcitxAPI.AddonDep.Required)
                 } + a.optionalDependencies.map {
-                    ImmutableGraph.Edge(it, a.uniqueName, AddonDep.Optional)
+                    ImmutableGraph.Edge(it, a.uniqueName, FcitxAPI.AddonDep.Optional)
                 }
             }.let { ImmutableGraph(it) }
         }
     }
 
-    private val addonReversedDependencies = mutableMapOf<String, List<Pair<String, AddonDep>>>()
+    private val addonReversedDependencies =
+        mutableMapOf<String, List<Pair<String, FcitxAPI.AddonDep>>>()
 
-    fun getAddonReverseDependencies(addon: String) =
+    override fun getAddonReverseDependencies(addon: String) =
         addonReversedDependencies.computeIfAbsent(addon) { addonGraph.bfs(it) }
 
-    fun translate(str: String, domain: String = "fcitx5") = getFcitxTranslation(domain, str)
+    override fun translate(str: String, domain: String) = getFcitxTranslation(domain, str)
 
-    suspend fun save() = withFcitxContext { saveFcitxState() }
-    suspend fun reloadConfig() = withFcitxContext { reloadFcitxConfig() }
+    override suspend fun save() = withFcitxContext { saveFcitxState() }
+    override suspend fun reloadConfig() = withFcitxContext { reloadFcitxConfig() }
 
-    suspend fun sendKey(key: String, states: UInt = 0u, up: Boolean = false, timestamp: Int = -1) =
+    override suspend fun sendKey(key: String, states: UInt, up: Boolean, timestamp: Int) =
         withFcitxContext { sendKeyToFcitxString(key, states.toInt(), up, timestamp) }
 
-    suspend fun sendKey(c: Char, states: UInt = 0u, up: Boolean = false, timestamp: Int = -1) =
+    override suspend fun sendKey(c: Char, states: UInt, up: Boolean, timestamp: Int) =
         withFcitxContext { sendKeyToFcitxChar(c, states.toInt(), up, timestamp) }
 
-    suspend fun sendKey(sym: Int, states: UInt = 0u, up: Boolean = false, timestamp: Int = -1) =
+    override suspend fun sendKey(sym: Int, states: UInt, up: Boolean, timestamp: Int) =
         withFcitxContext { sendKeySymToFcitx(sym, states.toInt(), up, timestamp) }
 
-    suspend fun sendKey(sym: KeySym, states: KeyStates, up: Boolean = false, timestamp: Int = -1) =
+    override suspend fun sendKey(sym: KeySym, states: KeyStates, up: Boolean, timestamp: Int) =
         withFcitxContext { sendKeySymToFcitx(sym.sym, states.toInt(), up, timestamp) }
 
-    suspend fun select(idx: Int): Boolean = withFcitxContext { selectCandidate(idx) }
-    suspend fun isEmpty(): Boolean = withFcitxContext { isInputPanelEmpty() }
-    suspend fun reset() = withFcitxContext { resetInputContext() }
-    suspend fun moveCursor(position: Int) = withFcitxContext { repositionCursor(position) }
-    suspend fun availableIme() =
+    override suspend fun select(idx: Int): Boolean = withFcitxContext { selectCandidate(idx) }
+    override suspend fun isEmpty(): Boolean = withFcitxContext { isInputPanelEmpty() }
+    override suspend fun reset() = withFcitxContext { resetInputContext() }
+    override suspend fun moveCursor(position: Int) = withFcitxContext { repositionCursor(position) }
+    override suspend fun availableIme() =
         withFcitxContext { availableInputMethods() ?: arrayOf() }
 
-    suspend fun enabledIme() =
+    override suspend fun enabledIme() =
         withFcitxContext { listInputMethods() ?: arrayOf() }
 
-    suspend fun setEnabledIme(array: Array<String>) =
+    override suspend fun setEnabledIme(array: Array<String>) =
         withFcitxContext { setEnabledInputMethods(array) }
 
-    suspend fun activateIme(ime: String) = withFcitxContext { setInputMethod(ime) }
-    suspend fun enumerateIme(forward: Boolean = true) =
+    override suspend fun activateIme(ime: String) = withFcitxContext { setInputMethod(ime) }
+    override suspend fun enumerateIme(forward: Boolean) =
         withFcitxContext { nextInputMethod(forward) }
 
-    suspend fun currentIme() = withFcitxContext { inputMethodStatus() ?: inputMethodEntryCached }
+    override suspend fun currentIme() =
+        withFcitxContext { inputMethodStatus() ?: inputMethodEntryCached }
 
-    suspend fun getGlobalConfig() = withFcitxContext {
+    override suspend fun getGlobalConfig() = withFcitxContext {
         getFcitxGlobalConfig() ?: RawConfig(arrayOf())
     }
 
-    suspend fun setGlobalConfig(config: RawConfig) = withFcitxContext {
+    override suspend fun setGlobalConfig(config: RawConfig) = withFcitxContext {
         setFcitxGlobalConfig(config)
     }
 
-    suspend fun getAddonConfig(addon: String) = withFcitxContext {
+    override suspend fun getAddonConfig(addon: String) = withFcitxContext {
         getFcitxAddonConfig(addon) ?: RawConfig(arrayOf())
     }
 
-    suspend fun setAddonConfig(addon: String, config: RawConfig) = withFcitxContext {
+    override suspend fun setAddonConfig(addon: String, config: RawConfig) = withFcitxContext {
         setFcitxAddonConfig(addon, config)
     }
 
-    suspend fun getAddonSubConfig(addon: String, path: String) = withFcitxContext {
+    override suspend fun getAddonSubConfig(addon: String, path: String) = withFcitxContext {
         getFcitxAddonSubConfig(addon, path) ?: RawConfig(arrayOf())
     }
 
-    suspend fun setAddonSubConfig(addon: String, path: String, config: RawConfig = RawConfig()) =
+    override suspend fun setAddonSubConfig(addon: String, path: String, config: RawConfig) =
         withFcitxContext { setFcitxAddonSubConfig(addon, path, config) }
 
-    suspend fun getImConfig(key: String) = withFcitxContext {
+    override suspend fun getImConfig(key: String) = withFcitxContext {
         getFcitxInputMethodConfig(key) ?: RawConfig(arrayOf())
     }
 
-    suspend fun setImConfig(key: String, config: RawConfig) = withFcitxContext {
+    override suspend fun setImConfig(key: String, config: RawConfig) = withFcitxContext {
         setFcitxInputMethodConfig(key, config)
     }
 
-    suspend fun addons() = withFcitxContext { getFcitxAddons() ?: arrayOf() }
-    suspend fun setAddonState(name: Array<String>, state: BooleanArray) =
+    override suspend fun addons() = withFcitxContext { getFcitxAddons() ?: arrayOf() }
+    override suspend fun setAddonState(name: Array<String>, state: BooleanArray) =
         withFcitxContext { setFcitxAddonState(name, state) }
 
-    suspend fun triggerQuickPhrase() = withFcitxContext { triggerQuickPhraseInput() }
-    suspend fun triggerUnicode() = withFcitxContext { triggerUnicodeInput() }
+    override suspend fun triggerQuickPhrase() = withFcitxContext { triggerQuickPhraseInput() }
+    override suspend fun triggerUnicode() = withFcitxContext { triggerUnicodeInput() }
     private suspend fun setClipboard(string: String) =
         withFcitxContext { setFcitxClipboard(string) }
 
-    suspend fun focus(focus: Boolean = true) = withFcitxContext { focusInputContext(focus) }
-    suspend fun activate(uid: Int) = withFcitxContext { activateInputContext(uid) }
-    suspend fun deactivate(uid: Int) = withFcitxContext { deactivateInputContext(uid) }
-    suspend fun setCapFlags(flags: CapabilityFlags) =
+    override suspend fun focus(focus: Boolean) = withFcitxContext { focusInputContext(focus) }
+    override suspend fun activate(uid: Int) = withFcitxContext { activateInputContext(uid) }
+    override suspend fun deactivate(uid: Int) = withFcitxContext { deactivateInputContext(uid) }
+    override suspend fun setCapFlags(flags: CapabilityFlags) =
         withFcitxContext { setCapabilityFlags(flags.toLong()) }
 
-    suspend fun statusArea(): Array<Action> =
+    override suspend fun statusArea(): Array<Action> =
         withFcitxContext { getFcitxStatusAreaActions() ?: arrayOf() }
 
-    suspend fun activateAction(id: Int) =
+    override suspend fun activateAction(id: Int) =
         withFcitxContext { activateUserInterfaceAction(id) }
 
     init {
@@ -156,9 +157,11 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
             throw IllegalAccessException("Fcitx5 has already been created!")
     }
 
-    private companion object JNI : FcitxLifecycleOwner {
 
-        private val lifecycleRegistry by lazy { FcitxLifecycleRegistry() }
+    override val lifecycle: FcitxLifecycle
+        get() = lifecycleRegistry
+
+    private companion object JNI {
 
         private val eventFlow_ =
             MutableSharedFlow<FcitxEvent<*>>(
@@ -312,7 +315,6 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
                     // block it will also block fcitx
                     onFirstRun()
                 }
-                onReady()
             }
             eventFlow_.tryEmit(event)
         }
@@ -333,13 +335,6 @@ class Fcitx(private val context: Context) : FcitxLifecycleOwner by JNI {
             firstRun = false
         }
 
-        // will be called in fcitx main thread
-        private fun onReady() {
-            lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_READY)
-        }
-
-        override val lifecycle: FcitxLifecycle
-            get() = lifecycleRegistry
     }
 
     private val dispatcher = FcitxDispatcher(object : FcitxDispatcher.FcitxController {

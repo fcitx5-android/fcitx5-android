@@ -6,25 +6,26 @@ import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.forEach
 import androidx.preference.isEmpty
-import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.core.Fcitx
+import org.fcitx.fcitx5.android.core.FcitxAPI
 import org.fcitx.fcitx5.android.core.RawConfig
+import org.fcitx.fcitx5.android.daemon.FcitxConnection
+import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
 import org.fcitx.fcitx5.android.ui.common.PaddingPreferenceFragment
 import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 
 abstract class FcitxPreferenceFragment : PaddingPreferenceFragment() {
     abstract fun getPageTitle(): String
-    abstract suspend fun obtainConfig(fcitx: Fcitx): RawConfig
-    abstract suspend fun saveConfig(fcitx: Fcitx, newConfig: RawConfig)
+    abstract suspend fun obtainConfig(fcitx: FcitxAPI): RawConfig
+    abstract suspend fun saveConfig(fcitx: FcitxAPI, newConfig: RawConfig)
 
     private lateinit var raw: RawConfig
     private var configLoaded = false
 
     private val viewModel: MainViewModel by activityViewModels()
 
-    private val fcitx: Fcitx
+    private val fcitx: FcitxConnection
         get() = viewModel.fcitx
 
     fun requireStringArg(key: String) =
@@ -33,8 +34,8 @@ abstract class FcitxPreferenceFragment : PaddingPreferenceFragment() {
 
     private fun save() {
         if (!configLoaded) return
-        lifecycleScope.launch {
-            saveConfig(fcitx, raw["cfg"])
+        lifecycleScope.launchOnFcitxReady(fcitx) {
+            saveConfig(it, raw["cfg"])
         }
     }
 
@@ -46,7 +47,7 @@ abstract class FcitxPreferenceFragment : PaddingPreferenceFragment() {
     final override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         val context = requireContext()
         lifecycleScope.withLoadingDialog(context) {
-            raw = obtainConfig(fcitx)
+            raw = fcitx.runOnReady { obtainConfig(this) }
             if (raw.findByName("cfg") != null && raw.findByName("desc") != null) {
                 configLoaded = true
             } else {
