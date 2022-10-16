@@ -24,16 +24,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
 
     private val lifecycleRegistry = FcitxLifecycleRegistry()
 
-    override val eventFlow = eventFlow_.asSharedFlow().apply {
-        onEach {
-            when (it) {
-                is FcitxEvent.ReadyEvent -> lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_READY)
-                is FcitxEvent.IMChangeEvent -> inputMethodEntryCached = it.data
-                is FcitxEvent.StatusAreaEvent -> statusAreaActionsCached = it.data
-                else -> {}
-            }
-        }.launchIn(lifeCycleScope)
-    }
+    override val eventFlow = eventFlow_.asSharedFlow()
 
     override val isReady
         get() = lifecycle.currentState == FcitxLifecycle.State.READY
@@ -45,23 +36,17 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
     override var statusAreaActionsCached: Array<Action> = arrayOf()
         private set
 
-    private val addonGraph: ImmutableGraph<String, FcitxAPI.AddonDep> by lazy {
-        runBlocking {
-            addons().flatMap { a ->
-                a.dependencies.map {
-                    ImmutableGraph.Edge(it, a.uniqueName, FcitxAPI.AddonDep.Required)
-                } + a.optionalDependencies.map {
-                    ImmutableGraph.Edge(it, a.uniqueName, FcitxAPI.AddonDep.Optional)
-                }
-            }.let { ImmutableGraph(it) }
-        }
-    }
+    // the computation is delayed to the first call of [getAddonReverseDependencies]
+    private var addonGraph: ImmutableGraph<String, FcitxAPI.AddonDep>? = null
 
-    private val addonReversedDependencies =
+    private val addonReverseDependencies =
         mutableMapOf<String, List<Pair<String, FcitxAPI.AddonDep>>>()
 
     override fun getAddonReverseDependencies(addon: String) =
-        addonReversedDependencies.computeIfAbsent(addon) { addonGraph.bfs(it) }
+        (addonGraph ?: run { computeAddonGraph().also { addonGraph = it } }).let { graph ->
+            addonReverseDependencies.computeIfAbsent(addon)
+            { graph.bfs(it) }
+        }
 
     override fun translate(str: String, domain: String) = getFcitxTranslation(domain, str)
 
@@ -391,11 +376,31 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         lifecycle.lifecycleScope.launch { setClipboard(it) }
     }
 
+    private fun computeAddonGraph() = runBlocking {
+        addons().flatMap { a ->
+            a.dependencies.map {
+                ImmutableGraph.Edge(it, a.uniqueName, FcitxAPI.AddonDep.Required)
+            } + a.optionalDependencies.map {
+                ImmutableGraph.Edge(it, a.uniqueName, FcitxAPI.AddonDep.Optional)
+            }
+        }.let { ImmutableGraph(it) }
+    }
+
     fun start() {
         if (lifecycle.currentState != FcitxLifecycle.State.STOPPED) {
             Timber.w("Skip starting fcitx: not at stopped state!")
             return
         }
+        // launch before dispatcher started to update internal states in this class
+        // the job gets cancelled automatically on stop
+        eventFlow.onEach {
+            when (it) {
+                is FcitxEvent.ReadyEvent -> lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_READY)
+                is FcitxEvent.IMChangeEvent -> inputMethodEntryCached = it.data
+                is FcitxEvent.StatusAreaEvent -> statusAreaActionsCached = it.data
+                else -> {}
+            }
+        }.launchIn(lifeCycleScope)
         lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_START)
         ClipboardManager.addOnUpdateListener(onClipboardUpdate)
         dispatcher.start()
@@ -414,6 +419,9 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
                 Timber.w("${it.size} job(s) didn't get a chance to run!")
         }
         lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_STOPPED)
+        // clear addon graph
+        addonGraph = null
+        addonReverseDependencies.clear()
     }
 
 }

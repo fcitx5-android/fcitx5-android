@@ -53,9 +53,10 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
 
     private val isRunning = AtomicBoolean(false)
 
-//    Disabled for now
-//    private val aliveChecker = AliveChecker(ALIVE_CHECKER_PERIOD)
-
+    /**
+     * Start the dispatcher
+     * This function returns immediately
+     */
     fun start() {
         internalScope.launch {
             runningLock.withLock {
@@ -63,7 +64,6 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
                 if (isRunning.compareAndSet(false, true)) {
                     Timber.d("Calling native startup")
                     controller.nativeStartup()
-//                    aliveChecker.install()
                     while (isActive && isRunning.get()) {
                         // blocking...
                         nativeLoopLock.withLock {
@@ -76,14 +76,16 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
                         }
                     }
                     Timber.i("Calling native exit")
-//                    aliveChecker.teardown()
                     controller.nativeExit()
                 }
             }
         }
     }
 
-    // blocking until stopped
+    /**
+     * Stop the dispatcher
+     * This function blocks until fully stopped
+     */
     fun stop(): List<Runnable> {
         Timber.i("FcitxDispatcher stop()")
         return if (isRunning.compareAndSet(true, false)) {
@@ -119,7 +121,6 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
 
     companion object {
         const val JOB_WAITING_LIMIT = 2000L
-//        const val ALIVE_CHECKER_PERIOD = 8000L
     }
 
 }

@@ -100,7 +100,6 @@ class FcitxLifecycleCoroutineScope(
     override fun onStateChanged(event: FcitxLifecycle.Event) {
 
         if (lifecycle.currentState >= FcitxLifecycle.State.STOPPING) {
-            lifecycle.removeObserver(this)
             coroutineContext.cancelChildren()
         }
     }
