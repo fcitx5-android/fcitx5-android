@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.data.theme
 
 import android.content.SharedPreferences
 import android.content.res.Configuration
+import androidx.annotation.StringRes
 import kotlinx.serialization.json.Json
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
@@ -196,6 +197,22 @@ object ThemeManager {
     class Prefs(sharedPreferences: SharedPreferences) :
         ManagedPreferenceCategory(R.string.theme, sharedPreferences) {
 
+        private fun themePreference(
+            @StringRes
+            title: Int,
+            key: String,
+            defaultValue: Theme,
+            @StringRes
+            summary: Int? = null,
+            enableUiOn: () -> Boolean = { true },
+        ): ManagedThemePreference {
+            val pref = ManagedThemePreference(sharedPreferences, key, defaultValue)
+            val ui = ManagedThemePreferenceUi(title, key, defaultValue, summary, enableUiOn)
+            pref.register()
+            ui.registerUi()
+            return pref
+        }
+
         val keyBorder = switch(R.string.key_border, "key_border", false)
 
         val keyRippleEffect = switch(R.string.key_ripple_effect, "key_ripple_effect", false)
@@ -246,19 +263,21 @@ object ThemeManager {
             summary = R.string.follow_system_day_night_theme_summary
         )
 
-        val lightModeTheme = ManagedThemePreference(
-            sharedPreferences,
+        val lightModeTheme = themePreference(
+            R.string.light_mode_theme,
             "light_mode_theme",
             ThemePreset.PixelLight,
-            enableUiOn = { followSystemDayNightTheme.getValue() }
-        ) { setTitle(R.string.light_mode_theme) }.apply { register() }
+            enableUiOn = {
+                followSystemDayNightTheme.getValue()
+            })
 
-        val darkModeTheme = ManagedThemePreference(
-            sharedPreferences,
+        val darkModeTheme = themePreference(
+            R.string.dark_mode_theme,
             "dark_mode_theme",
             ThemePreset.PixelDark,
-            enableUiOn = { followSystemDayNightTheme.getValue() }
-        ) { setTitle(R.string.dark_mode_theme) }.apply { register() }
+            enableUiOn = {
+                followSystemDayNightTheme.getValue()
+            })
 
         enum class NavbarBackground {
             None,
@@ -297,17 +316,17 @@ object ThemeManager {
         ThemePreset.AMOLEDBlack,
     )
 
-    private val onActiveThemeNameChange = ManagedPreference.OnChangeListener<String> {
+    private val onActiveThemeNameChange = ManagedPreference.OnChangeListener<String> { _, it ->
         currentTheme = getTheme(internalPrefs.activeThemeName.getValue())
             ?: errorState(R.string.exception_theme_unknown, it)
         this@ThemeManager.fireChange()
     }
 
-    private val prefsChange = ManagedPreference.OnChangeListener<Any> {
+    private val prefsChange = ManagedPreference.OnChangeListener<Any> { _, _ ->
         this@ThemeManager.fireChange()
     }
 
-    private val dayLightThemePrefsChange = ManagedPreference.OnChangeListener<Any> {
+    private val dayLightThemePrefsChange = ManagedPreference.OnChangeListener<Any> { _, _ ->
         onSystemDarkModeChanged()
     }
 

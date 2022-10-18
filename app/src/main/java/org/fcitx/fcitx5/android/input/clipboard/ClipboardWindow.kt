@@ -34,7 +34,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         )
     }
 
-    private val clipboardEnabledListener = ManagedPreference.OnChangeListener<Boolean> {
+    private val clipboardEnabledListener = ManagedPreference.OnChangeListener<Boolean> { _, it ->
         stateMachine.push(
             if (it)
                 if (isClipboardDbEmpty) ClipboardListeningEnabledWithDbEmpty

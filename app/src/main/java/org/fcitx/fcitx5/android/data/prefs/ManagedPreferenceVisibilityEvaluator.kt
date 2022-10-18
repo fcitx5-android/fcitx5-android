@@ -1,19 +1,19 @@
 package org.fcitx.fcitx5.android.data.prefs
 
 class ManagedPreferenceVisibilityEvaluator(
-    private val managedPreferences: Map<String, ManagedPreference<*, *>>,
-    private val onVisibilityChanged: (Map<String,Boolean>) -> Unit
+    private val provider: ManagedPreferenceProvider,
+    private val onVisibilityChanged: (Map<String, Boolean>) -> Unit
 ) {
 
     private val visibility = mutableMapOf<String, Boolean>()
 
     // it would be better to declare the dependency relationship, rather than reevaluating on each value changed
-    private val onValueChangeListener = ManagedPreference.OnChangeListener<Any> {
+    private val onValueChangeListener = ManagedPreference.OnChangeListener<Any> { _, _ ->
         evaluateVisibility()
     }
 
     init {
-        managedPreferences.forEach { (_, pref) ->
+        provider.managedPreferences.forEach { (_, pref) ->
             pref.registerOnChangeListener(
                 onValueChangeListener
             )
@@ -21,14 +21,14 @@ class ManagedPreferenceVisibilityEvaluator(
     }
 
     fun evaluateVisibility() {
-        val changed = mutableMapOf<String,Boolean>()
-        managedPreferences.forEach { (key, pref) ->
-            val old = visibility[key]
-            val new = pref.enableUiOn()
+        val changed = mutableMapOf<String, Boolean>()
+        provider.managedPreferencesUi.forEach { ui ->
+            val old = visibility[ui.key]
+            val new = ui.enableUiOn()
             if (old != null && old != new) {
-                changed[key] = new
+                changed[ui.key] = new
             }
-            visibility[key] = new
+            visibility[ui.key] = new
         }
         if (changed.isNotEmpty())
             onVisibilityChanged(changed)

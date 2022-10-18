@@ -16,7 +16,10 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.fcitx.fcitx5.android.core.*
+import org.fcitx.fcitx5.android.core.CapabilityFlags
+import org.fcitx.fcitx5.android.core.FcitxEvent
+import org.fcitx.fcitx5.android.core.KeyStates
+import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
@@ -84,7 +87,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     private val ignoreSystemCursor by AppPrefs.getInstance().advanced.ignoreSystemCursor
 
-    private val recreateInputViewListener = ManagedPreference.OnChangeListener<Any> {
+    private val recreateInputViewListener = ManagedPreference.OnChangeListener<Any> { _, _ ->
         recreateInputView(ThemeManager.getActiveTheme())
     }
 

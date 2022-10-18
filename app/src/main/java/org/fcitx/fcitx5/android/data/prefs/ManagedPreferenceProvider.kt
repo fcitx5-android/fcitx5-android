@@ -2,16 +2,28 @@ package org.fcitx.fcitx5.android.data.prefs
 
 import androidx.preference.PreferenceScreen
 
-interface ManagedPreferenceProvider {
+abstract class ManagedPreferenceProvider {
 
-    val managedPreferences: MutableMap<String, ManagedPreference<*, *>>
+    private val _managedPreferences: MutableMap<String, ManagedPreference<*>> = mutableMapOf()
 
-    fun createUi(screen: PreferenceScreen) {
+    private val _managedPreferencesUi: MutableList<ManagedPreferenceUi<*>> = mutableListOf()
+
+    val managedPreferences: Map<String, ManagedPreference<*>>
+        get() = _managedPreferences
+
+    val managedPreferencesUi: List<ManagedPreferenceUi<*>>
+        get() = _managedPreferencesUi
+
+    open fun createUi(screen: PreferenceScreen) {
 
     }
 
-    fun ManagedPreference<*, *>.register() {
-        managedPreferences[key] = this
+    fun ManagedPreferenceUi<*>.registerUi() {
+        _managedPreferencesUi.add(this)
+    }
+
+    fun ManagedPreference<*>.register() {
+        _managedPreferences[key] = this
     }
 
 }
