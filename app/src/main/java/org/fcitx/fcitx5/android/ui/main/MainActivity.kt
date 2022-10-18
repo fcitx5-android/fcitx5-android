@@ -14,12 +14,10 @@ import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
 import org.fcitx.fcitx5.android.databinding.ActivityMainBinding
 import org.fcitx.fcitx5.android.ui.main.settings.PinyinDictionaryFragment
 import org.fcitx.fcitx5.android.ui.setup.SetupActivity
@@ -98,13 +96,11 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent?) {
         processIntent(intent)
         super.onNewIntent(intent)
+        navHostFragment.navController.handleDeepLink(intent)
     }
 
     private fun processIntent(intent: Intent?) {
-        listOf(
-            ::processAddDictIntent,
-            ::processConfigIntent,
-        ).firstOrNull { it(intent) }
+        listOf(::processAddDictIntent).firstOrNull { it(intent) }
     }
 
     private fun processAddDictIntent(intent: Intent?): Boolean {
@@ -127,34 +123,6 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-    private fun processConfigIntent(intent: Intent?): Boolean {
-        intent?.getStringExtra(INTENT_DATA_CONFIG)?.let {
-            val target = when (it) {
-                INTENT_DATA_CONFIG_GLOBAL ->
-                    R.id.action_mainFragment_to_globalConfigFragment to null
-                INTENT_DATA_CONFIG_IM_LIST ->
-                    R.id.action_mainFragment_to_imListFragment to null
-                INTENT_DATA_CONFIG_IM ->
-                    R.id.action_mainFragment_to_imConfigFragment to
-                            (intent.getBundleExtra(INTENT_DATA_CONFIG_IM) ?: return false)
-                INTENT_DATA_CONFIG_BEHAVIOR ->
-                    R.id.action_mainFragment_to_behaviorSettingsFragment to null
-                INTENT_DATA_CONFIG_THEME ->
-                    R.id.action_mainFragment_to_themeListFragment to null
-                else -> return false
-            }
-            with(viewModel) {
-                // we need fcitx ready
-                viewModelScope.launchOnFcitxReady(fcitx) {
-                    navHostFragment.navController.navigateFromMain(
-                        target.first,
-                        target.second
-                    )
-                }
-            }
-        }
-        return false
-    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean = menu.run {
         add(R.string.save).apply {
@@ -182,12 +150,4 @@ class MainActivity : AppCompatActivity() {
         true
     }
 
-    companion object {
-        const val INTENT_DATA_CONFIG = "config"
-        const val INTENT_DATA_CONFIG_GLOBAL = "global"
-        const val INTENT_DATA_CONFIG_IM_LIST = "im_list"
-        const val INTENT_DATA_CONFIG_IM = "im"
-        const val INTENT_DATA_CONFIG_BEHAVIOR = "behavior"
-        const val INTENT_DATA_CONFIG_THEME = "theme"
-    }
 }

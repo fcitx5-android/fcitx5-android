@@ -1,7 +1,6 @@
 package org.fcitx.fcitx5.android.input.status
 
 import android.widget.Toast
-import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Action
@@ -17,8 +16,6 @@ import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.status.StatusAreaEntry.Android.Type.*
 import org.fcitx.fcitx5.android.input.wm.InputWindow
-import org.fcitx.fcitx5.android.ui.main.MainActivity
-import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
 import org.fcitx.fcitx5.android.utils.AppUtil
 import splitties.dimensions.dp
 import splitties.views.backgroundColor
@@ -67,16 +64,12 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
                     when (it) {
                         is StatusAreaEntry.Fcitx -> f.activateAction(it.action.id)
                         is StatusAreaEntry.Android -> when (it.type) {
-                            GlobalOptions -> AppUtil.launchMainToConfig(
-                                context, MainActivity.INTENT_DATA_CONFIG_GLOBAL
-                            )
+                            GlobalOptions -> AppUtil.launchMainToGlobalOptions(context)
                             InputMethod -> f.currentIme().let {
-                                AppUtil.launchMainToConfig(
-                                    context, MainActivity.INTENT_DATA_CONFIG_IM,
-                                    bundleOf(
-                                        InputMethodConfigFragment.ARG_NAME to it.displayName,
-                                        InputMethodConfigFragment.ARG_UNIQUE_NAME to it.uniqueName
-                                    )
+                                AppUtil.launchMainToInputMethodConfig(
+                                    context,
+                                    it.uniqueName,
+                                    it.displayName
                                 )
                             }
                             ReloadConfig -> {
@@ -84,12 +77,8 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
                                 Toast.makeText(service, R.string.done, Toast.LENGTH_SHORT)
                                     .show()
                             }
-                            Behavior -> AppUtil.launchMainToConfig(
-                                context, MainActivity.INTENT_DATA_CONFIG_BEHAVIOR
-                            )
-                            ThemeList -> AppUtil.launchMainToConfig(
-                                context, MainActivity.INTENT_DATA_CONFIG_THEME
-                            )
+                            Behavior -> AppUtil.launchMainToBehavior(context)
+                            ThemeList -> AppUtil.launchMainToThemeList(context)
                         }
                     }
                 }

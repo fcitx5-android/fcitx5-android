@@ -10,7 +10,6 @@ import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxAPI
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
-import org.fcitx.fcitx5.android.ui.main.MainActivity
 import org.fcitx.fcitx5.android.utils.AppUtil
 import splitties.resources.dimenPxSize
 import splitties.resources.styledDrawable
@@ -51,7 +50,7 @@ object InputMethodSwitcherDialog {
                 }
             })
             .setNeutralButton(R.string.input_methods) { _, _ ->
-                AppUtil.launchMainToConfig(service, MainActivity.INTENT_DATA_CONFIG_IM_LIST)
+                AppUtil.launchMainToInputMethodList(context)
             }
             .create()
         dialog.window?.decorView

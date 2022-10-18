@@ -63,12 +63,7 @@ class CommonKeyActionListener :
                     }
                     is LangSwitchAction -> {
                         if (it.enabledIme().size < 2) {
-                            inputView.showDialog(
-                                AddMoreInputMethodsPrompt.build(
-                                    service,
-                                    context
-                                )
-                            )
+                            inputView.showDialog(AddMoreInputMethodsPrompt.build(context))
                         } else {
                             it.enumerateIme()
                         }
