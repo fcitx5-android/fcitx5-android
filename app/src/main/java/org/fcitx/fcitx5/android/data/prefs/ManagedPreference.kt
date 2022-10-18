@@ -1,34 +1,28 @@
 package org.fcitx.fcitx5.android.data.prefs
 
-import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import androidx.preference.ListPreference
-import androidx.preference.Preference
-import androidx.preference.SwitchPreference
-import org.fcitx.fcitx5.android.ui.main.settings.DialogSeekBarPreference
 import org.fcitx.fcitx5.android.utils.WeakHashSet
 import timber.log.Timber
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-abstract class ManagedPreference<T : Any, P : Preference>(
+abstract class ManagedPreference<T : Any>(
     val sharedPreferences: SharedPreferences,
     val key: String,
     val defaultValue: T,
-    val enableUiOn: () -> Boolean,
-    private val uiConfig: P.() -> Unit
 ) : ReadWriteProperty<Any?, T> {
 
+    interface StringLikeCodec<T : Any> {
+        fun encode(x: T): String = x.toString()
+        fun decode(raw: String): T?
+    }
+
     fun interface OnChangeListener<in T : Any> {
-        fun onChange(value: T)
+        fun onChange(key: String, value: T)
     }
 
     private val listeners by lazy { WeakHashSet<OnChangeListener<T>>() }
-
-    fun createUi(context: Context): P = createUiProtected(context).apply(uiConfig)
-
-    protected abstract fun createUiProtected(context: Context): P
 
     abstract fun setValue(value: T)
 
@@ -50,67 +44,21 @@ abstract class ManagedPreference<T : Any, P : Preference>(
     }
 
     fun fireChange() {
-        listeners.forEach { with(it) { onChange(getValue()) } }
+        listeners.forEach { with(it) { onChange(key, getValue()) } }
     }
 
-    interface StringLikeCodec<T : Any> {
-        fun encode(x: T): String = x.toString()
-        fun decode(raw: String): T?
-    }
-
-    class Switch(
-        sharedPreferences: SharedPreferences,
-        key: String,
-        defaultValue: Boolean,
-        enableUiOn: () -> Boolean,
-        uiConfig: SwitchPreference.() -> Unit
-    ) : ManagedPreference<Boolean, SwitchPreference>(
-        sharedPreferences,
-        key,
-        defaultValue,
-        enableUiOn,
-        uiConfig
-    ) {
-        override fun createUiProtected(context: Context): SwitchPreference =
-            SwitchPreference(context).apply {
-                key = this@Switch.key
-                isIconSpaceReserved = false
-                isSingleLineTitle = false
-                setDefaultValue(defaultValue)
-            }
+    class PBool(sharedPreferences: SharedPreferences, key: String, defaultValue: Boolean) :
+        ManagedPreference<Boolean>(sharedPreferences, key, defaultValue) {
 
         override fun setValue(value: Boolean) {
             sharedPreferences.edit { putBoolean(key, value) }
         }
 
         override fun getValue(): Boolean = sharedPreferences.getBoolean(key, defaultValue)
-
     }
 
-    class StringList(
-        sharedPreferences: SharedPreferences,
-        key: String,
-        defaultValue: String,
-        val entries: Array<String>,
-        enableUiOn: () -> Boolean,
-        uiConfig: ListPreference.() -> Unit
-    ) : ManagedPreference<String, ListPreference>(
-        sharedPreferences,
-        key,
-        defaultValue,
-        enableUiOn,
-        uiConfig
-    ) {
-
-        override fun createUiProtected(context: Context): ListPreference =
-            ListPreference(context).apply {
-                key = this@StringList.key
-                isIconSpaceReserved = false
-                isSingleLineTitle = false
-                entryValues = this@StringList.entries
-                summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
-                setDefaultValue(defaultValue)
-            }
+    class PString(sharedPreferences: SharedPreferences, key: String, defaultValue: String) :
+        ManagedPreference<String>(sharedPreferences, key, defaultValue) {
 
         override fun setValue(value: String) {
             sharedPreferences.edit { putString(key, value) }
@@ -119,30 +67,13 @@ abstract class ManagedPreference<T : Any, P : Preference>(
         override fun getValue(): String = sharedPreferences.getString(key, defaultValue)!!
     }
 
-    class StringLikeList<T : Any>(
+    class PStringLike<T : Any>(
         sharedPreferences: SharedPreferences,
         key: String,
         defaultValue: T,
-        val codec: StringLikeCodec<T>,
-        val entries: List<T>,
-        enableUiOn: () -> Boolean,
-        uiConfig: ListPreference.() -> Unit
-    ) : ManagedPreference<T, ListPreference>(
-        sharedPreferences,
-        key,
-        defaultValue,
-        enableUiOn,
-        uiConfig
-    ) {
-        override fun createUiProtected(context: Context): ListPreference =
-            ListPreference(context).apply {
-                key = this@StringLikeList.key
-                isIconSpaceReserved = false
-                isSingleLineTitle = false
-                entryValues = this@StringLikeList.entries.map { codec.encode(it) }.toTypedArray()
-                summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
-                setDefaultValue(codec.encode(defaultValue))
-            }
+        val codec: StringLikeCodec<T>
+    ) :
+        ManagedPreference<T>(sharedPreferences, key, defaultValue) {
 
         override fun setValue(value: T) {
             sharedPreferences.edit { putString(key, codec.encode(value)) }
@@ -156,93 +87,9 @@ abstract class ManagedPreference<T : Any, P : Preference>(
             }
     }
 
-    class SeekBarInt(
-        sharedPreferences: SharedPreferences,
-        key: String,
-        defaultValue: Int,
-        enableUiOn: () -> Boolean,
-        uiConfig: DialogSeekBarPreference.() -> Unit
-    ) : ManagedPreference<Int, DialogSeekBarPreference>(
-        sharedPreferences,
-        key,
-        defaultValue,
-        enableUiOn,
-        uiConfig
-    ) {
-        override fun createUiProtected(context: Context): DialogSeekBarPreference =
-            DialogSeekBarPreference(context).apply {
-                key = this@SeekBarInt.key
-                isIconSpaceReserved = false
-                isSingleLineTitle = false
-                summaryProvider = DialogSeekBarPreference.SimpleSummaryProvider
-                setDefaultValue(this@SeekBarInt.defaultValue)
-            }
 
-        override fun setValue(value: Int) = sharedPreferences.edit { putInt(key, value) }
-
-        override fun getValue(): Int = sharedPreferences.getInt(key, defaultValue)
-
-    }
-
-    abstract class NoUiManagedPreference<T : Any>(
-        sharedPreferences: SharedPreferences,
-        key: String,
-        defaultValue: T
-    ) : ManagedPreference<T, Nothing>(sharedPreferences, key, defaultValue, { false }, {}) {
-        final override fun createUiProtected(context: Context): Nothing =
-            throw UnsupportedOperationException()
-    }
-
-    class RawBool(
-        sharedPreferences: SharedPreferences,
-        key: String,
-        defaultValue: Boolean,
-    ) : NoUiManagedPreference<Boolean>(sharedPreferences, key, defaultValue) {
-
-        override fun setValue(value: Boolean) {
-            sharedPreferences.edit { putBoolean(key, value) }
-        }
-
-        override fun getValue(): Boolean = sharedPreferences.getBoolean(key, defaultValue)
-    }
-
-    class RawString(
-        sharedPreferences: SharedPreferences,
-        key: String,
-        defaultValue: String,
-    ) : NoUiManagedPreference<String>(sharedPreferences, key, defaultValue) {
-
-        override fun setValue(value: String) {
-            sharedPreferences.edit { putString(key, value) }
-
-        }
-
-        override fun getValue(): String = sharedPreferences.getString(key, defaultValue)!!
-    }
-
-    class RawStringLike<T : Any>(
-        sharedPreferences: SharedPreferences,
-        key: String,
-        val codec: StringLikeCodec<T>,
-        defaultValue: T,
-    ) : NoUiManagedPreference<T>(sharedPreferences, key, defaultValue) {
-
-        override fun setValue(value: T) {
-            sharedPreferences.edit { putString(key, codec.encode(value)) }
-        }
-
-        override fun getValue(): T = sharedPreferences.getString(key, null).let { raw ->
-            raw?.runCatching { codec.decode(this) }
-                ?.onFailure { Timber.w("Failed to decode value '$raw' of preference $key") }
-                ?.getOrNull() ?: defaultValue
-        }
-    }
-
-    class RawInt(
-        sharedPreferences: SharedPreferences,
-        key: String,
-        defaultValue: Int,
-    ) : NoUiManagedPreference<Int>(sharedPreferences, key, defaultValue) {
+    class PInt(sharedPreferences: SharedPreferences, key: String, defaultValue: Int) :
+        ManagedPreference<Int>(sharedPreferences, key, defaultValue) {
 
         override fun setValue(value: Int) {
             sharedPreferences.edit { putInt(key, value) }
@@ -251,12 +98,8 @@ abstract class ManagedPreference<T : Any, P : Preference>(
         override fun getValue(): Int = sharedPreferences.getInt(key, defaultValue)
     }
 
-    class RawFloat(
-        sharedPreferences: SharedPreferences,
-        key: String,
-        defaultValue: Float,
-    ) : NoUiManagedPreference<Float>(sharedPreferences, key, defaultValue) {
-
+    class PFloat(sharedPreferences: SharedPreferences, key: String, defaultValue: Float) :
+        ManagedPreference<Float>(sharedPreferences, key, defaultValue) {
         override fun setValue(value: Float) {
             sharedPreferences.edit { putFloat(key, value) }
         }

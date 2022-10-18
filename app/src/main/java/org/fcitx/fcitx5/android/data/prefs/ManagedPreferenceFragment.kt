@@ -11,7 +11,7 @@ abstract class ManagedPreferenceFragment(private val preferenceProvider: Managed
     PaddingPreferenceFragment() {
 
     private val evaluator =
-        ManagedPreferenceVisibilityEvaluator(preferenceProvider.managedPreferences) {
+        ManagedPreferenceVisibilityEvaluator(preferenceProvider) {
             lifecycleScope.launch {
                 it.forEach { (key, enable) ->
                     findPreference<Preference>(key)?.isEnabled = enable

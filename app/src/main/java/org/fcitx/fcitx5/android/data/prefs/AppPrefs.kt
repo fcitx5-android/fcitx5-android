@@ -9,10 +9,9 @@ import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
 class AppPrefs(
     private val sharedPreferences: SharedPreferences,
     private val resources: Resources
-) : ManagedPreferenceProvider {
+) : ManagedPreferenceProvider() {
 
     private val providers = mutableListOf<ManagedPreferenceProvider>()
-    override val managedPreferences = mutableMapOf<String, ManagedPreference<*, *>>()
 
     private val onSharedPreferenceChangeListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
@@ -43,7 +42,11 @@ class AppPrefs(
             switch(R.string.system_touch_sounds, "system_touch_sounds", true)
         val popupOnKeyPress = switch(R.string.popup_on_key_press, "popup_on_key_press", true)
         val keepLettersUppercase =
-            switch(R.string.keep_keyboard_letters_uppercase, "keep_keyboard_letters_uppercase", false)
+            switch(
+                R.string.keep_keyboard_letters_uppercase,
+                "keep_keyboard_letters_uppercase",
+                false
+            )
         val horizontalCandidateGrowth =
             switch(R.string.horizontal_candidate_growth, "horizontal_candidate_growth", true)
         val expandedCandidateStyle =
@@ -131,7 +134,7 @@ class AppPrefs(
         val provider = providerF(sharedPreferences)
         if (includeUi)
             providers.add(provider)
-        managedPreferences.putAll(provider.managedPreferences)
+        provider.managedPreferences.forEach { (_, v) -> v.register() }
         return provider
     }
 

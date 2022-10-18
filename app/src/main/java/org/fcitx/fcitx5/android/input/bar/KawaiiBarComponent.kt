@@ -77,7 +77,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         }
 
     private val onExpandToolbarByDefaultUpdateListener =
-        ManagedPreference.OnChangeListener<Boolean> {
+        ManagedPreference.OnChangeListener<Boolean> { _, it ->
             idleUiStateMachine = IdleUiStateMachine.new(it, idleUiStateMachine)
         }
 

@@ -18,7 +18,6 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
@@ -116,7 +115,7 @@ class InputView(
             return resources.displayMetrics.heightPixels * percent / 100
         }
 
-    private val onWindowHeightChangeListener = ManagedPreference.OnChangeListener<Int> {
+    private val onWindowHeightChangeListener = ManagedPreference.OnChangeListener<Int> { _, _ ->
         updateKeyboardHeight()
     }
 
