@@ -230,8 +230,12 @@ object ThemeManager {
             PunctuationPosition.Bottom,
             PunctuationPosition,
             listOf(
-                appContext.getString(R.string.punctuation_pos_bottom) to PunctuationPosition.Bottom,
-                appContext.getString(R.string.punctuation_pos_top_right) to PunctuationPosition.TopRight
+                PunctuationPosition.Bottom,
+                PunctuationPosition.TopRight
+            ),
+            listOf(
+                R.string.punctuation_pos_bottom,
+                R.string.punctuation_pos_top_right
             )
         )
 
@@ -250,9 +254,14 @@ object ThemeManager {
             NavbarBackground.Full,
             NavbarBackground,
             listOf(
-                appContext.getString(R.string.navbar_bkg_none) to NavbarBackground.None,
-                appContext.getString(R.string.navbar_bkg_color_only) to NavbarBackground.ColorOnly,
-                appContext.getString(R.string.navbar_bkg_full) to NavbarBackground.Full
+                NavbarBackground.None,
+                NavbarBackground.ColorOnly,
+                NavbarBackground.Full
+            ),
+            listOf(
+                R.string.navbar_bkg_none,
+                R.string.navbar_bkg_color_only,
+                R.string.navbar_bkg_full
             )
         )
 
