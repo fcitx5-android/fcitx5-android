@@ -57,7 +57,6 @@
     <string name="delete">삭제</string>
     <string name="clipboard">클립보드</string>
     <string name="keyboard_height">키보드 높이</string>
-    <string name="keyboard_height_landscape">키보드 높이(가로)</string>
     <string name="keyboard">키보드</string>
     <string name="version">버전</string>
     <string name="build_time">빌드 시간</string>
@@ -68,8 +67,7 @@
     <string name="open_source_licenses">오픈 소스 라이선스</string>
     <string name="licenses_of_third_party_libraries">타사 라이브러리 라이선스</string>
     <string name="github_repo">GitHub 저장소</string>
-    <string name="expanded_candidate_grid_span_count_landscape">격자 스타일 확장 후보 범위 수(가로)</string>
-    <string name="expanded_candidate_grid_span_count_portrait">격자 스타일 확장 후보 범위 수(세로)</string>
+    <string name="expanded_candidate_grid_span_count">격자 스타일 확장 후보 범위 수</string>
     <string name="no_config_options">현재 사용 가능한 구성 옵션이 없습니다</string>
     <string name="unimplemented_type">⛔ 구현되지 않은 유형</string>
     <string name="select">선택</string>

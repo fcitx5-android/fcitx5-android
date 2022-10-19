@@ -22,18 +22,19 @@ import splitties.views.gravityHorizontalCenter
  *  than 1, 1 will be used as step.
  * @property unit The unit to show after the value. Set to an empty string to disable this feature.
  */
-class DialogSeekBarPreference : Preference {
+class DialogSeekBarPreference @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = androidx.preference.R.attr.preferenceStyle
+) : Preference(context, attrs, defStyleAttr) {
+
     private var value = 0
     var min: Int
     var max: Int
     var step: Int
     var unit: String
 
-    constructor(context: Context) : this(context, null)
-    constructor(context: Context, attrs: AttributeSet?) :
-            this(context, attrs, androidx.preference.R.attr.preferenceStyle)
-
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+    init {
         context.theme.obtainStyledAttributes(attrs, R.styleable.DialogSeekBarPreference, 0, 0).run {
             try {
                 min = getInteger(R.styleable.DialogSeekBarPreference_min, 0)
@@ -125,7 +126,7 @@ class DialogSeekBarPreference : Preference {
      */
     private fun valueForProgress(progress: Int) = (progress * step) + min
 
-    private fun textForValue(value: Int) = "$value$unit"
+    private fun textForValue(value: Int) = "$value $unit"
 
     object SimpleSummaryProvider : SummaryProvider<DialogSeekBarPreference> {
         override fun provideSummary(preference: DialogSeekBarPreference): CharSequence {

@@ -58,7 +58,6 @@
     <string name="delete">Удалить</string>
     <string name="clipboard">Буфер обмена</string>
     <string name="keyboard_height">Высота клавиатуры</string>
-    <string name="keyboard_height_landscape">Высота клавиатуры (альбомная ориентация)</string>
     <string name="keyboard">Клавиатура</string>
     <string name="clipboard_suggestion_timeout">Тайм-аут предложения буфера обмена</string>
     <string name="version">Версия</string>
@@ -70,8 +69,7 @@
     <string name="open_source_licenses">Лицензии с открытым исходным кодом</string>
     <string name="licenses_of_third_party_libraries">Лицензии сторонних библиотек</string>
     <string name="github_repo">Репозиторий GitHub</string>
-    <string name="expanded_candidate_grid_span_count_landscape">Счетчик расширенных диапазонов кандидатов в стиле сетки (альбомная ориентация)</string>
-    <string name="expanded_candidate_grid_span_count_portrait">Счетчик расширенных диапазонов кандидатов в стиле сетки (книжная ориентация)</string>
+    <string name="expanded_candidate_grid_span_count">Счетчик расширенных диапазонов кандидатов в стиле сетки</string>
     <string name="no_config_options">В настоящее время параметры конфигурации недоступны</string>
     <string name="unimplemented_type">⛔ Нереализованный тип</string>
     <string name="select">Выбрать</string>

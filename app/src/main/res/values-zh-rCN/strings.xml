@@ -58,7 +58,6 @@
     <string name="delete">删除</string>
     <string name="clipboard">剪贴板</string>
     <string name="keyboard_height">键盘高度</string>
-    <string name="keyboard_height_landscape">键盘高度（横屏）</string>
     <string name="keyboard">键盘</string>
     <string name="clipboard_suggestion_timeout">剪贴板提示超时</string>
     <string name="version">版本</string>
@@ -70,8 +69,7 @@
     <string name="open_source_licenses">开源软件许可</string>
     <string name="licenses_of_third_party_libraries">第三方库许可证</string>
     <string name="github_repo">GitHub 仓库</string>
-    <string name="expanded_candidate_grid_span_count_landscape">表格样式展开候选词列数（横屏）</string>
-    <string name="expanded_candidate_grid_span_count_portrait">表格样式展开候选词列数（竖屏）</string>
+    <string name="expanded_candidate_grid_span_count">表格样式展开候选词列数</string>
     <string name="no_config_options">目前没有可用的配置选项</string>
     <string name="unimplemented_type">⛔ 未实现类型</string>
     <string name="select">选择</string>

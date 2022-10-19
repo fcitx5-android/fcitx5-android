@@ -61,6 +61,42 @@ abstract class ManagedPreferenceCategory(
         return pref
     }
 
+    protected fun twinInt(
+        @StringRes
+        title: Int,
+        @StringRes
+        label: Int,
+        key: String,
+        defaultValue: Int,
+        @StringRes
+        secondaryLabel: Int,
+        secondaryKey: String,
+        secondaryDefaultValue: Int,
+        min: Int,
+        max: Int,
+        unit: String = "",
+        enableUiOn: () -> Boolean = { true },
+    ): Pair<ManagedPreference.PInt, ManagedPreference.PInt> {
+        val primary = ManagedPreference.PInt(
+            sharedPreferences,
+            key, defaultValue,
+        )
+        val secondary = ManagedPreference.PInt(
+            sharedPreferences,
+            secondaryKey, secondaryDefaultValue
+        )
+        val ui = ManagedPreferenceUi.TwinSeekBarInt(
+            title,
+            label, key, defaultValue,
+            secondaryLabel, secondaryKey, secondaryDefaultValue,
+            min, max, unit, enableUiOn
+        )
+        primary.register()
+        secondary.register()
+        ui.registerUi()
+        return primary to secondary
+    }
+
     override fun createUi(screen: PreferenceScreen) {
         val category = PreferenceCategory(screen.context)
         category.isIconSpaceReserved = false
