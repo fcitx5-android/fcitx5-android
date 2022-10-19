@@ -50,9 +50,9 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
                 ReloadConfig
             ),
             StatusAreaEntry.Android(
-                context.getString(R.string.behavior),
+                context.getString(R.string.keyboard),
                 R.drawable.ic_baseline_keyboard_24,
-                Behavior
+                Keyboard
             )
         )
     }
@@ -77,7 +77,7 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
                                 Toast.makeText(service, R.string.done, Toast.LENGTH_SHORT)
                                     .show()
                             }
-                            Behavior -> AppUtil.launchMainToBehavior(context)
+                            Keyboard -> AppUtil.launchMainToKeyboard(context)
                             ThemeList -> AppUtil.launchMainToThemeList(context)
                         }
                     }

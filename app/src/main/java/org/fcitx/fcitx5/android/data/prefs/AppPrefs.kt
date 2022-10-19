@@ -2,25 +2,13 @@ package org.fcitx.fcitx5.android.data.prefs
 
 import android.content.SharedPreferences
 import android.content.res.Resources
-import androidx.preference.PreferenceScreen
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
 
 class AppPrefs(
     private val sharedPreferences: SharedPreferences,
     private val resources: Resources
-) : ManagedPreferenceProvider() {
-
-    private val providers = mutableListOf<ManagedPreferenceProvider>()
-
-    private val onSharedPreferenceChangeListener =
-        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            managedPreferences[key]?.fireChange()
-        }
-
-    private fun <T : ManagedPreferenceProvider> T.register() = apply {
-        registerProvider { this }
-    }
+) {
 
     inner class Internal : ManagedPreferenceInternal(sharedPreferences) {
         val firstRun = bool("first_run", true)
@@ -40,26 +28,22 @@ class AppPrefs(
             switch(R.string.button_haptic_feedback, "button_haptic_feedback", true)
         val systemTouchSounds =
             switch(R.string.system_touch_sounds, "system_touch_sounds", true)
+        val expandToolbarByDefault =
+            switch(R.string.expand_toolbar_by_default, "expand_toolbar_by_default", false)
         val popupOnKeyPress = switch(R.string.popup_on_key_press, "popup_on_key_press", true)
-        val keepLettersUppercase =
-            switch(
-                R.string.keep_keyboard_letters_uppercase,
-                "keep_keyboard_letters_uppercase",
-                false
-            )
-        val horizontalCandidateGrowth =
-            switch(R.string.horizontal_candidate_growth, "horizontal_candidate_growth", true)
-        val expandedCandidateStyle =
-            list(
-                R.string.expanded_candidate_style,
-                "expanded_candidate_style",
-                ExpandedCandidateStyle.Grid,
-                ExpandedCandidateStyle,
-                listOf(
-                    resources.getString(R.string.expanded_candidate_style_grid) to ExpandedCandidateStyle.Grid,
-                    resources.getString(R.string.expanded_candidate_style_flexbox) to ExpandedCandidateStyle.Flexbox
-                )
-            )
+        val keepLettersUppercase = switch(
+            R.string.keep_keyboard_letters_uppercase,
+            "keep_keyboard_letters_uppercase",
+            false
+        )
+        val longPressDelay = int(
+            R.string.keyboard_long_press_delay,
+            "keyboard_long_press_delay",
+            300,
+            100,
+            700,
+            "ms"
+        )
 
         val keyboardHeightPercent: ManagedPreference.PInt
         val keyboardHeightPercentLandscape: ManagedPreference.PInt
@@ -81,8 +65,19 @@ class AppPrefs(
             keyboardHeightPercentLandscape = secondary
         }
 
-        val expandToolbarByDefault =
-            switch(R.string.expand_toolbar_by_default, "expand_toolbar_by_default", false)
+        val horizontalCandidateGrowth =
+            switch(R.string.horizontal_candidate_growth, "horizontal_candidate_growth", true)
+        val expandedCandidateStyle =
+            list(
+                R.string.expanded_candidate_style,
+                "expanded_candidate_style",
+                ExpandedCandidateStyle.Grid,
+                ExpandedCandidateStyle,
+                listOf(
+                    resources.getString(R.string.expanded_candidate_style_grid) to ExpandedCandidateStyle.Grid,
+                    resources.getString(R.string.expanded_candidate_style_flexbox) to ExpandedCandidateStyle.Flexbox
+                )
+            )
 
         val expandedCandidateGridSpanCount: ManagedPreference.PInt
         val expandedCandidateGridSpanCountLandscape: ManagedPreference.PInt
@@ -103,15 +98,6 @@ class AppPrefs(
             expandedCandidateGridSpanCountLandscape = secondary
         }
 
-        val longPressDelay = int(
-            R.string.keyboard_long_press_delay,
-            "keyboard_long_press_delay",
-            300,
-            100,
-            700,
-            "ms"
-        )
-
     }
 
     inner class Clipboard : ManagedPreferenceCategory(R.string.clipboard, sharedPreferences) {
@@ -129,16 +115,7 @@ class AppPrefs(
         ) { clipboardListening.getValue() }
     }
 
-    val internal = Internal().register()
-    val keyboard = Keyboard().register()
-    val clipboard = Clipboard().register()
-    val advanced = Advanced().register()
-
-    override fun createUi(screen: PreferenceScreen) {
-        providers.forEach {
-            it.createUi(screen)
-        }
-    }
+    private val providers = mutableListOf<ManagedPreferenceProvider>()
 
     fun <T : ManagedPreferenceProvider> registerProvider(
         includeUi: Boolean = true,
@@ -147,9 +124,27 @@ class AppPrefs(
         val provider = providerF(sharedPreferences)
         if (includeUi)
             providers.add(provider)
-        provider.managedPreferences.forEach { (_, v) -> v.register() }
         return provider
     }
+
+    private fun <T : ManagedPreferenceProvider> T.register() = this.apply {
+        registerProvider { this }
+    }
+
+    val internal = Internal().register()
+    val keyboard = Keyboard().register()
+    val clipboard = Clipboard().register()
+    val advanced = Advanced().register()
+
+    private val onSharedPreferenceChangeListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            providers.forEach {
+                it.managedPreferences[key]?.apply {
+                    fireChange()
+                    return@forEach
+                }
+            }
+        }
 
     companion object {
         private var instance: AppPrefs? = null

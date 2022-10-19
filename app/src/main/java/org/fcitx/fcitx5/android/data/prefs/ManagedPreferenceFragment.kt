@@ -10,25 +10,25 @@ import org.fcitx.fcitx5.android.ui.common.PaddingPreferenceFragment
 abstract class ManagedPreferenceFragment(private val preferenceProvider: ManagedPreferenceProvider) :
     PaddingPreferenceFragment() {
 
-    private val evaluator =
-        ManagedPreferenceVisibilityEvaluator(preferenceProvider) {
-            lifecycleScope.launch {
-                it.forEach { (key, enable) ->
-                    findPreference<Preference>(key)?.isEnabled = enable
-                }
+    private val evaluator = ManagedPreferenceVisibilityEvaluator(preferenceProvider) {
+        lifecycleScope.launch {
+            it.forEach { (key, enable) ->
+                findPreference<Preference>(key)?.isEnabled = enable
             }
         }
-
-    private fun createUi() {
-        val context = preferenceManager.context
-        val screen = preferenceManager.createPreferenceScreen(context)
-        preferenceProvider.createUi(screen)
-        preferenceScreen = screen
     }
 
     @CallSuper
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         evaluator.evaluateVisibility()
-        createUi()
+        preferenceScreen =
+            preferenceManager.createPreferenceScreen(preferenceManager.context).also { screen ->
+                preferenceProvider.createUi(screen)
+            }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        evaluator.destroy()
     }
 }

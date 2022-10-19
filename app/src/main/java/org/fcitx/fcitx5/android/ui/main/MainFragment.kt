@@ -61,10 +61,10 @@ class MainFragment : PaddingPreferenceFragment() {
         }
         screen.addPreference(androidCategory)
         androidCategory.addPreference(Preference(context).apply {
-            setTitle(R.string.behavior)
+            setTitle(R.string.keyboard)
             setIcon(R.drawable.ic_baseline_keyboard_24)
             setOnPreferenceClickListener {
-                findNavController().navigate(R.id.action_mainFragment_to_behaviorSettingsFragment)
+                findNavController().navigate(R.id.action_mainFragment_to_keyboardSettingsFragment)
                 true
             }
         })
@@ -77,10 +77,18 @@ class MainFragment : PaddingPreferenceFragment() {
             }
         })
         androidCategory.addPreference(Preference(context).apply {
-            setTitle(R.string.developer)
-            setIcon(R.drawable.ic_baseline_developer_mode_24)
+            setTitle(R.string.clipboard)
+            setIcon(R.drawable.ic_clipboard)
             setOnPreferenceClickListener {
-                findNavController().navigate(R.id.action_mainFragment_to_developerFragment)
+                findNavController().navigate(R.id.action_mainFragment_to_clipboardSettingsFragment)
+                true
+            }
+        })
+        androidCategory.addPreference(Preference(context).apply {
+            setTitle(R.string.advanced)
+            setIcon(R.drawable.ic_baseline_more_horiz_24)
+            setOnPreferenceClickListener {
+                findNavController().navigate(R.id.action_mainFragment_to_advancedSettingsFragment)
                 true
             }
         })
