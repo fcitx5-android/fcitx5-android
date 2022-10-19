@@ -14,9 +14,7 @@ class ManagedPreferenceVisibilityEvaluator(
 
     init {
         provider.managedPreferences.forEach { (_, pref) ->
-            pref.registerOnChangeListener(
-                onValueChangeListener
-            )
+            pref.registerOnChangeListener(onValueChangeListener)
         }
     }
 
@@ -32,6 +30,12 @@ class ManagedPreferenceVisibilityEvaluator(
         }
         if (changed.isNotEmpty())
             onVisibilityChanged(changed)
+    }
+
+    fun destroy() {
+        provider.managedPreferences.forEach { (_, pref) ->
+            pref.unregisterOnChangeListener(onValueChangeListener)
+        }
     }
 
 }

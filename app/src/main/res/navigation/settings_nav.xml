@@ -38,8 +38,22 @@
             app:popEnterAnim="@animator/nav_default_pop_enter_anim"
             app:popExitAnim="@animator/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_mainFragment_to_behaviorSettingsFragment"
-            app:destination="@id/behaviorSettingsFragment"
+            android:id="@+id/action_mainFragment_to_keyboardSettingsFragment"
+            app:destination="@id/keyboardSettingsFragment"
+            app:enterAnim="@animator/nav_default_enter_anim"
+            app:exitAnim="@animator/nav_default_exit_anim"
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_mainFragment_to_clipboardSettingsFragment"
+            app:destination="@id/clipboardSettingsFragment"
+            app:enterAnim="@animator/nav_default_enter_anim"
+            app:exitAnim="@animator/nav_default_exit_anim"
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_mainFragment_to_advancedSettingsFragment"
+            app:destination="@id/advancedSettingsFragment"
             app:enterAnim="@animator/nav_default_enter_anim"
             app:exitAnim="@animator/nav_default_exit_anim"
             app:popEnterAnim="@animator/nav_default_pop_enter_anim"
@@ -189,8 +203,14 @@
     </fragment>
 
     <fragment
-        android:id="@+id/behaviorSettingsFragment"
-        android:name="org.fcitx.fcitx5.android.ui.main.settings.behavior.BehaviorSettingsFragment" />
+        android:id="@+id/keyboardSettingsFragment"
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.behavior.KeyboardSettingsFragment" />
+    <fragment
+        android:id="@+id/clipboardSettingsFragment"
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.behavior.ClipboardSettingsFragment" />
+    <fragment
+        android:id="@+id/advancedSettingsFragment"
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.behavior.AdvancedSettingsFragment" />
     <fragment
         android:id="@+id/themeListFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.settings.theme.ThemeListFragment">

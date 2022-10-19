@@ -41,8 +41,8 @@ object AppUtil {
     fun launchMainToGlobalOptions(context: Context) =
         launchMainToDest(context, R.id.globalConfigFragment)
 
-    fun launchMainToBehavior(context: Context) =
-        launchMainToDest(context, R.id.behaviorSettingsFragment)
+    fun launchMainToKeyboard(context: Context) =
+        launchMainToDest(context, R.id.keyboardSettingsFragment)
 
     fun launchMainToInputMethodList(context: Context) =
         launchMainToDest(context, R.id.imListFragment)

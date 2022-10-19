@@ -128,24 +128,36 @@ class MainActivity : AppCompatActivity() {
         add(R.string.save).apply {
             setIcon(R.drawable.ic_baseline_save_24)
             setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
-            viewModel.toolbarSaveButtonOnClickListener.also {
-                isVisible = it.value != null
-                it.observe(this@MainActivity) { listener -> isVisible = listener != null }
+            viewModel.toolbarSaveButtonOnClickListener.apply {
+                observe(this@MainActivity) { listener -> isVisible = listener != null }
+                // fire observer immediately
+                postValue(value)
             }
             setOnMenuItemClickListener {
                 viewModel.toolbarSaveButtonOnClickListener.value?.invoke()
                 true
             }
         }
-        add(R.string.about).apply {
-            viewModel.aboutButton.also {
-                isVisible = it.value ?: true
-                it.observe(this@MainActivity) { enabled -> isVisible = enabled }
+        val aboutMenus = mutableListOf<MenuItem>()
+        add(R.string.developer).apply {
+            aboutMenus.add(this)
+            setOnMenuItemClickListener {
+                navHostFragment.navController.navigate(R.id.action_mainFragment_to_developerFragment)
+                true
             }
+        }
+        add(R.string.about).apply {
+            aboutMenus.add(this)
             setOnMenuItemClickListener {
                 navHostFragment.navController.navigate(R.id.action_mainFragment_to_aboutFragment)
                 true
             }
+        }
+        viewModel.aboutButton.apply {
+            observe(this@MainActivity) { enabled ->
+                aboutMenus.forEach { menu -> menu.isVisible = enabled }
+            }
+            postValue(value)
         }
         true
     }

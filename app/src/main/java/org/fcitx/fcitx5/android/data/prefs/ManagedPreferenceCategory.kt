@@ -2,11 +2,10 @@ package org.fcitx.fcitx5.android.data.prefs
 
 import android.content.SharedPreferences
 import androidx.annotation.StringRes
-import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceScreen
 
 abstract class ManagedPreferenceCategory(
-    @StringRes private val title: Int,
+    @StringRes val title: Int,
     protected val sharedPreferences: SharedPreferences
 ) : ManagedPreferenceProvider() {
 
@@ -98,12 +97,9 @@ abstract class ManagedPreferenceCategory(
     }
 
     override fun createUi(screen: PreferenceScreen) {
-        val category = PreferenceCategory(screen.context)
-        category.isIconSpaceReserved = false
-        category.setTitle(title)
-        screen.addPreference(category)
+        val ctx = screen.context
         managedPreferencesUi.forEach {
-            category.addPreference(it.createUi(screen.context).apply {
+            screen.addPreference(it.createUi(ctx).apply {
                 isEnabled = it.enableUiOn()
             })
         }

@@ -16,7 +16,7 @@ sealed class StatusAreaEntry(
             GlobalOptions, // unused
             InputMethod,
             ReloadConfig,
-            Behavior,
+            Keyboard,
             ThemeList
         }
     }
