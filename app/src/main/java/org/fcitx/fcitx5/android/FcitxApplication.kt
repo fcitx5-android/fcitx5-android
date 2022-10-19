@@ -39,7 +39,7 @@ class FcitxApplication : Application() {
             })
         }
 
-        AppPrefs.init(sharedPrefs, resources)
+        AppPrefs.init(sharedPrefs)
         // record last pid for crash logs
         AppPrefs.getInstance().internal.pid.apply {
             val currentPid = Process.myPid()

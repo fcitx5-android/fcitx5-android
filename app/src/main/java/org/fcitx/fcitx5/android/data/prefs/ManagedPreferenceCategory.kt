@@ -31,12 +31,15 @@ abstract class ManagedPreferenceCategory(
         key: String,
         defaultValue: T,
         codec: ManagedPreference.StringLikeCodec<T>,
-        entries: List<Pair<String, T>>,
+        entryValues: List<T>,
+        @StringRes
+        entryLabels: List<Int>,
         enableUiOn: () -> Boolean = { true },
     ): ManagedPreference.PStringLike<T> {
         val pref = ManagedPreference.PStringLike(sharedPreferences, key, defaultValue, codec)
-        val ui =
-            ManagedPreferenceUi.StringList(title, key, defaultValue, codec, entries, enableUiOn)
+        val ui = ManagedPreferenceUi.StringList(
+            title, key, defaultValue, codec, entryValues, entryLabels, enableUiOn
+        )
         pref.register()
         ui.registerUi()
         return pref

@@ -42,18 +42,20 @@ abstract class ManagedPreferenceUi<T : Preference>(
         key: String,
         val defaultValue: T,
         val codec: ManagedPreference.StringLikeCodec<T>,
-        val entries: List<Pair<String, T>>,
+        val entryValues: List<T>,
+        @StringRes
+        val entryLabels: List<Int>,
         enableUiOn: () -> Boolean = { true },
     ) : ManagedPreferenceUi<ListPreference>(key, enableUiOn) {
         override fun createUi(context: Context): ListPreference = ListPreference(context).apply {
             key = this@StringList.key
             isIconSpaceReserved = false
             isSingleLineTitle = false
-            entryValues = this@StringList.entries.map { codec.encode(it.second) }.toTypedArray()
+            entryValues = this@StringList.entryValues.map { codec.encode(it) }.toTypedArray()
             summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
             setDefaultValue(codec.encode(defaultValue))
             setTitle(this@StringList.title)
-            entries = this@StringList.entries.map { it.first }.toTypedArray()
+            entries = this@StringList.entryLabels.map { context.getString(it) }.toTypedArray()
             setDialogTitle(this@StringList.title)
         }
     }

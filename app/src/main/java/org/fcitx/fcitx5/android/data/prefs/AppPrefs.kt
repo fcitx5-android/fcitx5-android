@@ -1,14 +1,10 @@
 package org.fcitx.fcitx5.android.data.prefs
 
 import android.content.SharedPreferences
-import android.content.res.Resources
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
 
-class AppPrefs(
-    private val sharedPreferences: SharedPreferences,
-    private val resources: Resources
-) {
+class AppPrefs(private val sharedPreferences: SharedPreferences) {
 
     inner class Internal : ManagedPreferenceInternal(sharedPreferences) {
         val firstRun = bool("first_run", true)
@@ -67,17 +63,20 @@ class AppPrefs(
 
         val horizontalCandidateGrowth =
             switch(R.string.horizontal_candidate_growth, "horizontal_candidate_growth", true)
-        val expandedCandidateStyle =
-            list(
-                R.string.expanded_candidate_style,
-                "expanded_candidate_style",
+        val expandedCandidateStyle = list(
+            R.string.expanded_candidate_style,
+            "expanded_candidate_style",
+            ExpandedCandidateStyle.Grid,
+            ExpandedCandidateStyle,
+            listOf(
                 ExpandedCandidateStyle.Grid,
-                ExpandedCandidateStyle,
-                listOf(
-                    resources.getString(R.string.expanded_candidate_style_grid) to ExpandedCandidateStyle.Grid,
-                    resources.getString(R.string.expanded_candidate_style_flexbox) to ExpandedCandidateStyle.Flexbox
-                )
+                ExpandedCandidateStyle.Flexbox
+            ),
+            listOf(
+                R.string.expanded_candidate_style_grid,
+                R.string.expanded_candidate_style_flexbox
             )
+        )
 
         val expandedCandidateGridSpanCount: ManagedPreference.PInt
         val expandedCandidateGridSpanCountLandscape: ManagedPreference.PInt
@@ -152,10 +151,10 @@ class AppPrefs(
         /**
          * MUST call before use
          */
-        fun init(sharedPreferences: SharedPreferences, resources: Resources) {
+        fun init(sharedPreferences: SharedPreferences) {
             if (instance != null)
                 return
-            instance = AppPrefs(sharedPreferences, resources)
+            instance = AppPrefs(sharedPreferences)
             sharedPreferences.registerOnSharedPreferenceChangeListener(getInstance().onSharedPreferenceChangeListener)
         }
 
