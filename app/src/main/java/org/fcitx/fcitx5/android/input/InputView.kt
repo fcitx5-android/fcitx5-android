@@ -125,8 +125,10 @@ class InputView(
         // MUST call before any operation
         setupScope()
 
-        AppPrefs.getInstance().keyboard.keyboardHeightPercent
-            .registerOnChangeListener(onWindowHeightChangeListener)
+        AppPrefs.getInstance().keyboard.apply {
+            keyboardHeightPercent.registerOnChangeListener(onWindowHeightChangeListener)
+            keyboardHeightPercentLandscape.registerOnChangeListener(onWindowHeightChangeListener)
+        }
 
         windowManager.addEssentialWindow(pickerWindow)
 
@@ -215,8 +217,10 @@ class InputView(
     }
 
     override fun onDetachedFromWindow() {
-        AppPrefs.getInstance().keyboard.keyboardHeightPercent
-            .unregisterOnChangeListener(onWindowHeightChangeListener)
+        AppPrefs.getInstance().keyboard.apply {
+            keyboardHeightPercent.unregisterOnChangeListener(onWindowHeightChangeListener)
+            keyboardHeightPercentLandscape.unregisterOnChangeListener(onWindowHeightChangeListener)
+        }
         ViewCompat.setOnApplyWindowInsetsListener(this, null)
         super.onDetachedFromWindow()
     }

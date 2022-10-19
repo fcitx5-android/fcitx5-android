@@ -16,7 +16,7 @@ class GridExpandedCandidateWindow :
     private val gridSpanCount by lazy {
         AppPrefs.getInstance().keyboard.run {
             if (context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-                expandedCandidateGridSpanCountPortrait
+                expandedCandidateGridSpanCount
             else
                 expandedCandidateGridSpanCountLandscape
         }.getValue()

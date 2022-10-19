@@ -57,7 +57,6 @@
     <string name="delete">刪除</string>
     <string name="clipboard">剪貼簿</string>
     <string name="keyboard_height">鍵盤高度</string>
-    <string name="keyboard_height_landscape">鍵盤高度（橫向）</string>
     <string name="keyboard">鍵盤</string>
     <string name="version">版本</string>
     <string name="build_time">建構時間</string>
@@ -68,8 +67,7 @@
     <string name="open_source_licenses">開放原始碼授權條款</string>
     <string name="licenses_of_third_party_libraries">第三方函式庫的授權條款</string>
     <string name="github_repo">GitHub 倉庫</string>
-    <string name="expanded_candidate_grid_span_count_landscape">網格樣式展開候選詞列數（橫向畫面）</string>
-    <string name="expanded_candidate_grid_span_count_portrait">網格樣式展開候選詞列數（縱向畫面）</string>
+    <string name="expanded_candidate_grid_span_count">網格樣式展開候選詞列數</string>
     <string name="no_config_options">目前沒有可用的設定選項</string>
     <string name="unimplemented_type">⛔ 未實作類型</string>
     <string name="select">選取</string>

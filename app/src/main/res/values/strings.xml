@@ -58,7 +58,6 @@
     <string name="delete">Delete</string>
     <string name="clipboard">Clipboard</string>
     <string name="keyboard_height">Keyboard height</string>
-    <string name="keyboard_height_landscape">Keyboard height (Landscape)</string>
     <string name="keyboard">Keyboard</string>
     <string name="clipboard_suggestion_timeout">Clipboard suggestion timeout</string>
     <string name="version">Version</string>
@@ -70,8 +69,7 @@
     <string name="open_source_licenses">Open source licenses</string>
     <string name="licenses_of_third_party_libraries">Licenses of third-party libraries</string>
     <string name="github_repo">GitHub repository</string>
-    <string name="expanded_candidate_grid_span_count_landscape">Grid style expanded candidate span count (Landscape)</string>
-    <string name="expanded_candidate_grid_span_count_portrait">Grid style expanded candidate span count (Portrait)</string>
+    <string name="expanded_candidate_grid_span_count">Grid style expanded candidate span count</string>
     <string name="no_config_options">Currently no configuration options are available</string>
     <string name="unimplemented_type">⛔ Unimplemented type</string>
     <string name="select">Select</string>
@@ -152,4 +150,6 @@
     <string name="edit_clipboard">Edit clipboard</string>
     <string name="clipboard_edit_text_hint">Clipboard content</string>
     <string name="config_addon_not_loaded">No configuration options available, maybe this addon is disabled when fcitx start?</string>
+    <string name="portrait">Portrait</string>
+    <string name="landscape">Landscape</string>
 </resources>

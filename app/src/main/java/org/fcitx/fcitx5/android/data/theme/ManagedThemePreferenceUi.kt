@@ -13,8 +13,7 @@ class ManagedThemePreferenceUi(
     @StringRes
     val summary: Int? = null,
     enableUiOn: () -> Boolean = { true },
-) :
-    ManagedPreferenceUi<ThemeSelectPreference>(setOf(key), enableUiOn) {
+) : ManagedPreferenceUi<ThemeSelectPreference>(key, enableUiOn) {
     override fun createUi(context: Context): ThemeSelectPreference =
         ThemeSelectPreference(context, defaultValue).apply {
             key = this@ManagedThemePreferenceUi.key

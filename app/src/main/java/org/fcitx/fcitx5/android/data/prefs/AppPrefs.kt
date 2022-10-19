@@ -60,36 +60,49 @@ class AppPrefs(
                     resources.getString(R.string.expanded_candidate_style_flexbox) to ExpandedCandidateStyle.Flexbox
                 )
             )
-        val keyboardHeightPercent =
-            int(R.string.keyboard_height, "keyboard_height_percent", 30, 10, 90, "%")
-        val keyboardHeightPercentLandscape =
-            int(
-                R.string.keyboard_height_landscape,
+
+        val keyboardHeightPercent: ManagedPreference.PInt
+        val keyboardHeightPercentLandscape: ManagedPreference.PInt
+
+        init {
+            val (primary, secondary) = twinInt(
+                R.string.keyboard_height,
+                R.string.portrait,
+                "keyboard_height_percent",
+                30,
+                R.string.landscape,
                 "keyboard_height_percent_landscape",
                 49,
                 10,
                 90,
                 "%"
             )
-        val expandToolbarByDefault = switch(
-            R.string.expand_toolbar_by_default,
-            "expand_toolbar_by_default",
-            false
-        )
-        val expandedCandidateGridSpanCountPortrait = int(
-            R.string.expanded_candidate_grid_span_count_portrait,
-            "expanded_candidate_grid_span_count_portrait",
-            6,
-            4,
-            10
-        )
-        val expandedCandidateGridSpanCountLandscape = int(
-            R.string.expanded_candidate_grid_span_count_landscape,
-            "expanded_candidate_grid_span_count_landscape",
-            8,
-            6,
-            12
-        )
+            keyboardHeightPercent = primary
+            keyboardHeightPercentLandscape = secondary
+        }
+
+        val expandToolbarByDefault =
+            switch(R.string.expand_toolbar_by_default, "expand_toolbar_by_default", false)
+
+        val expandedCandidateGridSpanCount: ManagedPreference.PInt
+        val expandedCandidateGridSpanCountLandscape: ManagedPreference.PInt
+
+        init {
+            val (primary, secondary) = twinInt(
+                R.string.expanded_candidate_grid_span_count,
+                R.string.portrait,
+                "expanded_candidate_grid_span_count_portrait",
+                6,
+                R.string.landscape,
+                "expanded_candidate_grid_span_count_landscape",
+                8,
+                4,
+                12,
+            ) { expandedCandidateStyle.getValue() == ExpandedCandidateStyle.Grid }
+            expandedCandidateGridSpanCount = primary
+            expandedCandidateGridSpanCountLandscape = secondary
+        }
+
         val longPressDelay = int(
             R.string.keyboard_long_press_delay,
             "keyboard_long_press_delay",

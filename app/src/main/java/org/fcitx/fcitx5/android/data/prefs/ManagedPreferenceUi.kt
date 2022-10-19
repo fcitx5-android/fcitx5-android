@@ -6,14 +6,12 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.SwitchPreference
 import org.fcitx.fcitx5.android.ui.main.settings.DialogSeekBarPreference
+import org.fcitx.fcitx5.android.ui.main.settings.TwinSeekBarPreference
 
 abstract class ManagedPreferenceUi<T : Preference>(
-    // not related to enableUiOn, unused for now
-    dependingKeys: Set<String>,
+    val key: String,
     val enableUiOn: () -> Boolean
 ) {
-
-    val key = dependingKeys.joinToString("+")
 
     abstract fun createUi(context: Context): T
 
@@ -25,9 +23,7 @@ abstract class ManagedPreferenceUi<T : Preference>(
         @StringRes
         val summary: Int? = null,
         enableUiOn: () -> Boolean = { true }
-    ) : ManagedPreferenceUi<SwitchPreference>(
-        setOf(key), enableUiOn
-    ) {
+    ) : ManagedPreferenceUi<SwitchPreference>(key, enableUiOn) {
         override fun createUi(context: Context): SwitchPreference =
             SwitchPreference(context).apply {
                 key = this@Switch.key
@@ -48,7 +44,7 @@ abstract class ManagedPreferenceUi<T : Preference>(
         val codec: ManagedPreference.StringLikeCodec<T>,
         val entries: List<Pair<String, T>>,
         enableUiOn: () -> Boolean = { true },
-    ) : ManagedPreferenceUi<ListPreference>(setOf(key), enableUiOn) {
+    ) : ManagedPreferenceUi<ListPreference>(key, enableUiOn) {
         override fun createUi(context: Context): ListPreference = ListPreference(context).apply {
             key = this@StringList.key
             isIconSpaceReserved = false
@@ -71,7 +67,7 @@ abstract class ManagedPreferenceUi<T : Preference>(
         val max: Int,
         val unit: String = "",
         enableUiOn: () -> Boolean = { true },
-    ) : ManagedPreferenceUi<DialogSeekBarPreference>(setOf(key), enableUiOn) {
+    ) : ManagedPreferenceUi<DialogSeekBarPreference>(key, enableUiOn) {
         override fun createUi(context: Context): DialogSeekBarPreference =
             DialogSeekBarPreference(context).apply {
                 key = this@SeekBarInt.key
@@ -85,5 +81,38 @@ abstract class ManagedPreferenceUi<T : Preference>(
                 unit = this@SeekBarInt.unit
             }
 
+    }
+
+    class TwinSeekBarInt(
+        @StringRes
+        val title: Int,
+        @StringRes
+        val label: Int,
+        key: String,
+        val defaultValue: Int,
+        @StringRes
+        val secondaryLabel: Int,
+        val secondaryKey: String,
+        val secondaryDefaultValue: Int,
+        val min: Int,
+        val max: Int,
+        val unit: String = "",
+        enableUiOn: () -> Boolean = { true },
+    ) : ManagedPreferenceUi<TwinSeekBarPreference>(key, enableUiOn) {
+        override fun createUi(context: Context): TwinSeekBarPreference =
+            TwinSeekBarPreference(context).apply {
+                setTitle(this@TwinSeekBarInt.title)
+                label = context.getString(this@TwinSeekBarInt.label)
+                key = this@TwinSeekBarInt.key
+                secondaryLabel = context.getString(this@TwinSeekBarInt.secondaryLabel)
+                secondaryKey = this@TwinSeekBarInt.secondaryKey
+                setDefaultValue(this@TwinSeekBarInt.defaultValue to this@TwinSeekBarInt.secondaryDefaultValue)
+                min = this@TwinSeekBarInt.min
+                max = this@TwinSeekBarInt.max
+                unit = this@TwinSeekBarInt.unit
+                isIconSpaceReserved = false
+                isSingleLineTitle = false
+                summaryProvider = TwinSeekBarPreference.SimpleSummaryProvider
+            }
     }
 }

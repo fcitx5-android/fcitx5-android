@@ -66,8 +66,7 @@
     <string name="open_source_licenses">オープンソースライセンス</string>
     <string name="licenses_of_third_party_libraries">サードパーティライブラリのライセンス</string>
     <string name="github_repo">GitHub リポジトリ</string>
-    <string name="expanded_candidate_grid_span_count_landscape">グリッドスタイル拡張候補スパン数（横）</string>
-    <string name="expanded_candidate_grid_span_count_portrait">グリッドスタイル拡張候補スパン数（縦）</string>
+    <string name="expanded_candidate_grid_span_count">グリッドスタイル拡張候補スパン数</string>
     <string name="no_config_options">現在、利用可能な設定オプションはありません</string>
     <string name="unimplemented_type">⛔ 未実装タイプ</string>
     <string name="select">選択</string>
