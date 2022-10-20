@@ -117,12 +117,10 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
     private val providers = mutableListOf<ManagedPreferenceProvider>()
 
     fun <T : ManagedPreferenceProvider> registerProvider(
-        includeUi: Boolean = true,
         providerF: (SharedPreferences) -> T
     ): T {
         val provider = providerF(sharedPreferences)
-        if (includeUi)
-            providers.add(provider)
+        providers.add(provider)
         return provider
     }
 
@@ -140,7 +138,6 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             providers.forEach {
                 it.managedPreferences[key]?.apply {
                     fireChange()
-                    return@forEach
                 }
             }
         }
