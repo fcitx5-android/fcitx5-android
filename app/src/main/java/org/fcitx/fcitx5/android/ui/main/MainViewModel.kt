@@ -15,7 +15,7 @@ class MainViewModel : ViewModel() {
 
     val toolbarSaveButtonOnClickListener = MutableLiveData<(() -> Unit)?>()
 
-    val aboutButton = MutableLiveData<Boolean>()
+    val aboutButton = MutableLiveData(false)
 
     val fcitx: FcitxConnection = FcitxDaemon.connect(javaClass.name)
 

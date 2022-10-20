@@ -130,8 +130,7 @@ class MainActivity : AppCompatActivity() {
             setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
             viewModel.toolbarSaveButtonOnClickListener.apply {
                 observe(this@MainActivity) { listener -> isVisible = listener != null }
-                // fire observer immediately
-                postValue(value)
+                setValue(value)
             }
             setOnMenuItemClickListener {
                 viewModel.toolbarSaveButtonOnClickListener.value?.invoke()
@@ -157,7 +156,7 @@ class MainActivity : AppCompatActivity() {
             observe(this@MainActivity) { enabled ->
                 aboutMenus.forEach { menu -> menu.isVisible = enabled }
             }
-            postValue(value)
+            setValue(value)
         }
         true
     }
