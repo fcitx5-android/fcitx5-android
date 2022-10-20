@@ -307,7 +307,7 @@ object ThemeManager {
 
     private val defaultTheme = ThemePreset.PixelDark
 
-    val prefs = AppPrefs.getInstance().registerProvider(false, ::Prefs)
+    val prefs = AppPrefs.getInstance().registerProvider(::Prefs)
 
     private val internalPrefs = AppPrefs.getInstance().registerProvider(providerF = ::InternalPrefs)
 
