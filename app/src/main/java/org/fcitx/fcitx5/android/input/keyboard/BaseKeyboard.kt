@@ -254,7 +254,7 @@ abstract class BaseKeyboard(
         preedit: FcitxEvent.PreeditEvent.Data
         // aux: FcitxEvent.InputPanelAuxEvent.Data
     ) {
-        val hasPreedit = preedit.preedit.isNotEmpty()
+        val hasPreedit = preedit.preedit.isNotEmpty() || preedit.clientPreedit.isNotEmpty()
         // `auxUp` is not empty when switching input methods, ignore it to reduce flicker
         //        || aux.auxUp.isNotEmpty()
         `return`.img.imageResource = if (hasPreedit) {
