@@ -38,9 +38,6 @@ object AppUtil {
             .send()
     }
 
-    fun launchMainToGlobalOptions(context: Context) =
-        launchMainToDest(context, R.id.globalConfigFragment)
-
     fun launchMainToKeyboard(context: Context) =
         launchMainToDest(context, R.id.keyboardSettingsFragment)
 

@@ -1,5 +1,7 @@
 package org.fcitx.fcitx5.android.input.status
 
+import android.view.View
+import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import org.fcitx.fcitx5.android.R
@@ -57,29 +59,45 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
         )
     }
 
+    private fun activateAction(action: Action) {
+        service.lifecycleScope.launchOnFcitxReady(fcitx) { f ->
+            f.activateAction(action.id)
+        }
+    }
+
     private val adapter: StatusAreaAdapter by lazy {
         object : StatusAreaAdapter() {
-            override fun onItemClick(it: StatusAreaEntry) {
-                service.lifecycleScope.launchOnFcitxReady(fcitx) { f ->
-                    when (it) {
-                        is StatusAreaEntry.Fcitx -> f.activateAction(it.action.id)
-                        is StatusAreaEntry.Android -> when (it.type) {
-                            GlobalOptions -> AppUtil.launchMainToGlobalOptions(context)
-                            InputMethod -> f.currentIme().let {
-                                AppUtil.launchMainToInputMethodConfig(
-                                    context,
-                                    it.uniqueName,
-                                    it.displayName
-                                )
+            override fun onItemClick(view: View, entry: StatusAreaEntry) {
+                when (entry) {
+                    is StatusAreaEntry.Fcitx -> {
+                        val menu = entry.action.menu
+                        if (menu != null && menu.isNotEmpty()) {
+                            val popup = PopupMenu(context, view)
+                            menu.forEach { action ->
+                                popup.menu.add(action.shortText).apply {
+                                    setOnMenuItemClickListener {
+                                        activateAction(action)
+                                        true
+                                    }
+                                }
                             }
-                            ReloadConfig -> {
-                                f.reloadConfig()
-                                Toast.makeText(service, R.string.done, Toast.LENGTH_SHORT)
-                                    .show()
-                            }
-                            Keyboard -> AppUtil.launchMainToKeyboard(context)
-                            ThemeList -> AppUtil.launchMainToThemeList(context)
+                            popup.show()
+                        } else {
+                            activateAction(entry.action)
                         }
+                    }
+                    is StatusAreaEntry.Android -> when (entry.type) {
+                        InputMethod -> fcitx.runImmediately { inputMethodEntryCached }.let {
+                            AppUtil.launchMainToInputMethodConfig(
+                                context, it.uniqueName, it.displayName
+                            )
+                        }
+                        ReloadConfig -> service.lifecycleScope.launchOnFcitxReady(fcitx) { f ->
+                            f.reloadConfig()
+                            Toast.makeText(service, R.string.done, Toast.LENGTH_SHORT).show()
+                        }
+                        Keyboard -> AppUtil.launchMainToKeyboard(context)
+                        ThemeList -> AppUtil.launchMainToThemeList(context)
                     }
                 }
             }

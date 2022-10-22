@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.input.status
 
 import android.annotation.SuppressLint
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.data.theme.Theme
@@ -16,21 +17,20 @@ abstract class StatusAreaAdapter : RecyclerView.Adapter<StatusAreaAdapter.Holder
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
-        return Holder(StatusAreaEntryUi(parent.context,theme))
+        return Holder(StatusAreaEntryUi(parent.context, theme))
     }
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
-        entries[position].let {
-            holder.ui.setEntry(it)
-            holder.ui.root.setOnClickListener { _ ->
-                onItemClick(it)
-            }
+        val entry = entries[position]
+        holder.ui.setEntry(entry)
+        holder.ui.root.setOnClickListener {
+            onItemClick(it, entry)
         }
     }
 
-    abstract val theme:Theme
+    abstract val theme: Theme
 
     override fun getItemCount() = entries.size
 
-    abstract fun onItemClick(it: StatusAreaEntry)
+    abstract fun onItemClick(view: View, entry: StatusAreaEntry)
 }

@@ -13,7 +13,6 @@ sealed class StatusAreaEntry(
     class Android(label: String, icon: Int, val type: Type) :
         StatusAreaEntry(label, icon, false) {
         enum class Type {
-            GlobalOptions, // unused
             InputMethod,
             ReloadConfig,
             Keyboard,
@@ -25,7 +24,9 @@ sealed class StatusAreaEntry(
         StatusAreaEntry(label, icon, active)
 
     companion object {
-        private fun drawableRes(icon: String) = when (icon) {
+        private fun Action.isActive() = icon.endsWith("-active") || isChecked
+
+        private fun drawableRes(icon: String, active: Boolean = false) = when (icon) {
             "fcitx-chttrans-active" -> R.drawable.ic_fcitx_status_chttrans_trad
             "fcitx-chttrans-inactive" -> R.drawable.ic_fcitx_status_chttrans_simp
             "fcitx-punc-active" -> R.drawable.ic_fcitx_status_punc_active
@@ -34,13 +35,12 @@ sealed class StatusAreaEntry(
             "fcitx-fullwidth-inactive" -> R.drawable.ic_fcitx_status_fullwidth_inactive
             "fcitx-remind-active" -> R.drawable.ic_fcitx_status_prediction_active
             "fcitx-remind-inactive" -> R.drawable.ic_fcitx_status_prediction_inactive
-            else -> when {
-                icon.endsWith("-active") -> R.drawable.ic_baseline_code_24
-                else -> R.drawable.ic_baseline_code_off_24
-            }
+            else -> if (active) R.drawable.ic_baseline_code_24 else R.drawable.ic_baseline_code_off_24
         }
 
-        fun fromAction(it: Action) =
-            Fcitx(it, it.shortText, drawableRes(it.icon), it.icon.endsWith("-active"))
+        fun fromAction(it: Action): Fcitx {
+            val active = it.isActive()
+            return Fcitx(it, it.shortText, drawableRes(it.icon, active), active)
+        }
     }
 }
