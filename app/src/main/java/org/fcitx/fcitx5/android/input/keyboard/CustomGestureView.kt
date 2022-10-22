@@ -7,6 +7,7 @@ import android.os.SystemClock
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.widget.FrameLayout
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -81,6 +82,8 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
     var onRepeatListener: ((View) -> Unit)? = null
     var onGestureListener: OnGestureListener? = null
 
+    private val touchSlop: Float = ViewConfiguration.get(ctx).scaledTouchSlop.toFloat()
+
     init {
         isSoundEffectsEnabled = systemTouchSounds
     }
@@ -99,7 +102,10 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
     }
 
     private fun pointInView(x: Float, y: Float): Boolean {
-        return 0f < x && 0f < y && x < width && y < height
+        return -touchSlop <= x &&
+                -touchSlop <= y &&
+                x < (width + touchSlop) &&
+                y < (height + touchSlop)
     }
 
     private fun resetState() {
