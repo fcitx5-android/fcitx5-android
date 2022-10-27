@@ -1,13 +1,15 @@
 package org.fcitx.fcitx5.android.ui.main
 
+import android.app.Activity
 import android.content.ClipData
 import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.databinding.ActivityClipboardEditBinding
@@ -15,7 +17,9 @@ import org.fcitx.fcitx5.android.utils.str
 import splitties.systemservices.clipboardManager
 import splitties.systemservices.inputMethodManager
 
-class ClipboardEditActivity : AppCompatActivity() {
+class ClipboardEditActivity : Activity() {
+
+    private val scope: CoroutineScope = MainScope()
 
     private lateinit var editText: EditText
 
@@ -50,7 +54,7 @@ class ClipboardEditActivity : AppCompatActivity() {
     }
 
     private fun updateClipEntry(entryId: Int, text: String) {
-        if (entryId > 0) lifecycleScope.launch {
+        if (entryId > 0) scope.launch {
             ClipboardManager.updateText(entryId, text)
         }
     }
@@ -62,7 +66,7 @@ class ClipboardEditActivity : AppCompatActivity() {
 
     private fun processIntent(intent: Intent) {
         intent.extras?.getInt(ENTRY_ID)?.let { id ->
-            lifecycleScope.launch {
+            scope.launch {
                 ClipboardManager.get(id)?.let { entry ->
                     entryId = entry.id
                     editText.setText(entry.text)
@@ -74,6 +78,11 @@ class ClipboardEditActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         finish()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel()
     }
 
     companion object {

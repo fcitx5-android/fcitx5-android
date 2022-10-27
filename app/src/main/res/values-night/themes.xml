@@ -17,8 +17,5 @@
 
     <style name="Theme.InputViewTheme" parent="Theme.AppCompat.DayNight.NoActionBar" />
 
-    <style name="Theme.DialogTheme" parent="Theme.AppCompat.DayNight.Dialog.Alert">
-        <item name="windowNoTitle">true</item>
-        <item name="windowActionBar">false</item>
-    </style>
+    <style name="Theme.DialogTheme" parent="@android:style/Theme.DeviceDefault.Dialog" />
 </resources>

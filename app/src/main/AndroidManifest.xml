@@ -67,6 +67,7 @@
             android:name=".ui.main.ClipboardEditActivity"
             android:autoRemoveFromRecents="true"
             android:excludeFromRecents="true"
+            android:label="@string/edit_clipboard"
             android:launchMode="singleInstance"
             android:taskAffinity=".ui.main.ClipboardEditActivity"
             android:theme="@style/Theme.DialogTheme"
