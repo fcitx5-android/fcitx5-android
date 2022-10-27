@@ -5,7 +5,6 @@ import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import splitties.resources.dimenPxSize
 import splitties.resources.styledDimenPxSize
 import kotlin.math.max
 
@@ -28,8 +27,8 @@ class SingleDividerDecoration(val drawable: Drawable, val index: Int) : Recycler
     }
 
     override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
-        val l = parent.dimenPxSize(androidx.appcompat.R.dimen.abc_select_dialog_padding_start_material)
-        val r = parent.styledDimenPxSize(androidx.appcompat.R.attr.dialogPreferredPadding)
+        val l = parent.styledDimenPxSize(android.R.attr.listPreferredItemPaddingStart)
+        val r = parent.styledDimenPxSize(android.R.attr.listPreferredItemPaddingEnd)
         val view = parent.getChildAt(index) ?: return
         drawable.apply {
             setBounds(view.left + l, view.top - dividerHeight, view.right - r, view.top)

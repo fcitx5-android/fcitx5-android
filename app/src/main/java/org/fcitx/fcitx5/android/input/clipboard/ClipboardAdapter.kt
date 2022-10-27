@@ -1,9 +1,13 @@
 package org.fcitx.fcitx5.android.input.clipboard
 
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
@@ -12,6 +16,8 @@ import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardEntry
 import org.fcitx.fcitx5.android.data.theme.Theme
+import splitties.resources.drawable
+import splitties.resources.styledColor
 import kotlin.collections.set
 
 abstract class ClipboardAdapter :
@@ -32,7 +38,6 @@ abstract class ClipboardAdapter :
     inner class ViewHolder(val entryUi: ClipboardEntryUi) :
         RecyclerView.ViewHolder(entryUi.root)
 
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(ClipboardEntryUi(parent.context, theme))
 
@@ -45,52 +50,37 @@ abstract class ClipboardAdapter :
                 onPaste(entry.id)
             }
             root.setOnLongClickListener {
-                val menu = PopupMenu(root.context, root)
+                val iconColor = ctx.styledColor(android.R.attr.colorControlNormal)
+                val iconColorFilter = PorterDuffColorFilter(iconColor, PorterDuff.Mode.SRC_IN)
+                val popup = PopupMenu(root.context, root)
                 val scope = root.findViewTreeLifecycleOwner()!!.lifecycleScope
-                menu.menu.apply {
-                    if (entry.pinned) add(R.string.unpin).apply {
-                        setIcon(R.drawable.ic_outline_push_pin_24)
+                fun menuItem(@StringRes title: Int, @DrawableRes ic: Int, cb: suspend () -> Unit) {
+                    popup.menu.add(title).apply {
+                        icon = ctx.drawable(ic)?.apply { colorFilter = iconColorFilter }
                         setOnMenuItemClickListener {
-                            scope.launch {
-                                onUnpin(entry.id)
-                                setPinStatus(entry.id, false)
-                            }
-                            true
-                        }
-                    } else add(R.string.pin).apply {
-                        setIcon(R.drawable.ic_baseline_push_pin_24)
-                        setOnMenuItemClickListener {
-                            scope.launch {
-                                onPin(entry.id)
-                                setPinStatus(entry.id, true)
-                            }
+                            scope.launch { cb() }
                             true
                         }
                     }
-                    add(R.string.edit).apply {
-                        setIcon(R.drawable.ic_baseline_edit_24)
-                        setOnMenuItemClickListener {
-                            scope.launch {
-                                onEdit(entry.id)
-                            }
-                            true
-                        }
-                    }
-                    add(R.string.delete).apply {
-                        setIcon(R.drawable.ic_baseline_delete_24)
-                        setOnMenuItemClickListener {
-                            scope.launch {
-                                onDelete(entry.id)
-                                delete(entry.id)
-                            }
-                            true
-                        }
-                    }
+                }
+                if (entry.pinned) menuItem(R.string.unpin, R.drawable.ic_outline_push_pin_24) {
+                    onUnpin(entry.id)
+                    setPinStatus(entry.id, false)
+                } else menuItem(R.string.pin, R.drawable.ic_baseline_push_pin_24) {
+                    onPin(entry.id)
+                    setPinStatus(entry.id, true)
+                }
+                menuItem(R.string.edit, R.drawable.ic_baseline_edit_24) {
+                    onEdit(entry.id)
+                }
+                menuItem(R.string.delete, R.drawable.ic_baseline_delete_24) {
+                    onDelete(entry.id)
+                    delete(entry.id)
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    menu.setForceShowIcon(true)
+                    popup.setForceShowIcon(true)
                 }
-                menu.show()
+                popup.show()
                 true
             }
         }

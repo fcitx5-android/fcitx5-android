@@ -34,6 +34,7 @@ import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
 import org.fcitx.fcitx5.android.input.punctuation.PunctuationComponent
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
+import org.fcitx.fcitx5.android.utils.styledFloat
 import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.wrapToUniqueComponent
 import org.mechdancer.dependency.plusAssign
@@ -61,10 +62,8 @@ class InputView(
 
     private val bottomPaddingSpace = view(::Space)
 
-    private val eventHandlerJob =
-        fcitx.runImmediately {
-            eventFlow.onEach(::handleFcitxEvent).launchIn(service.lifecycleScope)
-        }
+    private val eventHandlerJob = fcitx.runImmediately { eventFlow }
+        .onEach(::handleFcitxEvent).launchIn(service.lifecycleScope)
 
     private val scope = DynamicScope()
     private val themedContext = context.withTheme(R.style.Theme_InputViewTheme)
@@ -160,9 +159,7 @@ class InputView(
 
         windowManager.addEssentialWindow(pickerWindow)
 
-        fcitx.runImmediately {
-            broadcaster.onImeUpdate(inputMethodEntryCached)
-        }
+        broadcaster.onImeUpdate(fcitx.runImmediately { inputMethodEntryCached })
 
         service.window.window!!.also {
             when (navbarBackground) {
@@ -323,7 +320,11 @@ class InputView(
             token = windowToken
             type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
         }
-        window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
+        window.addFlags(
+            WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM or
+                    WindowManager.LayoutParams.FLAG_DIM_BEHIND
+        )
+        window.setDimAmount(themedContext.styledFloat(android.R.attr.backgroundDimAmount))
         showingDialog = dialog.apply {
             setOnDismissListener { this@InputView.showingDialog = null }
             show()

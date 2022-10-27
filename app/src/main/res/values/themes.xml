@@ -15,7 +15,7 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
     </style>
 
-    <style name="Theme.InputViewTheme" parent="Theme.AppCompat.Light.NoActionBar" />
+    <style name="Theme.InputViewTheme" parent="@android:style/Theme.DeviceDefault.Settings" />
 
     <style name="Theme.DialogTheme" parent="@android:style/Theme.DeviceDefault.Light.Dialog" />
 </resources>
