@@ -251,7 +251,7 @@ dependencies {
     val arrowVersion = "1.1.3"
     implementation("io.arrow-kt:arrow-core:$arrowVersion")
     implementation("androidx.activity:activity-ktx:1.6.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     implementation("com.github.CanHub:Android-Image-Cropper:4.2.1")
     implementation("cat.ereza:customactivityoncrash:2.4.0")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
@@ -273,7 +273,7 @@ dependencies {
     implementation("androidx.preference:preference-ktx:1.2.0")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("androidx.viewpager2:viewpager2:1.0.0")
-    val navVersion = "2.5.2"
+    val navVersion = "2.5.3"
     implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
     implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
     val splittiesVersion = "3.0.0"
