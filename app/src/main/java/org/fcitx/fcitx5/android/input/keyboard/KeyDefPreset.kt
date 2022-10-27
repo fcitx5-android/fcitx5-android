@@ -26,7 +26,7 @@ class SymbolKey(
         variant = variant
     ),
     setOf(
-        Behavior.Press(action = KeyAction.FcitxKeyAction(symbol))
+        Behavior.Press(KeyAction.FcitxKeyAction(symbol))
     ),
     popup ?: arrayOf(
         Popup.Preview(symbol),
@@ -98,9 +98,9 @@ class CapsKey : KeyDef(
         variant = Variant.Alternative
     ),
     setOf(
-        Behavior.Press(action = KeyAction.CapsAction(false)),
-        Behavior.LongPress(action = KeyAction.CapsAction(true)),
-        Behavior.DoubleTap(action = KeyAction.CapsAction(true))
+        Behavior.Press(KeyAction.CapsAction(false)),
+        Behavior.LongPress(KeyAction.CapsAction(true)),
+        Behavior.DoubleTap(KeyAction.CapsAction(true))
     )
 )
 
@@ -118,7 +118,7 @@ class LayoutSwitchKey(
         variant = variant
     ),
     setOf(
-        Behavior.Press(action = KeyAction.LayoutSwitchAction(to))
+        Behavior.Press(KeyAction.LayoutSwitchAction(to))
     )
 )
 
@@ -133,8 +133,8 @@ class BackspaceKey(
         viewId = R.id.button_backspace
     ),
     setOf(
-        Behavior.Press(action = KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_BackSpace))),
-        Behavior.Repeat(action = KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_BackSpace)))
+        Behavior.Press(KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_BackSpace))),
+        Behavior.Repeat(KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_BackSpace)))
     )
 )
 
@@ -186,7 +186,7 @@ class ReturnKey(percentWidth: Float = 0.15f) : KeyDef(
         viewId = R.id.button_return
     ),
     setOf(
-        Behavior.Press(action = KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_Return)))
+        Behavior.Press(KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_Return)))
     )
 )
 
@@ -205,7 +205,7 @@ class ImageLayoutSwitchKey(
         viewId = viewId
     ),
     setOf(
-        Behavior.Press(action = KeyAction.LayoutSwitchAction(to))
+        Behavior.Press(KeyAction.LayoutSwitchAction(to))
     )
 )
 
@@ -217,7 +217,7 @@ class MiniSpaceKey : KeyDef(
         viewId = R.id.button_mini_space
     ),
     setOf(
-        Behavior.Press(action = KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_space)))
+        Behavior.Press(KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_space)))
     )
 )
 
@@ -236,6 +236,6 @@ class NumPadKey(
         variant = variant
     ),
     setOf(
-        Behavior.Press(action = KeyAction.SymAction(KeySym(sym), NumLockState))
+        Behavior.Press(KeyAction.SymAction(KeySym(sym), NumLockState))
     )
 )

@@ -16,11 +16,12 @@ import timber.log.Timber
 class FcitxApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        CaocConfig.Builder
-            .create()
-            .errorActivity(LogActivity::class.java)
-            .enabled(!BuildConfig.DEBUG)
-            .apply()
+        if (!BuildConfig.DEBUG) {
+            CaocConfig.Builder
+                .create()
+                .errorActivity(LogActivity::class.java)
+                .apply()
+        }
         instance = this
         // we don't have AppPrefs available yet
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
@@ -33,7 +34,7 @@ class FcitxApplication : Application() {
         } else {
             Timber.plant(object : Timber.Tree() {
                 override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-                    if (priority == Log.VERBOSE || priority == Log.DEBUG) return
+                    if (priority < Log.INFO) return
                     Log.println(priority, "[${Thread.currentThread().name}]", message)
                 }
             })
