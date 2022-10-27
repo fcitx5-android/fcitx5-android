@@ -10,10 +10,7 @@ import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.Space
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updateLayoutParams
+import androidx.core.view.*
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -103,20 +100,52 @@ class InputView(
         broadcaster.onScopeSetupFinished(scope)
     }
 
-    private val windowHeightPercent: Int by AppPrefs.getInstance().keyboard.keyboardHeightPercent
-    private val windowHeightPercentLandscape: Int by AppPrefs.getInstance().keyboard.keyboardHeightPercentLandscape
+    private val keyboardPrefs = AppPrefs.getInstance().keyboard
+    private val keyboardHeightPercent = keyboardPrefs.keyboardHeightPercent
+    private val keyboardHeightPercentLandscape = keyboardPrefs.keyboardHeightPercentLandscape
+    private val keyboardSidePadding = keyboardPrefs.keyboardSidePadding
+    private val keyboardSidePaddingLandscape = keyboardPrefs.keyboardSidePaddingLandscape
+    private val keyboardBottomPadding = keyboardPrefs.keyboardBottomPadding
+    private val keyboardBottomPaddingLandscape = keyboardPrefs.keyboardBottomPaddingLandscape
 
-    private val windowHeightPx: Int
+    private val keyboardSizePrefs = listOf(
+        keyboardHeightPercent,
+        keyboardHeightPercentLandscape,
+        keyboardSidePadding,
+        keyboardSidePaddingLandscape,
+        keyboardBottomPadding,
+        keyboardBottomPaddingLandscape,
+    )
+
+    private val keyboardHeightPx: Int
         get() {
             val percent = when (resources.configuration.orientation) {
-                Configuration.ORIENTATION_LANDSCAPE -> windowHeightPercentLandscape
-                else -> windowHeightPercent
-            }
+                Configuration.ORIENTATION_LANDSCAPE -> keyboardHeightPercentLandscape
+                else -> keyboardHeightPercent
+            }.getValue()
             return resources.displayMetrics.heightPixels * percent / 100
         }
 
-    private val onWindowHeightChangeListener = ManagedPreference.OnChangeListener<Int> { _, _ ->
-        updateKeyboardHeight()
+    private val keyboardSidePaddingPx: Int
+        get() {
+            val value = when (resources.configuration.orientation) {
+                Configuration.ORIENTATION_LANDSCAPE -> keyboardSidePaddingLandscape
+                else -> keyboardSidePadding
+            }.getValue()
+            return dp(value)
+        }
+
+    private val keyboardBottomPaddingPx: Int
+        get() {
+            val value = when (resources.configuration.orientation) {
+                Configuration.ORIENTATION_LANDSCAPE -> keyboardBottomPaddingLandscape
+                else -> keyboardBottomPadding
+            }.getValue()
+            return dp(value)
+        }
+
+    private val onKeyboardSizeChangeListener = ManagedPreference.OnChangeListener<Int> { _, _ ->
+        updateKeyboardSize()
     }
 
     val keyboardView: View
@@ -125,9 +154,8 @@ class InputView(
         // MUST call before any operation
         setupScope()
 
-        AppPrefs.getInstance().keyboard.apply {
-            keyboardHeightPercent.registerOnChangeListener(onWindowHeightChangeListener)
-            keyboardHeightPercentLandscape.registerOnChangeListener(onWindowHeightChangeListener)
+        keyboardSizePrefs.forEach {
+            it.registerOnChangeListener(onKeyboardSizeChangeListener)
         }
 
         windowManager.addEssentialWindow(pickerWindow)
@@ -185,7 +213,7 @@ class InputView(
                 topOfParent()
                 centerHorizontally()
             })
-            add(windowManager.view, lParams(matchParent, windowHeightPx) {
+            add(windowManager.view, lParams(matchParent, keyboardHeightPx) {
                 below(kawaiiBar.view)
                 centerHorizontally()
                 above(bottomPaddingSpace)
@@ -195,6 +223,8 @@ class InputView(
                 bottomOfParent()
             })
         }
+
+        updateKeyboardSize()
 
         add(preedit.ui.root, lParams(matchParent, wrapContent) {
             above(keyboardView)
@@ -210,16 +240,21 @@ class InputView(
         })
     }
 
-    private fun updateKeyboardHeight() {
+    private fun updateKeyboardSize() {
         windowManager.view.updateLayoutParams {
-            height = windowHeightPx
+            height = keyboardHeightPx
         }
+        bottomPaddingSpace.updateLayoutParams<MarginLayoutParams> {
+            bottomMargin = keyboardBottomPaddingPx
+        }
+        val sidePadding = keyboardSidePaddingPx
+        kawaiiBar.view.setPadding(sidePadding, 0, sidePadding, 0)
+        windowManager.view.setPadding(sidePadding, 0, sidePadding, 0)
     }
 
     override fun onDetachedFromWindow() {
-        AppPrefs.getInstance().keyboard.apply {
-            keyboardHeightPercent.unregisterOnChangeListener(onWindowHeightChangeListener)
-            keyboardHeightPercentLandscape.unregisterOnChangeListener(onWindowHeightChangeListener)
+        keyboardSizePrefs.forEach {
+            it.unregisterOnChangeListener(onKeyboardSizeChangeListener)
         }
         ViewCompat.setOnApplyWindowInsetsListener(this, null)
         super.onDetachedFromWindow()

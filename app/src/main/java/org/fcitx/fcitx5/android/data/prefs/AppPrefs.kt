@@ -61,6 +61,46 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             keyboardHeightPercentLandscape = secondary
         }
 
+        val keyboardSidePadding: ManagedPreference.PInt
+        val keyboardSidePaddingLandscape: ManagedPreference.PInt
+
+        init {
+            val (primary, secondary) = twinInt(
+                R.string.keyboard_side_padding,
+                R.string.portrait,
+                "keyboard_side_padding",
+                0,
+                R.string.landscape,
+                "keyboard_side_padding_landscape",
+                0,
+                0,
+                100,
+                "dp"
+            )
+            keyboardSidePadding = primary
+            keyboardSidePaddingLandscape = secondary
+        }
+
+        val keyboardBottomPadding: ManagedPreference.PInt
+        val keyboardBottomPaddingLandscape: ManagedPreference.PInt
+
+        init {
+            val (primary, secondary) = twinInt(
+                R.string.keyboard_bottom_padding,
+                R.string.portrait,
+                "keyboard_bottom_padding",
+                0,
+                R.string.landscape,
+                "keyboard_bottom_padding_landscape",
+                0,
+                0,
+                100,
+                "dp"
+            )
+            keyboardBottomPadding = primary
+            keyboardBottomPaddingLandscape = secondary
+        }
+
         val horizontalCandidateGrowth =
             switch(R.string.horizontal_candidate_growth, "horizontal_candidate_growth", true)
         val expandedCandidateStyle = list(

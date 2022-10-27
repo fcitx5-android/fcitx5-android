@@ -9,9 +9,7 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updateLayoutParams
+import androidx.core.view.*
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
@@ -31,8 +29,32 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
     var intrinsicHeight: Int = -1
         private set
 
-    private val heightPercent by AppPrefs.getInstance().keyboard.keyboardHeightPercent
-    private val heightPercentLandscape by AppPrefs.getInstance().keyboard.keyboardHeightPercentLandscape
+    private val keyboardPrefs = AppPrefs.getInstance().keyboard
+    private val keyboardHeightPercent by keyboardPrefs.keyboardHeightPercent
+    private val keyboardHeightPercentLandscape by keyboardPrefs.keyboardHeightPercentLandscape
+    private val keyboardSidePadding by keyboardPrefs.keyboardSidePadding
+    private val keyboardSidePaddingLandscape by keyboardPrefs.keyboardSidePaddingLandscape
+    private val keyboardBottomPadding by keyboardPrefs.keyboardBottomPadding
+    private val keyboardBottomPaddingLandscape by keyboardPrefs.keyboardBottomPaddingLandscape
+
+    private val keyboardSidePaddingPx: Int
+        get() {
+            val value = when (ctx.resources.configuration.orientation) {
+                Configuration.ORIENTATION_LANDSCAPE -> keyboardSidePaddingLandscape
+                else -> keyboardSidePadding
+            }
+            return ctx.dp(value)
+        }
+
+    private val keyboardBottomPaddingPx: Int
+        get() {
+            val value = when (ctx.resources.configuration.orientation) {
+                Configuration.ORIENTATION_LANDSCAPE -> keyboardBottomPaddingLandscape
+                else -> keyboardBottomPadding
+            }
+            return ctx.dp(value)
+        }
+
     private val navbarBackground by ThemeManager.prefs.navbarBackground
     private val keyBorder by ThemeManager.prefs.keyBorder
 
@@ -62,13 +84,15 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
     var onSizeMeasured: ((Int, Int) -> Unit)? = null
 
     private fun keyboardWindowAspectRatio(): Pair<Int, Int> {
-        val w = ctx.resources.displayMetrics.widthPixels
-        val h = ctx.resources.displayMetrics.heightPixels
-        val ratio = when (ctx.resources.configuration.orientation) {
-            Configuration.ORIENTATION_LANDSCAPE -> this.heightPercentLandscape
-            else -> this.heightPercent
+        val resources = ctx.resources
+        val displayMetrics = resources.displayMetrics
+        val w = displayMetrics.widthPixels
+        val h = displayMetrics.heightPixels
+        val hPercent = when (resources.configuration.orientation) {
+            Configuration.ORIENTATION_LANDSCAPE -> keyboardHeightPercentLandscape
+            else -> keyboardHeightPercent
         }
-        return w to (h * ratio / 100)
+        return w to (h * hPercent / 100)
     }
 
     /**
@@ -106,13 +130,15 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
         keyboardWidth = w
         keyboardHeight = h
         fakeKeyboardWindow.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            width = keyboardWidth
             height = keyboardHeight
+            horizontalMargin = keyboardSidePaddingPx
         }
         intrinsicWidth = keyboardWidth
-        // bar height
+        // KawaiiBar height + WindowManager view height
         intrinsicHeight = barHeight + keyboardHeight
-        // bottom padding
+        // extra bottom padding
+        intrinsicHeight += keyboardBottomPaddingPx
+        // windowInsets navbar padding
         if (navbarBackground == NavbarBackground.Full) {
             ViewCompat.getRootWindowInsets(root)?.also {
                 // IME window has different navbar height when system navigation in "gesture navigation" mode
@@ -121,7 +147,7 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
                     // in case navigation hint was hidden ...
                     it.getInsets(WindowInsetsCompat.Type.systemGestures()).bottom > 0
                 ) {
-                    intrinsicHeight = barHeight + keyboardHeight + navbarHeight()
+                    intrinsicHeight += navbarHeight()
                 }
             }
         }
@@ -143,9 +169,9 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
         fakeKawaiiBar.backgroundColor = if (keyBorder) Color.TRANSPARENT else theme.barColor
         fakeKeyboardWindow = TextKeyboard(ctx, theme)
         fakeInputView.apply {
-            add(fakeKeyboardWindow, lParams(keyboardWidth, keyboardHeight) {
+            add(fakeKeyboardWindow, lParams(matchConstraints, keyboardHeight) {
                 below(fakeKawaiiBar)
-                centerHorizontally()
+                centerHorizontally(keyboardSidePaddingPx)
             })
         }
     }

@@ -152,4 +152,6 @@
     <string name="config_addon_not_loaded">No configuration options available, maybe this addon is disabled when fcitx start?</string>
     <string name="portrait">Portrait</string>
     <string name="landscape">Landscape</string>
+    <string name="keyboard_bottom_padding">Keyboard bottom padding</string>
+    <string name="keyboard_side_padding">Keyboard side padding</string>
 </resources>
