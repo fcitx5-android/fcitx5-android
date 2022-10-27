@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
 import androidx.lifecycle.lifecycleScope
+import org.fcitx.fcitx5.android.core.FcitxAPI
 import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
 import org.fcitx.fcitx5.android.input.dependency.context
@@ -34,6 +35,19 @@ class CommonKeyActionListener :
 
     private var backspaceSwipeState = Stopped
 
+    private suspend fun FcitxAPI.commitAndReset() {
+        if (preedit.content.preedit.run { preedit.isEmpty() && clientPreedit.isEmpty() }) {
+            // preedit is empty, there can be prediction candidates
+            reset()
+        } else if (inputMethodEntryCached.uniqueName.let { it == "keyboard-us" || it == "unikey" }) {
+            // androidkeyboard clears composing on reset, but we want to commit it as-is
+            service.inputConnection?.finishComposingText()
+            reset()
+        } else {
+            if (!select(0)) reset()
+        }
+    }
+
     val listener by lazy {
         KeyActionListener { action, _ ->
             service.lifecycleScope.launchOnFcitxReady(fcitx) {
@@ -41,24 +55,15 @@ class CommonKeyActionListener :
                     is FcitxKeyAction -> it.sendKey(action.act, KeyState.Virtual.state)
                     is SymAction -> it.sendKey(action.sym, action.states)
                     is CommitAction -> {
-                        if (preedit.content.preedit.run { preedit.isEmpty() && clientPreedit.isEmpty() }) {
-                            // preedit is empty, there can be prediction candidates
-                            it.reset()
-                        } else if (it.inputMethodEntryCached.uniqueName == "keyboard-us") {
-                            // androidkeyboard clears composing on reset, but we want to commit it as-is
-                            service.inputConnection?.finishComposingText()
-                            it.reset()
-                        } else {
-                            if (!it.select(0)) it.reset()
-                        }
+                        it.commitAndReset()
                         service.inputConnection?.commitText(action.text, 1)
                     }
                     is QuickPhraseAction -> {
-                        it.reset()
+                        it.commitAndReset()
                         it.triggerQuickPhrase()
                     }
                     is UnicodeAction -> {
-                        it.reset()
+                        it.commitAndReset()
                         it.triggerUnicode()
                     }
                     is LangSwitchAction -> {
