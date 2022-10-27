@@ -53,6 +53,7 @@ interface FcitxAPI {
 
     suspend fun setEnabledIme(array: Array<String>)
 
+    suspend fun toggleIme()
     suspend fun activateIme(ime: String)
     suspend fun enumerateIme(forward: Boolean = true)
 

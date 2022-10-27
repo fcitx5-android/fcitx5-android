@@ -106,6 +106,10 @@ public:
         p_frontend->call<fcitx::IAndroidFrontend::repositionCursor>(position);
     }
 
+    void toggleInputMethod() {
+        p_instance->toggle();
+    }
+
     void nextInputMethod(bool forward) {
         p_instance->enumerate(forward);
     }
@@ -703,6 +707,13 @@ JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_repositionCursor(JNIEnv *env, jclass clazz, jint position) {
     FCITX_DEBUG() << "repositionCursor: to " << position;
     Fcitx::Instance().repositionCursor(position);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_toggleInputMethod(JNIEnv *env, jclass clazz) {
+    RETURN_IF_NOT_RUNNING
+    Fcitx::Instance().toggleInputMethod();
 }
 
 extern "C"

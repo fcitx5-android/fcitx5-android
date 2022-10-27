@@ -78,6 +78,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
     override suspend fun setEnabledIme(array: Array<String>) =
         withFcitxContext { setEnabledInputMethods(array) }
 
+    override suspend fun toggleIme() = withFcitxContext { toggleInputMethod() }
     override suspend fun activateIme(ime: String) = withFcitxContext { setInputMethod(ime) }
     override suspend fun enumerateIme(forward: Boolean) =
         withFcitxContext { nextInputMethod(forward) }
@@ -202,6 +203,9 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
 
         @JvmStatic
         external fun repositionCursor(position: Int)
+
+        @JvmStatic
+        external fun toggleInputMethod()
 
         @JvmStatic
         external fun nextInputMethod(forward: Boolean)

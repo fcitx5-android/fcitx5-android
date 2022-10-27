@@ -64,8 +64,10 @@ class CommonKeyActionListener :
                     is LangSwitchAction -> {
                         if (it.enabledIme().size < 2) {
                             inputView.showDialog(AddMoreInputMethodsPrompt.build(context))
-                        } else {
+                        } else if (action.enumerate) {
                             it.enumerateIme()
+                        } else {
+                            it.toggleIme()
                         }
                     }
                     is InputMethodSwitchAction -> {

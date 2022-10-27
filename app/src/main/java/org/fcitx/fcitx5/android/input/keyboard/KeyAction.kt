@@ -22,7 +22,7 @@ sealed class KeyAction {
 
     object UnicodeAction : KeyAction()
 
-    object LangSwitchAction : KeyAction()
+    class LangSwitchAction(val enumerate: Boolean = true) : KeyAction()
 
     object InputMethodSwitchAction : KeyAction()
 
