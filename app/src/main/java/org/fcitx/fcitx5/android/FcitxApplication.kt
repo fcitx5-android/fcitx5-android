@@ -16,12 +16,10 @@ import timber.log.Timber
 class FcitxApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        if (!BuildConfig.DEBUG) {
-            CaocConfig.Builder
-                .create()
-                .errorActivity(LogActivity::class.java)
-                .apply()
-        }
+        CaocConfig.Builder.create()
+            .enabled(!BuildConfig.DEBUG)
+            .errorActivity(LogActivity::class.java)
+            .apply()
         instance = this
         // we don't have AppPrefs available yet
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
