@@ -154,4 +154,5 @@
     <string name="landscape">Landscape</string>
     <string name="keyboard_bottom_padding">Keyboard bottom padding</string>
     <string name="keyboard_side_padding">Keyboard side padding</string>
+    <string name="clipboard_suggestion">Show clipboard suggestion</string>
 </resources>

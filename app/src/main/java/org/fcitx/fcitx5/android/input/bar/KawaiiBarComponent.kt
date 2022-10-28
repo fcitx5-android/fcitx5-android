@@ -57,6 +57,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     private val service by manager.inputMethodService()
     private val horizontalCandidate: HorizontalCandidateComponent by manager.must()
 
+    private val clipboardSuggestion = AppPrefs.getInstance().clipboard.clipboardSuggestion
     private val clipboardItemTimeout by AppPrefs.getInstance().clipboard.clipboardItemTimeout
     private val expandedCandidateStyle by AppPrefs.getInstance().keyboard.expandedCandidateStyle
     private val expandToolbarByDefault = AppPrefs.getInstance().keyboard.expandToolbarByDefault
@@ -65,6 +66,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     private val onClipboardUpdateListener =
         ClipboardManager.OnClipboardUpdateListener {
+            if (!clipboardSuggestion.getValue()) return@OnClipboardUpdateListener
             service.lifecycleScope.launch {
                 if (it.isEmpty()) {
                     idleUiStateMachine.push(ClipboardUpdatedEmpty)
@@ -76,6 +78,15 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             }
         }
 
+    private val onClipboardSuggestionUpdateListener =
+        ManagedPreference.OnChangeListener<Boolean> { _, it ->
+            if (!it) {
+                idleUiStateMachine.push(ClipboardUpdatedEmpty)
+                clipboardTimeoutJob?.cancel()
+                clipboardTimeoutJob = null
+            }
+        }
+
     private val onExpandToolbarByDefaultUpdateListener =
         ManagedPreference.OnChangeListener<Boolean> { _, it ->
             idleUiStateMachine = IdleUiStateMachine.new(it, idleUiStateMachine)
@@ -83,6 +94,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     init {
         ClipboardManager.addOnUpdateListener(onClipboardUpdateListener)
+        clipboardSuggestion.registerOnChangeListener(onClipboardSuggestionUpdateListener)
         expandToolbarByDefault.registerOnChangeListener(onExpandToolbarByDefaultUpdateListener)
     }
 

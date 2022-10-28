@@ -35,6 +35,7 @@ object IdleUiStateMachine {
             from(Clipboard) transitTo ToolbarWithClip on MenuButtonClicked
             from(Clipboard) transitTo ClipboardTimedOut on Timeout
             from(Clipboard) transitTo initialState on Pasted
+            from(Clipboard) transitTo initialState on ClipboardUpdatedEmpty
             from(ClipboardTimedOut) transitTo Toolbar on MenuButtonClicked
             from(ClipboardTimedOut) transitTo initialState on KawaiiBarShown
             from(ClipboardTimedOut) transitTo initialState on Pasted

@@ -148,10 +148,13 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             1,
             50,
         ) { clipboardListening.getValue() }
+        val clipboardSuggestion = switch(
+            R.string.clipboard_suggestion, "clipboard_suggestion", true
+        ) { clipboardListening.getValue() }
         val clipboardItemTimeout = int(
             R.string.clipboard_suggestion_timeout, "clipboard_item_timeout",
             30, 30, 300, "s"
-        ) { clipboardListening.getValue() }
+        ) { clipboardListening.getValue() && clipboardSuggestion.getValue() }
     }
 
     private val providers = mutableListOf<ManagedPreferenceProvider>()
