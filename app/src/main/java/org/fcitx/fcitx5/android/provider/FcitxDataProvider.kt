@@ -14,7 +14,6 @@ import org.fcitx.fcitx5.android.R
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
-import java.util.LinkedList
 
 class FcitxDataProvider : DocumentsProvider() {
 
@@ -79,7 +78,7 @@ class FcitxDataProvider : DocumentsProvider() {
         return true
     }
 
-    override fun queryRoots(projection: Array<out String>?) =
+    override fun queryRoots(projection: Array<String>?) =
         MatrixCursor(projection ?: DEFAULT_ROOT_PROJECTION).apply {
             newRow().apply {
                 add(Root.COLUMN_ROOT_ID, baseDir.docId)
@@ -101,7 +100,7 @@ class FcitxDataProvider : DocumentsProvider() {
 
     override fun queryChildDocuments(
         parentDocumentId: String,
-        projection: Array<out String>?,
+        projection: Array<String>?,
         sortOrder: String?
     ) = MatrixCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION).apply {
         fileFromDocId(parentDocumentId).listFiles()?.forEach {
@@ -225,18 +224,11 @@ class FcitxDataProvider : DocumentsProvider() {
         query: String,
         projection: Array<String>?
     ) = MatrixCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION).apply {
-        val qs = query.lowercase()
-        val queue = LinkedList<File>().apply {
-            add(fileFromDocId(rootId))
-        }
-        while (!queue.isEmpty() && count < SEARCH_RESULTS_LIMIT) {
-            val file: File = queue.removeFirst()
-            if (file.isDirectory) {
-                file.listFiles()?.let { queue.addAll(it) }
-            } else if (file.name.lowercase().contains(qs)) {
-                newRowFromFile(file)
-            }
-        }
+        val q = query.lowercase()
+        fileFromDocId(rootId).walk()
+            .filter { it.name.lowercase().contains(q) }
+            .take(SEARCH_RESULTS_LIMIT)
+            .forEach { newRowFromFile(it) }
     }
 
     private val File.mimeType: String
