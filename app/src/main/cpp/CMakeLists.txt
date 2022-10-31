@@ -65,6 +65,8 @@ endforeach ()
 option(ENABLE_TEST "" OFF)
 set(_Fcitx5Macro_SELF_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fcitx5/src/lib/fcitx-utils)
 add_subdirectory(libime)
+# rename to include executable in apk
+set_target_properties(libime_tabledict PROPERTIES OUTPUT_NAME liblibime_tabledict.so)
 
 # prebuilt lua
 include("${PREBUILT_DIR}/lua/${ANDROID_ABI}/lib/cmake/LuaConfig.cmake")
@@ -80,13 +82,12 @@ option(ENABLE_BROWSER "" OFF)
 option(USE_WEBKIT "" OFF)
 option(ENABLE_CLOUDPINYIN "" OFF)
 add_subdirectory(fcitx5-chinese-addons)
+# rename to include executable in apk
+set_target_properties(scel2org5 PROPERTIES OUTPUT_NAME libscel2org5.so)
 
 option(ENABLE_TEST "" OFF)
 option(ENABLE_QT "" OFF)
 add_subdirectory(fcitx5-unikey)
-
-# rename to include this executable in apk
-set_target_properties(scel2org5 PROPERTIES OUTPUT_NAME libscel2org5.so)
 
 add_library(native-lib SHARED native-lib.cpp)
 target_link_libraries(native-lib
