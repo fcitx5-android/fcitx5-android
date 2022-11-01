@@ -82,7 +82,7 @@ open class KeyDef(
         class Keyboard(val label: String) : Popup()
 
         class Menu(val items: Array<Item>) : Popup() {
-            class Item(val label: String, val action: KeyAction)
+            class Item(val label: String, @DrawableRes val icon: Int, val action: KeyAction)
         }
     }
 }

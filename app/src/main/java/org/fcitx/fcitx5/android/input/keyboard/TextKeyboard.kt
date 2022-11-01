@@ -62,12 +62,12 @@ class TextKeyboard(
             ),
             listOf(
                 LayoutSwitchKey("?123", ""),
-                QuickPhraseKey(),
+                CommaKey(0.1f, KeyDef.Appearance.Variant.Alternative),
                 LanguageKey(),
                 SpaceKey(),
-                AlphabetKey(".", ",", KeyDef.Appearance.Variant.Alternative),
+                SymbolKey(".", 0.1f, KeyDef.Appearance.Variant.Alternative),
                 ReturnKey()
-            ),
+            )
         )
     }
 
@@ -78,8 +78,8 @@ class TextKeyboard(
     val space: TextKeyView by lazy { findViewById(R.id.button_space) }
     val `return`: ImageKeyView by lazy { findViewById(R.id.button_return) }
 
-    private val textKeys: List<AltTextKeyView> by lazy {
-        allViews.filterIsInstance(AltTextKeyView::class.java).toList()
+    private val textKeys: List<TextKeyView> by lazy {
+        allViews.filterIsInstance(TextKeyView::class.java).toList()
     }
 
     private var capsState: CapsState = CapsState.None
@@ -190,7 +190,7 @@ class TextKeyboard(
 
     private fun updateAlphabetKeys() {
         textKeys.forEach {
-            it.def as KeyDef.Appearance.AltText
+            if (it.def !is KeyDef.Appearance.AltText) return
             it.mainText.text = it.def.displayText.let { str ->
                 if (str.length != 1 || !str[0].isLetter()) return@forEach
                 if (keepLettersUppercase) str.uppercase() else transformAlphabet(str)
@@ -200,11 +200,15 @@ class TextKeyboard(
 
     private fun updatePunctuationKeys() {
         textKeys.forEach {
-            it.def as KeyDef.Appearance.AltText
-            it.altText.text = transformPunctuation(it.def.altText)
-            it.mainText.text = it.def.displayText.let { str ->
-                if (str[0].isLetter()) return@forEach
-                transformPunctuation(str)
+            if (it is AltTextKeyView) {
+                it.def as KeyDef.Appearance.AltText
+                it.altText.text = transformPunctuation(it.def.altText)
+            } else {
+                it.def as KeyDef.Appearance.Text
+                it.mainText.text = it.def.displayText.let { str ->
+                    if (str[0].run { isLetter() || isWhitespace() }) return@forEach
+                    transformPunctuation(str)
+                }
             }
         }
     }
