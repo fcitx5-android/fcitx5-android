@@ -69,7 +69,7 @@
     <string name="open_source_licenses">Лицензии с открытым исходным кодом</string>
     <string name="licenses_of_third_party_libraries">Лицензии сторонних библиотек</string>
     <string name="github_repo">Репозиторий GitHub</string>
-    <string name="expanded_candidate_grid_span_count">Счетчик расширенных диапазонов кандидатов в стиле сетки</string>
+    <string name="expanded_candidate_grid_span_count">Стиль таблицы для увеличения количества столбцов слов-кандидатов</string>
     <string name="no_config_options">В настоящее время параметры конфигурации недоступны</string>
     <string name="unimplemented_type">⛔ Нереализованный тип</string>
     <string name="select">Выбрать</string>
@@ -147,4 +147,12 @@
     <string name="theme_migrated">Тема перенесена в текущую версию</string>
     <string name="keep_keyboard_letters_uppercase">Сохранять буквы клавиатуры прописными</string>
     <string name="choose_input_method">Выбор метода ввода</string>
+    <string name="edit_clipboard">Редактировать буфер обмена</string>
+    <string name="clipboard_edit_text_hint">Содержимое буфера обмена</string>
+    <string name="config_addon_not_loaded">Параметры конфигурации недоступны, возможно, это дополнение отключено при запуске fcitx?</string>
+    <string name="portrait">Портретный режим экрана</string>
+    <string name="landscape">Горизонтальный режим экрана</string>
+    <string name="keyboard_bottom_padding">Нижнее поле клавиатуры</string>
+    <string name="keyboard_side_padding">Боковое поле клавиатуры</string>
+    <string name="clipboard_suggestion">Показать предложение буфера обмена</string>
 </resources>
