@@ -165,6 +165,29 @@ abstract class BaseKeyboard(
             }
             def.popup?.forEach {
                 when (it) {
+                // TODO: gesture processing middleware
+                    is KeyDef.Popup.Menu -> {
+                        setOnLongClickListener { view ->
+                            view as KeyView
+                            onPopupMenu(view.id, it, view.bounds)
+                            // do not consume this LongClick gesture
+                            false
+                        }
+                        val oldOnGestureListener = onGestureListener ?: OnGestureListener.Empty
+                        swipeEnabled = true
+                        onGestureListener = OnGestureListener { view, event ->
+                            view as KeyView
+                            when (event.type) {
+                                GestureType.Move -> {
+                                    onPopupChangeFocus(view.id, event.x, event.y)
+                                }
+                                GestureType.Up -> {
+                                    onPopupTrigger(view.id)
+                                }
+                                else -> false
+                            } || oldOnGestureListener.onGesture(view, event)
+                        }
+                    }
                     is KeyDef.Popup.Keyboard -> {
                         setOnLongClickListener { view ->
                             view as KeyView
@@ -178,10 +201,10 @@ abstract class BaseKeyboard(
                             view as KeyView
                             when (event.type) {
                                 GestureType.Move -> {
-                                    onPopupKeyboardChangeFocus(view.id, event.x, event.y)
+                                    onPopupChangeFocus(view.id, event.x, event.y)
                                 }
                                 GestureType.Up -> {
-                                    onPopupKeyboardTrigger(view.id)
+                                    onPopupTrigger(view.id)
                                 }
                                 else -> false
                             } || oldOnGestureListener.onGesture(view, event)
@@ -224,8 +247,6 @@ abstract class BaseKeyboard(
                             oldOnGestureListener.onGesture(view, event)
                         }
                     }
-                    // TODO: menu style popup
-                    is KeyDef.Popup.Menu -> {}
                 }
             }
         }
@@ -294,15 +315,19 @@ abstract class BaseKeyboard(
         keyPopupListener?.onShowKeyboard(viewId, keyboard, bounds)
     }
 
+    open fun onPopupMenu(viewId: Int, menu: KeyDef.Popup.Menu, bounds: Rect) {
+        keyPopupListener?.onShowMenu(viewId, menu, bounds)
+    }
+
     @CallSuper
-    open fun onPopupKeyboardChangeFocus(viewId: Int, x: Float, y: Float): Boolean {
+    open fun onPopupChangeFocus(viewId: Int, x: Float, y: Float): Boolean {
         return keyPopupListener?.onChangeFocus(viewId, x, y) ?: false
     }
 
     @CallSuper
-    fun onPopupKeyboardTrigger(viewId: Int): Boolean {
+    fun onPopupTrigger(viewId: Int): Boolean {
         // ask popup keyboard whether there's a pending KeyAction
-        val action = keyPopupListener?.onTriggerKeyboard(viewId) ?: return false
+        val action = keyPopupListener?.onTrigger(viewId) ?: return false
         onAction(action, KeyActionListener.Source.Popup)
         onPopupDismiss(viewId)
         return true

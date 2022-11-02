@@ -9,6 +9,7 @@ interface PopupListener {
     fun onPreviewUpdate(viewId: Int, content: String)
     fun onDismiss(viewId: Int)
     fun onShowKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect)
+    fun onShowMenu(viewId: Int, menu: KeyDef.Popup.Menu, bounds: Rect)
     fun onChangeFocus(viewId: Int, x: Float, y: Float): Boolean
-    fun onTriggerKeyboard(viewId: Int): KeyAction?
+    fun onTrigger(viewId: Int): KeyAction?
 }

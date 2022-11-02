@@ -188,7 +188,7 @@ class PickerPageUi(override val ctx: Context, val theme: Theme) : Ui {
 
     private fun onPopupKeyboardTrigger(viewId: Int): Boolean {
         // TODO: maybe popup keyboard should just yield String value?
-        val action = popupListener?.onTriggerKeyboard(viewId) as? FcitxKeyAction ?: return false
+        val action = popupListener?.onTrigger(viewId) as? FcitxKeyAction ?: return false
         onSymbolClick(action.act)
         onPopupDismiss(viewId)
         return true

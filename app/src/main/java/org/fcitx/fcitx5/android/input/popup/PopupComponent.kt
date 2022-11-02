@@ -36,7 +36,7 @@ class PopupComponent :
     private val dismissJobs = HashMap<Int, Job>()
     private val freeEntryUi = LinkedList<PopupEntryUi>()
 
-    private val showingKeyboardUi = HashMap<Int, PopupKeyboardUi>()
+    private val showingContainerUi = HashMap<Int, PopupContainerUi>()
 
     private val keyBottomMargin by lazy {
         context.dp(ThemeManager.prefs.keyVerticalMargin.getValue())
@@ -79,6 +79,7 @@ class PopupComponent :
         }
         root.apply {
             add(popup.root, lParams(popupWidth, popupHeight) {
+                // align popup bottom with key border bottom [^1]
                 topMargin = bounds.bottom - popupHeight - keyBottomMargin
                 leftMargin = (bounds.left + bounds.right - popupWidth) / 2
             })
@@ -95,87 +96,109 @@ class PopupComponent :
         val entryUi = showingEntryUi[viewId]
         if (entryUi != null) {
             entryUi.setText("")
-            reallyShowKeyboard(viewId, entryUi, keys, bounds)
+            reallyShowKeyboard(viewId, keys, bounds)
         } else {
             showPopup(viewId, "", bounds)
             // in case popup preview is disabled, wait newly created popup entry to layout
             ContextCompat.getMainExecutor(service).execute {
-                reallyShowKeyboard(viewId, showingEntryUi.getValue(viewId), keys, bounds)
+                reallyShowKeyboard(viewId, keys, bounds)
             }
         }
     }
 
-    private fun reallyShowKeyboard(
-        viewId: Int,
-        entryUi: PopupEntryUi,
-        keys: Array<String>,
-        bounds: Rect
-    ) {
+    private fun reallyShowKeyboard(viewId: Int, keys: Array<String>, bounds: Rect) {
         val labels = if (punctuation.enabled) {
             Array(keys.size) { punctuation.transform(keys[it]) }
         } else keys
         val keyboardUi = PopupKeyboardUi(
             context,
             theme,
-            popupWidth,
-            popupHeight,
-            popupKeyHeight,
-            popupRadius,
             bounds,
+            { dismissPopup(viewId) },
+            popupRadius,
+            popupWidth,
+            popupKeyHeight,
+            // position popup keyboard higher, because of [^1]
+            popupHeight + keyBottomMargin,
             keys,
-            labels,
-            onDismissSelf = { dismissPopup(viewId) }
+            labels
         )
-        val (x, y) = intArrayOf(0, 0).also { entryUi.root.getLocationInWindow(it) }
         root.apply {
             add(keyboardUi.root, lParams {
-                leftMargin = x + keyboardUi.offsetX
-                topMargin = y + keyboardUi.offsetY
+                leftMargin = bounds.left + keyboardUi.offsetX
+                topMargin = bounds.top + keyboardUi.offsetY
             })
         }
-        showingKeyboardUi[viewId] = keyboardUi
+        showingContainerUi[viewId] = keyboardUi
+    }
+
+    fun showMenu(viewId: Int, menu: KeyDef.Popup.Menu, bounds: Rect) {
+        showingEntryUi[viewId]?.let {
+            dismissPopupEntry(viewId, it)
+        }
+        val menuUi = PopupMenuUi(
+            context,
+            theme,
+            bounds,
+            { dismissPopup(viewId) },
+            menu.items,
+        )
+        root.apply {
+            add(menuUi.root, lParams {
+                leftMargin = bounds.left + menuUi.offsetX
+                topMargin = bounds.top + menuUi.offsetY
+            })
+        }
+        showingContainerUi[viewId] = menuUi
     }
 
     fun changeFocus(viewId: Int, x: Float, y: Float): Boolean {
-        return showingKeyboardUi[viewId]?.changeFocus(x, y) ?: false
+        return showingContainerUi[viewId]?.changeFocus(x, y) ?: false
     }
 
-    fun triggerFocusedKeyboard(viewId: Int): KeyAction? {
-        return showingKeyboardUi[viewId]?.trigger()
+    fun triggerFocused(viewId: Int): KeyAction? {
+        return showingContainerUi[viewId]?.onTrigger()
     }
 
     fun dismissPopup(viewId: Int) {
+        dismissPopupContainer(viewId)
         showingEntryUi[viewId]?.also {
             val timeLeft = it.lastShowTime + hideThreshold - System.currentTimeMillis()
             if (timeLeft <= 0L) {
-                reallyDismissPopup(viewId, it)
+                dismissPopupEntry(viewId, it)
             } else {
                 dismissJobs[viewId] = service.lifecycleScope.launch {
                     delay(timeLeft)
-                    reallyDismissPopup(viewId, it)
+                    dismissPopupEntry(viewId, it)
                     dismissJobs.remove(viewId)
                 }
             }
         }
     }
 
-    private fun reallyDismissPopup(viewId: Int, popup: PopupEntryUi) {
-        showingKeyboardUi[viewId]?.also {
-            showingKeyboardUi.remove(viewId)
+    private fun dismissPopupContainer(viewId: Int) {
+        showingContainerUi[viewId]?.also {
+            showingContainerUi.remove(viewId)
             root.removeView(it.root)
         }
+    }
+
+    private fun dismissPopupEntry(viewId: Int, popup: PopupEntryUi) {
         showingEntryUi.remove(viewId)
         root.removeView(popup.root)
         freeEntryUi.add(popup)
     }
 
     fun dismissAll() {
+        showingContainerUi.forEach {
+            dismissPopupContainer(it.key)
+        }
         showingEntryUi.forEach {
             dismissJobs[it.key]?.apply {
                 cancel()
                 dismissJobs.remove(it.key)
             }
-            reallyDismissPopup(it.key, it.value)
+            dismissPopupEntry(it.key, it.value)
         }
     }
 
@@ -196,12 +219,16 @@ class PopupComponent :
             showKeyboard(viewId, keyboard, bounds)
         }
 
+        override fun onShowMenu(viewId: Int, menu: KeyDef.Popup.Menu, bounds: Rect) {
+            showMenu(viewId, menu, bounds)
+        }
+
         override fun onChangeFocus(viewId: Int, x: Float, y: Float): Boolean {
             return changeFocus(viewId, x, y)
         }
 
-        override fun onTriggerKeyboard(viewId: Int): KeyAction? {
-            return triggerFocusedKeyboard(viewId)
+        override fun onTrigger(viewId: Int): KeyAction? {
+            return triggerFocused(viewId)
         }
     }
 }
