@@ -38,7 +38,8 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             300,
             100,
             700,
-            "ms"
+            "ms",
+            10
         )
 
         val keyboardHeightPercent: ManagedPreference.PInt
@@ -74,7 +75,7 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
                 "keyboard_side_padding_landscape",
                 0,
                 0,
-                100,
+                200,
                 "dp"
             )
             keyboardSidePadding = primary
@@ -152,8 +153,12 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             R.string.clipboard_suggestion, "clipboard_suggestion", true
         ) { clipboardListening.getValue() }
         val clipboardItemTimeout = int(
-            R.string.clipboard_suggestion_timeout, "clipboard_item_timeout",
-            30, 30, 300, "s"
+            R.string.clipboard_suggestion_timeout,
+            "clipboard_item_timeout",
+            30,
+            30,
+            300,
+            "s"
         ) { clipboardListening.getValue() && clipboardSuggestion.getValue() }
     }
 

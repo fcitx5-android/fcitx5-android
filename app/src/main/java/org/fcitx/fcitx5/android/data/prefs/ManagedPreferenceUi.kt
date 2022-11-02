@@ -68,6 +68,7 @@ abstract class ManagedPreferenceUi<T : Preference>(
         val min: Int,
         val max: Int,
         val unit: String = "",
+        val step: Int,
         enableUiOn: () -> Boolean = { true },
     ) : ManagedPreferenceUi<DialogSeekBarPreference>(key, enableUiOn) {
         override fun createUi(context: Context): DialogSeekBarPreference =
@@ -81,6 +82,7 @@ abstract class ManagedPreferenceUi<T : Preference>(
                 min = this@SeekBarInt.min
                 max = this@SeekBarInt.max
                 unit = this@SeekBarInt.unit
+                step = this@SeekBarInt.step
             }
 
     }
@@ -99,6 +101,7 @@ abstract class ManagedPreferenceUi<T : Preference>(
         val min: Int,
         val max: Int,
         val unit: String = "",
+        val step: Int,
         enableUiOn: () -> Boolean = { true },
     ) : ManagedPreferenceUi<TwinSeekBarPreference>(key, enableUiOn) {
         override fun createUi(context: Context): TwinSeekBarPreference =
@@ -112,6 +115,7 @@ abstract class ManagedPreferenceUi<T : Preference>(
                 min = this@TwinSeekBarInt.min
                 max = this@TwinSeekBarInt.max
                 unit = this@TwinSeekBarInt.unit
+                step = this@TwinSeekBarInt.step
                 isIconSpaceReserved = false
                 isSingleLineTitle = false
                 summaryProvider = TwinSeekBarPreference.SimpleSummaryProvider

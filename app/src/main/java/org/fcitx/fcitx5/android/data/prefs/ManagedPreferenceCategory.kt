@@ -53,11 +53,13 @@ abstract class ManagedPreferenceCategory(
         min: Int,
         max: Int,
         unit: String = "",
+        step: Int = 1,
         enableUiOn: () -> Boolean = { true },
     ): ManagedPreference.PInt {
         val pref = ManagedPreference.PInt(sharedPreferences, key, defaultValue)
-        val ui =
-            ManagedPreferenceUi.SeekBarInt(title, key, defaultValue, min, max, unit, enableUiOn)
+        val ui = ManagedPreferenceUi.SeekBarInt(
+            title, key, defaultValue, min, max, unit, step, enableUiOn
+        )
         pref.register()
         ui.registerUi()
         return pref
@@ -77,6 +79,7 @@ abstract class ManagedPreferenceCategory(
         min: Int,
         max: Int,
         unit: String = "",
+        step: Int = 1,
         enableUiOn: () -> Boolean = { true },
     ): Pair<ManagedPreference.PInt, ManagedPreference.PInt> {
         val primary = ManagedPreference.PInt(
@@ -91,7 +94,7 @@ abstract class ManagedPreferenceCategory(
             title,
             label, key, defaultValue,
             secondaryLabel, secondaryKey, secondaryDefaultValue,
-            min, max, unit, enableUiOn
+            min, max, unit, step, enableUiOn
         )
         primary.register()
         secondary.register()
