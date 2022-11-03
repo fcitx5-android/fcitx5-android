@@ -4,13 +4,17 @@ import org.fcitx.fcitx5.android.utils.appContext
 
 // Not thread-safe
 class RecentlyUsed(
-    val name: String,
+    val fileName: String,
     val capacity: Int
 ) : LinkedHashMap<String, String>(0, .75f, true) {
 
-    private val file = appContext.filesDir.resolve("recently_used").run {
+    companion object {
+        const val DIR_NAME = "recently_used"
+    }
+
+    private val file = appContext.filesDir.resolve(DIR_NAME).run {
         mkdirs()
-        resolve(name).apply { createNewFile() }
+        resolve(fileName).apply { createNewFile() }
     }
 
     fun load() {
