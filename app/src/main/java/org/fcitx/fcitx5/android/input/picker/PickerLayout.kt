@@ -2,7 +2,6 @@ package org.fcitx.fcitx5.android.input.picker
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Typeface
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.viewpager2.widget.ViewPager2
 import org.fcitx.fcitx5.android.R
@@ -26,7 +25,6 @@ class PickerLayout(context: Context, theme: Theme) : ConstraintLayout(context) {
             Appearance.Text(
                 displayText = symbol,
                 textSize = 23f,
-                typeface = Typeface.NORMAL,
                 percentWidth = percentWidth,
                 variant = variant
             ),

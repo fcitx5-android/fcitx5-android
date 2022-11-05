@@ -2,7 +2,6 @@ package org.fcitx.fcitx5.android.input.picker
 
 import android.content.Context
 import android.graphics.Rect
-import android.graphics.Typeface
 import android.view.ViewGroup
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxKeyMapping
@@ -28,7 +27,6 @@ class PickerPageUi(override val ctx: Context, val theme: Theme) : Ui {
         val SymbolAppearance = Appearance.Text(
             displayText = "",
             textSize = 19f,
-            typeface = Typeface.NORMAL,
             variant = Variant.Normal,
             border = Border.Off
         )
