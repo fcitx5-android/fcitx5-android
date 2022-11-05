@@ -28,7 +28,7 @@ import org.fcitx.fcitx5.android.input.candidates.CandidateViewBuilder
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
-import org.fcitx.fcitx5.android.input.picker.PickerPreset
+import org.fcitx.fcitx5.android.input.picker.PickerData
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
@@ -77,7 +77,8 @@ class InputView(
     private val kawaiiBar = KawaiiBarComponent()
     private val horizontalCandidate = HorizontalCandidateComponent()
     private val keyboardWindow = KeyboardWindow()
-    private val pickerWindow = PickerWindow(PickerPreset.Symbols)
+    private val symbolPicker = PickerWindow(PickerWindow.Symbol, PickerData.Symbol)
+    private val emojiPicker = PickerWindow(PickerWindow.Emoji, PickerData.Emoji, false)
 
     private fun setupScope() {
         scope += this@InputView.wrapToUniqueComponent()
@@ -95,7 +96,8 @@ class InputView(
         scope += kawaiiBar
         scope += horizontalCandidate
         scope += keyboardWindow
-        scope += pickerWindow
+        scope += symbolPicker
+        scope += emojiPicker
         broadcaster.onScopeSetupFinished(scope)
     }
 
@@ -157,7 +159,8 @@ class InputView(
             it.registerOnChangeListener(onKeyboardSizeChangeListener)
         }
 
-        windowManager.addEssentialWindow(pickerWindow)
+        windowManager.addEssentialWindow(symbolPicker)
+        windowManager.addEssentialWindow(emojiPicker)
 
         broadcaster.onImeUpdate(fcitx.runImmediately { inputMethodEntryCached })
 

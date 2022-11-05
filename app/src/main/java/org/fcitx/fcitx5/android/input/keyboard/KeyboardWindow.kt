@@ -113,14 +113,18 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
 
     fun switchLayout(to: String) {
         if (to == currentKeyboardName) return
+        if (to == PickerWindow.Emoji.name) {
+            windowManager.attachWindow(PickerWindow.Emoji)
+            return
+        }
         val target = to.ifEmpty { lastSymbolType }
         ContextCompat.getMainExecutor(service).execute {
             if (keyboards.containsKey(target)) {
                 detachCurrentLayout()
                 attachLayout(target)
             } else {
-                lastSymbolType = "PickerWindow"
-                windowManager.attachWindow(PickerWindow)
+                lastSymbolType = PickerWindow.Symbol.name
+                windowManager.attachWindow(PickerWindow.Symbol)
             }
         }
     }

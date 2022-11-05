@@ -9,6 +9,7 @@ import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Border
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Variant
+import org.fcitx.fcitx5.android.input.picker.PickerWindow
 
 val NumLockState = KeyStates(KeyState.NumLock, KeyState.Virtual)
 
@@ -164,6 +165,11 @@ class CommaKey(
         Popup.Preview(","),
         Popup.Menu(
             arrayOf(
+                Popup.Menu.Item(
+                    "Emoji",
+                    R.drawable.ic_baseline_tag_faces_24,
+                    KeyAction.LayoutSwitchAction(PickerWindow.Emoji.name)
+                ),
                 Popup.Menu.Item(
                     "QuickPhrase",
                     R.drawable.ic_baseline_format_quote_24,
