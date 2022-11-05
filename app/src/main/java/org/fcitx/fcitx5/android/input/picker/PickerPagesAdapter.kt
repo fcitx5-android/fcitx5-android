@@ -11,7 +11,8 @@ class PickerPagesAdapter(
     val theme: Theme,
     private val keyActionListener: KeyActionListener,
     private val popupListener: PopupListener,
-    data: List<Pair<String, Array<String>>>
+    data: List<Pair<String, Array<String>>>,
+    recentlyUsedFileName: String
 ) : RecyclerView.Adapter<PickerPagesAdapter.ViewHolder>() {
 
     class ViewHolder(val ui: PickerPageUi) : RecyclerView.ViewHolder(ui.root)
@@ -33,13 +34,13 @@ class PickerPagesAdapter(
      * It does not interleave the layout calculation for data.
      * See the note on [cats] for details
      */
-    private val recentlyUsed = RecentlyUsed("picker", ITEMS_PER_PAGE)
+    private val recentlyUsed = RecentlyUsed(recentlyUsedFileName, ITEMS_PER_PAGE)
 
     val categories: List<String>
 
     init {
         // Add recently used category
-        categories = listOf(PickerPreset.RecentlyUsedSymbol) + data.map { it.first }
+        categories = listOf(PickerData.RecentlyUsedSymbol) + data.map { it.first }
         val concat = data.flatMap { it.second.toList() }
         // shift the start page of each category in data by one
         var start = 1

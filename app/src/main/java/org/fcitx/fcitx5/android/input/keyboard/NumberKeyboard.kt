@@ -5,6 +5,7 @@ import android.content.Context
 import android.view.inputmethod.EditorInfo
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.input.picker.PickerWindow
 import splitties.views.imageResource
 
 @SuppressLint("ViewConstructor")
@@ -41,12 +42,12 @@ class NumberKeyboard(
             listOf(
                 LayoutSwitchKey("ABC", TextKeyboard.Name),
                 SymbolKey(",", variant = KeyDef.Appearance.Variant.Alternative),
-                LayoutSwitchKey("!?#", "Picker", 0.13333f, KeyDef.Appearance.Variant.AltForeground),
+                LayoutSwitchKey("!?#", PickerWindow.Symbol.name, 0.13333f, KeyDef.Appearance.Variant.AltForeground),
                 NumPadKey("0", 0xffb0, 30f, 0.23334f),
                 SymbolKey("=", 0.13333f),
                 NumPadKey(".", 0xffae, 23f, 0.1f, KeyDef.Appearance.Variant.Alternative),
                 ReturnKey()
-            ),
+            )
         )
     }
 

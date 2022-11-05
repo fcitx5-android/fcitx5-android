@@ -4,6 +4,7 @@ import android.graphics.Rect
 import android.view.Gravity
 import androidx.core.content.ContextCompat
 import androidx.transition.Slide
+import androidx.transition.Transition
 import androidx.viewpager2.widget.ViewPager2
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.theme
@@ -15,32 +16,39 @@ import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.mechdancer.dependency.manager.must
 
-class PickerWindow(val data: List<Pair<String, Array<String>>>) :
-    InputWindow.ExtendedInputWindow<PickerWindow>(), EssentialWindow, InputBroadcastReceiver {
+class PickerWindow(
+    override val key: PickerKey,
+    val data: List<Pair<String, Array<String>>>,
+    val popupPreview: Boolean = true
+) : InputWindow.ExtendedInputWindow<PickerWindow>(), EssentialWindow, InputBroadcastReceiver {
+
+    class PickerKey(val name: String) : EssentialWindow.Key
+
+    companion object {
+        val Symbol = PickerKey("symbol")
+        val Emoji = PickerKey("emoji")
+    }
 
     private val theme by manager.theme()
     private val windowManager: InputWindowManager by manager.must()
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
     private val popup: PopupComponent by manager.must()
 
-    companion object : EssentialWindow.Key
-
-    override val key: EssentialWindow.Key
-        get() = PickerWindow
-
     private lateinit var pickerLayout: PickerLayout
     private lateinit var pickerPagesAdapter: PickerPagesAdapter
 
-    override fun enterAnimation(lastWindow: InputWindow) = Slide().apply {
-        slideEdge = Gravity.BOTTOM
-    }.takeIf {
+    override fun enterAnimation(lastWindow: InputWindow): Transition? {
         // disable animation switching between keyboard
-        lastWindow !is KeyboardWindow
+        return if (lastWindow !is KeyboardWindow)
+            Slide().apply { slideEdge = Gravity.BOTTOM }
+        else null
     }
 
-    override fun exitAnimation(nextWindow: InputWindow) = super.exitAnimation(nextWindow).takeIf {
+    override fun exitAnimation(nextWindow: InputWindow): Transition? {
         // disable animation switching between keyboard
-        nextWindow !is KeyboardWindow
+        return if (nextWindow !is KeyboardWindow)
+            super.exitAnimation(nextWindow)
+        else null
     }
 
     private val keyActionListener = KeyActionListener { it, source ->
@@ -66,6 +74,11 @@ class PickerWindow(val data: List<Pair<String, Array<String>>>) :
 
     private val popupListener: PopupListener by lazy {
         object : PopupListener by popup.listener {
+            override fun onPreview(viewId: Int, content: String, bounds: Rect) {
+                if (!popupPreview) return
+                popup.listener.onPreview(viewId, content, bounds)
+            }
+
             override fun onShowKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
                 // prevent ViewPager from consuming swipe gesture when popup keyboard shown
                 pickerLayout.pager.isUserInputEnabled = false
@@ -82,7 +95,7 @@ class PickerWindow(val data: List<Pair<String, Array<String>>>) :
 
     override fun onCreateView() = PickerLayout(context, theme).apply {
         pickerLayout = this
-        pickerPagesAdapter = PickerPagesAdapter(theme, keyActionListener, popupListener, data)
+        pickerPagesAdapter = PickerPagesAdapter(theme, keyActionListener, popupListener, data, key.name)
         tabsUi.apply {
             setTabs(pickerPagesAdapter.categories)
             setOnTabClickListener { i ->
