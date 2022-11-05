@@ -190,7 +190,8 @@ open class TextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Text) 
         background = null
         text = def.displayText
         textSize = def.textSize
-        typeface = Typeface.defaultFromStyle(def.typeface)
+        // keep original typeface, apply textStyle only
+        setTypeface(typeface, def.textStyle)
         setTextColor(
             when (def.variant) {
                 Variant.Normal -> theme.keyTextColor
@@ -217,7 +218,7 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
         isFocusable = false
         // TODO hardcoded alt text size
         textSize = 10.7f
-        typeface = Typeface.defaultFromStyle(Typeface.BOLD)
+        setTypeface(typeface, Typeface.BOLD)
         text = def.altText
         // TODO darken altText color
         setTextColor(

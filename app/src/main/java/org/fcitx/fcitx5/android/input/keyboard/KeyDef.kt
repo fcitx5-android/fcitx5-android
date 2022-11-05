@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
+import android.graphics.Typeface
 import androidx.annotation.DrawableRes
 
 open class KeyDef(
@@ -24,7 +25,11 @@ open class KeyDef(
         open class Text(
             val displayText: String,
             val textSize: Float,
-            val typeface: Int,
+            /**
+             * `Int` constants in [Typeface].
+             * Can be `NORMAL`(default), `BOLD`, `ITALIC` or `BOLD_ITALIC`
+             */
+            val textStyle: Int = Typeface.NORMAL,
             percentWidth: Float = 0.1f,
             variant: Variant = Variant.Normal,
             border: Border = Border.Default,
@@ -35,12 +40,16 @@ open class KeyDef(
             displayText: String,
             val altText: String,
             textSize: Float,
-            typeface: Int,
+            /**
+             * `Int` constants in [Typeface].
+             * Can be `NORMAL`(default), `BOLD`, `ITALIC` or `BOLD_ITALIC`
+             */
+            textStyle: Int = Typeface.NORMAL,
             percentWidth: Float = 0.1f,
             variant: Variant = Variant.Normal,
             border: Border = Border.Default,
             viewId: Int = -1
-        ) : Text(displayText, textSize, typeface, percentWidth, variant, border, viewId)
+        ) : Text(displayText, textSize, textStyle, percentWidth, variant, border, viewId)
 
         class Image(
             @DrawableRes

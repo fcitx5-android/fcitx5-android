@@ -21,7 +21,6 @@ class SymbolKey(
     Appearance.Text(
         displayText = symbol,
         textSize = 23f,
-        typeface = Typeface.NORMAL,
         percentWidth = percentWidth,
         variant = variant
     ),
@@ -44,7 +43,6 @@ class AlphabetKey(
         displayText = character,
         altText = punctuation,
         textSize = 23f,
-        typeface = Typeface.NORMAL,
         variant = variant
     ),
     setOf(
@@ -66,8 +64,7 @@ class AlphabetDigitKey(
     Appearance.AltText(
         displayText = character,
         altText = altText,
-        textSize = 23f,
-        typeface = Typeface.NORMAL
+        textSize = 23f
     ),
     setOf(
         Behavior.Press(KeyAction.FcitxKeyAction(character)),
@@ -113,7 +110,7 @@ class LayoutSwitchKey(
     Appearance.Text(
         displayText,
         textSize = 16f,
-        typeface = Typeface.BOLD,
+        textStyle = Typeface.BOLD,
         percentWidth = percentWidth,
         variant = variant
     ),
@@ -157,10 +154,8 @@ class CommaKey(
     Appearance.Text(
         displayText = ",",
         textSize = 23f,
-        typeface = Typeface.NORMAL,
         percentWidth = percentWidth,
-        variant = variant,
-        border = Border.Default
+        variant = variant
     ),
     setOf(
         Behavior.Press(KeyAction.FcitxKeyAction(","))
@@ -200,7 +195,6 @@ class SpaceKey : KeyDef(
     Appearance.Text(
         displayText = " ",
         textSize = 13f,
-        typeface = Typeface.NORMAL,
         percentWidth = 0f,
         border = Border.Special,
         viewId = R.id.button_space
@@ -265,7 +259,6 @@ class NumPadKey(
     Appearance.Text(
         displayText,
         textSize = textSize,
-        typeface = Typeface.NORMAL,
         percentWidth = percentWidth,
         variant = variant
     ),
