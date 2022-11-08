@@ -28,8 +28,8 @@ import org.fcitx.fcitx5.android.input.candidates.CandidateViewBuilder
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
-import org.fcitx.fcitx5.android.input.picker.PickerData
-import org.fcitx.fcitx5.android.input.picker.PickerWindow
+import org.fcitx.fcitx5.android.input.picker.emojiPicker
+import org.fcitx.fcitx5.android.input.picker.symbolPicker
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
 import org.fcitx.fcitx5.android.input.punctuation.PunctuationComponent
@@ -77,8 +77,8 @@ class InputView(
     private val kawaiiBar = KawaiiBarComponent()
     private val horizontalCandidate = HorizontalCandidateComponent()
     private val keyboardWindow = KeyboardWindow()
-    private val symbolPicker = PickerWindow(PickerWindow.Symbol, PickerData.Symbol)
-    private val emojiPicker = PickerWindow(PickerWindow.Emoji, PickerData.Emoji, false)
+    private val symbolPicker = symbolPicker()
+    private val emojiPicker = emojiPicker()
 
     private fun setupScope() {
         scope += this@InputView.wrapToUniqueComponent()

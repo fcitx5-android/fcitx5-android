@@ -19,6 +19,7 @@ import org.mechdancer.dependency.manager.must
 class PickerWindow(
     override val key: PickerKey,
     val data: List<Pair<String, Array<String>>>,
+    val density: PickerPageUi.Density,
     val popupPreview: Boolean = true
 ) : InputWindow.ExtendedInputWindow<PickerWindow>(), EssentialWindow, InputBroadcastReceiver {
 
@@ -95,7 +96,9 @@ class PickerWindow(
 
     override fun onCreateView() = PickerLayout(context, theme).apply {
         pickerLayout = this
-        pickerPagesAdapter = PickerPagesAdapter(theme, keyActionListener, popupListener, data, key.name)
+        pickerPagesAdapter = PickerPagesAdapter(
+            theme, keyActionListener, popupListener, data, density, key.name
+        )
         tabsUi.apply {
             setTabs(pickerPagesAdapter.categories)
             setOnTabClickListener { i ->
