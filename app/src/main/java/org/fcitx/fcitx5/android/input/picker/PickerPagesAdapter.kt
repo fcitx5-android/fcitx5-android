@@ -12,6 +12,7 @@ class PickerPagesAdapter(
     private val keyActionListener: KeyActionListener,
     private val popupListener: PopupListener,
     data: List<Pair<String, Array<String>>>,
+    val density: PickerPageUi.Density,
     recentlyUsedFileName: String
 ) : RecyclerView.Adapter<PickerPagesAdapter.ViewHolder>() {
 
@@ -34,7 +35,7 @@ class PickerPagesAdapter(
      * It does not interleave the layout calculation for data.
      * See the note on [cats] for details
      */
-    private val recentlyUsed = RecentlyUsed(recentlyUsedFileName, ITEMS_PER_PAGE)
+    private val recentlyUsed = RecentlyUsed(recentlyUsedFileName, density.pageSize)
 
     val categories: List<String>
 
@@ -51,14 +52,14 @@ class PickerPagesAdapter(
         pages.add(arrayOf())
         cats = Array(data.size) { i ->
             val v = data[i].second
-            val filled = v.size / ITEMS_PER_PAGE
-            val rest = v.size % ITEMS_PER_PAGE
+            val filled = v.size / density.pageSize
+            val rest = v.size % density.pageSize
             val pageNum = filled + if (rest != 0) 1 else 0
             for (j in start until start + filled) {
-                pages.add(j, (p until p + ITEMS_PER_PAGE).map {
+                pages.add(j, (p until p + density.pageSize).map {
                     concat[it]
                 }.toTypedArray())
-                p += ITEMS_PER_PAGE
+                p += density.pageSize
             }
             if (rest != 0) {
                 pages.add(start + pageNum - 1, (p until p + rest).map {
@@ -105,7 +106,7 @@ class PickerPagesAdapter(
     override fun getItemCount() = pages.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(PickerPageUi(parent.context, theme))
+        return ViewHolder(PickerPageUi(parent.context, theme, density))
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -133,7 +134,5 @@ class PickerPagesAdapter(
     companion object {
         private val Digit = IntRange('0'.code, '9'.code)
         private val FullWidthDigit = IntRange('０'.code, '９'.code)
-
-        private const val ITEMS_PER_PAGE = 28
     }
 }

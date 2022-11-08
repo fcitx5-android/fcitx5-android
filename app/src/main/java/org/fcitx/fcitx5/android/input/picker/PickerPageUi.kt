@@ -21,16 +21,26 @@ import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.matchParent
 
-class PickerPageUi(override val ctx: Context, val theme: Theme) : Ui {
+class PickerPageUi(override val ctx: Context, val theme: Theme, val density: Density) : Ui {
+
+    enum class Density(
+        val pageSize: Int,
+        val columnCount: Int,
+        val rowCount: Int,
+        val textSize: Float,
+        val showBackspace: Boolean
+    ) {
+        // symbol: 10/10/8, backspace on bottom right
+        High(28, 10, 3, 19f, true),
+
+        // emoji: 7/7/6, backspace on bottom right
+        Medium(20, 7, 3, 23.7f, true),
+
+        // emoticon: 4/4/4, no backspace
+        Low(12, 4, 3, 19f, false)
+    }
 
     companion object {
-        val SymbolAppearance = Appearance.Text(
-            displayText = "",
-            textSize = 19f,
-            variant = Variant.Normal,
-            border = Border.Off
-        )
-
         val BackspaceAppearance = Appearance.Image(
             src = R.drawable.ic_baseline_backspace_24,
             variant = Variant.Alternative,
@@ -40,18 +50,21 @@ class PickerPageUi(override val ctx: Context, val theme: Theme) : Ui {
 
         val BackspaceAction = SymAction(KeySym(FcitxKeyMapping.FcitxKey_BackSpace))
 
-        // TODO: configurable grid size
-        const val RowCount = 3
-        const val ColumnCount = 10
-
         private var popupOnKeyPress by AppPrefs.getInstance().keyboard.popupOnKeyPress
     }
 
     var keyActionListener: KeyActionListener? = null
     var popupListener: PopupListener? = null
 
-    private val keyViews = Array(28) {
-        TextKeyView(ctx, theme, SymbolAppearance)
+    private val keyAppearance = Appearance.Text(
+        displayText = "",
+        textSize = density.textSize,
+        variant = Variant.Normal,
+        border = Border.Off
+    )
+
+    private val keyViews = Array(density.pageSize) {
+        TextKeyView(ctx, theme, keyAppearance)
     }
 
     private val backspaceKey = ImageKeyView(ctx, theme, BackspaceAppearance).apply {
@@ -65,50 +78,93 @@ class PickerPageUi(override val ctx: Context, val theme: Theme) : Ui {
     }
 
     override val root = constraintLayout {
-        val keyWidth = 1f / ColumnCount
-        keyViews.forEachIndexed { i, keyView ->
-            val row = i / ColumnCount
-            val column = i % ColumnCount
-            add(keyView, lParams {
-                // layout_constraintTop_to
-                if (row == 0) {
-                    // first row, align top to top of parent
-                    topOfParent()
-                } else {
-                    // not first row, align top to bottom of first view in last row
-                    topToBottomOf(keyViews[(row - 1) * ColumnCount])
+        val columnCount = density.columnCount
+        val rowCount = density.rowCount
+        val keyWidth = 1f / columnCount
+        when (density) {
+            Density.High -> {
+                keyViews.forEachIndexed { i, keyView ->
+                    val row = i / columnCount
+                    val column = i % columnCount
+                    add(keyView, lParams {
+                        // layout_constraintTop_to
+                        if (row == 0) {
+                            // first row, align top to top of parent
+                            topOfParent()
+                        } else {
+                            // not first row, align top to bottom of first view in last row
+                            topToBottomOf(keyViews[(row - 1) * columnCount])
+                        }
+                        // layout_constraintBottom_to
+                        if (row == rowCount - 1) {
+                            // last row, align bottom to bottom of parent
+                            bottomOfParent()
+                        } else {
+                            // not last row, align bottom to top of first view in next row
+                            bottomToTopOf(keyViews[(row + 1) * columnCount])
+                        }
+                        // layout_constraintEnd_to
+                        if (i == keyViews.size - 1) {
+                            // last key (likely not last column), align end to start of backspace button
+                            endToStartOf(backspaceKey)
+                        } else if (column == columnCount - 1) {
+                            // last column, align end to end of parent
+                            endOfParent()
+                        } else {
+                            // neither, align end to start of next view
+                            endToStartOf(keyViews[i + 1])
+                        }
+                        matchConstraintPercentWidth = keyWidth
+                    })
                 }
-                // layout_constraintBottom_to
-                if (row == RowCount - 1) {
-                    // last row, align bottom to bottom of parent
-                    bottomOfParent()
-                } else {
-                    // not last row, align bottom to top of first view in next row
-                    bottomToTopOf(keyViews[(row + 1) * ColumnCount])
+            }
+            Density.Medium -> {
+                keyViews.forEachIndexed { i, keyView ->
+                    val row = i / columnCount
+                    val column = i % columnCount
+                    add(keyView, lParams {
+                        // layout_constraintTop_to
+                        if (row == 0) {
+                            // first row, align top to top of parent
+                            topOfParent()
+                        } else {
+                            // not first row, align top to bottom of first view in last row
+                            topToBottomOf(keyViews[(row - 1) * columnCount])
+                        }
+                        // layout_constraintBottom_to
+                        if (row == rowCount - 1) {
+                            // last row, align bottom to bottom of parent
+                            bottomOfParent()
+                        } else {
+                            // not last row, align bottom to top of first view in next row
+                            bottomToTopOf(keyViews[(row + 1) * columnCount])
+                        }
+                        // layout_constraintStart_to
+                        if (column == 0) {
+                            // first column, align start to start of parent
+                            startOfParent()
+                        } else {
+                            // not first column, align start to end of last column
+                            startToEndOf(keyViews[i - 1])
+                        }
+                        matchConstraintPercentWidth = keyWidth
+                    })
                 }
-                // layout_constraintEnd_to
-                if (i == keyViews.size - 1) {
-                    // last key (likely not last column), align end to start of backspace button
-                    endToStartOf(backspaceKey)
-                } else if (column == ColumnCount - 1) {
-                    // last column, align end to end of parent
-                    endOfParent()
-                } else {
-                    // neither, align end to start of next view
-                    endToStartOf(keyViews[i + 1])
-                }
-                matchConstraintPercentWidth = keyWidth
+            }
+            Density.Low -> {
+                // unused
+            }
+        }
+        if (density.showBackspace) {
+            add(backspaceKey, lParams {
+                // top to bottom of first view of second-last row
+                below(keyViews[(rowCount - 2) * columnCount])
+                // bottom/right corner
+                bottomOfParent()
+                endOfParent()
+                matchConstraintPercentWidth = 0.15f
             })
         }
-        add(backspaceKey, lParams {
-            // top to bottom of first view of second-last row
-            below(keyViews[(RowCount - 2) * ColumnCount])
-            // bottom/right corner
-            bottomOfParent()
-            endOfParent()
-            matchConstraintPercentWidth = 0.15f
-        })
-        // Pages must fill the whole ViewPager2 (use match_parent)
         layoutParams = ViewGroup.LayoutParams(matchParent, matchParent)
     }
 
