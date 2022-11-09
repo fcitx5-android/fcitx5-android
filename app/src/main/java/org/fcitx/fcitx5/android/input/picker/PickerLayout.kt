@@ -17,19 +17,15 @@ class PickerLayout(context: Context, theme: Theme) : ConstraintLayout(context) {
 
     class Keyboard(context: Context, theme: Theme) : BaseKeyboard(context, theme, Layout) {
 
-        class SymbolKey(
-            val symbol: String,
-            percentWidth: Float = 0.1f,
-            variant: Appearance.Variant = Appearance.Variant.Alternative,
-        ) : KeyDef(
+        class PunctuationKey(val symbol: String) : KeyDef(
             Appearance.Text(
                 displayText = symbol,
                 textSize = 23f,
-                percentWidth = percentWidth,
-                variant = variant
+                percentWidth = 0.1f,
+                variant = Appearance.Variant.Alternative
             ),
             setOf(
-                Behavior.Press(action = KeyAction.CommitAction(symbol))
+                Behavior.Press(KeyAction.FcitxKeyAction(symbol))
             )
         )
 
@@ -37,10 +33,10 @@ class PickerLayout(context: Context, theme: Theme) : ConstraintLayout(context) {
             val Layout: List<List<KeyDef>> = listOf(
                 listOf(
                     LayoutSwitchKey("ABC", TextKeyboard.Name),
-                    SymbolKey(","),
+                    PunctuationKey(","),
                     ImageLayoutSwitchKey(R.drawable.ic_number_pad, NumberKeyboard.Name),
                     SpaceKey(),
-                    SymbolKey("."),
+                    PunctuationKey("."),
                     ReturnKey()
                 )
             )

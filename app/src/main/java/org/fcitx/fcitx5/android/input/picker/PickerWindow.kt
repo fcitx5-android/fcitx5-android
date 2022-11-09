@@ -64,6 +64,11 @@ class PickerWindow(
                     windowManager.attachWindow(KeyboardWindow)
                 }
             }
+            is KeyAction.FcitxKeyAction -> {
+                // we want the behavior of CommitAction (commit the character as-is),
+                // but don't want to include it in recently used list
+                commonKeyActionListener.listener.onKeyAction(KeyAction.CommitAction(it.act), source)
+            }
             else -> {
                 if (it is KeyAction.CommitAction) {
                     pickerPagesAdapter.insertRecent(it.text)
