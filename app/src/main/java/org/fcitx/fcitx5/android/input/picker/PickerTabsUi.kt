@@ -31,7 +31,7 @@ class PickerTabsUi(override val ctx: Context, val theme: Theme) : Ui {
         var position: Int = -1
 
         val label = textView {
-            textSize = 14f // sp
+            textSize = 16f // sp
             typeface = Typeface.DEFAULT_BOLD
             setTextColor(theme.keyTextColor)
         }
@@ -70,7 +70,7 @@ class PickerTabsUi(override val ctx: Context, val theme: Theme) : Ui {
         }
 
         fun setActive(active: Boolean) {
-            val color = theme.keyTextColor.alpha(if (active) 1f else 0.3f)
+            val color = theme.keyTextColor.alpha(if (active) 1f else 0.5f)
             label.setTextColor(color)
             icon.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
         }
@@ -83,13 +83,15 @@ class PickerTabsUi(override val ctx: Context, val theme: Theme) : Ui {
 
     override val root = constraintLayout { }
 
-    fun setTabs(labels: List<String>) {
+    fun setTabs(categories: List<PickerData.Category>) {
         tabs.forEach { root.removeView(it.root) }
         selected = -1
-        tabs = Array(labels.size) {
+        tabs = Array(categories.size) {
+            val category = categories[it]
             TabUi().apply {
                 position = it
-                setLabel(labels[it])
+                if (category.icon != 0) setIcon(category.icon)
+                else setLabel(category.label)
                 setActive(false)
             }
         }

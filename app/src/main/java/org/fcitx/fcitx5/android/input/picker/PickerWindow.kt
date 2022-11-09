@@ -18,7 +18,7 @@ import org.mechdancer.dependency.manager.must
 
 class PickerWindow(
     override val key: PickerKey,
-    val data: List<Pair<String, Array<String>>>,
+    val data: List<Pair<PickerData.Category, Array<String>>>,
     val density: PickerPageUi.Density,
     val popupPreview: Boolean = true
 ) : InputWindow.ExtendedInputWindow<PickerWindow>(), EssentialWindow, InputBroadcastReceiver {
