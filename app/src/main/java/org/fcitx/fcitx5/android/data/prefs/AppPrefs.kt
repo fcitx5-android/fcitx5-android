@@ -3,6 +3,7 @@ package org.fcitx.fcitx5.android.data.prefs
 import android.content.SharedPreferences
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
+import org.fcitx.fcitx5.android.input.keyboard.SwipeSymbolDirection
 
 class AppPrefs(private val sharedPreferences: SharedPreferences) {
 
@@ -27,12 +28,26 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
         val expandToolbarByDefault =
             switch(R.string.expand_toolbar_by_default, "expand_toolbar_by_default", false)
         val popupOnKeyPress = switch(R.string.popup_on_key_press, "popup_on_key_press", true)
-        val swipeUpKeyBehavior =
-            switch(R.string.swipe_up_key_behavior, "swipe_up_key_behavior", false)
         val keepLettersUppercase = switch(
             R.string.keep_keyboard_letters_uppercase,
             "keep_keyboard_letters_uppercase",
             false
+        )
+        val swipeSymbolDirection = list(
+            R.string.swipe_symbol_behavior,
+            "swipe_symbol_behavior",
+            SwipeSymbolDirection.Down,
+            SwipeSymbolDirection,
+            listOf(
+                SwipeSymbolDirection.Up,
+                SwipeSymbolDirection.Down,
+                SwipeSymbolDirection.Disabled
+            ),
+            listOf(
+                R.string.swipe_up,
+                R.string.swipe_down,
+                R.string.disabled
+            )
         )
         val longPressDelay = int(
             R.string.keyboard_long_press_delay,

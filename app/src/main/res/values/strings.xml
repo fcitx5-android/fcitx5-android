@@ -158,5 +158,8 @@
     <string name="disable_addon_warn_title">Disabling %1$s will also</string>
     <string name="disable_addon_warn_dep">Disable %1$s</string>
     <string name="disable_addon_warn_optdep">Disable some features in %1$s</string>
-    <string name="swipe_up_key_behavior">Swipe up to input punctuations and digits</string>
+    <string name="swipe_symbol_behavior">Swipe to input punctuations and digits</string>
+    <string name="swipe_down">Swipe down</string>
+    <string name="swipe_up">Swipe up</string>
+    <string name="disabled">Disabled</string>
 </resources>

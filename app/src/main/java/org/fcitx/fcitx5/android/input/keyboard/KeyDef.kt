@@ -74,7 +74,7 @@ open class KeyDef(
             val action: KeyAction
         ) : Behavior()
 
-        class SwipeDown(
+        class Swipe(
             val action: KeyAction
         ) : Behavior()
 

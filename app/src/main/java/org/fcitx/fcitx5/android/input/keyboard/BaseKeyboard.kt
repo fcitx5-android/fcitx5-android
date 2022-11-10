@@ -28,8 +28,8 @@ abstract class BaseKeyboard(
 
     var keyActionListener: KeyActionListener? = null
 
-    private var popupOnKeyPress by AppPrefs.getInstance().keyboard.popupOnKeyPress
-    private val swipeUpKeyBehavior by AppPrefs.getInstance().keyboard.swipeUpKeyBehavior
+    private val popupOnKeyPress by AppPrefs.getInstance().keyboard.popupOnKeyPress
+    private val swipeSymbolDirection by AppPrefs.getInstance().keyboard.swipeSymbolDirection
 
     var keyPopupListener: PopupListener? = null
 
@@ -139,20 +139,17 @@ abstract class BaseKeyboard(
                             onAction(it.action)
                         }
                     }
-                    is KeyDef.Behavior.SwipeDown -> {
+                    is KeyDef.Behavior.Swipe -> {
                         swipeEnabled = true
                         swipeThresholdY = inputSwipeThreshold
                         val oldOnGestureListener = onGestureListener ?: OnGestureListener.Empty
                         onGestureListener = OnGestureListener { view, event ->
+                            if (swipeSymbolDirection == SwipeSymbolDirection.Disabled) {
+                                return@OnGestureListener false
+                            }
                             when (event.type) {
                                 GestureType.Up -> {
-                                    val triggered = event.totalY.let { x ->
-                                        if (swipeUpKeyBehavior)
-                                            x < 0
-                                        else
-                                            x > 0
-                                    }
-                                    if (!event.consumed && triggered) {
+                                    if (!event.consumed && swipeSymbolDirection.checkY(event.totalY)) {
                                         onAction(it.action)
                                         true
                                     } else {
@@ -221,13 +218,17 @@ abstract class BaseKeyboard(
                     is KeyDef.Popup.AltPreview -> {
                         val oldOnGestureListener = onGestureListener ?: OnGestureListener.Empty
                         onGestureListener = OnGestureListener { view, event ->
+                            if (swipeSymbolDirection == SwipeSymbolDirection.Disabled) {
+                                return@OnGestureListener false
+                            }
                             view as KeyView
                             when (event.type) {
                                 GestureType.Down -> {
                                     onPopupPreview(view.id, it.content, view.bounds)
                                 }
                                 GestureType.Move -> {
-                                    val text = if (event.totalY > 0) it.alternative else it.content
+                                    val triggered = swipeSymbolDirection.checkY(event.totalY)
+                                    val text = if (triggered) it.alternative else it.content
                                     onPopupPreviewUpdate(view.id, text)
                                 }
                                 GestureType.Up -> {
