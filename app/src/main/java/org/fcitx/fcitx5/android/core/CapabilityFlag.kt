@@ -73,12 +73,11 @@ value class CapabilityFlags constructor(val flags: ULong) {
         fun mergeFlags(arr: Array<out CapabilityFlag>): ULong =
             arr.fold(CapabilityFlag.NoFlag.flag) { acc, it -> acc or it.flag }
 
-        private val DefaultFlags
-            get() = CapabilityFlags(
-                CapabilityFlag.Preedit,
-                CapabilityFlag.ClientUnfocusCommit,
-                CapabilityFlag.ClientSideInputPanel,
-            )
+        private val DefaultFlags = CapabilityFlags(
+            CapabilityFlag.Preedit.flag or
+                    CapabilityFlag.ClientUnfocusCommit.flag or
+                    CapabilityFlag.ClientSideInputPanel.flag
+        )
 
         fun fromEditorInfo(info: EditorInfo?): CapabilityFlags {
             var flags = DefaultFlags.flags
