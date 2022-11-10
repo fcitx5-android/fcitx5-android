@@ -37,8 +37,7 @@ class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
     }
 
     private fun disableAddon(entry: AddonInfo, reset: () -> Unit) {
-        val dependents = fcitx
-            .runImmediately { getAddonReverseDependencies(entry.uniqueName) }
+        val dependents = fcitx.runImmediately { getAddonReverseDependencies(entry.uniqueName) }
         if (dependents.isNotEmpty()) {
             fun f(depTy: FcitxAPI.AddonDep) =
                 dependents.mapNotNull {
@@ -47,10 +46,7 @@ class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
                         ?.let { u -> it.first to (addonDisplayNames[u] ?: u) }
                 }
 
-            fun mkStr(
-                list: List<Pair<String, String>>,
-                @StringRes template: Int
-            ) =
+            fun mkStr(list: List<Pair<String, String>>, @StringRes template: Int) =
                 list.takeIf { it.isNotEmpty() }
                     ?.joinToString(", ") { it.second }
                     ?.let { getString(template, it) }
@@ -62,18 +58,19 @@ class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
 
             if (depStr != null || optDepStr != null) {
                 val msg = buildString {
+                    appendLine(getString(R.string.disable_addon_warn_name, entry.displayName))
                     depStr?.let {
                         append("- ")
                         appendLine(it)
                     }
                     optDepStr?.let {
-                        appendLine()
                         append("- ")
                         appendLine(it)
                     }
+                    appendLine(getString(R.string.disable_addon_warn_confirm))
                 }
                 AlertDialog.Builder(requireContext())
-                    .setTitle(getString(R.string.disable_addon_warn_title, entry.displayName))
+                    .setTitle(getString(R.string.disable_addon_warn_title))
                     .setIcon(R.drawable.ic_baseline_error_24)
                     .setMessage(msg)
                     .setCancelable(false)
