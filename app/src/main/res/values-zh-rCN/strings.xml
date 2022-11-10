@@ -155,4 +155,13 @@
     <string name="keyboard_bottom_padding">键盘底部边距</string>
     <string name="keyboard_side_padding">键盘两侧边距</string>
     <string name="clipboard_suggestion">显示剪贴板提示</string>
+    <string name="disable_addon_warn_title">禁用附加组件</string>
+    <string name="disable_addon_warn_name">禁用%1$s将同时：</string>
+    <string name="disable_addon_warn_dep">禁用%1$s</string>
+    <string name="disable_addon_warn_optdep">禁用%1$s中的某些功能</string>
+    <string name="disable_addon_warn_confirm">确定要禁用它吗？</string>
+    <string name="swipe_symbol_behavior">划动输入标点符号及数字</string>
+    <string name="swipe_down">下划</string>
+    <string name="swipe_up">上划</string>
+    <string name="disabled">禁用</string>
 </resources>
