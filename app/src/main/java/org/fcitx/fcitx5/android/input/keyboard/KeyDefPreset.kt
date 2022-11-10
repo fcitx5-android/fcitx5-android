@@ -168,7 +168,7 @@ class CommaKey(
                 Popup.Menu.Item(
                     "Emoji",
                     R.drawable.ic_baseline_tag_faces_24,
-                    KeyAction.LayoutSwitchAction(PickerWindow.Emoji.name)
+                    KeyAction.PickerSwitchAction()
                 ),
                 Popup.Menu.Item(
                     "QuickPhrase",
@@ -246,7 +246,7 @@ class ImageLayoutSwitchKey(
 class ImagePickerSwitchKey(
     @DrawableRes
     icon: Int,
-    to: PickerWindow.PickerKey,
+    to: PickerWindow.Key,
     percentWidth: Float = 0.1f,
     variant: Variant = Variant.AltForeground,
     viewId: Int = -1
@@ -264,7 +264,7 @@ class ImagePickerSwitchKey(
 
 class TextPickerSwitchKey(
     text: String,
-    to: PickerWindow.PickerKey,
+    to: PickerWindow.Key,
     percentWidth: Float = 0.1f,
     variant: Variant = Variant.AltForeground,
     viewId: Int = -1

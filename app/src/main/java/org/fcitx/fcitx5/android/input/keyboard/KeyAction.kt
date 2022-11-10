@@ -33,6 +33,5 @@ sealed class KeyAction {
 
     data class DeleteSelectionAction(val totalCnt: Int = 0) : KeyAction()
 
-    // only handled in PickerWindow
-    data class PickerSwitchAction(val key: PickerWindow.PickerKey) : KeyAction()
+    data class PickerSwitchAction(val key: PickerWindow.Key? = null) : KeyAction()
 }

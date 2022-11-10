@@ -17,19 +17,17 @@ import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.mechdancer.dependency.manager.must
 
 class PickerWindow(
-    override val key: PickerKey,
+    override val key: Key,
     val data: List<Pair<PickerData.Category, Array<String>>>,
     val density: PickerPageUi.Density,
     private val switchKey: KeyDef,
     val popupPreview: Boolean = true
 ) : InputWindow.ExtendedInputWindow<PickerWindow>(), EssentialWindow, InputBroadcastReceiver {
 
-    class PickerKey(val name: String) : EssentialWindow.Key
-
-    companion object {
-        val Symbol = PickerKey("symbol")
-        val Emoji = PickerKey("emoji")
-        val Emoticon = PickerKey("emoticon")
+    enum class Key : EssentialWindow.Key {
+        Symbol,
+        Emoji,
+        Emoticon
     }
 
     private val theme by manager.theme()
@@ -70,9 +68,6 @@ class PickerWindow(
                 // we want the behavior of CommitAction (commit the character as-is),
                 // but don't want to include it in recently used list
                 commonKeyActionListener.listener.onKeyAction(KeyAction.CommitAction(it.act), source)
-            }
-            is KeyAction.PickerSwitchAction -> {
-                windowManager.attachWindow(it.key)
             }
             else -> {
                 if (it is KeyAction.CommitAction) {

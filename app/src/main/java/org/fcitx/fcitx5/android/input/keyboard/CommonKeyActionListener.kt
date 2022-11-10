@@ -1,9 +1,11 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import org.fcitx.fcitx5.android.core.FcitxAPI
 import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
@@ -12,7 +14,9 @@ import org.fcitx.fcitx5.android.input.dialog.AddMoreInputMethodsPrompt
 import org.fcitx.fcitx5.android.input.dialog.InputMethodSwitcherDialog
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener.BackspaceSwipeState.*
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction.*
+import org.fcitx.fcitx5.android.input.picker.PickerWindow
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
+import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.inputConnection
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
@@ -31,7 +35,10 @@ class CommonKeyActionListener :
     private val fcitx by manager.fcitx()
     private val service by manager.inputMethodService()
     private val inputView by manager.inputView()
+    private val windowManager: InputWindowManager by manager.must()
     private val preedit: PreeditComponent by manager.must()
+
+    private var lastPickerType by AppPrefs.getInstance().internal.lastPickerType
 
     private var backspaceSwipeState = Stopped
 
@@ -106,6 +113,15 @@ class CommonKeyActionListener :
                             }
                         }
                         backspaceSwipeState = Stopped
+                    }
+                    is PickerSwitchAction -> {
+                        // update lastSymbolType only when specified explicitly
+                        val key = action.key?.also { k -> lastPickerType = k.name }
+                            ?: runCatching { PickerWindow.Key.valueOf(lastPickerType) }.getOrNull()
+                            ?: PickerWindow.Key.Emoji
+                        ContextCompat.getMainExecutor(service).execute {
+                            windowManager.attachWindow(key)
+                        }
                     }
                     else -> {
                     }

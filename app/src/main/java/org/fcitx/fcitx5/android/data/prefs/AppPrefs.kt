@@ -4,12 +4,14 @@ import android.content.SharedPreferences
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
 import org.fcitx.fcitx5.android.input.keyboard.SwipeSymbolDirection
+import org.fcitx.fcitx5.android.input.picker.PickerWindow
 
 class AppPrefs(private val sharedPreferences: SharedPreferences) {
 
     inner class Internal : ManagedPreferenceInternal(sharedPreferences) {
         val firstRun = bool("first_run", true)
-        val lastSymbolLayout = string("last_symbol_layout", "NumSym")
+        val lastSymbolLayout = string("last_symbol_layout", PickerWindow.Key.Symbol.name)
+        val lastPickerType = string("last_picker_type", PickerWindow.Key.Emoji.name)
         val verboseLog = bool("verbose_log", false)
         val pid = int("pid", 0)
     }
