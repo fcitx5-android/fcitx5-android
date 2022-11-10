@@ -27,6 +27,8 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
         val expandToolbarByDefault =
             switch(R.string.expand_toolbar_by_default, "expand_toolbar_by_default", false)
         val popupOnKeyPress = switch(R.string.popup_on_key_press, "popup_on_key_press", true)
+        val swipeUpKeyBehavior =
+            switch(R.string.swipe_up_key_behavior, "swipe_up_key_behavior", false)
         val keepLettersUppercase = switch(
             R.string.keep_keyboard_letters_uppercase,
             "keep_keyboard_letters_uppercase",

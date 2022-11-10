@@ -29,6 +29,7 @@ abstract class BaseKeyboard(
     var keyActionListener: KeyActionListener? = null
 
     private var popupOnKeyPress by AppPrefs.getInstance().keyboard.popupOnKeyPress
+    private val swipeUpKeyBehavior by AppPrefs.getInstance().keyboard.swipeUpKeyBehavior
 
     var keyPopupListener: PopupListener? = null
 
@@ -86,7 +87,8 @@ abstract class BaseKeyboard(
                         GestureType.Move -> when (val count = event.countX) {
                             0 -> false
                             else -> {
-                                val sym = if (count > 0) FcitxKeyMapping.FcitxKey_Right else FcitxKeyMapping.FcitxKey_Left
+                                val sym =
+                                    if (count > 0) FcitxKeyMapping.FcitxKey_Right else FcitxKeyMapping.FcitxKey_Left
                                 val action = KeyAction.SymAction(KeySym(sym), KeyStates.Empty)
                                 repeat(count.absoluteValue) {
                                     onAction(action)
@@ -144,7 +146,13 @@ abstract class BaseKeyboard(
                         onGestureListener = OnGestureListener { view, event ->
                             when (event.type) {
                                 GestureType.Up -> {
-                                    if (!event.consumed && event.totalY > 0) {
+                                    val triggered = event.totalY.let { x ->
+                                        if (swipeUpKeyBehavior)
+                                            x < 0
+                                        else
+                                            x > 0
+                                    }
+                                    if (!event.consumed && triggered) {
                                         onAction(it.action)
                                         true
                                     } else {
@@ -165,7 +173,7 @@ abstract class BaseKeyboard(
             }
             def.popup?.forEach {
                 when (it) {
-                // TODO: gesture processing middleware
+                    // TODO: gesture processing middleware
                     is KeyDef.Popup.Menu -> {
                         setOnLongClickListener { view ->
                             view as KeyView
