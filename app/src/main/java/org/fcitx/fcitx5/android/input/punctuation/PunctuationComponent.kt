@@ -32,15 +32,15 @@ class PunctuationComponent : InputBroadcastReceiver,
 
     private var updateJob: Job? = null
 
-    private fun updateMapping() {
+    private fun updateMapping(lang: String? = null) {
         updateJob = service.lifecycleScope.launch {
             updateJob?.cancel()
             mapping = if (enabled) {
                 fcitx.runOnReady {
-                    PunctuationManager.load(this, inputMethodEntryCached.languageCode)
+                    PunctuationManager.load(this, lang ?: inputMethodEntryCached.languageCode)
                         .associate { it.key to it.mapping }
                 }
-            } else mapOf()
+            } else emptyMap()
             broadcaster.onPunctuationUpdate(mapping)
             updateJob = null
         }
@@ -55,6 +55,6 @@ class PunctuationComponent : InputBroadcastReceiver,
     }
 
     override fun onImeUpdate(ime: InputMethodEntry) {
-        updateMapping()
+        updateMapping(ime.languageCode)
     }
 }
