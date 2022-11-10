@@ -30,6 +30,7 @@ import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
 import org.fcitx.fcitx5.android.input.picker.emojiPicker
 import org.fcitx.fcitx5.android.input.picker.symbolPicker
+import org.fcitx.fcitx5.android.input.picker.emoticonPicker
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
 import org.fcitx.fcitx5.android.input.punctuation.PunctuationComponent
@@ -79,6 +80,7 @@ class InputView(
     private val keyboardWindow = KeyboardWindow()
     private val symbolPicker = symbolPicker()
     private val emojiPicker = emojiPicker()
+    private val emoticonPicker = emoticonPicker()
 
     private fun setupScope() {
         scope += this@InputView.wrapToUniqueComponent()
@@ -98,6 +100,7 @@ class InputView(
         scope += keyboardWindow
         scope += symbolPicker
         scope += emojiPicker
+        scope += emoticonPicker
         broadcaster.onScopeSetupFinished(scope)
     }
 
@@ -161,6 +164,7 @@ class InputView(
 
         windowManager.addEssentialWindow(symbolPicker)
         windowManager.addEssentialWindow(emojiPicker)
+        windowManager.addEssentialWindow(emoticonPicker)
 
         broadcaster.onImeUpdate(fcitx.runImmediately { inputMethodEntryCached })
 

@@ -13,9 +13,21 @@ import splitties.views.dsl.core.add
 import splitties.views.dsl.core.view
 
 @SuppressLint("ViewConstructor")
-class PickerLayout(context: Context, theme: Theme) : ConstraintLayout(context) {
+class PickerLayout(context: Context, theme: Theme, switchKey: KeyDef) :
+    ConstraintLayout(context) {
 
-    class Keyboard(context: Context, theme: Theme) : BaseKeyboard(context, theme, Layout) {
+    class Keyboard(context: Context, theme: Theme, switchKey: KeyDef) : BaseKeyboard(
+        context, theme, listOf(
+            listOf(
+                LayoutSwitchKey("ABC", TextKeyboard.Name),
+                PunctuationKey(","),
+                switchKey,
+                SpaceKey(),
+                PunctuationKey("."),
+                ReturnKey()
+            )
+        )
+    ) {
 
         class PunctuationKey(val symbol: String) : KeyDef(
             Appearance.Text(
@@ -29,24 +41,11 @@ class PickerLayout(context: Context, theme: Theme) : ConstraintLayout(context) {
             )
         )
 
-        companion object {
-            val Layout: List<List<KeyDef>> = listOf(
-                listOf(
-                    LayoutSwitchKey("ABC", TextKeyboard.Name),
-                    PunctuationKey(","),
-                    ImageLayoutSwitchKey(R.drawable.ic_number_pad, NumberKeyboard.Name),
-                    SpaceKey(),
-                    PunctuationKey("."),
-                    ReturnKey()
-                )
-            )
-        }
-
         val backspace: ImageKeyView by lazy { findViewById(R.id.button_backspace) }
         val `return`: ImageKeyView by lazy { findViewById(R.id.button_return) }
     }
 
-    val embeddedKeyboard = Keyboard(context, theme)
+    val embeddedKeyboard = Keyboard(context, theme, switchKey)
 
     val pager = view(::ViewPager2) { }
 

@@ -20,6 +20,7 @@ class PickerWindow(
     override val key: PickerKey,
     val data: List<Pair<PickerData.Category, Array<String>>>,
     val density: PickerPageUi.Density,
+    private val switchKey: KeyDef,
     val popupPreview: Boolean = true
 ) : InputWindow.ExtendedInputWindow<PickerWindow>(), EssentialWindow, InputBroadcastReceiver {
 
@@ -28,6 +29,7 @@ class PickerWindow(
     companion object {
         val Symbol = PickerKey("symbol")
         val Emoji = PickerKey("emoji")
+        val Emoticon = PickerKey("emoticon")
     }
 
     private val theme by manager.theme()
@@ -40,14 +42,14 @@ class PickerWindow(
 
     override fun enterAnimation(lastWindow: InputWindow): Transition? {
         // disable animation switching between keyboard
-        return if (lastWindow !is KeyboardWindow)
+        return if (lastWindow !is KeyboardWindow && lastWindow !is PickerWindow)
             Slide().apply { slideEdge = Gravity.BOTTOM }
         else null
     }
 
     override fun exitAnimation(nextWindow: InputWindow): Transition? {
         // disable animation switching between keyboard
-        return if (nextWindow !is KeyboardWindow)
+        return if (nextWindow !is KeyboardWindow && nextWindow !is PickerWindow)
             super.exitAnimation(nextWindow)
         else null
     }
@@ -69,6 +71,9 @@ class PickerWindow(
                 // but don't want to include it in recently used list
                 commonKeyActionListener.listener.onKeyAction(KeyAction.CommitAction(it.act), source)
             }
+            is KeyAction.PickerSwitchAction -> {
+                windowManager.attachWindow(it.key)
+            }
             else -> {
                 if (it is KeyAction.CommitAction) {
                     pickerPagesAdapter.insertRecent(it.text)
@@ -85,7 +90,11 @@ class PickerWindow(
                 popup.listener.onPreview(viewId, content, bounds)
             }
 
-            override fun onShowKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
+            override fun onShowKeyboard(
+                viewId: Int,
+                keyboard: KeyDef.Popup.Keyboard,
+                bounds: Rect
+            ) {
                 // prevent ViewPager from consuming swipe gesture when popup keyboard shown
                 pickerLayout.pager.isUserInputEnabled = false
                 popup.listener.onShowKeyboard(viewId, keyboard, bounds)
@@ -99,7 +108,7 @@ class PickerWindow(
         }
     }
 
-    override fun onCreateView() = PickerLayout(context, theme).apply {
+    override fun onCreateView() = PickerLayout(context, theme, switchKey).apply {
         pickerLayout = this
         pickerPagesAdapter = PickerPagesAdapter(
             theme, keyActionListener, popupListener, data, density, key.name

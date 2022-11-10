@@ -2,7 +2,9 @@ package org.fcitx.fcitx5.android.input.picker
 
 import android.content.Context
 import android.graphics.Rect
+import android.util.TypedValue
 import android.view.ViewGroup
+import androidx.core.widget.TextViewCompat
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxKeyMapping
 import org.fcitx.fcitx5.android.core.KeySym
@@ -118,10 +120,21 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, val density: Den
                     })
                 }
             }
-            Density.Medium -> {
+            Density.Medium, Density.Low -> {
                 keyViews.forEachIndexed { i, keyView ->
                     val row = i / columnCount
                     val column = i % columnCount
+                    if (density == Density.Low)
+                        keyView.mainText.apply {
+                            maxLines = 1
+                            TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
+                                this,
+                                4,
+                                density.textSize.toInt(),
+                                1,
+                                TypedValue.COMPLEX_UNIT_SP
+                            )
+                        }
                     add(keyView, lParams {
                         // layout_constraintTop_to
                         if (row == 0) {
@@ -150,9 +163,6 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, val density: Den
                         matchConstraintPercentWidth = keyWidth
                     })
                 }
-            }
-            Density.Low -> {
-                // unused
             }
         }
         if (density.showBackspace) {

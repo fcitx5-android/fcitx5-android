@@ -243,6 +243,45 @@ class ImageLayoutSwitchKey(
     )
 )
 
+class ImagePickerSwitchKey(
+    @DrawableRes
+    icon: Int,
+    to: PickerWindow.PickerKey,
+    percentWidth: Float = 0.1f,
+    variant: Variant = Variant.AltForeground,
+    viewId: Int = -1
+) : KeyDef(
+    Appearance.Image(
+        src = icon,
+        percentWidth = percentWidth,
+        variant = variant,
+        viewId = viewId
+    ),
+    setOf(
+        Behavior.Press(KeyAction.PickerSwitchAction(to))
+    )
+)
+
+class TextPickerSwitchKey(
+    text: String,
+    to: PickerWindow.PickerKey,
+    percentWidth: Float = 0.1f,
+    variant: Variant = Variant.AltForeground,
+    viewId: Int = -1
+) : KeyDef(
+    Appearance.Text(
+        displayText = text,
+        textSize = 16f,
+        percentWidth = percentWidth,
+        variant = variant,
+        viewId = viewId,
+        textStyle = Typeface.BOLD
+    ),
+    setOf(
+        Behavior.Press(KeyAction.PickerSwitchAction(to))
+    )
+)
+
 class MiniSpaceKey : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_baseline_space_bar_24,

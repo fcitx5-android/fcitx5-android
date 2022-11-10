@@ -3,6 +3,7 @@ package org.fcitx.fcitx5.android.input.keyboard
 import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
+import org.fcitx.fcitx5.android.input.picker.PickerWindow
 
 sealed class KeyAction {
 
@@ -31,4 +32,7 @@ sealed class KeyAction {
     data class MoveSelectionAction(val start: Int = 0, val end: Int = 0) : KeyAction()
 
     data class DeleteSelectionAction(val totalCnt: Int = 0) : KeyAction()
+
+    // only handled in PickerWindow
+    data class PickerSwitchAction(val key: PickerWindow.PickerKey) : KeyAction()
 }
