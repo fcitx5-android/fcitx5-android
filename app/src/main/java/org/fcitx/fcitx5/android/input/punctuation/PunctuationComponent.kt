@@ -1,8 +1,9 @@
 package org.fcitx.fcitx5.android.input.punctuation
 
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.punctuation.PunctuationManager
@@ -30,19 +31,20 @@ class PunctuationComponent : InputBroadcastReceiver,
 
     fun transform(p: String) = mapping.getOrDefault(p, p)
 
-    private var updateJob: Job? = null
+    // Semaphore guarantees that all suspending acquirers are processed in FIFO order
+    val semaphore = Semaphore(1)
 
     private fun updateMapping() {
-        updateJob = service.lifecycleScope.launch {
-            updateJob?.cancel()
-            mapping = if (enabled) {
-                fcitx.runOnReady {
-                    PunctuationManager.load(this, inputMethodEntryCached.languageCode)
-                        .associate { it.key to it.mapping }
-                }
-            } else mapOf()
-            broadcaster.onPunctuationUpdate(mapping)
-            updateJob = null
+        service.lifecycleScope.launch {
+            semaphore.withPermit {
+                mapping = if (enabled) {
+                    fcitx.runOnReady {
+                        PunctuationManager.load(this, inputMethodEntryCached.languageCode)
+                            .associate { it.key to it.mapping }
+                    }
+                } else mapOf()
+                broadcaster.onPunctuationUpdate(mapping)
+            }
         }
     }
 
