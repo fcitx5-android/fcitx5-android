@@ -50,16 +50,17 @@ abstract class ManagedPreferenceCategory(
         title: Int,
         key: String,
         defaultValue: Int,
-        min: Int,
-        max: Int,
+        min: Int = 0,
+        max: Int = Int.MAX_VALUE,
         unit: String = "",
         step: Int = 1,
         enableUiOn: () -> Boolean = { true },
     ): ManagedPreference.PInt {
         val pref = ManagedPreference.PInt(sharedPreferences, key, defaultValue)
-        val ui = ManagedPreferenceUi.SeekBarInt(
-            title, key, defaultValue, min, max, unit, step, enableUiOn
-        )
+        val ui = if ((max - min) / step >= 240)
+            ManagedPreferenceUi.EditTextInt(title, key, defaultValue, min, max, unit, enableUiOn)
+        else
+            ManagedPreferenceUi.SeekBarInt(title, key, defaultValue, min, max, unit, step, enableUiOn)
         pref.register()
         ui.registerUi()
         return pref
