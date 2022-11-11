@@ -46,7 +46,7 @@
           cmakeVersion = "3.22.1";
           buildToolsVersion = "33.0.0";
           platformToolsVersion = "33.0.2";
-          platformVersion = "33";
+          platformVersion = "19";
           ndkVersion = "24.0.8215888";
           abiVersions = [ "arm64-v8a" "armeabi-v7a" ];
           androidComposition = prev.androidenv.composeAndroidPackages {

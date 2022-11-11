@@ -36,7 +36,7 @@ val defaultABI = "arm64-v8a"
 
 android {
     namespace = "org.fcitx.fcitx5.android"
-    compileSdk = 33
+    compileSdk = 19
     buildToolsVersion = "33.0.0"
     ndkVersion = System.getenv("NDK_VERSION") ?: "25.0.8775105"
 
