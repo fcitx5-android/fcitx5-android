@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Rect
 import android.util.TypedValue
 import android.view.ViewGroup
+import androidx.core.view.updateLayoutParams
 import androidx.core.widget.TextViewCompat
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxKeyMapping
@@ -22,6 +23,8 @@ import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.matchParent
+import splitties.views.gravityCenter
+import splitties.views.lines
 
 class PickerPageUi(override val ctx: Context, val theme: Theme, val density: Density) : Ui {
 
@@ -66,7 +69,21 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, val density: Den
     )
 
     private val keyViews = Array(density.pageSize) {
-        TextKeyView(ctx, theme, keyAppearance)
+        TextKeyView(ctx, theme, keyAppearance).apply {
+            if (density == Density.Low) {
+                mainText.apply {
+                    lines = 1
+                    gravity = gravityCenter
+                    updateLayoutParams {
+                        width = matchParent
+                        height = matchParent
+                    }
+                }
+                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
+                    mainText, 4, density.textSize.toInt(), 1, TypedValue.COMPLEX_UNIT_SP
+                )
+            }
+        }
     }
 
     private val backspaceKey = ImageKeyView(ctx, theme, BackspaceAppearance).apply {
@@ -124,17 +141,6 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, val density: Den
                 keyViews.forEachIndexed { i, keyView ->
                     val row = i / columnCount
                     val column = i % columnCount
-                    if (density == Density.Low)
-                        keyView.mainText.apply {
-                            maxLines = 1
-                            TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
-                                this,
-                                4,
-                                density.textSize.toInt(),
-                                1,
-                                TypedValue.COMPLEX_UNIT_SP
-                            )
-                        }
                     add(keyView, lParams {
                         // layout_constraintTop_to
                         if (row == 0) {
