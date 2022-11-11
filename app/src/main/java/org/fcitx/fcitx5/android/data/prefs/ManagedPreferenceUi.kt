@@ -2,18 +2,22 @@ package org.fcitx.fcitx5.android.data.prefs
 
 import android.content.Context
 import androidx.annotation.StringRes
+import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.SwitchPreference
 import org.fcitx.fcitx5.android.ui.main.settings.DialogSeekBarPreference
+import org.fcitx.fcitx5.android.ui.main.settings.EditTextIntPreference
 import org.fcitx.fcitx5.android.ui.main.settings.TwinSeekBarPreference
 
 abstract class ManagedPreferenceUi<T : Preference>(
     val key: String,
-    val enableUiOn: () -> Boolean
+    private val enableUiOn: (() -> Boolean)? = null
 ) {
 
     abstract fun createUi(context: Context): T
+
+    fun isEnabled() = enableUiOn?.invoke() ?: true
 
     class Switch(
         @StringRes
@@ -22,18 +26,17 @@ abstract class ManagedPreferenceUi<T : Preference>(
         val defaultValue: Boolean,
         @StringRes
         val summary: Int? = null,
-        enableUiOn: () -> Boolean = { true }
+        enableUiOn: (() -> Boolean)? = null
     ) : ManagedPreferenceUi<SwitchPreference>(key, enableUiOn) {
-        override fun createUi(context: Context): SwitchPreference =
-            SwitchPreference(context).apply {
-                key = this@Switch.key
-                isIconSpaceReserved = false
-                isSingleLineTitle = false
-                setDefaultValue(defaultValue)
-                if (this@Switch.summary != null)
-                    setSummary(this@Switch.summary)
-                setTitle(this@Switch.title)
-            }
+        override fun createUi(context: Context) = SwitchPreference(context).apply {
+            key = this@Switch.key
+            isIconSpaceReserved = false
+            isSingleLineTitle = false
+            setDefaultValue(defaultValue)
+            if (this@Switch.summary != null)
+                setSummary(this@Switch.summary)
+            setTitle(this@Switch.title)
+        }
     }
 
     class StringList<T : Any>(
@@ -45,9 +48,9 @@ abstract class ManagedPreferenceUi<T : Preference>(
         val entryValues: List<T>,
         @StringRes
         val entryLabels: List<Int>,
-        enableUiOn: () -> Boolean = { true },
+        enableUiOn: (() -> Boolean)? = null
     ) : ManagedPreferenceUi<ListPreference>(key, enableUiOn) {
-        override fun createUi(context: Context): ListPreference = ListPreference(context).apply {
+        override fun createUi(context: Context) = ListPreference(context).apply {
             key = this@StringList.key
             isIconSpaceReserved = false
             isSingleLineTitle = false
@@ -68,7 +71,7 @@ abstract class ManagedPreferenceUi<T : Preference>(
         val min: Int,
         val max: Int,
         val unit: String = "",
-        enableUiOn: () -> Boolean = { true }
+        enableUiOn: (() -> Boolean)? = null
     ) : ManagedPreferenceUi<EditTextPreference>(key, enableUiOn) {
         override fun createUi(context: Context) = EditTextIntPreference(context).apply {
             key = this@EditTextInt.key
@@ -92,23 +95,21 @@ abstract class ManagedPreferenceUi<T : Preference>(
         val min: Int,
         val max: Int,
         val unit: String = "",
-        val step: Int,
-        enableUiOn: () -> Boolean = { true },
+        val step: Int = 1,
+        enableUiOn: (() -> Boolean)? = null
     ) : ManagedPreferenceUi<DialogSeekBarPreference>(key, enableUiOn) {
-        override fun createUi(context: Context): DialogSeekBarPreference =
-            DialogSeekBarPreference(context).apply {
-                key = this@SeekBarInt.key
-                isIconSpaceReserved = false
-                isSingleLineTitle = false
-                summaryProvider = DialogSeekBarPreference.SimpleSummaryProvider
-                setDefaultValue(this@SeekBarInt.defaultValue)
-                setTitle(this@SeekBarInt.title)
-                min = this@SeekBarInt.min
-                max = this@SeekBarInt.max
-                unit = this@SeekBarInt.unit
-                step = this@SeekBarInt.step
-            }
-
+        override fun createUi(context: Context) = DialogSeekBarPreference(context).apply {
+            key = this@SeekBarInt.key
+            isIconSpaceReserved = false
+            isSingleLineTitle = false
+            summaryProvider = DialogSeekBarPreference.SimpleSummaryProvider
+            setDefaultValue(this@SeekBarInt.defaultValue)
+            setTitle(this@SeekBarInt.title)
+            min = this@SeekBarInt.min
+            max = this@SeekBarInt.max
+            unit = this@SeekBarInt.unit
+            step = this@SeekBarInt.step
+        }
     }
 
     class TwinSeekBarInt(
@@ -125,24 +126,23 @@ abstract class ManagedPreferenceUi<T : Preference>(
         val min: Int,
         val max: Int,
         val unit: String = "",
-        val step: Int,
-        enableUiOn: () -> Boolean = { true },
+        val step: Int = 1,
+        enableUiOn: (() -> Boolean)? = null
     ) : ManagedPreferenceUi<TwinSeekBarPreference>(key, enableUiOn) {
-        override fun createUi(context: Context): TwinSeekBarPreference =
-            TwinSeekBarPreference(context).apply {
-                setTitle(this@TwinSeekBarInt.title)
-                label = context.getString(this@TwinSeekBarInt.label)
-                key = this@TwinSeekBarInt.key
-                secondaryLabel = context.getString(this@TwinSeekBarInt.secondaryLabel)
-                secondaryKey = this@TwinSeekBarInt.secondaryKey
-                setDefaultValue(this@TwinSeekBarInt.defaultValue to this@TwinSeekBarInt.secondaryDefaultValue)
-                min = this@TwinSeekBarInt.min
-                max = this@TwinSeekBarInt.max
-                unit = this@TwinSeekBarInt.unit
-                step = this@TwinSeekBarInt.step
-                isIconSpaceReserved = false
-                isSingleLineTitle = false
-                summaryProvider = TwinSeekBarPreference.SimpleSummaryProvider
-            }
+        override fun createUi(context: Context) = TwinSeekBarPreference(context).apply {
+            setTitle(this@TwinSeekBarInt.title)
+            label = context.getString(this@TwinSeekBarInt.label)
+            key = this@TwinSeekBarInt.key
+            secondaryLabel = context.getString(this@TwinSeekBarInt.secondaryLabel)
+            secondaryKey = this@TwinSeekBarInt.secondaryKey
+            setDefaultValue(this@TwinSeekBarInt.defaultValue to this@TwinSeekBarInt.secondaryDefaultValue)
+            min = this@TwinSeekBarInt.min
+            max = this@TwinSeekBarInt.max
+            unit = this@TwinSeekBarInt.unit
+            step = this@TwinSeekBarInt.step
+            isIconSpaceReserved = false
+            isSingleLineTitle = false
+            summaryProvider = TwinSeekBarPreference.SimpleSummaryProvider
+        }
     }
 }

@@ -12,15 +12,14 @@ class ManagedThemePreferenceUi(
     val defaultValue: Theme,
     @StringRes
     val summary: Int? = null,
-    enableUiOn: () -> Boolean = { true },
+    enableUiOn: (() -> Boolean)? = null
 ) : ManagedPreferenceUi<ThemeSelectPreference>(key, enableUiOn) {
-    override fun createUi(context: Context): ThemeSelectPreference =
-        ThemeSelectPreference(context, defaultValue).apply {
-            key = this@ManagedThemePreferenceUi.key
-            isIconSpaceReserved = false
-            isSingleLineTitle = false
-            if (this@ManagedThemePreferenceUi.summary != null)
-                setSummary(this@ManagedThemePreferenceUi.summary)
-            setTitle(this@ManagedThemePreferenceUi.title)
-        }
+    override fun createUi(context: Context) = ThemeSelectPreference(context, defaultValue).apply {
+        key = this@ManagedThemePreferenceUi.key
+        isIconSpaceReserved = false
+        isSingleLineTitle = false
+        if (this@ManagedThemePreferenceUi.summary != null)
+            setSummary(this@ManagedThemePreferenceUi.summary)
+        setTitle(this@ManagedThemePreferenceUi.title)
+    }
 }

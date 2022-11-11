@@ -16,7 +16,7 @@ abstract class ManagedPreferenceCategory(
         defaultValue: Boolean,
         @StringRes
         summary: Int? = null,
-        enableUiOn: () -> Boolean = { true },
+        enableUiOn: (() -> Boolean)? = null
     ): ManagedPreference.PBool {
         val pref = ManagedPreference.PBool(sharedPreferences, key, defaultValue)
         val ui = ManagedPreferenceUi.Switch(title, key, defaultValue, summary, enableUiOn)
@@ -34,7 +34,7 @@ abstract class ManagedPreferenceCategory(
         entryValues: List<T>,
         @StringRes
         entryLabels: List<Int>,
-        enableUiOn: () -> Boolean = { true },
+        enableUiOn: (() -> Boolean)? = null
     ): ManagedPreference.PStringLike<T> {
         val pref = ManagedPreference.PStringLike(sharedPreferences, key, defaultValue, codec)
         val ui = ManagedPreferenceUi.StringList(
@@ -54,7 +54,7 @@ abstract class ManagedPreferenceCategory(
         max: Int = Int.MAX_VALUE,
         unit: String = "",
         step: Int = 1,
-        enableUiOn: () -> Boolean = { true },
+        enableUiOn: (() -> Boolean)? = null
     ): ManagedPreference.PInt {
         val pref = ManagedPreference.PInt(sharedPreferences, key, defaultValue)
         val ui = if ((max - min) / step >= 240)
@@ -81,7 +81,7 @@ abstract class ManagedPreferenceCategory(
         max: Int,
         unit: String = "",
         step: Int = 1,
-        enableUiOn: () -> Boolean = { true },
+        enableUiOn: (() -> Boolean)? = null
     ): Pair<ManagedPreference.PInt, ManagedPreference.PInt> {
         val primary = ManagedPreference.PInt(
             sharedPreferences,
@@ -107,7 +107,7 @@ abstract class ManagedPreferenceCategory(
         val ctx = screen.context
         managedPreferencesUi.forEach {
             screen.addPreference(it.createUi(ctx).apply {
-                isEnabled = it.enableUiOn()
+                isEnabled = it.isEnabled()
             })
         }
     }

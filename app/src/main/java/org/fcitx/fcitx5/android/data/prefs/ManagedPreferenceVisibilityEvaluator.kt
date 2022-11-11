@@ -22,7 +22,7 @@ class ManagedPreferenceVisibilityEvaluator(
         val changed = mutableMapOf<String, Boolean>()
         provider.managedPreferencesUi.forEach { ui ->
             val old = visibility[ui.key]
-            val new = ui.enableUiOn()
+            val new = ui.isEnabled()
             if (old != null && old != new) {
                 changed[ui.key] = new
             }

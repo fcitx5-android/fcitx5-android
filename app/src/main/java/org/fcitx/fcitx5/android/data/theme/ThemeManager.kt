@@ -204,7 +204,7 @@ object ThemeManager {
             defaultValue: Theme,
             @StringRes
             summary: Int? = null,
-            enableUiOn: () -> Boolean = { true },
+            enableUiOn: (() -> Boolean)? = null
         ): ManagedThemePreference {
             val pref = ManagedThemePreference(sharedPreferences, key, defaultValue)
             val ui = ManagedThemePreferenceUi(title, key, defaultValue, summary, enableUiOn)
