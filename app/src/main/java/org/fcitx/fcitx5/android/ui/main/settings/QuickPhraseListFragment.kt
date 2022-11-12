@@ -291,7 +291,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                 .setTitle(R.string.import_error)
                 .setMessage(message)
                 .setPositiveButton(android.R.string.ok) { _, _ -> }
-                .setIcon(R.drawable.ic_baseline_error_24)
+                .setIconAttribute(android.R.attr.alertDialogIcon)
                 .show()
         }
     }

@@ -179,7 +179,7 @@ suspend fun errorDialog(context: Context, title: String, message: String) {
             .setTitle(title)
             .setMessage(message)
             .setPositiveButton(android.R.string.ok) { _, _ -> }
-            .setIcon(R.drawable.ic_baseline_error_24)
+            .setIconAttribute(android.R.attr.alertDialogIcon)
             .show()
     }
 }

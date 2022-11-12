@@ -71,7 +71,7 @@ class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
                 }
                 AlertDialog.Builder(requireContext())
                     .setTitle(getString(R.string.disable_addon_warn_title))
-                    .setIcon(R.drawable.ic_baseline_error_24)
+                    .setIconAttribute(android.R.attr.alertDialogIcon)
                     .setMessage(msg)
                     .setCancelable(false)
                     .setNegativeButton(android.R.string.cancel) { _, _ ->
