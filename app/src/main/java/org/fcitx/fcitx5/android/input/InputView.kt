@@ -10,7 +10,10 @@ import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.Space
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.*
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -29,13 +32,17 @@ import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
 import org.fcitx.fcitx5.android.input.picker.emojiPicker
-import org.fcitx.fcitx5.android.input.picker.symbolPicker
 import org.fcitx.fcitx5.android.input.picker.emoticonPicker
+import org.fcitx.fcitx5.android.input.picker.symbolPicker
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
 import org.fcitx.fcitx5.android.input.punctuation.PunctuationComponent
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.styledFloat
+import org.fcitx.fcitx5.android.utils.tStr
+import org.fcitx.fcitx5.android.utils.tracer
+import org.fcitx.fcitx5.android.utils.withSpan
+import org.mechdancer.dependency.Component
 import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.wrapToUniqueComponent
 import org.mechdancer.dependency.plusAssign
@@ -82,25 +89,32 @@ class InputView(
     private val emojiPicker = emojiPicker()
     private val emoticonPicker = emoticonPicker()
 
-    private fun setupScope() {
-        scope += this@InputView.wrapToUniqueComponent()
-        scope += service.wrapToUniqueComponent()
-        scope += fcitx.wrapToUniqueComponent()
-        scope += theme.wrapToUniqueComponent()
-        scope += themedContext.wrapToUniqueComponent()
-        scope += broadcaster
-        scope += popup
-        scope += punctuation
-        scope += preedit
-        scope += commonKeyActionListener
-        scope += candidateViewBuilder
-        scope += windowManager
-        scope += kawaiiBar
-        scope += horizontalCandidate
-        scope += keyboardWindow
-        scope += symbolPicker
-        scope += emojiPicker
-        scope += emoticonPicker
+    private val tracer by tracer(javaClass.name)
+
+    private fun setupScope() = tracer.withSpan("setupScope") {
+        fun setupT(component: Component) {
+            tracer.withSpan(component.tStr()) {
+                scope += component
+            }
+        }
+        setupT(this@InputView.wrapToUniqueComponent())
+        setupT(service.wrapToUniqueComponent())
+        setupT(fcitx.wrapToUniqueComponent())
+        setupT(theme.wrapToUniqueComponent())
+        setupT(themedContext.wrapToUniqueComponent())
+        setupT(broadcaster)
+        setupT(popup)
+        setupT(punctuation)
+        setupT(preedit)
+        setupT(commonKeyActionListener)
+        setupT(candidateViewBuilder)
+        setupT(windowManager)
+        setupT(kawaiiBar)
+        setupT(horizontalCandidate)
+        setupT(keyboardWindow)
+        setupT(symbolPicker)
+        setupT(emojiPicker)
+        setupT(emoticonPicker)
         broadcaster.onScopeSetupFinished(scope)
     }
 
@@ -264,7 +278,7 @@ class InputView(
         super.onDetachedFromWindow()
     }
 
-    fun onShow() {
+    fun onShow() = tracer.withSpan("onShow") {
         if (shouldUpdateNavbarForeground || shouldUpdateNavbarBackground) {
             service.window.window!!.also {
                 if (shouldUpdateNavbarForeground) {

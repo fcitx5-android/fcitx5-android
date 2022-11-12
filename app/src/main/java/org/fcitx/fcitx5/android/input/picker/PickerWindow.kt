@@ -159,4 +159,6 @@ class PickerWindow(
     }
 
     override val showTitle = false
+
+    override fun toString(): String = "${javaClass.name}[$key]"
 }

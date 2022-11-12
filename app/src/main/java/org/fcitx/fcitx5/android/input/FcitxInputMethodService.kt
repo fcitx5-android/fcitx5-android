@@ -28,6 +28,8 @@ import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.utils.inputConnection
+import org.fcitx.fcitx5.android.utils.tracer
+import org.fcitx.fcitx5.android.utils.withSpan
 import splitties.bitflags.hasFlag
 import timber.log.Timber
 
@@ -68,6 +70,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
     }
 
+    private val tracer by tracer(javaClass.name)
+
     private lateinit var fcitx: FcitxConnection
     private var eventHandlerJob: Job? = null
 
@@ -95,17 +99,17 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         recreateInputView(it)
     }
 
-    private fun recreateInputView(theme: Theme) {
+    private fun recreateInputView(theme: Theme) = tracer.withSpan("recreateInputView") {
         // InputView should be created first in onCreateInputView
         // setInputView should be used to 'replace' current InputView only
-        inputView?.onDestroy() ?: return
-        InputView(this, fcitx, theme).also {
+        inputView?.onDestroy() ?: return@withSpan
+        InputView(this@FcitxInputMethodService, fcitx, theme).also {
             inputView = it
             setInputView(it)
         }
     }
 
-    override fun onCreate() {
+    override fun onCreate() = tracer.withSpan("onCreate") {
         fcitx = FcitxDaemon.connect(javaClass.name)
         eventHandlerJob =
             fcitx.runImmediately { eventFlow.onEach(::handleFcitxEvent).launchIn(lifecycleScope) }
@@ -292,9 +296,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         lifecycleScope.launchOnFcitxReady(fcitx) { it.reset() }
     }
 
-    override fun onCreateInputView(): View {
+    override fun onCreateInputView(): View = tracer.withSpan("onCreateInputView") {
         super.onCreateInputView()
-        return InputView(this, fcitx, ThemeManager.getActiveTheme()).also {
+        InputView(this@FcitxInputMethodService, fcitx, ThemeManager.getActiveTheme()).also {
             inputView = it
         }
     }
@@ -366,7 +370,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         return forwardKeyEvent(event) || super.onKeyUp(keyCode, event)
     }
 
-    override fun onBindInput() {
+    override fun onBindInput() = tracer.withSpan("onBindInput") {
         val uid = currentInputBinding.uid
         Timber.d("onBindInput: uid=$uid")
         lifecycleScope.launchOnFcitxReady(fcitx) {
@@ -374,37 +378,43 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    override fun onStartInput(attribute: EditorInfo, restarting: Boolean) {
-        // update selection as soon as possible
-        selection.update(attribute.initialSelStart, attribute.initialSelEnd)
-        composing.clear()
-        composingText = ""
-        editorInfo = attribute
-        Timber.d("onStartInput: initialSel=$selection, restarting=$restarting")
-        if (restarting) return
-        currentInputConnection.apply {
-            cursorAnchorAvailable = requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
-        }
-        lifecycleScope.launchOnFcitxReady(fcitx) {
-            it.setCapFlags(CapabilityFlags.fromEditorInfo(attribute))
-        }
-    }
-
-    override fun onStartInputView(info: EditorInfo, restarting: Boolean) {
-        Timber.d("onStartInputView: restarting=$restarting")
-        editorInfo = info
-        lifecycleScope.launchOnFcitxReady(fcitx) {
-            // EditorInfo can be different in onStartInput and onStartInputView,
-            // especially in browsers
-            it.setCapFlags(CapabilityFlags.fromEditorInfo(info))
-            if (restarting) {
-                // when input restarts in the same editor, unfocus it to clear previous state
-                it.focus(false)
+    override fun onStartInput(attribute: EditorInfo, restarting: Boolean) =
+        tracer.withSpan("onStartInput") {
+            setAttribute("info", attribute.toString())
+            setAttribute("restarting", restarting)
+            // update selection as soon as possible
+            selection.update(attribute.initialSelStart, attribute.initialSelEnd)
+            composing.clear()
+            composingText = ""
+            editorInfo = attribute
+            Timber.d("onStartInput: initialSel=$selection, restarting=$restarting")
+            if (restarting) return
+            currentInputConnection.apply {
+                cursorAnchorAvailable = requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
             }
-            it.focus()
+            lifecycleScope.launchOnFcitxReady(fcitx) {
+                it.setCapFlags(CapabilityFlags.fromEditorInfo(attribute))
+            }
         }
-        inputView?.onShow()
-    }
+
+    override fun onStartInputView(info: EditorInfo, restarting: Boolean): Unit =
+        tracer.withSpan("onStartInputView") {
+            setAttribute("info", info.toString())
+            setAttribute("restarting", restarting)
+            Timber.d("onStartInputView: restarting=$restarting")
+            editorInfo = info
+            lifecycleScope.launchOnFcitxReady(fcitx) {
+                // EditorInfo can be different in onStartInput and onStartInputView,
+                // especially in browsers
+                it.setCapFlags(CapabilityFlags.fromEditorInfo(info))
+                if (restarting) {
+                    // when input restarts in the same editor, unfocus it to clear previous state
+                    it.focus(false)
+                }
+                it.focus()
+            }
+            inputView?.onShow()
+        }
 
     override fun onUpdateSelection(
         oldSelStart: Int,
@@ -520,16 +530,18 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         ic.endBatchEdit()
     }
 
-    override fun onFinishInputView(finishingInput: Boolean) {
-        Timber.d("onFinishInputView: finishingInput=$finishingInput")
-        currentInputConnection.finishComposingText()
-        lifecycleScope.launchOnFcitxReady(fcitx) {
-            it.focus(false)
+    override fun onFinishInputView(finishingInput: Boolean): Unit =
+        tracer.withSpan("onFinishInputView") {
+            setAttribute("finishingInput", finishingInput)
+            Timber.d("onFinishInputView: finishingInput=$finishingInput")
+            currentInputConnection.finishComposingText()
+            lifecycleScope.launchOnFcitxReady(fcitx) {
+                it.focus(false)
+            }
+            inputView?.onHide()
         }
-        inputView?.onHide()
-    }
 
-    override fun onFinishInput() {
+    override fun onFinishInput() = tracer.withSpan("onFinishInput") {
         Timber.d("onFinishInput")
         if (cursorAnchorAvailable) {
             cursorAnchorAvailable = false
@@ -538,7 +550,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         editorInfo = null
     }
 
-    override fun onUnbindInput() {
+    override fun onUnbindInput() = tracer.withSpan("onUnbindInput") {
         cachedKeyEvents.evictAll()
         cachedKeyEventIndex = 0
         val uid = currentInputBinding.uid
@@ -548,7 +560,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    override fun onDestroy() {
+    override fun onDestroy() = tracer.withSpan("onDestroy") {
         AppPrefs.getInstance().apply {
             keyboard.buttonHapticFeedback.unregisterOnChangeListener(recreateInputViewListener)
             keyboard.systemTouchSounds.unregisterOnChangeListener(recreateInputViewListener)

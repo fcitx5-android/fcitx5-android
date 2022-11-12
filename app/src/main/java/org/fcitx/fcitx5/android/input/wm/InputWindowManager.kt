@@ -12,6 +12,9 @@ import org.fcitx.fcitx5.android.input.broadcast.InputBroadcaster
 import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.utils.isUiThread
+import org.fcitx.fcitx5.android.utils.tStr
+import org.fcitx.fcitx5.android.utils.tracer
+import org.fcitx.fcitx5.android.utils.withSpan
 import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.must
 import org.mechdancer.dependency.minusAssign
@@ -28,6 +31,7 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
     private val context by manager.context()
     private val broadcaster: InputBroadcaster by manager.must()
     private lateinit var scope: DynamicScope
+    private val tracer by tracer(javaClass.name)
 
     private val essentialWindows = mutableMapOf<EssentialWindow.Key, Pair<InputWindow, View?>>()
 
@@ -105,18 +109,21 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
      * This function initialize the view for windows and save it for essential windows.
      * [attachWindow] includes the operation done by [addEssentialWindow].
      */
-    fun attachWindow(window: InputWindow) {
+    fun attachWindow(window: InputWindow) = tracer.withSpan("attachWindow ${window.tStr()}") {
         ensureThread()
         if (window === currentWindow)
             Timber.d("Skip attaching $window")
         val newView = if (window is EssentialWindow) {
             // keep the view for essential windows
-            essentialWindows[window.key]?.second ?: window.onCreateView()
-                .also { essentialWindows[window.key] = window to it }
+            essentialWindows[window.key]?.second
+                ?: tracer.withSpan("createView") { window.onCreateView() }
+                    .also { essentialWindows[window.key] = window to it }
         } else {
             // add the new window to scope, except essential windows (they are always in scope)
-            scope += window
-            window.onCreateView()
+            tracer.withSpan("addScope") {
+                scope += window
+            }
+            tracer.withSpan("createView") { window.onCreateView() }
         }
         if (currentWindow != null) {
             val oldWindow = currentWindow!!
@@ -128,28 +135,32 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
                 newView
             )
             // notify the window that it will be detached
-            oldWindow.onDetached()
+            tracer.withSpan("detachOld") { oldWindow.onDetached() }
             // remove the old window from layout
             view.removeView(oldView)
             // broadcast the old window was removed from layout
-            broadcaster.onWindowDetached(oldWindow)
+            tracer.withSpan("broadcastDetached") {
+                broadcaster.onWindowDetached(oldWindow)
+            }
             Timber.d("Detach $oldWindow")
             // finally remove the old window from scope only if it's not an essential window,
             if (oldWindow !is EssentialWindow)
-                scope -= oldWindow
+                tracer.withSpan("removeScope") { scope -= oldWindow }
         }
         // call before attached for essential window
         if (window is EssentialWindow)
-            window.beforeAttached()
+            tracer.withSpan("beforeAttached") { window.beforeAttached() }
         // add the new window to layout
         view.apply { add(newView, lParams(matchParent, matchParent)) }
         currentView = newView
         Timber.d("Attach $window")
         // notify the window it was attached
-        window.onAttached()
+        tracer.withSpan("onAttached") { window.onAttached() }
         currentWindow = window
         // broadcast the new window was added to layout
-        broadcaster.onWindowAttached(window)
+        tracer.withSpan("broadcastAttached") {
+            broadcaster.onWindowAttached(window)
+        }
     }
 
     override val view: FrameLayout by lazy { context.frameLayout(R.id.input_window) }

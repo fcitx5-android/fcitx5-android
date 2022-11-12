@@ -246,11 +246,15 @@ tasks.register<Delete>("cleanCxxIntermediates") {
 }.also { tasks.clean.dependsOn(it) }
 
 dependencies {
+    implementation(platform("io.opentelemetry:opentelemetry-bom:1.20.0"))
+    implementation("io.opentelemetry:opentelemetry-api")
+    implementation("io.opentelemetry:opentelemetry-sdk")
+    implementation("io.opentelemetry:opentelemetry-exporter-logging")
     ksp(project(":codegen"))
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.2.2")
     val arrowVersion = "1.1.3"
     implementation("io.arrow-kt:arrow-core:$arrowVersion")
-    implementation("androidx.activity:activity-ktx:1.6.0")
+    implementation("androidx.activity:activity-ktx:1.6.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     implementation("com.github.CanHub:Android-Image-Cropper:4.2.1")
     implementation("cat.ereza:customactivityoncrash:2.4.0")

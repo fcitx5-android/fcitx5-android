@@ -6,6 +6,14 @@ import android.os.Process
 import android.util.Log
 import androidx.preference.PreferenceManager
 import cat.ereza.customactivityoncrash.config.CaocConfig
+import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.exporter.logging.LoggingSpanExporter
+import io.opentelemetry.sdk.OpenTelemetrySdk
+import io.opentelemetry.sdk.resources.Resource
+import io.opentelemetry.sdk.trace.SdkTracerProvider
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor
+import io.opentelemetry.sdk.trace.samplers.Sampler
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
@@ -14,6 +22,25 @@ import org.fcitx.fcitx5.android.utils.isDarkMode
 import timber.log.Timber
 
 class FcitxApplication : Application() {
+
+    val openTelemetry: OpenTelemetrySdk = OpenTelemetrySdk
+        .builder()
+        .setTracerProvider(
+            SdkTracerProvider.builder()
+                .setResource(
+                    Resource.create(
+                        Attributes.of(
+                            AttributeKey.stringKey("service.name"),
+                            "fcitx5-android"
+                        )
+                    )
+                )
+                .setSampler(Sampler.alwaysOff())
+                .addSpanProcessor(BatchSpanProcessor.builder(LoggingSpanExporter.create()).build())
+                .build()
+        )
+        .buildAndRegisterGlobal()
+
     override fun onCreate() {
         super.onCreate()
         CaocConfig.Builder.create()

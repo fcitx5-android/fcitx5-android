@@ -6,6 +6,9 @@ import org.fcitx.fcitx5.android.core.FcitxEvent.InputPanelAuxEvent
 import org.fcitx.fcitx5.android.core.FcitxEvent.PreeditEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.input.wm.InputWindow
+import org.fcitx.fcitx5.android.utils.tStr
+import org.fcitx.fcitx5.android.utils.tracer
+import org.fcitx.fcitx5.android.utils.withSpan
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.ScopeEvent
@@ -15,6 +18,8 @@ import java.util.concurrent.ConcurrentLinkedQueue
 class InputBroadcaster : UniqueComponent<InputBroadcaster>(), Dependent, InputBroadcastReceiver {
 
     private val receivers = ConcurrentLinkedQueue<InputBroadcastReceiver>()
+
+    private val tracer by tracer(javaClass.name)
 
     override fun handle(scopeEvent: ScopeEvent) {
         when (scopeEvent) {
@@ -31,48 +36,110 @@ class InputBroadcaster : UniqueComponent<InputBroadcaster>(), Dependent, InputBr
         }
     }
 
-    override fun onPreeditUpdate(data: PreeditEvent.Data) {
-        receivers.forEach { it.onPreeditUpdate(data) }
+    override fun onPreeditUpdate(data: PreeditEvent.Data) =
+        tracer.withSpan("onPreeditUpdate") {
+            setAttribute("preedit.preedit", data.preedit)
+            setAttribute("preedit.clientPreedit", data.clientPreedit)
+            receivers.forEach {
+                tracer.withSpan(it.tStr()) {
+                    it.onPreeditUpdate(data)
+                }
+            }
+        }
+
+    override fun onInputPanelAuxUpdate(data: InputPanelAuxEvent.Data) =
+        tracer.withSpan("onInputPanelAuxUpdate") {
+            setAttribute("aux.up", data.auxUp)
+            setAttribute("aux.down", data.auxDown)
+            receivers.forEach {
+                tracer.withSpan(it.tStr()) {
+                    it.onInputPanelAuxUpdate(data)
+                }
+            }
+        }
+
+    override fun onEditorInfoUpdate(info: EditorInfo?) = tracer.withSpan("onEditorInfoUpdate") {
+        setAttribute("info", info.toString())
+        receivers.forEach {
+            tracer.withSpan(it.tStr()) {
+                it.onEditorInfoUpdate(info)
+            }
+        }
     }
 
-    override fun onInputPanelAuxUpdate(data: InputPanelAuxEvent.Data) {
-        receivers.forEach { it.onInputPanelAuxUpdate(data) }
+    override fun onImeUpdate(ime: InputMethodEntry) = tracer.withSpan("onImeUpdate") {
+        setAttribute("ime", ime.uniqueName)
+        receivers.forEach {
+            tracer.withSpan(it.tStr()) {
+                it.onImeUpdate(ime)
+            }
+        }
     }
 
-    override fun onEditorInfoUpdate(info: EditorInfo?) {
-        receivers.forEach { it.onEditorInfoUpdate(info) }
+    override fun onCandidateUpdate(data: Array<String>) = tracer.withSpan("onCandidateUpdate") {
+        setAttribute("candidates", data.joinToString())
+        receivers.forEach {
+            tracer.withSpan(it.tStr()) {
+                it.onCandidateUpdate(data)
+            }
+        }
     }
 
-    override fun onImeUpdate(ime: InputMethodEntry) {
-        receivers.forEach { it.onImeUpdate(ime) }
+    override fun onStatusAreaUpdate(actions: Array<Action>) =
+        tracer.withSpan("onStatusAreaUpdate") {
+            setAttribute("actions", actions.joinToString())
+            receivers.forEach {
+                tracer.withSpan(it.tStr()) {
+                    it.onStatusAreaUpdate(actions)
+                }
+            }
+        }
+
+    override fun onSelectionUpdate(start: Int, end: Int) = tracer.withSpan("onSelectionUpdate") {
+        setAttribute("start", start.toLong())
+        setAttribute("end", end.toLong())
+        receivers.forEach {
+            tracer.withSpan(it.tStr()) {
+                it.onSelectionUpdate(start, end)
+            }
+        }
     }
 
-    override fun onCandidateUpdate(data: Array<String>) {
-        receivers.forEach { it.onCandidateUpdate(data) }
+    override fun onWindowAttached(window: InputWindow) = tracer.withSpan("onWindowAttached") {
+        setAttribute("window", window.toString())
+        receivers.forEach {
+            tracer.withSpan(it.tStr()) {
+                it.onWindowAttached(window)
+            }
+        }
     }
 
-    override fun onStatusAreaUpdate(actions: Array<Action>) {
-        receivers.forEach { it.onStatusAreaUpdate(actions) }
+    override fun onWindowDetached(window: InputWindow) = tracer.withSpan("onWindowDetached") {
+        setAttribute("window", window.toString())
+        receivers.forEach {
+            tracer.withSpan(it.tStr()) {
+                it.onWindowDetached(window)
+            }
+        }
     }
 
-    override fun onSelectionUpdate(start: Int, end: Int) {
-        receivers.forEach { it.onSelectionUpdate(start, end) }
-    }
+    override fun onScopeSetupFinished(scope: DynamicScope) =
+        tracer.withSpan("onScopeSetupFinished") {
+            receivers.forEach {
+                tracer.withSpan(it.tStr()) {
+                    it.onScopeSetupFinished(scope)
+                }
+            }
+        }
 
-    override fun onWindowAttached(window: InputWindow) {
-        receivers.forEach { it.onWindowAttached(window) }
-    }
-
-    override fun onWindowDetached(window: InputWindow) {
-        receivers.forEach { it.onWindowDetached(window) }
-    }
-
-    override fun onScopeSetupFinished(scope: DynamicScope) {
-        receivers.forEach { it.onScopeSetupFinished(scope) }
-    }
-
-    override fun onPunctuationUpdate(mapping: Map<String, String>) {
-        receivers.forEach { it.onPunctuationUpdate(mapping) }
-    }
+    override fun onPunctuationUpdate(mapping: Map<String, String>) =
+        tracer.withSpan("onPunctuationUpdate") {
+            setAttribute("punctuation", mapping.toString())
+            receivers.forEach {
+                tracer.withSpan(it.tStr()) {
+                    it.onPunctuationUpdate(mapping)
+                }
+            }
+        }
 
 }
