@@ -3,6 +3,7 @@
 #include <fcitx/instance.h>
 #include <fcitx/candidatelist.h>
 #include <fcitx/inputpanel.h>
+#include <fcitx/userinterfacemanager.h>
 
 #include "../fcitx5/src/modules/spell/spell_public.h"
 #include "../fcitx5/src/im/keyboard/chardata.h"
@@ -40,8 +41,19 @@ private:
 
 AndroidKeyboardEngine::AndroidKeyboardEngine(Instance *instance)
         : instance_(instance) {
-    instance_->inputContextManager().registerProperty("keyboardState", &factory_);
+    instance_->inputContextManager().registerProperty("androidkeyboardState", &factory_);
     reloadConfig();
+    wordHintAction_.setShortText(_("Word hint"));
+    wordHintAction_.setLongText(_("Word hint"));
+    wordHintAction_.setIcon("tools-check-spelling");
+    wordHintAction_.setChecked(*config_.enableWordHint);
+    wordHintAction_.connect<SimpleAction::Activated>([this](InputContext *ic) {
+        auto enabled = !(*config_.enableWordHint);
+        config_.enableWordHint.setValue(enabled);
+        wordHintAction_.setChecked(enabled);
+        wordHintAction_.update(ic);
+    });
+    instance_->userInterfaceManager().registerAction("androidkeyboard-word-hint", &wordHintAction_);
 }
 
 static inline bool isValidSym(const Key &key) {
@@ -196,15 +208,26 @@ void AndroidKeyboardEngine::setConfig(const RawConfig &config) {
     reloadConfig();
 }
 
-void AndroidKeyboardEngine::reset(const InputMethodEntry &entry, InputContextEvent &event) {
+void AndroidKeyboardEngine::activate(const InputMethodEntry &entry, InputContextEvent &event) {
+    auto *inputContext = event.inputContext();
+    wordHintAction_.setChecked(*config_.enableWordHint);
+    wordHintAction_.update(inputContext);
+    inputContext->statusArea().addAction(StatusGroup::InputMethod, &wordHintAction_);
+}
+
+void AndroidKeyboardEngine::deactivate(const InputMethodEntry &entry, InputContextEvent &event) {
     auto *inputContext = event.inputContext();
     // Android would commit composing text when finishing input (we simulate as focus in/out),
     // but not so when switching input method in fcitx
     if (event.type() == EventType::InputContextSwitchInputMethod) {
         commitBuffer(inputContext);
-    } else {
-        resetState(inputContext);
     }
+    reset(entry, event);
+}
+
+void AndroidKeyboardEngine::reset(const InputMethodEntry &entry, InputContextEvent &event) {
+    auto *inputContext = event.inputContext();
+    resetState(inputContext);
     inputContext->inputPanel().reset();
     inputContext->updatePreedit();
     inputContext->updateUserInterface(UserInterfaceComponent::InputPanel);

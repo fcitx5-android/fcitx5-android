@@ -35,6 +35,7 @@ sealed class StatusAreaEntry(
             "fcitx-fullwidth-inactive" -> R.drawable.ic_fcitx_status_fullwidth_inactive
             "fcitx-remind-active" -> R.drawable.ic_fcitx_status_prediction_active
             "fcitx-remind-inactive" -> R.drawable.ic_fcitx_status_prediction_inactive
+            "tools-check-spelling" -> R.drawable.ic_baseline_spellcheck_24
             else -> if (active) R.drawable.ic_baseline_code_24 else R.drawable.ic_baseline_code_off_24
         }
 

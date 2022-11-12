@@ -7,6 +7,7 @@
 #include <fcitx/addonfactory.h>
 #include <fcitx/addonmanager.h>
 #include <fcitx/inputmethodengine.h>
+#include <fcitx/action.h>
 
 namespace fcitx {
 
@@ -68,6 +69,10 @@ public:
 
     void setConfig(const RawConfig &config) override;
 
+    void activate(const InputMethodEntry &entry, InputContextEvent &event) override;
+
+    void deactivate(const InputMethodEntry &entry, InputContextEvent &event) override;
+
     void reset(const InputMethodEntry &entry, InputContextEvent &event) override;
 
     void resetState(InputContext *inputContext, bool fromCandidate = false);
@@ -100,6 +105,7 @@ private:
     Instance *instance_;
     AndroidKeyboardEngineConfig config_;
     KeyList selectionKeys_;
+    fcitx::SimpleAction wordHintAction_;
 
     FactoryFor<AndroidKeyboardEngineState> factory_{
             [](InputContext &) { return new AndroidKeyboardEngineState; }
