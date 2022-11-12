@@ -110,7 +110,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         eventHandlerJob =
             fcitx.runImmediately { eventFlow.onEach(::handleFcitxEvent).launchIn(lifecycleScope) }
         AppPrefs.getInstance().apply {
-            keyboard.buttonHapticFeedback.registerOnChangeListener(recreateInputViewListener)
             keyboard.systemTouchSounds.registerOnChangeListener(recreateInputViewListener)
             advanced.disableAnimation.registerOnChangeListener(recreateInputViewListener)
         }
@@ -550,7 +549,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onDestroy() {
         AppPrefs.getInstance().apply {
-            keyboard.buttonHapticFeedback.unregisterOnChangeListener(recreateInputViewListener)
             keyboard.systemTouchSounds.unregisterOnChangeListener(recreateInputViewListener)
             advanced.disableAnimation.unregisterOnChangeListener(recreateInputViewListener)
         }

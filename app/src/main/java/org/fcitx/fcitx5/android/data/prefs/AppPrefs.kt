@@ -1,10 +1,12 @@
 package org.fcitx.fcitx5.android.data.prefs
 
 import android.content.SharedPreferences
+import android.os.Build
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
 import org.fcitx.fcitx5.android.input.keyboard.SwipeSymbolDirection
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
+import splitties.systemservices.vibrator
 
 class AppPrefs(private val sharedPreferences: SharedPreferences) {
 
@@ -25,6 +27,49 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
     inner class Keyboard : ManagedPreferenceCategory(R.string.keyboard, sharedPreferences) {
         val buttonHapticFeedback =
             switch(R.string.button_haptic_feedback, "button_haptic_feedback", true)
+        val buttonPressVibrationMilliseconds: ManagedPreference.PInt
+        val buttonLongPressVibrationMilliseconds: ManagedPreference.PInt
+
+        init {
+            val (primary, secondary) = twinInt(
+                R.string.button_vibration_milliseconds,
+                R.string.button_press,
+                "button_vibration_press_milliseconds",
+                0,
+                R.string.button_long_press,
+                "button_vibration_long_press_milliseconds",
+                0,
+                0,
+                100,
+                "ms"
+            ) { buttonHapticFeedback.getValue() }
+            buttonPressVibrationMilliseconds = primary
+            buttonLongPressVibrationMilliseconds = secondary
+        }
+
+        val buttonPressVibrationAmplitude: ManagedPreference.PInt
+        val buttonLongPressVibrationAmplitude: ManagedPreference.PInt
+
+        init {
+            val (primary, secondary) = twinInt(
+                R.string.button_vibration_amplitude,
+                R.string.button_press,
+                "button_vibration_press_amplitude",
+                0,
+                R.string.button_long_press,
+                "button_vibration_long_press_amplitude",
+                0,
+                0,
+                255
+            ) {
+                buttonHapticFeedback.getValue()
+                        && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                        && vibrator.hasAmplitudeControl()
+            }
+            buttonPressVibrationAmplitude = primary
+            buttonLongPressVibrationAmplitude = secondary
+        }
+
         val systemTouchSounds =
             switch(R.string.system_touch_sounds, "system_touch_sounds", true)
         val expandToolbarByDefault =
