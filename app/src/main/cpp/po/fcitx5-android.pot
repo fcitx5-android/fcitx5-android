@@ -17,6 +17,9 @@ msgstr ""
 msgid "Android Keyboard"
 msgstr ""
 
+msgid "Word hint"
+msgstr ""
+
 msgid "Enable word hint"
 msgstr ""
 
