@@ -34,6 +34,9 @@ class DialogSeekBarPreference @JvmOverloads constructor(
     var step: Int
     var unit: String
 
+    var default: Int? = null
+    var defaultLabel: String? = null
+
     init {
         context.theme.obtainStyledAttributes(attrs, R.styleable.DialogSeekBarPreference, 0, 0).run {
             try {
@@ -52,6 +55,11 @@ class DialogSeekBarPreference @JvmOverloads constructor(
 
     private val currentValue: Int
         get() = getPersistedInt(value)
+
+    override fun setDefaultValue(defaultValue: Any?) {
+        super.setDefaultValue(defaultValue)
+        (defaultValue as? Int)?.let { default = it }
+    }
 
     override fun onGetDefaultValue(a: TypedArray, index: Int): Any {
         return a.getInteger(index, 0)
@@ -126,11 +134,12 @@ class DialogSeekBarPreference @JvmOverloads constructor(
      */
     private fun valueForProgress(progress: Int) = (progress * step) + min
 
-    private fun textForValue(value: Int) = "$value $unit"
+    private fun textForValue(value: Int = this@DialogSeekBarPreference.value): String =
+        if (value == default && defaultLabel != null) defaultLabel!! else "$value $unit"
 
     object SimpleSummaryProvider : SummaryProvider<DialogSeekBarPreference> {
         override fun provideSummary(preference: DialogSeekBarPreference): CharSequence {
-            return preference.textForValue(preference.currentValue)
+            return preference.run { textForValue() }
         }
     }
 }

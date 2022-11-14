@@ -41,7 +41,8 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
                 0,
                 0,
                 100,
-                "ms"
+                "ms",
+                defaultLabel = R.string.system_default
             ) { buttonHapticFeedback.getValue() }
             buttonPressVibrationMilliseconds = primary
             buttonLongPressVibrationMilliseconds = secondary
@@ -60,7 +61,8 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
                 "button_vibration_long_press_amplitude",
                 0,
                 0,
-                255
+                255,
+                defaultLabel = R.string.system_default
             ) {
                 buttonHapticFeedback.getValue()
                         && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O

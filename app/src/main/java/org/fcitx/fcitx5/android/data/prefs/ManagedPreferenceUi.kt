@@ -96,6 +96,8 @@ abstract class ManagedPreferenceUi<T : Preference>(
         val max: Int,
         val unit: String = "",
         val step: Int = 1,
+        @StringRes
+        val defaultLabel: Int? = null,
         enableUiOn: (() -> Boolean)? = null
     ) : ManagedPreferenceUi<DialogSeekBarPreference>(key, enableUiOn) {
         override fun createUi(context: Context) = DialogSeekBarPreference(context).apply {
@@ -103,6 +105,7 @@ abstract class ManagedPreferenceUi<T : Preference>(
             isIconSpaceReserved = false
             isSingleLineTitle = false
             summaryProvider = DialogSeekBarPreference.SimpleSummaryProvider
+            this@SeekBarInt.defaultLabel?.let { defaultLabel = context.getString(it) }
             setDefaultValue(this@SeekBarInt.defaultValue)
             setTitle(this@SeekBarInt.title)
             min = this@SeekBarInt.min
@@ -127,6 +130,8 @@ abstract class ManagedPreferenceUi<T : Preference>(
         val max: Int,
         val unit: String = "",
         val step: Int = 1,
+        @StringRes
+        val defaultLabel: Int? = null,
         enableUiOn: (() -> Boolean)? = null
     ) : ManagedPreferenceUi<TwinSeekBarPreference>(key, enableUiOn) {
         override fun createUi(context: Context) = TwinSeekBarPreference(context).apply {
@@ -135,6 +140,7 @@ abstract class ManagedPreferenceUi<T : Preference>(
             key = this@TwinSeekBarInt.key
             secondaryLabel = context.getString(this@TwinSeekBarInt.secondaryLabel)
             secondaryKey = this@TwinSeekBarInt.secondaryKey
+            this@TwinSeekBarInt.defaultLabel?.let { defaultLabel = context.getString(it) }
             setDefaultValue(this@TwinSeekBarInt.defaultValue to this@TwinSeekBarInt.secondaryDefaultValue)
             min = this@TwinSeekBarInt.min
             max = this@TwinSeekBarInt.max
