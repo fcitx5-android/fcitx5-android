@@ -12,7 +12,8 @@
         android:roundIcon="@mipmap/app_icon_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FcitxAppTheme"
-        tools:targetApi="31">
+        android:localeConfig="@xml/locales_config"
+    tools:targetApi="31">
         <activity
             android:name=".ui.setup.SetupActivity"
             android:exported="false"
