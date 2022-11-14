@@ -168,4 +168,5 @@
     <string name="swipe_down">Swipe down</string>
     <string name="swipe_up">Swipe up</string>
     <string name="disabled">Disabled</string>
+    <string name="system_default">System default</string>
 </resources>

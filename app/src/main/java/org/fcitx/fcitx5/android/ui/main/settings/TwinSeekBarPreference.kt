@@ -29,6 +29,10 @@ class TwinSeekBarPreference @JvmOverloads constructor(
     var secondaryKey: String = ""
     var secondaryLabel: String = ""
 
+    var default: Int? = null
+    var secondaryDefault: Int? = null
+    var defaultLabel: String? = null
+
     var value = 0
         private set
     var secondaryValue = 0
@@ -46,8 +50,8 @@ class TwinSeekBarPreference @JvmOverloads constructor(
 
     override fun setDefaultValue(defaultValue: Any?) {
         (defaultValue as? Pair<*, *>)?.apply {
-            (first as? Int)?.let { value = it }
-            (second as? Int)?.let { secondaryValue = it }
+            (first as? Int)?.let { value = it; default = it }
+            (second as? Int)?.let { secondaryValue = it; secondaryDefault = it }
         }
     }
 
@@ -82,6 +86,7 @@ class TwinSeekBarPreference @JvmOverloads constructor(
     private fun ConstraintLayout.addSeekBar(
         label: String,
         initialValue: Int,
+        defaultValue: Int? = null,
         belowView: View? = null,
         initSeekBar: SeekBar.() -> Unit = {}
     ) {
@@ -90,12 +95,14 @@ class TwinSeekBarPreference @JvmOverloads constructor(
             text = label
         }
         val valueLabel = textView {
-            text = textForValue(initialValue)
+            text = textForValue(initialValue, defaultValue)
         }
         val seekBar = seekBar {
             max = progressForValue(this@TwinSeekBarPreference.max)
             progress = progressForValue(initialValue)
-            setOnChangeListener { valueLabel.text = textForValue(valueForProgress(progress)) }
+            setOnChangeListener {
+                valueLabel.text = textForValue(valueForProgress(progress), defaultValue)
+            }
             initSeekBar(this)
         }
         val textMargin = dp(24)
@@ -120,10 +127,10 @@ class TwinSeekBarPreference @JvmOverloads constructor(
         val primarySeekBar: SeekBar
         val secondarySeekBar: SeekBar
         val dialogContent = constraintLayout {
-            addSeekBar(label, value) {
+            addSeekBar(label, value, default) {
                 primarySeekBar = this
             }
-            addSeekBar(secondaryLabel, secondaryValue, primarySeekBar) {
+            addSeekBar(secondaryLabel, secondaryValue, secondaryDefault, primarySeekBar) {
                 secondarySeekBar = this
             }
         }
@@ -146,11 +153,14 @@ class TwinSeekBarPreference @JvmOverloads constructor(
 
     private fun valueForProgress(progress: Int) = (progress * step) + min
 
-    private fun textForValue(value: Int) = "$value $unit"
+    private fun textForValue(value: Int, default: Int? = null): String =
+        if (value == default && defaultLabel != null) defaultLabel!! else "$value $unit"
 
     object SimpleSummaryProvider : SummaryProvider<TwinSeekBarPreference> {
         override fun provideSummary(preference: TwinSeekBarPreference): CharSequence {
-            return preference.run { "${textForValue(value)} / ${textForValue(secondaryValue)}" }
+            return preference.run {
+                "${textForValue(value, default)} / ${textForValue(secondaryValue, secondaryDefault)}"
+            }
         }
     }
 
