@@ -8,6 +8,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
@@ -16,9 +17,12 @@ import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
+import org.fcitx.fcitx5.android.input.editorinfo.EditorInfoWindow
 import org.fcitx.fcitx5.android.input.status.StatusAreaEntry.Android.Type.*
 import org.fcitx.fcitx5.android.input.wm.InputWindow
+import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.AppUtil
+import org.mechdancer.dependency.manager.must
 import splitties.dimensions.dp
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.add
@@ -33,6 +37,9 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
     private val service: FcitxInputMethodService by manager.inputMethodService()
     private val fcitx: FcitxConnection by manager.fcitx()
     private val theme by manager.theme()
+    private val windowManager: InputWindowManager by manager.must()
+
+    private val editorInfoInspector by AppPrefs.getInstance().internal.editorInfoInspector
 
     private val staticEntries by lazy {
         arrayOf(
@@ -126,18 +133,25 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
         )
     }
 
-    override fun onCreateView() = view.apply {
-        settingsButton.setOnClickListener {
-            AppUtil.launchMain(context)
+    override fun onCreateView() = view
+
+    private val editorInfoButton by lazy {
+        ToolButton(context, R.drawable.ic_baseline_info_24, theme).apply {
+            setOnClickListener { windowManager.attachWindow(EditorInfoWindow()) }
         }
     }
 
     private val settingsButton by lazy {
-        ToolButton(context, R.drawable.ic_baseline_settings_24, theme)
+        ToolButton(context, R.drawable.ic_baseline_settings_24, theme).apply {
+            setOnClickListener { AppUtil.launchMain(context) }
+        }
     }
 
     private val barExtension by lazy {
         context.horizontalLayout {
+            if (editorInfoInspector) {
+                add(editorInfoButton, lParams(dp(40), dp(40)))
+            }
             add(settingsButton, lParams(dp(40), dp(40)))
         }
     }

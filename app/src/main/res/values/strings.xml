@@ -86,7 +86,7 @@
     <string name="app_crash_message">Sorry, but we bring you some logs to investigate.</string>
     <string name="crash_logs">Crash logs</string>
     <string name="verbose_log">Verbose logging</string>
-    <string name="verbose_log_summary">Effective after restart</string>
+    <string name="verbose_log_summary">Requires restart</string>
     <string name="removed_x">Removed %1$s</string>
     <string name="added_x">Added %1$s</string>
     <string name="edited_x">Edited %1$s</string>
@@ -169,4 +169,5 @@
     <string name="swipe_up">Swipe up</string>
     <string name="disabled">Disabled</string>
     <string name="system_default">System default</string>
+    <string name="editor_info_inspector">EditorInfo Inspector</string>
 </resources>

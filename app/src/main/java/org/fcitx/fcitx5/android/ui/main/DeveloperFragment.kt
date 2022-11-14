@@ -40,6 +40,13 @@ class DeveloperFragment : PaddingPreferenceFragment() {
             isIconSpaceReserved = false
             isSingleLineTitle = false
         })
+        screen.addPreference(SwitchPreference(context).apply {
+            key = AppPrefs.getInstance().internal.editorInfoInspector.key
+            setTitle(R.string.editor_info_inspector)
+            setDefaultValue(false)
+            isIconSpaceReserved = false
+            isSingleLineTitle = false
+        })
 
         screen.addPreference(Preference(context).apply {
             setTitle(R.string.delete_and_sync_data)
