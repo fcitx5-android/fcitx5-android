@@ -53,8 +53,11 @@ class DialogSeekBarPreference @JvmOverloads constructor(
         }
     }
 
-    private val currentValue: Int
-        get() = getPersistedInt(value)
+    override fun persistInt(value: Int): Boolean {
+        return super.persistInt(value).also {
+            if (it) this@DialogSeekBarPreference.value = value
+        }
+    }
 
     override fun setDefaultValue(defaultValue: Any?) {
         super.setDefaultValue(defaultValue)
@@ -77,13 +80,12 @@ class DialogSeekBarPreference @JvmOverloads constructor(
      * Shows the seek bar dialog.
      */
     private fun showSeekBarDialog() = with(context) {
-        val initValue = currentValue
         val textView = textView {
-            text = textForValue(initValue)
+            text = textForValue(value)
         }
         val seekBar = seekBar {
             max = progressForValue(this@DialogSeekBarPreference.max)
-            progress = progressForValue(initValue)
+            progress = progressForValue(value)
             setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                     textView.text = textForValue(valueForProgress(progress))
