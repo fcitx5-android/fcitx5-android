@@ -218,11 +218,11 @@ object ThemeManager {
         val keyRippleEffect = switch(R.string.key_ripple_effect, "key_ripple_effect", false)
 
         val keyHorizontalMargin =
-            int(R.string.key_horizontal_margin, "key_horizontal_margin", 3, 0, 8)
+            int(R.string.key_horizontal_margin, "key_horizontal_margin", 3, 0, 8, "dp")
 
-        val keyVerticalMargin = int(R.string.key_vertical_margin, "key_vertical_margin", 7, 0, 16)
+        val keyVerticalMargin = int(R.string.key_vertical_margin, "key_vertical_margin", 7, 0, 16, "dp")
 
-        val keyRadius = int(R.string.key_radius, "key_radius", 4, 0, 48)
+        val keyRadius = int(R.string.key_radius, "key_radius", 4, 0, 48, "dp")
 
         val punctuationPosition = list(
             R.string.punctuation_position,
