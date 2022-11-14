@@ -69,7 +69,7 @@ class DialogSeekBarPreference @JvmOverloads constructor(
     }
 
     override fun onSetInitialValue(defaultValue: Any?) {
-        value = defaultValue as? Int ?: getPersistedInt(0)
+        value = getPersistedInt(defaultValue as? Int ?: 0)
     }
 
     override fun onClick() {
