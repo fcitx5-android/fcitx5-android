@@ -44,7 +44,7 @@ android {
         applicationId = "org.fcitx.fcitx5.android"
         minSdk = 23
         targetSdk = 33
-        versionCode = 2
+        versionCode = 3
         versionName = gitVersionName
         setProperty("archivesBaseName", "$applicationId-$gitVersionName")
         buildConfigField("String", "BUILD_GIT_HASH", "\"$gitCommitHash\"")

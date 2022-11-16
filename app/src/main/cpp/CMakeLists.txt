@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(fcitx5-android VERSION 0.0.2)
+project(fcitx5-android VERSION 0.0.3)
 
 set(ANDROID_STL c++_shared)
 
