@@ -16,6 +16,10 @@
     <string name="hide_key_config">Скрыть конфигурации горячих клавиш</string>
     <string name="_not_available_">(Недоступно)</string>
     <string name="button_haptic_feedback">Тактильная обратная связь при нажатии клавиши</string>
+    <string name="button_vibration_milliseconds">Длительность вибрации при нажатии клавиши</string>
+    <string name="button_press">Нажать</string>
+    <string name="button_long_press">Длительное нажатие</string>
+    <string name="button_vibration_amplitude">Амплитуда вибрации при нажатии клавиши</string>
     <string name="add">Добавить</string>
     <string name="edit">Редактировать</string>
     <string name="undo">Отменить</string>
@@ -82,7 +86,7 @@
     <string name="app_crash_message">Извините, но мы предоставляем вам несколько журналов для изучения.</string>
     <string name="crash_logs">Журналы сбоев</string>
     <string name="verbose_log">Подробное ведение журнала</string>
-    <string name="verbose_log_summary">Вступит в силу после перезапуска</string>
+    <string name="verbose_log_summary">Требуется перезапуск</string>
     <string name="removed_x">Удалено %1$s</string>
     <string name="added_x">Добавлено %1$s</string>
     <string name="edited_x">Отредактировано %1$s</string>
@@ -155,4 +159,15 @@
     <string name="keyboard_bottom_padding">Нижнее поле клавиатуры</string>
     <string name="keyboard_side_padding">Боковое поле клавиатуры</string>
     <string name="clipboard_suggestion">Показать предложение буфера обмена</string>
+    <string name="disable_addon_warn_title">Отключить дополнение</string>
+    <string name="disable_addon_warn_name">Отключение %1$s также приведет к:</string>
+    <string name="disable_addon_warn_dep">Отключить %1$s</string>
+    <string name="disable_addon_warn_optdep">Отключить некоторые функции в %1$s</string>
+    <string name="disable_addon_warn_confirm">Вы уверены, что хотите отключить?</string>
+    <string name="swipe_symbol_behavior">Проведите пальцем, чтобы ввести знаки препинания и цифры</string>
+    <string name="swipe_down">Провести вниз</string>
+    <string name="swipe_up">Провести вверх</string>
+    <string name="disabled">Отключено</string>
+    <string name="system_default">Системные установки по умолчанию</string>
+    <string name="editor_info_inspector">Инспектор EditorInfo</string>
 </resources>

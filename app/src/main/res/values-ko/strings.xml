@@ -67,7 +67,6 @@
     <string name="open_source_licenses">오픈 소스 라이선스</string>
     <string name="licenses_of_third_party_libraries">타사 라이브러리 라이선스</string>
     <string name="github_repo">GitHub 저장소</string>
-    <string name="expanded_candidate_grid_span_count">격자 스타일 확장 후보 범위 수</string>
     <string name="no_config_options">현재 사용 가능한 구성 옵션이 없습니다</string>
     <string name="unimplemented_type">⛔ 구현되지 않은 유형</string>
     <string name="select">선택</string>
@@ -80,7 +79,6 @@
     <string name="app_crash_message">죄송합니다. 조사를 위해 몇 가지 로그를 가져왔습니다.</string>
     <string name="crash_logs">충돌 로그</string>
     <string name="verbose_log">자세한 로깅</string>
-    <string name="verbose_log_summary">재시작 후 유효</string>
     <string name="removed_x">%1$s 제거됨</string>
     <string name="added_x">%1$s 추가됨</string>
     <string name="edited_x">%1$s 편집됨</string>

@@ -67,7 +67,6 @@
     <string name="open_source_licenses">開放原始碼授權條款</string>
     <string name="licenses_of_third_party_libraries">第三方函式庫的授權條款</string>
     <string name="github_repo">GitHub 倉庫</string>
-    <string name="expanded_candidate_grid_span_count">網格樣式展開候選詞列數</string>
     <string name="no_config_options">目前沒有可用的設定選項</string>
     <string name="unimplemented_type">⛔ 未實作類型</string>
     <string name="select">選取</string>
@@ -80,7 +79,6 @@
     <string name="app_crash_message">抱歉，但我們為您帶來了一些紀錄檔以供調查。</string>
     <string name="crash_logs">當機紀錄檔</string>
     <string name="verbose_log">詳細記錄日誌</string>
-    <string name="verbose_log_summary">重啟後生效</string>
     <string name="removed_x">已移除 %1$s</string>
     <string name="added_x">已新增%1$s</string>
     <string name="edited_x">已編輯%1$s</string>

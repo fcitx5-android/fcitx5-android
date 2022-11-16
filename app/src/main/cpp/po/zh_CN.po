@@ -23,6 +23,9 @@ msgstr "Android 输入法前端"
 msgid "Android Keyboard"
 msgstr "Android 英文键盘"
 
+msgid "Word hint"
+msgstr "单词提示"
+
 msgid "Enable word hint"
 msgstr "启用单词提示"
 

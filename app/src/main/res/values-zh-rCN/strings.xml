@@ -16,6 +16,10 @@
     <string name="hide_key_config">隐藏快捷键配置</string>
     <string name="_not_available_">（不可用）</string>
     <string name="button_haptic_feedback">按键时振动</string>
+    <string name="button_vibration_milliseconds">按键振动时长</string>
+    <string name="button_press">短按</string>
+    <string name="button_long_press">长按</string>
+    <string name="button_vibration_amplitude">按键振动幅度</string>
     <string name="add">添加</string>
     <string name="edit">编辑</string>
     <string name="undo">撤销</string>
@@ -82,7 +86,7 @@
     <string name="app_crash_message">抱歉，但我们提供了日志以供调查。</string>
     <string name="crash_logs">崩溃日志</string>
     <string name="verbose_log">详细记录日志</string>
-    <string name="verbose_log_summary">重启后生效</string>
+    <string name="verbose_log_summary">需要重启</string>
     <string name="removed_x">已移除 %1$s</string>
     <string name="added_x">已添加 %1$s</string>
     <string name="edited_x">已编辑 %1$s</string>
@@ -164,4 +168,6 @@
     <string name="swipe_down">下划</string>
     <string name="swipe_up">上划</string>
     <string name="disabled">禁用</string>
+    <string name="system_default">系统默认</string>
+    <string name="editor_info_inspector">EditorInfo 检查器</string>
 </resources>
