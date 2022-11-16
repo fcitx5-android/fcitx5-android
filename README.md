@@ -14,7 +14,7 @@ An attempt to run fcitx5 on Android.
 - Themeing (custom color scheme and background image)
 - Popup preview on key press
 - Long press popup keyboard for convenient symbol input
-- User-friendly symbol selector
+- Symbol and Emoji picker
 
 ### Work in progress
 
@@ -23,9 +23,13 @@ An attempt to run fcitx5 on Android.
 
 ## Screenshots
 
-|拼音, builtin light theme, key border enabled|自然码双拼, builtin dark theme, border disabled|
+|拼音, Material Light theme, key border enabled|自然码双拼, Pixel Dark theme, key border disabled|
 |:-:|:-:|
-|<img src="https://user-images.githubusercontent.com/13914967/172801207-0a229424-9a19-4d06-bdd4-2accf61f4de5.png" width="360px">|<img src="https://user-images.githubusercontent.com/13914967/172801229-e7d51003-d80c-462d-a756-a0c22e1d7dee.png" width="360px">|
+|<img src="https://user-images.githubusercontent.com/13914967/202180575-04b6db41-ff24-4bef-899a-8051fc0243f5.png" width="360px">|<img src="https://user-images.githubusercontent.com/13914967/202180709-457e4897-961f-48a6-8fb2-b6560568a122.png" width="360px">|
+
+|Emoji picker, Pixel Light theme, key border enabled|Symbol picker, Material Dark theme, key border disabled|
+|:-:|:-:|
+|<img src="https://user-images.githubusercontent.com/13914967/202181845-6a5f6bb2-a877-468c-851a-fd7e66e64ed4.png" width="360px">|<img src="https://user-images.githubusercontent.com/13914967/202181861-dd253439-1d5e-4f5f-9535-934f28796a6b.png" width="360px">|
 
 ## Get involved
 
@@ -39,7 +43,7 @@ Discuss on Telegram: https://t.me/+hci-DrFVWUM3NTUx ([@fcitx5_android](https://t
 
 ### Dependencies
 
-- Android SDK Platform & Build-Tools 33 or newer version
+- Android SDK Platform & Build-Tools 33.
 - Android NDK (Side by side) 25 & CMake 3.22.1, they can be installed using SDK Manager in Android Studio or `sdkmanager` command line. **Note:** NDK 21 & 22 are confirmed not working with this project.
 - [KDE/extra-cmake-modules](https://github.com/KDE/extra-cmake-modules)
 - GNU Gettext >= 0.20 (for `msgfmt` binary; or install `appstream` if you really have to use gettext <= 0.19.)
@@ -67,15 +71,15 @@ Install Android SDK Platform, Android SDK Build-Tools, Android NDK and cmake via
 <details>
 <summary>Detailed steps (screenshots)</summary>
 
-![open SDK Manager](https://user-images.githubusercontent.com/48406926/142432806-d3ee3c16-beee-409e-9f6b-60c352c3f230.png)
+![Open SDK Manager](https://user-images.githubusercontent.com/13914967/202184493-3ee1546b-0a83-4cc9-9e41-d20b0904a0cf.png)
 
-![install SDK Platform](https://user-images.githubusercontent.com/48406926/142432902-d979ceda-1c12-4c9c-a59f-ffa201457861.png)
+![Install SDK Platform](https://user-images.githubusercontent.com/13914967/202184534-340a9e7c-7c42-49bd-9cf5-1ec9dcafcf32.png)
 
-![install SDK Build-Tools](https://user-images.githubusercontent.com/48406926/142432955-380ccd4a-df11-46ae-a520-3c13eac38960.png)
+![Install SDK Build-Tools](https://user-images.githubusercontent.com/13914967/202185945-0c7a9f39-1fcc-4018-9c81-b3d2bf1c2d3f.png)
 
-![install NDK](https://user-images.githubusercontent.com/48406926/142433006-9dfbeb20-b3e3-4230-aa28-625efb58f936.png)
+![Install NDK](https://user-images.githubusercontent.com/13914967/202185601-0cf877ea-e148-4b88-bd2f-70533189b3d4.png)
 
-![install CMake](https://user-images.githubusercontent.com/48406926/142433080-a4ad2446-889a-479c-837a-c2b5ad74b104.png)
+![Install CMake](https://user-images.githubusercontent.com/13914967/202184655-3c1ab47c-432f-4bd7-a508-92096482de50.png)
 
 </details>
 
