@@ -248,9 +248,8 @@ tasks.register<Delete>("cleanCxxIntermediates") {
 dependencies {
     ksp(project(":codegen"))
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.2.2")
-    val arrowVersion = "1.1.3"
-    implementation("io.arrow-kt:arrow-core:$arrowVersion")
-    implementation("androidx.activity:activity-ktx:1.6.0")
+    implementation("io.arrow-kt:arrow-core:1.1.3")
+    implementation("androidx.activity:activity-ktx:1.6.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     implementation("com.github.CanHub:Android-Image-Cropper:4.2.1")
     implementation("cat.ereza:customactivityoncrash:2.4.0")
@@ -285,8 +284,8 @@ dependencies {
     implementation("com.louiscad.splitties:splitties-views-recyclerview:$splittiesVersion")
     implementation("com.louiscad.splitties:splitties-views-dsl-material:$splittiesVersion")
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test:runner:1.4.0")
-    androidTestImplementation("androidx.test:rules:1.4.0")
+    androidTestImplementation("androidx.test:runner:1.5.1")
+    androidTestImplementation("androidx.test:rules:1.5.0")
     androidTestImplementation("androidx.lifecycle:lifecycle-runtime-testing:2.5.1")
     androidTestImplementation("junit:junit:4.13.2")
 }
