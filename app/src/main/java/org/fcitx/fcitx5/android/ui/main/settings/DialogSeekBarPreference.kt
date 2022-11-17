@@ -44,7 +44,7 @@ class DialogSeekBarPreference @JvmOverloads constructor(
                 max = getInteger(R.styleable.DialogSeekBarPreference_max, 100)
                 step = getInteger(R.styleable.DialogSeekBarPreference_step, 1)
                 unit = getString(R.styleable.DialogSeekBarPreference_unit) ?: ""
-                if (getBoolean(R.styleable.DialogSeekBarPreference_useSimpleSummaryProvider, false)) {
+                if (getBoolean(R.styleable.DialogSeekBarPreference_useSimpleSummaryProvider,false)) {
                     summaryProvider = SimpleSummaryProvider
                 }
             } finally {
@@ -110,13 +110,22 @@ class DialogSeekBarPreference @JvmOverloads constructor(
             .setView(dialogContent)
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 val value = valueForProgress(seekBar.progress)
-                if (callChangeListener(value)) {
-                    persistInt(value)
-                    notifyChanged()
+                setValue(value)
+            }
+            .setNeutralButton(R.string.default_) { _, _ ->
+                default?.let {
+                    setValue(it)
                 }
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
+    }
+
+    private fun setValue(value: Int) {
+        if (callChangeListener(value)) {
+            persistInt(value)
+            notifyChanged()
+        }
     }
 
     /**

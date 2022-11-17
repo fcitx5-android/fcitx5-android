@@ -8,9 +8,13 @@ import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.edit
 import androidx.preference.Preference
+import org.fcitx.fcitx5.android.R
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.*
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.seekBar
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.wrapContent
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -140,13 +144,24 @@ class TwinSeekBarPreference @JvmOverloads constructor(
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 val primary = valueForProgress(primarySeekBar.progress)
                 val secondary = valueForProgress(secondarySeekBar.progress)
-                if (callChangeListener(primary to secondary)) {
-                    persistValues(primary, secondary)
-                    notifyChanged()
+                setValue(primary, secondary)
+            }
+            .setNeutralButton(R.string.default_) { _, _ ->
+                default?.let { p ->
+                    secondaryDefault?.let { s ->
+                        setValue(p, s)
+                    }
                 }
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
+    }
+
+    private fun setValue(primary: Int, secondary: Int) {
+        if (callChangeListener(primary to secondary)) {
+            persistValues(primary, secondary)
+            notifyChanged()
+        }
     }
 
     private fun progressForValue(value: Int) = (value - min) / step
