@@ -11,8 +11,6 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Key
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
-import org.fcitx.fcitx5.android.ui.main.modified.MyEditTextPreference
-import org.fcitx.fcitx5.android.ui.main.modified.MyListPreference
 import org.fcitx.fcitx5.android.ui.main.settings.addon.AddonConfigFragment
 import org.fcitx.fcitx5.android.ui.main.settings.global.GlobalConfigFragment
 import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
@@ -28,20 +26,21 @@ object PreferenceScreenFactory {
     fun create(
         preferenceManager: PreferenceManager,
         fragmentManager: FragmentManager,
-        raw: RawConfig
+        raw: RawConfig,
+        save: () -> Unit
     ): PreferenceScreen {
         val context = preferenceManager.context
         val screen = preferenceManager.createPreferenceScreen(context)
         val cfg = raw["cfg"]
         val desc = raw["desc"]
-        val store = FcitxRawConfigStore(cfg)
+        val store = FcitxRawConfigStore(cfg, save)
 
         ConfigDescriptor
             .parseTopLevel(desc)
             .redeem({ throw it }) {
                 screen.title = it.name
                 it.values.forEach { d ->
-                    general(context, fragmentManager, cfg, screen, d, store)
+                    general(context, fragmentManager, cfg, screen, d, store, save)
                 }
             }
 
@@ -54,7 +53,8 @@ object PreferenceScreenFactory {
         cfg: RawConfig,
         screen: PreferenceScreen,
         descriptor: ConfigDescriptor<*, *>,
-        store: PreferenceDataStore
+        store: PreferenceDataStore,
+        save: () -> Unit
     ) {
 
         // Hide key related configs
@@ -62,7 +62,7 @@ object PreferenceScreenFactory {
             return
 
         if (descriptor is ConfigCustom) {
-            custom(context, fragmentManager, cfg, screen, descriptor)
+            custom(context, fragmentManager, cfg, screen, descriptor, save)
             return
         }
 
@@ -176,7 +176,7 @@ object PreferenceScreenFactory {
             is ConfigBool -> SwitchPreferenceCompat(context).apply {
                 setDefaultValue(descriptor.defaultValue)
             }
-            is ConfigEnum -> MyListPreference(context).apply {
+            is ConfigEnum -> ListPreference(context).apply {
                 entries = (descriptor.entriesI18n ?: descriptor.entries).toTypedArray()
                 entryValues = descriptor.entries.toTypedArray()
                 dialogTitle = descriptor.description ?: descriptor.name
@@ -210,7 +210,7 @@ object PreferenceScreenFactory {
                 listPreference(descriptor.type.subtype)
             else
                 stubPreference()
-            is ConfigString -> MyEditTextPreference(context).apply {
+            is ConfigString -> EditTextPreference(context).apply {
                 dialogTitle = descriptor.description ?: descriptor.name
                 summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
                 setDefaultValue(descriptor.defaultValue)
@@ -232,9 +232,10 @@ object PreferenceScreenFactory {
         fragmentManager: FragmentManager,
         cfg: RawConfig,
         screen: PreferenceScreen,
-        descriptor: ConfigCustom
+        descriptor: ConfigCustom,
+        save: () -> Unit
     ) {
-        val subStore = FcitxRawConfigStore(cfg[descriptor.name])
+        val subStore = FcitxRawConfigStore(cfg[descriptor.name], save)
         val subPref = PreferenceCategory(context).apply {
             key = descriptor.name
             title = descriptor.description ?: descriptor.name
@@ -249,7 +250,8 @@ object PreferenceScreenFactory {
                 cfg[descriptor.name],
                 screen,
                 it,
-                subStore
+                subStore,
+                save
             )
         }
     }

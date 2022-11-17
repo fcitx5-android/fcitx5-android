@@ -1,11 +1,15 @@
 package org.fcitx.fcitx5.android.ui.main.settings
 
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
-import androidx.preference.forEach
 import androidx.preference.isEmpty
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxAPI
 import org.fcitx.fcitx5.android.core.RawConfig
@@ -23,6 +27,9 @@ abstract class FcitxPreferenceFragment : PaddingPreferenceFragment() {
     private lateinit var raw: RawConfig
     private var configLoaded = false
 
+    private val supervisorJob = SupervisorJob()
+    private val scope = CoroutineScope(supervisorJob)
+
     private val viewModel: MainViewModel by activityViewModels()
 
     private val fcitx: FcitxConnection
@@ -34,43 +41,52 @@ abstract class FcitxPreferenceFragment : PaddingPreferenceFragment() {
 
     private fun save() {
         if (!configLoaded) return
-        lifecycleScope.launchOnFcitxReady(fcitx) {
+        scope.launchOnFcitxReady(fcitx) {
             saveConfig(it, raw["cfg"])
         }
     }
 
-    private val onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, _ ->
-        save()
-        true
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        requireActivity().onBackPressedDispatcher
+            .addCallback(this, object : OnBackPressedCallback(true) {
+                // prevent "back" from navigating away from this Fragment when it's still saving
+                override fun handleOnBackPressed() {
+                    lifecycleScope.withLoadingDialog(requireContext(), R.string.saving) {
+                        // complete the parent job and wait for all children
+                        supervisorJob.complete()
+                        supervisorJob.join()
+                        scope.cancel()
+                        findNavController().popBackStack()
+                    }
+                }
+            })
     }
 
     final override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         val context = requireContext()
         lifecycleScope.withLoadingDialog(context) {
             raw = fcitx.runOnReady { obtainConfig(this) }
-            if (raw.findByName("cfg") != null && raw.findByName("desc") != null) {
-                configLoaded = true
+            configLoaded = raw.findByName("cfg") != null && raw.findByName("desc") != null
+            preferenceScreen = if (configLoaded) {
+                PreferenceScreenFactory.create(
+                    preferenceManager, parentFragmentManager, raw, ::save
+                ).apply {
+                    if (isEmpty()) {
+                        addPreference(Preference(context).apply {
+                            setTitle(R.string.no_config_options)
+                            isIconSpaceReserved = false
+                        })
+                    }
+                }
             } else {
-                preferenceScreen = preferenceManager.createPreferenceScreen(context).apply {
+                preferenceManager.createPreferenceScreen(context).apply {
                     addPreference(Preference(context).apply {
                         setTitle(R.string.config_addon_not_loaded)
                         isIconSpaceReserved = false
                     })
                 }
-                return@withLoadingDialog
             }
-            val screen =
-                PreferenceScreenFactory.create(preferenceManager, parentFragmentManager, raw)
-            screen.forEach {
-                it.onPreferenceChangeListener = onPreferenceChangeListener
-            }
-            if (screen.isEmpty()) {
-                screen.addPreference(Preference(context).apply {
-                    setTitle(R.string.no_config_options)
-                    isIconSpaceReserved = false
-                })
-            }
-            preferenceScreen = screen
             viewModel.disableAboutButton()
         }
     }
