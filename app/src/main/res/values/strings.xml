@@ -171,4 +171,5 @@
     <string name="system_default">System default</string>
     <string name="editor_info_inspector">EditorInfo Inspector</string>
     <string name="default_">Default</string>
+    <string name="saving">Saving</string>
 </resources>

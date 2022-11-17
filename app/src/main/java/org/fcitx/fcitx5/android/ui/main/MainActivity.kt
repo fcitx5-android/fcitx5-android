@@ -14,6 +14,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
+import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
@@ -29,19 +30,7 @@ class MainActivity : AppCompatActivity() {
 
     private val viewModel: MainViewModel by viewModels()
 
-    private lateinit var navHostFragment: NavHostFragment
-
-    private fun onNavigateUpListener(): Boolean {
-        val navController = navHostFragment.navController
-        return when (navController.currentDestination?.id) {
-            R.id.mainFragment -> {
-                // "minimize" the app, don't exit activity
-                moveTaskToBack(false)
-                true
-            }
-            else -> onSupportNavigateUp()
-        }
-    }
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,11 +55,20 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         val appBarConfiguration = AppBarConfiguration(
-            topLevelDestinationIds = setOf(),
-            fallbackOnNavigateUpListener = ::onNavigateUpListener
+            // always show back icon regardless of `navController.currentDestination`
+            topLevelDestinationIds = setOf()
         )
-        navHostFragment = binding.navHostFragment.getFragment()
-        binding.toolbar.setupWithNavController(navHostFragment.navController, appBarConfiguration)
+        navController = binding.navHostFragment.getFragment<NavHostFragment>().navController
+        binding.toolbar.setupWithNavController(navController, appBarConfiguration)
+        binding.toolbar.setNavigationOnClickListener {
+            // prevent navigate up when child fragment has enabled `OnBackPressedCallback`
+            if (onBackPressedDispatcher.hasEnabledCallbacks()) {
+                onBackPressedDispatcher.onBackPressed()
+                return@setNavigationOnClickListener
+            }
+            // "minimize" the activity if we can't go back
+            navController.navigateUp() || onSupportNavigateUp() || moveTaskToBack(false)
+        }
         viewModel.toolbarTitle.observe(this) {
             binding.toolbar.title = it
         }
@@ -82,7 +80,7 @@ class MainActivity : AppCompatActivity() {
                 )
             }
         }
-        navHostFragment.navController.addOnDestinationChangedListener { _, dest, _ ->
+        navController.addOnDestinationChangedListener { _, dest, _ ->
             when (dest.id) {
                 R.id.themeListFragment -> viewModel.disableAppbarShadow()
                 else -> viewModel.enableAppbarShadow()
@@ -96,7 +94,7 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent?) {
         processIntent(intent)
         super.onNewIntent(intent)
-        navHostFragment.navController.handleDeepLink(intent)
+        navController.handleDeepLink(intent)
     }
 
     private fun processIntent(intent: Intent?) {
@@ -111,7 +109,7 @@ class MainActivity : AppCompatActivity() {
                     .setMessage(R.string.whether_import_dict)
                     .setNegativeButton(android.R.string.cancel) { _, _ -> }
                     .setPositiveButton(R.string.import_) { _, _ ->
-                        navHostFragment.navController.navigateFromMain(
+                        navController.navigateFromMain(
                             R.id.action_mainFragment_to_pinyinDictionaryFragment,
                             bundleOf(PinyinDictionaryFragment.INTENT_DATA_URI to it)
                         )
@@ -122,7 +120,6 @@ class MainActivity : AppCompatActivity() {
         }
         return false
     }
-
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean = menu.run {
         add(R.string.save).apply {
@@ -141,14 +138,14 @@ class MainActivity : AppCompatActivity() {
         add(R.string.developer).apply {
             aboutMenus.add(this)
             setOnMenuItemClickListener {
-                navHostFragment.navController.navigate(R.id.action_mainFragment_to_developerFragment)
+                navController.navigate(R.id.action_mainFragment_to_developerFragment)
                 true
             }
         }
         add(R.string.about).apply {
             aboutMenus.add(this)
             setOnMenuItemClickListener {
-                navHostFragment.navController.navigate(R.id.action_mainFragment_to_aboutFragment)
+                navController.navigate(R.id.action_mainFragment_to_aboutFragment)
                 true
             }
         }

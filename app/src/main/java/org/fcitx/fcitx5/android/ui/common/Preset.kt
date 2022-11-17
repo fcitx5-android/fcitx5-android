@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.View
 import android.widget.CheckBox
 import android.widget.ImageButton
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.cancelAndJoin
@@ -57,10 +58,10 @@ fun <T> Context.CheckBoxListUi(
 )
 
 @Suppress("FunctionName")
-fun Context.ProgressBarDialogIndeterminate(): AlertDialog.Builder {
+fun Context.ProgressBarDialogIndeterminate(@StringRes title: Int): AlertDialog.Builder {
     val androidStyles = AndroidStyles(this)
     return AlertDialog.Builder(this)
-        .setTitle(R.string.loading)
+        .setTitle(title)
         .setView(verticalLayout {
             add(androidStyles.progressBar.horizontal {
                 isIndeterminate = true
@@ -75,18 +76,18 @@ fun Context.ProgressBarDialogIndeterminate(): AlertDialog.Builder {
 
 fun LifecycleCoroutineScope.withLoadingDialog(
     context: Context,
+    @StringRes title: Int = R.string.loading,
     threshold: Long = 200L,
     action: suspend () -> Unit
 ) {
-    val loading = context.ProgressBarDialogIndeterminate().create()
-    val job = launch {
+    var loadingDialog: AlertDialog? = null
+    val loadingJob = launch {
         delay(threshold)
-        loading.show()
+        loadingDialog = context.ProgressBarDialogIndeterminate(title).show()
     }
     launch {
         action()
-        job.cancelAndJoin()
-        if (loading.isShowing)
-            loading.dismiss()
+        loadingJob.cancelAndJoin()
+        loadingDialog?.dismiss()
     }
 }
