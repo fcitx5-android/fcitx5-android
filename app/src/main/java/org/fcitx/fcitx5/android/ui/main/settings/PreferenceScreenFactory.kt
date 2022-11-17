@@ -11,6 +11,8 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Key
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.ui.main.modified.MyEditTextPreference
+import org.fcitx.fcitx5.android.ui.main.modified.MyListPreference
 import org.fcitx.fcitx5.android.ui.main.settings.addon.AddonConfigFragment
 import org.fcitx.fcitx5.android.ui.main.settings.global.GlobalConfigFragment
 import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
@@ -174,7 +176,7 @@ object PreferenceScreenFactory {
             is ConfigBool -> SwitchPreferenceCompat(context).apply {
                 setDefaultValue(descriptor.defaultValue)
             }
-            is ConfigEnum -> ListPreference(context).apply {
+            is ConfigEnum -> MyListPreference(context).apply {
                 entries = (descriptor.entriesI18n ?: descriptor.entries).toTypedArray()
                 entryValues = descriptor.entries.toTypedArray()
                 dialogTitle = descriptor.description ?: descriptor.name
@@ -208,7 +210,7 @@ object PreferenceScreenFactory {
                 listPreference(descriptor.type.subtype)
             else
                 stubPreference()
-            is ConfigString -> EditTextPreference(context).apply {
+            is ConfigString -> MyEditTextPreference(context).apply {
                 dialogTitle = descriptor.description ?: descriptor.name
                 summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
                 setDefaultValue(descriptor.defaultValue)

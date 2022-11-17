@@ -4,13 +4,9 @@ import android.content.Context
 import android.content.res.TypedArray
 import android.text.InputType
 import android.text.method.DigitsKeyListener
-import android.util.AttributeSet
 import androidx.preference.EditTextPreference
 
-class EditTextIntPreference @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null
-) : EditTextPreference(context, attrs) {
+class EditTextIntPreference(context: Context) : EditTextPreference(context) {
 
     private var value = 0
     var min: Int = 0
