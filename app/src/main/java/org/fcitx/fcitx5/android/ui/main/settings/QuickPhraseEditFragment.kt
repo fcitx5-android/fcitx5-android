@@ -116,12 +116,12 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
     private fun saveConfig() {
         if (!dustman.dirty)
             return
+        resetDustman()
         lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
             quickPhrase.saveData(
                 QuickPhraseData(entries)
             )
             launch(Dispatchers.Main) {
-                resetDustman()
                 // tell parent that we need to reload
                 setFragmentResult(RESULT, bundleOf(RESULT to true))
             }

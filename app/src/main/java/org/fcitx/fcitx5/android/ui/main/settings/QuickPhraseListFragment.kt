@@ -299,6 +299,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
     private fun reloadQuickPhrase() {
         if (!dustman.dirty)
             return
+        resetDustman()
         lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
             if (busy.compareAndSet(false, true)) {
                 val builder = NotificationCompat.Builder(
@@ -318,9 +319,6 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                 }.let { Timber.d("Took $it to reload quickphrase") }
                 notificationManager.cancel(id)
                 busy.set(false)
-                launch(Dispatchers.Main) {
-                    resetDustman()
-                }
             }
         }
     }
