@@ -65,8 +65,7 @@ class PopupComponent :
     fun showPopup(viewId: Int, content: String, bounds: Rect) {
         showingEntryUi[viewId]?.apply {
             dismissJobs[viewId]?.also {
-                it.cancel()
-                dismissJobs.remove(viewId)
+                dismissJobs.remove(viewId)?.cancel()
             }
             lastShowTime = System.currentTimeMillis()
             setText(content)
@@ -190,16 +189,22 @@ class PopupComponent :
     }
 
     fun dismissAll() {
-        showingContainerUi.forEach {
-            dismissPopupContainer(it.key)
+        // avoid modifying collection while iterating
+        dismissJobs.forEach { (_, job) ->
+            job.cancel()
         }
-        showingEntryUi.forEach {
-            dismissJobs[it.key]?.apply {
-                cancel()
-                dismissJobs.remove(it.key)
-            }
-            dismissPopupEntry(it.key, it.value)
+        dismissJobs.clear()
+        // too
+        showingContainerUi.forEach { (_, container) ->
+            root.removeView(container.root)
         }
+        showingContainerUi.clear()
+        // too too
+        showingEntryUi.forEach { (_, entry) ->
+            root.removeView(entry.root)
+            freeEntryUi.add(entry)
+        }
+        showingEntryUi.clear()
     }
 
     val listener: PopupListener = object : PopupListener {
