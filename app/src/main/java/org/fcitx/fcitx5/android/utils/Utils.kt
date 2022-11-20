@@ -19,6 +19,7 @@ import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputConnection
 import android.widget.EditText
+import android.widget.SeekBar
 import android.widget.Toast
 import androidx.annotation.AttrRes
 import androidx.annotation.IdRes
@@ -212,3 +213,13 @@ inline fun <reified T : Parcelable> Bundle.parcelableArray(key: String): Array<T
 }
 
 fun Int.alpha(a: Float) = ColorUtils.setAlphaComponent(this, (a * 0xff).roundToInt())
+
+fun SeekBar.setOnChangeListener(listener: SeekBar.(progress: Int) -> Unit) {
+    setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        override fun onStartTrackingTouch(seekBar: SeekBar) {}
+        override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+            listener.invoke(seekBar, progress)
+        }
+    })
+}

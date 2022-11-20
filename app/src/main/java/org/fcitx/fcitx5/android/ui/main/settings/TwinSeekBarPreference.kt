@@ -9,6 +9,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.edit
 import androidx.preference.Preference
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.utils.setOnChangeListener
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.add
@@ -76,16 +77,6 @@ class TwinSeekBarPreference @JvmOverloads constructor(
         showDialog()
     }
 
-    private fun SeekBar.setOnChangeListener(listener: SeekBar.(progress: Int) -> Unit) {
-        setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onStartTrackingTouch(seekBar: SeekBar) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar) {}
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                listener.invoke(seekBar, progress)
-            }
-        })
-    }
-
     @OptIn(ExperimentalContracts::class)
     private fun ConstraintLayout.addSeekBar(
         label: String,
@@ -105,7 +96,7 @@ class TwinSeekBarPreference @JvmOverloads constructor(
             max = progressForValue(this@TwinSeekBarPreference.max)
             progress = progressForValue(initialValue)
             setOnChangeListener {
-                valueLabel.text = textForValue(valueForProgress(progress), defaultValue)
+                valueLabel.text = textForValue(valueForProgress(it), defaultValue)
             }
             initSeekBar(this)
         }
@@ -174,7 +165,9 @@ class TwinSeekBarPreference @JvmOverloads constructor(
     object SimpleSummaryProvider : SummaryProvider<TwinSeekBarPreference> {
         override fun provideSummary(preference: TwinSeekBarPreference): CharSequence {
             return preference.run {
-                "${textForValue(value, default)} / ${textForValue(secondaryValue, secondaryDefault)}"
+                val primary = textForValue(value, default)
+                val secondary = textForValue(secondaryValue, secondaryDefault)
+                "$primary / $secondary"
             }
         }
     }

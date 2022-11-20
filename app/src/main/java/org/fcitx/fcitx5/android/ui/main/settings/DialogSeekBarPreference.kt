@@ -3,10 +3,10 @@ package org.fcitx.fcitx5.android.ui.main.settings
 import android.content.Context
 import android.content.res.TypedArray
 import android.util.AttributeSet
-import android.widget.SeekBar
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.utils.setOnChangeListener
 import splitties.dimensions.dp
 import splitties.views.dsl.core.*
 import splitties.views.gravityHorizontalCenter
@@ -86,13 +86,9 @@ class DialogSeekBarPreference @JvmOverloads constructor(
         val seekBar = seekBar {
             max = progressForValue(this@DialogSeekBarPreference.max)
             progress = progressForValue(value)
-            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    textView.text = textForValue(valueForProgress(progress))
-                }
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-            })
+            setOnChangeListener {
+                textView.text = textForValue(valueForProgress(it))
+            }
         }
         val dialogContent = verticalLayout {
             gravity = gravityHorizontalCenter
@@ -150,7 +146,7 @@ class DialogSeekBarPreference @JvmOverloads constructor(
 
     object SimpleSummaryProvider : SummaryProvider<DialogSeekBarPreference> {
         override fun provideSummary(preference: DialogSeekBarPreference): CharSequence {
-            return preference.run { textForValue() }
+            return preference.textForValue()
         }
     }
 }
