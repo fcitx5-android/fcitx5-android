@@ -116,6 +116,15 @@ class PickerWindow(
         }
         pager.apply {
             adapter = pickerPagesAdapter
+            // show first symbol category by default, rather than recently used
+            val initialPage = pickerPagesAdapter.getStartPageOfCategory(1)
+            setCurrentItem(initialPage, false)
+            // update initial tab and page manually to avoid
+            // "Adding or removing callbacks during dispatch to callbacks"
+            tabsUi.activateTab(1)
+            paginationUi.updatePageCount(
+                pickerPagesAdapter.getCategoryRangeOfPage(initialPage).run { last - first + 1 }
+            )
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageScrolled(
                     position: Int,
@@ -135,14 +144,6 @@ class PickerWindow(
                     popup.dismissAll()
                 }
             })
-            // show first symbol category by default, rather than recently used
-            val initialPage = pickerPagesAdapter.getStartPageOfCategory(1)
-            setCurrentItem(initialPage, false)
-            // ViewPager2#setCurrentItem(Int, smoothScroll = false) won't trigger onPageScrolled
-            // need to call updatePageCount manually
-            paginationUi.updatePageCount(
-                pickerPagesAdapter.getCategoryRangeOfPage(initialPage).run { last - first + 1 }
-            )
         }
     }
 
