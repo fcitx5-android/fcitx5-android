@@ -60,9 +60,9 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
     private fun saveConfig() {
         if (!dustman.dirty)
             return
+        resetDustman()
         lifecycleScope.launchOnFcitxReady(fcitx) {
             PunctuationManager.save(it, lang, ui.entries)
-            resetDustman()
         }
     }
 

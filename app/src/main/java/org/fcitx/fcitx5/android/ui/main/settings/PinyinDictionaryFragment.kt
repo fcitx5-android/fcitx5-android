@@ -189,6 +189,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
     private fun reloadDict() {
         if (!dustman.dirty)
             return
+        resetDustman()
         lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
             if (busy.compareAndSet(false, true)) {
                 val builder = NotificationCompat.Builder(requireContext(), CHANNEL_ID)
@@ -205,9 +206,6 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                 }.let { Timber.d("Took $it to reload dict") }
                 notificationManager.cancel(id)
                 busy.set(false)
-                launch(Dispatchers.Main) {
-                    resetDustman()
-                }
             }
         }
     }
