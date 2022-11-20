@@ -2,8 +2,8 @@ package org.fcitx.fcitx5.android.input.candidates.adapter
 
 import android.graphics.Paint
 import android.graphics.Rect
+import android.util.LruCache
 import android.view.ViewGroup
-import androidx.collection.lruCache
 import androidx.recyclerview.widget.GridLayoutManager
 import splitties.dimensions.dp
 import splitties.views.dsl.core.matchParent
@@ -11,7 +11,7 @@ import splitties.views.dsl.core.matchParent
 abstract class GridCandidateViewAdapter : BaseCandidateViewAdapter() {
 
     // cache measureWidth
-    private val measuredWidths = lruCache<String, Float>(200)
+    private val measuredWidths = LruCache<String, Float>(200)
 
     fun measureWidth(position: Int): Float {
         val candidate = getCandidateAt(position)
