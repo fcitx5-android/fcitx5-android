@@ -10,10 +10,10 @@ import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardDao
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardDatabase
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.utils.UTF8Utils
 import org.fcitx.fcitx5.android.utils.WeakHashSet
 import splitties.systemservices.clipboardManager
-import timber.log.Timber
 
 object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
@@ -43,19 +43,32 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
         onUpdateListeners.remove(listener)
     }
 
-    private val enabled by AppPrefs.getInstance().clipboard.clipboardListening
+    private val enabledPref = AppPrefs.getInstance().clipboard.clipboardListening
+    private val enabledListener = ManagedPreference.OnChangeListener<Boolean> { _, value ->
+        if (value) {
+            clipboardManager.addPrimaryClipChangedListener(this)
+        } else {
+            clipboardManager.removePrimaryClipChangedListener(this)
+        }
+    }
 
-    private val limit by AppPrefs.getInstance().clipboard.clipboardHistoryLimit
+    private val limitPref = AppPrefs.getInstance().clipboard.clipboardHistoryLimit
+    private val limitListener = ManagedPreference.OnChangeListener<Int> { _, _ ->
+        launch { removeOutdated() }
+    }
 
     var lastEntry: ClipboardEntry? = null
     var lastEntryTimestamp: Long = -1L
 
     fun init(context: Context) {
-        clipboardManager.addPrimaryClipChangedListener(this)
         clbDb = Room
             .databaseBuilder(context, ClipboardDatabase::class.java, "clbdb")
             .build()
         clbDao = clbDb.clipboardDao()
+        enabledListener.onChange(enabledPref.key, enabledPref.getValue())
+        enabledPref.registerOnChangeListener(enabledListener)
+        limitListener.onChange(limitPref.key, limitPref.getValue())
+        limitPref.registerOnChangeListener(limitListener)
         launch { updateItemCount() }
     }
 
@@ -90,14 +103,10 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     }
 
     override fun onPrimaryClipChanged() {
-        if (!(enabled && this::clbDao.isInitialized))
-            return
-        clipboardManager
-            .primaryClip
+        clipboardManager.primaryClip
             ?.let { ClipboardEntry.fromClipData(it) }
             ?.takeIf { it.text.isNotBlank() && UTF8Utils.instance.validateUTF8(it.text) }
             ?.let { e ->
-                Timber.d("Accept $e")
                 launch {
                     mutex.withLock {
                         val all = clbDao.getAll()
@@ -119,22 +128,18 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
                     }
                 }
             }
-
     }
 
     private suspend fun removeOutdated() {
-        val all = clbDao.getAll()
-        if (all.size > limit) {
+        val limit = limitPref.getValue()
+        val unpinned = clbDao.getAll().filter { !it.pinned }
+        if (unpinned.size > limit) {
             // the last one we will keep
-            val last = all
-                .map {
-                    // pinned one should always be considered as the latest
-                    if (it.pinned) it.copy(id = Int.MAX_VALUE)
-                    else it
-                }
-                .sortedBy { it.id }[all.size - limit]
-            // delete all unpinned before that
-            clbDao.deleteUnpinnedIdLessThan(last.id)
+            val last = unpinned
+                .sortedBy { it.id }
+                .getOrNull(unpinned.size - limit)
+            // delete all unpinned before that, or delete all when limit <= 0
+            clbDao.deleteUnpinnedIdLessThan(last?.id ?: Int.MAX_VALUE)
         }
     }
 
