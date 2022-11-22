@@ -381,7 +381,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         editorInfo = attribute
         Timber.d("onStartInput: initialSel=$selection, restarting=$restarting")
         if (restarting) return
-        currentInputConnection.apply {
+        inputConnection?.apply {
             cursorAnchorAvailable = requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
         }
         lifecycleScope.launchOnFcitxReady(fcitx) {
@@ -477,7 +477,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     // it's not possible to set cursor inside composing text
     private fun updateComposingText(text: String, cursor: Int) {
         fcitxCursor = cursor
-        val ic = currentInputConnection ?: return
+        val ic = inputConnection ?: return
         ic.beginBatchEdit()
         do {
             if (text != composingText) {
@@ -521,7 +521,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onFinishInputView(finishingInput: Boolean) {
         Timber.d("onFinishInputView: finishingInput=$finishingInput")
-        currentInputConnection.finishComposingText()
+        inputConnection?.finishComposingText()
         lifecycleScope.launchOnFcitxReady(fcitx) {
             it.focus(false)
         }
@@ -532,7 +532,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         Timber.d("onFinishInput")
         if (cursorAnchorAvailable) {
             cursorAnchorAvailable = false
-            currentInputConnection.requestCursorUpdates(0)
+            inputConnection?.requestCursorUpdates(0)
         }
         editorInfo = null
     }
