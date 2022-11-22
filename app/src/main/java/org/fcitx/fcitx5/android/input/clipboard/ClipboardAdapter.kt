@@ -19,9 +19,36 @@ import org.fcitx.fcitx5.android.data.theme.Theme
 import splitties.resources.drawable
 import splitties.resources.styledColor
 import kotlin.collections.set
+import kotlin.math.min
 
 abstract class ClipboardAdapter :
     RecyclerView.Adapter<ClipboardAdapter.ViewHolder>() {
+
+    companion object {
+        /**
+         * excerpt text to show on ClipboardEntryUi, to reduce render time of very long text
+         * @param str text to excerpt
+         * @param lines max output lines
+         * @param chars max chars per output line
+         */
+        fun excerptText(str: String, lines: Int = 4, chars: Int = 128) = buildString {
+            val totalLength = str.length
+            var lineBreak = -1
+            for (i in 1..lines) {
+                val start = lineBreak + 1   // skip previous '\n'
+                lineBreak = str.indexOf('\n', start)
+                if (lineBreak < 0) {
+                    // no line breaks remaining, substring to end of text
+                    append(str.substring(start, min(start + chars, totalLength)))
+                    break
+                } else {
+                    // append one line exactly
+                    appendLine(str.substring(start, min(min(lineBreak, start + chars), totalLength)))
+                }
+            }
+        }
+    }
+
     private val _entries = mutableListOf<ClipboardEntry>()
 
     // maps entry id to list index
@@ -44,7 +71,7 @@ abstract class ClipboardAdapter :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         with(holder.entryUi) {
             val entry = _entries[position]
-            text.text = entry.text
+            text.text = excerptText(entry.text)
             pin.visibility = if (entry.pinned) View.VISIBLE else View.INVISIBLE
             root.setOnClickListener {
                 onPaste(entry.id)
