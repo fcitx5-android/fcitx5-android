@@ -179,7 +179,6 @@ object PreferenceScreenFactory {
             is ConfigEnum -> ListPreference(context).apply {
                 entries = (descriptor.entriesI18n ?: descriptor.entries).toTypedArray()
                 entryValues = descriptor.entries.toTypedArray()
-                dialogTitle = descriptor.description ?: descriptor.name
                 summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
                 setDefaultValue(descriptor.defaultValue)
             }
@@ -196,11 +195,24 @@ object PreferenceScreenFactory {
                 ConfigExternal.ETy.Table -> addonConfigPreference("table")
                 else -> stubPreference()
             }
-            is ConfigInt -> DialogSeekBarPreference(context).apply {
-                summaryProvider = DialogSeekBarPreference.SimpleSummaryProvider
-                descriptor.defaultValue?.let { setDefaultValue(it) }
-                descriptor.intMin?.let { min = it }
-                descriptor.intMax?.let { max = it }
+            is ConfigInt -> {
+                val min = descriptor.intMin
+                val max = descriptor.intMax
+                if (min != null && max != null) {
+                    DialogSeekBarPreference(context).apply {
+                        summaryProvider = DialogSeekBarPreference.SimpleSummaryProvider
+                        descriptor.defaultValue?.let { setDefaultValue(it) }
+                        this.min = min
+                        this.max = max
+                    }
+                } else {
+                    EditTextIntPreference(context).apply {
+                        summaryProvider = EditTextIntPreference.SimpleSummaryProvider
+                        descriptor.defaultValue?.let { setDefaultValue(it) }
+                        min?.let { this.min = it }
+                        max?.let { this.max = it }
+                    }
+                }
             }
             is ConfigKey -> FcitxKeyPreference(context).apply {
                 summaryProvider = FcitxKeyPreference.SimpleSummaryProvider
@@ -211,7 +223,6 @@ object PreferenceScreenFactory {
             else
                 stubPreference()
             is ConfigString -> EditTextPreference(context).apply {
-                dialogTitle = descriptor.description ?: descriptor.name
                 summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
                 setDefaultValue(descriptor.defaultValue)
             }
@@ -222,6 +233,10 @@ object PreferenceScreenFactory {
             isSingleLineTitle = false
             isIconSpaceReserved = false
             preferenceDataStore = store
+            if (this is DialogPreference) {
+                dialogTitle = title
+                dialogMessage = descriptor.tooltip
+            }
         }.let {
             screen.addPreference(it)
         }

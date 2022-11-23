@@ -2,14 +2,16 @@ package org.fcitx.fcitx5.android.ui.main.settings
 
 import android.content.Context
 import android.content.res.TypedArray
+import android.os.Build
 import android.text.InputType
 import android.text.method.DigitsKeyListener
 import androidx.preference.EditTextPreference
+import java.util.Locale
 
 class EditTextIntPreference(context: Context) : EditTextPreference(context) {
 
     private var value = 0
-    var min: Int = 0
+    var min: Int = Int.MIN_VALUE
     var max: Int = Int.MAX_VALUE
     var unit: String = ""
 
@@ -28,7 +30,12 @@ class EditTextIntPreference(context: Context) : EditTextPreference(context) {
         setOnBindEditTextListener {
             it.setText(currentValue.toString())
             it.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
-            it.keyListener = DigitsKeyListener.getInstance("0123456789")
+            it.keyListener = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                DigitsKeyListener.getInstance(Locale.ROOT, min < 0, false)
+            } else {
+                @Suppress("DEPRECATION")
+                DigitsKeyListener.getInstance(min < 0, false)
+            }
         }
     }
 

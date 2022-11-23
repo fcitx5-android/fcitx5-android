@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.res.TypedArray
 import android.util.AttributeSet
 import androidx.appcompat.app.AlertDialog
-import androidx.preference.Preference
+import androidx.preference.DialogPreference
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.utils.setOnChangeListener
 import splitties.dimensions.dp
@@ -26,7 +26,7 @@ class DialogSeekBarPreference @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = androidx.preference.R.attr.preferenceStyle
-) : Preference(context, attrs, defStyleAttr) {
+) : DialogPreference(context, attrs, defStyleAttr) {
 
     private var value = 0
     var min: Int
@@ -102,7 +102,7 @@ class DialogSeekBarPreference @JvmOverloads constructor(
             })
         }
         AlertDialog.Builder(context)
-            .setTitle(this@DialogSeekBarPreference.title)
+            .setTitle(this@DialogSeekBarPreference.dialogTitle)
             .setView(dialogContent)
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 val value = valueForProgress(seekBar.progress)

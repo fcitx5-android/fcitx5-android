@@ -7,7 +7,7 @@ import android.widget.SeekBar
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.edit
-import androidx.preference.Preference
+import androidx.preference.DialogPreference
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.utils.setOnChangeListener
 import splitties.dimensions.dp
@@ -23,7 +23,7 @@ import kotlin.contracts.contract
 class TwinSeekBarPreference @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : Preference(context, attrs) {
+) : DialogPreference(context, attrs) {
 
     var min: Int = 0
     var max: Int = 100
@@ -130,7 +130,7 @@ class TwinSeekBarPreference @JvmOverloads constructor(
             }
         }
         AlertDialog.Builder(context)
-            .setTitle(this@TwinSeekBarPreference.title)
+            .setTitle(this@TwinSeekBarPreference.dialogTitle)
             .setView(dialogContent)
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 val primary = valueForProgress(primarySeekBar.progress)

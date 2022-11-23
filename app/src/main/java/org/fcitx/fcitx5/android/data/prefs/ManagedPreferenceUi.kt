@@ -108,6 +108,7 @@ abstract class ManagedPreferenceUi<T : Preference>(
             this@SeekBarInt.defaultLabel?.let { defaultLabel = context.getString(it) }
             setDefaultValue(this@SeekBarInt.defaultValue)
             setTitle(this@SeekBarInt.title)
+            setDialogTitle(this@SeekBarInt.title)
             min = this@SeekBarInt.min
             max = this@SeekBarInt.max
             unit = this@SeekBarInt.unit
@@ -136,6 +137,7 @@ abstract class ManagedPreferenceUi<T : Preference>(
     ) : ManagedPreferenceUi<TwinSeekBarPreference>(key, enableUiOn) {
         override fun createUi(context: Context) = TwinSeekBarPreference(context).apply {
             setTitle(this@TwinSeekBarInt.title)
+            setDialogTitle(this@TwinSeekBarInt.title)
             label = context.getString(this@TwinSeekBarInt.label)
             key = this@TwinSeekBarInt.key
             secondaryLabel = context.getString(this@TwinSeekBarInt.secondaryLabel)
