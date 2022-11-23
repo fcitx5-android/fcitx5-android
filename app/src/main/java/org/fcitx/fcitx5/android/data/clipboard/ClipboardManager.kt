@@ -110,24 +110,27 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
                 launch {
                     mutex.withLock {
                         val all = clbDao.getAll()
-                        var pinned = false
                         all.find { e.text == it.text }?.let {
-                            clbDao.delete(it.id)
-                            pinned = it.pinned
+                            updateEntry(it)
+                            return@launch
                         }
-                        val rowId = clbDao.insert(e.copy(pinned = pinned))
+                        val rowId = clbDao.insert(e)
                         removeOutdated()
                         updateItemCount()
                         clbDao.get(rowId)?.let { newEntry ->
-                            lastEntry = newEntry
-                            lastEntryTimestamp = System.currentTimeMillis()
-                            onUpdateListeners.forEach { listener ->
-                                listener.onUpdate(newEntry.text)
-                            }
+                            updateEntry(newEntry)
                         }
                     }
                 }
             }
+    }
+
+    private fun updateEntry(entry: ClipboardEntry) {
+        lastEntry = entry
+        lastEntryTimestamp = System.currentTimeMillis()
+        onUpdateListeners.forEach { listener ->
+            listener.onUpdate(entry.text)
+        }
     }
 
     private suspend fun removeOutdated() {
@@ -139,7 +142,7 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
                 .sortedBy { it.id }
                 .getOrNull(unpinned.size - limit)
             // delete all unpinned before that, or delete all when limit <= 0
-            clbDao.deleteUnpinnedIdLessThan(last?.id ?: Int.MAX_VALUE)
+            clbDao.deleteUnpinnedIdLessThan(last?.timestamp ?: System.currentTimeMillis())
         }
     }
 

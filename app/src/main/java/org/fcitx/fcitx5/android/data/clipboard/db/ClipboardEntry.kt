@@ -1,6 +1,8 @@
 package org.fcitx.fcitx5.android.data.clipboard.db
 
 import android.content.ClipData
+import android.content.ClipDescription
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -9,14 +11,18 @@ data class ClipboardEntry(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val text: String,
-    val pinned: Boolean = false
+    val pinned: Boolean = false,
+    @ColumnInfo(defaultValue = "-1")
+    val timestamp: Long = System.currentTimeMillis(),
+    @ColumnInfo(defaultValue = ClipDescription.MIMETYPE_TEXT_PLAIN)
+    val type: String = ClipDescription.MIMETYPE_TEXT_PLAIN
 ) {
     companion object {
         const val TABLE_NAME = "clipboard"
 
         fun fromClipData(clipData: ClipData): ClipboardEntry? {
             val str = clipData.getItemAt(0).text?.toString() ?: return null
-            return ClipboardEntry(text = str)
+            return ClipboardEntry(text = str, type = clipData.description.getMimeType(0))
         }
     }
 }
