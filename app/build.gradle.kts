@@ -52,10 +52,6 @@ android {
         buildConfigField("String", "DATA_DESCRIPTOR_NAME", "\"${dataDescriptorName}\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        vectorDrawables {
-            useSupportLibrary = true
-        }
-
         if (targetABI == null)
             ndk {
                 abiFilters.add(defaultABI)
@@ -66,8 +62,6 @@ android {
         getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
-            isDebuggable = false
-            isJniDebuggable = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -79,9 +73,6 @@ android {
         }
         getByName("debug") {
             applicationIdSuffix = ".debug"
-            isDebuggable = true
-            isDefault = true
-            isJniDebuggable = true
 
             resValue("mipmap", "app_icon", "@mipmap/ic_launcher_debug")
             resValue("mipmap", "app_icon_round", "@mipmap/ic_launcher_round_debug")
