@@ -15,6 +15,9 @@ interface ClipboardDao {
     @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET text=:text WHERE id=:id")
     suspend fun updateText(id: Int, text: String)
 
+    @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET timestamp=:timestamp WHERE id=:id")
+    suspend fun updateTime(id: Int, timestamp: Long)
+
     @Query("SELECT COUNT(*) FROM ${ClipboardEntry.TABLE_NAME}")
     suspend fun itemCount(): Int
 
@@ -27,8 +30,8 @@ interface ClipboardDao {
     @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME}")
     suspend fun getAll(): List<ClipboardEntry>
 
-    @Query("DELETE FROM ${ClipboardEntry.TABLE_NAME} WHERE id<:id AND NOT pinned")
-    suspend fun deleteUnpinnedIdLessThan(id: Int)
+    @Query("DELETE FROM ${ClipboardEntry.TABLE_NAME} WHERE timestamp<:timestamp AND NOT pinned")
+    suspend fun deleteUnpinnedIdLessThan(timestamp: Long)
 
     @Query("DELETE FROM ${ClipboardEntry.TABLE_NAME} WHERE id=:id")
     suspend fun delete(id: Int)
