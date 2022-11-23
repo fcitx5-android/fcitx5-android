@@ -192,7 +192,7 @@ object PreferenceScreenFactory {
                 )
                 ConfigExternal.ETy.QuickPhrase -> quickPhraseEditor()
                 ConfigExternal.ETy.Chttrans -> addonConfigPreference("chttrans")
-                ConfigExternal.ETy.Table -> addonConfigPreference("table")
+                ConfigExternal.ETy.TableGlobal -> addonConfigPreference("table")
                 else -> stubPreference()
             }
             is ConfigInt -> {

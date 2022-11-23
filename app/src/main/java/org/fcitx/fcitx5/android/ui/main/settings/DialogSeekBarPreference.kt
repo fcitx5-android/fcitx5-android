@@ -8,8 +8,10 @@ import androidx.preference.DialogPreference
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.utils.setOnChangeListener
 import splitties.dimensions.dp
+import splitties.resources.resolveThemeAttribute
 import splitties.views.dsl.core.*
 import splitties.views.gravityHorizontalCenter
+import splitties.views.textAppearance
 
 /**
  * Custom preference which represents a seek bar which shows the current value in the summary. The
@@ -44,7 +46,7 @@ class DialogSeekBarPreference @JvmOverloads constructor(
                 max = getInteger(R.styleable.DialogSeekBarPreference_max, 100)
                 step = getInteger(R.styleable.DialogSeekBarPreference_step, 1)
                 unit = getString(R.styleable.DialogSeekBarPreference_unit) ?: ""
-                if (getBoolean(R.styleable.DialogSeekBarPreference_useSimpleSummaryProvider,false)) {
+                if (getBoolean(R.styleable.DialogSeekBarPreference_useSimpleSummaryProvider, false)) {
                     summaryProvider = SimpleSummaryProvider
                 }
             } finally {
@@ -82,6 +84,7 @@ class DialogSeekBarPreference @JvmOverloads constructor(
     private fun showSeekBarDialog() = with(context) {
         val textView = textView {
             text = textForValue(value)
+            textAppearance = context.resolveThemeAttribute(android.R.attr.textAppearanceListItem)
         }
         val seekBar = seekBar {
             max = progressForValue(this@DialogSeekBarPreference.max)
@@ -92,8 +95,15 @@ class DialogSeekBarPreference @JvmOverloads constructor(
         }
         val dialogContent = verticalLayout {
             gravity = gravityHorizontalCenter
+            if (dialogMessage != null) {
+                val messageText = textView { text = dialogMessage }
+                add(messageText, lParams {
+                    verticalMargin = dp(8)
+                    horizontalMargin = dp(24)
+                })
+            }
             add(textView, lParams {
-                verticalMargin = dp(16)
+                verticalMargin = dp(24)
             })
             add(seekBar, lParams {
                 width = matchParent

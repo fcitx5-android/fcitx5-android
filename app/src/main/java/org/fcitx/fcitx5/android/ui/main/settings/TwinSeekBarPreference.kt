@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.SeekBar
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.edit
@@ -11,11 +12,10 @@ import androidx.preference.DialogPreference
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.utils.setOnChangeListener
 import splitties.dimensions.dp
+import splitties.resources.resolveThemeAttribute
 import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.add
-import splitties.views.dsl.core.seekBar
-import splitties.views.dsl.core.textView
-import splitties.views.dsl.core.wrapContent
+import splitties.views.dsl.core.*
+import splitties.views.textAppearance
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -88,9 +88,11 @@ class TwinSeekBarPreference @JvmOverloads constructor(
         contract { callsInPlace(initSeekBar, InvocationKind.EXACTLY_ONCE) }
         val textLabel = textView {
             text = label
+            textAppearance = context.resolveThemeAttribute(android.R.attr.textAppearanceListItem)
         }
         val valueLabel = textView {
             text = textForValue(initialValue, defaultValue)
+            textAppearance = context.resolveThemeAttribute(android.R.attr.textAppearanceListItem)
         }
         val seekBar = seekBar {
             max = progressForValue(this@TwinSeekBarPreference.max)
@@ -119,10 +121,18 @@ class TwinSeekBarPreference @JvmOverloads constructor(
     }
 
     private fun showDialog() = with(context) {
+        var messageText: TextView? = null
         val primarySeekBar: SeekBar
         val secondarySeekBar: SeekBar
         val dialogContent = constraintLayout {
-            addSeekBar(label, value, default) {
+            if (dialogMessage != null) {
+                messageText = textView { text = dialogMessage }
+                add(messageText!!, lParams {
+                    verticalMargin = dp(8)
+                    horizontalMargin = dp(24)
+                })
+            }
+            addSeekBar(label, value, default, messageText) {
                 primarySeekBar = this
             }
             addSeekBar(secondaryLabel, secondaryValue, secondaryDefault, primarySeekBar) {

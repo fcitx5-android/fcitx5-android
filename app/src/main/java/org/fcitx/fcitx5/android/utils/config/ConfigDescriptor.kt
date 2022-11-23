@@ -14,6 +14,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
     abstract val type: ConfigType<T>
     abstract val description: String?
     abstract val defaultValue: U?
+    abstract val tooltip: String?
 
     @Parcelize
     data class ConfigTopLevelDef(
@@ -33,6 +34,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
         override val name: String,
         override val description: String? = null,
         override val defaultValue: Int? = null,
+        override val tooltip: String? = null,
         val intMax: Int?,
         val intMin: Int?,
     ) : ConfigDescriptor<ConfigType.TyInt, Int>() {
@@ -45,6 +47,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
         override val name: String,
         override val description: String? = null,
         override val defaultValue: String? = null,
+        override val tooltip: String? = null,
     ) : ConfigDescriptor<ConfigType.TyString, String>() {
         override val type: ConfigType<ConfigType.TyString>
             get() = ConfigType.TyString
@@ -55,6 +58,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
         override val name: String,
         override val description: String? = null,
         override val defaultValue: Boolean? = null,
+        override val tooltip: String? = null,
     ) : ConfigDescriptor<ConfigType.TyBool, Boolean>() {
         override val type: ConfigType<ConfigType.TyBool>
             get() = ConfigType.TyBool
@@ -66,6 +70,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
         override val name: String,
         override val description: String? = null,
         override val defaultValue: String? = null,
+        override val tooltip: String? = null,
     ) : ConfigDescriptor<ConfigType.TyKey, String>() {
         override val type: ConfigType<ConfigType.TyKey>
             get() = ConfigType.TyKey
@@ -77,6 +82,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
         override val name: String,
         override val description: String? = null,
         override val defaultValue: String? = null,
+        override val tooltip: String? = null,
         val entries: List<String>,
         val entriesI18n: List<String>?
     ) : ConfigDescriptor<ConfigType.TyEnum, String>() {
@@ -90,6 +96,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
         override val name: String,
         override val type: ConfigType.TyCustom,
         override val description: String? = null,
+        override val tooltip: String? = null,
         // will be filled in parseTopLevel
         var customTypeDef: ConfigCustomTypeDef? = null
     ) : ConfigDescriptor<ConfigType.TyCustom, Nothing>() {
@@ -102,6 +109,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
         override val name: String,
         override val type: ConfigType.TyList,
         override val description: String? = null,
+        override val tooltip: String? = null,
         /**
          * [Any?] is used for a union type. See [parse] for details.
          */
@@ -116,6 +124,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
         override val name: String,
         override val description: String? = null,
         override val defaultValue: List<String>? = null,
+        override val tooltip: String? = null,
         val entries: List<String>,
         val entriesI18n: List<String>?
     ) :
@@ -128,6 +137,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
     data class ConfigExternal(
         override val name: String,
         override val description: String? = null,
+        override val tooltip: String? = null,
         val uri: String? = null,
         val knownType: ETy? = null
     ) : ConfigDescriptor<ConfigType.TyExternal, Nothing>() {
@@ -136,7 +146,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
             Punctuation,
             QuickPhrase,
             Chttrans,
-            Table
+            TableGlobal
         }
 
         override val type: ConfigType<ConfigType.TyExternal>
@@ -162,6 +172,8 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
             get() = findByName("IntMin")?.value?.toInt()
         private val RawConfig.intMax
             get() = findByName("IntMax")?.value?.toInt()
+        private val RawConfig.tooltip
+            get() = findByName("Tooltip")?.value
 
         sealed class ParseException : Exception() {
             data class NoTypeExist(val config: RawConfig) : ParseException()
@@ -195,6 +207,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                                 raw.name,
                                 raw.description,
                                 raw.defaultValue,
+                                raw.tooltip,
                                 entries,
                                 raw.enumI18n
                             )
@@ -203,6 +216,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                             raw.name,
                             raw.description,
                             raw.defaultValue?.toInt(),
+                            raw.tooltip,
                             raw.intMax,
                             raw.intMin
                         )
@@ -214,6 +228,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                                     raw.name,
                                     raw.description,
                                     raw.findByName("DefaultValue")?.subItems?.map { ele -> ele.value },
+                                    raw.tooltip,
                                     entries,
                                     raw.enumI18n
                                 )
@@ -222,6 +237,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                                     raw.name,
                                     it,
                                     raw.description,
+                                    raw.tooltip,
                                     raw.findByName("DefaultValue")?.subItems?.map { ele ->
                                         when (it.subtype) {
                                             ConfigType.TyBool -> ele.value.toBoolean()
@@ -241,13 +257,14 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                         ConfigType.TyExternal -> ConfigExternal(
                             raw.name,
                             raw.description,
+                            raw.tooltip,
                             raw.findByName("External")?.value,
                             when (raw.name) {
                                 "DictManager" -> ConfigExternal.ETy.PinyinDict
                                 "Punctuation" -> ConfigExternal.ETy.Punctuation
                                 "QuickPhrase", "Editor" -> ConfigExternal.ETy.QuickPhrase
                                 "Chttrans" -> ConfigExternal.ETy.Chttrans
-                                "TableGlobal" -> ConfigExternal.ETy.Table
+                                "TableGlobal" -> ConfigExternal.ETy.TableGlobal
                                 else -> null
                             }
                         )
