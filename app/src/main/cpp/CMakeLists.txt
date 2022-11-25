@@ -92,8 +92,10 @@ add_subdirectory(fcitx5-unikey)
 add_library(native-lib SHARED native-lib.cpp)
 target_link_libraries(native-lib
         log
-        Fcitx5::Core
         libevent::core
+        Fcitx5::Utils
+        Fcitx5::Config
+        Fcitx5::Core
         Fcitx5::Module::QuickPhrase
         Fcitx5::Module::Unicode
         Fcitx5::Module::Clipboard)

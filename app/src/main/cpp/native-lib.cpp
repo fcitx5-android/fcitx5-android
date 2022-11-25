@@ -41,6 +41,15 @@ public:
         return instance;
     }
 
+    static void setLogStream(std::ostream &stream, bool verbose) {
+        fcitx::Log::setLogStream(stream);
+        if (verbose) {
+            fcitx::Log::setLogRule("*=5,notimedate");
+        } else {
+            fcitx::Log::setLogRule("notimedate");
+        }
+    }
+
     bool isRunning() {
         return p_instance != nullptr && p_dispatcher != nullptr && p_frontend != nullptr;
     }
@@ -167,18 +176,18 @@ public:
         imMgr.save();
     }
 
-    static fcitx::RawConfig mergeConfigDesc(const fcitx::Configuration *conf) {
+    static fcitx::RawConfig mergeConfigDesc(const fcitx::Configuration &conf) {
         fcitx::RawConfig topLevel;
         auto cfg = topLevel.get("cfg", true);
-        conf->save(*cfg);
+        conf.save(*cfg);
         auto desc = topLevel.get("desc", true);
-        conf->dumpDescription(*desc);
+        conf.dumpDescription(*desc);
         return topLevel;
     }
 
     std::unique_ptr<fcitx::RawConfig> getGlobalConfig() {
         const auto &configuration = p_instance->globalConfig().config();
-        return std::make_unique<fcitx::RawConfig>(mergeConfigDesc(&configuration));
+        return std::make_unique<fcitx::RawConfig>(mergeConfigDesc(configuration));
     }
 
     void setGlobalConfig(const fcitx::RawConfig &config) {
@@ -205,7 +214,7 @@ public:
         if (!configuration) {
             return nullptr;
         }
-        return std::make_unique<fcitx::RawConfig>(mergeConfigDesc(configuration));
+        return std::make_unique<fcitx::RawConfig>(mergeConfigDesc(*configuration));
     }
 
     void setAddonConfig(const std::string &addonName, const fcitx::RawConfig &config) {
@@ -225,7 +234,7 @@ public:
         if (!configuration) {
             return nullptr;
         }
-        return std::make_unique<fcitx::RawConfig>(mergeConfigDesc(configuration));
+        return std::make_unique<fcitx::RawConfig>(mergeConfigDesc(*configuration));
     }
 
     void setAddonSubConfig(const std::string &addonName, const std::string &path, const fcitx::RawConfig &config) {
@@ -249,7 +258,7 @@ public:
         if (!configuration) {
             return nullptr;
         }
-        return std::make_unique<fcitx::RawConfig>(mergeConfigDesc(configuration));
+        return std::make_unique<fcitx::RawConfig>(mergeConfigDesc(*configuration));
     }
 
     void setInputMethodConfig(const std::string &imName, const fcitx::RawConfig &config) {
@@ -449,15 +458,9 @@ JNI_OnLoad(JavaVM *jvm, void * /* reserved */) {
 extern "C"
 JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_setupLogStream(JNIEnv *env, jclass clazz, jboolean verbose) {
-    static char tag[] = "fcitx5";
     static native_streambuf log_streambuf;
     static std::ostream stream(&log_streambuf);
-    fcitx::Log::setLogStream(stream);
-    if (verbose) {
-        fcitx::Log::setLogRule("*=5,notimedate");
-    } else {
-        fcitx::Log::setLogRule("notimedate");
-    }
+    Fcitx::setLogStream(stream, verbose);
 }
 
 jobject fcitxInputMethodEntryWithSubModeToJObject(JNIEnv *env, const fcitx::InputMethodEntry *entry, const std::vector<std::string> &subMode);
@@ -990,7 +993,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_focusInputContext(JNIEnv *env, jclass clazz, jboolean focus) {
     RETURN_IF_NOT_RUNNING
-    Fcitx::Instance().focusInputContext(focus == JNI_TRUE);
+    Fcitx::Instance().focusInputContext(focus);
 }
 
 extern "C"

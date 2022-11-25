@@ -87,7 +87,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         withFcitxContext { inputMethodStatus() ?: inputMethodEntryCached }
 
     override suspend fun getGlobalConfig() = withFcitxContext {
-        getFcitxGlobalConfig() ?: RawConfig(arrayOf())
+        getFcitxGlobalConfig() ?: RawConfig()
     }
 
     override suspend fun setGlobalConfig(config: RawConfig) = withFcitxContext {
@@ -95,7 +95,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
     }
 
     override suspend fun getAddonConfig(addon: String) = withFcitxContext {
-        getFcitxAddonConfig(addon) ?: RawConfig(arrayOf())
+        getFcitxAddonConfig(addon) ?: RawConfig()
     }
 
     override suspend fun setAddonConfig(addon: String, config: RawConfig) = withFcitxContext {
@@ -103,14 +103,14 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
     }
 
     override suspend fun getAddonSubConfig(addon: String, path: String) = withFcitxContext {
-        getFcitxAddonSubConfig(addon, path) ?: RawConfig(arrayOf())
+        getFcitxAddonSubConfig(addon, path) ?: RawConfig()
     }
 
     override suspend fun setAddonSubConfig(addon: String, path: String, config: RawConfig) =
         withFcitxContext { setFcitxAddonSubConfig(addon, path, config) }
 
     override suspend fun getImConfig(key: String) = withFcitxContext {
-        getFcitxInputMethodConfig(key) ?: RawConfig(arrayOf())
+        getFcitxInputMethodConfig(key) ?: RawConfig()
     }
 
     override suspend fun setImConfig(key: String, config: RawConfig) = withFcitxContext {
