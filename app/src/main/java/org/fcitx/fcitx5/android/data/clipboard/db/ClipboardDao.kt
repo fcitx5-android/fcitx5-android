@@ -30,6 +30,9 @@ interface ClipboardDao {
     @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME}")
     suspend fun getAll(): List<ClipboardEntry>
 
+    @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME} WHERE text=:text LIMIT 1")
+    suspend fun find(text: String): ClipboardEntry?
+
     @Query("DELETE FROM ${ClipboardEntry.TABLE_NAME} WHERE timestamp<:timestamp AND NOT pinned")
     suspend fun deleteUnpinnedIdLessThan(timestamp: Long)
 

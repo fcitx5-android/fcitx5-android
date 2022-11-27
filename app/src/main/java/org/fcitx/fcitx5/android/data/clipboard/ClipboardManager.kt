@@ -21,7 +21,7 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     private lateinit var clbDao: ClipboardDao
 
     fun interface OnClipboardUpdateListener {
-        fun onUpdate(text: String)
+        fun onUpdate(entry: ClipboardEntry)
     }
 
     private val mutex = Mutex()
@@ -58,7 +58,11 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     }
 
     var lastEntry: ClipboardEntry? = null
-    var lastEntryTimestamp: Long = -1L
+
+    private fun updateLastEntry(entry: ClipboardEntry) {
+        lastEntry = entry
+        onUpdateListeners.forEach { it.onUpdate(entry) }
+    }
 
     fun init(context: Context) {
         clbDb = Room
@@ -80,7 +84,12 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
 
     suspend fun unpin(id: Int) = clbDao.updatePinStatus(id, false)
 
-    suspend fun updateText(id: Int, text: String) = clbDao.updateText(id, text)
+    suspend fun updateText(id: Int, text: String) {
+        lastEntry?.let {
+            if (id == it.id) updateLastEntry(it.copy(text = text))
+        }
+        clbDao.updateText(id, text)
+    }
 
     suspend fun delete(id: Int) {
         clbDao.delete(id)
@@ -109,28 +118,19 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
             ?.let { e ->
                 launch {
                     mutex.withLock {
-                        val all = clbDao.getAll()
-                        all.find { e.text == it.text }?.let {
-                            updateEntry(it)
+                        clbDao.find(e.text)?.let {
+                            updateLastEntry(it.copy(timestamp = e.timestamp))
+                            clbDao.updateTime(it.id, e.timestamp)
                             return@launch
                         }
                         val rowId = clbDao.insert(e)
                         removeOutdated()
                         updateItemCount()
-                        clbDao.get(rowId)?.let { newEntry ->
-                            updateEntry(newEntry)
-                        }
+                        // new entry can be deleted immediately if clipboard limit == 0
+                        updateLastEntry(clbDao.get(rowId) ?: e)
                     }
                 }
             }
-    }
-
-    private fun updateEntry(entry: ClipboardEntry) {
-        lastEntry = entry
-        lastEntryTimestamp = System.currentTimeMillis()
-        onUpdateListeners.forEach { listener ->
-            listener.onUpdate(entry.text)
-        }
     }
 
     private suspend fun removeOutdated() {

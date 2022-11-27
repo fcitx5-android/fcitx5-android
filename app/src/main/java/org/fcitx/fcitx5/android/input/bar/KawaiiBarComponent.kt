@@ -46,7 +46,6 @@ import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import splitties.views.imageResource
 import timber.log.Timber
-import kotlin.time.Duration.Companion.seconds
 
 class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(),
     InputBroadcastReceiver {
@@ -58,7 +57,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     private val horizontalCandidate: HorizontalCandidateComponent by manager.must()
 
     private val clipboardSuggestion = AppPrefs.getInstance().clipboard.clipboardSuggestion
-    private val clipboardItemTimeout by AppPrefs.getInstance().clipboard.clipboardItemTimeout
+    private val clipboardItemTimeout = AppPrefs.getInstance().clipboard.clipboardItemTimeout
     private val expandedCandidateStyle by AppPrefs.getInstance().keyboard.expandedCandidateStyle
     private val expandToolbarByDefault = AppPrefs.getInstance().keyboard.expandToolbarByDefault
 
@@ -68,10 +67,10 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         ClipboardManager.OnClipboardUpdateListener {
             if (!clipboardSuggestion.getValue()) return@OnClipboardUpdateListener
             service.lifecycleScope.launch {
-                if (it.isEmpty()) {
+                if (it.text.isEmpty()) {
                     idleUiStateMachine.push(ClipboardUpdatedEmpty)
                 } else {
-                    idleUi.setClipboardItemText(it.take(42))
+                    idleUi.setClipboardItemText(it.text.take(42))
                     idleUiStateMachine.push(ClipboardUpdatedNonEmpty)
                     launchClipboardTimeoutJob()
                 }
@@ -87,6 +86,18 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             }
         }
 
+    private val onClipboardTimeoutUpdateListener =
+        ManagedPreference.OnChangeListener<Int> { _, _ ->
+            when (idleUiStateMachine.currentState) {
+                IdleUiStateMachine.State.Clipboard,
+                IdleUiStateMachine.State.ToolbarWithClip -> {
+                    // renew timeout when clipboard suggestion is present
+                    launchClipboardTimeoutJob()
+                }
+                else -> {}
+            }
+        }
+
     private val onExpandToolbarByDefaultUpdateListener =
         ManagedPreference.OnChangeListener<Boolean> { _, it ->
             idleUiStateMachine = IdleUiStateMachine.new(it, idleUiStateMachine)
@@ -95,13 +106,17 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     init {
         ClipboardManager.addOnUpdateListener(onClipboardUpdateListener)
         clipboardSuggestion.registerOnChangeListener(onClipboardSuggestionUpdateListener)
+        clipboardItemTimeout.registerOnChangeListener(onClipboardTimeoutUpdateListener)
         expandToolbarByDefault.registerOnChangeListener(onExpandToolbarByDefaultUpdateListener)
     }
 
     private fun launchClipboardTimeoutJob() {
         clipboardTimeoutJob?.cancel()
+        val timeout = clipboardItemTimeout.getValue() * 1000L
+        // never transition to ClipboardTimedOut state when timeout < 0
+        if (timeout < 0L) return
         clipboardTimeoutJob = service.lifecycleScope.launch {
-            delay(clipboardItemTimeout.seconds)
+            delay(timeout)
             idleUiStateMachine.push(Timeout)
             clipboardTimeoutJob = null
         }
@@ -141,7 +156,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             }
             clipboardSuggestionItem.setOnLongClickListener {
                 ClipboardManager.lastEntry?.let {
-                    AppUtil.launchClipboardEdit(context, it.id)
+                    AppUtil.launchClipboardEdit(context, it.id, true)
                 }
                 true
             }
@@ -245,8 +260,12 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     }
 
     override fun onScopeSetupFinished(scope: DynamicScope) {
-        if (System.currentTimeMillis() - ClipboardManager.lastEntryTimestamp < clipboardItemTimeout * 1000L) {
-            onClipboardUpdateListener.onUpdate(ClipboardManager.lastEntry?.text ?: "")
+        ClipboardManager.lastEntry?.let {
+            val now = System.currentTimeMillis()
+            val clipboardTimeout = clipboardItemTimeout.getValue() * 1000L
+            if (now - it.timestamp < clipboardTimeout) {
+                onClipboardUpdateListener.onUpdate(it)
+            }
         }
     }
 

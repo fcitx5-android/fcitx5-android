@@ -59,7 +59,8 @@ abstract class ManagedPreferenceCategory(
         enableUiOn: (() -> Boolean)? = null
     ): ManagedPreference.PInt {
         val pref = ManagedPreference.PInt(sharedPreferences, key, defaultValue)
-        val ui = if ((max - min) / step >= 240)
+        // Int can overflow when min < 0 && max == Int.MAX_VALUE
+        val ui = if ((max.toLong() - min.toLong()) / step.toLong() >= 240L)
             ManagedPreferenceUi.EditTextInt(
                 title, key, defaultValue, min, max, unit, enableUiOn
             )

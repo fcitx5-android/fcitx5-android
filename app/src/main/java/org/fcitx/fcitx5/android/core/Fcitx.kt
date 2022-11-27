@@ -377,7 +377,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         }
 
     private val onClipboardUpdate = ClipboardManager.OnClipboardUpdateListener {
-        lifecycle.lifecycleScope.launch { setClipboard(it) }
+        lifecycle.lifecycleScope.launch { setClipboard(it.text) }
     }
 
     private fun computeAddonGraph() = runBlocking {

@@ -55,11 +55,12 @@ object AppUtil {
             )
         )
 
-    fun launchClipboardEdit(context: Context, id: Int) {
+    fun launchClipboardEdit(context: Context, id: Int, lastEntry: Boolean = false) {
         context.startActivity(
             Intent(context, ClipboardEditActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 putExtra(ClipboardEditActivity.ENTRY_ID, id)
+                putExtra(ClipboardEditActivity.LAST_ENTRY, lastEntry)
             }
         )
     }

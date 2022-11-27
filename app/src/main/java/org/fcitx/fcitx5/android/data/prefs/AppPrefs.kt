@@ -221,8 +221,8 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             R.string.clipboard_suggestion_timeout,
             "clipboard_item_timeout",
             30,
-            30,
-            300,
+            -1,
+            Int.MAX_VALUE,
             "s"
         ) { clipboardListening.getValue() && clipboardSuggestion.getValue() }
     }

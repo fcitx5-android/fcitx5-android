@@ -84,7 +84,11 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
             override suspend fun onPin(id: Int) = ClipboardManager.pin(id)
             override suspend fun onUnpin(id: Int) = ClipboardManager.unpin(id)
             override fun onEdit(id: Int) = AppUtil.launchClipboardEdit(context, id)
-            override suspend fun onDelete(id: Int) = ClipboardManager.delete(id)
+            override suspend fun onDelete(id: Int) {
+                ClipboardManager.delete(id)
+                isClipboardDbEmpty = entries.isEmpty()
+            }
+
             override fun onPaste(id: Int) {
                 service.inputConnection?.commitText(getEntryById(id).text, 1)
             }

@@ -101,8 +101,9 @@ abstract class ClipboardAdapter :
                     onEdit(entry.id)
                 }
                 menuItem(R.string.delete, R.drawable.ic_baseline_delete_24) {
-                    onDelete(entry.id)
                     delete(entry.id)
+                    // make `onDelete` access entries after delete
+                    onDelete(entry.id)
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     popup.setForceShowIcon(true)
