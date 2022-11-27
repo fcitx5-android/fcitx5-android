@@ -1,6 +1,9 @@
 package org.fcitx.fcitx5.android.data.punctuation
 
-import org.fcitx.fcitx5.android.core.*
+import org.fcitx.fcitx5.android.core.FcitxAPI
+import org.fcitx.fcitx5.android.core.RawConfig
+import org.fcitx.fcitx5.android.core.getPunctuationConfig
+import org.fcitx.fcitx5.android.core.savePunctuationConfig
 
 object PunctuationManager {
 
@@ -24,6 +27,7 @@ object PunctuationManager {
         fcitx.savePunctuationConfig(lang, cfg)
     }
 
+    const val MAP_ENTRY_CONFIG = "Entries\$PunctuationMapEntryConfig"
     const val ENTRIES = "Entries"
     const val KEY = "Key"
     const val MAPPING = "Mapping"

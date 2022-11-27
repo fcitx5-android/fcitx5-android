@@ -3,7 +3,6 @@ package org.fcitx.fcitx5.android.ui.main.settings
 import android.app.AlertDialog
 import android.view.View
 import androidx.lifecycle.lifecycleScope
-import arrow.core.redeem
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import org.fcitx.fcitx5.android.core.RawConfig
@@ -14,7 +13,6 @@ import org.fcitx.fcitx5.android.data.punctuation.PunctuationMapEntry
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.utils.NaiveDustman
-import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor
 import org.fcitx.fcitx5.android.utils.str
 import splitties.views.dsl.core.*
 import splitties.views.dsl.material.addInput
@@ -40,21 +38,15 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
         get() = ui.entries
 
     private fun findDesc(raw: RawConfig) {
-        val desc = raw["desc"]
         // parse config desc to get description text of the options
-        ConfigDescriptor.parseTopLevel(desc)
-            .redeem({ throw it }) {
-                it.customTypes.first().values.forEach { descriptor ->
-                    when (descriptor.name) {
-                        PunctuationManager.KEY ->
-                            keyDesc = descriptor.description ?: descriptor.name
-                        PunctuationManager.MAPPING ->
-                            mappingDesc = descriptor.description ?: descriptor.name
-                        PunctuationManager.ALT_MAPPING ->
-                            altMappingDesc = descriptor.description ?: descriptor.name
-                    }
-                }
+        raw["desc"][PunctuationManager.MAP_ENTRY_CONFIG].subItems!!.forEach {
+            val desc = it["Description"].value
+            when (it.name) {
+                PunctuationManager.KEY -> keyDesc = desc
+                PunctuationManager.MAPPING -> mappingDesc = desc
+                PunctuationManager.ALT_MAPPING -> altMappingDesc = desc
             }
+        }
     }
 
     private fun saveConfig() {
