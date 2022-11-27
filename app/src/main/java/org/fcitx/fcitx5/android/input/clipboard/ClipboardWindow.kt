@@ -1,6 +1,10 @@
 package org.fcitx.fcitx5.android.input.clipboard
 
 import android.view.View
+import android.widget.PopupMenu
+import androidx.core.text.bold
+import androidx.core.text.buildSpannedString
+import androidx.core.text.color
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import kotlinx.coroutines.launch
@@ -18,6 +22,7 @@ import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.EventStateMachine
 import org.fcitx.fcitx5.android.utils.inputConnection
+import splitties.resources.styledColor
 import kotlin.properties.Delegates
 
 class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
@@ -54,6 +59,22 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         }
     }
 
+    private fun deleteAllEntries(skipPinned: Boolean = true) {
+        service.lifecycleScope.launch {
+            ClipboardManager.deleteAll(skipPinned)
+            if (skipPinned) {
+                ClipboardManager.getAll().also {
+                    isClipboardDbEmpty = it.isEmpty()
+                    adapter.updateEntries(it)
+                }
+            } else {
+                // manually set entries to empty
+                adapter.updateEntries(emptyList())
+                isClipboardDbEmpty = true
+            }
+        }
+    }
+
     private val onClipboardUpdateListener = ClipboardManager.OnClipboardUpdateListener {
         updateClipboardEntries()
     }
@@ -83,25 +104,45 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
                 clipboardEnabledPref.setValue(true)
             }
             deleteAllButton.setOnClickListener {
-                service.lifecycleScope.launch {
-                    // the button is visible iff entries list is non-empty
-                    if (adapter.entries.all { it.pinned }) {
-                        // delete all pinned if we don't have unpinned
-                        ClipboardManager.deleteAll(false)
-                        // manually update entries to empty
-                        adapter.updateEntries(emptyList())
-                        isClipboardDbEmpty = true
-                    } else {
-                        // delete all unpinned if we have pinned
-                        ClipboardManager.deleteAll()
-                        updateClipboardEntries()
-                    }
+                if (adapter.entries.any { !it.pinned }) {
+                    deleteAllEntries()
+                } else {
+                    promptDeleteAllPinned()
                 }
             }
         }
     }
 
     override fun onCreateView(): View = ui.root
+
+    private var promptMenu: PopupMenu? = null
+
+    private fun promptDeleteAllPinned() {
+        promptMenu?.dismiss()
+        promptMenu = PopupMenu(context, ui.deleteAllButton).apply {
+            menu.apply {
+                add(buildSpannedString {
+                    bold {
+                        color(context.styledColor(android.R.attr.colorAccent)) {
+                            append(context.getString(R.string.delete_all_pinned_items))
+                        }
+                    }
+                }).apply {
+                    isEnabled = false
+                }
+                add(android.R.string.cancel).apply {
+                    setOnMenuItemClickListener { true }
+                }
+                add(android.R.string.ok).apply {
+                    setOnMenuItemClickListener {
+                        deleteAllEntries(false)
+                        true
+                    }
+                }
+            }
+            show()
+        }
+    }
 
     override fun onAttached() {
         val initialState = when {
@@ -123,6 +164,8 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     override fun onDetached() {
         clipboardEnabledPref.unregisterOnChangeListener(clipboardEnabledListener)
         ClipboardManager.removeOnUpdateListener(onClipboardUpdateListener)
+        promptMenu?.dismiss()
+        promptMenu = null
     }
 
     override val title: String by lazy {
