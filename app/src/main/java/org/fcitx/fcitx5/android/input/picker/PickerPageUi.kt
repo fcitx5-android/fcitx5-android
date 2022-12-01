@@ -208,6 +208,8 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, val density: Den
                     setOnLongClickListener { view ->
                         view as KeyView
                         if (!popupOnKeyPress) {
+                            // in case "popup on keypress" is disabled, popup keyboard need to know
+                            // the actual bounds on press. see [^1] as well
                             view.updateBounds()
                         }
                         onPopupKeyboard(view.id, text, view.bounds)
@@ -219,6 +221,10 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, val density: Den
                         when (event.type) {
                             CustomGestureView.GestureType.Down -> {
                                 if (popupOnKeyPress) {
+                                    // [^1]: bounds is first calculated in KeyView's onLayout(), it
+                                    // not in screen viewport at the time of layout.
+                                    // eg. it's inside the next page of ViewPager
+                                    // so update bounds when it's pressed
                                     view.updateBounds()
                                     onPopupPreview(view.id, text, view.bounds)
                                 }

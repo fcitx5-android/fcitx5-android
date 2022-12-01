@@ -38,7 +38,13 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
     val hMargin = dp(ThemeManager.prefs.keyHorizontalMargin.getValue())
     val vMargin = dp(ThemeManager.prefs.keyVerticalMargin.getValue())
 
-    val bounds = Rect()
+    private val cachedLocation = intArrayOf(0, 0)
+    private val cachedBounds = Rect()
+    private var boundsValid = false
+    val bounds: Rect
+        get() = cachedBounds.also {
+            if (!boundsValid) updateBounds()
+        }
 
     val layout = constraintLayout {
         // sync any state from parent
@@ -121,13 +127,18 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
         layout.alpha = if (enabled) 1f else styledFloat(android.R.attr.disabledAlpha)
     }
 
-    fun updateBounds(w: Int = width, h: Int = height) {
-        val (x, y) = intArrayOf(0, 0).also { getLocationInWindow(it) }
-        bounds.set(x, y, x + w, y + h)
+    fun updateBounds() {
+        val (x, y) = cachedLocation.also { getLocationInWindow(it) }
+        cachedBounds.set(x, y, x + width, y + height)
+        boundsValid = true
+    }
+
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        boundsValid = false
+        super.onLayout(changed, left, top, right, bottom)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        updateBounds()
         if (bordered) return
         when (def.viewId) {
             R.id.button_space -> {
