@@ -138,7 +138,7 @@ abstract class ClipboardAdapter :
             when {
                 o1.pinned && !o2.pinned -> -1
                 !o1.pinned && o2.pinned -> 1
-                else -> o2.id.compareTo(o1.id)
+                else -> o2.timestamp.compareTo(o1.timestamp)
             }
         }
         val callback = ClipboardEntryDiffCallback(_entries, sorted)
