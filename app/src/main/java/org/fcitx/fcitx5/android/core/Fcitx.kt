@@ -168,7 +168,8 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
             locale: String,
             appData: String,
             appLib: String,
-            extData: String
+            extData: String,
+            extCache: String
         )
 
         @JvmStatic
@@ -352,7 +353,8 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
                     locale,
                     applicationInfo.dataDir,
                     applicationInfo.nativeLibraryDir,
-                    externalFilesDir.absolutePath
+                    externalFilesDir.absolutePath,
+                    (externalCacheDir ?: cacheDir).absolutePath
                 )
             }
         }

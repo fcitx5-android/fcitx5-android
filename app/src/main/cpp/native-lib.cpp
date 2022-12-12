@@ -493,7 +493,7 @@ jobject fcitxActionToJObject(JNIEnv *env, const ActionEntity &act) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, jstring locale, jstring appData, jstring appLib, jstring extData) {
+Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, jstring locale, jstring appData, jstring appLib, jstring extData, jstring extCache) {
     if (Fcitx::Instance().isRunning()) {
         FCITX_ERROR() << "Fcitx is already running!";
         return;
@@ -506,6 +506,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
     auto appData_ = CString(env, appData);
     auto appLib_ = CString(env, appLib);
     auto extData_ = CString(env, extData);
+    auto extCache_ = CString(env, extCache);
 
     std::string lang_ = fcitx::stringutils::split(*locale_, ":")[0];
     std::string config_home = fcitx::stringutils::joinPath(*extData_, "config");
@@ -533,11 +534,24 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
     // for fcitx i18nstring loading translations in .conf files
     setenv("FCITX_LOCALE", locale_, 1);
     setenv("HOME", extData_, 1);
+    // system StandardPath::Type::Data
     setenv("XDG_DATA_DIRS", usr_share.c_str(), 1);
+    // user StandardPath::Type::PkgConfig
     setenv("FCITX_CONFIG_HOME", config_home.c_str(), 1);
+    // user StandardPath::Type::PkgData
     setenv("FCITX_DATA_HOME", data_home.c_str(), 1);
+    // system StandardPath::Type::Addon
     setenv("FCITX_ADDON_DIRS", appLib_, 1);
+    // libime language model dir
     setenv("LIBIME_MODEL_DIRS", libime_data.c_str(), 1);
+    // user StandardPath::Type::Data
+    setenv("XDG_DATA_HOME", data_home.c_str(), 1);
+    // user StandardPath::Type::Cache
+    setenv("XDG_CACHE_HOME", extCache_, 1);
+    // user StandardPath::Type::Config
+    setenv("XDG_CONFIG_HOME", config_home.c_str(), 1);
+    // user StandardPath::Type::Runtime
+    setenv("XDG_RUNTIME_DIR", extCache_, 1);
     setenv("LUA_PATH", lua_path.c_str(), 1);
     setenv("LUA_CPATH", lua_cpath.c_str(), 1);
 
