@@ -5,6 +5,7 @@
 #include <fcitx/focusgroup.h>
 #include <fcitx/inputpanel.h>
 #include <fcitx/instance.h>
+#include <fcitx-utils/event.h>
 
 #include "androidfrontend.h"
 
@@ -107,7 +108,9 @@ AndroidFrontend::AndroidFrontend(Instance *instance)
           focusGroup_("android", instance->inputContextManager()),
           activeIC_(nullptr),
           icCache_(),
-          eventHandlers_() {
+          eventHandlers_(),
+          statusAreaDefer_(),
+          statusAreaUpdated_(false) {
     eventHandlers_.emplace_back(instance_->watchEvent(
             EventType::InputContextInputMethodActivated,
             EventWatcherPhase::Default,
@@ -119,7 +122,7 @@ AndroidFrontend::AndroidFrontend(Instance *instance)
             [this](Event &event) {
                 auto &e = static_cast<InputContextUpdateUIEvent &>(event);
                 if (e.component() == UserInterfaceComponent::StatusArea) {
-                    statusAreaUpdateCallback();
+                    handleStatusAreaUpdate();
                 }
             }
     ));
@@ -252,6 +255,17 @@ void AndroidFrontend::setInputMethodChangeCallback(const InputMethodChangeCallba
 
 void AndroidFrontend::setStatusAreaUpdateCallback(const StatusAreaUpdateCallback &callback) {
     statusAreaUpdateCallback = callback;
+}
+
+void AndroidFrontend::handleStatusAreaUpdate() {
+    if (statusAreaUpdated_) return;
+    statusAreaUpdated_ = true;
+    statusAreaDefer_ = instance_->eventLoop().addDeferEvent([this](EventSource *) {
+        statusAreaUpdateCallback();
+        statusAreaUpdated_ = false;
+        statusAreaDefer_ = nullptr;
+        return false;
+    });
 }
 
 class AndroidFrontendFactory : public AddonFactory {

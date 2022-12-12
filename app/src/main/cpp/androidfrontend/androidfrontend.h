@@ -63,6 +63,10 @@ private:
     InputContext *activeIC_;
     InputContextCache icCache_;
     std::vector<std::unique_ptr<HandlerTableEntry<EventHandler>>> eventHandlers_;
+    std::unique_ptr<EventSource> statusAreaDefer_;
+    bool statusAreaUpdated_;
+
+    void handleStatusAreaUpdate();
 
     CandidateListCallback candidateListCallback = [](const std::vector<std::string> &) {};
     CommitStringCallback commitStringCallback = [](const std::string &) {};

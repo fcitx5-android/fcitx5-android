@@ -1,10 +1,8 @@
 package org.fcitx.fcitx5.android.input.punctuation
 
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.Action
-import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.punctuation.PunctuationManager
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcaster
@@ -30,11 +28,8 @@ class PunctuationComponent : InputBroadcastReceiver,
 
     fun transform(p: String) = mapping.getOrDefault(p, p)
 
-    private var updateJob: Job? = null
-
     private fun updateMapping(lang: String? = null) {
-        updateJob = service.lifecycleScope.launch {
-            updateJob?.cancel()
+        service.lifecycleScope.launch {
             mapping = if (enabled) {
                 fcitx.runOnReady {
                     PunctuationManager.load(this, lang ?: inputMethodEntryCached.languageCode)
@@ -42,7 +37,6 @@ class PunctuationComponent : InputBroadcastReceiver,
                 }
             } else emptyMap()
             broadcaster.onPunctuationUpdate(mapping)
-            updateJob = null
         }
     }
 
@@ -52,9 +46,5 @@ class PunctuationComponent : InputBroadcastReceiver,
             it.name == "punctuation" && it.icon == "fcitx-punc-active"
         }
         updateMapping()
-    }
-
-    override fun onImeUpdate(ime: InputMethodEntry) {
-        updateMapping(ime.languageCode)
     }
 }
