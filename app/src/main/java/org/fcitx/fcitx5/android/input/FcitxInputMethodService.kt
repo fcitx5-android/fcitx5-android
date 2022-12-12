@@ -540,7 +540,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     override fun onUnbindInput() {
         cachedKeyEvents.evictAll()
         cachedKeyEventIndex = 0
-        val uid = currentInputBinding.uid
+        // currentInputBinding can be null on some devices under some special Multi-screen mode
+        val uid = currentInputBinding?.uid ?: return
         Timber.d("onUnbindInput: uid=$uid")
         lifecycleScope.launchOnFcitxReady(fcitx) {
             it.deactivate(uid)
