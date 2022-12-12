@@ -9,6 +9,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
 import splitties.resources.drawable
 import splitties.views.imageDrawable
@@ -77,6 +78,15 @@ class TextKeyboard(
     val lang: ImageKeyView by lazy { findViewById(R.id.button_lang) }
     val space: TextKeyView by lazy { findViewById(R.id.button_space) }
     val `return`: ImageKeyView by lazy { findViewById(R.id.button_return) }
+
+    private val keepLettersUppercase = AppPrefs.getInstance().keyboard.keepLettersUppercase
+    private val keepLettersUppercaseListener = ManagedPreference.OnChangeListener<Boolean> { _, _ ->
+        updateAlphabetKeys()
+    }
+
+    init {
+        keepLettersUppercase.registerOnChangeListener(keepLettersUppercaseListener)
+    }
 
     private val textKeys: List<TextKeyView> by lazy {
         allViews.filterIsInstance(TextKeyView::class.java).toList()
@@ -186,14 +196,12 @@ class TextKeyboard(
         }
     }
 
-    private val keepLettersUppercase by AppPrefs.getInstance().keyboard.keepLettersUppercase
-
     private fun updateAlphabetKeys() {
         textKeys.forEach {
             if (it.def !is KeyDef.Appearance.AltText) return
             it.mainText.text = it.def.displayText.let { str ->
                 if (str.length != 1 || !str[0].isLetter()) return@forEach
-                if (keepLettersUppercase) str.uppercase() else transformAlphabet(str)
+                if (keepLettersUppercase.getValue()) str.uppercase() else transformAlphabet(str)
             }
         }
     }
