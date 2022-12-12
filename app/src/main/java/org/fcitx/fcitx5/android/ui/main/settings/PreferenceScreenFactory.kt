@@ -174,6 +174,7 @@ object PreferenceScreenFactory {
 
         when (descriptor) {
             is ConfigBool -> SwitchPreferenceCompat(context).apply {
+                summary = descriptor.tooltip
                 setDefaultValue(descriptor.defaultValue)
             }
             is ConfigEnum -> ListPreference(context).apply {
