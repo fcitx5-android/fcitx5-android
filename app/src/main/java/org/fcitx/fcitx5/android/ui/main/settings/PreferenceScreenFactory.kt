@@ -33,7 +33,7 @@ object PreferenceScreenFactory {
         val screen = preferenceManager.createPreferenceScreen(context)
         val cfg = raw["cfg"]
         val desc = raw["desc"]
-        val store = FcitxRawConfigStore(cfg, save)
+        val store = FcitxRawConfigStore(cfg)
 
         ConfigDescriptor
             .parseTopLevel(desc)
@@ -238,8 +238,11 @@ object PreferenceScreenFactory {
                 dialogTitle = title
                 dialogMessage = descriptor.tooltip
             }
-        }.let {
-            screen.addPreference(it)
+            setOnPreferenceChangeListener { _, _ ->
+                save()
+                true
+            }
+            screen.addPreference(this)
         }
     }
 
@@ -251,7 +254,7 @@ object PreferenceScreenFactory {
         descriptor: ConfigCustom,
         save: () -> Unit
     ) {
-        val subStore = FcitxRawConfigStore(cfg[descriptor.name], save)
+        val subStore = FcitxRawConfigStore(cfg[descriptor.name])
         val subPref = PreferenceCategory(context).apply {
             key = descriptor.name
             title = descriptor.description ?: descriptor.name
