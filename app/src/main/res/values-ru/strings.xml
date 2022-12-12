@@ -170,4 +170,7 @@
     <string name="disabled">Отключено</string>
     <string name="system_default">Системные установки по умолчанию</string>
     <string name="editor_info_inspector">Инспектор EditorInfo</string>
+    <string name="default_">По умолчанию</string>
+    <string name="saving">Сохранение</string>
+    <string name="delete_all_pinned_items">Удалить все закрепленные элементы?</string>
 </resources>

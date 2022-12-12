@@ -170,4 +170,7 @@
     <string name="disabled">禁用</string>
     <string name="system_default">系统默认</string>
     <string name="editor_info_inspector">EditorInfo 检查器</string>
+    <string name="default_">默认</string>
+    <string name="saving">保存中</string>
+    <string name="delete_all_pinned_items">要删除所有置顶条目吗？</string>
 </resources>
