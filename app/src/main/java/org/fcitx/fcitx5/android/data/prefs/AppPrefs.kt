@@ -6,6 +6,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
 import org.fcitx.fcitx5.android.input.keyboard.SwipeSymbolDirection
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
+import org.fcitx.fcitx5.android.utils.getSystemProperty
 import splitties.systemservices.vibrator
 
 class AppPrefs(private val sharedPreferences: SharedPreferences) {
@@ -23,6 +24,11 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
         val ignoreSystemCursor = switch(R.string.ignore_sys_cursor, "ignore_system_cursor", true)
         val hideKeyConfig = switch(R.string.hide_key_config, "hide_key_config", true)
         val disableAnimation = switch(R.string.disable_animation, "disable_animation", false)
+        val vivoKeypressWorkaround = switch(
+            R.string.vivo_keypress_workaround,
+            "vivo_keypress_workaround",
+            getSystemProperty("ro.vivo.os.version") != null
+        )
     }
 
     inner class Keyboard : ManagedPreferenceCategory(R.string.keyboard, sharedPreferences) {

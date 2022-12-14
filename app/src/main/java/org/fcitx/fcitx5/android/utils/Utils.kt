@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.utils
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
@@ -222,4 +223,15 @@ fun SeekBar.setOnChangeListener(listener: SeekBar.(progress: Int) -> Unit) {
             listener.invoke(seekBar, progress)
         }
     })
+}
+
+@SuppressLint("PrivateApi")
+fun getSystemProperty(key: String): String? {
+    return try {
+        Class.forName("android.os.SystemProperties")
+            .getMethod("get", String::class.java)
+            .invoke(null, key) as String?
+    } catch (e: Exception) {
+        null
+    }
 }
