@@ -27,7 +27,7 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
         val vivoKeypressWorkaround = switch(
             R.string.vivo_keypress_workaround,
             "vivo_keypress_workaround",
-            getSystemProperty("ro.vivo.os.version") != null
+            getSystemProperty("ro.vivo.os.version").isNotEmpty()
         )
     }
 

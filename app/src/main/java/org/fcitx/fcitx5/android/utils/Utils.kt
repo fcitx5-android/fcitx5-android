@@ -226,12 +226,8 @@ fun SeekBar.setOnChangeListener(listener: SeekBar.(progress: Int) -> Unit) {
 }
 
 @SuppressLint("PrivateApi")
-fun getSystemProperty(key: String): String? {
-    return try {
-        Class.forName("android.os.SystemProperties")
-            .getMethod("get", String::class.java)
-            .invoke(null, key) as String?
-    } catch (e: Exception) {
-        null
-    }
+fun getSystemProperty(key: String): String {
+    return Class.forName("android.os.SystemProperties")
+        .getMethod("get", String::class.java)
+        .invoke(null, key) as String
 }
