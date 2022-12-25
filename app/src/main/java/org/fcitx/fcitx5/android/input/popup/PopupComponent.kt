@@ -1,7 +1,6 @@
 package org.fcitx.fcitx5.android.input.popup
 
 import android.graphics.Rect
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -92,17 +91,9 @@ class PopupComponent :
 
     fun showKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
         val keys = PopupPreset[keyboard.label] ?: return
-        val entryUi = showingEntryUi[viewId]
-        if (entryUi != null) {
-            entryUi.setText("")
-            reallyShowKeyboard(viewId, keys, bounds)
-        } else {
-            showPopup(viewId, "", bounds)
-            // in case popup preview is disabled, wait newly created popup entry to layout
-            ContextCompat.getMainExecutor(service).execute {
-                reallyShowKeyboard(viewId, keys, bounds)
-            }
-        }
+        // clear popup preview text         OR create empty popup preview
+        showingEntryUi[viewId]?.setText("") ?: showPopup(viewId, "", bounds)
+        reallyShowKeyboard(viewId, keys, bounds)
     }
 
     private fun reallyShowKeyboard(viewId: Int, keys: Array<String>, bounds: Rect) {
