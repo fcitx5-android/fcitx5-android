@@ -310,9 +310,9 @@ abstract class BaseKeyboard(
 
     private fun findTargetChild(x: Float, y: Float): View? {
         val y0 = y.roundToInt()
-        // assume all rows have equal height and fill parent width
+        // assume all rows have equal height
         val row = keyRows.getOrNull(y0 * keyRows.size / bounds.height()) ?: return null
-        val x1 = x.roundToInt()
+        val x1 = x.roundToInt() + bounds.left
         val y1 = y0 + bounds.top
         return row.children.find {
             if (it !is KeyView) false else it.bounds.contains(x1, y1)
