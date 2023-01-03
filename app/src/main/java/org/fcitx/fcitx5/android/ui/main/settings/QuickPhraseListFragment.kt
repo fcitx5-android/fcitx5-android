@@ -18,8 +18,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.RecyclerView
 import arrow.core.None
 import arrow.core.Option
 import arrow.core.continuations.option
@@ -33,7 +31,6 @@ import org.fcitx.fcitx5.android.data.quickphrase.CustomQuickPhrase
 import org.fcitx.fcitx5.android.data.quickphrase.QuickPhrase
 import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseManager
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
-import org.fcitx.fcitx5.android.ui.common.DynamicListTouchCallback
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import org.fcitx.fcitx5.android.utils.NaiveDustman
@@ -195,19 +192,9 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
             override fun showEntry(x: QuickPhrase): String = x.name
 
         }.also {
-            it.addTouchCallback(object : DynamicListTouchCallback<QuickPhrase>(it) {
-                override fun getSwipeDirs(
-                    recyclerView: RecyclerView,
-                    viewHolder: RecyclerView.ViewHolder
-                ): Int {
-                    // Builtin quick phrase shouldn't be removed
-                    // But it can be disabled
-                    if (entries[viewHolder.bindingAdapterPosition] is BuiltinQuickPhrase)
-                        return if (it.enableOrder) ItemTouchHelper.UP or ItemTouchHelper.DOWN
-                        else ItemTouchHelper.ACTION_STATE_IDLE
-                    return super.getSwipeDirs(recyclerView, viewHolder)
-                }
-            })
+            // Builtin quick phrase shouldn't be removed
+            // But it can be disabled
+            it.removable = { e -> e !is BuiltinQuickPhrase }
         }
     }
 

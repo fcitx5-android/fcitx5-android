@@ -4,13 +4,10 @@ import android.view.View
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
-import org.fcitx.fcitx5.android.ui.common.DynamicListTouchCallback
 import org.fcitx.fcitx5.android.ui.common.DynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.ui.main.settings.ProgressFragment
@@ -49,23 +46,11 @@ class InputMethodListFragment : ProgressFragment(), OnItemChangedListener<InputM
                     )
                 }
             },
-            useCustomTouchCallback = true,
             show = { it.displayName }
         )
         ui.addOnItemChangedListener(this@InputMethodListFragment)
-        ui.addTouchCallback(object : DynamicListTouchCallback<InputMethodEntry>(ui) {
-
-            override fun getSwipeDirs(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder
-            ): Int {
-                // English keyboard shouldn't be removed
-                if (ui.entries[viewHolder.bindingAdapterPosition].uniqueName == "keyboard-us")
-                    return if (ui.enableOrder) ItemTouchHelper.UP or ItemTouchHelper.DOWN
-                    else ItemTouchHelper.ACTION_STATE_IDLE
-                return super.getSwipeDirs(recyclerView, viewHolder)
-            }
-        })
+        // English keyboard shouldn't be removed
+        ui.removable = { it.uniqueName != "keyboard-us" }
         return ui.root
     }
 
@@ -73,6 +58,11 @@ class InputMethodListFragment : ProgressFragment(), OnItemChangedListener<InputM
         super.onResume()
         viewModel.disableToolbarSaveButton()
         viewModel.setToolbarTitle(requireContext().getString(R.string.input_methods_conf))
+    }
+
+    override fun onPause() {
+        ui.exitMultiselect()
+        super.onPause()
     }
 
     override fun onItemSwapped(fromIdx: Int, toIdx: Int, item: InputMethodEntry) {

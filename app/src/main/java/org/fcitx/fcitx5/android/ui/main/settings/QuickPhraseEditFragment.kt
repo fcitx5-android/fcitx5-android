@@ -134,6 +134,7 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
 
     override fun onPause() {
         saveConfig()
+        ui.exitMultiselect()
         super.onPause()
     }
 

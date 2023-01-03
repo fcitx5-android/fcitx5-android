@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.ColorFilter
@@ -25,6 +26,7 @@ import android.widget.Toast
 import androidx.annotation.AttrRes
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.ViewCompat
@@ -230,4 +232,15 @@ fun getSystemProperty(key: String): String {
     return Class.forName("android.os.SystemProperties")
         .getMethod("get", String::class.java)
         .invoke(null, key) as String
+}
+
+fun Context.getHostActivity(): AppCompatActivity? {
+    var context = this
+    while (context is ContextWrapper) {
+        if (context is AppCompatActivity)
+            return context
+        else
+            context = context.baseContext
+    }
+    return null
 }
