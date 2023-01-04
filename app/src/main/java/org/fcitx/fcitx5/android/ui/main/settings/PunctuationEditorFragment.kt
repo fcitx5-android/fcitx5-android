@@ -140,6 +140,10 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
         dustman.remove(item.key)
     }
 
+    override fun onItemRemovedBatch(indexed: List<Pair<Int, PunctuationMapEntry>>) {
+        batchRemove(indexed)
+    }
+
     override fun onItemUpdated(idx: Int, old: PunctuationMapEntry, new: PunctuationMapEntry) {
         dustman.addOrUpdate(new.key, new)
     }

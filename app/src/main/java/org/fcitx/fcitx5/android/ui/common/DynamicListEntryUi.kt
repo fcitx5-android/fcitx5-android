@@ -20,9 +20,12 @@ import splitties.views.textAppearance
 
 class DynamicListEntryUi(override val ctx: Context) : Ui {
 
+    val multiselectCheckBox = checkBox()
+
     val handleImage = imageView {
         imageResource = R.drawable.ic_baseline_drag_handle_24
-        colorFilter = PorterDuffColorFilter(styledColor(android.R.attr.colorAccent), PorterDuff.Mode.SRC_IN)
+        colorFilter =
+            PorterDuffColorFilter(styledColor(android.R.attr.colorAccent), PorterDuff.Mode.SRC_IN)
     }
 
     val checkBox = checkBox()
@@ -46,6 +49,14 @@ class DynamicListEntryUi(override val ctx: Context) : Ui {
         layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
         backgroundColor = styledColor(android.R.attr.colorBackground)
         minHeight = styledDimenPxSize(android.R.attr.listPreferredItemHeightSmall)
+
+        add(multiselectCheckBox, lParams {
+            visibility = View.GONE
+            width = dp(30)
+            height = 0
+            centerVertically()
+            startOfParent(styledDimenPxSize(android.R.attr.listPreferredItemPaddingStart))
+        })
 
         add(handleImage, lParams {
             width = dp(24)

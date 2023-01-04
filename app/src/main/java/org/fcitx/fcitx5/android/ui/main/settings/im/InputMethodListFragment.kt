@@ -77,6 +77,10 @@ class InputMethodListFragment : ProgressFragment(), OnItemChangedListener<InputM
         updateIMState()
     }
 
+    override fun onItemRemovedBatch(indexed: List<Pair<Int, InputMethodEntry>>) {
+        batchRemove(indexed)
+    }
+
     override fun onItemUpdated(idx: Int, old: InputMethodEntry, new: InputMethodEntry) {
         updateIMState()
     }

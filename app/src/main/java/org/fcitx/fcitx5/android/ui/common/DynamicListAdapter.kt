@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.ui.common
 
+import android.annotation.SuppressLint
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -12,7 +13,6 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.utils.getHostActivity
-import splitties.views.backgroundColor
 import java.util.*
 
 abstract class DynamicListAdapter<T>(
@@ -55,11 +55,14 @@ abstract class DynamicListAdapter<T>(
 
     override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
         if (item.itemId == R.id.action_delete) {
-            selected.forEach { entry ->
-                indexItem(entry)
-                    .takeIf { it != -1 }
-                    ?.let { removeItem(it) }
+            val indexed = selected.mapNotNull { entry ->
+                indexItem(entry).takeIf { it != -1 }?.let { it to entry }
             }
+            indexed.forEach { (index, _) ->
+                _entries.removeAt(index)
+                notifyItemRemoved(index)
+            }
+            listener?.onItemRemovedBatch(indexed)
         }
         mode.finish()
         return true
@@ -71,20 +74,18 @@ abstract class DynamicListAdapter<T>(
     }
 
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onDestroyActionMode(mode: ActionMode) {
         multiselect = false
-        val index = selected.map { entries.indexOf(it) }
         selected.clear()
-        index.forEach {
-            if (it != -1)
-                notifyItemChanged(it)
-        }
+        notifyDataSetChanged()
         actionMode = null
     }
 
     override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean = true
 
     inner class ViewHolder(entryUi: DynamicListEntryUi) : RecyclerView.ViewHolder(entryUi.root) {
+        val multiselectCheckBox = entryUi.multiselectCheckBox
         val handleImage = entryUi.handleImage
         val checkBox = entryUi.checkBox
         val nameText = entryUi.nameText
@@ -95,10 +96,10 @@ abstract class DynamicListAdapter<T>(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(DynamicListEntryUi(parent.context))
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = entries[position]
         with(holder) {
-            handleImage.visibility = if (enableOrder) View.VISIBLE else View.GONE
             handleImage.setOnLongClickListener {
                 if (!multiselect && removable(item))
                     itemTouchHelper
@@ -108,39 +109,50 @@ abstract class DynamicListAdapter<T>(
                 else false
             }
             nameText.text = showEntry(item)
-            initCheckBox(checkBox, item)
-            initSettingsButton(settingsButton, item)
-            initEditButton(editButton, item)
-            if (item in selected)
-                itemView.backgroundColor = R.color.red_400
-            else
-                itemView.backgroundColor = android.R.color.transparent
+
+            multiselectCheckBox.isChecked = item in selected
+
+            if (multiselect) {
+                handleImage.visibility = View.GONE
+                multiselectCheckBox.visibility = View.VISIBLE
+                checkBox.visibility = View.GONE
+                settingsButton.visibility = View.GONE
+                editButton.visibility = View.GONE
+            } else {
+                handleImage.visibility = if (enableOrder) View.VISIBLE else View.GONE
+                multiselectCheckBox.visibility = View.GONE
+                initCheckBox(checkBox, item)
+                initSettingsButton(settingsButton, item)
+                initEditButton(editButton, item)
+            }
+
             if (enableAddAndDelete && removable(item)) {
                 nameText.setOnLongClickListener {
                     if (!multiselect) {
                         multiselect = true
-                        select(item, itemView)
+                        select(item, multiselectCheckBox)
                         actionMode = itemView.context.getHostActivity()!!
                             .startSupportActionMode(this@DynamicListAdapter)
+                        notifyDataSetChanged()
                     }
                     true
                 }
                 nameText.setOnClickListener {
-                    select(item, itemView)
+                    select(item, multiselectCheckBox)
                 }
             }
         }
     }
 
-    private fun select(item: T, itemView: View) {
+    private fun select(item: T, checkBox: CheckBox) {
         if (!enableAddAndDelete || !multiselect)
             return
         if (item in selected) {
             selected.remove(item)
-            itemView.backgroundColor = android.R.color.transparent
+            checkBox.isChecked = false
         } else {
             selected.add(item)
-            itemView.backgroundColor = R.color.red_400
+            checkBox.isChecked = true
         }
     }
 

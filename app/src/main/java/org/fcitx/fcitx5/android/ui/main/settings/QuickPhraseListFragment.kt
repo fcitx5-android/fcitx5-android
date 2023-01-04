@@ -341,6 +341,10 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
         dustman.remove(item.name)
     }
 
+    override fun onItemRemovedBatch(indexed: List<Pair<Int, QuickPhrase>>) {
+        batchRemove(indexed)
+    }
+
     override fun onItemUpdated(idx: Int, old: QuickPhrase, new: QuickPhrase) {
         dustman.addOrUpdate(new.name, new.isEnabled)
     }

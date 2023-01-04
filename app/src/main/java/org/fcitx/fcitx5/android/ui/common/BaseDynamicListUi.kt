@@ -124,6 +124,10 @@ abstract class BaseDynamicListUi<T>(
                     updateItem(idx, old)
                 }
             }
+
+            override fun onItemRemovedBatch(indexed: List<Pair<Int, T>>) {
+                updateFAB()
+            }
         })
     }
 

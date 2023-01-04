@@ -109,6 +109,10 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
         dustman.remove(item.serialize())
     }
 
+    override fun onItemRemovedBatch(indexed: List<Pair<Int, QuickPhraseEntry>>) {
+        batchRemove(indexed)
+    }
+
     override fun onItemUpdated(idx: Int, old: QuickPhraseEntry, new: QuickPhraseEntry) {
         dustman.addOrUpdate(new.serialize(), new)
     }
