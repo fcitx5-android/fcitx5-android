@@ -5,6 +5,12 @@
 
 #include <string>
 
+void throwJavaException(JNIEnv *env, const char *msg) {
+    jclass c = env->FindClass("java/lang/Exception");
+    env->ThrowNew(c, msg);
+    env->DeleteLocalRef(c);
+}
+
 class CString {
 private:
     JNIEnv *env_;
