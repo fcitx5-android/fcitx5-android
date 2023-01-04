@@ -12,7 +12,7 @@ import splitties.resources.appDrawable
 import splitties.resources.appStyledColor
 import kotlin.math.absoluteValue
 
-class DynamicListTouchCallback<T>(private val adapter: DynamicListAdapter<T>) :
+open class DynamicListTouchCallback<T>(private val adapter: DynamicListAdapter<T>) :
     ItemTouchHelper.SimpleCallback(
         if (adapter.enableOrder)
             ItemTouchHelper.UP or ItemTouchHelper.DOWN
@@ -47,8 +47,17 @@ class DynamicListTouchCallback<T>(private val adapter: DynamicListAdapter<T>) :
     // manually call start drag at the on long click listener
     override fun isLongPressDragEnabled(): Boolean = false
 
-    // disable swipe in multi selecting
-    override fun isItemViewSwipeEnabled(): Boolean = !adapter.multiselect
+    // disable swipe in multi-selecting and for non-removable items
+    override fun getSwipeDirs(
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder
+    ): Int {
+        val item = adapter.entries[viewHolder.bindingAdapterPosition]
+        if (adapter.multiselect || !adapter.removable(item))
+            return if (adapter.enableOrder) ItemTouchHelper.UP or ItemTouchHelper.DOWN
+            else ItemTouchHelper.ACTION_STATE_IDLE
+        return super.getSwipeDirs(recyclerView, viewHolder)
+    }
 
     override fun onMove(
         recyclerView: RecyclerView,

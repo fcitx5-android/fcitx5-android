@@ -78,6 +78,7 @@ abstract class DynamicListAdapter<T>(
     override fun onDestroyActionMode(mode: ActionMode) {
         multiselect = false
         selected.clear()
+        // make multiselectCheckBox invisible
         notifyDataSetChanged()
         actionMode = null
     }
@@ -110,7 +111,6 @@ abstract class DynamicListAdapter<T>(
             }
             nameText.text = showEntry(item)
 
-            multiselectCheckBox.isChecked = item in selected
 
             if (multiselect) {
                 handleImage.visibility = View.GONE
@@ -126,6 +126,8 @@ abstract class DynamicListAdapter<T>(
                 initEditButton(editButton, item)
             }
 
+            multiselectCheckBox.isChecked = item in selected
+
             if (enableAddAndDelete && removable(item)) {
                 nameText.setOnLongClickListener {
                     if (!multiselect) {
@@ -133,6 +135,7 @@ abstract class DynamicListAdapter<T>(
                         select(item, multiselectCheckBox)
                         actionMode = itemView.context.getHostActivity()!!
                             .startSupportActionMode(this@DynamicListAdapter)
+                        // make multiselectCheckBox visible
                         notifyDataSetChanged()
                     }
                     true
@@ -140,7 +143,8 @@ abstract class DynamicListAdapter<T>(
                 nameText.setOnClickListener {
                     select(item, multiselectCheckBox)
                 }
-            }
+            } else
+                multiselectCheckBox.visibility = View.GONE
         }
     }
 

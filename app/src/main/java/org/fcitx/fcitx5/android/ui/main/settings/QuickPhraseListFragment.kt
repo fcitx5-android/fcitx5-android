@@ -195,6 +195,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
             // Builtin quick phrase shouldn't be removed
             // But it can be disabled
             it.removable = { e -> e !is BuiltinQuickPhrase }
+            it.addTouchCallback()
         }
     }
 

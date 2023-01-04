@@ -51,7 +51,6 @@ class DynamicListEntryUi(override val ctx: Context) : Ui {
         minHeight = styledDimenPxSize(android.R.attr.listPreferredItemHeightSmall)
 
         add(multiselectCheckBox, lParams {
-            visibility = View.GONE
             width = dp(30)
             height = 0
             centerVertically()
