@@ -65,8 +65,6 @@ endforeach ()
 option(ENABLE_TEST "" OFF)
 set(_Fcitx5Macro_SELF_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fcitx5/src/lib/fcitx-utils)
 add_subdirectory(libime)
-# rename to include executable in apk
-set_target_properties(libime_tabledict PROPERTIES OUTPUT_NAME liblibime_tabledict.so)
 
 # prebuilt lua
 include("${PREBUILT_DIR}/lua/${ANDROID_ABI}/lib/cmake/LuaConfig.cmake")
@@ -105,3 +103,6 @@ target_link_libraries(pinyindictionaryutils LibIME::Pinyin)
 
 add_library(utf8utils SHARED utf8utils.cpp)
 target_link_libraries(utf8utils Fcitx5::Utils)
+
+add_library(tabledictionaryutils SHARED tabledictionaryutils.cpp)
+target_link_libraries(tabledictionaryutils LibIME::Table)
