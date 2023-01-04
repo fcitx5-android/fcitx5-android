@@ -22,7 +22,6 @@ fun <T> Context.DynamicListUi(
     enableOrder: Boolean = false,
     initCheckBox: (CheckBox.(T) -> Unit) = { visibility = View.GONE },
     initSettingsButton: (ImageButton.(T) -> Unit) = { visibility = View.GONE },
-    useCustomTouchCallback: Boolean = false,
     show: (T) -> String
 ): BaseDynamicListUi<T> = object :
     BaseDynamicListUi<T>(
@@ -34,8 +33,7 @@ fun <T> Context.DynamicListUi(
         initSettingsButton
     ) {
     init {
-        if (!useCustomTouchCallback)
-            addTouchCallback()
+        addTouchCallback()
     }
 
     override fun showEntry(x: T): String = show(x)
@@ -53,7 +51,6 @@ fun <T> Context.CheckBoxListUi(
     false,
     initCheckBox,
     initSettingsButton,
-    false,
     show
 )
 
