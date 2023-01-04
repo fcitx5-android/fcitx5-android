@@ -1,3 +1,4 @@
+import android.databinding.tool.ext.capitalizeUS
 import com.android.build.gradle.internal.tasks.factory.dependsOn
 import com.google.common.hash.Hashing
 import com.google.common.io.Files
@@ -157,7 +158,7 @@ project.gradle.taskGraph.whenReady {
     }
 }
 android.applicationVariants.all {
-    val variantName = name.capitalize()
+    val variantName = name.capitalizeUS()
     tasks.findByName("merge${variantName}Assets")?.dependsOn(generateDataDescriptor)
 }
 
@@ -166,7 +167,7 @@ android.applicationVariants.all {
  */
 fun installFcitxComponent(targetName: String, componentName: String, destDir: File) {
     // Deliberately use doLast to wait ext be set
-    val build by tasks.register("buildFcitx${componentName.capitalize()}") {
+    val build by tasks.register("buildFcitx${componentName.capitalizeUS()}") {
         doLast {
             try {
                 exec {
@@ -190,7 +191,7 @@ fun installFcitxComponent(targetName: String, componentName: String, destDir: Fi
         }
     }
 
-    tasks.register("installFcitx${componentName.capitalize()}") {
+    tasks.register("installFcitx${componentName.capitalizeUS()}") {
         doLast {
             try {
                 exec {
