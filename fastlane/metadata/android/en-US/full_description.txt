@@ -1,0 +1,15 @@
+<b>Features</b>
+<ul>
+<li>Virtual Keyboard (layout not customizable yet)</li>
+<li>Expandable candidate view</li>
+<li>Clipboard management (plain text only)</li>
+<li>Themeing (custom color scheme and background image)</li>
+<li>Popup preview on key press</li>
+<li>Long press popup keyboard for convenient symbol input</li>
+<li>Symbol and Emoji picker</li>
+</ul>
+<b>Work in progress</b>
+<ul>
+<li>Customiziable keyboard layout</li>
+<li>More input methods</li>
+</ul>
