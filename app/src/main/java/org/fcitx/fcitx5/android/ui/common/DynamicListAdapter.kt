@@ -57,7 +57,7 @@ abstract class DynamicListAdapter<T>(
         if (item.itemId == R.id.action_delete) {
             val indexed = selected.mapNotNull { entry ->
                 indexItem(entry).takeIf { it != -1 }?.let { it to entry }
-            }
+            }.sortedByDescending { it.first }
             indexed.forEach { (index, _) ->
                 _entries.removeAt(index)
                 notifyItemRemoved(index)
