@@ -44,8 +44,6 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
 
     override suspend fun initialize(): View {
         quickPhrase = requireArguments().serializable(ARG)!!
-        viewModel.disableToolbarSaveButton()
-        viewModel.setToolbarTitle(quickPhrase.name)
         val initialEntries = withContext(Dispatchers.IO) {
             quickPhrase.loadData().getOrThrow()
         }
@@ -95,6 +93,12 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
         ui.addOnItemChangedListener(this)
         ui.addTouchCallback()
         resetDustman()
+        viewModel.enableToolbarEditButton {
+            ui.enterMultiSelect(
+                requireActivity().onBackPressedDispatcher,
+                viewModel
+            )
+        }
         return ui.root
     }
 
@@ -134,6 +138,20 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
 
     private fun resetDustman() {
         dustman.reset(entries.associateBy { it.serialize() })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.disableToolbarSaveButton()
+        viewModel.setToolbarTitle(quickPhrase.name)
+
+        if (::ui.isInitialized)
+            viewModel.enableToolbarEditButton {
+                ui.enterMultiSelect(
+                    requireActivity().onBackPressedDispatcher,
+                    viewModel
+                )
+            }
     }
 
     override fun onPause() {
