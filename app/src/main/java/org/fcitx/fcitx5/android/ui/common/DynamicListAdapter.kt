@@ -1,18 +1,16 @@
 package org.fcitx.fcitx5.android.ui.common
 
 import android.annotation.SuppressLint
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageButton
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.OnBackPressedDispatcher
 import androidx.annotation.CallSuper
-import androidx.appcompat.view.ActionMode
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.utils.getHostActivity
+import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import java.util.*
 
 abstract class DynamicListAdapter<T>(
@@ -23,7 +21,7 @@ abstract class DynamicListAdapter<T>(
     var initEditButton: (ImageButton.(T) -> Unit) = { visibility = View.GONE },
     var initSettingsButton: (ImageButton.(T) -> Unit) = { visibility = View.GONE }
 ) :
-    RecyclerView.Adapter<DynamicListAdapter<T>.ViewHolder>(), ActionMode.Callback {
+    RecyclerView.Adapter<DynamicListAdapter<T>.ViewHolder>() {
 
     private val _entries = initialEntries.toMutableList()
 
@@ -33,16 +31,13 @@ abstract class DynamicListAdapter<T>(
     var multiselect = false
         private set
 
-    private var actionMode: ActionMode? = null
-
-    // The undo action may change the entries during selection
-    // Thus we cannot use position
     private val selected = mutableListOf<T>()
 
     private var listener: OnItemChangedListener<T>? = null
     protected var itemTouchHelper: ItemTouchHelper? = null
 
     var removable: (T) -> Boolean = { true }
+    private var onBackPressedCallback: OnBackPressedCallback? = null
 
     abstract fun showEntry(x: T): String
     fun removeItemChangedListener() {
@@ -53,37 +48,6 @@ abstract class DynamicListAdapter<T>(
         listener = listener?.let { OnItemChangedListener.merge(it, x) } ?: x
     }
 
-    override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-        if (item.itemId == R.id.action_delete) {
-            val indexed = selected.mapNotNull { entry ->
-                indexItem(entry).takeIf { it != -1 }?.let { it to entry }
-            }.sortedByDescending { it.first }
-            indexed.forEach { (index, _) ->
-                _entries.removeAt(index)
-                notifyItemRemoved(index)
-            }
-            listener?.onItemRemovedBatch(indexed)
-        }
-        mode.finish()
-        return true
-    }
-
-    override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-        mode.menuInflater.inflate(R.menu.dlistm, menu)
-        return true
-    }
-
-
-    @SuppressLint("NotifyDataSetChanged")
-    override fun onDestroyActionMode(mode: ActionMode) {
-        multiselect = false
-        selected.clear()
-        // make multiselectCheckBox invisible
-        notifyDataSetChanged()
-        actionMode = null
-    }
-
-    override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean = true
 
     inner class ViewHolder(entryUi: DynamicListEntryUi) : RecyclerView.ViewHolder(entryUi.root) {
         val multiselectCheckBox = entryUi.multiselectCheckBox
@@ -97,7 +61,6 @@ abstract class DynamicListAdapter<T>(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(DynamicListEntryUi(parent.context))
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = entries[position]
         with(holder) {
@@ -110,7 +73,6 @@ abstract class DynamicListAdapter<T>(
                 else false
             }
             nameText.text = showEntry(item)
-
 
             if (multiselect) {
                 handleImage.visibility = View.GONE
@@ -133,14 +95,7 @@ abstract class DynamicListAdapter<T>(
 
             if (enableAddAndDelete && removable(item)) {
                 nameText.setOnLongClickListener {
-                    if (!multiselect) {
-                        multiselect = true
-                        select(item, multiselectCheckBox)
-                        actionMode = itemView.context.getHostActivity()!!
-                            .startSupportActionMode(this@DynamicListAdapter)
-                        // make multiselectCheckBox visible
-                        notifyDataSetChanged()
-                    }
+                    itemTouchHelper?.startDrag(holder)
                     true
                 }
                 nameText.setOnClickListener {
@@ -162,6 +117,54 @@ abstract class DynamicListAdapter<T>(
             selected.add(item)
             checkBox.isChecked = true
         }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun enterMultiSelect(
+        onBackPressedDispatcher: OnBackPressedDispatcher,
+        mainViewModel: MainViewModel
+    ) {
+        if (multiselect)
+            return
+        onBackPressedCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                exitMultiSelect(mainViewModel)
+            }
+        }
+        onBackPressedDispatcher.addCallback(onBackPressedCallback!!)
+        mainViewModel.enableToolbarDeleteButton {
+            deleteSelected()
+            exitMultiSelect(mainViewModel)
+        }
+        mainViewModel.hideToolbarEditButton()
+        multiselect = true
+        notifyDataSetChanged()
+    }
+
+
+    private fun deleteSelected() {
+        if (!multiselect || selected.isEmpty())
+            return
+        val indexed = selected.mapNotNull { entry ->
+            indexItem(entry).takeIf { it != -1 }?.let { it to entry }
+        }.sortedByDescending { it.first }
+        indexed.forEach { (index, _) ->
+            _entries.removeAt(index)
+            notifyItemRemoved(index)
+        }
+        listener?.onItemRemovedBatch(indexed)
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun exitMultiSelect(viewModel: MainViewModel) {
+        if (!multiselect)
+            return
+        onBackPressedCallback?.remove()
+        viewModel.disableToolbarDeleteButton()
+        multiselect = false
+        selected.clear()
+        notifyDataSetChanged()
+        viewModel.showToolbarEditButton()
     }
 
     override fun getItemCount(): Int = entries.size
@@ -197,8 +200,4 @@ abstract class DynamicListAdapter<T>(
     }
 
     fun indexItem(item: T): Int = _entries.indexOf(item)
-
-    fun exitMultiselect() {
-        actionMode?.finish()
-    }
 }

@@ -325,8 +325,6 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
         savedInstanceState: Bundle?
     ): View {
         createNotificationChannel()
-        viewModel.disableToolbarSaveButton()
-        viewModel.setToolbarTitle(getString(R.string.quickphrase_editor))
         registerLauncher()
         ui.addOnItemChangedListener(this)
         resetDustman()
@@ -350,8 +348,22 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
         dustman.addOrUpdate(new.name, new.isEnabled)
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.disableToolbarSaveButton()
+        viewModel.setToolbarTitle(getString(R.string.quickphrase_editor))
+        viewModel.enableToolbarEditButton {
+            ui.enterMultiSelect(
+                requireActivity().onBackPressedDispatcher,
+                viewModel
+            )
+        }
+    }
+
     override fun onPause() {
         reloadQuickPhrase()
+        ui.exitMultiSelect(viewModel)
+        viewModel.disableToolbarEditButton()
         super.onPause()
     }
 

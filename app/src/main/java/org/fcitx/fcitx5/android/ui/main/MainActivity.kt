@@ -155,6 +155,32 @@ class MainActivity : AppCompatActivity() {
             }
             setValue(value)
         }
+
+        add(R.string.edit).apply {
+            setIcon(R.drawable.ic_baseline_edit_24)
+            setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
+            viewModel.toolbarEditButtonVisible.apply {
+                observe(this@MainActivity) { isVisible = it }
+                setValue(value)
+            }
+            setOnMenuItemClickListener {
+                viewModel.toolbarEditButtonOnClickListener.value?.invoke()
+                true
+            }
+        }
+
+        add(R.string.delete).apply {
+            setIcon(R.drawable.ic_baseline_delete_24)
+            setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
+            viewModel.toolbarDeleteButtonOnClickListener.apply {
+                observe(this@MainActivity) { listener -> isVisible = listener != null }
+                setValue(value)
+            }
+            setOnMenuItemClickListener {
+                viewModel.toolbarDeleteButtonOnClickListener.value?.invoke()
+                true
+            }
+        }
         true
     }
 

@@ -126,10 +126,24 @@ class ListFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
+    ): View = ui.root
+
+    override fun onResume() {
+        super.onResume()
         viewModel.setToolbarTitle(descriptor.description ?: descriptor.name)
         viewModel.disableToolbarSaveButton()
-        return ui.root
+        viewModel.enableToolbarEditButton {
+            ui.enterMultiSelect(
+                requireActivity().onBackPressedDispatcher,
+                viewModel
+            )
+        }
+    }
+
+    override fun onPause() {
+        ui.exitMultiSelect(viewModel)
+        viewModel.disableToolbarEditButton()
+        super.onPause()
     }
 
     override fun onDestroy() {
