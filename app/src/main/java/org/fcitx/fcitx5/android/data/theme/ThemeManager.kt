@@ -19,8 +19,6 @@ import java.util.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
-import kotlin.io.path.createTempDirectory
-import kotlin.io.path.pathString
 
 object ThemeManager {
 
@@ -156,15 +154,7 @@ object ThemeManager {
     fun importTheme(src: InputStream): Result<Triple<Boolean, Theme.Custom, Boolean>> =
         runCatching {
             ZipInputStream(src).use { zipStream ->
-                val tempDir = File(createTempDirectory().pathString)
-                val extracted = mutableListOf<File>()
-                var entry = zipStream.nextEntry
-                while (entry != null && !entry.isDirectory) {
-                    val file = File(tempDir, entry.name)
-                    zipStream.copyTo(file.outputStream())
-                    extracted.add(file)
-                    entry = zipStream.nextEntry
-                }
+                val extracted = zipStream.extract()
                 val jsonFile = extracted.find { it.extension == "json" }
                     ?: errorRuntime(R.string.exception_theme_json)
                 val (decoded, migrated) = Json.decodeFromString(
@@ -220,7 +210,8 @@ object ThemeManager {
         val keyHorizontalMargin =
             int(R.string.key_horizontal_margin, "key_horizontal_margin", 3, 0, 8, "dp")
 
-        val keyVerticalMargin = int(R.string.key_vertical_margin, "key_vertical_margin", 7, 0, 16, "dp")
+        val keyVerticalMargin =
+            int(R.string.key_vertical_margin, "key_vertical_margin", 7, 0, 16, "dp")
 
         val keyRadius = int(R.string.key_radius, "key_radius", 4, 0, 48, "dp")
 

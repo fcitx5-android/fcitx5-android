@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.ui.main.settings.addon
 
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxAPI
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.ui.main.settings.FcitxPreferenceFragment
@@ -7,8 +8,21 @@ import org.fcitx.fcitx5.android.ui.main.settings.FcitxPreferenceFragment
 class AddonConfigFragment : FcitxPreferenceFragment() {
     override fun getPageTitle(): String = requireStringArg(ARG_NAME)
 
-    override suspend fun obtainConfig(fcitx: FcitxAPI): RawConfig =
-        fcitx.getAddonConfig(requireStringArg(ARG_UNIQUE_NAME))
+    override suspend fun obtainConfig(fcitx: FcitxAPI): RawConfig {
+        val addon = requireStringArg(ARG_UNIQUE_NAME)
+        val raw = fcitx.getAddonConfig(addon)
+        if (addon == "table") {
+            val desc = raw["desc"]["TableGlobalConfig"]
+            val androidTable = RawConfig(
+                "AndroidTable", subItems = arrayOf(
+                    RawConfig("Type", "External"),
+                    RawConfig("Description", getString(R.string.table_im))
+                )
+            )
+            desc.subItems = (desc.subItems ?: arrayOf()) + androidTable
+        }
+        return raw
+    }
 
     override suspend fun saveConfig(fcitx: FcitxAPI, newConfig: RawConfig) {
         fcitx.setAddonConfig(requireStringArg(ARG_UNIQUE_NAME), newConfig)
