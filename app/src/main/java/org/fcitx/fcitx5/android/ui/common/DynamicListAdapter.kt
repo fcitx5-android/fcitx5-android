@@ -121,6 +121,9 @@ abstract class DynamicListAdapter<T>(
             } else {
                 handleImage.visibility = if (enableOrder) View.VISIBLE else View.GONE
                 multiselectCheckBox.visibility = View.GONE
+                checkBox.visibility = View.VISIBLE
+                settingsButton.visibility = View.VISIBLE
+                editButton.visibility = View.VISIBLE
                 initCheckBox(checkBox, item)
                 initSettingsButton(settingsButton, item)
                 initEditButton(editButton, item)
@@ -143,8 +146,9 @@ abstract class DynamicListAdapter<T>(
                 nameText.setOnClickListener {
                     select(item, multiselectCheckBox)
                 }
-            } else
-                multiselectCheckBox.visibility = View.GONE
+            } else {
+                multiselectCheckBox.isEnabled = false
+            }
         }
     }
 
