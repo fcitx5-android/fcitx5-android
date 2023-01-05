@@ -47,12 +47,16 @@ import org.fcitx.fcitx5.android.R
 import splitties.experimental.InternalSplittiesApi
 import splitties.resources.withResolvedThemeAttribute
 import splitties.views.bottomPadding
+import java.io.File
 import java.io.Serializable
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.zip.ZipInputStream
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.io.path.createTempDirectory
+import kotlin.io.path.pathString
 import kotlin.math.roundToInt
 
 val InputMethodService.inputConnection: InputConnection?
@@ -232,6 +236,19 @@ fun getSystemProperty(key: String): String {
     return Class.forName("android.os.SystemProperties")
         .getMethod("get", String::class.java)
         .invoke(null, key) as String
+}
+
+fun ZipInputStream.extract(): List<File> {
+    val tempDir = File(createTempDirectory().pathString)
+    val extracted = mutableListOf<File>()
+    var entry = nextEntry
+    while (entry != null && !entry.isDirectory) {
+        val file = File(tempDir, entry.name)
+        copyTo(file.outputStream())
+        extracted.add(file)
+        entry = nextEntry
+    }
+    return extracted
 }
 
 fun Context.getHostActivity(): AppCompatActivity? {

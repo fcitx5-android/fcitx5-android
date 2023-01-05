@@ -146,7 +146,10 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
             Punctuation,
             QuickPhrase,
             Chttrans,
-            TableGlobal
+            TableGlobal,
+
+            // manually added on Android side for TableManager
+            AndroidTable
         }
 
         override val type: ConfigType<ConfigType.TyExternal>
@@ -265,6 +268,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                                 "QuickPhrase", "Editor" -> ConfigExternal.ETy.QuickPhrase
                                 "Chttrans" -> ConfigExternal.ETy.Chttrans
                                 "TableGlobal" -> ConfigExternal.ETy.TableGlobal
+                                "AndroidTable" -> ConfigExternal.ETy.AndroidTable
                                 else -> null
                             }
                         )

@@ -1,7 +1,6 @@
 package org.fcitx.fcitx5.android.core
 
 import android.content.Context
-import android.os.Build
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -15,6 +14,7 @@ import org.fcitx.fcitx5.android.data.DataManager
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.utils.ImmutableGraph
+import org.fcitx.fcitx5.android.utils.Locales
 import timber.log.Timber
 
 /**
@@ -331,22 +331,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         override fun nativeStartup() {
             with(context) {
                 DataManager.sync()
-                val locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    resources.configuration.locales.let {
-                        buildString {
-                            for (i in 0 until it.size()) {
-                                if (i != 0) append(":")
-                                append(it[i].run { "${language}_${country}:$language" })
-                                // since there is not an `en.mo` file, `en` must be the only locale
-                                // in order to use default english translation
-                                if (i == 0 && it[i].language == "en") break
-                            }
-                        }
-                    }
-                } else {
-                    @Suppress("DEPRECATION")
-                    resources.configuration.locale.run { "${language}_${country}:$language" }
-                }
+                val locale = Locales.fcitxLocale
                 Timber.i("Current locale is $locale")
                 val externalFilesDir = getExternalFilesDir(null)!!
                 startupFcitx(

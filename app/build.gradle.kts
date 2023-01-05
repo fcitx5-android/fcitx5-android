@@ -238,6 +238,7 @@ tasks.register<Delete>("cleanCxxIntermediates") {
 }.also { tasks.clean.dependsOn(it) }
 
 dependencies {
+    implementation("org.ini4j:ini4j:0.5.4")
     ksp(project(":codegen"))
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.2.2")
     implementation("io.arrow-kt:arrow-core:1.1.3")

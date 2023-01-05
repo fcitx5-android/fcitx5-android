@@ -116,6 +116,15 @@ object PreferenceScreenFactory {
             }
         }
 
+        fun tableInputMethod() = Preference(context).apply {
+            setOnPreferenceClickListener {
+                val currentFragment = fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
+                currentFragment.findNavController()
+                    .navigate(R.id.action_addonConfigFragment_to_tableInputMethodFragment)
+                true
+            }
+        }
+
         fun listPreference(subtype: ConfigType<*>): Preference = object : Preference(context) {
             override fun onClick() {
                 val currentFragment = fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
@@ -194,6 +203,7 @@ object PreferenceScreenFactory {
                 ConfigExternal.ETy.QuickPhrase -> quickPhraseEditor()
                 ConfigExternal.ETy.Chttrans -> addonConfigPreference("chttrans")
                 ConfigExternal.ETy.TableGlobal -> addonConfigPreference("table")
+                ConfigExternal.ETy.AndroidTable -> tableInputMethod()
                 else -> stubPreference()
             }
             is ConfigInt -> {
