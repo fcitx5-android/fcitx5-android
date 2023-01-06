@@ -184,4 +184,13 @@
     <string name="table_already_exists">Table input method configuration file \"%1$s\" already exists</string>
     <string name="table_file_does_not_exist_title">Table unavailable</string>
     <string name="table_file_does_not_exist_message">Table dictionary \"%1$s\" does not exist. Please check the table dict file or delete and re-import.</string>
+    <string name="import_table">Import Table</string>
+    <string name="table_from_zip">From zip …</string>
+    <string name="table_select_files">From separate files …</string>
+    <string name="table_file_placeholder">Select file …</string>
+    <string name="table_conf_select_title">Input method configuration file (.conf or .conf.in)</string>
+    <string name="table_dict_select_title">Table dictionary (.dict or .txt)</string>
+    <string name="exception_table_conf_filename">The extension of \"%1$s\" does not indicate a table input method configuration file (.conf or .conf.in)</string>
+    <string name="exception_table_dict_filename">The extension of \"%1$s\" does not indicate a table dictionary (.dict or .txt)</string>
+    <string name="exception_table_import_both_files">Please select both of above files before importing</string>
 </resources>
