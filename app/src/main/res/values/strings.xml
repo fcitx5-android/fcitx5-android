@@ -193,4 +193,6 @@
     <string name="exception_table_conf_filename">The extension of \"%1$s\" does not indicate a table input method configuration file (.conf or .conf.in)</string>
     <string name="exception_table_dict_filename">The extension of \"%1$s\" does not indicate a table dictionary (.dict or .txt)</string>
     <string name="exception_table_import_both_files">Please select both of above files before importing</string>
+    <string name="notification_permission_message">Without the permission to post notifications, we are not able to notify you when some time-consuming operations are done.</string>
+    <string name="notification_permission_title">No Notification Permission</string>
 </resources>
