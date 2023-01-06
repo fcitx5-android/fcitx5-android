@@ -1,15 +1,20 @@
 package org.fcitx.fcitx5.android.ui.main
 
+import android.Manifest
 import android.animation.ObjectAnimator
 import android.animation.StateListAnimator
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -25,6 +30,7 @@ import org.fcitx.fcitx5.android.ui.setup.SetupActivity
 import org.fcitx.fcitx5.android.utils.applyTranslucentSystemBars
 import org.fcitx.fcitx5.android.utils.navigateFromMain
 import splitties.dimensions.dp
+import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
 
@@ -89,6 +95,7 @@ class MainActivity : AppCompatActivity() {
         if (SetupActivity.shouldShowUp() && intent.action == Intent.ACTION_MAIN)
             startActivity(Intent(this, SetupActivity::class.java))
         processIntent(intent)
+        requestNotificationPermission()
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -182,6 +189,36 @@ class MainActivity : AppCompatActivity() {
             }
         }
         true
+    }
+
+    private val requestNotificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+            if (!it) {
+                AlertDialog.Builder(this)
+                    .setNeutralButton(android.R.string.ok, null)
+                    .setTitle(R.string.notification_permission_title)
+                    .setMessage(R.string.notification_permission_message)
+                    .setIcon(R.drawable.ic_baseline_info_24)
+                    .show()
+            }
+        }
+
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            when {
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                }
+                shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
+                    Timber.d("No notification permission")
+                }
+                else -> {
+                    requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        }
     }
 
 }
