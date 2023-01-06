@@ -6,11 +6,10 @@ import org.fcitx.fcitx5.android.data.table.dict.LibIMEDictionary
 import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.errorRuntime
 import org.fcitx.fcitx5.android.utils.extract
+import org.fcitx.fcitx5.android.utils.withTempDir
 import java.io.File
 import java.io.InputStream
 import java.util.zip.ZipInputStream
-import kotlin.io.path.createTempDirectory
-import kotlin.io.path.pathString
 
 object TableManager {
 
@@ -44,14 +43,16 @@ object TableManager {
     fun importFromZip(src: InputStream): Result<TableBasedInputMethod> =
         runCatching {
             ZipInputStream(src).use { zipStream ->
-                val extracted = zipStream.extract()
-                val confFile =
-                    extracted.find { it.name.endsWith(".conf") || it.name.endsWith(".conf.in") }
-                        ?: errorRuntime(R.string.exception_table_im)
-                val dictFile =
-                    extracted.find { it.name.endsWith(".dict") || it.name.endsWith(".txt") }
-                        ?: errorRuntime(R.string.exception_table)
-                importFiles(confFile, dictFile)
+                withTempDir { tempDir ->
+                    val extracted = zipStream.extract(tempDir)
+                    val confFile =
+                        extracted.find { it.name.endsWith(".conf") || it.name.endsWith(".conf.in") }
+                            ?: errorRuntime(R.string.exception_table_im)
+                    val dictFile =
+                        extracted.find { it.name.endsWith(".dict") || it.name.endsWith(".txt") }
+                            ?: errorRuntime(R.string.exception_table)
+                    importFiles(confFile, dictFile)
+                }
             }
         }
 
@@ -61,14 +62,15 @@ object TableManager {
         dictName: String,
         dictStream: InputStream
     ): Result<TableBasedInputMethod> = runCatching {
-        val tempDir = File(createTempDirectory().pathString)
-        val confFile = File(tempDir, confName).apply {
-            outputStream().use { o -> confStream.use { i -> i.copyTo(o) } }
+        withTempDir { tempDir ->
+            val confFile = File(tempDir, confName).apply {
+                outputStream().use { o -> confStream.use { i -> i.copyTo(o) } }
+            }
+            val dictFile = File(tempDir, dictName).apply {
+                outputStream().use { o -> dictStream.use { i -> i.copyTo(o) } }
+            }
+            importFiles(confFile, dictFile)
         }
-        val dictFile = File(tempDir, dictName).apply {
-            outputStream().use { o -> dictStream.use { i -> i.copyTo(o) } }
-        }
-        importFiles(confFile, dictFile)
     }
 
     private fun importFiles(confFile: File, dictFile: File): TableBasedInputMethod {

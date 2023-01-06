@@ -238,13 +238,11 @@ fun getSystemProperty(key: String): String {
         .invoke(null, key) as String
 }
 
-fun ZipInputStream.extract(): List<File> {
-    // creates /data/user/<userId>/<packageName>/cache/<randomId>
-    val tempDir = File(createTempDirectory().pathString)
+fun ZipInputStream.extract(destDir: File): List<File> {
     val extracted = mutableListOf<File>()
     var entry = nextEntry
     while (entry != null && !entry.isDirectory) {
-        val file = File(tempDir, entry.name)
+        val file = File(destDir, entry.name)
         copyTo(file.outputStream())
         extracted.add(file)
         entry = nextEntry
@@ -261,4 +259,14 @@ fun Context.getHostActivity(): AppCompatActivity? {
             context = context.baseContext
     }
     return null
+}
+
+inline fun <T> withTempDir(block: (File) -> T): T {
+    // creates /data/user/<userId>/<packageName>/cache/<randomId>
+    val dir = File(createTempDirectory().pathString)
+    try {
+        return block(dir)
+    } finally {
+        dir.delete()
+    }
 }
