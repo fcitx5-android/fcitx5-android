@@ -174,12 +174,14 @@
     <string name="saving">Saving</string>
     <string name="delete_all_pinned_items">Delete all pinned items?</string>
     <string name="vivo_keypress_workaround">vivo Origin OS keypress workaround</string>
-    <string name="invalid_im">Invalid input method file</string>
-    <string name="exception_table_im">Unable to find table input method file</string>
-    <string name="exception_table">Unable to find table dictionary</string>
+    <string name="invalid_im">Invalid input method configuration file:\n%1$s</string>
+    <string name="invalid_table_dict">Invalid dictionary:\n%1$s</string>
+    <string name="exception_table_im">Table input method configuration file (.conf or .conf.in) not found</string>
+    <string name="exception_table">Table dictionary (.dict or .txt) not found</string>
     <string name="table_im">Table Input Methods</string>
-    <string name="exception_table_im_filename">The filename extension of %1$s does not indicate a table input method</string>
-    <string name="table_already_exists">Table already exists</string>
-    <string name="table_file_does_not_exist_title">Table file does not exist</string>
-    <string name="table_file_does_not_exist_message">Please check the table dict file or delete and re-import</string>
+    <string name="manage_table_im">Manage Table Input Methods</string>
+    <string name="exception_table_im_filename">The extension of \"%1$s\" does not indicate a table input method package (.zip)</string>
+    <string name="table_already_exists">Table input method configuration file \"%1$s\" already exists</string>
+    <string name="table_file_does_not_exist_title">Table unavailable</string>
+    <string name="table_file_does_not_exist_message">Table dictionary \"%1$s\" does not exist. Please check the table dict file or delete and re-import.</string>
 </resources>

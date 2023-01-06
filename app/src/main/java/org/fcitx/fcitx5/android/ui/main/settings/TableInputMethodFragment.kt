@@ -26,8 +26,9 @@ import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import org.fcitx.fcitx5.android.utils.*
+import splitties.resources.styledDrawable
 import splitties.systemservices.notificationManager
-import splitties.views.imageResource
+import splitties.views.imageDrawable
 import java.io.File
 
 class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInputMethod> {
@@ -45,7 +46,6 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
     private val dustman = NaiveDustman<TableBasedInputMethod>().apply {
         onDirty = {
             viewModel.enableToolbarSaveButton { reloadConfig() }
-
         }
         onClean = {
             viewModel.disableToolbarSaveButton()
@@ -59,13 +59,14 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
             TableManager.inputMethods(),
             initSettingsButton = {
                 visibility = if (it.tableFileExists) View.GONE else View.VISIBLE
-                imageResource = R.drawable.ic_baseline_info_24
-                setOnClickListener {
+                imageDrawable = styledDrawable(android.R.attr.alertDialogIcon)
+                setOnClickListener { _: View ->
+                    if (it.tableFileExists) return@setOnClickListener
                     lifecycleScope.launch {
                         errorDialog(
                             requireContext(),
                             getString(R.string.table_file_does_not_exist_title),
-                            getString(R.string.table_file_does_not_exist_message)
+                            getString(R.string.table_file_does_not_exist_message, it.tableFileName)
                         )
                     }
                 }
@@ -121,34 +122,31 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
 
     private fun importFromUri(uri: Uri) =
         lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
+            val importId = IMPORT_ID++
             runCatching {
-                val id = IMPORT_ID++
                 val fileName = uri.queryFileName(contentResolver)
                 fileName.filter { it.endsWith(".zip") }.orNull()
                     ?: errorArg(R.string.exception_table_im_filename, fileName.getOrElse { "" })
                 val file = File(fileName.orNull()!!)
-                val builder =
-                    NotificationCompat.Builder(requireContext(), CHANNEL_ID)
-                        .setSmallIcon(R.drawable.ic_baseline_library_books_24)
-                        .setContentTitle(getString(R.string.table_im))
-                        .setContentText("${getString(R.string.importing)} ${file.nameWithoutExtension}")
-                        .setOngoing(true)
-                        .setProgress(100, 0, true)
-                        .setPriority(NotificationCompat.PRIORITY_HIGH)
-                builder.build().let { notificationManager.notify(id, it) }
+                val builder = NotificationCompat.Builder(requireContext(), CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_baseline_library_books_24)
+                    .setContentTitle(getString(R.string.table_im))
+                    .setContentText("${getString(R.string.importing)} ${file.nameWithoutExtension}")
+                    .setOngoing(true)
+                    .setProgress(100, 0, true)
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                builder.build().let { notificationManager.notify(importId, it) }
                 contentResolver.openInputStream(uri)
             }.bindOnNotNull {
                 TableManager.importTableBasedIM(it)
+            }?.onFailure {
+                importErrorDialog(it.localizedMessage ?: it.stackTraceToString())
+            }?.onSuccess {
+                launch(Dispatchers.Main) {
+                    ui.addItem(item = it)
+                }
             }
-                ?.onFailure {
-                    importErrorDialog(it.localizedMessage ?: it.stackTraceToString())
-                }
-                ?.onSuccess {
-                    launch(Dispatchers.Main) {
-                        ui.addItem(item = it)
-                    }
-                }
-            notificationManager.cancel(id)
+            notificationManager.cancel(importId)
         }
 
     private suspend fun importErrorDialog(message: String) {
@@ -162,7 +160,6 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
         lifecycleScope.launch {
             viewModel.fcitx.runOnReady { reloadConfig() }
         }
-
     }
 
     private fun resetDustman() {

@@ -16,7 +16,7 @@ class AddonConfigFragment : FcitxPreferenceFragment() {
             val androidTable = RawConfig(
                 "AndroidTable", subItems = arrayOf(
                     RawConfig("Type", "External"),
-                    RawConfig("Description", getString(R.string.table_im))
+                    RawConfig("Description", getString(R.string.manage_table_im))
                 )
             )
             desc.subItems = (desc.subItems ?: arrayOf()) + androidTable

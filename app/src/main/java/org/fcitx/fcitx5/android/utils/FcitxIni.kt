@@ -21,7 +21,6 @@ class FcitxIni() : Ini() {
         load()
     }
 
-
     constructor(input: URL) : this() {
         load(input)
     }
