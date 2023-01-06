@@ -186,7 +186,7 @@ suspend fun errorDialog(context: Context, title: String, message: String) {
         AlertDialog.Builder(context)
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton(android.R.string.ok) { _, _ -> }
+            .setPositiveButton(android.R.string.ok, null)
             .setIconAttribute(android.R.attr.alertDialogIcon)
             .show()
     }

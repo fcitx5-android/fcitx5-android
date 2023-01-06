@@ -9,6 +9,8 @@ import org.fcitx.fcitx5.android.utils.extract
 import java.io.File
 import java.io.InputStream
 import java.util.zip.ZipInputStream
+import kotlin.io.path.createTempDirectory
+import kotlin.io.path.pathString
 
 object TableManager {
 
@@ -39,40 +41,59 @@ object TableManager {
                 }.getOrNull()
             } ?: listOf()
 
-    fun importTableBasedIM(src: InputStream): Result<TableBasedInputMethod> =
+    fun importFromZip(src: InputStream): Result<TableBasedInputMethod> =
         runCatching {
             ZipInputStream(src).use { zipStream ->
                 val extracted = zipStream.extract()
                 val confFile =
                     extracted.find { it.name.endsWith(".conf") || it.name.endsWith(".conf.in") }
                         ?: errorRuntime(R.string.exception_table_im)
-                val im = confFile.let {
-                    val importedConfFile = File(inputMethodDir, it.name.removeSuffix(".in"))
-                    if (importedConfFile.exists())
-                        errorRuntime(R.string.table_already_exists, it.name)
-                    it.copyTo(importedConfFile)
-                    runCatching {
-                        TableBasedInputMethod.new(importedConfFile)
-                    }.getOrElse { t: Throwable ->
-                        importedConfFile.delete()
-                        errorRuntime(R.string.invalid_im, t.message)
-                    }
-                }
                 val dictFile =
                     extracted.find { it.name.endsWith(".dict") || it.name.endsWith(".txt") }
                         ?: errorRuntime(R.string.exception_table)
-                val table = Dictionary.new(dictFile)!!
-                im.tableFileName = TableBasedInputMethod.fixedTableFileName(table.name)
-                runCatching {
-                    im.table = table.toLibIMEDictionary(File(tableDicDir, im.tableFileName))
-                }.onFailure { t: Throwable ->
-                    im.file.delete()
-                    errorRuntime(R.string.invalid_table_dict, t.message)
-                }
-                im.save()
-                im
+                importFiles(confFile, dictFile)
             }
         }
+
+    fun importFromConfAndDict(
+        confName: String,
+        confStream: InputStream,
+        dictName: String,
+        dictStream: InputStream
+    ): Result<TableBasedInputMethod> = runCatching {
+        val tempDir = File(createTempDirectory().pathString)
+        val confFile = File(tempDir, confName).apply {
+            outputStream().use { o -> confStream.use { i -> i.copyTo(o) } }
+        }
+        val dictFile = File(tempDir, dictName).apply {
+            outputStream().use { o -> dictStream.use { i -> i.copyTo(o) } }
+        }
+        importFiles(confFile, dictFile)
+    }
+
+    private fun importFiles(confFile: File, dictFile: File): TableBasedInputMethod {
+        val importedConfFile = File(inputMethodDir, confFile.name.removeSuffix(".in")).also {
+            if (it.exists())
+                errorRuntime(R.string.table_already_exists, it.name)
+            confFile.copyTo(it)
+        }
+        val im = runCatching {
+            TableBasedInputMethod.new(importedConfFile)
+        }.getOrElse {
+            importedConfFile.delete()
+            errorRuntime(R.string.invalid_im, it.message)
+        }
+        val table = Dictionary.new(dictFile)!!
+        im.tableFileName = TableBasedInputMethod.fixedTableFileName(table.name)
+        runCatching {
+            im.table = table.toLibIMEDictionary(File(tableDicDir, im.tableFileName))
+        }.onFailure {
+            im.file.delete()
+            errorRuntime(R.string.invalid_table_dict, it.message)
+        }
+        im.save()
+        return im
+    }
 
     @JvmStatic
     external fun tableDictConv(src: String, dest: String, mode: Boolean)
