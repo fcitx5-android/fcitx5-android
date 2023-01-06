@@ -154,33 +154,35 @@ object ThemeManager {
     fun importTheme(src: InputStream): Result<Triple<Boolean, Theme.Custom, Boolean>> =
         runCatching {
             ZipInputStream(src).use { zipStream ->
-                val extracted = zipStream.extract()
-                val jsonFile = extracted.find { it.extension == "json" }
-                    ?: errorRuntime(R.string.exception_theme_json)
-                val (decoded, migrated) = Json.decodeFromString(
-                    CustomThemeSerializer.WithMigrationStatus,
-                    jsonFile.readText()
-                )
-                if (builtinThemes.find { it.name == decoded.name } != null)
-                    errorRuntime(R.string.exception_theme_name_clash)
-                val exists = customThemes.find { it.name == decoded.name } != null
-                val newTheme = if (decoded.backgroundImage != null) {
-                    val srcFile = File(dir, decoded.backgroundImage.srcFilePath)
-                    val croppedFile = File(dir, decoded.backgroundImage.croppedFilePath)
-                    extracted.find { it.name == srcFile.name }?.copyTo(srcFile)
-                        ?: errorRuntime(R.string.exception_theme_src_image)
-                    extracted.find { it.name == croppedFile.name }?.copyTo(croppedFile)
-                        ?: errorRuntime(R.string.exception_theme_cropped_image)
-                    decoded.copy(
-                        backgroundImage = decoded.backgroundImage.copy(
-                            croppedFilePath = croppedFile.path,
-                            srcFilePath = srcFile.path
-                        )
+                withTempDir { tempDir ->
+                    val extracted = zipStream.extract(tempDir)
+                    val jsonFile = extracted.find { it.extension == "json" }
+                        ?: errorRuntime(R.string.exception_theme_json)
+                    val (decoded, migrated) = Json.decodeFromString(
+                        CustomThemeSerializer.WithMigrationStatus,
+                        jsonFile.readText()
                     )
-                } else
-                    decoded
-                saveTheme(newTheme)
-                Triple(!exists, newTheme, migrated)
+                    if (builtinThemes.find { it.name == decoded.name } != null)
+                        errorRuntime(R.string.exception_theme_name_clash)
+                    val exists = customThemes.find { it.name == decoded.name } != null
+                    val newTheme = if (decoded.backgroundImage != null) {
+                        val srcFile = File(dir, decoded.backgroundImage.srcFilePath)
+                        val croppedFile = File(dir, decoded.backgroundImage.croppedFilePath)
+                        extracted.find { it.name == srcFile.name }?.copyTo(srcFile)
+                            ?: errorRuntime(R.string.exception_theme_src_image)
+                        extracted.find { it.name == croppedFile.name }?.copyTo(croppedFile)
+                            ?: errorRuntime(R.string.exception_theme_cropped_image)
+                        decoded.copy(
+                            backgroundImage = decoded.backgroundImage.copy(
+                                croppedFilePath = croppedFile.path,
+                                srcFilePath = srcFile.path
+                            )
+                        )
+                    } else
+                        decoded
+                    saveTheme(newTheme)
+                    Triple(!exists, newTheme, migrated)
+                }
             }
         }
 
