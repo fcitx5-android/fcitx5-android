@@ -82,13 +82,7 @@ open class DynamicListTouchCallback<T>(private val adapter: DynamicListAdapter<T
         isCurrentlyActive: Boolean
     ) {
         val itemView = viewHolder?.itemView ?: return super.onChildDrawOver(
-            c,
-            recyclerView,
-            viewHolder,
-            dX,
-            dY,
-            actionState,
-            isCurrentlyActive
+            c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive
         )
         when (actionState) {
             ItemTouchHelper.ACTION_STATE_SWIPE -> {
@@ -102,17 +96,17 @@ open class DynamicListTouchCallback<T>(private val adapter: DynamicListAdapter<T
                     val revealed = (dX.absoluteValue - iconMargin).toInt()
                     c.drawBitmap(
                         it,
-                        /* src= */ Rect(
-                            /* right = */ if (revealed > it.width) 0 else it.width - revealed,
-                            /* top   = */ 0,
-                            /* left  = */ it.width,
-                            /* bottom= */ it.height
+                        /* src = */ Rect(
+                            /* left = */ if (revealed > it.width) 0 else it.width - revealed,
+                            /* top = */ 0,
+                            /* right = */ it.width,
+                            /* bottom = */ it.height
                         ),
-                        /* dst= */ Rect(
-                            /* right = */ if (revealed > it.width) itemView.right - iconMargin - it.width else canvasLeft,
-                            /* top   = */ itemView.top + iconMargin,
-                            /* left  = */ itemView.right - iconMargin,
-                            /* bottom= */ itemView.top + iconMargin + it.height
+                        /* dst = */ Rect(
+                            /* left = */ if (revealed > it.width) itemView.right - iconMargin - it.width else canvasLeft,
+                            /* top = */ itemView.top + iconMargin,
+                            /* right = */ itemView.right - iconMargin,
+                            /* bottom = */ itemView.top + iconMargin + it.height
                         ),
                         deleteIconPaint
                     )
