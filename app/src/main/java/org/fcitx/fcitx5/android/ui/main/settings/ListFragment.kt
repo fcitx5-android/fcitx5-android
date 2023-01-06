@@ -11,7 +11,6 @@ import androidx.fragment.app.activityViewModels
 import org.fcitx.fcitx5.android.core.Key
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
-import org.fcitx.fcitx5.android.ui.common.DynamicListTouchCallback
 import org.fcitx.fcitx5.android.ui.common.DynamicListUi
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor
@@ -112,7 +111,7 @@ class ListFragment : Fragment() {
                                     .show()
                             }
                         }.apply {
-                            addTouchCallback(DynamicListTouchCallback(this))
+                            addTouchCallback()
                         }
                     }
                     ConfigType.TyEnum -> error("Impossible!")
@@ -127,10 +126,24 @@ class ListFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
+    ): View = ui.root
+
+    override fun onResume() {
+        super.onResume()
         viewModel.setToolbarTitle(descriptor.description ?: descriptor.name)
         viewModel.disableToolbarSaveButton()
-        return ui.root
+        viewModel.enableToolbarEditButton {
+            ui.enterMultiSelect(
+                requireActivity().onBackPressedDispatcher,
+                viewModel
+            )
+        }
+    }
+
+    override fun onPause() {
+        ui.exitMultiSelect(viewModel)
+        viewModel.disableToolbarEditButton()
+        super.onPause()
     }
 
     override fun onDestroy() {

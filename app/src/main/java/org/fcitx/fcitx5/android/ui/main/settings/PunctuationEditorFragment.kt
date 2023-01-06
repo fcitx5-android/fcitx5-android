@@ -65,8 +65,6 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
     }
 
     override suspend fun initialize(): View {
-        viewModel.disableToolbarSaveButton()
-        viewModel.setToolbarTitle(requireArguments().getString(TITLE)!!)
         lang = requireArguments().getString(LANG, DEFAULT_LANG)
         val raw = fcitx.runOnReady { getPunctuationConfig(lang) }
         findDesc(raw)
@@ -129,6 +127,12 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
             }
         }
         resetDustman()
+        viewModel.enableToolbarEditButton {
+            ui.enterMultiSelect(
+                requireActivity().onBackPressedDispatcher,
+                viewModel
+            )
+        }
         return ui.root
     }
 
@@ -140,12 +144,31 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
         dustman.remove(item.key)
     }
 
+    override fun onItemRemovedBatch(indexed: List<Pair<Int, PunctuationMapEntry>>) {
+        batchRemove(indexed)
+    }
+
     override fun onItemUpdated(idx: Int, old: PunctuationMapEntry, new: PunctuationMapEntry) {
         dustman.addOrUpdate(new.key, new)
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.disableToolbarSaveButton()
+        viewModel.setToolbarTitle(requireArguments().getString(TITLE)!!)
+        if (::ui.isInitialized)
+            viewModel.enableToolbarEditButton {
+                ui.enterMultiSelect(
+                    requireActivity().onBackPressedDispatcher,
+                    viewModel
+                )
+            }
+    }
+
     override fun onPause() {
         saveConfig()
+        ui.exitMultiSelect(viewModel)
+        viewModel.disableToolbarEditButton()
         super.onPause()
     }
 

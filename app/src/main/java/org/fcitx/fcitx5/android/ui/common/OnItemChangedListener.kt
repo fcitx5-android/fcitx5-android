@@ -13,6 +13,13 @@ interface OnItemChangedListener<T> {
 
     fun onItemUpdated(idx: Int, old: T, new: T) {}
 
+    fun onItemRemovedBatch(indexed: List<Pair<Int, T>>) {}
+
+    // only on multiselect
+    fun batchRemove(indexed: List<Pair<Int, T>>) {
+        indexed.forEach { onItemRemoved(it.first, it.second) }
+    }
+
     companion object {
         /**
          * Merge two listeners
@@ -32,6 +39,11 @@ interface OnItemChangedListener<T> {
                 override fun onItemRemoved(idx: Int, item: T) {
                     l1.onItemRemoved(idx, item)
                     l2.onItemRemoved(idx, item)
+                }
+
+                override fun onItemRemovedBatch(indexed: List<Pair<Int, T>>) {
+                    l1.onItemRemovedBatch(indexed)
+                    l2.onItemRemovedBatch(indexed)
                 }
 
                 override fun onItemUpdated(idx: Int, old: T, new: T) {

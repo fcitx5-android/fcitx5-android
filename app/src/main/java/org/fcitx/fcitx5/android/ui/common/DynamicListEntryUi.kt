@@ -22,8 +22,12 @@ class DynamicListEntryUi(override val ctx: Context) : Ui {
 
     val handleImage = imageView {
         imageResource = R.drawable.ic_baseline_drag_handle_24
-        colorFilter = PorterDuffColorFilter(styledColor(android.R.attr.colorAccent), PorterDuff.Mode.SRC_IN)
+        colorFilter =
+            PorterDuffColorFilter(styledColor(android.R.attr.colorAccent), PorterDuff.Mode.SRC_IN)
+        setPaddingDp(3, 0, 3, 0)
     }
+
+    val multiselectCheckBox = checkBox()
 
     val checkBox = checkBox()
 
@@ -47,26 +51,35 @@ class DynamicListEntryUi(override val ctx: Context) : Ui {
         backgroundColor = styledColor(android.R.attr.colorBackground)
         minHeight = styledDimenPxSize(android.R.attr.listPreferredItemHeightSmall)
 
+        val paddingStart = styledDimenPxSize(android.R.attr.listPreferredItemPaddingStart)
+
         add(handleImage, lParams {
-            width = dp(24)
+            width = dp(30)
             height = 0
             centerVertically()
-            startOfParent(styledDimenPxSize(android.R.attr.listPreferredItemPaddingStart))
+            startOfParent(paddingStart)
+        })
+
+        add(multiselectCheckBox, lParams {
+            width = dp(30)
+            height = 0
+            centerVertically()
+            after(handleImage, paddingStart)
         })
 
         add(checkBox, lParams {
             width = dp(30)
             height = 0
             centerVertically()
-            after(handleImage, dp(12))
+            after(multiselectCheckBox, paddingStart)
         })
 
         add(nameText, lParams {
             width = 0
             height = wrapContent
             centerVertically()
-            before(editButton, dp(12))
-            after(checkBox, dp(16))
+            after(checkBox, paddingStart)
+            before(editButton)
         })
 
         add(editButton, lParams {

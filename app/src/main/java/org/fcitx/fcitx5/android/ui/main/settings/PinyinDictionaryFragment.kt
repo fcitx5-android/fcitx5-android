@@ -223,6 +223,10 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
         dustman.remove(item.name)
     }
 
+    override fun onItemRemovedBatch(indexed: List<Pair<Int, LibIMEDictionary>>) {
+        batchRemove(indexed)
+    }
+
     override fun onItemUpdated(idx: Int, old: LibIMEDictionary, new: LibIMEDictionary) {
         dustman.addOrUpdate(new.name, new.isEnabled)
     }

@@ -15,6 +15,12 @@ class MainViewModel : ViewModel() {
 
     val toolbarSaveButtonOnClickListener = MutableLiveData<(() -> Unit)?>()
 
+    val toolbarEditButtonVisible = MutableLiveData(false)
+
+    val toolbarEditButtonOnClickListener = MutableLiveData<(() -> Unit)?>()
+
+    val toolbarDeleteButtonOnClickListener = MutableLiveData<(() -> Unit)?>()
+
     val aboutButton = MutableLiveData(false)
 
     val fcitx: FcitxConnection = FcitxDaemon.connect(javaClass.name)
@@ -37,6 +43,33 @@ class MainViewModel : ViewModel() {
 
     fun disableToolbarSaveButton() {
         toolbarSaveButtonOnClickListener.value = null
+    }
+
+    fun enableToolbarEditButton(onClick: () -> Unit) {
+        toolbarEditButtonOnClickListener.value = onClick
+        toolbarEditButtonVisible.value = true
+        showToolbarEditButton()
+    }
+
+    fun disableToolbarEditButton() {
+        toolbarEditButtonVisible.value = false
+        hideToolbarEditButton()
+    }
+
+    fun hideToolbarEditButton() {
+        toolbarEditButtonVisible.value = false
+    }
+
+    fun showToolbarEditButton() {
+        toolbarEditButtonVisible.value = true
+    }
+
+    fun enableToolbarDeleteButton(onClick: () -> Unit) {
+        toolbarDeleteButtonOnClickListener.value = onClick
+    }
+
+    fun disableToolbarDeleteButton() {
+        toolbarDeleteButtonOnClickListener.value = null
     }
 
     fun enableAboutButton() {

@@ -124,6 +124,10 @@ abstract class BaseDynamicListUi<T>(
                     updateItem(idx, old)
                 }
             }
+
+            override fun onItemRemovedBatch(indexed: List<Pair<Int, T>>) {
+                updateFAB()
+            }
         })
     }
 
@@ -225,7 +229,9 @@ abstract class BaseDynamicListUi<T>(
         touchCallback: DynamicListTouchCallback<T> =
             DynamicListTouchCallback(this@BaseDynamicListUi)
     ) {
-        ItemTouchHelper(touchCallback).attachToRecyclerView(recyclerView)
+        itemTouchHelper = ItemTouchHelper(touchCallback).also {
+            it.attachToRecyclerView(recyclerView)
+        }
     }
 
     private fun updateViewMargin(insets: WindowInsetsCompat? = null) {
