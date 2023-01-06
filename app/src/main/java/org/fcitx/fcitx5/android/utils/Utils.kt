@@ -239,6 +239,7 @@ fun getSystemProperty(key: String): String {
 }
 
 fun ZipInputStream.extract(): List<File> {
+    // creates /data/user/<userId>/<packageName>/cache/<randomId>
     val tempDir = File(createTempDirectory().pathString)
     val extracted = mutableListOf<File>()
     var entry = nextEntry

@@ -24,45 +24,51 @@ object TableManager {
         appContext.getExternalFilesDir(null)!!, "data/table"
     ).also { it.mkdirs() }
 
-    fun inputMethods() =
+    fun inputMethods(): List<TableBasedInputMethod> =
         inputMethodDir
             .listFiles()
-            ?.mapNotNull { im ->
-                TableBasedInputMethod.new(im)?.apply {
-                    table = runCatching {
-                        File(
-                            tableDicDir,
-                            tableFileName
-                        ).takeIf { it.extension == "dict" }?.let {
-                            LibIMEDictionary(it)
-                        }
-                    }.getOrNull()
-                }
-            }
-            ?: listOf()
+            ?.mapNotNull { confFile ->
+                runCatching {
+                    TableBasedInputMethod.new(confFile).apply {
+                        table = runCatching {
+                            File(tableDicDir, tableFileName)
+                                .takeIf { it.extension == "dict" }
+                                ?.let { LibIMEDictionary(it) }
+                        }.getOrNull()
+                    }
+                }.getOrNull()
+            } ?: listOf()
 
     fun importTableBasedIM(src: InputStream): Result<TableBasedInputMethod> =
         runCatching {
             ZipInputStream(src).use { zipStream ->
                 val extracted = zipStream.extract()
-                val im =
-                    (extracted.find { it.name.endsWith(".conf") }
-                        ?: extracted.find { it.name.endsWith(".conf.in") }
-                        ?: errorRuntime(R.string.exception_table_im)).let {
-                        val f = File(inputMethodDir, it.name.removeSuffix(".in"))
-                        it.copyTo(f)
-                        TableBasedInputMethod.new(f) ?: run {
-                            f.delete()
-                            errorRuntime(R.string.invalid_im)
-                        }
+                val confFile =
+                    extracted.find { it.name.endsWith(".conf") || it.name.endsWith(".conf.in") }
+                        ?: errorRuntime(R.string.exception_table_im)
+                val im = confFile.let {
+                    val importedConfFile = File(inputMethodDir, it.name.removeSuffix(".in"))
+                    if (importedConfFile.exists())
+                        errorRuntime(R.string.table_already_exists, it.name)
+                    it.copyTo(importedConfFile)
+                    runCatching {
+                        TableBasedInputMethod.new(importedConfFile)
+                    }.getOrElse { t: Throwable ->
+                        importedConfFile.delete()
+                        errorRuntime(R.string.invalid_im, t.message)
                     }
-                val table =
-                    (extracted.find { it.name.endsWith(".dict") || it.name.endsWith(".txt") }
-                        ?: errorRuntime(R.string.exception_table)).let {
-                        Dictionary.new(it)!!
-                    }
+                }
+                val dictFile =
+                    extracted.find { it.name.endsWith(".dict") || it.name.endsWith(".txt") }
+                        ?: errorRuntime(R.string.exception_table)
+                val table = Dictionary.new(dictFile)!!
                 im.tableFileName = TableBasedInputMethod.fixedTableFileName(table.name)
-                im.table = table.toLibIMEDictionary(File(tableDicDir, im.tableFileName))
+                runCatching {
+                    im.table = table.toLibIMEDictionary(File(tableDicDir, im.tableFileName))
+                }.onFailure { t: Throwable ->
+                    im.file.delete()
+                    errorRuntime(R.string.invalid_table_dict, t.message)
+                }
                 im.save()
                 im
             }
@@ -70,6 +76,9 @@ object TableManager {
 
     @JvmStatic
     external fun tableDictConv(src: String, dest: String, mode: Boolean)
+
+    @JvmStatic
+    external fun checkTableDictFormat(src: String, user: Boolean = false): Boolean
 
     const val MODE_BIN_TO_TXT = true
     const val MODE_TXT_TO_BIN = false

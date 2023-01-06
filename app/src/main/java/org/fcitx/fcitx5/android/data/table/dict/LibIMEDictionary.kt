@@ -29,6 +29,7 @@ class LibIMEDictionary(file: File) : Dictionary() {
 
     override fun toLibIMEDictionary(dest: File): LibIMEDictionary {
         ensureBin(dest)
+        TableManager.checkTableDictFormat(file.absolutePath)
         file.copyTo(dest)
         return LibIMEDictionary(dest)
     }
