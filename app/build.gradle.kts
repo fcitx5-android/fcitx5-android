@@ -20,11 +20,11 @@ val gitVersionName = exec("git describe --tags --long --always")
 
 plugins {
     id("com.android.application")
-    id("kotlin-android")
-    id("com.google.devtools.ksp") version "1.7.20-1.0.6"
+    kotlin("android")
+    id("com.google.devtools.ksp") version "1.8.0-1.0.8"
     id("com.cookpad.android.plugin.license-tools") version "1.2.8"
-    kotlin("plugin.serialization") version "1.7.20"
-    id("kotlin-parcelize")
+    kotlin("plugin.serialization") version "1.8.0"
+    kotlin("plugin.parcelize")
 }
 
 val dataDescriptorName = "descriptor.json"
@@ -277,7 +277,7 @@ dependencies {
     implementation("com.louiscad.splitties:splitties-views-recyclerview:$splittiesVersion")
     implementation("com.louiscad.splitties:splitties-views-dsl-material:$splittiesVersion")
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test:runner:1.5.1")
+    androidTestImplementation("androidx.test:runner:1.5.2")
     androidTestImplementation("androidx.test:rules:1.5.0")
     androidTestImplementation("androidx.lifecycle:lifecycle-runtime-testing:2.5.1")
     androidTestImplementation("junit:junit:4.13.2")

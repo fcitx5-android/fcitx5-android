@@ -1,6 +1,6 @@
 plugins {
     id("java-library")
-    id("org.jetbrains.kotlin.jvm")
+    kotlin("jvm")
 }
 
 java {
@@ -10,5 +10,5 @@ java {
 
 dependencies {
     implementation("com.squareup:kotlinpoet-ksp:1.12.0")
-    implementation("com.google.devtools.ksp:symbol-processing-api:1.7.21-1.0.8")
+    implementation("com.google.devtools.ksp:symbol-processing-api:1.8.0-1.0.8")
 }

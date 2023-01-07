@@ -15,6 +15,6 @@ dependencyResolutionManagement {
     }
 }
 
-include (":app")
+include(":app")
 include(":codegen")
 rootProject.name = "fcitx5-android"
