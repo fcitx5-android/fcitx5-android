@@ -1,3 +1,9 @@
+<b>Supported languages</b>
+<ul>
+<li>English (with spellcheck)</li>
+<li>Chinese (Pinyin, Shuangpin, Wubi, Cangjie and custom tables)</li>
+<li>Vietnamese (Based on UniKey, supports Telex, VNI and VIQR)</li>
+</ul>
 <b>Features</b>
 <ul>
 <li>Virtual Keyboard (layout not customizable yet)</li>

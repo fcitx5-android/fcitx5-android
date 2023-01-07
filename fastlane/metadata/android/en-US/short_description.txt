@@ -1,1 +1,1 @@
-A Chinese imput method based on fcitx5
+Fcitx5 input method framework and engines ported to Android
