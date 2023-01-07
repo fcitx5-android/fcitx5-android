@@ -53,6 +53,7 @@
     <string name="no_more_input_methods">No more input methods to switch</string>
     <string name="add_more_input_methods">Would you like to add more input methods?</string>
     <string name="about">About</string>
+    <string name="faq">FAQ</string>
     <string name="current_version">Current version</string>
     <string name="real_time_logs">Real-time logs</string>
     <string name="developer">Developer</string>

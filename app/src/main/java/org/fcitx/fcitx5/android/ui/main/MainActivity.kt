@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator
 import android.animation.StateListAnimator
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
@@ -27,6 +28,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.databinding.ActivityMainBinding
 import org.fcitx.fcitx5.android.ui.main.settings.PinyinDictionaryFragment
 import org.fcitx.fcitx5.android.ui.setup.SetupActivity
+import org.fcitx.fcitx5.android.utils.Const
 import org.fcitx.fcitx5.android.utils.applyTranslucentSystemBars
 import org.fcitx.fcitx5.android.utils.navigateFromMain
 import splitties.dimensions.dp
@@ -142,6 +144,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
         val aboutMenus = mutableListOf<MenuItem>()
+        add(R.string.faq).apply {
+            aboutMenus.add(this)
+            setOnMenuItemClickListener {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Const.faqUrl)))
+                true
+            }
+        }
         add(R.string.developer).apply {
             aboutMenus.add(this)
             setOnMenuItemClickListener {
