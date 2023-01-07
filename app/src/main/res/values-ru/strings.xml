@@ -173,4 +173,5 @@
     <string name="default_">По умолчанию</string>
     <string name="saving">Сохранение</string>
     <string name="delete_all_pinned_items">Удалить все закрепленные элементы?</string>
-</resources>
+    <string name="vivo_keypress_workaround">Обходной путь для нажатия клавиши в vivo Origin OS</string>
+    </resources>

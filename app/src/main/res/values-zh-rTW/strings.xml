@@ -15,6 +15,10 @@
     <string name="ignore_sys_cursor">忽略系統游標位置</string>
     <string name="hide_key_config">隱藏快捷鍵設定</string>
     <string name="_not_available_">（無法使用）</string>
+    <string name="button_haptic_feedback">按下按鍵時的觸覺回饋</string>
+    <string name="button_press">短按</string>
+    <string name="button_long_press">長按</string>
+    <string name="button_vibration_amplitude">按键振动幅度</string>
     <string name="add">新增</string>
     <string name="edit">編輯</string>
     <string name="undo">還原</string>
@@ -58,6 +62,7 @@
     <string name="clipboard">剪貼簿</string>
     <string name="keyboard_height">鍵盤高度</string>
     <string name="keyboard">鍵盤</string>
+    <string name="clipboard_suggestion_timeout">剪貼簿項目逾時</string>
     <string name="version">版本</string>
     <string name="build_time">建構時間</string>
     <string name="build_git_hash">建構 Git 雜湊值</string>
@@ -115,6 +120,7 @@
     <string name="expand_toolbar_by_default">預設展開工具欄</string>
     <string name="popup_on_key_press">按鍵時彈出顯示字元</string>
     <string name="disable_animation">禁用動畫</string>
+    <string name="duplicate_builtin_theme">複製內建主題</string>
     <string name="exception_logcat_created">Logcat 程序已經建立</string>
     <string name="exception_quickphrase_parse">解析字典失敗：%1$s</string>
     <string name="exception_quickphrase_filename">%1$s 副檔名並不是一個字典檔</string>
@@ -133,4 +139,17 @@
     <string name="light_mode_theme">日間模式主題</string>
     <string name="dark_mode_theme">夜間模式主題</string>
     <string name="new_theme">新主題</string>
+    <string name="skip">跳過</string>
+    <string name="none">無</string>
+    <string name="landscape">横向畫面</string>
+    <string name="disable_addon_warn_title">禁用附加組件</string>
+    <string name="disable_addon_warn_name">禁用%1$s且同時：</string>
+    <string name="disable_addon_warn_dep">禁用%1$s</string>
+    <string name="swipe_down">下滑</string>
+    <string name="swipe_up">上滑</string>
+    <string name="disabled">禁用</string>
+    <string name="system_default">系統預設</string>
+    <string name="default_">預設</string>
+    <string name="saving">存檔</string>
+    <string name="delete_all_pinned_items">要删除所有置頂項目吗？</string>
     </resources>
