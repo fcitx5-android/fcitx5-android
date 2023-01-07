@@ -333,12 +333,13 @@ object ThemeManager {
     }
 
     fun init(configuration: Configuration) {
+        isCurrentDark = configuration.isDarkMode()
         // fire all `OnThemeChangedListener`s on theme preferences change
         prefs.managedPreferences.values.forEach {
             it.registerOnChangeListener(prefsChange)
         }
         currentTheme = if (prefs.followSystemDayNightTheme.getValue()) {
-            (if (configuration.isDarkMode()) prefs.darkModeTheme else prefs.lightModeTheme).getValue()
+            (if (isCurrentDark) prefs.darkModeTheme else prefs.lightModeTheme).getValue()
         } else {
             val activeThemeName = internalPrefs.activeThemeName.getValue()
             // fallback to default theme if active theme not found
