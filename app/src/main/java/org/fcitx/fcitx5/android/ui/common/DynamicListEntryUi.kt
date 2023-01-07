@@ -33,7 +33,7 @@ class DynamicListEntryUi(override val ctx: Context) : Ui {
 
     val nameText = textView {
         setPaddingDp(0, 16, 0, 16)
-        textAppearance = ctx.resolveThemeAttribute(androidx.appcompat.R.attr.textAppearanceListItem)
+        textAppearance = ctx.resolveThemeAttribute(android.R.attr.textAppearanceListItem)
     }
 
     val editButton = imageButton {
