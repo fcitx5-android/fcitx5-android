@@ -99,9 +99,6 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
 
     private fun attachLayout(target: String) {
         currentKeyboardName = target
-        if (target != TextKeyboard.Name && target != lastSymbolType) {
-            lastSymbolType = target
-        }
         currentKeyboard?.let {
             it.keyActionListener = keyActionListener
             it.keyPopupListener = popupListener
@@ -111,28 +108,34 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
         }
     }
 
-    fun switchLayout(to: String) {
+    fun switchLayout(to: String, remember: Boolean = true) {
         if (to == currentKeyboardName) return
         val target = to.ifEmpty { lastSymbolType }
         ContextCompat.getMainExecutor(service).execute {
             if (keyboards.containsKey(target)) {
+                if (remember && target != TextKeyboard.Name) {
+                    lastSymbolType = target
+                }
                 detachCurrentLayout()
                 attachLayout(target)
             } else {
-                lastSymbolType = PickerWindow.Key.Symbol.name
+                if (remember) {
+                    lastSymbolType = PickerWindow.Key.Symbol.name
+                }
                 windowManager.attachWindow(PickerWindow.Key.Symbol)
             }
         }
     }
 
     override fun onEditorInfoUpdate(info: EditorInfo?) {
-        switchLayout(service.editorInfo?.inputType?.let {
-            when (it and InputType.TYPE_MASK_CLASS) {
+        val targetLayout = service.editorInfo?.let {
+            when (it.inputType and InputType.TYPE_MASK_CLASS) {
                 InputType.TYPE_CLASS_NUMBER -> NumberKeyboard.Name
                 InputType.TYPE_CLASS_PHONE -> NumberKeyboard.Name
                 else -> TextKeyboard.Name
             }
-        } ?: TextKeyboard.Name)
+        }
+        switchLayout(targetLayout ?: TextKeyboard.Name, remember = false)
         currentKeyboard?.onEditorInfoChange(info)
     }
 
