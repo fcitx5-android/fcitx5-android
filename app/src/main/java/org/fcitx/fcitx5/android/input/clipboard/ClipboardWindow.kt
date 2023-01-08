@@ -144,6 +144,9 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
                     }
                 }
             }
+            setOnDismissListener {
+                if (it === promptMenu) promptMenu = null
+            }
             show()
         }
     }
@@ -168,8 +171,8 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     override fun onDetached() {
         clipboardEnabledPref.unregisterOnChangeListener(clipboardEnabledListener)
         ClipboardManager.removeOnUpdateListener(onClipboardUpdateListener)
+        adapter.onDetached()
         promptMenu?.dismiss()
-        promptMenu = null
     }
 
     override val title: String by lazy {

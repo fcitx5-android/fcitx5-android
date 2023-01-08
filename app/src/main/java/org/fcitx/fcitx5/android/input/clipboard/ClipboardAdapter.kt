@@ -62,6 +62,8 @@ abstract class ClipboardAdapter :
 
     fun getEntryById(id: Int) = entries[getPositionById(id)]
 
+    private var popupMenu: PopupMenu? = null
+
     inner class ViewHolder(val entryUi: ClipboardEntryUi) :
         RecyclerView.ViewHolder(entryUi.root)
 
@@ -77,6 +79,7 @@ abstract class ClipboardAdapter :
                 onPaste(entry.id)
             }
             root.setOnLongClickListener {
+                popupMenu?.dismiss()
                 val iconColor = ctx.styledColor(android.R.attr.colorControlNormal)
                 val iconColorFilter = PorterDuffColorFilter(iconColor, PorterDuff.Mode.SRC_IN)
                 val popup = PopupMenu(root.context, root)
@@ -107,6 +110,10 @@ abstract class ClipboardAdapter :
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     popup.setForceShowIcon(true)
+                }
+                popupMenu = popup
+                popup.setOnDismissListener {
+                    if (it === popupMenu) popupMenu = null
                 }
                 popup.show()
                 true
@@ -150,6 +157,10 @@ abstract class ClipboardAdapter :
             _entriesId[clipboardEntry.id] = index
         }
         diff.dispatchUpdatesTo(this)
+    }
+
+    fun onDetached() {
+        popupMenu?.dismiss()
     }
 
     abstract val theme: Theme
