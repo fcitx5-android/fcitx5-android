@@ -29,11 +29,25 @@ plugins {
 
 val dataDescriptorName = "descriptor.json"
 
-val targetABI = System.getenv("ABI")
-    ?.takeIf { it.isNotBlank() }
+// NOTE: increase this value to bump version code
+val baseVersionCode = 1
+
+fun calculateVersionCode(abi: String): Int {
+    val abiId = when (abi) {
+        "armeabi-v7a" -> 1
+        "arm64-v8a" -> 2
+        "x86" -> 3
+        "x86_64" -> 4
+        else -> 0
+    }
+    return baseVersionCode * 10 + abiId
+}
 
 // will be used if `targetABI` is unset
 val defaultABI = "arm64-v8a"
+val targetABI: String = System.getenv("ABI").let {
+    if (it.isNullOrBlank()) defaultABI else it
+}
 
 android {
     namespace = "org.fcitx.fcitx5.android"
@@ -45,18 +59,13 @@ android {
         applicationId = "org.fcitx.fcitx5.android"
         minSdk = 23
         targetSdk = 33
-        versionCode = 3
+        versionCode = calculateVersionCode(targetABI)
         versionName = gitVersionName
         setProperty("archivesBaseName", "$applicationId-$gitVersionName")
         buildConfigField("String", "BUILD_GIT_HASH", "\"$gitCommitHash\"")
         buildConfigField("long", "BUILD_TIME", System.currentTimeMillis().toString())
         buildConfigField("String", "DATA_DESCRIPTOR_NAME", "\"${dataDescriptorName}\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        if (targetABI == null)
-            ndk {
-                abiFilters.add(defaultABI)
-            }
     }
 
     buildTypes {
@@ -83,11 +92,10 @@ android {
 
     splits {
         abi {
-            targetABI?.let {
-                isEnable = true
-                reset()
-                include(it)
-            }
+            isEnable = true
+            reset()
+            include(targetABI)
+            isUniversalApk = false
         }
     }
 
@@ -182,13 +190,8 @@ fun installFcitxComponent(targetName: String, componentName: String, destDir: Fi
         }
 
         // make sure that this task runs after than the native task
-        targetABI?.let {
-            mustRunAfter("buildCMakeDebug[$it]")
-            mustRunAfter("buildCMakeRelWithDebInfo[$it]")
-        } ?: run {
-            mustRunAfter("buildCMakeDebug[$defaultABI]")
-            mustRunAfter("buildCMakeRelWithDebInfo[$defaultABI]")
-        }
+        mustRunAfter("buildCMakeDebug[$targetABI]")
+        mustRunAfter("buildCMakeRelWithDebInfo[$targetABI]")
     }
 
     tasks.register("installFcitx${componentName.capitalizeUS()}") {
