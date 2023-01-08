@@ -46,7 +46,9 @@ fun calculateVersionCode(abi: String): Int {
 // will be used if `targetABI` is unset
 val defaultABI = "arm64-v8a"
 val targetABI: String = System.getenv("ABI").let {
-    if (it.isNullOrBlank()) defaultABI else it
+    if (it.isNullOrBlank())
+        runCatching { project.property("targetABI")!!.toString() }.getOrElse { defaultABI }
+    else it
 }
 
 android {
