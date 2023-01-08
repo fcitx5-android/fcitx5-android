@@ -393,13 +393,15 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         Timber.d("onStartInputView: restarting=$restarting")
         editorInfo = info
         lifecycleScope.launchOnFcitxReady(fcitx) {
+            if (restarting) {
+                // when input restarts in the same editor, focus out to clear previous state
+                it.focus(false)
+                // try focus out before changing CapabilityFlags,
+                // to avoid confusing state of different text fields
+            }
             // EditorInfo can be different in onStartInput and onStartInputView,
             // especially in browsers
             it.setCapFlags(CapabilityFlags.fromEditorInfo(info))
-            if (restarting) {
-                // when input restarts in the same editor, unfocus it to clear previous state
-                it.focus(false)
-            }
             it.focus()
         }
         inputView?.onShow()

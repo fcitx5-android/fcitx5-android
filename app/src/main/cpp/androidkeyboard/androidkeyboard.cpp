@@ -217,9 +217,9 @@ void AndroidKeyboardEngine::activate(const InputMethodEntry &entry, InputContext
 
 void AndroidKeyboardEngine::deactivate(const InputMethodEntry &entry, InputContextEvent &event) {
     auto *inputContext = event.inputContext();
-    // Android would commit composing text when finishing input (we simulate as focus in/out),
+    // Android would commit composing text when finishing input (we simulate as focus out/in),
     // but not so when switching input method in fcitx
-    if (event.type() == EventType::InputContextSwitchInputMethod) {
+    if (event.type() == EventType::InputContextSwitchInputMethod && inputContext->hasFocus()) {
         commitBuffer(inputContext);
     }
     reset(entry, event);
