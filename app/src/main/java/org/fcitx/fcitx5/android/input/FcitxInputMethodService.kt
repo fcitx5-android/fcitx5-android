@@ -9,7 +9,6 @@ import android.util.LruCache
 import android.view.*
 import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputConnection
 import android.widget.FrameLayout
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
@@ -63,6 +62,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             data[1] = i
         }
 
+        fun offset(offset: Int) {
+            data[0] += offset
+            data[1] += offset
+        }
+
         fun contains(other: CursorRange): Boolean {
             return start <= other.start && other.end <= end
         }
@@ -78,12 +82,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     var editorInfo: EditorInfo? = null
 
-    private var cursorAnchorAvailable = false
-
     val selection = CursorRange()
     val composing = CursorRange()
     private var composingText = ""
     private var fcitxCursor = -1
+    private var cursorUpdateIndex: Int = 0
 
     private val ignoreSystemCursor by AppPrefs.getInstance().advanced.ignoreSystemCursor
 
@@ -134,7 +137,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     when (it.unicode) {
                         '\b'.code -> handleBackspaceKey()
                         '\r'.code -> handleReturnKey()
-                        else -> inputConnection?.commitText(Char(it.unicode).toString(), 1)
+                        else -> commitText(Char(it.unicode).toString())
                     }
                 } else {
                     // KeyEvent from physical keyboard (or input method engine forwardKey)
@@ -156,7 +159,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     } else {
                         // no matching keyCode, commit character once on key down
                         if (!it.up && it.unicode > 0) {
-                            inputConnection?.commitText(Char(it.unicode).toString(), 1)
+                            commitText(Char(it.unicode).toString())
                         } else {
                             Timber.w("Unhandled Fcitx KeyEvent: $it")
                         }
@@ -172,6 +175,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     private fun handleBackspaceKey() {
+        if (selection.isNotEmpty()) {
+            selection.update(selection.start)
+        } else if (selection.start > 0) {
+            selection.offset(-1)
+        }
         editorInfo?.apply {
             // In practice nobody (apart form us) would set `privateImeOptions` to our
             // `DeleteSurroundingFlag`, leading to a behavior of simulating backspace key pressing
@@ -207,7 +215,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 return
             }
             if (imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION)) {
-                inputConnection?.commitText("\n", 1)
+                commitText("\n")
                 return
             }
             if (actionLabel?.isNotEmpty() == true && actionId != EditorInfo.IME_ACTION_UNSPECIFIED) {
@@ -216,10 +224,15 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             }
             when (val action = imeOptions and EditorInfo.IME_MASK_ACTION) {
                 EditorInfo.IME_ACTION_UNSPECIFIED,
-                EditorInfo.IME_ACTION_NONE -> inputConnection?.commitText("\n", 1)
+                EditorInfo.IME_ACTION_NONE -> commitText("\n")
                 else -> inputConnection?.performEditorAction(action)
             }
         } ?: sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
+    }
+
+    fun commitText(text: String) {
+        selection.offset(text.length)
+        inputConnection?.commitText(text, 1)
     }
 
     private fun sendDownKeyEvent(eventTime: Long, keyEventCode: Int, metaState: Int = 0) {
@@ -254,6 +267,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         )
     }
 
+    fun deleteSelection() {
+        if (selection.isEmpty()) return
+        selection.update(selection.start)
+        inputConnection?.commitText("", 1)
+    }
+
     fun sendCombinationKeyEvents(
         keyEventCode: Int,
         alt: Boolean = false,
@@ -282,6 +301,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             val start = selection.start + offsetStart
             val end = selection.end + offsetEnd
             if (start > end) return
+            selection.update(start, end)
             it.setSelection(start, end)
         }
     }
@@ -381,9 +401,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         editorInfo = attribute
         Timber.d("onStartInput: initialSel=$selection, restarting=$restarting")
         if (restarting) return
-        inputConnection?.apply {
-            cursorAnchorAvailable = requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
-        }
         lifecycleScope.launchOnFcitxReady(fcitx) {
             it.setCapFlags(CapabilityFlags.fromEditorInfo(attribute))
         }
@@ -402,7 +419,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             // EditorInfo can be different in onStartInput and onStartInputView,
             // especially in browsers
             it.setCapFlags(CapabilityFlags.fromEditorInfo(info))
-            it.focus()
+            it.focus(true)
         }
         inputView?.onShow()
     }
@@ -417,33 +434,37 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     ) {
         // onUpdateSelection can left behind when user types quickly enough, eg. long press backspace
         // TODO: call InputConnection#beginBatchEdit() before starting key repeat
+        cursorUpdateIndex += 1
+        Timber.d("onUpdateSelection: old=[$oldSelStart,$oldSelEnd] new=[$newSelStart,$newSelEnd] cand=[$candidatesStart,$candidatesEnd]")
         // skip cursor update if we are already up-to-date
         if (selection.start == newSelStart && selection.end == newSelEnd) return
-        selection.update(newSelStart, newSelEnd)
-        Timber.d("onUpdateSelection: $selection")
-        // since `CursorAnchorInfo` has composingText, we can determine whether it's up-to-date
-        // handle cursor update in `onUpdateSelection` only when `CursorAnchorInfo` unavailable
-        if (!cursorAnchorAvailable) {
-            handleCursorUpdate()
-        }
+        handleCursorUpdate(newSelStart, newSelEnd, cursorUpdateIndex)
         inputView?.onSelectionUpdate(newSelStart, newSelEnd)
     }
 
     override fun onUpdateCursorAnchorInfo(info: CursorAnchorInfo) {
-        // onUpdateCursorAnchorInfo can left behind when user types quickly enough
-        // skip the event if `info.composingText` is not up-to-date.
-        if (!composingText.contentEquals(info.composingText ?: "")) return
-        selection.update(info.selectionStart, info.selectionEnd)
-        Timber.d("onUpdateCursorAnchorInfo: selection=$selection")
-        handleCursorUpdate()
+        // CursorAnchorInfo focus more on screen coordinates rather than selection
     }
 
-    private fun handleCursorUpdate() {
-        // skip fcitx cursor move when composing empty
-        if (composing.isEmpty()) return
+    private fun handleCursorUpdate(newSelStart: Int, newSelEnd: Int, updateIndex: Int) {
         // workaround some misbehaved editors: report composingText but wrong selectionStart
         if (selection.start < 0 && composing.start >= 0) return
-        Timber.d("handleCursorUpdate: composing=$composing selection=$selection")
+        // do nothing if already up-to-date
+        if (selection.start == newSelStart && selection.end == newSelEnd) return
+        // update saved selection
+        selection.update(newSelStart, newSelEnd)
+        // skip selection range update, we only care about selection cursor (zero width) here
+        if (selection.isNotEmpty()) return
+        // do reset if composing is empty && input panel is not empty
+        if (composing.isEmpty()) {
+            lifecycleScope.launchOnFcitxReady(fcitx) {
+                if (!it.isEmpty()) {
+                    it.reset()
+                    Timber.d("handleCursorUpdate: reset")
+                }
+            }
+            return
+        }
         // check if cursor inside composing text
         if (composing.contains(selection)) {
             if (ignoreSystemCursor) return
@@ -453,9 +474,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             val codePointPosition = composingText.codePointCount(0, position)
             // move fcitx cursor when cursor position changed
             if (codePointPosition != fcitxCursor) {
-                Timber.d("handleCursorUpdate: move fcitx cursor to $codePointPosition")
                 lifecycleScope.launchOnFcitxReady(fcitx) {
+                    if (updateIndex != cursorUpdateIndex) return@launchOnFcitxReady
                     it.moveCursor(codePointPosition)
+                    Timber.d("handleCursorUpdate: move fcitx cursor to $codePointPosition")
                 }
             }
         } else {
@@ -466,7 +488,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             // since we have `ClientUnfocusCommit`, focus out and in would do the trick
             lifecycleScope.launchOnFcitxReady(fcitx) {
                 it.focus(false)
-                it.focus()
+                it.focus(true)
             }
         }
     }
@@ -532,16 +554,13 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onFinishInput() {
         Timber.d("onFinishInput")
-        if (cursorAnchorAvailable) {
-            cursorAnchorAvailable = false
-            inputConnection?.requestCursorUpdates(0)
-        }
         editorInfo = null
     }
 
     override fun onUnbindInput() {
         cachedKeyEvents.evictAll()
         cachedKeyEventIndex = 0
+        cursorUpdateIndex = 0
         // currentInputBinding can be null on some devices under some special Multi-screen mode
         val uid = currentInputBinding?.uid ?: return
         Timber.d("onUnbindInput: uid=$uid")

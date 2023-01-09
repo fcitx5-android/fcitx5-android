@@ -63,7 +63,7 @@ class CommonKeyActionListener :
                     is SymAction -> it.sendKey(action.sym, action.states)
                     is CommitAction -> {
                         it.commitAndReset()
-                        service.inputConnection?.commitText(action.text, 1)
+                        service.commitText(action.text)
                     }
                     is QuickPhraseAction -> {
                         it.commitAndReset()
@@ -105,9 +105,7 @@ class CommonKeyActionListener :
                     is DeleteSelectionAction -> {
                         when (backspaceSwipeState) {
                             Stopped -> {}
-                            Selection -> if (service.selection.isNotEmpty()) {
-                                service.inputConnection?.commitText("", 1)
-                            }
+                            Selection -> service.deleteSelection()
                             Reset -> if (action.totalCnt < 0) { // swipe left
                                 it.reset()
                             }

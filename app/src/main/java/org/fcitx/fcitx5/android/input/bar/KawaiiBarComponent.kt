@@ -36,7 +36,6 @@ import org.fcitx.fcitx5.android.input.status.StatusAreaWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.AppUtil
-import org.fcitx.fcitx5.android.utils.inputConnection
 import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.must
 import splitties.bitflags.hasFlag
@@ -148,7 +147,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             }
             clipboardSuggestionItem.setOnClickListener {
                 ClipboardManager.lastEntry?.let {
-                    service.inputConnection?.commitText(it.text, 1)
+                    service.commitText(it.text)
                 }
                 clipboardTimeoutJob?.cancel()
                 clipboardTimeoutJob = null

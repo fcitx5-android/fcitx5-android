@@ -21,7 +21,6 @@ import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.EventStateMachine
-import org.fcitx.fcitx5.android.utils.inputConnection
 import splitties.resources.styledColor
 import kotlin.properties.Delegates
 
@@ -90,7 +89,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
             }
 
             override fun onPaste(id: Int) {
-                service.inputConnection?.commitText(getEntryById(id).text, 1)
+                service.commitText(getEntryById(id).text)
             }
 
             override val theme: Theme
