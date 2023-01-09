@@ -29,6 +29,7 @@ import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.utils.inputConnection
 import splitties.bitflags.hasFlag
 import timber.log.Timber
+import kotlin.math.max
 
 class FcitxInputMethodService : LifecycleInputMethodService() {
 
@@ -298,8 +299,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     fun applySelectionOffset(offsetStart: Int, offsetEnd: Int = 0) {
         inputConnection?.also {
-            val start = selection.start + offsetStart
-            val end = selection.end + offsetEnd
+            val start = max(selection.start + offsetStart, 0)
+            val end = max(selection.end + offsetEnd, 0)
             if (start > end) return
             selection.update(start, end)
             it.setSelection(start, end)
