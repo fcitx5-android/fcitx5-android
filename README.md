@@ -11,14 +11,14 @@ An attempt to run fcitx5 on Android.
 - Virtual Keyboard (layout not customizable yet)
 - Expandable candidate view
 - Clipboard management (plain text only)
-- Themeing (custom color scheme and background image)
+- Theming (custom color scheme and background image)
 - Popup preview on key press
 - Long press popup keyboard for convenient symbol input
 - Symbol and Emoji picker
 
 ### Work in progress
 
-- Customiziable keyboard layout
+- Customizable keyboard layout
 - More input methods
 
 ## Screenshots
