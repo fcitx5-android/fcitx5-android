@@ -245,7 +245,7 @@ tasks.register<Delete>("cleanCxxIntermediates") {
 dependencies {
     implementation("org.ini4j:ini4j:0.5.4")
     ksp(project(":codegen"))
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.2.2")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.0")
     implementation("io.arrow-kt:arrow-core:1.1.3")
     implementation("androidx.activity:activity-ktx:1.6.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
@@ -253,14 +253,14 @@ dependencies {
     implementation("cat.ereza:customactivityoncrash:2.4.0")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("org.mechdancer:dependency:0.1.2")
-    val roomVersion = "2.4.3"
+    val roomVersion = "2.5.0"
     implementation("androidx.room:room-runtime:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
-    implementation("net.java.dev.jna:jna:5.12.1@aar")
+    implementation("net.java.dev.jna:jna:5.13.0@aar")
     implementation("com.jakewharton.timber:timber:5.0.1")
     implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.appcompat:appcompat:1.5.1")
+    implementation("androidx.appcompat:appcompat:1.6.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     val lifecycleVersion = "2.5.1"
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
