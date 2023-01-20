@@ -1,18 +1,19 @@
 #ifndef _FCITX5_ANDROID_ANDROIDFRONTEND_PUBLIC_H_
 #define _FCITX5_ANDROID_ANDROIDFRONTEND_PUBLIC_H_
 
-#include <fcitx/inputcontext.h>
+#include <fcitx/text.h>
+#include <fcitx-utils/key.h>
 
 typedef std::function<void(const std::vector<std::string> &)> CandidateListCallback;
 typedef std::function<void(const std::string &)> CommitStringCallback;
-typedef std::function<void(const std::string &, const int, const std::string &, const int)> PreeditCallback;
-typedef std::function<void(const std::string &, const std::string &)> InputPanelAuxCallback;
+typedef std::function<void(const fcitx::Text &, const fcitx::Text &)> PreeditCallback;
+typedef std::function<void(const fcitx::Text &, const fcitx::Text &)> InputPanelAuxCallback;
 typedef std::function<void(const int, const uint32_t, const uint32_t, const bool, const int)> KeyEventCallback;
 typedef std::function<void()> InputMethodChangeCallback;
 typedef std::function<void()> StatusAreaUpdateCallback;
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, keyEvent,
-                             void(const Key &, bool isRelease, const int timestamp))
+                             void(const fcitx::Key &, bool isRelease, const int timestamp))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, selectCandidate,
                              bool(int idx))

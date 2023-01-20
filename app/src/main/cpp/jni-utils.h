@@ -127,6 +127,9 @@ public:
     jclass Key;
     jmethodID KeyInit;
 
+    jclass FormattedText;
+    jmethodID FormattedTextFromByteCursor;
+
     GlobalRefSingleton(JavaVM *jvm_) : jvm(jvm_) {
         JNIEnv *env;
         jvm->AttachCurrentThread(&env, nullptr);
@@ -163,6 +166,9 @@ public:
 
         Key = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("org/fcitx/fcitx5/android/core/Key")));
         KeyInit = env->GetMethodID(Key, "<init>", "(IILjava/lang/String;Ljava/lang/String;)V");
+
+        FormattedText = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("org/fcitx/fcitx5/android/core/FormattedText")));
+        FormattedTextFromByteCursor = env->GetStaticMethodID(FormattedText, "fromByteCursor", "([Ljava/lang/String;[II)Lorg/fcitx/fcitx5/android/core/FormattedText;");
     }
 
     const JEnv AttachEnv() const { return JEnv(jvm); }

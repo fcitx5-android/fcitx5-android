@@ -5,12 +5,14 @@ import android.graphics.Paint
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RectShape
 import android.text.Spannable
+import android.text.SpannedString
 import android.text.style.DynamicDrawableSpan
 import android.view.View
 import android.view.View.*
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.core.text.buildSpannedString
+import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import splitties.dimensions.dp
@@ -71,25 +73,29 @@ class PreeditUi(override val ctx: Context, private val theme: Theme) : Ui {
         }
     }
 
-    fun update(content: PreeditContent) {
-        val upText: String
+    fun update(preedit: FcitxEvent.PreeditEvent.Data, aux: FcitxEvent.InputPanelAuxEvent.Data) {
+        val bkgColor = theme.genericActiveBackgroundColor
+        val upText: SpannedString
         val upCursor: Int
-        if (content.aux.auxUp.isEmpty()) {
-            upText = content.preedit.preedit
-            upCursor = content.preedit.cursor
+        if (aux.auxUp.isEmpty()) {
+            upText = preedit.preedit.toSpannedString(bkgColor)
+            upCursor = preedit.preedit.cursor
         } else {
-            upText = content.aux.auxUp + content.preedit.preedit
-            upCursor = content.preedit.cursor.let {
+            upText = buildSpannedString {
+                append(aux.auxUp.toSpannedString(bkgColor))
+                append(preedit.preedit.toSpannedString(bkgColor))
+            }
+            upCursor = preedit.preedit.cursor.let {
                 if (it < 0) it
-                else content.aux.auxUp.length + it
+                else aux.auxUp.length + it
             }
         }
-        val downText = content.aux.auxDown
+        val downString = aux.auxDown.toSpannedString(bkgColor)
         val hasUp = upText.isNotEmpty()
-        val hasDown = downText.isNotEmpty()
+        val hasDown = downString.isNotEmpty()
         visible = hasUp || hasDown
         if (!visible) return
-        val upSequence: CharSequence = if (upCursor < 0 || upCursor == upText.length) {
+        val upString = if (upCursor < 0 || upCursor == upText.length) {
             upText
         } else buildSpannedString {
             append(upText, 0, upCursor)
@@ -97,7 +103,7 @@ class PreeditUi(override val ctx: Context, private val theme: Theme) : Ui {
             setSpan(cursorSpan, upCursor, upCursor + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
             append(upText, upCursor, upText.length)
         }
-        updateTextView(upView, upSequence, hasUp)
-        updateTextView(downView, downText, hasDown)
+        updateTextView(upView, upString, hasUp)
+        updateTextView(downView, downString, hasDown)
     }
 }

@@ -4,7 +4,6 @@
 #include <fcitx/inputmethodengine.h>
 #include <fcitx/focusgroup.h>
 #include <fcitx/inputpanel.h>
-#include <fcitx/instance.h>
 #include <fcitx-utils/event.h>
 
 #include "androidfrontend.h"
@@ -48,10 +47,7 @@ public:
 
     void updateClientSideUIImpl() override {
         InputPanel &ip = inputPanel();
-        frontend_->updatePreedit(
-                frontend_->instance()->outputFilter(this, ip.preedit()),
-                frontend_->instance()->outputFilter(this, ip.clientPreedit())
-        );
+        frontend_->updatePreedit(filterText(ip.preedit()), filterText(ip.clientPreedit()));
         frontend_->updateInputPanelAux(filterText(ip.auxUp()), filterText(ip.auxDown()));
         std::vector<std::string> candidates;
         const auto &list = ip.candidateList();
@@ -63,12 +59,12 @@ public:
                     auto &candidate = bulk->candidateFromAll(i);
                     // maybe unnecessary; I don't see anywhere using `CandidateWord::setPlaceHolder`
                     // if (candidate.isPlaceHolder()) continue;
-                    candidates.emplace_back(filterText(candidate.text()));
+                    candidates.emplace_back(filterString(candidate.text()));
                 }
             } else {
                 const int size = list->size();
                 for (int i = 0; i < size; i++) {
-                    candidates.emplace_back(filterText(list->candidate(i).text()));
+                    candidates.emplace_back(filterString(list->candidate(i).text()));
                 }
             }
         }
@@ -98,8 +94,12 @@ private:
     AndroidFrontend *frontend_;
     int uid_;
 
-    std::string filterText(const Text &orig) {
-        return frontend_->instance()->outputFilter(this, orig).toString();
+    Text filterText(const Text &orig) {
+        return frontend_->instance()->outputFilter(this, orig);
+    }
+
+    std::string filterString(const Text &orig) {
+        return filterText(orig).toString();
     }
 };
 
@@ -153,10 +153,10 @@ void AndroidFrontend::updateCandidateList(const std::vector<std::string> &candid
 }
 
 void AndroidFrontend::updatePreedit(const Text &preedit, const Text &clientPreedit) {
-    preeditCallback(preedit.toString(), preedit.cursor(), clientPreedit.toString(), clientPreedit.cursor());
+    preeditCallback(preedit, clientPreedit);
 }
 
-void AndroidFrontend::updateInputPanelAux(const std::string &auxUp, const std::string &auxDown) {
+void AndroidFrontend::updateInputPanelAux(const Text &auxUp, const Text &auxDown) {
     inputPanelAuxCallback(auxUp, auxDown);
 }
 

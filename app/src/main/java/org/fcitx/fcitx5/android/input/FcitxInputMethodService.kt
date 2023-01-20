@@ -15,10 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.fcitx.fcitx5.android.core.CapabilityFlags
-import org.fcitx.fcitx5.android.core.FcitxEvent
-import org.fcitx.fcitx5.android.core.KeyStates
-import org.fcitx.fcitx5.android.core.KeySym
+import org.fcitx.fcitx5.android.core.*
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
@@ -26,8 +23,10 @@ import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.utils.alpha
 import org.fcitx.fcitx5.android.utils.inputConnection
 import splitties.bitflags.hasFlag
+import splitties.resources.styledColor
 import timber.log.Timber
 import kotlin.math.max
 
@@ -85,9 +84,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     val selection = CursorRange()
     val composing = CursorRange()
-    private var composingText = ""
+    private var composingText = FormattedText()
     private var fcitxCursor = -1
     private var cursorUpdateIndex: Int = 0
+
+    private var highlightColor : Int = 0x66008577 // material_deep_teal_500 with alpha 0.4
 
     private val ignoreSystemCursor by AppPrefs.getInstance().advanced.ignoreSystemCursor
 
@@ -167,8 +168,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     }
                 }
             }
-            is FcitxEvent.PreeditEvent -> event.data.let {
-                updateComposingText(it.clientPreedit, it.clientCursor)
+            is FcitxEvent.PreeditEvent -> {
+                updateComposingText(event.data.clientPreedit)
             }
             else -> {
             }
@@ -320,6 +321,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun setInputView(view: View) {
+        highlightColor = view.styledColor(android.R.attr.colorAccent).alpha(0.4f)
         window.window!!.decorView
             .findViewById<FrameLayout>(android.R.id.inputArea)
             .updateLayoutParams<ViewGroup.LayoutParams> {
@@ -398,7 +400,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // update selection as soon as possible
         selection.update(attribute.initialSelStart, attribute.initialSelEnd)
         composing.clear()
-        composingText = ""
+        composingText = FormattedText()
         editorInfo = attribute
         Timber.d("onStartInput: initialSel=$selection, restarting=$restarting")
         if (restarting) return
@@ -472,7 +474,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             // fcitx cursor position is relative to client preedit (composing text)
             val position = selection.start - composing.start
             // cursor in InvokeActionEvent counts by 'char'
-            val codePointPosition = composingText.codePointCount(0, position)
+            val codePointPosition = composingText.toString().codePointCount(0, position)
             // move fcitx cursor when cursor position changed
             if (codePointPosition != fcitxCursor) {
                 lifecycleScope.launchOnFcitxReady(fcitx) {
@@ -500,7 +502,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     // those events need to be filtered.
     // because of https://android.googlesource.com/platform/frameworks/base.git/+/refs/tags/android-11.0.0_r45/core/java/android/view/inputmethod/BaseInputConnection.java#851
     // it's not possible to set cursor inside composing text
-    private fun updateComposingText(text: String, cursor: Int) {
+    private fun updateComposingText(text: FormattedText) {
+        val cursor = text.cursor
         fcitxCursor = cursor
         val ic = inputConnection ?: return
         ic.beginBatchEdit()
@@ -508,7 +511,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             if (text != composingText) {
                 composingText = text
                 // set composing text AND put cursor at end of composing
-                ic.setComposingText(text, 1)
+                ic.setComposingText(text.toSpannedString(highlightColor), 1)
                 if (text.isEmpty()) {
                     // clear composing text, put cursor at start of original composing
                     // [^1]: if this happens after committing text, composing should be cleared,

@@ -1,6 +1,9 @@
 #ifndef _FCITX5_ANDROID_ANDROIDFRONTEND_H_
 #define _FCITX5_ANDROID_ANDROIDFRONTEND_H_
 
+#include <fcitx/instance.h>
+#include <fcitx/addoninstance.h>
+#include <fcitx/inputcontext.h>
 #include <fcitx-utils/i18n.h>
 
 #include "androidfrontend_public.h"
@@ -17,7 +20,7 @@ public:
     void updateCandidateList(const std::vector<std::string> &candidates);
     void commitString(const std::string &str);
     void updatePreedit(const Text &preedit, const Text &clientPreedit);
-    void updateInputPanelAux(const std::string &auxUp, const std::string &auxDown);
+    void updateInputPanelAux(const Text &auxUp, const Text &auxDown);
     void releaseInputContext(const int uid);
 
     void keyEvent(const Key &key, bool isRelease, const int timestamp);
@@ -70,8 +73,8 @@ private:
 
     CandidateListCallback candidateListCallback = [](const std::vector<std::string> &) {};
     CommitStringCallback commitStringCallback = [](const std::string &) {};
-    PreeditCallback preeditCallback = [](const std::string &, const int, const std::string &, const int) {};
-    InputPanelAuxCallback inputPanelAuxCallback = [](const std::string &, const std::string &) {};
+    PreeditCallback preeditCallback = [](const Text &, const Text &) {};
+    InputPanelAuxCallback inputPanelAuxCallback = [](const fcitx::Text &, const fcitx::Text &) {};
     KeyEventCallback keyEventCallback = [](const int, const uint32_t, const uint32_t, const bool, const int) {};
     InputMethodChangeCallback imChangeCallback = [] {};
     StatusAreaUpdateCallback statusAreaUpdateCallback = [] {};

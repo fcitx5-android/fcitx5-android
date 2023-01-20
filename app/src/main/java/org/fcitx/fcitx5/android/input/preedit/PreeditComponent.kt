@@ -16,25 +16,23 @@ class PreeditComponent : UniqueComponent<PreeditComponent>(), Dependent, InputBr
     private val context by manager.context()
     private val theme by manager.theme()
 
-    val content = PreeditContent(
-        FcitxEvent.PreeditEvent.Data("", 0, "", 0),
-        FcitxEvent.InputPanelAuxEvent.Data("", "")
-    )
+    private var preedit = FcitxEvent.PreeditEvent.Data()
+    private var aux = FcitxEvent.InputPanelAuxEvent.Data()
 
     val ui by lazy { PreeditUi(context, theme) }
 
-    override fun onInputPanelAuxUpdate(data: FcitxEvent.InputPanelAuxEvent.Data) {
-        content.aux = data
+    override fun onPreeditUpdate(data: FcitxEvent.PreeditEvent.Data) {
+        preedit = data
         updateView()
     }
 
-    override fun onPreeditUpdate(data: FcitxEvent.PreeditEvent.Data) {
-        content.preedit = data
+    override fun onInputPanelAuxUpdate(data: FcitxEvent.InputPanelAuxEvent.Data) {
+        aux = data
         updateView()
     }
 
     private fun updateView() {
-        ui.update(content)
+        ui.update(preedit, aux)
         ui.root.visibility = if (ui.visible) View.VISIBLE else View.INVISIBLE
     }
 }

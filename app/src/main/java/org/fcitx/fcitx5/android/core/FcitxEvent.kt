@@ -40,37 +40,8 @@ sealed class FcitxEvent<T>(open val data: T) {
         override val eventType: EventType
             get() = EventType.Preedit
 
-        data class Data(
-            val preedit: String,
-            val cursor: Int,
-            val clientPreedit: String,
-            val clientCursor: Int
-        )
-
-        companion object {
-            private fun strCursor(str: String, byteCursor: Int): Int {
-                return if (byteCursor <= 0) {
-                    byteCursor
-                } else {
-                    str.encodeToByteArray().sliceArray(0 until byteCursor).decodeToString().length
-                }
-            }
-
-            fun fromByteCursor(
-                preedit: String,
-                cursor: Int,
-                clientPreedit: String,
-                clientCursor: Int
-            ): PreeditEvent {
-                return PreeditEvent(
-                    Data(
-                        preedit,
-                        strCursor(preedit, cursor),
-                        clientPreedit,
-                        strCursor(clientPreedit, clientCursor)
-                    )
-                )
-            }
+        data class Data(val preedit: FormattedText, val clientPreedit: FormattedText) {
+            constructor() : this(FormattedText(), FormattedText())
         }
     }
 
@@ -79,7 +50,9 @@ sealed class FcitxEvent<T>(open val data: T) {
         override val eventType: EventType
             get() = EventType.Aux
 
-        data class Data(val auxUp: String, val auxDown: String)
+        data class Data(val auxUp: FormattedText, val auxDown: FormattedText) {
+            constructor() : this(FormattedText(), FormattedText())
+        }
     }
 
     data class ReadyEvent(override val data: Unit = Unit) : FcitxEvent<Unit>(data) {
@@ -172,11 +145,11 @@ sealed class FcitxEvent<T>(open val data: T) {
             when (Types[type]) {
                 EventType.Candidate -> CandidateListEvent(params as Array<String>)
                 EventType.Commit -> CommitStringEvent(params[0] as String)
-                EventType.Preedit -> PreeditEvent.fromByteCursor(
-                    params[0] as String, params[1] as Int, params[2] as String, params[3] as Int
+                EventType.Preedit -> PreeditEvent(
+                    PreeditEvent.Data(params[0] as FormattedText, params[1] as FormattedText)
                 )
                 EventType.Aux -> InputPanelAuxEvent(
-                    InputPanelAuxEvent.Data(params[0] as String, params[1] as String)
+                    InputPanelAuxEvent.Data(params[0] as FormattedText, params[1] as FormattedText)
                 )
                 EventType.Ready -> ReadyEvent()
                 EventType.Key -> KeyEvent(

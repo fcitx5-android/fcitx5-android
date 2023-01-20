@@ -491,6 +491,24 @@ jobject fcitxActionToJObject(JNIEnv *env, const ActionEntity &act) {
     return obj;
 }
 
+jobject fcitxTextToJObject(JNIEnv *env, const fcitx::Text &text) {
+    const int size = static_cast<int>(text.size());
+    auto str = JRef<jobjectArray>(env, env->NewObjectArray(size, GlobalRef->String, nullptr));
+    auto fmt = JRef<jintArray>(env, env->NewIntArray(size));
+    int flag = static_cast<int>(fcitx::TextFormatFlag::NoFlag);
+    for (int i = 0; i < size; i++) {
+        env->SetObjectArrayElement(str, i, *JString(env, text.stringAt(i)));
+        flag = text.formatAt(i).toInteger();
+        env->SetIntArrayRegion(fmt, i, 1, &flag);
+    }
+    auto obj = env->CallStaticObjectMethod(GlobalRef->FormattedText, GlobalRef->FormattedTextFromByteCursor,
+                                           *str,
+                                           *fmt,
+                                           text.cursor()
+    );
+    return obj;
+}
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, jstring locale, jstring appData, jstring appLib, jstring extData, jstring extCache) {
@@ -577,20 +595,18 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
         env->SetObjectArrayElement(vararg, 0, JString(env, str));
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 1, *vararg);
     };
-    auto preeditCallback = [](const std::string &preedit, const int cursor, const std::string &clientPreedit, const int clientCursor) {
+    auto preeditCallback = [](const fcitx::Text &preedit, const fcitx::Text &clientPreedit) {
         auto env = GlobalRef->AttachEnv();
-        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(4, GlobalRef->Object, nullptr));
-        env->SetObjectArrayElement(vararg, 0, JString(env, preedit));
-        env->SetObjectArrayElement(vararg, 1, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, cursor));
-        env->SetObjectArrayElement(vararg, 2, JString(env, clientPreedit));
-        env->SetObjectArrayElement(vararg, 3, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, clientCursor));
+        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(2, GlobalRef->FormattedText, nullptr));
+        env->SetObjectArrayElement(vararg, 0, fcitxTextToJObject(env, preedit));
+        env->SetObjectArrayElement(vararg, 1, fcitxTextToJObject(env, clientPreedit));
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 2, *vararg);
     };
-    auto inputPanelAuxCallback = [](const std::string &auxUp, const std::string &auxDown) {
+    auto inputPanelAuxCallback = [](const fcitx::Text &auxUp, const fcitx::Text &auxDown) {
         auto env = GlobalRef->AttachEnv();
-        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(2, GlobalRef->String, nullptr));
-        env->SetObjectArrayElement(vararg, 0, JString(env, auxUp));
-        env->SetObjectArrayElement(vararg, 1, JString(env, auxDown));
+        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(2, GlobalRef->FormattedText, nullptr));
+        env->SetObjectArrayElement(vararg, 0, fcitxTextToJObject(env, auxUp));
+        env->SetObjectArrayElement(vararg, 1, fcitxTextToJObject(env, auxDown));
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 3, *vararg);
     };
     auto readyCallback = []() {
