@@ -36,6 +36,12 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
     override var statusAreaActionsCached: Array<Action> = arrayOf()
         private set
 
+    override var preeditCached = FcitxEvent.PreeditEvent.Data()
+        private set
+
+    override var panelAuxCached = FcitxEvent.InputPanelAuxEvent.Data()
+        private set
+
     // the computation is delayed to the first call of [getAddonReverseDependencies]
     private var addonGraph: ImmutableGraph<String, FcitxAPI.AddonDep>? = null
 
@@ -389,6 +395,8 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
                 is FcitxEvent.ReadyEvent -> lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_READY)
                 is FcitxEvent.IMChangeEvent -> inputMethodEntryCached = it.data
                 is FcitxEvent.StatusAreaEvent -> statusAreaActionsCached = it.data
+                is FcitxEvent.PreeditEvent -> preeditCached = it.data
+                is FcitxEvent.InputPanelAuxEvent -> panelAuxCached = it.data
                 else -> {}
             }
         }.launchIn(lifeCycleScope)

@@ -15,7 +15,6 @@ import org.fcitx.fcitx5.android.input.dialog.InputMethodSwitcherDialog
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener.BackspaceSwipeState.*
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction.*
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
-import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.inputConnection
 import org.mechdancer.dependency.Dependent
@@ -36,14 +35,13 @@ class CommonKeyActionListener :
     private val service by manager.inputMethodService()
     private val inputView by manager.inputView()
     private val windowManager: InputWindowManager by manager.must()
-    private val preedit: PreeditComponent by manager.must()
 
     private var lastPickerType by AppPrefs.getInstance().internal.lastPickerType
 
     private var backspaceSwipeState = Stopped
 
     private suspend fun FcitxAPI.commitAndReset() {
-        if (preedit.content.preedit.run { preedit.isEmpty() && clientPreedit.isEmpty() }) {
+        if (preeditCached.run { preedit.isEmpty() && clientPreedit.isEmpty() }) {
             // preedit is empty, there can be prediction candidates
             reset()
         } else if (inputMethodEntryCached.uniqueName.let { it == "keyboard-us" || it == "unikey" }) {
@@ -88,7 +86,7 @@ class CommonKeyActionListener :
                         )
                     }
                     is MoveSelectionAction -> when (backspaceSwipeState) {
-                        Stopped -> backspaceSwipeState = preedit.content.preedit.let { p ->
+                        Stopped -> backspaceSwipeState = it.preeditCached.let { p ->
                             if (p.preedit.isEmpty() && p.clientPreedit.isEmpty()) {
                                 // update state to `Selection` and apply first offset
                                 service.applySelectionOffset(action.start, action.end)

@@ -27,6 +27,10 @@ interface FcitxAPI {
 
     val statusAreaActionsCached: Array<Action>
 
+    val preeditCached: FcitxEvent.PreeditEvent.Data
+
+    val panelAuxCached: FcitxEvent.InputPanelAuxEvent.Data
+
     fun getAddonReverseDependencies(addon: String): List<Pair<String, AddonDep>>
 
     fun translate(str: String, domain: String = "fcitx5"): String
