@@ -53,6 +53,7 @@
     <string name="no_more_input_methods">Методов ввода для переключения больше нет</string>
     <string name="add_more_input_methods">Хотите добавить больше методов ввода?</string>
     <string name="about">О fcitx5-android</string>
+    <string name="faq">FAQ</string>
     <string name="current_version">Текущая версия</string>
     <string name="real_time_logs">Журналы в реальном времени</string>
     <string name="developer">Разработчик</string>
@@ -174,4 +175,25 @@
     <string name="saving">Сохранение</string>
     <string name="delete_all_pinned_items">Удалить все закрепленные элементы?</string>
     <string name="vivo_keypress_workaround">Обходной путь для нажатия клавиши в vivo Origin OS</string>
-    </resources>
+    <string name="invalid_im">Неверный файл конфигурации метода ввода:\n%1$s</string>
+    <string name="invalid_table_dict">Неверный словарь:\n%1$s</string>
+    <string name="exception_table_im">Файл конфигурации метода ввода кодовой таблицы (.conf или .conf.in) не найден</string>
+    <string name="exception_table">Словарь кодовой таблицы (.dict или .txt) не найден</string>
+    <string name="table_im">Методы ввода кодовой таблицы</string>
+    <string name="manage_table_im">Управление методами ввода кодовой таблицы</string>
+    <string name="exception_table_im_filename">Расширение \"%1$s\" не указывает на пакет метода ввода кодовой таблицы (.zip)</string>
+    <string name="table_already_exists">Файл конфигурации метода ввода кодовой таблицы \"%1$s\" уже существует</string>
+    <string name="table_file_does_not_exist_title">Таблица недоступна</string>
+    <string name="table_file_does_not_exist_message">Словарь кодовых таблиц \"%1$s\" не существует. Пожалуйста, проверьте файл таблицы dict или удалите и повторно импортируйте.</string>
+    <string name="import_table">Импорт кодовой таблицы</string>
+    <string name="table_from_zip">Из zip …</string>
+    <string name="table_select_files">Из отдельных файлов …</string>
+    <string name="table_file_placeholder">Выбрать файл …</string>
+    <string name="table_conf_select_title">Файл конфигурации метода ввода (.conf или .conf.in)</string>
+    <string name="table_dict_select_title">Словарь кодовой таблицы (.dict или .txt)</string>
+    <string name="exception_table_conf_filename">Расширение \"%1$s\" не указывает на файл конфигурации метода ввода кодовой таблицы (.conf или .conf.in)</string>
+    <string name="exception_table_dict_filename">Расширение \"%1$s\" не указывает на словарь кодовой таблицы (.dict или .txt).</string>
+    <string name="exception_table_import_both_files">Пожалуйста, выберите оба вышеуказанных файла перед импортом</string>
+    <string name="notification_permission_message">Без разрешения на публикацию уведомлений мы не сможем уведомить вас о выполнении некоторых сложных операций.</string>
+    <string name="notification_permission_title">Нет разрешения на уведомление</string>
+</resources>
