@@ -8,19 +8,7 @@ class InputMethodConfigFragment : FcitxPreferenceFragment() {
     override fun getPageTitle(): String = requireStringArg(ARG_NAME)
 
     override suspend fun obtainConfig(fcitx: FcitxAPI): RawConfig {
-        val im = requireStringArg(ARG_UNIQUE_NAME)
-        val raw = fcitx.getImConfig(im)
-        if (im == "pinyin") {
-            // hide Shuangpin related options in Pinyin config UI
-            val desc = raw["desc"]
-            desc.findByName("PinyinEngineConfig")?.apply {
-                subItems = subItems?.filter { !it.name.contains("Shuangpin") }?.toTypedArray()
-            }
-            desc.findByName("Fuzzy\$FuzzyConfig")?.apply {
-                subItems = subItems?.filter { it.name != "PartialSp" }?.toTypedArray()
-            }
-        }
-        return raw
+        return fcitx.getImConfig(requireStringArg(ARG_UNIQUE_NAME))
     }
 
     override suspend fun saveConfig(fcitx: FcitxAPI, newConfig: RawConfig) {
