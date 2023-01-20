@@ -43,6 +43,10 @@ sealed class FcitxEvent<T>(open val data: T) {
         data class Data(val preedit: FormattedText, val clientPreedit: FormattedText) {
             constructor() : this(FormattedText(), FormattedText())
         }
+
+        override fun toString(): String {
+            return "PreeditEvent(preedit=[${data.preedit}, ${data.preedit.cursor}], clientPreedit=[${data.clientPreedit}, ${data.clientPreedit.cursor}])"
+        }
     }
 
     data class InputPanelAuxEvent(override val data: Data) :

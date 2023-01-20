@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.Paint
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RectShape
-import android.text.Spannable
+import android.text.Spanned
 import android.text.SpannedString
 import android.text.style.DynamicDrawableSpan
 import android.view.View
@@ -98,9 +98,9 @@ class PreeditUi(override val ctx: Context, private val theme: Theme) : Ui {
         val upString = if (upCursor < 0 || upCursor == upText.length) {
             upText
         } else buildSpannedString {
-            append(upText, 0, upCursor)
+            if (upCursor > 0) append(upText, 0, upCursor)
             append('|')
-            setSpan(cursorSpan, upCursor, upCursor + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            setSpan(cursorSpan, upCursor, upCursor + 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
             append(upText, upCursor, upText.length)
         }
         updateTextView(upView, upString, hasUp)

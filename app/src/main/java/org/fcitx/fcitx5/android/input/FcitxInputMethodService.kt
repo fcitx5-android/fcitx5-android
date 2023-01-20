@@ -85,10 +85,14 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     val selection = CursorRange()
     val composing = CursorRange()
     private var composingText = FormattedText()
+
+    /**
+     * preedit cursor counts by Java's String length
+     */
     private var fcitxCursor = -1
     private var cursorUpdateIndex: Int = 0
 
-    private var highlightColor : Int = 0x66008577 // material_deep_teal_500 with alpha 0.4
+    private var highlightColor: Int = 0x66008577 // material_deep_teal_500 with alpha 0.4
 
     private val ignoreSystemCursor by AppPrefs.getInstance().advanced.ignoreSystemCursor
 
@@ -462,8 +466,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         if (composing.isEmpty()) {
             lifecycleScope.launchOnFcitxReady(fcitx) {
                 if (!it.isEmpty()) {
-                    it.reset()
                     Timber.d("handleCursorUpdate: reset")
+                    it.reset()
                 }
             }
             return
@@ -473,14 +477,14 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             if (ignoreSystemCursor) return
             // fcitx cursor position is relative to client preedit (composing text)
             val position = selection.start - composing.start
-            // cursor in InvokeActionEvent counts by 'char'
-            val codePointPosition = composingText.toString().codePointCount(0, position)
             // move fcitx cursor when cursor position changed
-            if (codePointPosition != fcitxCursor) {
+            if (position != fcitxCursor) {
+                // cursor in InvokeActionEvent counts by 'char'
+                val codePointPosition = composingText.toString().codePointCount(0, position)
                 lifecycleScope.launchOnFcitxReady(fcitx) {
                     if (updateIndex != cursorUpdateIndex) return@launchOnFcitxReady
-                    it.moveCursor(codePointPosition)
                     Timber.d("handleCursorUpdate: move fcitx cursor to $codePointPosition")
+                    it.moveCursor(codePointPosition)
                 }
             }
         } else {

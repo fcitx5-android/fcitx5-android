@@ -29,6 +29,9 @@ fun Int.hasFlag(flag: TextFormatFlag) = hasFlag(flag.flag)
 data class FormattedText(
     val strings: Array<String>,
     val flags: IntArray,
+    /**
+     * cursor index counts by Java's String length
+     */
     val cursor: Int
 ) {
 
@@ -42,22 +45,26 @@ data class FormattedText(
             flags: IntArray,
             byteCursor: Int
         ): FormattedText {
-            val stringBeforeCursor = buildString {
-                var byteSize = 0
-                strings.forEach {
-                    val bytes = it.encodeToByteArray()
-                    val total = byteSize + bytes.size
-                    if (total < byteCursor) {
-                        append(it)
-                        byteSize = total
-                    } else {
-                        if (total == byteCursor) append(it)
-                        else append(String(bytes.copyOfRange(0, total - byteSize)))
-                        return@buildString
+            val cursor = if (byteCursor <= 0) {
+                byteCursor
+            } else {
+                StringBuilder().apply {
+                    var byteSize = 0
+                    strings.forEach {
+                        val bytes = it.encodeToByteArray()
+                        val total = byteSize + bytes.size
+                        if (total < byteCursor) {
+                            append(it)
+                            byteSize = total
+                        } else {
+                            if (total == byteCursor) append(it)
+                            else append(String(bytes.copyOfRange(0, byteCursor - byteSize)))
+                            return@apply
+                        }
                     }
-                }
+                }.length
             }
-            return FormattedText(strings, flags, stringBeforeCursor.length)
+            return FormattedText(strings, flags, cursor)
         }
     }
 
