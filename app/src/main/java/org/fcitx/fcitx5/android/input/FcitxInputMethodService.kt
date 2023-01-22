@@ -479,8 +479,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             val position = selection.start - composing.start
             // move fcitx cursor when cursor position changed
             if (position != fcitxCursor) {
-                // cursor in InvokeActionEvent counts by 'char'
-                val codePointPosition = composingText.toString().codePointCount(0, position)
+                // cursor in InvokeActionEvent counts by "UTF-8 characters"
+                val codePointPosition = composingText.codePointCountUntil(position)
                 lifecycleScope.launchOnFcitxReady(fcitx) {
                     if (updateIndex != cursorUpdateIndex) return@launchOnFcitxReady
                     Timber.d("handleCursorUpdate: move fcitx cursor to $codePointPosition")
