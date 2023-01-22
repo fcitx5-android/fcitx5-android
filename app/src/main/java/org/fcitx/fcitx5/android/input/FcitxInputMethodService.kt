@@ -454,8 +454,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     private fun handleCursorUpdate(newSelStart: Int, newSelEnd: Int, updateIndex: Int) {
-        // workaround some misbehaved editors: report composingText but wrong selectionStart
-        if (selection.start < 0 && composing.start >= 0) return
         // do nothing if already up-to-date
         if (selection.start == newSelStart && selection.end == newSelEnd) return
         // update saved selection
@@ -517,12 +515,19 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 // set composing text AND put cursor at end of composing
                 ic.setComposingText(text.toSpannedString(highlightColor), 1)
                 if (text.isEmpty()) {
-                    // clear composing text, put cursor at start of original composing
-                    // [^1]: if this happens after committing text, composing should be cleared,
-                    //       and selection should be put at original composing start. so composing
-                    //       shouldn't be reset to [0, 0], but it's original position
-                    selection.update(composing.start)
-                    composing.clear()
+                    if (composing.isEmpty()) {
+                        // do not reset saved selection range when incoming composing
+                        // and saved composing range are both empty:
+                        // composing.start is invalid when it's empty.
+                        selection.update(selection.start)
+                    } else {
+                        // clear composing text, put cursor at start of original composing
+                        // [^1]: if this happens after committing text, composing should be cleared,
+                        //       and selection should be put at original composing start. so composing
+                        //       shouldn't be reset to [0, 0], but it's original position
+                        selection.update(composing.start)
+                        composing.clear()
+                    }
                 } else {
                     // update composing text, put cursor at end of new composing
                     val start = if (composing.isEmpty()) selection.start else composing.start
