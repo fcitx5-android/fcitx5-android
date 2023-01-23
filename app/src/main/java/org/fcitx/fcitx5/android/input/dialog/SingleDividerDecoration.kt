@@ -27,10 +27,10 @@ class SingleDividerDecoration(val drawable: Drawable, val index: Int) : Recycler
     }
 
     override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
-        val l = parent.styledDimenPxSize(android.R.attr.listPreferredItemPaddingStart)
-        val r = parent.styledDimenPxSize(android.R.attr.listPreferredItemPaddingEnd)
-        val view = parent.getChildAt(index) ?: return
+        val view = parent.findViewHolderForAdapterPosition(index)?.itemView ?: return
         drawable.apply {
+            val l = parent.styledDimenPxSize(android.R.attr.listPreferredItemPaddingStart)
+            val r = parent.styledDimenPxSize(android.R.attr.listPreferredItemPaddingEnd)
             setBounds(view.left + l, view.top - dividerHeight, view.right - r, view.top)
             draw(c)
         }
