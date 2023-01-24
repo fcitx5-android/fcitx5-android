@@ -129,13 +129,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private fun handleFcitxEvent(event: FcitxEvent<*>) {
         when (event) {
             is FcitxEvent.CommitStringEvent -> {
-                inputConnection?.commitText(event.data, 1)
-                // committed text should be put before start of composing (if any), or before cursor
-                val start = if (composing.isEmpty()) selection.start else composing.start
-                selection.update(start + event.data.length)
-                // clear composing range, but retain it's position for next update
-                // see [^1] for explanation
-                composing.update(selection.start)
+                commitText(event.data)
             }
             is FcitxEvent.KeyEvent -> event.data.let event@{
                 if (it.states.virtual) {
@@ -237,7 +231,13 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     fun commitText(text: String) {
-        selection.offset(text.length)
+        // committed text should replace composing (if any), replace selected range (if any),
+        // or simply prepend before cursor
+        val start = if (composing.isEmpty()) selection.start else composing.start
+        selection.update(start + text.length)
+        // clear composing range
+        composing.clear()
+        composingText = FormattedText()
         inputConnection?.commitText(text, 1)
     }
 
@@ -522,9 +522,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                         selection.update(selection.start)
                     } else {
                         // clear composing text, put cursor at start of original composing
-                        // [^1]: if this happens after committing text, composing should be cleared,
-                        //       and selection should be put at original composing start. so composing
-                        //       shouldn't be reset to [0, 0], but it's original position
                         selection.update(composing.start)
                         composing.clear()
                     }
