@@ -498,7 +498,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    // FIXME: cursor flicker
     // because setComposingText(text, cursor) can only put cursor at end of composing,
     // sometimes onUpdateCursorAnchorInfo/onUpdateSelection would receive event with wrong cursor position.
     // those events need to be filtered.
@@ -510,7 +509,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         val ic = inputConnection ?: return
         ic.beginBatchEdit()
         do {
-            if (text != composingText) {
+            if (!composingText.spanEquals(text)) {
                 composingText = text
                 // set composing text AND put cursor at end of composing
                 ic.setComposingText(text.toSpannedString(highlightColor), 1)
