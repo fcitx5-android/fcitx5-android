@@ -325,7 +325,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun setInputView(view: View) {
-        highlightColor = view.styledColor(android.R.attr.colorAccent).alpha(0.4f)
+        runCatching {
+            highlightColor = view.styledColor(android.R.attr.colorAccent).alpha(0.4f)
+        }.onFailure {
+            Timber.w("Device does not support android.R.attr.colorAccent which it should have.")
+        }
         window.window!!.decorView
             .findViewById<FrameLayout>(android.R.id.inputArea)
             .updateLayoutParams<ViewGroup.LayoutParams> {
