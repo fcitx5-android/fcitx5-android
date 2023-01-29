@@ -81,19 +81,19 @@ class DialogSeekBarPreference @JvmOverloads constructor(
     /**
      * Shows the seek bar dialog.
      */
-    private fun showSeekBarDialog() = with(context) {
-        val textView = textView {
+    private fun showSeekBarDialog() {
+        val textView = context.textView {
             text = textForValue(value)
             textAppearance = context.resolveThemeAttribute(android.R.attr.textAppearanceListItem)
         }
-        val seekBar = seekBar {
+        val seekBar = context.seekBar {
             max = progressForValue(this@DialogSeekBarPreference.max)
             progress = progressForValue(value)
             setOnChangeListener {
                 textView.text = textForValue(valueForProgress(it))
             }
         }
-        val dialogContent = verticalLayout {
+        val dialogContent = context.verticalLayout {
             gravity = gravityHorizontalCenter
             if (dialogMessage != null) {
                 val messageText = textView { text = dialogMessage }

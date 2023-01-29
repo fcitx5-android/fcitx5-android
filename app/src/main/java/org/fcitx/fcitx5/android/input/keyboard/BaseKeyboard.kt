@@ -52,38 +52,36 @@ abstract class BaseKeyboard(
     private val touchTarget = hashMapOf<Int, View>()
 
     init {
-        with(context) {
-            keyRows = keyLayout.map { row ->
-                val keyViews = row.map { def ->
-                    createKeyView(def)
-                }
-                constraintLayout Row@{
-                    keyViews.forEachIndexed { index, view ->
-                        add(view, lParams {
-                            topOfParent()
-                            bottomOfParent()
-                            if (index == 0) {
-                                startOfParent()
-                                horizontalChainStyle = LayoutParams.CHAIN_PACKED
-                            } else after(keyViews[index - 1])
-                            if (index == keyViews.size - 1) endOfParent()
-                            else before(keyViews[index + 1])
-                            val def = row[index]
-                            matchConstraintPercentWidth = def.appearance.percentWidth
-                        })
-                    }
+        keyRows = keyLayout.map { row ->
+            val keyViews = row.map { def ->
+                createKeyView(def)
+            }
+            constraintLayout Row@{
+                keyViews.forEachIndexed { index, view ->
+                    add(view, lParams {
+                        topOfParent()
+                        bottomOfParent()
+                        if (index == 0) {
+                            startOfParent()
+                            horizontalChainStyle = LayoutParams.CHAIN_PACKED
+                        } else after(keyViews[index - 1])
+                        if (index == keyViews.size - 1) endOfParent()
+                        else before(keyViews[index + 1])
+                        val def = row[index]
+                        matchConstraintPercentWidth = def.appearance.percentWidth
+                    })
                 }
             }
-            keyRows.forEachIndexed { index, row ->
-                add(row, lParams {
-                    if (index == 0) topOfParent()
-                    else below(keyRows[index - 1])
-                    if (index == keyRows.size - 1) bottomOfParent()
-                    else above(keyRows[index + 1])
-                    startOfParent()
-                    endOfParent()
-                })
-            }
+        }
+        keyRows.forEachIndexed { index, row ->
+            add(row, lParams {
+                if (index == 0) topOfParent()
+                else below(keyRows[index - 1])
+                if (index == keyRows.size - 1) bottomOfParent()
+                else above(keyRows[index + 1])
+                startOfParent()
+                endOfParent()
+            })
         }
     }
 

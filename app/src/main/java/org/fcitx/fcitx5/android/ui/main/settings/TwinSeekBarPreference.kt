@@ -16,9 +16,6 @@ import splitties.resources.resolveThemeAttribute
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.textAppearance
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
 
 class TwinSeekBarPreference @JvmOverloads constructor(
     context: Context,
@@ -77,15 +74,12 @@ class TwinSeekBarPreference @JvmOverloads constructor(
         showDialog()
     }
 
-    @OptIn(ExperimentalContracts::class)
     private fun ConstraintLayout.addSeekBar(
         label: String,
         initialValue: Int,
         defaultValue: Int? = null,
-        belowView: View? = null,
-        initSeekBar: SeekBar.() -> Unit = {}
-    ) {
-        contract { callsInPlace(initSeekBar, InvocationKind.EXACTLY_ONCE) }
+        belowView: View? = null
+    ): SeekBar {
         val textLabel = textView {
             text = label
             textAppearance = context.resolveThemeAttribute(android.R.attr.textAppearanceListItem)
@@ -100,7 +94,6 @@ class TwinSeekBarPreference @JvmOverloads constructor(
             setOnChangeListener {
                 valueLabel.text = textForValue(valueForProgress(it), defaultValue)
             }
-            initSeekBar(this)
         }
         val textMargin = dp(24)
         val seekBarMargin = dp(10)
@@ -118,13 +111,14 @@ class TwinSeekBarPreference @JvmOverloads constructor(
             below(valueLabel, seekBarMargin)
             centerHorizontally(seekBarMargin)
         })
+        return seekBar
     }
 
-    private fun showDialog() = with(context) {
+    private fun showDialog() {
         var messageText: TextView? = null
         val primarySeekBar: SeekBar
         val secondarySeekBar: SeekBar
-        val dialogContent = constraintLayout {
+        val dialogContent = context.constraintLayout {
             if (dialogMessage != null) {
                 messageText = textView { text = dialogMessage }
                 add(messageText!!, lParams {
@@ -132,12 +126,8 @@ class TwinSeekBarPreference @JvmOverloads constructor(
                     horizontalMargin = dp(24)
                 })
             }
-            addSeekBar(label, value, default, messageText) {
-                primarySeekBar = this
-            }
-            addSeekBar(secondaryLabel, secondaryValue, secondaryDefault, primarySeekBar) {
-                secondarySeekBar = this
-            }
+            primarySeekBar = addSeekBar(label, value, default, messageText)
+            secondarySeekBar = addSeekBar(secondaryLabel, secondaryValue, secondaryDefault, primarySeekBar)
         }
         AlertDialog.Builder(context)
             .setTitle(this@TwinSeekBarPreference.dialogTitle)
