@@ -6,6 +6,9 @@ set(ANDROID_STL c++_shared)
 
 set(CMAKE_CXX_STANDARD 17)
 
+# For reproducible build
+add_link_options(-Wl,--hash-style=gnu,--build-id=none)
+
 set(CMAKE_INSTALL_PREFIX /usr)
 set(FCITX_INSTALL_PKGDATADIR /usr/share/fcitx5)
 set(FCITX_INSTALL_LOCALEDIR /usr/share/locale)
