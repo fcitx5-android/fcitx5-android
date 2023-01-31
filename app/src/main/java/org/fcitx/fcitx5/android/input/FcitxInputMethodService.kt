@@ -23,6 +23,8 @@ import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.input.cursor.CursorRange
+import org.fcitx.fcitx5.android.input.cursor.CursorTracker
 import org.fcitx.fcitx5.android.utils.alpha
 import org.fcitx.fcitx5.android.utils.inputConnection
 import splitties.bitflags.hasFlag
@@ -31,46 +33,6 @@ import timber.log.Timber
 import kotlin.math.max
 
 class FcitxInputMethodService : LifecycleInputMethodService() {
-
-    @JvmInline
-    value class CursorRange private constructor(val data: IntArray) {
-        constructor(start: Int = 0, end: Int = 0) : this(intArrayOf(start, end))
-
-        val start: Int get() = data[0]
-        val end: Int get() = data[1]
-
-        fun isEmpty() = data[0] == data[1]
-        fun isNotEmpty() = data[0] != data[1]
-
-        fun clear() {
-            data[0] = 0
-            data[1] = 0
-        }
-
-        fun update(start: Int, end: Int) {
-            if (end >= start) {
-                data[0] = start
-                data[1] = end
-            } else {
-                data[0] = end
-                data[1] = start
-            }
-        }
-
-        fun update(i: Int) {
-            data[0] = i
-            data[1] = i
-        }
-
-        fun offset(offset: Int) {
-            data[0] += offset
-            data[1] += offset
-        }
-
-        fun contains(other: CursorRange): Boolean {
-            return start <= other.start && other.end <= end
-        }
-    }
 
     private lateinit var fcitx: FcitxConnection
     private var eventHandlerJob: Job? = null
@@ -82,14 +44,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     var editorInfo: EditorInfo? = null
 
-    val selection = CursorRange()
+    val selection = CursorTracker()
     val composing = CursorRange()
     private var composingText = FormattedText()
 
-    /**
-     * preedit cursor counts by Java's String length
-     */
-    private var fcitxCursor = -1
     private var cursorUpdateIndex: Int = 0
 
     private var highlightColor: Int = 0x66008577 // material_deep_teal_500 with alpha 0.4
@@ -175,10 +133,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     private fun handleBackspaceKey() {
-        if (selection.isNotEmpty()) {
-            selection.update(selection.start)
-        } else if (selection.start > 0) {
-            selection.offset(-1)
+        val lastSelection = selection.latest
+        if (lastSelection.isNotEmpty()) {
+            selection.predict(lastSelection.start)
+        } else if (lastSelection.start > 0) {
+            selection.predictOffset(-1)
         }
         editorInfo?.apply {
             // In practice nobody (apart form us) would set `privateImeOptions` to our
@@ -191,8 +150,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 return
             }
             inputConnection?.apply {
-                if (selection.isEmpty()) {
-                    if (selection.start <= 0) {
+                if (lastSelection.isEmpty()) {
+                    if (lastSelection.start <= 0) {
                         sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
                         return
                     }
@@ -233,8 +192,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     fun commitText(text: String) {
         // committed text should replace composing (if any), replace selected range (if any),
         // or simply prepend before cursor
-        val start = if (composing.isEmpty()) selection.start else composing.start
-        selection.update(start + text.length)
+        val start = if (composing.isEmpty()) selection.latest.start else composing.start
+        selection.predict(start + text.length)
         // clear composing range
         composing.clear()
         composingText = FormattedText()
@@ -274,8 +233,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     fun deleteSelection() {
-        if (selection.isEmpty()) return
-        selection.update(selection.start)
+        val lastSelection = selection.latest
+        if (lastSelection.isEmpty()) return
+        selection.predict(lastSelection.start)
         inputConnection?.commitText("", 1)
     }
 
@@ -303,13 +263,22 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     fun applySelectionOffset(offsetStart: Int, offsetEnd: Int = 0) {
+        val lastSelection = selection.latest
         inputConnection?.also {
-            val start = max(selection.start + offsetStart, 0)
-            val end = max(selection.end + offsetEnd, 0)
+            val start = max(lastSelection.start + offsetStart, 0)
+            val end = max(lastSelection.end + offsetEnd, 0)
             if (start > end) return
-            selection.update(start, end)
+            selection.predict(start, end)
             it.setSelection(start, end)
         }
+    }
+
+    fun cancelSelection() {
+        val lastSelection = selection.latest
+        if (lastSelection.isEmpty()) return
+        val end = lastSelection.end
+        selection.predict(end)
+        inputConnection?.setSelection(end, end)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -325,9 +294,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun setInputView(view: View) {
-        runCatching {
+        try {
             highlightColor = view.styledColor(android.R.attr.colorAccent).alpha(0.4f)
-        }.onFailure {
+        } catch (e: Exception) {
             Timber.w("Device does not support android.R.attr.colorAccent which it should have.")
         }
         window.window!!.decorView
@@ -406,11 +375,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onStartInput(attribute: EditorInfo, restarting: Boolean) {
         // update selection as soon as possible
-        selection.update(attribute.initialSelStart, attribute.initialSelEnd)
+        selection.resetTo(attribute.initialSelStart, attribute.initialSelEnd)
         composing.clear()
         composingText = FormattedText()
         editorInfo = attribute
-        Timber.d("onStartInput: initialSel=$selection, restarting=$restarting")
+        Timber.d("onStartInput: initialSel=${selection.current}, restarting=$restarting")
         if (restarting) return
         lifecycleScope.launchOnFcitxReady(fcitx) {
             it.setCapFlags(CapabilityFlags.fromEditorInfo(attribute))
@@ -447,8 +416,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // TODO: call InputConnection#beginBatchEdit() before starting key repeat
         cursorUpdateIndex += 1
         Timber.d("onUpdateSelection: old=[$oldSelStart,$oldSelEnd] new=[$newSelStart,$newSelEnd] cand=[$candidatesStart,$candidatesEnd]")
-        // skip cursor update if we are already up-to-date
-        if (selection.start == newSelStart && selection.end == newSelEnd) return
         handleCursorUpdate(newSelStart, newSelEnd, cursorUpdateIndex)
         inputView?.onSelectionUpdate(newSelStart, newSelEnd)
     }
@@ -458,12 +425,14 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     private fun handleCursorUpdate(newSelStart: Int, newSelEnd: Int, updateIndex: Int) {
-        // do nothing if already up-to-date
-        if (selection.start == newSelStart && selection.end == newSelEnd) return
-        // update saved selection
-        selection.update(newSelStart, newSelEnd)
+        if (selection.consume(newSelStart, newSelEnd)) {
+            return // do nothing if prediction matches
+        } else {
+            // cursor update can't match any prediction: it's treated as a user input
+            selection.resetTo(newSelStart, newSelEnd)
+        }
         // skip selection range update, we only care about selection cursor (zero width) here
-        if (selection.isNotEmpty()) return
+        if (newSelStart != newSelEnd) return
         // do reset if composing is empty && input panel is not empty
         if (composing.isEmpty()) {
             lifecycleScope.launchOnFcitxReady(fcitx) {
@@ -475,12 +444,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             return
         }
         // check if cursor inside composing text
-        if (composing.contains(selection)) {
+        if (composing.contains(newSelStart)) {
             if (ignoreSystemCursor) return
             // fcitx cursor position is relative to client preedit (composing text)
-            val position = selection.start - composing.start
+            val position = newSelStart - composing.start
             // move fcitx cursor when cursor position changed
-            if (position != fcitxCursor) {
+            if (position != composingText.cursor) {
                 // cursor in InvokeActionEvent counts by "UTF-8 characters"
                 val codePointPosition = composingText.codePointCountUntil(position)
                 lifecycleScope.launchOnFcitxReady(fcitx) {
@@ -508,51 +477,54 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     // because of https://android.googlesource.com/platform/frameworks/base.git/+/refs/tags/android-11.0.0_r45/core/java/android/view/inputmethod/BaseInputConnection.java#851
     // it's not possible to set cursor inside composing text
     private fun updateComposingText(text: FormattedText) {
-        val cursor = text.cursor
-        fcitxCursor = cursor
         val ic = inputConnection ?: return
+        val lastSelection = selection.latest
         ic.beginBatchEdit()
-        do {
-            if (!composingText.spanEquals(text)) {
-                composingText = text
-                // set composing text AND put cursor at end of composing
-                ic.setComposingText(text.toSpannedString(highlightColor), 1)
-                if (text.isEmpty()) {
-                    if (composing.isEmpty()) {
-                        // do not reset saved selection range when incoming composing
-                        // and saved composing range are both empty:
-                        // composing.start is invalid when it's empty.
-                        selection.update(selection.start)
-                    } else {
-                        // clear composing text, put cursor at start of original composing
-                        selection.update(composing.start)
-                        composing.clear()
-                    }
+        if (!composingText.spanEquals(text)) {
+            // composing text content changed
+            Timber.d("updateComposingText: '$text' lastSelection=$lastSelection")
+            if (text.isEmpty()) {
+                if (composing.isEmpty()) {
+                    // do not reset saved selection range when incoming composing
+                    // and saved composing range are both empty:
+                    // composing.start is invalid when it's empty.
+                    selection.predict(lastSelection.start)
                 } else {
-                    // update composing text, put cursor at end of new composing
-                    val start = if (composing.isEmpty()) selection.start else composing.start
-                    composing.update(start, start + text.length)
-                    selection.update(composing.end)
+                    // clear composing text, put cursor at start of original composing
+                    selection.predict(composing.start)
+                    composing.clear()
                 }
-                Timber.d("updateComposingText: '$text' composing=$composing selection=$selection")
-                if (cursor == text.length) {
-                    // cursor already at end of composing, skip cursor reposition
-                    break
+                ic.setComposingText("", 1)
+            } else {
+                val start = if (composing.isEmpty()) lastSelection.start else composing.start
+                composing.update(start, start + text.length)
+                // skip cursor reposition when:
+                // - preedit cursor is at the end
+                // - cursor position is invalid
+                if (text.cursor == text.length || text.cursor < 0) {
+                    selection.predict(composing.end)
+                    ic.setComposingText(text.toSpannedString(highlightColor), 1)
+                } else {
+                    val p = text.cursor + composing.start
+                    selection.predict(p)
+                    ic.setComposingText(text.toSpannedString(highlightColor), 1)
+                    ic.setSelection(p, p)
                 }
             }
-            // skip cursor reposition when:
-            // - user chose to ignore system cursor
-            // - fcitx cursor position is invalid
-            // - current and incoming composing text are both empty
-            if (ignoreSystemCursor || (cursor < 0) || text.isEmpty()) break
-            // fcitx cursor position is relative to client preedit (composing text)
-            val p = cursor + composing.start
-            if (p != selection.start) {
-                Timber.d("updateComposingText: set Android selection ($p, $p)")
-                ic.setSelection(p, p)
-                selection.update(p)
+            Timber.d("updateComposingText: composing=$composing")
+        } else {
+            // composing text content is up-to-date
+            // update cursor only when it's not empty AND cursor position is valid
+            if (text.length > 0 && text.cursor >= 0) {
+                val p = text.cursor + composing.start
+                if (p != lastSelection.start) {
+                    Timber.d("updateComposingText: set Android selection ($p, $p)")
+                    ic.setSelection(p, p)
+                    selection.predict(p)
+                }
             }
-        } while (false)
+        }
+        composingText = text
         ic.endBatchEdit()
     }
 
