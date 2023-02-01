@@ -14,8 +14,9 @@ class AndroidInputContext : public InputContext {
 public:
     AndroidInputContext(AndroidFrontend *frontend,
                         InputContextManager &inputContextManager,
-                        int uid)
-            : InputContext(inputContextManager, std::to_string(uid)),
+                        int uid,
+                        const std::string &pkgName)
+            : InputContext(inputContextManager, pkgName),
               frontend_(frontend),
               uid_(uid) {
         created();
@@ -201,12 +202,12 @@ void AndroidFrontend::focusInputContext(bool focus) {
     }
 }
 
-void AndroidFrontend::activateInputContext(const int uid) {
+void AndroidFrontend::activateInputContext(const int uid, const std::string &pkgName) {
     auto *ptr = icCache_.find(uid);
     if (ptr) {
         activeIC_ = ptr->get();
     } else {
-        auto *ic = new AndroidInputContext(this, instance_->inputContextManager(), uid);
+        auto *ic = new AndroidInputContext(this, instance_->inputContextManager(), uid, pkgName);
         activeIC_ = ic;
         icCache_.insert(uid, ic);
         ic->setFocusGroup(&focusGroup_);

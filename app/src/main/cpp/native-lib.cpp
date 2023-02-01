@@ -361,9 +361,9 @@ public:
         p_frontend->call<fcitx::IAndroidFrontend::focusInputContext>(focus);
     }
 
-    void activateInputContext(int uid) {
+    void activateInputContext(int uid, const std::string &pkgName) {
         if (!p_frontend) return;
-        p_frontend->call<fcitx::IAndroidFrontend::activateInputContext>(uid);
+        p_frontend->call<fcitx::IAndroidFrontend::activateInputContext>(uid, pkgName);
     }
 
     void deactivateInputContext(int uid) {
@@ -1028,9 +1028,9 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_focusInputContext(JNIEnv *env, jclass c
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_activateInputContext(JNIEnv *env, jclass clazz, jint uid) {
+Java_org_fcitx_fcitx5_android_core_Fcitx_activateInputContext(JNIEnv *env, jclass clazz, jint uid, jstring pkg_name) {
     RETURN_IF_NOT_RUNNING
-    Fcitx::Instance().activateInputContext(uid);
+    Fcitx::Instance().activateInputContext(uid, CString(env, pkg_name));
 }
 
 extern "C"

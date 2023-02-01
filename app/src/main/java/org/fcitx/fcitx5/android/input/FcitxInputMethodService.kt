@@ -40,6 +40,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private val cachedKeyEvents = LruCache<Int, KeyEvent>(78)
     private var cachedKeyEventIndex = 0
 
+    private lateinit var pkgNameCache: PackageNameCache
+
     private var inputView: InputView? = null
 
     var editorInfo: EditorInfo? = null
@@ -74,8 +76,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onCreate() {
         fcitx = FcitxDaemon.connect(javaClass.name)
-        eventHandlerJob =
-            fcitx.runImmediately { eventFlow.onEach(::handleFcitxEvent).launchIn(lifecycleScope) }
+        eventHandlerJob = fcitx.runImmediately { eventFlow }
+            .onEach(::handleFcitxEvent).launchIn(lifecycleScope)
+        pkgNameCache = PackageNameCache(this)
         AppPrefs.getInstance().apply {
             keyboard.systemTouchSounds.registerOnChangeListener(recreateInputViewListener)
             advanced.disableAnimation.registerOnChangeListener(recreateInputViewListener)
@@ -367,9 +370,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onBindInput() {
         val uid = currentInputBinding.uid
-        Timber.d("onBindInput: uid=$uid")
+        val pkgName = pkgNameCache.forUid(uid)
+        Timber.d("onBindInput: uid=$uid pkg=$pkgName")
         lifecycleScope.launchOnFcitxReady(fcitx) {
-            it.activate(uid)
+            it.activate(uid, pkgName)
         }
     }
 

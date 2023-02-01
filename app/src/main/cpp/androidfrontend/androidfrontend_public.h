@@ -31,7 +31,7 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, focusInputContext,
                              void(bool))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, activateInputContext,
-                             void(const int))
+                             void(const int, const std::string &))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, activeInputContext,
                              InputContext * ())

@@ -30,7 +30,7 @@ public:
     void resetInputContext();
     void repositionCursor(int idx);
     void focusInputContext(bool focus);
-    void activateInputContext(const int uid);
+    void activateInputContext(const int uid, const std::string &pkgName);
     void deactivateInputContext(const int uid);
     InputContext *activeInputContext() const;
     void setCapabilityFlags(uint64_t flag);
