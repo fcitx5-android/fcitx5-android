@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 import android.databinding.tool.ext.capitalizeUS
 import com.android.build.gradle.internal.tasks.factory.dependsOn
 import com.google.common.hash.Hashing
@@ -14,9 +16,6 @@ fun exec(cmd: String): String = ByteArrayOutputStream().use {
     }
     it.toString().trim()
 }
-
-val gitCommitHash = exec("git rev-parse HEAD")
-val gitVersionName = exec("git describe --tags --long --always")
 
 plugins {
     id("com.android.application")
@@ -43,12 +42,41 @@ fun calculateVersionCode(abi: String): Int {
     return baseVersionCode * 10 + abiId
 }
 
-// will be used if `targetABI` is unset
-val defaultABI = "arm64-v8a"
-val targetABI: String = System.getenv("ABI").let {
-    if (it.isNullOrBlank())
-        runCatching { project.property("targetABI")!!.toString() }.getOrElse { defaultABI }
-    else it
+fun envOrDefault(env: String, default: () -> String): String {
+    val v = System.getenv(env)
+    return if (v.isNullOrBlank()) default() else v
+}
+
+fun propertyOrDefault(prop: String, default: () -> String): String {
+    return try {
+        project.property(prop)!!.toString()
+    } catch (e: Exception) {
+        default()
+    }
+}
+
+val buildABI = envOrDefault("BUILD_ABI") {
+    propertyOrDefault("buildABI") {
+        "arm64-v8a"
+    }
+}
+
+val buildVersionName = envOrDefault("BUILD_VERSION_NAME") {
+    propertyOrDefault("buildVersionName") {
+        exec("git describe --tags --long --always")
+    }
+}
+
+val buildCommitHash = envOrDefault("BUILD_COMMIT_HASH") {
+    propertyOrDefault("buildCommitHash") {
+        exec("git rev-parse HEAD")
+    }
+}
+
+val buildTimestamp = envOrDefault("BUILD_TIMESTAMP") {
+    propertyOrDefault("buildTimestamp") {
+        System.currentTimeMillis().toString()
+    }
 }
 
 android {
@@ -61,11 +89,11 @@ android {
         applicationId = "org.fcitx.fcitx5.android"
         minSdk = 23
         targetSdk = 33
-        versionCode = calculateVersionCode(targetABI)
-        versionName = gitVersionName
-        setProperty("archivesBaseName", "$applicationId-$gitVersionName")
-        buildConfigField("String", "BUILD_GIT_HASH", "\"$gitCommitHash\"")
-        buildConfigField("long", "BUILD_TIME", System.currentTimeMillis().toString())
+        versionCode = calculateVersionCode(buildABI)
+        versionName = buildVersionName
+        setProperty("archivesBaseName", "$applicationId-$buildVersionName")
+        buildConfigField("String", "BUILD_GIT_HASH", "\"${buildCommitHash}\"")
+        buildConfigField("long", "BUILD_TIME", buildTimestamp)
         buildConfigField("String", "DATA_DESCRIPTOR_NAME", "\"${dataDescriptorName}\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -96,7 +124,7 @@ android {
         abi {
             isEnable = true
             reset()
-            include(targetABI)
+            include(buildABI)
             isUniversalApk = false
         }
     }
@@ -128,6 +156,7 @@ android {
         }
     }
 }
+
 kotlin {
     sourceSets.configureEach {
         kotlin.srcDir("$buildDir/generated/ksp/$name/kotlin/")
@@ -136,6 +165,27 @@ kotlin {
 
 kotlin.sourceSets.all {
     languageSettings.optIn("kotlin.RequiresOptIn")
+}
+
+val generateBuildMetadata by tasks.register("generateBuildMetadata") {
+    doLast {
+        val outputDir = file("build/outputs/apk")
+        outputDir.mkdirs()
+        val metadataFile = outputDir.resolve("build-metadata.json")
+        metadataFile.writeText(
+            JsonOutput.prettyPrint(
+                JsonOutput.toJson(
+                    mapOf(
+                        "versionName" to buildVersionName,
+                        "commitHash" to buildCommitHash,
+                        "timestamp" to buildTimestamp
+                    )
+                )
+            )
+        )
+    }
+
+    dependsOn(tasks.find { it.name == "compileDebugKotlin" || it.name == "compileReleaseKotlin" })
 }
 
 // This task should have depended on buildCMakeABITask
@@ -167,9 +217,11 @@ project.gradle.taskGraph.whenReady {
         ext.set("cmakeDir", cmakeDir)
     }
 }
+
 android.applicationVariants.all {
     val variantName = name.capitalizeUS()
     tasks.findByName("merge${variantName}Assets")?.dependsOn(generateDataDescriptor)
+    tasks.findByName("assemble${variantName}")?.dependsOn(generateBuildMetadata)
 }
 
 /**
@@ -192,11 +244,11 @@ fun installFcitxComponent(targetName: String, componentName: String, destDir: Fi
         }
 
         // make sure that this task runs after than the native task
-        mustRunAfter("buildCMakeDebug[$targetABI]")
-        mustRunAfter("buildCMakeRelWithDebInfo[$targetABI]")
+        mustRunAfter("buildCMakeDebug[$buildABI]")
+        mustRunAfter("buildCMakeRelWithDebInfo[$buildABI]")
     }
 
-    tasks.register("installFcitx${componentName.capitalizeUS()}") {
+    val install by tasks.register("installFcitx${componentName.capitalizeUS()}") {
         doLast {
             try {
                 exec {
@@ -215,7 +267,9 @@ fun installFcitxComponent(targetName: String, componentName: String, destDir: Fi
         }
 
         dependsOn(build)
-    }.also { installFcitxComponent.dependsOn(it) }
+    }
+
+    installFcitxComponent.dependsOn(install)
 }
 
 installFcitxComponent("generate-desktop-file", "config", file("src/main/assets"))
