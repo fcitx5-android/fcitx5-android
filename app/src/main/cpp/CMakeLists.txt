@@ -8,6 +8,9 @@ set(CMAKE_CXX_STANDARD 17)
 add_link_options("LINKER:--hash-style=gnu,--build-id=none")
 
 set(CMAKE_INSTALL_PREFIX /usr)
+# fcitx-utils/standardpath.cpp uses FCITX_INSTALL_LIBDATADIR,
+# which is CMAKE_INSTALL_LIBDATADIR's absolute path
+set(CMAKE_INSTALL_LIBDATADIR /usr/lib)
 set(FCITX_INSTALL_PKGDATADIR /usr/share/fcitx5)
 set(FCITX_INSTALL_LOCALEDIR /usr/share/locale)
 set(LIBIME_INSTALL_PKGDATADIR table)
@@ -65,6 +68,8 @@ endforeach ()
 
 option(ENABLE_TEST "" OFF)
 set(_Fcitx5Macro_SELF_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fcitx5/src/lib/fcitx-utils)
+# kenlm/util/exception.hh uses __FILE__ macro
+add_compile_options(-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.)
 add_subdirectory(libime)
 
 # prebuilt lua
