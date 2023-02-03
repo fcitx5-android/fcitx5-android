@@ -73,6 +73,8 @@ node("android") {
     catchError {
         timestamps {
             try {
+                def buildTimestamp = System.currentTimeMillis().toString()
+
                 stage("Fetching sources") {
                     checkout([$class                           : 'GitSCM',
                               branches                         : scm.branches,
@@ -107,10 +109,11 @@ node("android") {
                 }
 
                 forEachABI("Assemble release") { String abi ->
-                    withEnv(["ABI=$abi"]) {
-                        sh "./gradlew assembleRelease"
+                    withEnv(["BUILD_ABI=$abi", "BUILD_TIMESTAMP=$buildTimestamp"]) {
+                        sh './gradlew assembleRelease'
                         sh 'mv app/build/outputs/apk/release/*.apk out/'
                     }
+                    sh 'mv app/build/outputs/apk/build-metadata.json out/'
                 }
 
                 withBuildStatus("Sign and archive apks") {
@@ -118,6 +121,10 @@ node("android") {
                             keyStoreId: 'fcitx5-android-sign-key',
                             apksToSign: 'out/*-unsigned.apk',
                             archiveSignedApks: true,
+                    )
+                    archiveArtifacts(
+                            artifacts: 'out/build-metadata.json',
+                            fingerprint: true
                     )
                 }
 
