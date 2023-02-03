@@ -300,7 +300,7 @@ dependencies {
     implementation("org.ini4j:ini4j:0.5.4")
     ksp(project(":codegen"))
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.0")
-    implementation("io.arrow-kt:arrow-core:1.1.3")
+    implementation("io.arrow-kt:arrow-core:1.1.5")
     implementation("androidx.activity:activity-ktx:1.6.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     implementation("com.github.CanHub:Android-Image-Cropper:4.2.1")
