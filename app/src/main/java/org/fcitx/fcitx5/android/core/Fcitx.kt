@@ -51,7 +51,13 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
     override fun getAddonReverseDependencies(addon: String) =
         (addonGraph ?: run { computeAddonGraph().also { addonGraph = it } }).let { graph ->
             addonReverseDependencies.computeIfAbsent(addon)
-            { graph.bfs(it) }
+            {
+                graph.bfs(it) { level, _, dep ->
+                    // stop when the direct child is an optional dependency
+                    dep == FcitxAPI.AddonDep.Required
+                            || (level == 1 && dep == FcitxAPI.AddonDep.Optional)
+                }
+            }
         }
 
     override fun translate(str: String, domain: String) = getFcitxTranslation(domain, str)

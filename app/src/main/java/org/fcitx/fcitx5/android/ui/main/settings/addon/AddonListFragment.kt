@@ -90,6 +90,8 @@ class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
             } else {
                 ui.updateItem(ui.indexItem(entry), entry.copy(enabled = false))
             }
+        } else {
+            ui.updateItem(ui.indexItem(entry), entry.copy(enabled = false))
         }
     }
 

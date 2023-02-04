@@ -45,9 +45,9 @@
         fcitx5-android-sdk = rec {
           cmakeVersion = "3.22.1";
           buildToolsVersion = "33.0.0";
-          platformToolsVersion = "33.0.2";
+          platformToolsVersion = "33.0.3";
           platformVersion = "33";
-          ndkVersion = "24.0.8215888";
+          ndkVersion = "25.0.8775105";
           abiVersions = [ "arm64-v8a" "armeabi-v7a" ];
           androidComposition = prev.androidenv.composeAndroidPackages {
             inherit platformToolsVersion ndkVersion;
