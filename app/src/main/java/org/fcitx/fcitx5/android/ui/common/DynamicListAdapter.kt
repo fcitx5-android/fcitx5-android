@@ -94,28 +94,31 @@ abstract class DynamicListAdapter<T>(
             multiselectCheckBox.isChecked = item in selected
 
             if (enableAddAndDelete && removable(item)) {
+                multiselectCheckBox.setOnCheckedChangeListener { _, isChecked ->
+                    select(item, isChecked)
+                }
                 nameText.setOnLongClickListener {
                     itemTouchHelper?.startDrag(holder)
                     true
                 }
                 nameText.setOnClickListener {
-                    select(item, multiselectCheckBox)
+                    multiselectCheckBox.toggle()
                 }
             } else {
                 multiselectCheckBox.isEnabled = false
+                multiselectCheckBox.setOnCheckedChangeListener(null)
+                nameText.setOnClickListener(null)
             }
         }
     }
 
-    private fun select(item: T, checkBox: CheckBox) {
+    private fun select(item: T, shouldSelect: Boolean) {
         if (!enableAddAndDelete || !multiselect)
             return
-        if (item in selected) {
-            selected.remove(item)
-            checkBox.isChecked = false
+        if (shouldSelect) {
+            if (selected.indexOf(item) == -1) selected.add(item)
         } else {
-            selected.add(item)
-            checkBox.isChecked = true
+            selected.remove(item)
         }
     }
 
