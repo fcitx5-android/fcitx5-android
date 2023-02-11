@@ -10,15 +10,29 @@ import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.core.*
+import org.fcitx.fcitx5.android.core.FcitxEvent
+import org.fcitx.fcitx5.android.core.FcitxKeyMapping
+import org.fcitx.fcitx5.android.core.InputMethodEntry
+import org.fcitx.fcitx5.android.core.KeyStates
+import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.GestureType
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListener
-import org.fcitx.fcitx5.android.input.popup.PopupListener
+import org.fcitx.fcitx5.android.input.popup.PopupAction
+import org.fcitx.fcitx5.android.input.popup.PopupActionListener
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
-import splitties.views.dsl.constraintlayout.*
+import splitties.views.dsl.constraintlayout.above
+import splitties.views.dsl.constraintlayout.after
+import splitties.views.dsl.constraintlayout.before
+import splitties.views.dsl.constraintlayout.below
+import splitties.views.dsl.constraintlayout.bottomOfParent
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.endOfParent
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.startOfParent
+import splitties.views.dsl.constraintlayout.topOfParent
 import splitties.views.dsl.core.add
 import splitties.views.imageResource
 import timber.log.Timber
@@ -38,7 +52,7 @@ abstract class BaseKeyboard(
 
     private val vivoKeypressWorkaround by AppPrefs.getInstance().advanced.vivoKeypressWorkaround
 
-    var keyPopupListener: PopupListener? = null
+    var popupActionListener: PopupActionListener? = null
 
     private val selectionSwipeThreshold = dp(10f)
     private val inputSwipeThreshold = dp(36f)
@@ -109,6 +123,7 @@ abstract class BaseKeyboard(
                                 true
                             }
                         }
+
                         else -> false
                     }
                 }
@@ -125,10 +140,12 @@ abstract class BaseKeyboard(
                                 true
                             } else false
                         }
+
                         GestureType.Up -> {
                             onAction(KeyAction.DeleteSelectionAction(event.totalX))
                             false
                         }
+
                         else -> false
                     }
                 }
@@ -140,18 +157,21 @@ abstract class BaseKeyboard(
                             onAction(it.action)
                         }
                     }
+
                     is KeyDef.Behavior.LongPress -> {
                         setOnLongClickListener { _ ->
                             onAction(it.action)
                             true
                         }
                     }
+
                     is KeyDef.Behavior.Repeat -> {
                         repeatEnabled = true
                         onRepeatListener = { _ ->
                             onAction(it.action)
                         }
                     }
+
                     is KeyDef.Behavior.Swipe -> {
                         swipeEnabled = true
                         swipeThresholdY = inputSwipeThreshold
@@ -166,10 +186,12 @@ abstract class BaseKeyboard(
                                         false
                                     }
                                 }
+
                                 else -> false
                             } || oldOnGestureListener.onGesture(view, event)
                         }
                     }
+
                     is KeyDef.Behavior.DoubleTap -> {
                         doubleTapEnabled = true
                         onDoubleTapListener = { _ ->
@@ -184,7 +206,7 @@ abstract class BaseKeyboard(
                     is KeyDef.Popup.Menu -> {
                         setOnLongClickListener { view ->
                             view as KeyView
-                            onPopupMenu(view.id, it, view.bounds)
+                            onPopupAction(PopupAction.ShowMenuAction(view.id, it, view.bounds))
                             // do not consume this LongClick gesture
                             false
                         }
@@ -196,17 +218,20 @@ abstract class BaseKeyboard(
                                 GestureType.Move -> {
                                     onPopupChangeFocus(view.id, event.x, event.y)
                                 }
+
                                 GestureType.Up -> {
                                     onPopupTrigger(view.id)
                                 }
+
                                 else -> false
                             } || oldOnGestureListener.onGesture(view, event)
                         }
                     }
+
                     is KeyDef.Popup.Keyboard -> {
                         setOnLongClickListener { view ->
                             view as KeyView
-                            onPopupKeyboard(view.id, it, view.bounds)
+                            onPopupAction(PopupAction.ShowKeyboardAction(view.id, it, view.bounds))
                             // do not consume this LongClick gesture
                             false
                         }
@@ -218,46 +243,60 @@ abstract class BaseKeyboard(
                                 GestureType.Move -> {
                                     onPopupChangeFocus(view.id, event.x, event.y)
                                 }
+
                                 GestureType.Up -> {
                                     onPopupTrigger(view.id)
                                 }
+
                                 else -> false
                             } || oldOnGestureListener.onGesture(view, event)
                         }
                     }
+
                     is KeyDef.Popup.AltPreview -> {
                         val oldOnGestureListener = onGestureListener ?: OnGestureListener.Empty
                         onGestureListener = OnGestureListener { view, event ->
                             view as KeyView
-                            when (event.type) {
-                                GestureType.Down -> {
-                                    onPopupPreview(view.id, it.content, view.bounds)
-                                }
-                                GestureType.Move -> {
-                                    val triggered = swipeSymbolDirection.checkY(event.totalY)
-                                    val text = if (triggered) it.alternative else it.content
-                                    onPopupPreviewUpdate(view.id, text)
-                                }
-                                GestureType.Up -> {
-                                    onPopupDismiss(view.id)
+                            if (popupOnKeyPress) {
+                                when (event.type) {
+                                    GestureType.Down -> onPopupAction(
+                                        PopupAction.PreviewAction(view.id, it.content, view.bounds)
+                                    )
+
+                                    GestureType.Move -> {
+                                        val triggered = swipeSymbolDirection.checkY(event.totalY)
+                                        val text = if (triggered) it.alternative else it.content
+                                        onPopupAction(
+                                            PopupAction.PreviewUpdateAction(view.id, text)
+                                        )
+                                    }
+
+                                    GestureType.Up -> {
+                                        onPopupAction(PopupAction.DismissAction(view.id))
+                                    }
                                 }
                             }
                             // never consume gesture in preview popup
                             oldOnGestureListener.onGesture(view, event)
                         }
                     }
+
                     is KeyDef.Popup.Preview -> {
                         val oldOnGestureListener = onGestureListener ?: OnGestureListener.Empty
                         onGestureListener = OnGestureListener { view, event ->
                             view as KeyView
-                            when (event.type) {
-                                GestureType.Down -> {
-                                    onPopupPreview(view.id, it.content, view.bounds)
+                            if (popupOnKeyPress) {
+                                when (event.type) {
+                                    GestureType.Down -> onPopupAction(
+                                        PopupAction.PreviewAction(view.id, it.content, view.bounds)
+                                    )
+
+                                    GestureType.Up -> {
+                                        onPopupAction(PopupAction.DismissAction(view.id))
+                                    }
+
+                                    else -> {}
                                 }
-                                GestureType.Up -> {
-                                    onPopupDismiss(view.id)
-                                }
-                                else -> {}
                             }
                             // never consume gesture in preview popup
                             oldOnGestureListener.onGesture(view, event)
@@ -354,6 +393,7 @@ abstract class BaseKeyboard(
                     )
                     return true
                 }
+
                 MotionEvent.ACTION_POINTER_DOWN -> {
                     val i = event.actionIndex
                     val target = findTargetChild(event.getX(i), event.getY(i)) ?: return false
@@ -363,6 +403,7 @@ abstract class BaseKeyboard(
                     )
                     return true
                 }
+
                 MotionEvent.ACTION_MOVE -> {
                     for (i in 0 until event.pointerCount) {
                         val target = touchTarget[event.getPointerId(i)] ?: continue
@@ -372,6 +413,7 @@ abstract class BaseKeyboard(
                     }
                     return true
                 }
+
                 MotionEvent.ACTION_UP -> {
                     val i = event.actionIndex
                     val pid = event.getPointerId(i)
@@ -382,6 +424,7 @@ abstract class BaseKeyboard(
                     touchTarget.remove(pid)
                     return true
                 }
+
                 MotionEvent.ACTION_POINTER_UP -> {
                     val i = event.actionIndex
                     val pid = event.getPointerId(i)
@@ -392,6 +435,7 @@ abstract class BaseKeyboard(
                     touchTarget.remove(pid)
                     return true
                 }
+
                 MotionEvent.ACTION_CANCEL -> {
                     val i = event.actionIndex
                     val pid = event.getPointerId(i)
@@ -408,7 +452,7 @@ abstract class BaseKeyboard(
     }
 
     @CallSuper
-    open fun onAction(
+    protected open fun onAction(
         action: KeyAction,
         source: KeyActionListener.Source = KeyActionListener.Source.Keyboard
     ) {
@@ -416,42 +460,27 @@ abstract class BaseKeyboard(
     }
 
     @CallSuper
-    open fun onPopupPreview(viewId: Int, content: String, bounds: Rect) {
-        if (!popupOnKeyPress) return
-        keyPopupListener?.onPreview(viewId, content, bounds)
+    protected open fun onPopupAction(action: PopupAction) {
+        popupActionListener?.onPopupAction(action)
     }
 
-    @CallSuper
-    open fun onPopupPreviewUpdate(viewId: Int, content: String) {
-        if (!popupOnKeyPress) return
-        keyPopupListener?.onPreviewUpdate(viewId, content)
+    private fun onPopupChangeFocus(viewId: Int, x: Float, y: Float): Boolean {
+        var result = false
+        popupActionListener?.onPopupAction(PopupAction.ChangeFocusAction(viewId, x, y) {
+            result = it
+        })
+        return result
     }
 
-    @CallSuper
-    open fun onPopupDismiss(viewId: Int) {
-        keyPopupListener?.onDismiss(viewId)
-    }
-
-    @CallSuper
-    open fun onPopupKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
-        keyPopupListener?.onShowKeyboard(viewId, keyboard, bounds)
-    }
-
-    open fun onPopupMenu(viewId: Int, menu: KeyDef.Popup.Menu, bounds: Rect) {
-        keyPopupListener?.onShowMenu(viewId, menu, bounds)
-    }
-
-    @CallSuper
-    open fun onPopupChangeFocus(viewId: Int, x: Float, y: Float): Boolean {
-        return keyPopupListener?.onChangeFocus(viewId, x, y) ?: false
-    }
-
-    @CallSuper
-    fun onPopupTrigger(viewId: Int): Boolean {
+    private fun onPopupTrigger(viewId: Int): Boolean {
+        var action: KeyAction? = null
         // ask popup keyboard whether there's a pending KeyAction
-        val action = keyPopupListener?.onTrigger(viewId) ?: return false
-        onAction(action, KeyActionListener.Source.Popup)
-        onPopupDismiss(viewId)
+        onPopupAction(PopupAction.TriggerAction(viewId) {
+            action = it
+        })
+        if (action == null) return false
+        onAction(action!!, KeyActionListener.Source.Popup)
+        onPopupAction(PopupAction.DismissAction(viewId))
         return true
     }
 

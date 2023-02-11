@@ -1,7 +1,6 @@
 package org.fcitx.fcitx5.android.input.picker
 
 import android.content.Context
-import android.graphics.Rect
 import android.util.TypedValue
 import android.view.ViewGroup
 import androidx.core.view.updateLayoutParams
@@ -18,7 +17,8 @@ import org.fcitx.fcitx5.android.input.keyboard.KeyActionListener.Source
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Border
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Variant
-import org.fcitx.fcitx5.android.input.popup.PopupListener
+import org.fcitx.fcitx5.android.input.popup.PopupAction
+import org.fcitx.fcitx5.android.input.popup.PopupActionListener
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
@@ -26,7 +26,7 @@ import splitties.views.dsl.core.matchParent
 import splitties.views.gravityCenter
 import splitties.views.lines
 
-class PickerPageUi(override val ctx: Context, val theme: Theme, val density: Density) : Ui {
+class PickerPageUi(override val ctx: Context, val theme: Theme, private val density: Density) : Ui {
 
     enum class Density(
         val pageSize: Int,
@@ -59,7 +59,7 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, val density: Den
     }
 
     var keyActionListener: KeyActionListener? = null
-    var popupListener: PopupListener? = null
+    var popupActionListener: PopupActionListener? = null
 
     private val keyAppearance = Appearance.Text(
         displayText = "",
@@ -137,6 +137,7 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, val density: Den
                     })
                 }
             }
+
             Density.Medium, Density.Low -> {
                 keyViews.forEachIndexed { i, keyView ->
                     val row = i / columnCount
@@ -212,7 +213,14 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, val density: Den
                             // the actual bounds on press. see [^1] as well
                             view.updateBounds()
                         }
-                        onPopupKeyboard(view.id, text, view.bounds)
+                        // TODO: maybe popup keyboard should just accept String as label?
+                        onPopupAction(
+                            PopupAction.ShowKeyboardAction(
+                                view.id,
+                                KeyDef.Popup.Keyboard(text),
+                                bounds
+                            )
+                        )
                         false
                     }
                     swipeEnabled = true
@@ -226,16 +234,20 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, val density: Den
                                     // eg. it's inside the next page of ViewPager
                                     // so update bounds when it's pressed
                                     view.updateBounds()
-                                    onPopupPreview(view.id, text, view.bounds)
+                                    onPopupAction(
+                                        PopupAction.PreviewAction(view.id, text, view.bounds)
+                                    )
                                 }
                                 false
                             }
+
                             CustomGestureView.GestureType.Move -> {
-                                onPopupKeyboardChangeFocus(view.id, event.x, event.y)
+                                onPopupChangeFocus(view.id, event.x, event.y)
                             }
+
                             CustomGestureView.GestureType.Up -> {
-                                onPopupKeyboardTrigger(view.id).also {
-                                    onPopupDismiss(view.id)
+                                onPopupTrigger(view.id).also {
+                                    onPopupAction(PopupAction.DismissAction(view.id))
                                 }
                             }
                         }
@@ -245,28 +257,28 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, val density: Den
         }
     }
 
-    private fun onPopupPreview(viewId: Int, content: String, bounds: Rect) {
-        popupListener?.onPreview(viewId, content, bounds)
+    private fun onPopupAction(action: PopupAction) {
+        popupActionListener?.onPopupAction(action)
     }
 
-    private fun onPopupDismiss(viewId: Int) {
-        popupListener?.onDismiss(viewId)
+    private fun onPopupChangeFocus(viewId: Int, x: Float, y: Float): Boolean {
+        var result = false
+        popupActionListener?.onPopupAction(PopupAction.ChangeFocusAction(viewId, x, y) {
+            result = it
+        })
+        return result
     }
 
-    private fun onPopupKeyboard(viewId: Int, label: String, bounds: Rect) {
-        // TODO: maybe popup keyboard should just accept String as label?
-        popupListener?.onShowKeyboard(viewId, KeyDef.Popup.Keyboard(label), bounds)
-    }
-
-    private fun onPopupKeyboardChangeFocus(viewId: Int, x: Float, y: Float): Boolean {
-        return popupListener?.onChangeFocus(viewId, x, y) ?: false
-    }
-
-    private fun onPopupKeyboardTrigger(viewId: Int): Boolean {
+    private fun onPopupTrigger(viewId: Int): Boolean {
+        var action: FcitxKeyAction? = null
         // TODO: maybe popup keyboard should just yield String value?
-        val action = popupListener?.onTrigger(viewId) as? FcitxKeyAction ?: return false
-        onSymbolClick(action.act)
-        onPopupDismiss(viewId)
+        onPopupAction(PopupAction.TriggerAction(viewId) {
+            action = it as? FcitxKeyAction
+        })
+        if (action == null) return false
+        onSymbolClick(action!!.act)
+        onPopupAction(PopupAction.DismissAction(viewId))
         return true
     }
+
 }

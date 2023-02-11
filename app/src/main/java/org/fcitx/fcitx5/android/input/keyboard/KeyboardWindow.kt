@@ -17,8 +17,8 @@ import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
+import org.fcitx.fcitx5.android.input.popup.PopupActionListener
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
-import org.fcitx.fcitx5.android.input.popup.PopupListener
 import org.fcitx.fcitx5.android.input.wm.EssentialWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
@@ -77,7 +77,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
         }
     }
 
-    private val popupListener: PopupListener by lazy {
+    private val popupActionListener: PopupActionListener by lazy {
         popup.listener
     }
 
@@ -93,7 +93,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
             it.onDetach()
             keyboardView.removeView(it)
             it.keyActionListener = null
-            it.keyPopupListener = null
+            it.popupActionListener = null
         }
     }
 
@@ -101,7 +101,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
         currentKeyboardName = target
         currentKeyboard?.let {
             it.keyActionListener = keyActionListener
-            it.keyPopupListener = popupListener
+            it.popupActionListener = popupActionListener
             keyboardView.apply { add(it, lParams(matchParent, matchParent)) }
             it.onAttach(service.editorInfo)
             it.onInputMethodChange(fcitx.runImmediately { inputMethodEntryCached })
@@ -154,14 +154,14 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
     override fun onAttached() {
         currentKeyboard?.let {
             it.keyActionListener = keyActionListener
-            it.keyPopupListener = popupListener
+            it.popupActionListener = popupActionListener
         }
     }
 
     override fun onDetached() {
         currentKeyboard?.let {
             it.keyActionListener = null
-            it.keyPopupListener = null
+            it.popupActionListener = null
         }
         popup.dismissAll()
     }

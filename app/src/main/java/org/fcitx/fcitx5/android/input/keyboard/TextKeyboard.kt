@@ -2,7 +2,6 @@ package org.fcitx.fcitx5.android.input.keyboard
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Rect
 import android.view.inputmethod.EditorInfo
 import androidx.core.view.allViews
 import org.fcitx.fcitx5.android.R
@@ -11,6 +10,7 @@ import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.input.popup.PopupAction
 import splitties.resources.drawable
 import splitties.views.imageDrawable
 import splitties.views.imageResource
@@ -116,8 +116,7 @@ class TextKeyboard(
                 transformKeyAction(action)
             }
             is KeyAction.CapsAction -> switchCapsState(action.lock)
-            else -> {
-            }
+            else -> {}
         }
         super.onAction(action, source)
     }
@@ -156,20 +155,19 @@ class TextKeyboard(
         }
     }
 
-    override fun onPopupPreview(viewId: Int, content: String, bounds: Rect) {
-        super.onPopupPreview(viewId, transformInputString(content), bounds)
-    }
-
-    override fun onPopupPreviewUpdate(viewId: Int, content: String) {
-        super.onPopupPreviewUpdate(viewId, transformInputString(content))
-    }
-
-    override fun onPopupKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
-        val label = keyboard.label
-        val k = if (label.length == 1 && label[0].isLetter())
-            KeyDef.Popup.Keyboard(transformAlphabet(label))
-        else keyboard
-        super.onPopupKeyboard(viewId, k, bounds)
+    override fun onPopupAction(action: PopupAction) {
+        val newAction = when (action) {
+            is PopupAction.PreviewAction -> action.copy(content = transformInputString(action.content))
+            is PopupAction.PreviewUpdateAction -> action.copy(content = transformInputString(action.content))
+            is PopupAction.ShowKeyboardAction -> {
+                val label = action.keyboard.label
+                if (label.length == 1 && label[0].isLetter())
+                    action.copy(keyboard = KeyDef.Popup.Keyboard(transformAlphabet(label)))
+                else action
+            }
+            else -> action
+        }
+        super.onPopupAction(newAction)
     }
 
     private fun switchCapsState(lock: Boolean = false) {

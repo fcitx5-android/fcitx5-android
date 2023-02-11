@@ -21,7 +21,7 @@ import splitties.dimensions.dp
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.lParams
-import java.util.*
+import java.util.LinkedList
 
 class PopupComponent :
     UniqueComponent<PopupComponent>(), Dependent, ManagedHandler by managedHandler() {
@@ -61,7 +61,7 @@ class PopupComponent :
         }
     }
 
-    fun showPopup(viewId: Int, content: String, bounds: Rect) {
+    private fun showPopup(viewId: Int, content: String, bounds: Rect) {
         showingEntryUi[viewId]?.apply {
             dismissJobs[viewId]?.also {
                 dismissJobs.remove(viewId)?.cancel()
@@ -85,11 +85,11 @@ class PopupComponent :
         showingEntryUi[viewId] = popup
     }
 
-    fun updatePopup(viewId: Int, content: String) {
+    private fun updatePopup(viewId: Int, content: String) {
         showingEntryUi[viewId]?.setText(content)
     }
 
-    fun showKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
+    private fun showKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
         val keys = PopupPreset[keyboard.label] ?: return
         // clear popup preview text         OR create empty popup preview
         showingEntryUi[viewId]?.setText("") ?: showPopup(viewId, "", bounds)
@@ -122,7 +122,7 @@ class PopupComponent :
         showingContainerUi[viewId] = keyboardUi
     }
 
-    fun showMenu(viewId: Int, menu: KeyDef.Popup.Menu, bounds: Rect) {
+    private fun showMenu(viewId: Int, menu: KeyDef.Popup.Menu, bounds: Rect) {
         showingEntryUi[viewId]?.let {
             dismissPopupEntry(viewId, it)
         }
@@ -142,15 +142,15 @@ class PopupComponent :
         showingContainerUi[viewId] = menuUi
     }
 
-    fun changeFocus(viewId: Int, x: Float, y: Float): Boolean {
+    private fun changeFocus(viewId: Int, x: Float, y: Float): Boolean {
         return showingContainerUi[viewId]?.changeFocus(x, y) ?: false
     }
 
-    fun triggerFocused(viewId: Int): KeyAction? {
+    private fun triggerFocused(viewId: Int): KeyAction? {
         return showingContainerUi[viewId]?.onTrigger()
     }
 
-    fun dismissPopup(viewId: Int) {
+    private fun dismissPopup(viewId: Int) {
         dismissPopupContainer(viewId)
         showingEntryUi[viewId]?.also {
             val timeLeft = it.lastShowTime + hideThreshold - System.currentTimeMillis()
@@ -198,33 +198,18 @@ class PopupComponent :
         showingEntryUi.clear()
     }
 
-    val listener: PopupListener = object : PopupListener {
-        override fun onPreview(viewId: Int, content: String, bounds: Rect) {
-            showPopup(viewId, content, bounds)
+    val listener: PopupActionListener =
+        PopupActionListener { action ->
+            with(action) {
+                when (this) {
+                    is PopupAction.ChangeFocusAction -> cont(changeFocus(viewId, x, y))
+                    is PopupAction.DismissAction -> dismissPopup(viewId)
+                    is PopupAction.PreviewAction -> showPopup(viewId, content, bounds)
+                    is PopupAction.PreviewUpdateAction -> updatePopup(viewId, content)
+                    is PopupAction.ShowKeyboardAction -> showKeyboard(viewId, keyboard, bounds)
+                    is PopupAction.ShowMenuAction -> showMenu(viewId, menu, bounds)
+                    is PopupAction.TriggerAction -> cont(triggerFocused(viewId))
+                }
+            }
         }
-
-        override fun onPreviewUpdate(viewId: Int, content: String) {
-            updatePopup(viewId, content)
-        }
-
-        override fun onDismiss(viewId: Int) {
-            dismissPopup(viewId)
-        }
-
-        override fun onShowKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
-            showKeyboard(viewId, keyboard, bounds)
-        }
-
-        override fun onShowMenu(viewId: Int, menu: KeyDef.Popup.Menu, bounds: Rect) {
-            showMenu(viewId, menu, bounds)
-        }
-
-        override fun onChangeFocus(viewId: Int, x: Float, y: Float): Boolean {
-            return changeFocus(viewId, x, y)
-        }
-
-        override fun onTrigger(viewId: Int): KeyAction? {
-            return triggerFocused(viewId)
-        }
-    }
 }

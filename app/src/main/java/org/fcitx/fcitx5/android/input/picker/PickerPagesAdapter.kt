@@ -5,12 +5,12 @@ import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.data.RecentlyUsed
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.KeyActionListener
-import org.fcitx.fcitx5.android.input.popup.PopupListener
+import org.fcitx.fcitx5.android.input.popup.PopupActionListener
 
 class PickerPagesAdapter(
     val theme: Theme,
     private val keyActionListener: KeyActionListener,
-    private val popupListener: PopupListener,
+    private val popupActionListener: PopupActionListener,
     data: List<Pair<PickerData.Category, Array<String>>>,
     val density: PickerPageUi.Density,
     recentlyUsedFileName: String
@@ -117,18 +117,18 @@ class PickerPagesAdapter(
         holder.ui.keyActionListener = keyActionListener
         if (holder.bindingAdapterPosition == 0) {
             // prevent popup on RecentlyUsed page
-            holder.ui.popupListener = null
+            holder.ui.popupActionListener = null
             // update RecentlyUsed when it's page attached
             updateRecent()
             holder.ui.setItems(pages[0])
         } else {
-            holder.ui.popupListener = popupListener
+            holder.ui.popupActionListener = popupActionListener
         }
     }
 
     override fun onViewDetachedFromWindow(holder: ViewHolder) {
         holder.ui.keyActionListener = null
-        holder.ui.popupListener = null
+        holder.ui.popupActionListener = null
     }
 
     companion object {
