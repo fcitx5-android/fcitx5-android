@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.input.bar
 
 import android.graphics.Color
 import android.os.Build
+import android.text.InputType
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -17,9 +18,23 @@ import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
-import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.*
-import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.*
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.*
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.ClickToAttachWindow
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.ClickToDetachWindow
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.Hidden
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.ClipboardUpdatedEmpty
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.ClipboardUpdatedNonEmpty
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.KawaiiBarShown
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.MenuButtonClicked
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.Pasted
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.Timeout
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.CandidateUpdateNonEmpty
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.CapFlagsUpdatedNoPassword
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.CapFlagsUpdatedPassword
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.ExtendedWindowAttached
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.PreeditUpdatedEmpty
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.PreeditUpdatedNonEmpty
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.WindowDetachedWithCandidatesEmpty
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.WindowDetachedWithCandidatesNonEmpty
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
@@ -31,7 +46,9 @@ import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.editing.TextEditingWindow
+import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
+import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.status.StatusAreaWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
@@ -54,6 +71,8 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     private val windowManager: InputWindowManager by manager.must()
     private val service by manager.inputMethodService()
     private val horizontalCandidate: HorizontalCandidateComponent by manager.must()
+    private val commonKeyActionListener: CommonKeyActionListener by manager.must()
+    private val popup: PopupComponent by manager.must()
 
     private val clipboardSuggestion = AppPrefs.getInstance().clipboard.clipboardSuggestion
     private val clipboardItemTimeout = AppPrefs.getInstance().clipboard.clipboardItemTimeout
@@ -93,6 +112,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                     // renew timeout when clipboard suggestion is present
                     launchClipboardTimeoutJob()
                 }
+
                 else -> {}
             }
         }
@@ -101,6 +121,10 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         ManagedPreference.OnChangeListener<Boolean> { _, it ->
             idleUiStateMachine = IdleUiStateMachine.new(it, idleUiStateMachine)
         }
+
+    private val popupActionListener by lazy {
+        popup.listener
+    }
 
     init {
         ClipboardManager.addOnUpdateListener(onClipboardUpdateListener)
@@ -172,6 +196,8 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     private val titleUi by lazy { KawaiiBarUi.Title(context, theme) }
 
+    private val numberRowUi by lazy { KawaiiBarUi.NumberRowUi(context, theme) }
+
     private val barStateMachine = KawaiiBarStateMachine.new {
         switchUiByState(it)
     }
@@ -182,10 +208,12 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                 setExpandButtonToAttach()
                 setExpandButtonEnabled(true)
             }
+
             ClickToDetachWindow -> {
                 setExpandButtonToDetach()
                 setExpandButtonEnabled(true)
             }
+
             Hidden -> {
                 setExpandButtonEnabled(false)
             }
@@ -239,10 +267,19 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         if (view.displayedChild == index)
             return
         Timber.d("Switch bar to $state")
-        if (view.getChildAt(index) != titleUi.root) {
+        val new = view.getChildAt(index)
+        if (new != titleUi.root) {
             titleUi.setReturnButtonOnClickListener { }
             titleUi.setTitle("")
             titleUi.removeExtension()
+        }
+        if (new == numberRowUi.root) {
+            numberRowUi.root.keyActionListener = commonKeyActionListener.listener
+            numberRowUi.root.popupActionListener = popupActionListener
+        } else {
+            numberRowUi.root.keyActionListener = null
+            numberRowUi.root.popupActionListener = null
+            popup.dismissAll()
         }
         view.displayedChild = index
     }
@@ -255,6 +292,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             add(idleUi.root, lParams(matchParent, matchParent))
             add(candidateUi.root, lParams(matchParent, matchParent))
             add(titleUi.root, lParams(matchParent, matchParent))
+            add(numberRowUi.root, lParams(matchParent, matchParent))
         }
     }
 
@@ -292,6 +330,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                 }
                 barStateMachine.push(ExtendedWindowAttached)
             }
+
             is InputWindow.SimpleInputWindow<*> -> {
             }
         }
@@ -304,5 +343,18 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             else
                 WindowDetachedWithCandidatesNonEmpty
         )
+    }
+
+    override fun onEditorInfoUpdate(info: EditorInfo?) {
+        info?.inputType?.and(InputType.TYPE_MASK_VARIATION)?.run {
+            if (equals(InputType.TYPE_TEXT_VARIATION_PASSWORD) ||
+                equals(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) ||
+                equals(InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD)
+            )
+                barStateMachine.push(CapFlagsUpdatedPassword)
+            else
+                barStateMachine.push(CapFlagsUpdatedNoPassword)
+
+        }
     }
 }

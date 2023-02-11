@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.input.bar
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
@@ -15,14 +16,40 @@ import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.State.*
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.State.Clipboard
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.State.ClipboardTimedOut
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.State.Empty
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.State.Toolbar
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.State.ToolbarWithClip
+import org.fcitx.fcitx5.android.input.keyboard.BaseKeyboard
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
+import org.fcitx.fcitx5.android.input.keyboard.KeyAction
+import org.fcitx.fcitx5.android.input.keyboard.KeyDef
 import org.fcitx.fcitx5.android.utils.rippleDrawable
 import splitties.dimensions.dp
-import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.*
+import splitties.views.dsl.constraintlayout.after
+import splitties.views.dsl.constraintlayout.before
+import splitties.views.dsl.constraintlayout.bottomOfParent
+import splitties.views.dsl.constraintlayout.centerHorizontally
+import splitties.views.dsl.constraintlayout.centerVertically
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.endOfParent
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.matchConstraints
+import splitties.views.dsl.constraintlayout.startOfParent
+import splitties.views.dsl.constraintlayout.topOfParent
+import splitties.views.dsl.core.Ui
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.horizontalLayout
+import splitties.views.dsl.core.imageView
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.verticalMargin
+import splitties.views.dsl.core.wrapContent
 import splitties.views.gravityCenter
 import splitties.views.gravityVerticalCenter
 import splitties.views.imageResource
@@ -224,19 +251,23 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
                     transitionToClipboardBar()
                     enableClipboardItem()
                 }
+
                 Toolbar -> {
                     transitionToButtonsBar()
                     disableClipboardItem()
                 }
+
                 Empty -> {
                     // empty and clipboard share the same view
                     transitionToClipboardBar()
                     disableClipboardItem()
                     setClipboardItemText("")
                 }
+
                 ToolbarWithClip -> {
                     transitionToButtonsBar()
                 }
+
                 ClipboardTimedOut -> {
                     transitionToClipboardBar()
                 }
@@ -320,4 +351,24 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
         }
     }
 
+    class NumberRowUi(ctx: Context, theme: Theme) : KawaiiBarUi(ctx, theme) {
+        @SuppressLint("ViewConstructor")
+        class Keyboard(ctx: Context, theme: Theme) : BaseKeyboard(
+            ctx,
+            theme,
+            listOf(listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0").map(::NumKey))
+        ) {
+            class NumKey(digit: String) : KeyDef(
+                Appearance.Text(
+                    displayText = digit,
+                    textSize = 21f
+                ),
+                setOf(Behavior.Press(KeyAction.SymAction(KeySym(digit.codePointAt(0))))),
+                arrayOf(Popup.Preview(digit))
+            )
+        }
+
+        override val root = Keyboard(ctx, theme)
+
+    }
 }
