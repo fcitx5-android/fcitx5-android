@@ -383,9 +383,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onStartInput(attribute: EditorInfo, restarting: Boolean) {
         // update selection as soon as possible
-        // FIXME: onSelectionUpdate may happen before onStartInput when restarting=true,
-        // resulting outdated initialSel{Start,End}.
-        selection.resetTo(attribute.initialSelStart, attribute.initialSelEnd)
+        if (!restarting) {
+            // initialSel{Start,End} is usually outdated when restarting input
+            selection.resetTo(attribute.initialSelStart, attribute.initialSelEnd)
+        }
         composing.clear()
         composingText = FormattedText()
         val flags = CapabilityFlags.fromEditorInfo(attribute)
