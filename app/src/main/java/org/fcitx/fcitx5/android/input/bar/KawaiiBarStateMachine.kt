@@ -10,8 +10,9 @@ import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.ExtendedWindowAttached
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.PreeditUpdatedEmpty
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.PreeditUpdatedNonEmpty
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.WindowDetachedWithCandidatesEmpty
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.WindowDetachedWithCandidatesNonEmpty
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.WindowDetachedWithCapFlagsNoPassword
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.WindowDetachedWithCapFlagsPassword
 import org.fcitx.fcitx5.android.utils.eventStateMachine
 
 object KawaiiBarStateMachine {
@@ -24,7 +25,8 @@ object KawaiiBarStateMachine {
         PreeditUpdatedNonEmpty,
         CandidateUpdateNonEmpty,
         ExtendedWindowAttached,
-        WindowDetachedWithCandidatesEmpty,
+        WindowDetachedWithCapFlagsPassword,
+        WindowDetachedWithCapFlagsNoPassword,
         WindowDetachedWithCandidatesNonEmpty,
         CapFlagsUpdatedPassword,
         CapFlagsUpdatedNoPassword,
@@ -34,12 +36,14 @@ object KawaiiBarStateMachine {
         from(Idle) transitTo Title on ExtendedWindowAttached
         from(Idle) transitTo Candidate on PreeditUpdatedNonEmpty
         from(Idle) transitTo Candidate on CandidateUpdateNonEmpty
-        from(Title) transitTo Idle on WindowDetachedWithCandidatesEmpty
+        from(Title) transitTo Idle on WindowDetachedWithCapFlagsNoPassword
+        from(Title) transitTo NumberRow on WindowDetachedWithCapFlagsPassword
         from(Title) transitTo Candidate on WindowDetachedWithCandidatesNonEmpty
         from(Candidate) transitTo Idle on PreeditUpdatedEmpty
         from(Candidate) transitTo Title on ExtendedWindowAttached
         from(Idle) transitTo NumberRow on CapFlagsUpdatedPassword
         from(NumberRow) transitTo Idle on CapFlagsUpdatedNoPassword
+        from(NumberRow) transitTo Title on ExtendedWindowAttached
         onNewState(block)
     }
 }

@@ -10,11 +10,7 @@ import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.core.FcitxEvent
-import org.fcitx.fcitx5.android.core.FcitxKeyMapping
-import org.fcitx.fcitx5.android.core.InputMethodEntry
-import org.fcitx.fcitx5.android.core.KeyStates
-import org.fcitx.fcitx5.android.core.KeySym
+import org.fcitx.fcitx5.android.core.*
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.GestureType
@@ -23,16 +19,7 @@ import org.fcitx.fcitx5.android.input.popup.PopupAction
 import org.fcitx.fcitx5.android.input.popup.PopupActionListener
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
-import splitties.views.dsl.constraintlayout.above
-import splitties.views.dsl.constraintlayout.after
-import splitties.views.dsl.constraintlayout.before
-import splitties.views.dsl.constraintlayout.below
-import splitties.views.dsl.constraintlayout.bottomOfParent
-import splitties.views.dsl.constraintlayout.constraintLayout
-import splitties.views.dsl.constraintlayout.endOfParent
-import splitties.views.dsl.constraintlayout.lParams
-import splitties.views.dsl.constraintlayout.startOfParent
-import splitties.views.dsl.constraintlayout.topOfParent
+import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.add
 import splitties.views.imageResource
 import timber.log.Timber
@@ -488,7 +475,7 @@ abstract class BaseKeyboard(
         // do nothing by default
     }
 
-    open fun onEditorInfoChange(info: EditorInfo?) {
+    open fun onEditorInfoChange(info: EditorInfo, capFlags: CapabilityFlags) {
         // do nothing by default
     }
 

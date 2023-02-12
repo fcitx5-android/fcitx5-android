@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.input.editorinfo
 
 import android.view.inputmethod.EditorInfo
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.CapabilityFlags
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
@@ -25,11 +26,12 @@ class EditorInfoWindow : InputWindow.ExtendedInputWindow<EditorInfoWindow>(),
     override fun onCreateView() = ui.root
 
     override fun onAttached() {
-        onEditorInfoUpdate(service.editorInfo)
+        service.editorInfo?.let {
+            ui.setValues(EditorInfoParser.parse(it))
+        }
     }
 
-    override fun onEditorInfoUpdate(info: EditorInfo?) {
-        if (info == null) return
+    override fun onEditorInfoUpdate(info: EditorInfo, capFlags: CapabilityFlags) {
         ui.setValues(EditorInfoParser.parse(info))
     }
 

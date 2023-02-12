@@ -270,3 +270,7 @@ inline fun <T> withTempDir(block: (File) -> T): T {
         dir.delete()
     }
 }
+
+@Suppress("NOTHING_TO_INLINE")
+inline infix fun <T1 : Any, T2 : Any> T1?.notNullTo(y: T2?): Pair<T1, T2>? =
+    this?.let { a -> y?.let { b -> a to b } }

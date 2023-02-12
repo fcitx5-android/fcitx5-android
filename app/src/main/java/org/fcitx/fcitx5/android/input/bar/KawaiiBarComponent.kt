@@ -2,7 +2,6 @@ package org.fcitx.fcitx5.android.input.bar
 
 import android.graphics.Color
 import android.os.Build
-import android.text.InputType
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -13,28 +12,16 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.CapabilityFlag
+import org.fcitx.fcitx5.android.core.CapabilityFlags
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
-import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.ClickToAttachWindow
-import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.ClickToDetachWindow
-import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.Hidden
-import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.ClipboardUpdatedEmpty
-import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.ClipboardUpdatedNonEmpty
-import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.KawaiiBarShown
-import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.MenuButtonClicked
-import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.Pasted
-import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.Timeout
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.CandidateUpdateNonEmpty
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.CapFlagsUpdatedNoPassword
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.CapFlagsUpdatedPassword
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.ExtendedWindowAttached
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.PreeditUpdatedEmpty
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.PreeditUpdatedNonEmpty
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.WindowDetachedWithCandidatesEmpty
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.WindowDetachedWithCandidatesNonEmpty
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.*
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.*
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.*
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
@@ -339,22 +326,21 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     override fun onWindowDetached(window: InputWindow) {
         barStateMachine.push(
             if (horizontalCandidate.adapter.candidates.isEmpty())
-                WindowDetachedWithCandidatesEmpty
+                if (service.capabilityFlags.has(CapabilityFlag.Password))
+                    WindowDetachedWithCapFlagsPassword
+                else
+                    WindowDetachedWithCapFlagsNoPassword
             else
                 WindowDetachedWithCandidatesNonEmpty
         )
     }
 
-    override fun onEditorInfoUpdate(info: EditorInfo?) {
-        info?.inputType?.and(InputType.TYPE_MASK_VARIATION)?.run {
-            if (equals(InputType.TYPE_TEXT_VARIATION_PASSWORD) ||
-                equals(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) ||
-                equals(InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD)
-            )
-                barStateMachine.push(CapFlagsUpdatedPassword)
+    override fun onEditorInfoUpdate(info: EditorInfo, capFlags: CapabilityFlags) {
+        barStateMachine.push(
+            if (capFlags.has(CapabilityFlag.Password))
+                CapFlagsUpdatedPassword
             else
-                barStateMachine.push(CapFlagsUpdatedNoPassword)
-
-        }
+                CapFlagsUpdatedNoPassword
+        )
     }
 }

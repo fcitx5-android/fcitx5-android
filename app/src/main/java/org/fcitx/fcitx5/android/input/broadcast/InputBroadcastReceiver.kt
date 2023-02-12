@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.input.broadcast
 
 import android.view.inputmethod.EditorInfo
 import org.fcitx.fcitx5.android.core.Action
+import org.fcitx.fcitx5.android.core.CapabilityFlags
 import org.fcitx.fcitx5.android.core.FcitxEvent.InputPanelAuxEvent
 import org.fcitx.fcitx5.android.core.FcitxEvent.PreeditEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
@@ -12,7 +13,7 @@ interface InputBroadcastReceiver {
 
     fun onScopeSetupFinished(scope: DynamicScope) {}
 
-    fun onEditorInfoUpdate(info: EditorInfo?) {}
+    fun onEditorInfoUpdate(info: EditorInfo, capFlags: CapabilityFlags) {}
 
     fun onPreeditUpdate(data: PreeditEvent.Data) {}
 

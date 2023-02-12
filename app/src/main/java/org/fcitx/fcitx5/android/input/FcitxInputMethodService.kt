@@ -45,6 +45,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private var inputView: InputView? = null
 
     var editorInfo: EditorInfo? = null
+    var capabilityFlags = CapabilityFlags.DefaultFlags
 
     val selection = CursorTracker()
     val composing = CursorRange()
@@ -92,6 +93,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             is FcitxEvent.CommitStringEvent -> {
                 commitText(event.data)
             }
+
             is FcitxEvent.KeyEvent -> event.data.let event@{
                 if (it.states.virtual) {
                     // KeyEvent from virtual keyboard
@@ -127,9 +129,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     }
                 }
             }
+
             is FcitxEvent.PreeditEvent -> {
                 updateComposingText(event.data.clientPreedit)
             }
+
             else -> {
             }
         }
@@ -378,21 +382,26 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onStartInput(attribute: EditorInfo, restarting: Boolean) {
+        val flags = CapabilityFlags.fromEditorInfo(attribute)
         // update selection as soon as possible
         selection.resetTo(attribute.initialSelStart, attribute.initialSelEnd)
         composing.clear()
         composingText = FormattedText()
         editorInfo = attribute
+        capabilityFlags = flags
         Timber.d("onStartInput: initialSel=${selection.current}, restarting=$restarting")
         if (restarting) return
         lifecycleScope.launchOnFcitxReady(fcitx) {
             it.setCapFlags(CapabilityFlags.fromEditorInfo(attribute))
         }
+        inputView?.onEditorInfoUpdate(attribute, flags)
     }
 
     override fun onStartInputView(info: EditorInfo, restarting: Boolean) {
         Timber.d("onStartInputView: restarting=$restarting")
+        val flags = CapabilityFlags.fromEditorInfo(info)
         editorInfo = info
+        capabilityFlags = flags
         lifecycleScope.launchOnFcitxReady(fcitx) {
             if (restarting) {
                 // when input restarts in the same editor, focus out to clear previous state
@@ -402,10 +411,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             }
             // EditorInfo can be different in onStartInput and onStartInputView,
             // especially in browsers
-            it.setCapFlags(CapabilityFlags.fromEditorInfo(info))
+            it.setCapFlags(flags)
             it.focus(true)
         }
         inputView?.onShow()
+        inputView?.onEditorInfoUpdate(info, flags)
     }
 
     override fun onUpdateSelection(
@@ -544,6 +554,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     override fun onFinishInput() {
         Timber.d("onFinishInput")
         editorInfo = null
+        capabilityFlags = CapabilityFlags.DefaultFlags
     }
 
     override fun onUnbindInput() {

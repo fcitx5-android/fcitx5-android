@@ -8,6 +8,7 @@ import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import androidx.transition.Slide
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.CapabilityFlags
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
@@ -127,16 +128,14 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
         }
     }
 
-    override fun onEditorInfoUpdate(info: EditorInfo?) {
-        val targetLayout = service.editorInfo?.let {
-            when (it.inputType and InputType.TYPE_MASK_CLASS) {
-                InputType.TYPE_CLASS_NUMBER -> NumberKeyboard.Name
-                InputType.TYPE_CLASS_PHONE -> NumberKeyboard.Name
-                else -> TextKeyboard.Name
-            }
+    override fun onEditorInfoUpdate(info: EditorInfo, capFlags: CapabilityFlags) {
+        val targetLayout = when (info.inputType and InputType.TYPE_MASK_CLASS) {
+            InputType.TYPE_CLASS_NUMBER -> NumberKeyboard.Name
+            InputType.TYPE_CLASS_PHONE -> NumberKeyboard.Name
+            else -> TextKeyboard.Name
         }
-        switchLayout(targetLayout ?: TextKeyboard.Name, remember = false)
-        currentKeyboard?.onEditorInfoChange(info)
+        switchLayout(targetLayout, remember = false)
+        currentKeyboard?.onEditorInfoChange(info, capFlags)
     }
 
     override fun onImeUpdate(ime: InputMethodEntry) {

@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.input.broadcast
 
 import android.view.inputmethod.EditorInfo
 import org.fcitx.fcitx5.android.core.Action
+import org.fcitx.fcitx5.android.core.CapabilityFlags
 import org.fcitx.fcitx5.android.core.FcitxEvent.InputPanelAuxEvent
 import org.fcitx.fcitx5.android.core.FcitxEvent.PreeditEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
@@ -23,6 +24,7 @@ class InputBroadcaster : UniqueComponent<InputBroadcaster>(), Dependent, InputBr
                     receivers.add(scopeEvent.dependency as InputBroadcastReceiver)
                 }
             }
+
             is ScopeEvent.DependencyLeftEvent -> {
                 if (scopeEvent.dependency is InputBroadcastReceiver && scopeEvent.dependency !is InputBroadcaster) {
                     receivers.remove(scopeEvent.dependency as InputBroadcastReceiver)
@@ -39,8 +41,8 @@ class InputBroadcaster : UniqueComponent<InputBroadcaster>(), Dependent, InputBr
         receivers.forEach { it.onInputPanelAuxUpdate(data) }
     }
 
-    override fun onEditorInfoUpdate(info: EditorInfo?) {
-        receivers.forEach { it.onEditorInfoUpdate(info) }
+    override fun onEditorInfoUpdate(info: EditorInfo, capFlags: CapabilityFlags) {
+        receivers.forEach { it.onEditorInfoUpdate(info, capFlags) }
     }
 
     override fun onImeUpdate(ime: InputMethodEntry) {

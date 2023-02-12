@@ -5,6 +5,7 @@ import android.content.Context
 import android.view.inputmethod.EditorInfo
 import androidx.core.view.allViews
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.CapabilityFlags
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
@@ -135,7 +136,7 @@ class TextKeyboard(
         `return`.img.imageResource = drawableForReturn(info)
     }
 
-    override fun onEditorInfoChange(info: EditorInfo?) {
+    override fun onEditorInfoChange(info: EditorInfo, capFlags: CapabilityFlags) {
         `return`.img.imageResource = drawableForReturn(info)
     }
 

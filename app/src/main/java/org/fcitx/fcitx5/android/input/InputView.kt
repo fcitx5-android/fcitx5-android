@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.os.Build
 import android.view.View
 import android.view.WindowManager
+import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import android.widget.Space
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -15,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.CapabilityFlags
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
@@ -29,8 +31,8 @@ import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
 import org.fcitx.fcitx5.android.input.picker.emojiPicker
-import org.fcitx.fcitx5.android.input.picker.symbolPicker
 import org.fcitx.fcitx5.android.input.picker.emoticonPicker
+import org.fcitx.fcitx5.android.input.picker.symbolPicker
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
 import org.fcitx.fcitx5.android.input.punctuation.PunctuationComponent
@@ -176,6 +178,7 @@ class InputView(
                         it.isNavigationBarContrastEnforced = true
                     }
                 }
+
                 NavbarBackground.ColorOnly -> {
                     shouldUpdateNavbarForeground = true
                     shouldUpdateNavbarBackground = true
@@ -184,6 +187,7 @@ class InputView(
                         it.isNavigationBarContrastEnforced = false
                     }
                 }
+
                 NavbarBackground.Full -> {
                     shouldUpdateNavbarForeground = true
                     // allow draw behind navigation bar
@@ -283,7 +287,6 @@ class InputView(
         // We cannot use the key for keyboard window,
         // as this is the only place where the window manager gets keyboard window instance
         windowManager.attachWindow(keyboardWindow)
-        broadcaster.onEditorInfoUpdate(service.editorInfo)
     }
 
     fun onHide() {
@@ -295,18 +298,23 @@ class InputView(
             is FcitxEvent.CandidateListEvent -> {
                 broadcaster.onCandidateUpdate(it.data)
             }
+
             is FcitxEvent.PreeditEvent -> {
                 broadcaster.onPreeditUpdate(it.data)
             }
+
             is FcitxEvent.InputPanelAuxEvent -> {
                 broadcaster.onInputPanelAuxUpdate(it.data)
             }
+
             is FcitxEvent.IMChangeEvent -> {
                 broadcaster.onImeUpdate(it.data)
             }
+
             is FcitxEvent.StatusAreaEvent -> {
                 broadcaster.onStatusAreaUpdate(it.data)
             }
+
             else -> {
             }
         }
@@ -314,6 +322,10 @@ class InputView(
 
     fun onSelectionUpdate(start: Int, end: Int) {
         broadcaster.onSelectionUpdate(start, end)
+    }
+
+    fun onEditorInfoUpdate(info: EditorInfo, capFlags: CapabilityFlags) {
+        broadcaster.onEditorInfoUpdate(info, capFlags)
     }
 
     private var showingDialog: Dialog? = null
