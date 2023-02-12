@@ -382,11 +382,13 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onStartInput(attribute: EditorInfo, restarting: Boolean) {
-        val flags = CapabilityFlags.fromEditorInfo(attribute)
         // update selection as soon as possible
+        // FIXME: onSelectionUpdate may happen before onStartInput when restarting=true,
+        // resulting outdated initialSel{Start,End}.
         selection.resetTo(attribute.initialSelStart, attribute.initialSelEnd)
         composing.clear()
         composingText = FormattedText()
+        val flags = CapabilityFlags.fromEditorInfo(attribute)
         editorInfo = attribute
         capabilityFlags = flags
         Timber.d("onStartInput: initialSel=${selection.current}, restarting=$restarting")
@@ -474,6 +476,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             }
         } else {
             Timber.d("handleCursorUpdate: focus out/in")
+            composing.clear()
+            composingText = FormattedText()
             // cursor outside composing range, finish composing as-is
             inputConnection?.finishComposingText()
             // `fcitx.reset()` here would commit preedit after new cursor position
