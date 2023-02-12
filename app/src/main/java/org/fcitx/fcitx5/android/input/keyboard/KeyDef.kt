@@ -12,6 +12,7 @@ open class KeyDef(
         val percentWidth: Float,
         val variant: Variant,
         val border: Border,
+        val margin: Boolean,
         val viewId: Int,
     ) {
         enum class Variant {
@@ -33,8 +34,9 @@ open class KeyDef(
             percentWidth: Float = 0.1f,
             variant: Variant = Variant.Normal,
             border: Border = Border.Default,
+            margin: Boolean = true,
             viewId: Int = -1
-        ) : Appearance(percentWidth, variant, border, viewId)
+        ) : Appearance(percentWidth, variant, border, margin, viewId)
 
         class AltText(
             displayText: String,
@@ -48,8 +50,9 @@ open class KeyDef(
             percentWidth: Float = 0.1f,
             variant: Variant = Variant.Normal,
             border: Border = Border.Default,
+            margin: Boolean = true,
             viewId: Int = -1
-        ) : Text(displayText, textSize, textStyle, percentWidth, variant, border, viewId)
+        ) : Text(displayText, textSize, textStyle, percentWidth, variant, border, margin, viewId)
 
         class Image(
             @DrawableRes
@@ -57,8 +60,9 @@ open class KeyDef(
             percentWidth: Float = 0.1f,
             variant: Variant = Variant.Normal,
             border: Border = Border.Default,
+            margin: Boolean = true,
             viewId: Int = -1
-        ) : Appearance(percentWidth, variant, border, viewId)
+        ) : Appearance(percentWidth, variant, border, margin, viewId)
     }
 
     sealed class Behavior {

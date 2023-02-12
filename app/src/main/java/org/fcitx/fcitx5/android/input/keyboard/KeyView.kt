@@ -32,11 +32,20 @@ import kotlin.math.min
 abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearance) :
     CustomGestureView(ctx) {
 
-    val bordered = ThemeManager.prefs.keyBorder.getValue()
-    val rippled = ThemeManager.prefs.keyRippleEffect.getValue()
-    val radius = dp(ThemeManager.prefs.keyRadius.getValue().toFloat())
-    val hMargin = dp(ThemeManager.prefs.keyHorizontalMargin.getValue())
-    val vMargin = dp(ThemeManager.prefs.keyVerticalMargin.getValue())
+    val bordered: Boolean
+    val rippled: Boolean
+    val radius: Float
+    val hMargin: Int
+    val vMargin: Int
+
+    init {
+        val prefs = ThemeManager.prefs
+        bordered = prefs.keyBorder.getValue()
+        rippled = prefs.keyRippleEffect.getValue()
+        radius = dp(prefs.keyRadius.getValue().toFloat())
+        hMargin = if (def.margin) dp(prefs.keyHorizontalMargin.getValue()) else 0
+        vMargin = if (def.margin) dp(prefs.keyVerticalMargin.getValue()) else 0
+    }
 
     private val cachedLocation = intArrayOf(0, 0)
     private val cachedBounds = Rect()

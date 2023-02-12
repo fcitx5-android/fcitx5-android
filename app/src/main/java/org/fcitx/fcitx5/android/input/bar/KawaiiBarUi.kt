@@ -339,7 +339,9 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
             class NumKey(digit: String) : KeyDef(
                 Appearance.Text(
                     displayText = digit,
-                    textSize = 21f
+                    textSize = 21f,
+                    border = Appearance.Border.Off,
+                    margin = false
                 ),
                 setOf(Behavior.Press(KeyAction.SymAction(KeySym(digit.codePointAt(0))))),
                 arrayOf(Popup.Preview(digit))
