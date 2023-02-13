@@ -18,6 +18,8 @@ sealed class InputWindow : Dependent {
 
     protected val context by manager.context()
 
+    var viewCreated = false
+
     /**
      * Animation when the window is added to the layout
      */

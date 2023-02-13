@@ -99,10 +99,6 @@ class InputView(
         scope += windowManager
         scope += kawaiiBar
         scope += horizontalCandidate
-        scope += keyboardWindow
-        scope += symbolPicker
-        scope += emojiPicker
-        scope += emoticonPicker
         broadcaster.onScopeSetupFinished(scope)
     }
 
@@ -164,6 +160,7 @@ class InputView(
             it.registerOnChangeListener(onKeyboardSizeChangeListener)
         }
 
+        windowManager.addEssentialWindow(keyboardWindow)
         windowManager.addEssentialWindow(symbolPicker)
         windowManager.addEssentialWindow(emojiPicker)
         windowManager.addEssentialWindow(emoticonPicker)

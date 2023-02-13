@@ -54,19 +54,20 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
     }
 
     /**
-     * Associate essential window with its key
-     * This function does not create any view nor set up the scope
+     * Associate essential window with its key and add the window to scope
+     * This function does not create the view.
      */
     @Suppress("BOUNDS_NOT_ALLOWED_IF_BOUNDED_BY_TYPE_PARAMETER")
     fun <W : InputWindow, E : EssentialWindow, R> addEssentialWindow(window: R) where R : W, R : E {
         ensureThread()
         if (window.key in essentialWindows) {
-            if (essentialWindows[window.key] === window)
+            if (essentialWindows[window.key]?.first === window)
                 Timber.d("Skip adding essential window $window")
             else
                 throw IllegalStateException("${window.key} is already occupied")
         }
         essentialWindows[window.key] = window to null
+        scope += window
     }
 
     fun getEssentialWindow(windowKey: EssentialWindow.Key) =
@@ -118,6 +119,7 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
             scope += window
             window.onCreateView()
         }
+        window.viewCreated = true
         if (currentWindow != null) {
             val oldWindow = currentWindow!!
             val oldView = currentView!!
