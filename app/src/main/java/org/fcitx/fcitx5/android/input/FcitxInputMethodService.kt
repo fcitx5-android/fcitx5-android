@@ -397,7 +397,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         lifecycleScope.launchOnFcitxReady(fcitx) {
             it.setCapFlags(CapabilityFlags.fromEditorInfo(attribute))
         }
-        inputView?.onEditorInfoUpdate(attribute, flags)
     }
 
     override fun onStartInputView(info: EditorInfo, restarting: Boolean) {
@@ -417,8 +416,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             it.setCapFlags(flags)
             it.focus(true)
         }
-        inputView?.onShow()
-        inputView?.onEditorInfoUpdate(info, flags)
+        inputView?.onStart(info, flags, restarting)
     }
 
     override fun onUpdateSelection(
@@ -553,7 +551,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         lifecycleScope.launchOnFcitxReady(fcitx) {
             it.focus(false)
         }
-        inputView?.onHide()
+        inputView?.onFinish()
     }
 
     override fun onFinishInput() {

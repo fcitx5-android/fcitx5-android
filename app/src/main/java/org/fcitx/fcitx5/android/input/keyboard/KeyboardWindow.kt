@@ -128,7 +128,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
         }
     }
 
-    override fun onEditorInfoUpdate(info: EditorInfo, capFlags: CapabilityFlags) {
+    override fun onStartInput(info: EditorInfo, capFlags: CapabilityFlags) {
         val targetLayout = when (info.inputType and InputType.TYPE_MASK_CLASS) {
             InputType.TYPE_CLASS_NUMBER -> NumberKeyboard.Name
             InputType.TYPE_CLASS_PHONE -> NumberKeyboard.Name
