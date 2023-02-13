@@ -397,7 +397,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         lifecycleScope.launchOnFcitxReady(fcitx) {
             it.setCapFlags(CapabilityFlags.fromEditorInfo(attribute))
         }
-        inputView?.onEditorInfoUpdate(attribute, flags)
     }
 
     override fun onStartInputView(info: EditorInfo, restarting: Boolean) {
@@ -417,8 +416,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             it.setCapFlags(flags)
             it.focus(true)
         }
-        inputView?.onShow()
-        inputView?.onEditorInfoUpdate(info, flags)
+        inputView?.startInput(info, flags, restarting)
     }
 
     override fun onUpdateSelection(
@@ -434,7 +432,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         cursorUpdateIndex += 1
         Timber.d("onUpdateSelection: old=[$oldSelStart,$oldSelEnd] new=[$newSelStart,$newSelEnd] cand=[$candidatesStart,$candidatesEnd]")
         handleCursorUpdate(newSelStart, newSelEnd, cursorUpdateIndex)
-        inputView?.onSelectionUpdate(newSelStart, newSelEnd)
+        inputView?.updateSelection(newSelStart, newSelEnd)
     }
 
     override fun onUpdateCursorAnchorInfo(info: CursorAnchorInfo) {
@@ -553,7 +551,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         lifecycleScope.launchOnFcitxReady(fcitx) {
             it.focus(false)
         }
-        inputView?.onHide()
+        inputView?.finishInput()
     }
 
     override fun onFinishInput() {

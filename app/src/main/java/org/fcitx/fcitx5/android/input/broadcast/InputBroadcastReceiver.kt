@@ -13,7 +13,7 @@ interface InputBroadcastReceiver {
 
     fun onScopeSetupFinished(scope: DynamicScope) {}
 
-    fun onEditorInfoUpdate(info: EditorInfo, capFlags: CapabilityFlags) {}
+    fun onStartInput(info: EditorInfo, capFlags: CapabilityFlags) {}
 
     fun onPreeditUpdate(data: PreeditEvent.Data) {}
 

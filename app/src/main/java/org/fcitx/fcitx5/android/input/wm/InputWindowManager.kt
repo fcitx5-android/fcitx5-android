@@ -58,7 +58,10 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
      * This function does not create any view nor set up the scope
      */
     @Suppress("BOUNDS_NOT_ALLOWED_IF_BOUNDED_BY_TYPE_PARAMETER")
-    fun <W : InputWindow, E : EssentialWindow, R> addEssentialWindow(window: R) where R : W, R : E {
+    fun <W : InputWindow, E : EssentialWindow, R> addEssentialWindow(
+        window: R,
+        createView: Boolean = false
+    ) where R : W, R : E {
         ensureThread()
         if (window.key in essentialWindows) {
             if (essentialWindows[window.key] === window)
@@ -66,7 +69,8 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
             else
                 throw IllegalStateException("${window.key} is already occupied")
         }
-        essentialWindows[window.key] = window to null
+        val view = if (createView) window.onCreateView() else null
+        essentialWindows[window.key] = window to view
     }
 
     fun getEssentialWindow(windowKey: EssentialWindow.Key) =

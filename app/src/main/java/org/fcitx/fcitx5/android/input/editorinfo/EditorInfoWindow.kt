@@ -1,16 +1,12 @@
 package org.fcitx.fcitx5.android.input.editorinfo
 
-import android.view.inputmethod.EditorInfo
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.core.CapabilityFlags
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
-import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 
-class EditorInfoWindow : InputWindow.ExtendedInputWindow<EditorInfoWindow>(),
-    InputBroadcastReceiver {
+class EditorInfoWindow : InputWindow.ExtendedInputWindow<EditorInfoWindow>() {
 
     private val service: FcitxInputMethodService by manager.inputMethodService()
     private val theme by manager.theme()
@@ -29,10 +25,6 @@ class EditorInfoWindow : InputWindow.ExtendedInputWindow<EditorInfoWindow>(),
         service.editorInfo?.let {
             ui.setValues(EditorInfoParser.parse(it))
         }
-    }
-
-    override fun onEditorInfoUpdate(info: EditorInfo, capFlags: CapabilityFlags) {
-        ui.setValues(EditorInfoParser.parse(info))
     }
 
     override fun onDetached() {}

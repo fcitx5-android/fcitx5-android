@@ -164,6 +164,8 @@ class InputView(
             it.registerOnChangeListener(onKeyboardSizeChangeListener)
         }
 
+        // make sure KeyboardWindow's view has been created before it receives any broadcast
+        windowManager.addEssentialWindow(keyboardWindow, createView = true)
         windowManager.addEssentialWindow(symbolPicker)
         windowManager.addEssentialWindow(emojiPicker)
         windowManager.addEssentialWindow(emoticonPicker)
@@ -260,37 +262,28 @@ class InputView(
         windowManager.view.setPadding(sidePadding, 0, sidePadding, 0)
     }
 
-    override fun onDetachedFromWindow() {
-        keyboardSizePrefs.forEach {
-            it.unregisterOnChangeListener(onKeyboardSizeChangeListener)
-        }
-        ViewCompat.setOnApplyWindowInsetsListener(this, null)
-        super.onDetachedFromWindow()
-    }
-
-    fun onShow() {
-        if (shouldUpdateNavbarForeground || shouldUpdateNavbarBackground) {
-            service.window.window!!.also {
-                if (shouldUpdateNavbarForeground) {
-                    WindowCompat.getInsetsController(it, it.decorView)
-                        .isAppearanceLightNavigationBars = !theme.isDark
-                }
-                if (shouldUpdateNavbarBackground) {
-                    it.navigationBarColor = when (theme) {
-                        is Theme.Builtin -> if (keyBorder) theme.backgroundColor else theme.keyboardColor
-                        is Theme.Custom -> theme.backgroundColor
+    /**
+     * called when [InputView] is about to show, or restart
+     */
+    fun startInput(info: EditorInfo, capFlags: CapabilityFlags, restarting: Boolean = false) {
+        if (!restarting) {
+            if (shouldUpdateNavbarForeground || shouldUpdateNavbarBackground) {
+                service.window.window!!.also {
+                    if (shouldUpdateNavbarForeground) {
+                        WindowCompat.getInsetsController(it, it.decorView)
+                            .isAppearanceLightNavigationBars = !theme.isDark
+                    }
+                    if (shouldUpdateNavbarBackground) {
+                        it.navigationBarColor = when (theme) {
+                            is Theme.Builtin -> if (keyBorder) theme.backgroundColor else theme.keyboardColor
+                            is Theme.Custom -> theme.backgroundColor
+                        }
                     }
                 }
             }
         }
-        kawaiiBar.onShow()
-        // We cannot use the key for keyboard window,
-        // as this is the only place where the window manager gets keyboard window instance
-        windowManager.attachWindow(keyboardWindow)
-    }
-
-    fun onHide() {
-        showingDialog?.dismiss()
+        broadcaster.onStartInput(info, capFlags)
+        windowManager.attachWindow(KeyboardWindow)
     }
 
     private fun handleFcitxEvent(it: FcitxEvent<*>) {
@@ -320,12 +313,8 @@ class InputView(
         }
     }
 
-    fun onSelectionUpdate(start: Int, end: Int) {
+    fun updateSelection(start: Int, end: Int) {
         broadcaster.onSelectionUpdate(start, end)
-    }
-
-    fun onEditorInfoUpdate(info: EditorInfo, capFlags: CapabilityFlags) {
-        broadcaster.onEditorInfoUpdate(info, capFlags)
     }
 
     private var showingDialog: Dialog? = null
@@ -348,6 +337,21 @@ class InputView(
             setOnDismissListener { this@InputView.showingDialog = null }
             show()
         }
+    }
+
+    /**
+     * called when [InputView] is being hidden
+     */
+    fun finishInput() {
+        showingDialog?.dismiss()
+    }
+
+    override fun onDetachedFromWindow() {
+        keyboardSizePrefs.forEach {
+            it.unregisterOnChangeListener(onKeyboardSizeChangeListener)
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(this, null)
+        super.onDetachedFromWindow()
     }
 
     fun onDestroy() {

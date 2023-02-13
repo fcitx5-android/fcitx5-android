@@ -240,15 +240,6 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             candidateUi.expandButton.visibility = View.INVISIBLE
     }
 
-    fun onShow() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            idleUi.privateMode(
-                service.editorInfo?.imeOptions?.hasFlag(EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING) == true
-            )
-        }
-        idleUiStateMachine.push(KawaiiBarShown)
-    }
-
     private fun switchUiByState(state: KawaiiBarStateMachine.State) {
         val index = state.ordinal
         if (view.displayedChild == index)
@@ -293,6 +284,19 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         }
     }
 
+    override fun onStartInput(info: EditorInfo, capFlags: CapabilityFlags) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            idleUi.privateMode(info.imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING))
+        }
+        idleUiStateMachine.push(KawaiiBarShown)
+        barStateMachine.push(
+            if (capFlags.has(CapabilityFlag.Password))
+                CapFlagsUpdatedPassword
+            else
+                CapFlagsUpdatedNoPassword
+        )
+    }
+
     override fun onPreeditUpdate(data: FcitxEvent.PreeditEvent.Data) {
         barStateMachine.push(
             if (data.preedit.isEmpty() && data.clientPreedit.isEmpty())
@@ -335,12 +339,4 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         )
     }
 
-    override fun onEditorInfoUpdate(info: EditorInfo, capFlags: CapabilityFlags) {
-        barStateMachine.push(
-            if (capFlags.has(CapabilityFlag.Password))
-                CapFlagsUpdatedPassword
-            else
-                CapFlagsUpdatedNoPassword
-        )
-    }
 }
