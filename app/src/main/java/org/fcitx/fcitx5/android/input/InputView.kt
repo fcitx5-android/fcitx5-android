@@ -265,7 +265,7 @@ class InputView(
     /**
      * called when [InputView] is about to show, or restart
      */
-    fun onStart(info: EditorInfo, capFlags: CapabilityFlags, restarting: Boolean = false) {
+    fun startInput(info: EditorInfo, capFlags: CapabilityFlags, restarting: Boolean = false) {
         if (!restarting) {
             if (shouldUpdateNavbarForeground || shouldUpdateNavbarBackground) {
                 service.window.window!!.also {
@@ -313,7 +313,7 @@ class InputView(
         }
     }
 
-    fun onSelectionUpdate(start: Int, end: Int) {
+    fun updateSelection(start: Int, end: Int) {
         broadcaster.onSelectionUpdate(start, end)
     }
 
@@ -342,7 +342,7 @@ class InputView(
     /**
      * called when [InputView] is being hidden
      */
-    fun onFinish() {
+    fun finishInput() {
         showingDialog?.dismiss()
     }
 

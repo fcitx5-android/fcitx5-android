@@ -2,13 +2,11 @@ package org.fcitx.fcitx5.android.input.editorinfo
 
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
-import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 
-class EditorInfoWindow : InputWindow.ExtendedInputWindow<EditorInfoWindow>(),
-    InputBroadcastReceiver {
+class EditorInfoWindow : InputWindow.ExtendedInputWindow<EditorInfoWindow>() {
 
     private val service: FcitxInputMethodService by manager.inputMethodService()
     private val theme by manager.theme()
