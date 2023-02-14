@@ -79,9 +79,9 @@ value class CapabilityFlags constructor(val flags: ULong) {
                     CapabilityFlag.ClientSideInputPanel.flag
         )
 
-        fun fromEditorInfo(info: EditorInfo?): CapabilityFlags {
+        fun fromEditorInfo(info: EditorInfo): CapabilityFlags {
             var flags = DefaultFlags.flags
-            info?.imeOptions?.let {
+            info.imeOptions.let {
                 if (it.hasFlag(EditorInfo.IME_FLAG_FORCE_ASCII)) {
                     flags += CapabilityFlag.Alpha
                 }
@@ -89,7 +89,7 @@ value class CapabilityFlags constructor(val flags: ULong) {
                     flags += CapabilityFlag.Sensitive
                 }
             }
-            info?.inputType?.let {
+            info.inputType.let {
                 when (it and InputType.TYPE_MASK_CLASS) {
                     InputType.TYPE_NULL -> {
                         flags -= CapabilityFlag.Preedit

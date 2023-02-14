@@ -130,7 +130,7 @@ class TextKeyboard(
         if (capsState == CapsState.Once) switchCapsState()
     }
 
-    override fun onAttach(info: EditorInfo?) {
+    override fun onAttach(info: EditorInfo) {
         updateCapsButtonIcon()
         updateAlphabetKeys()
         `return`.img.imageResource = drawableForReturn(info)
@@ -140,7 +140,7 @@ class TextKeyboard(
         `return`.img.imageResource = drawableForReturn(info)
     }
 
-    override fun onPreeditChange(info: EditorInfo?, data: FcitxEvent.PreeditEvent.Data) {
+    override fun onPreeditChange(info: EditorInfo, data: FcitxEvent.PreeditEvent.Data) {
         updateReturnButton(`return`, info, data)
     }
 

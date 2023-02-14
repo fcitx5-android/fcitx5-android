@@ -295,11 +295,11 @@ abstract class BaseKeyboard(
     }
 
     @DrawableRes
-    protected fun drawableForReturn(info: EditorInfo?): Int {
-        if (info?.imeOptions?.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION) == true) {
+    protected fun drawableForReturn(info: EditorInfo): Int {
+        if (info.imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION)) {
             return R.drawable.ic_baseline_keyboard_return_24
         }
-        return when (info?.imeOptions?.and(EditorInfo.IME_MASK_ACTION)) {
+        return when (info.imeOptions and EditorInfo.IME_MASK_ACTION) {
             EditorInfo.IME_ACTION_GO -> R.drawable.ic_baseline_arrow_forward_24
             EditorInfo.IME_ACTION_SEARCH -> R.drawable.ic_baseline_search_24
             EditorInfo.IME_ACTION_SEND -> R.drawable.ic_baseline_send_24
@@ -313,7 +313,7 @@ abstract class BaseKeyboard(
     // FIXME: need some new API to know exactly whether next enter would be captured by fcitx
     protected fun updateReturnButton(
         `return`: ImageKeyView,
-        info: EditorInfo?,
+        info: EditorInfo,
         preedit: FcitxEvent.PreeditEvent.Data
         // aux: FcitxEvent.InputPanelAuxEvent.Data
     ) {
@@ -471,7 +471,7 @@ abstract class BaseKeyboard(
         return true
     }
 
-    open fun onAttach(info: EditorInfo? = null) {
+    open fun onAttach(info: EditorInfo) {
         // do nothing by default
     }
 
@@ -479,7 +479,7 @@ abstract class BaseKeyboard(
         // do nothing by default
     }
 
-    open fun onPreeditChange(info: EditorInfo?, data: FcitxEvent.PreeditEvent.Data) {
+    open fun onPreeditChange(info: EditorInfo, data: FcitxEvent.PreeditEvent.Data) {
         // do nothing by default
     }
 

@@ -44,12 +44,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     private var inputView: InputView? = null
 
-    var editorInfo: EditorInfo? = null
+    var editorInfo = EmptyEditorInfo
     var capabilityFlags = CapabilityFlags.DefaultFlags
 
     val selection = CursorTracker()
     val composing = CursorRange()
-    private var composingText = FormattedText()
+    private var composingText = EmptyFormattedText
 
     private var cursorUpdateIndex: Int = 0
 
@@ -146,36 +146,32 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         } else if (lastSelection.start > 0) {
             selection.predictOffset(-1)
         }
-        editorInfo?.apply {
-            // In practice nobody (apart form us) would set `privateImeOptions` to our
-            // `DeleteSurroundingFlag`, leading to a behavior of simulating backspace key pressing
-            // in almost every EditText.
-            if (privateImeOptions != DeleteSurroundingFlag ||
-                inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL
-            ) {
+        // In practice nobody (apart form us) would set `privateImeOptions` to our
+        // `DeleteSurroundingFlag`, leading to a behavior of simulating backspace key pressing
+        // in almost every EditText.
+        if (editorInfo.privateImeOptions != DeleteSurroundingFlag ||
+            editorInfo.inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL
+        ) {
+            sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
+            return
+        }
+        if (lastSelection.isEmpty()) {
+            if (lastSelection.start <= 0) {
                 sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
                 return
             }
-            inputConnection?.apply {
-                if (lastSelection.isEmpty()) {
-                    if (lastSelection.start <= 0) {
-                        sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
-                        return
-                    }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        deleteSurroundingTextInCodePoints(1, 0)
-                    } else {
-                        deleteSurroundingText(1, 0)
-                    }
-                } else {
-                    commitText("", 0)
-                }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                inputConnection?.deleteSurroundingTextInCodePoints(1, 0)
+            } else {
+                inputConnection?.deleteSurroundingText(1, 0)
             }
-        } ?: sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
+        } else {
+            inputConnection?.commitText("", 0)
+        }
     }
 
     private fun handleReturnKey() {
-        editorInfo?.apply {
+        editorInfo.run {
             if (inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL) {
                 sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
                 return
@@ -193,7 +189,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 EditorInfo.IME_ACTION_NONE -> commitText("\n")
                 else -> inputConnection?.performEditorAction(action)
             }
-        } ?: sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
+        }
     }
 
     fun commitText(text: String) {
@@ -203,7 +199,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         selection.predict(start + text.length)
         // clear composing range
         composing.clear()
-        composingText = FormattedText()
+        composingText = EmptyFormattedText
         inputConnection?.commitText(text, 1)
     }
 
@@ -388,7 +384,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             selection.resetTo(attribute.initialSelStart, attribute.initialSelEnd)
         }
         composing.clear()
-        composingText = FormattedText()
+        composingText = EmptyFormattedText
         val flags = CapabilityFlags.fromEditorInfo(attribute)
         editorInfo = attribute
         capabilityFlags = flags
@@ -476,7 +472,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         } else {
             Timber.d("handleCursorUpdate: focus out/in")
             composing.clear()
-            composingText = FormattedText()
+            composingText = EmptyFormattedText
             // cursor outside composing range, finish composing as-is
             inputConnection?.finishComposingText()
             // `fcitx.reset()` here would commit preedit after new cursor position
@@ -556,7 +552,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onFinishInput() {
         Timber.d("onFinishInput")
-        editorInfo = null
+        editorInfo = EmptyEditorInfo
         capabilityFlags = CapabilityFlags.DefaultFlags
     }
 
@@ -587,6 +583,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     companion object {
+        val EmptyEditorInfo = EditorInfo()
+        val EmptyFormattedText = FormattedText()
         const val DeleteSurroundingFlag = "org.fcitx.fcitx5.android.DELETE_SURROUNDING"
     }
 }

@@ -55,7 +55,7 @@ class NumberKeyboard(
     val space: TextKeyView by lazy { findViewById(R.id.button_mini_space) }
     val `return`: ImageKeyView by lazy { findViewById(R.id.button_return) }
 
-    override fun onAttach(info: EditorInfo?) {
+    override fun onAttach(info: EditorInfo) {
         `return`.img.imageResource = drawableForReturn(info)
     }
 
