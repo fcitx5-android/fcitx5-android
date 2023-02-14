@@ -127,10 +127,12 @@ value class CapabilityFlags constructor(val flags: ULong) {
                                 flags += CapabilityFlag.Email
                             }
                             if (equals(InputType.TYPE_TEXT_VARIATION_PASSWORD) ||
-                                equals(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) ||
                                 equals(InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD)
                             ) {
                                 flags += CapabilityFlag.Password
+                            }
+                            if (equals(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)) {
+                                flags += CapabilityFlag.Sensitive
                             }
                             if (equals(InputType.TYPE_TEXT_VARIATION_URI)) {
                                 flags += CapabilityFlag.Url
