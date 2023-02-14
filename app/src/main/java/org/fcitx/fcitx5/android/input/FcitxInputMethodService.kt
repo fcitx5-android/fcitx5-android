@@ -379,27 +379,16 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onStartInput(attribute: EditorInfo, restarting: Boolean) {
         // update selection as soon as possible
-        if (!restarting) {
-            // initialSel{Start,End} is usually outdated when restarting input
-            selection.resetTo(attribute.initialSelStart, attribute.initialSelEnd)
-        }
+        // sometimes when restarting input, onUpdateSelection happens before onStartInput, and
+        // initialSel{Start,End} is outdated. but it's the client app's responsibility to send
+        // right cursor position, try to workaround this would simply introduce more bugs.
+        selection.resetTo(attribute.initialSelStart, attribute.initialSelEnd)
         composing.clear()
         composingText = EmptyFormattedText
         val flags = CapabilityFlags.fromEditorInfo(attribute)
         editorInfo = attribute
         capabilityFlags = flags
         Timber.d("onStartInput: initialSel=${selection.current}, restarting=$restarting")
-        if (restarting) return
-        lifecycleScope.launchOnFcitxReady(fcitx) {
-            it.setCapFlags(CapabilityFlags.fromEditorInfo(attribute))
-        }
-    }
-
-    override fun onStartInputView(info: EditorInfo, restarting: Boolean) {
-        Timber.d("onStartInputView: restarting=$restarting")
-        val flags = CapabilityFlags.fromEditorInfo(info)
-        editorInfo = info
-        capabilityFlags = flags
         lifecycleScope.launchOnFcitxReady(fcitx) {
             if (restarting) {
                 // when input restarts in the same editor, focus out to clear previous state
@@ -412,7 +401,16 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             it.setCapFlags(flags)
             it.focus(true)
         }
-        inputView?.startInput(info, flags, restarting)
+    }
+
+    override fun onStartInputView(info: EditorInfo, restarting: Boolean) {
+        Timber.d("onStartInputView: restarting=$restarting")
+        lifecycleScope.launchOnFcitxReady(fcitx) {
+            it.focus(true)
+        }
+        // because onStartInputView will always be called after onStartInput,
+        // editorInfo and capFlags should be up-to-date
+        inputView?.startInput(editorInfo, capabilityFlags, restarting)
     }
 
     override fun onUpdateSelection(
