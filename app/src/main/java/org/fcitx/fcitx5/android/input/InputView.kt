@@ -99,10 +99,6 @@ class InputView(
         scope += windowManager
         scope += kawaiiBar
         scope += horizontalCandidate
-        scope += keyboardWindow
-        scope += symbolPicker
-        scope += emojiPicker
-        scope += emoticonPicker
         broadcaster.onScopeSetupFinished(scope)
     }
 

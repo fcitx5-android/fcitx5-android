@@ -44,6 +44,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.FcitxApplication
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.CapabilityFlag
+import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import splitties.experimental.InternalSplittiesApi
 import splitties.resources.withResolvedThemeAttribute
 import splitties.views.bottomPadding
@@ -271,6 +273,5 @@ inline fun <T> withTempDir(block: (File) -> T): T {
     }
 }
 
-@Suppress("NOTHING_TO_INLINE")
-inline infix fun <T1 : Any, T2 : Any> T1?.notNullTo(y: T2?): Pair<T1, T2>? =
-    this?.let { a -> y?.let { b -> a to b } }
+val FcitxInputMethodService.isInPasswordMode
+    get() = capabilityFlags.has(CapabilityFlag.Password)

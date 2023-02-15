@@ -19,9 +19,24 @@ import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
-import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.*
-import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.*
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.*
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.ClickToAttachWindow
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.ClickToDetachWindow
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.Hidden
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.ClipboardUpdatedEmpty
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.ClipboardUpdatedNonEmpty
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.KawaiiBarShown
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.MenuButtonClicked
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.Pasted
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.Timeout
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.CandidateUpdateNonEmpty
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.CapFlagsUpdatedNoPassword
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.CapFlagsUpdatedPassword
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.ExtendedWindowAttached
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.PreeditUpdatedEmpty
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.PreeditUpdatedNonEmpty
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.WindowDetachedWithCandidatesNonEmpty
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.WindowDetachedWithCapFlagsNoPassword
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.WindowDetachedWithCapFlagsPassword
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
@@ -40,6 +55,7 @@ import org.fcitx.fcitx5.android.input.status.StatusAreaWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.AppUtil
+import org.fcitx.fcitx5.android.utils.isInPasswordMode
 import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.must
 import splitties.bitflags.hasFlag
@@ -185,7 +201,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     private val numberRowUi by lazy { KawaiiBarUi.NumberRowUi(context, theme) }
 
-    private val barStateMachine = KawaiiBarStateMachine.new {
+    val barStateMachine = KawaiiBarStateMachine.new {
         switchUiByState(it)
     }
 
@@ -330,7 +346,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     override fun onWindowDetached(window: InputWindow) {
         barStateMachine.push(
             if (horizontalCandidate.adapter.candidates.isEmpty())
-                if (service.capabilityFlags.has(CapabilityFlag.Password))
+                if (service.isInPasswordMode)
                     WindowDetachedWithCapFlagsPassword
                 else
                     WindowDetachedWithCapFlagsNoPassword

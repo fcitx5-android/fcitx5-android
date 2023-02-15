@@ -13,6 +13,9 @@ import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.KeyboardSwitchedOutNumberWithCapFlagsPassword
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.KeyboardSwitchedToNumber
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
@@ -23,6 +26,7 @@ import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.wm.EssentialWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
+import org.fcitx.fcitx5.android.utils.isInPasswordMode
 import org.mechdancer.dependency.manager.must
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.frameLayout
@@ -38,6 +42,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
     private val windowManager: InputWindowManager by manager.must()
     private val popup: PopupComponent by manager.must()
+    private val bar: KawaiiBarComponent by manager.must()
 
     companion object : EssentialWindow.Key
 
@@ -119,6 +124,8 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
                 }
                 detachCurrentLayout()
                 attachLayout(target)
+                if (windowManager.isAttached(this))
+                    notifyBarLayoutChanged()
             } else {
                 if (remember) {
                     lastSymbolType = PickerWindow.Key.Symbol.name
@@ -155,6 +162,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
             it.keyActionListener = keyActionListener
             it.popupActionListener = popupActionListener
         }
+        notifyBarLayoutChanged()
     }
 
     override fun onDetached() {
@@ -163,5 +171,15 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
             it.popupActionListener = null
         }
         popup.dismissAll()
+    }
+
+    // Call this when
+    // 1) the keyboard window was newly attached
+    // 2) currently keyboard window is attached and switchLayout was used
+    private fun notifyBarLayoutChanged() {
+        if (currentKeyboardName == NumberKeyboard.Name)
+            bar.barStateMachine.push(KeyboardSwitchedToNumber)
+        else if (service.isInPasswordMode)
+            bar.barStateMachine.push(KeyboardSwitchedOutNumberWithCapFlagsPassword)
     }
 }
