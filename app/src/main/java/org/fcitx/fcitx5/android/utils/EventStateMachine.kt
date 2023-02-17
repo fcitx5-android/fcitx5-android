@@ -81,7 +81,11 @@ class TransitionEventBuilder<State : Any, B : EventStateMachine.BooleanStateKey>
         target = state
     }
 
-    infix fun Builder.on(pred: ((B) -> Boolean?) -> Boolean) = apply {
+    infix fun Builder.on(expected: Pair<B, Boolean>) = apply {
+        this.pred = { it(expected.first) == expected.second }
+    }
+
+    infix fun Builder.onF(pred: ((B) -> Boolean?) -> Boolean) = apply {
         this.pred = pred
     }
 

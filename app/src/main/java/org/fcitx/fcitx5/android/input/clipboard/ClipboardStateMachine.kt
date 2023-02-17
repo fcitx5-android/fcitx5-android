@@ -23,24 +23,21 @@ object ClipboardStateMachine {
     enum class TransitionEvent(val builder: TransitionBuildBlock<State, BooleanKey>) :
         EventStateMachine.TransitionEvent<State, BooleanKey> by BuildTransitionEvent(builder) {
         ClipboardDbUpdated({
-            from(Normal) transitTo AddMore on { it(ClipboardDbEmpty) == true }
-            from(AddMore) transitTo Normal on { it(ClipboardDbEmpty) == false }
+            from(Normal) transitTo AddMore on (ClipboardDbEmpty to true)
+            from(AddMore) transitTo Normal on (ClipboardDbEmpty to false)
         }),
         ClipboardListeningUpdated({
-            from(Normal) transitTo EnableListening on { it(ClipboardListeningEnabled) == false }
-            from(EnableListening) transitTo Normal on {
-                it(ClipboardListeningEnabled) == true && it(
-                    ClipboardDbEmpty
-                ) == false
+            from(Normal) transitTo EnableListening on (ClipboardListeningEnabled to false)
+            from(EnableListening) transitTo Normal onF {
+                it(ClipboardListeningEnabled) == true && it(ClipboardDbEmpty) == false
             }
-            from(EnableListening) transitTo AddMore on {
-                it(ClipboardListeningEnabled) == true && it(
-                    ClipboardDbEmpty
-                ) == true
+            from(EnableListening) transitTo AddMore onF {
+                it(ClipboardListeningEnabled) == true && it(ClipboardDbEmpty) == true
             }
-            from(AddMore) transitTo EnableListening on { it(ClipboardListeningEnabled) == false }
+            from(AddMore) transitTo EnableListening on (ClipboardListeningEnabled to false)
         })
     }
+
     fun new(initialState: State, block: (State) -> Unit) =
         EventStateMachine<State, TransitionEvent, BooleanKey>(initialState).apply {
             onNewStateListener = block

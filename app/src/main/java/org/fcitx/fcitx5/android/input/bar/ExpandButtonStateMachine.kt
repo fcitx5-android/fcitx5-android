@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.input.bar
 
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.BooleanKey.CandidatesEmpty
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.ClickToAttachWindow
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.ClickToDetachWindow
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.Hidden
@@ -22,15 +23,15 @@ object ExpandButtonStateMachine {
     enum class TransitionEvent(val builder: TransitionBuildBlock<State, BooleanKey>) :
         EventStateMachine.TransitionEvent<State, BooleanKey> by BuildTransitionEvent(builder) {
         ExpandedCandidatesUpdated({
-            from(Hidden) transitTo ClickToAttachWindow on { it(BooleanKey.CandidatesEmpty) == false }
-            from(ClickToAttachWindow) transitTo Hidden on { it(BooleanKey.CandidatesEmpty) == true }
+            from(Hidden) transitTo ClickToAttachWindow on (CandidatesEmpty to false)
+            from(ClickToAttachWindow) transitTo Hidden on (CandidatesEmpty to true)
         }),
         ExpandedCandidatesAttached({
             from(ClickToAttachWindow) transitTo ClickToDetachWindow
         }),
         ExpandedCandidatesDetached({
-            from(ClickToDetachWindow) transitTo Hidden on { it(BooleanKey.CandidatesEmpty) == true }
-            from(ClickToDetachWindow) transitTo ClickToAttachWindow on { it(BooleanKey.CandidatesEmpty) == true }
+            from(ClickToDetachWindow) transitTo Hidden on (CandidatesEmpty to true)
+            from(ClickToDetachWindow) transitTo ClickToAttachWindow on (CandidatesEmpty to true)
         });
     }
 

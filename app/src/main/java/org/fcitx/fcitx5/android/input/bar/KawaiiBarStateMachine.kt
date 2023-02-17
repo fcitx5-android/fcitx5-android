@@ -1,5 +1,7 @@
 package org.fcitx.fcitx5.android.input.bar
 
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.BooleanKey.CandidateEmpty
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.BooleanKey.CapFlagsPassword
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.State.Candidate
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.State.Idle
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.State.NumberRow
@@ -20,11 +22,11 @@ object KawaiiBarStateMachine {
     enum class TransitionEvent(val builder: TransitionBuildBlock<State, BooleanKey>) :
         EventStateMachine.TransitionEvent<State, BooleanKey> by BuildTransitionEvent(builder) {
         PreeditUpdatedNonEmpty({
-            from(Candidate) transitTo Idle on { it(BooleanKey.CandidateEmpty) == true }
-            from(Idle) transitTo Candidate on { it(BooleanKey.CandidateEmpty) == false }
+            from(Candidate) transitTo Idle on (CandidateEmpty to true)
+            from(Idle) transitTo Candidate on (CandidateEmpty to false)
         }),
         CandidatesUpdated({
-            from(Idle) transitTo Candidate on { it(BooleanKey.CandidateEmpty) == false }
+            from(Idle) transitTo Candidate on (CandidateEmpty to false)
         }),
         ExtendedWindowAttached({
             from(Idle) transitTo Title
@@ -32,21 +34,17 @@ object KawaiiBarStateMachine {
             from(NumberRow) transitTo Title
         }),
         CapFlagsUpdated({
-            from(Idle) transitTo NumberRow on { it(BooleanKey.CapFlagsPassword) == true }
-            from(NumberRow) transitTo Idle on { it(BooleanKey.CapFlagsPassword) == false }
+            from(Idle) transitTo NumberRow on (CapFlagsPassword to true)
+            from(NumberRow) transitTo Idle on (CapFlagsPassword to false)
         }),
         WindowDetached({
             // candidate state has higher priority so here it goes first
-            from(Title) transitTo Candidate on {
-                it(
-                    BooleanKey.CandidateEmpty
-                ) == false
-            }
-            from(Title) transitTo Idle on { it(BooleanKey.CapFlagsPassword) == false }
-            from(Title) transitTo NumberRow on { it(BooleanKey.CapFlagsPassword) == true }
+            from(Title) transitTo Candidate on (CandidateEmpty to false)
+            from(Title) transitTo Idle on (CapFlagsPassword to false)
+            from(Title) transitTo NumberRow on (CapFlagsPassword to true)
         }),
         KeyboardSwitchedOutNumber({
-            from(Idle) transitTo NumberRow on { it(BooleanKey.CapFlagsPassword) == true }
+            from(Idle) transitTo NumberRow on (CapFlagsPassword to true)
         }),
         KeyboardSwitchedToNumber({
             from(NumberRow) transitTo Idle
