@@ -14,7 +14,7 @@ import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.KeyboardSwitchedOutNumberWithCapFlagsPassword
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.KeyboardSwitchedOutNumber
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.KeyboardSwitchedToNumber
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.dependency.fcitx
@@ -26,7 +26,6 @@ import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.wm.EssentialWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
-import org.fcitx.fcitx5.android.utils.isInPasswordMode
 import org.mechdancer.dependency.manager.must
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.frameLayout
@@ -179,7 +178,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
     private fun notifyBarLayoutChanged() {
         if (currentKeyboardName == NumberKeyboard.Name)
             bar.barStateMachine.push(KeyboardSwitchedToNumber)
-        else if (service.isInPasswordMode)
-            bar.barStateMachine.push(KeyboardSwitchedOutNumberWithCapFlagsPassword)
+        else
+            bar.barStateMachine.push(KeyboardSwitchedOutNumber)
     }
 }

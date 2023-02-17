@@ -22,21 +22,20 @@ import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.ClickToAttachWindow
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.ClickToDetachWindow
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.Hidden
-import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.ClipboardUpdatedEmpty
-import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.ClipboardUpdatedNonEmpty
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.BooleanKey.ClipboardEmpty
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.ClipboardUpdated
 import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.KawaiiBarShown
 import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.MenuButtonClicked
 import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.Pasted
 import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.Timeout
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.CandidateUpdateNonEmpty
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.CapFlagsUpdatedNoPassword
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.CapFlagsUpdatedPassword
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.BooleanKey.CandidateEmpty
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.BooleanKey.CapFlagsPassword
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.BooleanKey.PreeditEmpty
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.CandidatesUpdated
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.CapFlagsUpdated
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.ExtendedWindowAttached
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.PreeditUpdatedEmpty
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.PreeditUpdatedNonEmpty
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.WindowDetachedWithCandidatesNonEmpty
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.WindowDetachedWithCapFlagsNoPassword
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.WindowDetachedWithCapFlagsPassword
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.PreeditUpdated
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.WindowDetached
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
@@ -55,7 +54,6 @@ import org.fcitx.fcitx5.android.input.status.StatusAreaWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.AppUtil
-import org.fcitx.fcitx5.android.utils.isInPasswordMode
 import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.must
 import splitties.bitflags.hasFlag
@@ -89,10 +87,10 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             if (!clipboardSuggestion.getValue()) return@OnClipboardUpdateListener
             service.lifecycleScope.launch {
                 if (it.text.isEmpty()) {
-                    idleUiStateMachine.push(ClipboardUpdatedEmpty)
+                    idleUiStateMachine.push(ClipboardUpdated, ClipboardEmpty to true)
                 } else {
                     idleUi.setClipboardItemText(it.text.take(42))
-                    idleUiStateMachine.push(ClipboardUpdatedNonEmpty)
+                    idleUiStateMachine.push(ClipboardUpdated, ClipboardEmpty to false)
                     launchClipboardTimeoutJob()
                 }
             }
@@ -101,7 +99,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     private val onClipboardSuggestionUpdateListener =
         ManagedPreference.OnChangeListener<Boolean> { _, it ->
             if (!it) {
-                idleUiStateMachine.push(ClipboardUpdatedEmpty)
+                idleUiStateMachine.push(ClipboardUpdated, ClipboardEmpty to true)
                 clipboardTimeoutJob?.cancel()
                 clipboardTimeoutJob = null
             }
@@ -122,7 +120,9 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     private val onExpandToolbarByDefaultUpdateListener =
         ManagedPreference.OnChangeListener<Boolean> { _, it ->
-            idleUiStateMachine = IdleUiStateMachine.new(it, idleUiStateMachine)
+            idleUiStateMachine = IdleUiStateMachine.new(it) {
+                idleUi.switchUiByState(it)
+            }
         }
 
     private val popupActionListener by lazy {
@@ -305,26 +305,19 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             idleUi.privateMode(info.imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING))
         }
         idleUiStateMachine.push(KawaiiBarShown)
-        barStateMachine.push(
-            if (capFlags.has(CapabilityFlag.Password))
-                CapFlagsUpdatedPassword
-            else
-                CapFlagsUpdatedNoPassword
-        )
+        barStateMachine.setBooleanState(CapFlagsPassword, capFlags.has(CapabilityFlag.Password))
+        barStateMachine.push(CapFlagsUpdated)
     }
 
     override fun onPreeditUpdate(data: FcitxEvent.PreeditEvent.Data) {
         barStateMachine.push(
-            if (data.preedit.isEmpty() && data.clientPreedit.isEmpty())
-                PreeditUpdatedEmpty
-            else
-                PreeditUpdatedNonEmpty
+            PreeditUpdated,
+            PreeditEmpty to (data.preedit.isEmpty() && data.clientPreedit.isEmpty())
         )
     }
 
     override fun onCandidateUpdate(data: Array<String>) {
-        if (data.isNotEmpty())
-            barStateMachine.push(CandidateUpdateNonEmpty)
+        barStateMachine.push(CandidatesUpdated, CandidateEmpty to data.isEmpty())
     }
 
     override fun onWindowAttached(window: InputWindow) {
@@ -344,15 +337,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     }
 
     override fun onWindowDetached(window: InputWindow) {
-        barStateMachine.push(
-            if (horizontalCandidate.adapter.candidates.isEmpty())
-                if (service.isInPasswordMode)
-                    WindowDetachedWithCapFlagsPassword
-                else
-                    WindowDetachedWithCapFlagsNoPassword
-            else
-                WindowDetachedWithCandidatesNonEmpty
-        )
+        barStateMachine.push(WindowDetached)
     }
 
 }

@@ -1,9 +1,12 @@
 package org.fcitx.fcitx5.android.input.bar
 
-import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.*
-import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.*
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.BooleanKey.CandidatesEmpty
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.ClickToAttachWindow
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.ClickToDetachWindow
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.Hidden
+import org.fcitx.fcitx5.android.utils.BuildTransitionEvent
 import org.fcitx.fcitx5.android.utils.EventStateMachine
-import org.fcitx.fcitx5.android.utils.eventStateMachine
+import org.fcitx.fcitx5.android.utils.TransitionBuildBlock
 
 
 object ExpandButtonStateMachine {
@@ -13,23 +16,28 @@ object ExpandButtonStateMachine {
         Hidden
     }
 
-    enum class TransitionEvent {
-        ExpandedCandidatesUpdatedEmpty,
-        ExpandedCandidatesUpdatedNonEmpty,
-        ExpandedCandidatesAttached,
-        ExpandedCandidatesDetachedWithCandidatesEmpty,
-        ExpandedCandidatesDetachedWithCandidatesNonEmpty,
+    enum class BooleanKey : EventStateMachine.BooleanStateKey {
+        CandidatesEmpty
     }
 
-    fun new(block: (State) -> Unit): EventStateMachine<State, TransitionEvent> =
-        eventStateMachine(
-            Hidden
-        ) {
-            from(Hidden) transitTo ClickToAttachWindow on ExpandedCandidatesUpdatedNonEmpty
-            from(ClickToAttachWindow) transitTo Hidden on ExpandedCandidatesUpdatedEmpty
-            from(ClickToAttachWindow) transitTo ClickToDetachWindow on ExpandedCandidatesAttached
-            from(ClickToDetachWindow) transitTo ClickToAttachWindow on ExpandedCandidatesDetachedWithCandidatesNonEmpty
-            from(ClickToDetachWindow) transitTo Hidden on ExpandedCandidatesDetachedWithCandidatesEmpty
-            onNewState(block)
+    enum class TransitionEvent(val builder: TransitionBuildBlock<State, BooleanKey>) :
+        EventStateMachine.TransitionEvent<State, BooleanKey> by BuildTransitionEvent(builder) {
+        ExpandedCandidatesUpdated({
+            from(Hidden) transitTo ClickToAttachWindow on (CandidatesEmpty to false)
+            from(ClickToAttachWindow) transitTo Hidden on (CandidatesEmpty to true)
+        }),
+        ExpandedCandidatesAttached({
+            from(ClickToAttachWindow) transitTo ClickToDetachWindow
+        }),
+        ExpandedCandidatesDetached({
+            from(ClickToDetachWindow) transitTo Hidden on (CandidatesEmpty to true)
+            from(ClickToDetachWindow) transitTo ClickToAttachWindow on (CandidatesEmpty to false)
+        });
+    }
+
+    fun new(block: (State) -> Unit) =
+        EventStateMachine<State, TransitionEvent, BooleanKey>(Hidden).apply {
+            onNewStateListener = block
         }
 }
+

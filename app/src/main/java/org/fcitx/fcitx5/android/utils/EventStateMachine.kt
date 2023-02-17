@@ -3,95 +3,143 @@ package org.fcitx.fcitx5.android.utils
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import timber.log.Timber
 
-class EventStateMachine<State : Any, Event : Any>(
-    initialState: State,
-    private val stateGraph: ImmutableGraph<State, List<Event>>
+class EventStateMachine<State : Any, Event : EventStateMachine.TransitionEvent<State, B>, B : EventStateMachine.BooleanStateKey>(
+    private val initialState: State,
+    private val externalBooleanStates: MutableMap<B, Boolean> = mutableMapOf()
 ) {
 
-    private var currentStateIx = stateGraph.vertices.indexOf(initialState)
+    interface BooleanStateKey {
+        val name: String
+    }
+
+    interface TransitionEvent<State : Any, B : BooleanStateKey> {
+        /**
+         * INVARIANT: No side effects
+         * @return the next state
+         */
+        fun accept(initialState: State, currentState: State, useBoolean: (B) -> Boolean?): State
+
+    }
 
     var onNewStateListener: ((State) -> Unit)? = null
 
-    val currentState
-        get() = stateGraph.vertices[currentStateIx]
+    var currentState = initialState
+        private set
 
     private val enableDebugLog: Boolean by AppPrefs.getInstance().internal.verboseLog
-
-    private val knownEvents by lazy { stateGraph.labels.flatten() }
 
     /**
      * Push an event that may trigger a transition of state
      */
     fun push(event: Event) {
-        if (event !in knownEvents)
-            throw IllegalArgumentException("$event is an unknown event")
-        val transitions = stateGraph.getEdgesOfVertexWithIndex(currentState)
-        val filtered = transitions.filter { event in it.second.label }
-        when (filtered.size) {
-            0 -> {
-                // do nothing
-                if (enableDebugLog)
-                    Timber.d("At $currentState ignored $event. All transitions ${transitions.map { it.second.label.joinToString() }} did not match")
-            }
-            1 -> {
-                if (enableDebugLog)
-                    Timber.d("At $currentState transited to ${filtered.first().second.vertex2}. Transition $event was matched")
-                currentStateIx = filtered.first().first.first
-                onNewStateListener?.invoke(filtered.first().second.vertex2)
-            }
-            else -> throw IllegalStateException("More than one transitions are found given $event on $currentState")
+        val newState = event.accept(initialState, currentState) { externalBooleanStates[it] }
+        if (newState == currentState) {
+            if (enableDebugLog)
+                Timber.d("At $currentState, $event didn't change the state")
+            return
         }
+        if (enableDebugLog)
+            Timber.d("At $currentState transited to $newState by $event")
+        currentState = newState
+        onNewStateListener?.invoke(newState)
     }
 
+    /**
+     * Update boolean states and push an event
+     */
+    fun push(event: Event, vararg booleanStates: Pair<B, Boolean>) {
+        booleanStates.forEach {
+            setBooleanState(it.first, it.second)
+        }
+        push(event)
+    }
+
+    fun setBooleanState(key: B, value: Boolean) {
+        externalBooleanStates[key] = value
+    }
+
+    fun getBooleanState(key: B) =
+        externalBooleanStates[key]
+
+    fun unsafeJump(state: State) {
+        currentState = state
+        onNewStateListener?.invoke(state)
+    }
 }
 
-
 // DSL
+class TransitionEventBuilder<State : Any, B : EventStateMachine.BooleanStateKey> {
 
-fun <State : Any, Event : Any> eventStateMachine(
-    initialState: State,
-    builder: EventStateMachineBuilder<State, Event>.() -> Unit
-) =
-    EventStateMachineBuilder<State, Event>(initialState).apply(builder).build()
+    private val enableDebugLog: Boolean by AppPrefs.getInstance().internal.verboseLog
 
-class EventStateMachineBuilder<State : Any, Event : Any>(
-    private val initialState: State
-) {
-    private val map = mutableMapOf<Pair<State, State>, MutableList<Event>>()
+    private var raw: ((State, State, (B) -> Boolean?) -> State)? = null
 
-    private var listener: ((State) -> Unit)? = null
-
-    inner class EventTransitionBuilder(val startState: State) {
-        lateinit var endState: State
-        lateinit var event: Event
-
+    inner class Builder(val source: State) {
+        lateinit var target: State
+        var pred: ((B) -> Boolean?) -> Boolean = { _ -> true }
     }
 
-    infix fun EventTransitionBuilder.transitTo(state: State) = apply {
-        endState = state
+    infix fun Builder.transitTo(state: State) = apply {
+        target = state
     }
 
-    infix fun EventTransitionBuilder.on(event: Event) = run {
-        this.event = event
-        if (startState to endState !in map)
-            map[startState to endState] = mutableListOf(event)
-        else
-            map.getValue(startState to endState) += event
+    infix fun Builder.on(expected: Pair<B, Boolean>) = apply {
+        this.pred = { it(expected.first) == expected.second }
     }
 
-    fun from(state: State) = EventTransitionBuilder(state)
+    infix fun Builder.onF(pred: ((B) -> Boolean?) -> Boolean) = apply {
+        this.pred = pred
+    }
 
-    fun onNewState(block: (State) -> Unit) {
-        listener = block
+    val builders = mutableListOf<Builder>()
+
+    fun from(state: State) = Builder(state).also { builders += it }
+
+    /**
+     * Use either [from] or [accept] to build the transition event
+     */
+    fun accept(block: ((State, State, (B) -> Boolean?) -> State)) = apply {
+        raw = block
     }
 
 
-    fun build() = EventStateMachine(
-        initialState,
-        ImmutableGraph(map.map { (k, v) ->
-            ImmutableGraph.Edge(k.first, k.second, v)
-        })
-    ).apply {
-        listener?.let { onNewStateListener = it }
+    fun build() =
+        object : EventStateMachine.TransitionEvent<State, B> {
+            override fun accept(
+                initialState: State,
+                currentState: State,
+                useBoolean: (B) -> Boolean?
+            ): State {
+                if (raw != null)
+                    return raw!!(initialState, currentState, useBoolean)
+                val filtered = builders.filter { it.source == currentState && it.pred(useBoolean) }
+                return when (filtered.size) {
+                    0 -> currentState
+                    1 -> filtered[0].target
+                    else -> {
+                        val first = filtered[0].target
+                        if (enableDebugLog)
+                            Timber.d("More than one target states at $currentState: ${filtered.joinToString()}. Take the first one: $first")
+                        first
+                    }
+                }
+            }
+        }
+}
+
+typealias TransitionBuildBlock<State, B> = TransitionEventBuilder<State, B>.() -> Unit
+
+class BuildTransitionEvent<State : Any, B : EventStateMachine.BooleanStateKey>(block: TransitionBuildBlock<State, B>) :
+    EventStateMachine.TransitionEvent<State, B> {
+    private val delegate: EventStateMachine.TransitionEvent<State, B> by lazy {
+        TransitionEventBuilder<State, B>().also(block).build()
     }
+
+    override fun accept(
+        initialState: State,
+        currentState: State,
+        useBoolean: (B) -> Boolean?
+    ): State =
+        delegate.accept(initialState, currentState, useBoolean)
+
 }
