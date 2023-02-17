@@ -123,13 +123,7 @@ class TransitionEventBuilder<State : Any, B : EventStateMachine.BooleanStateKey>
                     else -> {
                         val first = filtered.first().target
                         if (enableDebugLog)
-                            Timber.d(
-                                "More than one target states at $currentState: ${
-                                    filtered.joinToString(
-                                        separator = ", "
-                                    )
-                                }. Take the first one: $first"
-                            )
+                            Timber.d("More than one target states at $currentState: ${filtered.joinToString()}. Take the first one: $first")
                         first
                     }
                 }
