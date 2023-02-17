@@ -112,16 +112,12 @@ class TransitionEventBuilder<State : Any, B : EventStateMachine.BooleanStateKey>
             ): State {
                 if (raw != null)
                     return raw!!(initialState, currentState, useBoolean)
-                val filtered = builders.mapNotNull {
-                    it.takeIf {
-                        (it.source == currentState) && it.pred(useBoolean)
-                    }
-                }
+                val filtered = builders.filter { it.source == currentState && it.pred(useBoolean) }
                 return when (filtered.size) {
                     0 -> currentState
-                    1 -> filtered.first().target
+                    1 -> filtered[0].target
                     else -> {
-                        val first = filtered.first().target
+                        val first = filtered[0].target
                         if (enableDebugLog)
                             Timber.d("More than one target states at $currentState: ${filtered.joinToString()}. Take the first one: $first")
                         first
