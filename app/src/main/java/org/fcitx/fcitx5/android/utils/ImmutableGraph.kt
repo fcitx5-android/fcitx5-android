@@ -25,14 +25,6 @@ class ImmutableGraph<V, L>(
         }
     }
 
-    fun getEdgesOfVertexWithIndex(vertex: V) = adjacencyMatrix[vertices.indexOf(vertex)]
-        .asIterable()
-        .mapIndexedNotNull { v2Idx, labelIdx ->
-            labelIdx.takeIf { it != -1 }?.run {
-                (v2Idx to labelIdx) to Edge(vertex, vertices[v2Idx], labels[labelIdx])
-            }
-        }
-
     /**
      * @param predicate: whether to continue searching after this node
      */

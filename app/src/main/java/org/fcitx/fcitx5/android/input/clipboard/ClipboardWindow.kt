@@ -14,8 +14,13 @@ import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
-import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.State.*
-import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.TransitionEvent.*
+import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.BooleanKey.ClipboardDbEmpty
+import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.BooleanKey.ClipboardListeningEnabled
+import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.State.AddMore
+import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.State.EnableListening
+import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.State.Normal
+import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.TransitionEvent.ClipboardDbUpdated
+import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.TransitionEvent.ClipboardListeningUpdated
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.wm.InputWindow
@@ -29,21 +34,17 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     private val service: FcitxInputMethodService by manager.inputMethodService()
     private val theme by manager.theme()
 
-    private lateinit var stateMachine: EventStateMachine<ClipboardStateMachine.State, ClipboardStateMachine.TransitionEvent>
+    private lateinit var stateMachine: EventStateMachine<ClipboardStateMachine.State, ClipboardStateMachine.TransitionEvent, ClipboardStateMachine.BooleanKey>
 
     private var isClipboardDbEmpty by Delegates.observable(ClipboardManager.itemCount == 0) { _, _, new ->
         stateMachine.push(
-            if (new) ClipboardDbUpdatedEmpty
-            else ClipboardDbUpdatedNonEmpty
+            ClipboardDbUpdated, ClipboardDbEmpty to new
         )
     }
 
     private val clipboardEnabledListener = ManagedPreference.OnChangeListener<Boolean> { _, it ->
         stateMachine.push(
-            if (it)
-                if (isClipboardDbEmpty) ClipboardListeningEnabledWithDbEmpty
-                else ClipboardListeningEnabledWithDbNonEmpty
-            else ClipboardListeningDisabled
+            ClipboardListeningUpdated, ClipboardListeningEnabled to it
         )
     }
 

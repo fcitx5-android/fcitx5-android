@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.runBlocking
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
-import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesUpdatedEmpty
-import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesUpdatedNonEmpty
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.BooleanKey.CandidatesEmpty
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesUpdated
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.candidates.expanded.decoration.FlexboxVerticalDecoration
@@ -63,10 +63,8 @@ class HorizontalCandidateComponent :
                     super.onLayoutCompleted(state)
                     refreshExpanded()
                     bar.expandButtonStateMachine.push(
-                        if (adapter!!.itemCount - childCount > 0)
-                            ExpandedCandidatesUpdatedNonEmpty
-                        else
-                            ExpandedCandidatesUpdatedEmpty
+                        ExpandedCandidatesUpdated,
+                        CandidatesEmpty to (adapter!!.itemCount - childCount <= 0)
                     )
                 }
             }

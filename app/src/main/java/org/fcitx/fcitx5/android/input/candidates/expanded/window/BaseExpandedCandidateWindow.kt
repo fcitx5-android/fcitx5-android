@@ -10,7 +10,9 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
-import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.*
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.BooleanKey.CandidatesEmpty
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesAttached
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesDetached
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.candidates.CandidateViewBuilder
@@ -88,10 +90,8 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
 
     override fun onDetached() {
         bar.expandButtonStateMachine.push(
-            if (adapter.candidates.size > adapter.offset)
-                ExpandedCandidatesDetachedWithCandidatesNonEmpty
-            else
-                ExpandedCandidatesDetachedWithCandidatesEmpty
+            ExpandedCandidatesDetached,
+            CandidatesEmpty to (adapter.candidates.size <= adapter.offset)
         )
         offsetJob?.cancel()
         offsetJob = null
