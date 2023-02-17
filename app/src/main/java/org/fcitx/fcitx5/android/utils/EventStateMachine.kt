@@ -38,6 +38,8 @@ class EventStateMachine<State : Any, Event : EventStateMachine.TransitionEvent<S
                 Timber.d("At $currentState, $event didn't change the state")
             return
         }
+        if (enableDebugLog)
+            Timber.d("At $currentState transited to $newState by $event")
         currentState = newState
         onNewStateListener?.invoke(newState)
     }

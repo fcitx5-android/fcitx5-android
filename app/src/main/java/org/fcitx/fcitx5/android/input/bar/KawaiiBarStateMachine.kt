@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.input.bar
 
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.BooleanKey.CandidateEmpty
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.BooleanKey.CapFlagsPassword
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.BooleanKey.PreeditEmpty
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.State.Candidate
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.State.Idle
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.State.NumberRow
@@ -16,14 +17,14 @@ object KawaiiBarStateMachine {
     }
 
     enum class BooleanKey : EventStateMachine.BooleanStateKey {
-        CandidateEmpty, CapFlagsPassword
+        PreeditEmpty, CandidateEmpty, CapFlagsPassword
     }
 
     enum class TransitionEvent(val builder: TransitionBuildBlock<State, BooleanKey>) :
         EventStateMachine.TransitionEvent<State, BooleanKey> by BuildTransitionEvent(builder) {
-        PreeditUpdatedNonEmpty({
-            from(Candidate) transitTo Idle on (CandidateEmpty to true)
-            from(Idle) transitTo Candidate on (CandidateEmpty to false)
+        PreeditUpdated({
+            from(Candidate) transitTo Idle on (PreeditEmpty to true)
+            from(Idle) transitTo Candidate on (PreeditEmpty to false)
         }),
         CandidatesUpdated({
             from(Idle) transitTo Candidate on (CandidateEmpty to false)

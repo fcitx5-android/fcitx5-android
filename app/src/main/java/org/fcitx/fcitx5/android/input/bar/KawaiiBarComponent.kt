@@ -30,10 +30,11 @@ import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.Pas
 import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.Timeout
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.BooleanKey.CandidateEmpty
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.BooleanKey.CapFlagsPassword
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.BooleanKey.PreeditEmpty
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.CandidatesUpdated
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.CapFlagsUpdated
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.ExtendedWindowAttached
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.PreeditUpdatedNonEmpty
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.PreeditUpdated
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.WindowDetached
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
@@ -309,8 +310,10 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     }
 
     override fun onPreeditUpdate(data: FcitxEvent.PreeditEvent.Data) {
-        if (!(data.preedit.isEmpty() && data.clientPreedit.isEmpty()))
-            barStateMachine.push(PreeditUpdatedNonEmpty)
+        barStateMachine.push(
+            PreeditUpdated,
+            PreeditEmpty to (data.preedit.isEmpty() && data.clientPreedit.isEmpty())
+        )
     }
 
     override fun onCandidateUpdate(data: Array<String>) {

@@ -31,7 +31,7 @@ object ExpandButtonStateMachine {
         }),
         ExpandedCandidatesDetached({
             from(ClickToDetachWindow) transitTo Hidden on (CandidatesEmpty to true)
-            from(ClickToDetachWindow) transitTo ClickToAttachWindow on (CandidatesEmpty to true)
+            from(ClickToDetachWindow) transitTo ClickToAttachWindow on (CandidatesEmpty to false)
         });
     }
 
