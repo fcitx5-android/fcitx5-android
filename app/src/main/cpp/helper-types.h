@@ -5,6 +5,38 @@
 #include <fcitx/menu.h>
 #include <fcitx/inputcontext.h>
 
+class InputMethodStatus {
+public:
+    const fcitx::InputMethodEntry *entry;
+    std::string subMode;
+    std::string subModeLabel;
+    std::string subModeIcon;
+
+    InputMethodStatus(const fcitx::InputMethodEntry *entry,
+                      fcitx::InputMethodEngine *engine,
+                      fcitx::InputContext *ic)
+            : entry(entry) {
+        if (engine) {
+            subMode = engine->subMode(*entry, *ic);
+            subModeLabel = engine->subModeLabel(*entry, *ic);
+            subModeIcon = engine->subModeIcon(*entry, *ic);
+        }
+    }
+
+    InputMethodStatus(const fcitx::InputMethodEntry *entry)
+            : entry(entry) {}
+};
+
+class AddonStatus {
+public:
+    const fcitx::AddonInfo *info;
+    bool enabled;
+
+    AddonStatus(const fcitx::AddonInfo *info, bool enabled) :
+            info(info),
+            enabled(enabled) {}
+};
+
 class ActionEntity {
 public:
     int id;

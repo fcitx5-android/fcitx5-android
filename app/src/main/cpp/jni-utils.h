@@ -98,9 +98,6 @@ public:
     jclass Integer;
     jmethodID IntegerInit;
 
-    jclass Long;
-    jmethodID LongInit;
-
     jclass Boolean;
     jmethodID BooleanInit;
 
@@ -173,5 +170,7 @@ public:
 
     const JEnv AttachEnv() const { return JEnv(jvm); }
 };
+
+extern GlobalRefSingleton *GlobalRef;
 
 #endif //FCITX5_ANDROID_JNI_UTILS_H
