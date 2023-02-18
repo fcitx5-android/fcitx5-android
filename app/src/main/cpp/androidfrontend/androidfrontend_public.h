@@ -6,8 +6,8 @@
 
 typedef std::function<void(const std::vector<std::string> &)> CandidateListCallback;
 typedef std::function<void(const std::string &)> CommitStringCallback;
-typedef std::function<void(const fcitx::Text &, const fcitx::Text &)> PreeditCallback;
-typedef std::function<void(const fcitx::Text &, const fcitx::Text &)> InputPanelAuxCallback;
+typedef std::function<void(const fcitx::Text &)> ClientPreeditCallback;
+typedef std::function<void(const fcitx::Text &, const fcitx::Text &, const fcitx::Text &)> InputPanelCallback;
 typedef std::function<void(const int, const uint32_t, const uint32_t, const bool, const int)> KeyEventCallback;
 typedef std::function<void()> InputMethodChangeCallback;
 typedef std::function<void()> StatusAreaUpdateCallback;
@@ -49,10 +49,10 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setCommitStringCallback,
                              void(const CommitStringCallback &))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setPreeditCallback,
-                             void(const PreeditCallback &))
+                             void(const ClientPreeditCallback &))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setInputPanelAuxCallback,
-                             void(const InputPanelAuxCallback &))
+                             void(const InputPanelCallback &))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setKeyEventCallback,
                              void(const KeyEventCallback &))

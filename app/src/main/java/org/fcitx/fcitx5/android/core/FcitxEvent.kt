@@ -24,9 +24,7 @@ sealed class FcitxEvent<T>(open val data: T) {
             return data.contentHashCode()
         }
 
-        override fun toString(): String = "CandidateListEvent(data=[${
-            data.take(5).joinToString()
-        }${if (data.size > 5) ", ..." else ""}])"
+        override fun toString(): String = "CandidateListEvent(${data.joinToString(limit = 5)})"
     }
 
     data class CommitStringEvent(override val data: String) :
@@ -35,27 +33,25 @@ sealed class FcitxEvent<T>(open val data: T) {
             get() = EventType.Commit
     }
 
-    data class PreeditEvent(override val data: Data) :
-        FcitxEvent<PreeditEvent.Data>(data) {
+    data class ClientPreeditEvent(override val data: FormattedText) :
+        FcitxEvent<FormattedText>(data) {
         override val eventType: EventType
-            get() = EventType.Preedit
+            get() = EventType.ClientPreedit
 
-        data class Data(val preedit: FormattedText, val clientPreedit: FormattedText) {
-            constructor() : this(FormattedText(), FormattedText())
-        }
-
-        override fun toString(): String {
-            return "PreeditEvent(preedit=[${data.preedit}, ${data.preedit.cursor}], clientPreedit=[${data.clientPreedit}, ${data.clientPreedit.cursor}])"
-        }
+        override fun toString(): String = "ClientPreeditEvent('$data', ${data.cursor})"
     }
 
-    data class InputPanelAuxEvent(override val data: Data) :
-        FcitxEvent<InputPanelAuxEvent.Data>(data) {
+    data class InputPanelEvent(override val data: Data) :
+        FcitxEvent<InputPanelEvent.Data>(data) {
         override val eventType: EventType
-            get() = EventType.Aux
+            get() = EventType.InputPanel
 
-        data class Data(val auxUp: FormattedText, val auxDown: FormattedText) {
-            constructor() : this(FormattedText(), FormattedText())
+        data class Data(
+            val preedit: FormattedText,
+            val auxUp: FormattedText,
+            val auxDown: FormattedText
+        ) {
+            constructor() : this(FormattedText.Empty, FormattedText.Empty, FormattedText.Empty)
         }
     }
 
@@ -131,8 +127,8 @@ sealed class FcitxEvent<T>(open val data: T) {
     enum class EventType {
         Candidate,
         Commit,
-        Preedit,
-        Aux,
+        ClientPreedit,
+        InputPanel,
         Ready,
         Key,
         Change,
@@ -149,11 +145,13 @@ sealed class FcitxEvent<T>(open val data: T) {
             when (Types[type]) {
                 EventType.Candidate -> CandidateListEvent(params as Array<String>)
                 EventType.Commit -> CommitStringEvent(params[0] as String)
-                EventType.Preedit -> PreeditEvent(
-                    PreeditEvent.Data(params[0] as FormattedText, params[1] as FormattedText)
-                )
-                EventType.Aux -> InputPanelAuxEvent(
-                    InputPanelAuxEvent.Data(params[0] as FormattedText, params[1] as FormattedText)
+                EventType.ClientPreedit -> ClientPreeditEvent(params[0] as FormattedText)
+                EventType.InputPanel -> InputPanelEvent(
+                    InputPanelEvent.Data(
+                        params[0] as FormattedText,
+                        params[1] as FormattedText,
+                        params[2] as FormattedText
+                    )
                 )
                 EventType.Ready -> ReadyEvent()
                 EventType.Key -> KeyEvent(

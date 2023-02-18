@@ -39,6 +39,9 @@ data class FormattedText(
 
     companion object {
         @JvmStatic
+        val Empty = FormattedText()
+
+        @JvmStatic
         @Suppress("UNUSED") // called from JNI
         fun fromByteCursor(
             strings: Array<String>,

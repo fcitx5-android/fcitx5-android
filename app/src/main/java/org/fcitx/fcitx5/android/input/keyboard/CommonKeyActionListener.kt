@@ -41,7 +41,7 @@ class CommonKeyActionListener :
     private var backspaceSwipeState = Stopped
 
     private suspend fun FcitxAPI.commitAndReset() {
-        if (preeditCached.run { preedit.isEmpty() && clientPreedit.isEmpty() }) {
+        if (clientPreeditCached.isEmpty() && inputPanelCached.preedit.isEmpty()) {
             // preedit is empty, there can be prediction candidates
             reset()
         } else if (inputMethodEntryCached.uniqueName.let { it == "keyboard-us" || it == "unikey" }) {
@@ -86,15 +86,14 @@ class CommonKeyActionListener :
                         )
                     }
                     is MoveSelectionAction -> when (backspaceSwipeState) {
-                        Stopped -> backspaceSwipeState = it.preeditCached.let { p ->
-                            if (p.preedit.isEmpty() && p.clientPreedit.isEmpty()) {
+                        Stopped -> backspaceSwipeState =
+                            if (it.clientPreeditCached.isEmpty() && it.inputPanelCached.preedit.isEmpty()) {
                                 // update state to `Selection` and apply first offset
                                 service.applySelectionOffset(action.start, action.end)
                                 Selection
                             } else {
                                 Reset
                             }
-                        }
                         Selection -> {
                             service.applySelectionOffset(action.start, action.end)
                         }

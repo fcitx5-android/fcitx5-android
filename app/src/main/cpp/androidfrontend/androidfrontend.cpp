@@ -42,14 +42,25 @@ public:
     }
 
     void updatePreeditImpl() override {
-        // if PreeditInApplication is disabled, this function is not called
-        // moved to `updateClientSideUIImpl`
+        checkClientPreeditUpdate();
     }
 
-    void updateClientSideUIImpl() override {
+    void updateInputPanel() {
+        // Normally input method engine should check CapabilityFlag::Preedit before update clientPreedit,
+        // and fcitx5 won't trigger UpdatePreeditEvent when that flag is not present, in which case
+        // InputContext::updatePreeditImpl() won't be called.
+        // However on Android, androidkeyboard uses clientPreedit unconditionally in order to provide
+        // a more integrated experience, so we need to check clientPreedit update manually even if
+        // clientPreedit is not enabled.
+        if (!isPreeditEnabled()) {
+            checkClientPreeditUpdate();
+        }
         InputPanel &ip = inputPanel();
-        frontend_->updatePreedit(filterText(ip.preedit()), filterText(ip.clientPreedit()));
-        frontend_->updateInputPanelAux(filterText(ip.auxUp()), filterText(ip.auxDown()));
+        frontend_->updateInputPanel(
+                filterText(ip.preedit()),
+                filterText(ip.auxUp()),
+                filterText(ip.auxDown())
+        );
         std::vector<std::string> candidates;
         const auto &list = ip.candidateList();
         if (list) {
@@ -95,11 +106,22 @@ private:
     AndroidFrontend *frontend_;
     int uid_;
 
-    Text filterText(const Text &orig) {
+    bool clientPreeditEmpty_ = true;
+
+    void checkClientPreeditUpdate() {
+        const auto &clientPreedit = filterText(inputPanel().clientPreedit());
+        bool empty = clientPreedit.empty();
+        // skip update if new and old clientPreedit are both empty
+        if (empty && clientPreeditEmpty_) return;
+        clientPreeditEmpty_ = empty;
+        frontend_->updateClientPreedit(clientPreedit);
+    }
+
+    inline Text filterText(const Text &orig) {
         return frontend_->instance()->outputFilter(this, orig);
     }
 
-    std::string filterString(const Text &orig) {
+    inline std::string filterString(const Text &orig) {
         return filterText(orig).toString();
     }
 };
@@ -122,8 +144,16 @@ AndroidFrontend::AndroidFrontend(Instance *instance)
             EventWatcherPhase::Default,
             [this](Event &event) {
                 auto &e = static_cast<InputContextUpdateUIEvent &>(event);
-                if (e.component() == UserInterfaceComponent::StatusArea) {
-                    handleStatusAreaUpdate();
+                switch (e.component()) {
+                    case UserInterfaceComponent::InputPanel: {
+                        auto *ic = dynamic_cast<AndroidInputContext *>(activeIC_);
+                        if (ic) ic->updateInputPanel();
+                        break;
+                    }
+                    case UserInterfaceComponent::StatusArea: {
+                        handleStatusAreaUpdate();
+                        break;
+                    }
                 }
             }
     ));
@@ -153,12 +183,12 @@ void AndroidFrontend::updateCandidateList(const std::vector<std::string> &candid
     candidateListCallback(candidates);
 }
 
-void AndroidFrontend::updatePreedit(const Text &preedit, const Text &clientPreedit) {
-    preeditCallback(preedit, clientPreedit);
+void AndroidFrontend::updateClientPreedit(const Text &clientPreedit) {
+    preeditCallback(clientPreedit);
 }
 
-void AndroidFrontend::updateInputPanelAux(const Text &auxUp, const Text &auxDown) {
-    inputPanelAuxCallback(auxUp, auxDown);
+void AndroidFrontend::updateInputPanel(const Text &preedit, const Text &auxUp, const Text &auxDown) {
+    inputPanelAuxCallback(preedit, auxUp, auxDown);
 }
 
 void AndroidFrontend::releaseInputContext(const int uid) {
@@ -238,11 +268,11 @@ void AndroidFrontend::setCommitStringCallback(const CommitStringCallback &callba
     commitStringCallback = callback;
 }
 
-void AndroidFrontend::setPreeditCallback(const PreeditCallback &callback) {
+void AndroidFrontend::setPreeditCallback(const ClientPreeditCallback &callback) {
     preeditCallback = callback;
 }
 
-void AndroidFrontend::setInputPanelAuxCallback(const InputPanelAuxCallback &callback) {
+void AndroidFrontend::setInputPanelAuxCallback(const InputPanelCallback &callback) {
     inputPanelAuxCallback = callback;
 }
 
@@ -265,7 +295,7 @@ void AndroidFrontend::handleStatusAreaUpdate() {
         statusAreaUpdateCallback();
         statusAreaUpdated_ = false;
         statusAreaDefer_ = nullptr;
-        return false;
+        return true;
     });
 }
 

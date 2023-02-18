@@ -36,10 +36,10 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
     override var statusAreaActionsCached: Array<Action> = arrayOf()
         private set
 
-    override var preeditCached = FcitxEvent.PreeditEvent.Data()
+    override var clientPreeditCached = FormattedText.Empty
         private set
 
-    override var panelAuxCached = FcitxEvent.InputPanelAuxEvent.Data()
+    override var inputPanelCached = FcitxEvent.InputPanelEvent.Data()
         private set
 
     // the computation is delayed to the first call of [getAddonReverseDependencies]
@@ -403,8 +403,8 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
                 is FcitxEvent.ReadyEvent -> lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_READY)
                 is FcitxEvent.IMChangeEvent -> inputMethodEntryCached = it.data
                 is FcitxEvent.StatusAreaEvent -> statusAreaActionsCached = it.data
-                is FcitxEvent.PreeditEvent -> preeditCached = it.data
-                is FcitxEvent.InputPanelAuxEvent -> panelAuxCached = it.data
+                is FcitxEvent.ClientPreeditEvent -> clientPreeditCached = it.data
+                is FcitxEvent.InputPanelEvent -> inputPanelCached = it.data
                 else -> {}
             }
         }.launchIn(lifeCycleScope)

@@ -74,9 +74,8 @@ value class CapabilityFlags constructor(val flags: ULong) {
             arr.fold(CapabilityFlag.NoFlag.flag) { acc, it -> acc or it.flag }
 
         val DefaultFlags = CapabilityFlags(
-            CapabilityFlag.Preedit.flag or
-                    CapabilityFlag.ClientUnfocusCommit.flag or
-                    CapabilityFlag.ClientSideInputPanel.flag
+            CapabilityFlag.Preedit,
+            CapabilityFlag.ClientUnfocusCommit
         )
 
         fun fromEditorInfo(info: EditorInfo): CapabilityFlags {

@@ -15,37 +15,23 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.CapabilityFlag
 import org.fcitx.fcitx5.android.core.CapabilityFlags
 import org.fcitx.fcitx5.android.core.FcitxEvent
+import org.fcitx.fcitx5.android.core.FormattedText
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
-import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.ClickToAttachWindow
-import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.ClickToDetachWindow
-import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.Hidden
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.*
 import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.BooleanKey.ClipboardEmpty
-import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.ClipboardUpdated
-import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.KawaiiBarShown
-import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.MenuButtonClicked
-import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.Pasted
-import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.Timeout
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.BooleanKey.CandidateEmpty
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.BooleanKey.CapFlagsPassword
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.BooleanKey.PreeditEmpty
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.CandidatesUpdated
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.CapFlagsUpdated
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.ExtendedWindowAttached
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.PreeditUpdated
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.WindowDetached
+import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.TransitionEvent.*
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.BooleanKey.*
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.*
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
 import org.fcitx.fcitx5.android.input.candidates.expanded.window.FlexboxExpandedCandidateWindow
 import org.fcitx.fcitx5.android.input.candidates.expanded.window.GridExpandedCandidateWindow
 import org.fcitx.fcitx5.android.input.clipboard.ClipboardWindow
-import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
-import org.fcitx.fcitx5.android.input.dependency.context
-import org.fcitx.fcitx5.android.input.dependency.inputMethodService
-import org.fcitx.fcitx5.android.input.dependency.theme
+import org.fcitx.fcitx5.android.input.dependency.*
 import org.fcitx.fcitx5.android.input.editing.TextEditingWindow
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
@@ -67,6 +53,7 @@ import timber.log.Timber
 class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(),
     InputBroadcastReceiver {
 
+    private val fcitx by manager.fcitx()
     private val context by manager.context()
     private val theme by manager.theme()
     private val windowManager: InputWindowManager by manager.must()
@@ -309,11 +296,21 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         barStateMachine.push(CapFlagsUpdated)
     }
 
-    override fun onPreeditUpdate(data: FcitxEvent.PreeditEvent.Data) {
+    private fun pushPreeditUpdateEvent(preedit: FormattedText, clientPreedit: FormattedText) {
         barStateMachine.push(
             PreeditUpdated,
-            PreeditEmpty to (data.preedit.isEmpty() && data.clientPreedit.isEmpty())
+            PreeditEmpty to (preedit.isEmpty() && clientPreedit.isEmpty())
         )
+    }
+
+    override fun onClientPreeditUpdate(data: FormattedText) {
+        val preedit = fcitx.runImmediately { inputPanelCached.preedit }
+        pushPreeditUpdateEvent(preedit, data)
+    }
+
+    override fun onInputPanelUpdate(data: FcitxEvent.InputPanelEvent.Data) {
+        val clientPreedit = fcitx.runImmediately { clientPreeditCached }
+        pushPreeditUpdateEvent(data.preedit, clientPreedit)
     }
 
     override fun onCandidateUpdate(data: Array<String>) {

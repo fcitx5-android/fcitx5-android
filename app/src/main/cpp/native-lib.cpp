@@ -542,18 +542,18 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
         env->SetObjectArrayElement(vararg, 0, JString(env, str));
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 1, *vararg);
     };
-    auto preeditCallback = [](const fcitx::Text &preedit, const fcitx::Text &clientPreedit) {
+    auto preeditCallback = [](const fcitx::Text &clientPreedit) {
         auto env = GlobalRef->AttachEnv();
-        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(2, GlobalRef->FormattedText, nullptr));
-        env->SetObjectArrayElement(vararg, 0, fcitxTextToJObject(env, preedit));
-        env->SetObjectArrayElement(vararg, 1, fcitxTextToJObject(env, clientPreedit));
+        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(1, GlobalRef->FormattedText, nullptr));
+        env->SetObjectArrayElement(vararg, 0, fcitxTextToJObject(env, clientPreedit));
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 2, *vararg);
     };
-    auto inputPanelAuxCallback = [](const fcitx::Text &auxUp, const fcitx::Text &auxDown) {
+    auto inputPanelAuxCallback = [](const fcitx::Text &preedit, const fcitx::Text &auxUp, const fcitx::Text &auxDown) {
         auto env = GlobalRef->AttachEnv();
-        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(2, GlobalRef->FormattedText, nullptr));
-        env->SetObjectArrayElement(vararg, 0, fcitxTextToJObject(env, auxUp));
-        env->SetObjectArrayElement(vararg, 1, fcitxTextToJObject(env, auxDown));
+        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(3, GlobalRef->FormattedText, nullptr));
+        env->SetObjectArrayElement(vararg, 0, fcitxTextToJObject(env, preedit));
+        env->SetObjectArrayElement(vararg, 1, fcitxTextToJObject(env, auxUp));
+        env->SetObjectArrayElement(vararg, 2, fcitxTextToJObject(env, auxDown));
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 3, *vararg);
     };
     auto readyCallback = []() {

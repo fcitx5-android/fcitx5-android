@@ -3,8 +3,8 @@ package org.fcitx.fcitx5.android.input.broadcast
 import android.view.inputmethod.EditorInfo
 import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.core.CapabilityFlags
-import org.fcitx.fcitx5.android.core.FcitxEvent.InputPanelAuxEvent
-import org.fcitx.fcitx5.android.core.FcitxEvent.PreeditEvent
+import org.fcitx.fcitx5.android.core.FcitxEvent.InputPanelEvent
+import org.fcitx.fcitx5.android.core.FormattedText
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.mechdancer.dependency.Dependent
@@ -33,12 +33,12 @@ class InputBroadcaster : UniqueComponent<InputBroadcaster>(), Dependent, InputBr
         }
     }
 
-    override fun onPreeditUpdate(data: PreeditEvent.Data) {
-        receivers.forEach { it.onPreeditUpdate(data) }
+    override fun onClientPreeditUpdate(data: FormattedText) {
+        receivers.forEach { it.onClientPreeditUpdate(data) }
     }
 
-    override fun onInputPanelAuxUpdate(data: InputPanelAuxEvent.Data) {
-        receivers.forEach { it.onInputPanelAuxUpdate(data) }
+    override fun onInputPanelUpdate(data: InputPanelEvent.Data) {
+        receivers.forEach { it.onInputPanelUpdate(data) }
     }
 
     override fun onStartInput(info: EditorInfo, capFlags: CapabilityFlags) {

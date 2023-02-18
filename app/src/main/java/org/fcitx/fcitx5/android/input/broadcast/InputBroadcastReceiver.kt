@@ -3,8 +3,8 @@ package org.fcitx.fcitx5.android.input.broadcast
 import android.view.inputmethod.EditorInfo
 import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.core.CapabilityFlags
-import org.fcitx.fcitx5.android.core.FcitxEvent.InputPanelAuxEvent
-import org.fcitx.fcitx5.android.core.FcitxEvent.PreeditEvent
+import org.fcitx.fcitx5.android.core.FcitxEvent.InputPanelEvent
+import org.fcitx.fcitx5.android.core.FormattedText
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.mechdancer.dependency.DynamicScope
@@ -15,9 +15,9 @@ interface InputBroadcastReceiver {
 
     fun onStartInput(info: EditorInfo, capFlags: CapabilityFlags) {}
 
-    fun onPreeditUpdate(data: PreeditEvent.Data) {}
+    fun onClientPreeditUpdate(data: FormattedText) {}
 
-    fun onInputPanelAuxUpdate(data: InputPanelAuxEvent.Data) {}
+    fun onInputPanelUpdate(data: InputPanelEvent.Data) {}
 
     fun onImeUpdate(ime: InputMethodEntry) {}
 

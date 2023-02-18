@@ -19,8 +19,8 @@ public:
 
     void updateCandidateList(const std::vector<std::string> &candidates);
     void commitString(const std::string &str);
-    void updatePreedit(const Text &preedit, const Text &clientPreedit);
-    void updateInputPanelAux(const Text &auxUp, const Text &auxDown);
+    void updateClientPreedit(const Text &clientPreedit);
+    void updateInputPanel(const Text &preedit, const Text &auxUp, const Text &auxDown);
     void releaseInputContext(const int uid);
 
     void keyEvent(const Key &key, bool isRelease, const int timestamp);
@@ -36,8 +36,8 @@ public:
     void setCapabilityFlags(uint64_t flag);
     void setCandidateListCallback(const CandidateListCallback &callback);
     void setCommitStringCallback(const CommitStringCallback &callback);
-    void setPreeditCallback(const PreeditCallback &callback);
-    void setInputPanelAuxCallback(const InputPanelAuxCallback &callback);
+    void setPreeditCallback(const ClientPreeditCallback &callback);
+    void setInputPanelAuxCallback(const InputPanelCallback &callback);
     void setKeyEventCallback(const KeyEventCallback &callback);
     void setInputMethodChangeCallback(const InputMethodChangeCallback &callback);
     void setStatusAreaUpdateCallback(const StatusAreaUpdateCallback &callback);
@@ -73,8 +73,8 @@ private:
 
     CandidateListCallback candidateListCallback = [](const std::vector<std::string> &) {};
     CommitStringCallback commitStringCallback = [](const std::string &) {};
-    PreeditCallback preeditCallback = [](const Text &, const Text &) {};
-    InputPanelAuxCallback inputPanelAuxCallback = [](const fcitx::Text &, const fcitx::Text &) {};
+    ClientPreeditCallback preeditCallback = [](const Text &) {};
+    InputPanelCallback inputPanelAuxCallback = [](const fcitx::Text &, const fcitx::Text &, const Text &) {};
     KeyEventCallback keyEventCallback = [](const int, const uint32_t, const uint32_t, const bool, const int) {};
     InputMethodChangeCallback imChangeCallback = [] {};
     StatusAreaUpdateCallback statusAreaUpdateCallback = [] {};

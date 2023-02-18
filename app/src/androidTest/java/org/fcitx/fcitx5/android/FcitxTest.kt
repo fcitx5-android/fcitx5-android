@@ -70,10 +70,10 @@ class FcitxTest {
         private suspend fun receiveFirstCommitString() =
             receiveFirst<FcitxEvent.CommitStringEvent>()
 
-        private suspend fun receiveFirstPreedit() = receiveFirst<FcitxEvent.PreeditEvent>()
+        private suspend fun receiveFirstPreedit() = receiveFirst<FcitxEvent.ClientPreeditEvent>()
 
         private suspend fun receiveFirstInputPanelAux() =
-            receiveFirst<FcitxEvent.InputPanelAuxEvent>()
+            receiveFirst<FcitxEvent.InputPanelEvent>()
 
     }
 

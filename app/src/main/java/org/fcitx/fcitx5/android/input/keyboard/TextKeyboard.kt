@@ -2,11 +2,8 @@ package org.fcitx.fcitx5.android.input.keyboard
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.view.inputmethod.EditorInfo
 import androidx.core.view.allViews
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.core.CapabilityFlags
-import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
@@ -130,18 +127,13 @@ class TextKeyboard(
         if (capsState == CapsState.Once) switchCapsState()
     }
 
-    override fun onAttach(info: EditorInfo) {
+    override fun onAttach() {
         updateCapsButtonIcon()
         updateAlphabetKeys()
-        `return`.img.imageResource = drawableForReturn(info)
     }
 
-    override fun onEditorInfoChange(info: EditorInfo, capFlags: CapabilityFlags) {
-        `return`.img.imageResource = drawableForReturn(info)
-    }
-
-    override fun onPreeditChange(info: EditorInfo, data: FcitxEvent.PreeditEvent.Data) {
-        updateReturnButton(`return`, info, data)
+    override fun onReturnDrawableUpdate(returnDrawable: Int) {
+        `return`.img.imageResource = returnDrawable
     }
 
     override fun onPunctuationUpdate(mapping: Map<String, String>) {
@@ -149,7 +141,7 @@ class TextKeyboard(
         updatePunctuationKeys()
     }
 
-    override fun onInputMethodChange(ime: InputMethodEntry) {
+    override fun onInputMethodUpdate(ime: InputMethodEntry) {
         space.mainText.text = buildString {
             append(ime.displayName)
             ime.subMode.run { label.ifEmpty { name.ifEmpty { null } } }?.let { append(" ($it)") }

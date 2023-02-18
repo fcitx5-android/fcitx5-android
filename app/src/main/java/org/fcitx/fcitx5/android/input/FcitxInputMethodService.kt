@@ -49,7 +49,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     val selection = CursorTracker()
     val composing = CursorRange()
-    private var composingText = EmptyFormattedText
+    private var composingText = FormattedText.Empty
 
     private var cursorUpdateIndex: Int = 0
 
@@ -130,8 +130,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 }
             }
 
-            is FcitxEvent.PreeditEvent -> {
-                updateComposingText(event.data.clientPreedit)
+            is FcitxEvent.ClientPreeditEvent -> {
+                updateComposingText(event.data)
             }
 
             else -> {
@@ -199,7 +199,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         selection.predict(start + text.length)
         // clear composing range
         composing.clear()
-        composingText = EmptyFormattedText
+        composingText = FormattedText.Empty
         inputConnection?.commitText(text, 1)
     }
 
@@ -384,7 +384,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // right cursor position, try to workaround this would simply introduce more bugs.
         selection.resetTo(attribute.initialSelStart, attribute.initialSelEnd)
         composing.clear()
-        composingText = EmptyFormattedText
+        composingText = FormattedText.Empty
         val flags = CapabilityFlags.fromEditorInfo(attribute)
         editorInfo = attribute
         capabilityFlags = flags
@@ -470,7 +470,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         } else {
             Timber.d("handleCursorUpdate: focus out/in")
             composing.clear()
-            composingText = EmptyFormattedText
+            composingText = FormattedText.Empty
             // cursor outside composing range, finish composing as-is
             inputConnection?.finishComposingText()
             // `fcitx.reset()` here would commit preedit after new cursor position
@@ -582,7 +582,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     companion object {
         val EmptyEditorInfo = EditorInfo()
-        val EmptyFormattedText = FormattedText()
         const val DeleteSurroundingFlag = "org.fcitx.fcitx5.android.DELETE_SURROUNDING"
     }
 }

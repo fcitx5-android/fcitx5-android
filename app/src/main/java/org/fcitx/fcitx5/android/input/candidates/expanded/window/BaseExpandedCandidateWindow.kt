@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.FcitxEvent
+import org.fcitx.fcitx5.android.core.FormattedText
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.BooleanKey.CandidatesEmpty
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesAttached
@@ -19,6 +20,7 @@ import org.fcitx.fcitx5.android.input.candidates.CandidateViewBuilder
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.candidates.adapter.BaseCandidateViewAdapter
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateLayout
+import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction
@@ -33,6 +35,7 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
 
     protected val builder: CandidateViewBuilder by manager.must()
     protected val theme by manager.theme()
+    private val fcitx by manager.fcitx()
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
     private val bar: KawaiiBarComponent by manager.must()
     private val horizontalCandidate: HorizontalCandidateComponent by manager.must()
@@ -98,9 +101,19 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
         candidateLayout.embeddedKeyboard.keyActionListener = null
     }
 
-    override fun onPreeditUpdate(data: FcitxEvent.PreeditEvent.Data) {
-        if (data.preedit.isEmpty() && data.clientPreedit.isEmpty()) {
+    private fun evaluateShouldDetach(preedit: FormattedText, clientPreedit: FormattedText) {
+        if (preedit.isEmpty() && clientPreedit.isEmpty()) {
             windowManager.attachWindow(KeyboardWindow)
         }
+    }
+
+    override fun onClientPreeditUpdate(data: FormattedText) {
+        val preedit = fcitx.runImmediately { inputPanelCached.preedit }
+        evaluateShouldDetach(preedit, data)
+    }
+
+    override fun onInputPanelUpdate(data: FcitxEvent.InputPanelEvent.Data) {
+        val clientPreedit = fcitx.runImmediately { clientPreeditCached }
+        evaluateShouldDetach(data.preedit, clientPreedit)
     }
 }

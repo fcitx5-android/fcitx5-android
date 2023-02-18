@@ -73,37 +73,37 @@ class PreeditUi(override val ctx: Context, private val theme: Theme) : Ui {
         }
     }
 
-    fun update(preedit: FcitxEvent.PreeditEvent.Data, aux: FcitxEvent.InputPanelAuxEvent.Data) {
+    fun update(inputPanel: FcitxEvent.InputPanelEvent.Data) {
         val bkgColor = theme.genericActiveBackgroundColor
-        val upText: SpannedString
+        val upString: SpannedString
         val upCursor: Int
-        if (aux.auxUp.isEmpty()) {
-            upText = preedit.preedit.toSpannedString(bkgColor)
-            upCursor = preedit.preedit.cursor
+        if (inputPanel.auxUp.isEmpty()) {
+            upString = inputPanel.preedit.toSpannedString(bkgColor)
+            upCursor = inputPanel.preedit.cursor
         } else {
-            upText = buildSpannedString {
-                append(aux.auxUp.toSpannedString(bkgColor))
-                append(preedit.preedit.toSpannedString(bkgColor))
+            upString = buildSpannedString {
+                append(inputPanel.auxUp.toSpannedString(bkgColor))
+                append(inputPanel.preedit.toSpannedString(bkgColor))
             }
-            upCursor = preedit.preedit.cursor.let {
+            upCursor = inputPanel.preedit.cursor.let {
                 if (it < 0) it
-                else aux.auxUp.length + it
+                else inputPanel.auxUp.length + it
             }
         }
-        val downString = aux.auxDown.toSpannedString(bkgColor)
-        val hasUp = upText.isNotEmpty()
+        val downString = inputPanel.auxDown.toSpannedString(bkgColor)
+        val hasUp = upString.isNotEmpty()
         val hasDown = downString.isNotEmpty()
         visible = hasUp || hasDown
         if (!visible) return
-        val upString = if (upCursor < 0 || upCursor == upText.length) {
-            upText
+        val upStringWithCursor = if (upCursor < 0 || upCursor == upString.length) {
+            upString
         } else buildSpannedString {
-            if (upCursor > 0) append(upText, 0, upCursor)
+            if (upCursor > 0) append(upString, 0, upCursor)
             append('|')
             setSpan(cursorSpan, upCursor, upCursor + 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-            append(upText, upCursor, upText.length)
+            append(upString, upCursor, upString.length)
         }
-        updateTextView(upView, upString, hasUp)
+        updateTextView(upView, upStringWithCursor, hasUp)
         updateTextView(downView, downString, hasDown)
     }
 }

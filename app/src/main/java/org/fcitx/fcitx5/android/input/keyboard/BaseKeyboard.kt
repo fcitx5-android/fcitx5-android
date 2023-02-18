@@ -4,24 +4,23 @@ import android.content.Context
 import android.graphics.Rect
 import android.view.MotionEvent
 import android.view.View
-import android.view.inputmethod.EditorInfo
 import androidx.annotation.CallSuper
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
-import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.core.*
+import org.fcitx.fcitx5.android.core.FcitxKeyMapping
+import org.fcitx.fcitx5.android.core.InputMethodEntry
+import org.fcitx.fcitx5.android.core.KeyStates
+import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.GestureType
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListener
 import org.fcitx.fcitx5.android.input.popup.PopupAction
 import org.fcitx.fcitx5.android.input.popup.PopupActionListener
-import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.add
-import splitties.views.imageResource
 import timber.log.Timber
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
@@ -294,39 +293,6 @@ abstract class BaseKeyboard(
         }
     }
 
-    @DrawableRes
-    protected fun drawableForReturn(info: EditorInfo): Int {
-        if (info.imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION)) {
-            return R.drawable.ic_baseline_keyboard_return_24
-        }
-        return when (info.imeOptions and EditorInfo.IME_MASK_ACTION) {
-            EditorInfo.IME_ACTION_GO -> R.drawable.ic_baseline_arrow_forward_24
-            EditorInfo.IME_ACTION_SEARCH -> R.drawable.ic_baseline_search_24
-            EditorInfo.IME_ACTION_SEND -> R.drawable.ic_baseline_send_24
-            EditorInfo.IME_ACTION_NEXT -> R.drawable.ic_baseline_keyboard_tab_24
-            EditorInfo.IME_ACTION_DONE -> R.drawable.ic_baseline_done_24
-            EditorInfo.IME_ACTION_PREVIOUS -> R.drawable.ic_baseline_keyboard_tab_reverse_24
-            else -> R.drawable.ic_baseline_keyboard_return_24
-        }
-    }
-
-    // FIXME: need some new API to know exactly whether next enter would be captured by fcitx
-    protected fun updateReturnButton(
-        `return`: ImageKeyView,
-        info: EditorInfo,
-        preedit: FcitxEvent.PreeditEvent.Data
-        // aux: FcitxEvent.InputPanelAuxEvent.Data
-    ) {
-        val hasPreedit = preedit.preedit.isNotEmpty() || preedit.clientPreedit.isNotEmpty()
-        // `auxUp` is not empty when switching input methods, ignore it to reduce flicker
-        //        || aux.auxUp.isNotEmpty()
-        `return`.img.imageResource = if (hasPreedit) {
-            R.drawable.ic_baseline_keyboard_return_24
-        } else {
-            drawableForReturn(info)
-        }
-    }
-
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         val (x, y) = intArrayOf(0, 0).also { getLocationInWindow(it) }
         bounds.set(x, y, x + width, y + height)
@@ -471,15 +437,11 @@ abstract class BaseKeyboard(
         return true
     }
 
-    open fun onAttach(info: EditorInfo) {
+    open fun onAttach() {
         // do nothing by default
     }
 
-    open fun onEditorInfoChange(info: EditorInfo, capFlags: CapabilityFlags) {
-        // do nothing by default
-    }
-
-    open fun onPreeditChange(info: EditorInfo, data: FcitxEvent.PreeditEvent.Data) {
+    open fun onReturnDrawableUpdate(@DrawableRes returnDrawable: Int) {
         // do nothing by default
     }
 
@@ -487,7 +449,7 @@ abstract class BaseKeyboard(
         // do nothing by default
     }
 
-    open fun onInputMethodChange(ime: InputMethodEntry) {
+    open fun onInputMethodUpdate(ime: InputMethodEntry) {
         // do nothing by default
     }
 

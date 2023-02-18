@@ -27,9 +27,9 @@ interface FcitxAPI {
 
     val statusAreaActionsCached: Array<Action>
 
-    val preeditCached: FcitxEvent.PreeditEvent.Data
+    val clientPreeditCached: FormattedText
 
-    val panelAuxCached: FcitxEvent.InputPanelAuxEvent.Data
+    val inputPanelCached: FcitxEvent.InputPanelEvent.Data
 
     fun getAddonReverseDependencies(addon: String): List<Pair<String, AddonDep>>
 

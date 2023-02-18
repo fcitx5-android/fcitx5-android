@@ -5,14 +5,15 @@ import android.view.Gravity
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
+import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.transition.Slide
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.CapabilityFlags
 import org.fcitx.fcitx5.android.core.FcitxEvent
+import org.fcitx.fcitx5.android.core.FormattedText
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
-import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.KeyboardSwitchedOutNumber
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.KeyboardSwitchedToNumber
@@ -35,7 +36,7 @@ import splitties.views.dsl.core.matchParent
 class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), EssentialWindow,
     InputBroadcastReceiver {
 
-    private val service: FcitxInputMethodService by manager.inputMethodService()
+    private val service by manager.inputMethodService()
     private val fcitx by manager.fcitx()
     private val theme by manager.theme()
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
@@ -86,6 +87,16 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
         popup.listener
     }
 
+    @DrawableRes
+    private var returnDrawable = R.drawable.ic_baseline_keyboard_return_24
+
+    private fun updateReturnDrawable() {
+        val newDrawable = ReturnKeyDrawable.from(fcitx, service.editorInfo)
+        if (returnDrawable == newDrawable) return
+        returnDrawable = newDrawable
+        currentKeyboard?.onReturnDrawableUpdate(returnDrawable)
+    }
+
     // This will be called EXACTLY ONCE
     override fun onCreateView(): View {
         keyboardView = context.frameLayout(R.id.keyboard_view)
@@ -108,8 +119,9 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
             it.keyActionListener = keyActionListener
             it.popupActionListener = popupActionListener
             keyboardView.apply { add(it, lParams(matchParent, matchParent)) }
-            it.onAttach(service.editorInfo)
-            it.onInputMethodChange(fcitx.runImmediately { inputMethodEntryCached })
+            it.onAttach()
+            it.onReturnDrawableUpdate(returnDrawable)
+            it.onInputMethodUpdate(fcitx.runImmediately { inputMethodEntryCached })
         }
     }
 
@@ -141,15 +153,18 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
             else -> TextKeyboard.Name
         }
         switchLayout(targetLayout, remember = false)
-        currentKeyboard?.onEditorInfoChange(info, capFlags)
     }
 
     override fun onImeUpdate(ime: InputMethodEntry) {
-        currentKeyboard?.onInputMethodChange(ime)
+        currentKeyboard?.onInputMethodUpdate(ime)
     }
 
-    override fun onPreeditUpdate(data: FcitxEvent.PreeditEvent.Data) {
-        currentKeyboard?.onPreeditChange(service.editorInfo, data)
+    override fun onClientPreeditUpdate(data: FormattedText) {
+        updateReturnDrawable()
+    }
+
+    override fun onInputPanelUpdate(data: FcitxEvent.InputPanelEvent.Data) {
+        updateReturnDrawable()
     }
 
     override fun onPunctuationUpdate(mapping: Map<String, String>) {

@@ -2,7 +2,6 @@ package org.fcitx.fcitx5.android.input.keyboard
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.view.inputmethod.EditorInfo
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
@@ -55,8 +54,8 @@ class NumberKeyboard(
     val space: TextKeyView by lazy { findViewById(R.id.button_mini_space) }
     val `return`: ImageKeyView by lazy { findViewById(R.id.button_return) }
 
-    override fun onAttach(info: EditorInfo) {
-        `return`.img.imageResource = drawableForReturn(info)
+    override fun onReturnDrawableUpdate(returnDrawable: Int) {
+        `return`.img.imageResource = returnDrawable
     }
 
 }
