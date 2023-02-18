@@ -67,7 +67,8 @@ class InputMethodListFragment : ProgressFragment(), OnItemChangedListener<InputM
     }
 
     override fun onPause() {
-        ui.exitMultiSelect(viewModel)
+        if (::ui.isInitialized)
+            ui.exitMultiSelect(viewModel)
         viewModel.disableToolbarEditButton()
         super.onPause()
     }

@@ -20,7 +20,11 @@ import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.utils.NaiveDustman
 import org.fcitx.fcitx5.android.utils.serializable
 import org.fcitx.fcitx5.android.utils.str
-import splitties.views.dsl.core.*
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.verticalLayout
+import splitties.views.dsl.core.view
 import splitties.views.dsl.material.addInput
 import splitties.views.setPaddingDp
 
@@ -156,7 +160,8 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
 
     override fun onPause() {
         saveConfig()
-        ui.exitMultiSelect(viewModel)
+        if (::ui.isInitialized)
+            ui.exitMultiSelect(viewModel)
         viewModel.disableToolbarEditButton()
         super.onPause()
     }
