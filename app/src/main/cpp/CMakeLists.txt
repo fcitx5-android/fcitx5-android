@@ -35,6 +35,11 @@ find_package(LibIntl)
 # prebuilt libevent
 set(Libevent_DIR "${PREBUILT_DIR}/libevent/${ANDROID_ABI}/lib/cmake/libevent")
 set(LIBEVENT_STATIC_LINK ON)
+# LibeventTargets-static.cmake uses find_path and find_library, but NDK's android{,-legacy}.toolchain.cmake
+# set CMAKE_SYSROOT and CMAKE_FIND_ROOT_PATH cause find_* commands to re-root input paths.
+# turn off re-root behavior because we want to find libevent in prebuilt instead of NDK sysroot
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY NEVER)
 find_package(Libevent)
 
 option(ENABLE_TEST "" OFF)
@@ -79,12 +84,16 @@ include("${PREBUILT_DIR}/lua/${ANDROID_ABI}/lib/cmake/LuaConfig.cmake")
 option(USE_DLOPEN "" OFF)
 add_subdirectory(fcitx5-lua)
 
+set(OpenCC_DIR "${PREBUILT_DIR}/opencc/${ANDROID_ABI}/lib/cmake/opencc")
+find_package(OpenCC)
+
 option(ENABLE_TEST "" OFF)
-option(ENABLE_OPENCC "" OFF)
 option(ENABLE_GUI "" OFF)
 option(ENABLE_BROWSER "" OFF)
 option(USE_WEBKIT "" OFF)
 option(ENABLE_CLOUDPINYIN "" OFF)
+# prefer OpenCC_DIR rather than fcitx5-chinese-addons/cmake/FindOpenCC.cmake
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
 add_subdirectory(fcitx5-chinese-addons)
 # rename to include executable in apk
 set_target_properties(scel2org5 PROPERTIES OUTPUT_NAME libscel2org5.so)
