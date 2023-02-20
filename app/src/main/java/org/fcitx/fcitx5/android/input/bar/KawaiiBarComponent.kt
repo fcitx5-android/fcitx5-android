@@ -14,8 +14,6 @@ import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.CapabilityFlag
 import org.fcitx.fcitx5.android.core.CapabilityFlags
-import org.fcitx.fcitx5.android.core.FcitxEvent
-import org.fcitx.fcitx5.android.core.FormattedText
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
@@ -296,21 +294,8 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         barStateMachine.push(CapFlagsUpdated)
     }
 
-    private fun pushPreeditUpdateEvent(preedit: FormattedText, clientPreedit: FormattedText) {
-        barStateMachine.push(
-            PreeditUpdated,
-            PreeditEmpty to (preedit.isEmpty() && clientPreedit.isEmpty())
-        )
-    }
-
-    override fun onClientPreeditUpdate(data: FormattedText) {
-        val preedit = fcitx.runImmediately { inputPanelCached.preedit }
-        pushPreeditUpdateEvent(preedit, data)
-    }
-
-    override fun onInputPanelUpdate(data: FcitxEvent.InputPanelEvent.Data) {
-        val clientPreedit = fcitx.runImmediately { clientPreeditCached }
-        pushPreeditUpdateEvent(data.preedit, clientPreedit)
+    override fun onPreeditEmptyStateUpdate(empty: Boolean) {
+        barStateMachine.push(PreeditUpdated, PreeditEmpty to empty)
     }
 
     override fun onCandidateUpdate(data: Array<String>) {

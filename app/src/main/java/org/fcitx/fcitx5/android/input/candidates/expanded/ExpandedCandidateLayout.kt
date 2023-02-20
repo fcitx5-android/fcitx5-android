@@ -3,7 +3,6 @@ package org.fcitx.fcitx5.android.input.candidates.expanded
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
@@ -12,13 +11,10 @@ import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.add
 import splitties.views.dsl.recyclerview.recyclerView
+import splitties.views.imageResource
 
 @SuppressLint("ViewConstructor")
-class ExpandedCandidateLayout(
-    context: Context,
-    theme: Theme,
-    initRecyclerView: RecyclerView.() -> Unit = {}
-) : ConstraintLayout(context) {
+class ExpandedCandidateLayout(context: Context, theme: Theme) : ConstraintLayout(context) {
 
     class Keyboard(context: Context, theme: Theme) : BaseKeyboard(context, theme, Layout) {
         companion object {
@@ -56,6 +52,10 @@ class ExpandedCandidateLayout(
         val pageDnBtn: ImageKeyView by lazy { findViewById(DownBtnId) }
         val backspace: ImageKeyView by lazy { findViewById(R.id.button_backspace) }
         val `return`: ImageKeyView by lazy { findViewById(R.id.button_return) }
+
+        override fun onReturnDrawableUpdate(returnDrawable: Int) {
+            `return`.img.imageResource = returnDrawable
+        }
     }
 
     private val keyBorder by ThemeManager.prefs.keyBorder
@@ -91,8 +91,6 @@ class ExpandedCandidateLayout(
             endOfParent()
             bottomOfParent()
         })
-
-        initRecyclerView(recyclerView)
     }
 
     fun resetPosition() {

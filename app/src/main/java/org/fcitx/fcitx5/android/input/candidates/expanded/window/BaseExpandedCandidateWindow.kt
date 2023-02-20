@@ -8,14 +8,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import org.fcitx.fcitx5.android.core.FcitxEvent
-import org.fcitx.fcitx5.android.core.FormattedText
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.BooleanKey.CandidatesEmpty
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesAttached
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesDetached
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
+import org.fcitx.fcitx5.android.input.broadcast.ReturnKeyDrawableComponent
 import org.fcitx.fcitx5.android.input.candidates.CandidateViewBuilder
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.candidates.adapter.BaseCandidateViewAdapter
@@ -40,6 +39,7 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
     private val bar: KawaiiBarComponent by manager.must()
     private val horizontalCandidate: HorizontalCandidateComponent by manager.must()
     private val windowManager: InputWindowManager by manager.must()
+    private val returnKeyDrawable: ReturnKeyDrawableComponent by manager.must()
 
     protected val disableAnimation by AppPrefs.getInstance().advanced.disableAnimation
 
@@ -73,7 +73,10 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
     override fun onAttached() {
         lifecycleCoroutineScope = candidateLayout.findViewTreeLifecycleOwner()!!.lifecycleScope
         bar.expandButtonStateMachine.push(ExpandedCandidatesAttached)
-        candidateLayout.embeddedKeyboard.keyActionListener = keyActionListener
+        candidateLayout.embeddedKeyboard.also {
+            it.onReturnDrawableUpdate(returnKeyDrawable.resourceId)
+            it.keyActionListener = keyActionListener
+        }
         offsetJob = horizontalCandidate.expandedCandidateOffset
             .onEach(this::updateCandidatesWithOffset)
             .launchIn(lifecycleCoroutineScope)
@@ -101,19 +104,10 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
         candidateLayout.embeddedKeyboard.keyActionListener = null
     }
 
-    private fun evaluateShouldDetach(preedit: FormattedText, clientPreedit: FormattedText) {
-        if (preedit.isEmpty() && clientPreedit.isEmpty()) {
+    override fun onPreeditEmptyStateUpdate(empty: Boolean) {
+        if (empty) {
             windowManager.attachWindow(KeyboardWindow)
         }
     }
 
-    override fun onClientPreeditUpdate(data: FormattedText) {
-        val preedit = fcitx.runImmediately { inputPanelCached.preedit }
-        evaluateShouldDetach(preedit, data)
-    }
-
-    override fun onInputPanelUpdate(data: FcitxEvent.InputPanelEvent.Data) {
-        val clientPreedit = fcitx.runImmediately { clientPreeditCached }
-        evaluateShouldDetach(data.preedit, clientPreedit)
-    }
 }

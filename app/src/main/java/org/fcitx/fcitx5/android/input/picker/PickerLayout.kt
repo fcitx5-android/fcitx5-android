@@ -11,6 +11,7 @@ import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.view
+import splitties.views.imageResource
 
 @SuppressLint("ViewConstructor")
 class PickerLayout(context: Context, theme: Theme, switchKey: KeyDef) :
@@ -41,8 +42,11 @@ class PickerLayout(context: Context, theme: Theme, switchKey: KeyDef) :
             )
         )
 
-        val backspace: ImageKeyView by lazy { findViewById(R.id.button_backspace) }
         val `return`: ImageKeyView by lazy { findViewById(R.id.button_return) }
+
+        override fun onReturnDrawableUpdate(returnDrawable: Int) {
+            `return`.img.imageResource = returnDrawable
+        }
     }
 
     val embeddedKeyboard = Keyboard(context, theme, switchKey)

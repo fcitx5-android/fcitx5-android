@@ -5,19 +5,17 @@ import android.view.Gravity
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
-import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.transition.Slide
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.CapabilityFlags
-import org.fcitx.fcitx5.android.core.FcitxEvent
-import org.fcitx.fcitx5.android.core.FormattedText
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.KeyboardSwitchedOutNumber
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.KeyboardSwitchedToNumber
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
+import org.fcitx.fcitx5.android.input.broadcast.ReturnKeyDrawableComponent
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
@@ -43,6 +41,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
     private val windowManager: InputWindowManager by manager.must()
     private val popup: PopupComponent by manager.must()
     private val bar: KawaiiBarComponent by manager.must()
+    private val returnKeyDrawable: ReturnKeyDrawableComponent by manager.must()
 
     companion object : EssentialWindow.Key
 
@@ -87,16 +86,6 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
         popup.listener
     }
 
-    @DrawableRes
-    private var returnDrawable = R.drawable.ic_baseline_keyboard_return_24
-
-    private fun updateReturnDrawable() {
-        val newDrawable = ReturnKeyDrawable.from(fcitx, service.editorInfo)
-        if (returnDrawable == newDrawable) return
-        returnDrawable = newDrawable
-        currentKeyboard?.onReturnDrawableUpdate(returnDrawable)
-    }
-
     // This will be called EXACTLY ONCE
     override fun onCreateView(): View {
         keyboardView = context.frameLayout(R.id.keyboard_view)
@@ -120,7 +109,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
             it.popupActionListener = popupActionListener
             keyboardView.apply { add(it, lParams(matchParent, matchParent)) }
             it.onAttach()
-            it.onReturnDrawableUpdate(returnDrawable)
+            it.onReturnDrawableUpdate(returnKeyDrawable.resourceId)
             it.onInputMethodUpdate(fcitx.runImmediately { inputMethodEntryCached })
         }
     }
@@ -159,16 +148,12 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
         currentKeyboard?.onInputMethodUpdate(ime)
     }
 
-    override fun onClientPreeditUpdate(data: FormattedText) {
-        updateReturnDrawable()
-    }
-
-    override fun onInputPanelUpdate(data: FcitxEvent.InputPanelEvent.Data) {
-        updateReturnDrawable()
-    }
-
     override fun onPunctuationUpdate(mapping: Map<String, String>) {
         currentKeyboard?.onPunctuationUpdate(mapping)
+    }
+
+    override fun onReturnKeyDrawableUpdate(resourceId: Int) {
+        currentKeyboard?.onReturnDrawableUpdate(resourceId)
     }
 
     override fun onAttached() {

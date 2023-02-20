@@ -26,6 +26,9 @@ import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.data.theme.ThemeManager.Prefs.NavbarBackground
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcaster
+import org.fcitx.fcitx5.android.input.broadcast.PreeditEmptyStateComponent
+import org.fcitx.fcitx5.android.input.broadcast.PunctuationComponent
+import org.fcitx.fcitx5.android.input.broadcast.ReturnKeyDrawableComponent
 import org.fcitx.fcitx5.android.input.candidates.CandidateViewBuilder
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
@@ -35,7 +38,6 @@ import org.fcitx.fcitx5.android.input.picker.emoticonPicker
 import org.fcitx.fcitx5.android.input.picker.symbolPicker
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
-import org.fcitx.fcitx5.android.input.punctuation.PunctuationComponent
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.styledFloat
 import org.mechdancer.dependency.DynamicScope
@@ -73,6 +75,8 @@ class InputView(
     private val broadcaster = InputBroadcaster()
     private val popup = PopupComponent()
     private val punctuation = PunctuationComponent()
+    private val returnKeyDrawable = ReturnKeyDrawableComponent()
+    private val preeditEmptyState = PreeditEmptyStateComponent()
     private val preedit = PreeditComponent()
     private val commonKeyActionListener = CommonKeyActionListener()
     private val candidateViewBuilder = CandidateViewBuilder()
@@ -93,6 +97,8 @@ class InputView(
         scope += broadcaster
         scope += popup
         scope += punctuation
+        scope += returnKeyDrawable
+        scope += preeditEmptyState
         scope += preedit
         scope += commonKeyActionListener
         scope += candidateViewBuilder
@@ -279,6 +285,7 @@ class InputView(
             }
         }
         broadcaster.onStartInput(info, capFlags)
+        returnKeyDrawable.updateDrawableOnEditorInfo(info)
         windowManager.attachWindow(KeyboardWindow)
     }
 
@@ -289,10 +296,12 @@ class InputView(
             }
 
             is FcitxEvent.ClientPreeditEvent -> {
+                preeditEmptyState.updatePreeditEmptyState(clientPreedit = it.data)
                 broadcaster.onClientPreeditUpdate(it.data)
             }
 
             is FcitxEvent.InputPanelEvent -> {
+                preeditEmptyState.updatePreeditEmptyState(preedit = it.data.preedit)
                 broadcaster.onInputPanelUpdate(it.data)
             }
 
@@ -301,6 +310,7 @@ class InputView(
             }
 
             is FcitxEvent.StatusAreaEvent -> {
+                punctuation.updatePunctuationMapping(it.data)
                 broadcaster.onStatusAreaUpdate(it.data)
             }
 

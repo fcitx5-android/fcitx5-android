@@ -5,7 +5,7 @@ import androidx.core.content.ContextCompat
 import androidx.transition.Slide
 import androidx.transition.Transition
 import androidx.viewpager2.widget.ViewPager2
-import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
+import org.fcitx.fcitx5.android.input.broadcast.ReturnKeyDrawableComponent
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.keyboard.*
 import org.fcitx.fcitx5.android.input.popup.PopupAction
@@ -22,7 +22,7 @@ class PickerWindow(
     val density: PickerPageUi.Density,
     private val switchKey: KeyDef,
     val popupPreview: Boolean = true
-) : InputWindow.ExtendedInputWindow<PickerWindow>(), EssentialWindow, InputBroadcastReceiver {
+) : InputWindow.ExtendedInputWindow<PickerWindow>(), EssentialWindow {
 
     enum class Key : EssentialWindow.Key {
         Symbol,
@@ -34,6 +34,7 @@ class PickerWindow(
     private val windowManager: InputWindowManager by manager.must()
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
     private val popup: PopupComponent by manager.must()
+    private val returnKeyDrawable: ReturnKeyDrawableComponent by manager.must()
 
     private lateinit var pickerLayout: PickerLayout
     private lateinit var pickerPagesAdapter: PickerPagesAdapter
@@ -147,7 +148,10 @@ class PickerWindow(
     override fun onCreateBarExtension() = pickerLayout.tabsUi.root
 
     override fun onAttached() {
-        pickerLayout.embeddedKeyboard.keyActionListener = keyActionListener
+        pickerLayout.embeddedKeyboard.also {
+            it.onReturnDrawableUpdate(returnKeyDrawable.resourceId)
+            it.keyActionListener = keyActionListener
+        }
     }
 
     override fun onDetached() {

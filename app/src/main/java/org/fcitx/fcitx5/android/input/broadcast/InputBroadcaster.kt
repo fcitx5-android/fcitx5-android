@@ -77,4 +77,12 @@ class InputBroadcaster : UniqueComponent<InputBroadcaster>(), Dependent, InputBr
         receivers.forEach { it.onPunctuationUpdate(mapping) }
     }
 
+    override fun onPreeditEmptyStateUpdate(empty: Boolean) {
+        receivers.forEach { it.onPreeditEmptyStateUpdate(empty) }
+    }
+
+    override fun onReturnKeyDrawableUpdate(resourceId: Int) {
+        receivers.forEach { it.onReturnKeyDrawableUpdate(resourceId) }
+    }
+
 }
