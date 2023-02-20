@@ -24,10 +24,15 @@ object KawaiiBarStateMachine {
         EventStateMachine.TransitionEvent<State, BooleanKey> by BuildTransitionEvent(builder) {
         PreeditUpdated({
             from(Candidate) transitTo Idle on (PreeditEmpty to true)
-            from(Idle) transitTo Candidate on (PreeditEmpty to false)
+            from(Idle) transitTo Candidate onF {
+                it(PreeditEmpty) == false && it(CandidateEmpty) == false
+            }
         }),
         CandidatesUpdated({
             from(Idle) transitTo Candidate on (CandidateEmpty to false)
+            from(Candidate) transitTo Idle onF {
+                it(PreeditEmpty) == true && it(CandidateEmpty) == true
+            }
         }),
         ExtendedWindowAttached({
             from(Idle) transitTo Title
