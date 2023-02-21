@@ -3,6 +3,7 @@ package org.fcitx.fcitx5.android.input.candidates.expanded.window
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
@@ -44,8 +45,7 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
     protected val disableAnimation by AppPrefs.getInstance().advanced.disableAnimation
 
     private lateinit var lifecycleCoroutineScope: LifecycleCoroutineScope
-    protected lateinit var candidateLayout: ExpandedCandidateLayout
-        private set
+    private lateinit var candidateLayout: ExpandedCandidateLayout
 
     abstract fun onCreateCandidateLayout(): ExpandedCandidateLayout
 
@@ -63,6 +63,7 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
     }
 
     abstract val adapter: BaseCandidateViewAdapter
+    abstract val layoutManager: RecyclerView.LayoutManager
 
     private var offsetJob: Job? = null
 

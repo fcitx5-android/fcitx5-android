@@ -26,16 +26,17 @@ class GridExpandedCandidateWindow :
         builder.gridAdapter()
     }
 
-    val layoutManager: GridLayoutManager
-        get() = candidateLayout.recyclerView.layoutManager as GridLayoutManager
+    override val layoutManager by lazy {
+        GridLayoutManager(context, gridSpanCount).apply {
+            spanSizeLookup = SpanHelper(adapter, this)
+        }
+    }
 
     override fun onCreateCandidateLayout(): ExpandedCandidateLayout =
         ExpandedCandidateLayout(context, theme).apply {
             recyclerView.apply {
-                layoutManager = GridLayoutManager(context, gridSpanCount).apply {
-                    spanSizeLookup = SpanHelper(this@GridExpandedCandidateWindow.adapter, this)
-                }
                 adapter = this@GridExpandedCandidateWindow.adapter
+                layoutManager = this@GridExpandedCandidateWindow.layoutManager
                 addItemDecoration(GridDecoration(builder.dividerDrawable()))
                 addOnScrollListener(object : RecyclerView.OnScrollListener() {
                     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {

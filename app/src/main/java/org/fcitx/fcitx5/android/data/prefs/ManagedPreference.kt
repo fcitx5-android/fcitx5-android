@@ -44,7 +44,7 @@ abstract class ManagedPreference<T : Any>(
     }
 
     fun fireChange() {
-        listeners.forEach { with(it) { onChange(key, getValue()) } }
+        listeners.forEach { it.onChange(key, getValue()) }
     }
 
     class PBool(sharedPreferences: SharedPreferences, key: String, defaultValue: Boolean) :

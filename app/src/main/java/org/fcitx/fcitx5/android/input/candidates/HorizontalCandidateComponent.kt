@@ -1,7 +1,7 @@
 package org.fcitx.fcitx5.android.input.candidates
 
-import android.content.Context
-import android.view.ViewGroup
+import android.content.res.Configuration
+import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexboxLayoutManager
 import kotlinx.coroutines.channels.BufferOverflow
@@ -14,22 +14,39 @@ import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.BooleanKey.Ca
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesUpdated
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
+import org.fcitx.fcitx5.android.input.candidates.adapter.BaseCandidateViewAdapter
 import org.fcitx.fcitx5.android.input.candidates.expanded.decoration.FlexboxVerticalDecoration
 import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.mechdancer.dependency.manager.must
+import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
 
 class HorizontalCandidateComponent :
     UniqueViewComponent<HorizontalCandidateComponent, RecyclerView>(), InputBroadcastReceiver {
 
+    private val context by manager.context()
     private val builder: CandidateViewBuilder by manager.must()
-    private val context: Context by manager.context()
     private val bar: KawaiiBarComponent by manager.must()
 
-    val adapter by lazy {
-        builder.simpleAdapter()
+    private val maxSpanCount by lazy {
+        AppPrefs.getInstance().keyboard.run {
+            if (context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                expandedCandidateGridSpanCount
+            else
+                expandedCandidateGridSpanCountLandscape
+        }.getValue()
     }
+
+    private var layoutFlexGrow = 1f
+
+    /**
+     * Second layout pass is needed when total candidates count < [maxSpanCount], but the
+     * RecyclerView cannot display all of them. In that case, displayed candidates should be
+     * stretched evenly (by setting flexGrow to 1.0f).
+     */
+    private var secondLayoutPassNeeded = false
+    private var secondLayoutPassDone = false
 
     // Since expanded candidate window is created once the expand button was clicked,
     // we need to replay the last offset
@@ -40,39 +57,73 @@ class HorizontalCandidateComponent :
 
     val expandedCandidateOffset = _expandedCandidateOffset.asSharedFlow()
 
-    val horizontalCandidateGrowth by AppPrefs.getInstance().keyboard.horizontalCandidateGrowth
-
     private fun refreshExpanded() {
         runBlocking {
             _expandedCandidateOffset.emit(view.childCount)
         }
     }
 
+    val adapter: BaseCandidateViewAdapter by lazy {
+        builder.flexAdapter {
+            val rv = this@HorizontalCandidateComponent.view
+            FlexboxLayoutManager.LayoutParams(wrapContent, rv.height).apply {
+                minWidth = (rv.width - dividerDrawable.intrinsicWidth * maxSpanCount) / maxSpanCount
+                flexGrow = layoutFlexGrow
+            }
+        }
+    }
+
+    val layoutManager by lazy {
+        object : FlexboxLayoutManager(context) {
+            override fun canScrollVertically() = false
+            override fun canScrollHorizontally() = false
+            override fun onLayoutCompleted(state: RecyclerView.State?) {
+                super.onLayoutCompleted(state)
+                if (secondLayoutPassNeeded) {
+                    if (childCount >= adapter.candidates.size) {
+                        // second layout pass is not actually need,
+                        // because RecyclerView can display all the candidates
+                        secondLayoutPassNeeded = false
+                    } else {
+                        // second layout pass would trigger onLayoutCompleted as well,
+                        // just skip second onLayoutCompleted
+                        if (secondLayoutPassDone) return
+                        secondLayoutPassDone = true
+                        for (i in 0 until childCount) {
+                            getChildAt(i)!!.updateLayoutParams<LayoutParams> {
+                                flexGrow = 1f
+                            }
+                        }
+                    }
+                }
+                refreshExpanded()
+                bar.expandButtonStateMachine.push(
+                    ExpandedCandidatesUpdated,
+                    CandidatesEmpty to (adapter.candidates.size - childCount <= 0)
+                )
+            }
+            // no need to override `generate{,Default}LayoutParams`, because builder.flexAdapter()
+            // guarantees ViewHolder's layoutParams to be `FlexboxLayoutManager.LayoutParams`
+        }
+    }
+
+    private val dividerDrawable by lazy {
+        builder.dividerDrawable()
+    }
+
     override val view by lazy {
         context.recyclerView(R.id.candidate_view) {
             adapter = this@HorizontalCandidateComponent.adapter
-            layoutManager = object : FlexboxLayoutManager(context) {
-                override fun canScrollVertically(): Boolean = false
-                override fun canScrollHorizontally(): Boolean = false
-                override fun generateLayoutParams(lp: ViewGroup.LayoutParams?) =
-                    LayoutParams(lp).apply {
-                        flexGrow = if (horizontalCandidateGrowth) 1f else 0f
-                    }
-
-                override fun onLayoutCompleted(state: RecyclerView.State?) {
-                    super.onLayoutCompleted(state)
-                    refreshExpanded()
-                    bar.expandButtonStateMachine.push(
-                        ExpandedCandidatesUpdated,
-                        CandidatesEmpty to (adapter!!.itemCount - childCount <= 0)
-                    )
-                }
-            }
-            addItemDecoration(FlexboxVerticalDecoration(builder.dividerDrawable()))
+            layoutManager = this@HorizontalCandidateComponent.layoutManager
+            addItemDecoration(FlexboxVerticalDecoration(dividerDrawable))
         }
     }
 
     override fun onCandidateUpdate(data: Array<String>) {
+        layoutFlexGrow = if (data.size < maxSpanCount) 0f else 1f
+        // second layout pass maybe needed when total candidates count < maxSpanCount
+        secondLayoutPassNeeded = data.size < maxSpanCount
+        secondLayoutPassDone = false
         adapter.updateCandidates(data)
     }
 }
