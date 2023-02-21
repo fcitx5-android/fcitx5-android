@@ -6,11 +6,11 @@ An attempt to run fcitx5 on Android.
 
 ### Latest CI builds
 
-Jenkins Status: [![build status](https://img.shields.io/jenkins/build.svg?jobUrl=https://jenkins.fcitx-im.org/job/android/job/fcitx5-android/)](https://jenkins.fcitx-im.org/job/android/job/fcitx5-android/)
+Jenkins: [![build status](https://img.shields.io/jenkins/build.svg?jobUrl=https://jenkins.fcitx-im.org/job/android/job/fcitx5-android/)](https://jenkins.fcitx-im.org/job/android/job/fcitx5-android/)
 
 ### Tagged releases
 
-GitHub Releases: [![release version](https://img.shields.io/github/v/release/fcitx5-android/fcitx5-android)](https://github.com/fcitx5-android/fcitx5-android/releases)
+GitHub: [![release version](https://img.shields.io/github/v/release/fcitx5-android/fcitx5-android)](https://github.com/fcitx5-android/fcitx5-android/releases)
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
     alt="Get it on F-Droid"
