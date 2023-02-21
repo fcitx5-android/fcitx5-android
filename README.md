@@ -4,6 +4,10 @@ An attempt to run fcitx5 on Android.
 
 [![Jenkins Build Status](https://img.shields.io/jenkins/s/https/jenkins.fcitx-im.org/job/android/job/fcitx5-android.svg)](https://jenkins.fcitx-im.org/job/android/job/fcitx5-android/)
 
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+    alt="Get it on F-Droid"
+    height="80">](https://f-droid.org/packages/org.fcitx.fcitx5.android)
+
 ## Project status
 
 ### Implemented
