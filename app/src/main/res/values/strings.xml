@@ -197,4 +197,10 @@
     <string name="notification_permission_message">Without the permission to post notifications, we are not able to notify you when some time-consuming operations are done.</string>
     <string name="notification_permission_title">No Notification Permission</string>
     <string name="toolbar_num_row_on_password">Show number row on toolbar when input password</string>
+    <string name="space_long_press_behavior">Space key long press behavior</string>
+    <string name="space_behavior_none">None</string>
+    <string name="space_behavior_enumerate">Enumerate input methods</string>
+    <string name="space_behavior_activate">Toggle input method activate state</string>
+    <string name="space_behavior_picker">Show input method picker dialog</string>
+    <string name="show_lang_switch_key">Show language switch key</string>
 </resources>

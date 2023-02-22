@@ -23,9 +23,9 @@ sealed class KeyAction {
 
     object UnicodeAction : KeyAction()
 
-    class LangSwitchAction(val enumerate: Boolean = true) : KeyAction()
+    object LangSwitchAction : KeyAction()
 
-    object InputMethodSwitchAction : KeyAction()
+    object ShowInputMethodPickerAction : KeyAction()
 
     data class LayoutSwitchAction(val act: String = "") : KeyAction()
 
@@ -34,4 +34,6 @@ sealed class KeyAction {
     data class DeleteSelectionAction(val totalCnt: Int = 0) : KeyAction()
 
     data class PickerSwitchAction(val key: PickerWindow.Key? = null) : KeyAction()
+
+    object SpaceLongPressAction: KeyAction()
 }

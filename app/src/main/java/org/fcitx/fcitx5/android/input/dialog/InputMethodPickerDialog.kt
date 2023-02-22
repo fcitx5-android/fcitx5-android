@@ -17,7 +17,7 @@ import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.recyclerview.verticalLayoutManager
 import splitties.views.topPadding
 
-object InputMethodSwitcherDialog {
+object InputMethodPickerDialog {
     suspend fun build(
         fcitx: FcitxAPI,
         service: FcitxInputMethodService,

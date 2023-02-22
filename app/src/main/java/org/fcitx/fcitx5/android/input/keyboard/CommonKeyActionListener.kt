@@ -11,7 +11,7 @@ import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.inputView
 import org.fcitx.fcitx5.android.input.dialog.AddMoreInputMethodsPrompt
-import org.fcitx.fcitx5.android.input.dialog.InputMethodSwitcherDialog
+import org.fcitx.fcitx5.android.input.dialog.InputMethodPickerDialog
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener.BackspaceSwipeState.*
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction.*
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
@@ -74,15 +74,13 @@ class CommonKeyActionListener :
                     is LangSwitchAction -> {
                         if (it.enabledIme().size < 2) {
                             inputView.showDialog(AddMoreInputMethodsPrompt.build(context))
-                        } else if (action.enumerate) {
-                            it.enumerateIme()
                         } else {
                             it.toggleIme()
                         }
                     }
-                    is InputMethodSwitchAction -> {
+                    is ShowInputMethodPickerAction -> {
                         inputView.showDialog(
-                            InputMethodSwitcherDialog.build(it, service, context)
+                            InputMethodPickerDialog.build(it, service, context)
                         )
                     }
                     is MoveSelectionAction -> when (backspaceSwipeState) {
@@ -116,6 +114,16 @@ class CommonKeyActionListener :
                             ?: PickerWindow.Key.Emoji
                         ContextCompat.getMainExecutor(service).execute {
                             windowManager.attachWindow(key)
+                        }
+                    }
+                    is SpaceLongPressAction -> {
+                        when (AppPrefs.getInstance().keyboard.spaceKeyLongPressBehavior.getValue()) {
+                            SpaceLongPressBehavior.None -> {}
+                            SpaceLongPressBehavior.Enumerate -> it.enumerateIme()
+                            SpaceLongPressBehavior.ToggleActivate -> it.toggleIme()
+                            SpaceLongPressBehavior.ShowPicker -> inputView.showDialog(
+                                InputMethodPickerDialog.build(it, service, context)
+                            )
                         }
                     }
                     else -> {

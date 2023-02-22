@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.input.keyboard
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.view.View
 import androidx.core.view.allViews
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
@@ -77,12 +78,19 @@ class TextKeyboard(
     val space: TextKeyView by lazy { findViewById(R.id.button_space) }
     val `return`: ImageKeyView by lazy { findViewById(R.id.button_return) }
 
+    private val showLangSwitchKey = AppPrefs.getInstance().keyboard.showLangSwitchKey
+    private val showLangSwitchKeyListener = ManagedPreference.OnChangeListener<Boolean> { _, v ->
+        updateLangSwitchKey(v)
+    }
+
     private val keepLettersUppercase = AppPrefs.getInstance().keyboard.keepLettersUppercase
     private val keepLettersUppercaseListener = ManagedPreference.OnChangeListener<Boolean> { _, _ ->
         updateAlphabetKeys()
     }
 
     init {
+        updateLangSwitchKey(showLangSwitchKey.getValue())
+        showLangSwitchKey.registerOnChangeListener(showLangSwitchKeyListener)
         keepLettersUppercase.registerOnChangeListener(keepLettersUppercaseListener)
     }
 
@@ -185,6 +193,10 @@ class TextKeyboard(
                 }
             )
         }
+    }
+
+    private fun updateLangSwitchKey(visible: Boolean) {
+        lang.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
     private fun updateAlphabetKeys() {

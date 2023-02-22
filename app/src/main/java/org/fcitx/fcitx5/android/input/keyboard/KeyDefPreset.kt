@@ -192,8 +192,8 @@ class LanguageKey : KeyDef(
         viewId = R.id.button_lang
     ),
     setOf(
-        Behavior.Press(KeyAction.LangSwitchAction()),
-        Behavior.LongPress(KeyAction.InputMethodSwitchAction)
+        Behavior.Press(KeyAction.LangSwitchAction),
+        Behavior.LongPress(KeyAction.ShowInputMethodPickerAction)
     )
 )
 
@@ -207,7 +207,7 @@ class SpaceKey : KeyDef(
     ),
     setOf(
         Behavior.Press(KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_space))),
-        Behavior.LongPress(KeyAction.LangSwitchAction(enumerate = false))
+        Behavior.LongPress(KeyAction.SpaceLongPressAction)
     )
 )
 

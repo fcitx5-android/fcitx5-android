@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import android.os.Build
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
+import org.fcitx.fcitx5.android.input.keyboard.SpaceLongPressBehavior
 import org.fcitx.fcitx5.android.input.keyboard.SwipeSymbolDirection
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
 import org.fcitx.fcitx5.android.utils.getSystemProperty
@@ -116,6 +117,26 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             "ms",
             10
         )
+        val spaceKeyLongPressBehavior = list(
+            R.string.space_long_press_behavior,
+            "space_long_press_behavior",
+            SpaceLongPressBehavior.None,
+            SpaceLongPressBehavior,
+            listOf(
+                SpaceLongPressBehavior.None,
+                SpaceLongPressBehavior.Enumerate,
+                SpaceLongPressBehavior.ToggleActivate,
+                SpaceLongPressBehavior.ShowPicker
+            ),
+            listOf(
+                R.string.space_behavior_none,
+                R.string.space_behavior_enumerate,
+                R.string.space_behavior_activate,
+                R.string.space_behavior_picker
+            )
+        )
+        val showLangSwitchKey =
+            switch(R.string.show_lang_switch_key, "show_lang_switch_key", true)
 
         val keyboardHeightPercent: ManagedPreference.PInt
         val keyboardHeightPercentLandscape: ManagedPreference.PInt
