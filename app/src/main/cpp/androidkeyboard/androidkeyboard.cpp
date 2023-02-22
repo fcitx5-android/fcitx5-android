@@ -250,7 +250,7 @@ void AndroidKeyboardEngine::updateCandidate(const InputMethodEntry &entry, Input
         results = spell()->call<ISpell::hintForDisplay>(entry.languageCode(),
                                                         SpellProvider::Default,
                                                         state->buffer_.userInput(),
-                                                        *config_.pageSize);
+                                                        20);
     }
     auto candidateList = std::make_unique<CommonCandidateList>();
     for (const auto &result: results) {
