@@ -46,7 +46,7 @@ class CandidateViewBuilder :
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
                 return super.onCreateViewHolder(parent, viewType).apply {
                     ui.root.apply {
-                        setPaddingDp(8, 0, 8, 0)
+                        setPaddingDp(10, 0, 10, 0)
                         minimumWidth = dp(40)
                     }
                 }

@@ -175,6 +175,8 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             keyboardBottomPaddingLandscape = secondary
         }
 
+        val horizontalCandidateGrowth =
+            switch(R.string.horizontal_candidate_growth, "horizontal_candidate_growth", true)
         val expandedCandidateStyle = list(
             R.string.expanded_candidate_style,
             "expanded_candidate_style",

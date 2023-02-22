@@ -20,7 +20,6 @@ import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.mechdancer.dependency.manager.must
 import splitties.views.dsl.core.wrapContent
-import splitties.views.dsl.recyclerview.recyclerView
 
 class HorizontalCandidateComponent :
     UniqueViewComponent<HorizontalCandidateComponent, RecyclerView>(), InputBroadcastReceiver {
@@ -29,6 +28,7 @@ class HorizontalCandidateComponent :
     private val builder: CandidateViewBuilder by manager.must()
     private val bar: KawaiiBarComponent by manager.must()
 
+    private val candidateGrowth by AppPrefs.getInstance().keyboard.horizontalCandidateGrowth
     private val maxSpanCount by lazy {
         AppPrefs.getInstance().keyboard.run {
             if (context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
@@ -38,6 +38,8 @@ class HorizontalCandidateComponent :
         }.getValue()
     }
 
+    private var layoutViewWidth = 0
+    private var layoutViewHeight = 0
     private var layoutFlexGrow = 1f
 
     /**
@@ -65,11 +67,11 @@ class HorizontalCandidateComponent :
 
     val adapter: BaseCandidateViewAdapter by lazy {
         builder.flexAdapter {
-            val rv = this@HorizontalCandidateComponent.view
-            FlexboxLayoutManager.LayoutParams(wrapContent, rv.height).apply {
-                minWidth = (rv.width - dividerDrawable.intrinsicWidth * maxSpanCount) / maxSpanCount
+            val lp = FlexboxLayoutManager.LayoutParams(wrapContent, layoutViewHeight)
+            if (candidateGrowth) lp.apply {
+                minWidth = layoutViewWidth
                 flexGrow = layoutFlexGrow
-            }
+            } else lp
         }
     }
 
@@ -112,7 +114,14 @@ class HorizontalCandidateComponent :
     }
 
     override val view by lazy {
-        context.recyclerView(R.id.candidate_view) {
+        object : RecyclerView(context) {
+            override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+                super.onSizeChanged(w, h, oldw, oldh)
+                layoutViewWidth = w / maxSpanCount - dividerDrawable.intrinsicWidth
+                layoutViewHeight = h
+            }
+        }.apply {
+            id = R.id.candidate_view
             adapter = this@HorizontalCandidateComponent.adapter
             layoutManager = this@HorizontalCandidateComponent.layoutManager
             addItemDecoration(FlexboxVerticalDecoration(dividerDrawable))
@@ -120,10 +129,14 @@ class HorizontalCandidateComponent :
     }
 
     override fun onCandidateUpdate(data: Array<String>) {
-        layoutFlexGrow = if (data.size < maxSpanCount) 0f else 1f
-        // second layout pass maybe needed when total candidates count < maxSpanCount
-        secondLayoutPassNeeded = data.size < maxSpanCount
-        secondLayoutPassDone = false
+        if (candidateGrowth) {
+            // second layout pass maybe needed when total candidates count < maxSpanCount
+            secondLayoutPassNeeded = data.size < maxSpanCount
+            secondLayoutPassDone = false
+            layoutFlexGrow = if (secondLayoutPassNeeded) 0f else 1f
+        } else {
+            secondLayoutPassNeeded = false
+        }
         adapter.updateCandidates(data)
     }
 }
