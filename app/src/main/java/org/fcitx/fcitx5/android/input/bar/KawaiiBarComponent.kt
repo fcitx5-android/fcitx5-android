@@ -29,7 +29,10 @@ import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
 import org.fcitx.fcitx5.android.input.candidates.expanded.window.FlexboxExpandedCandidateWindow
 import org.fcitx.fcitx5.android.input.candidates.expanded.window.GridExpandedCandidateWindow
 import org.fcitx.fcitx5.android.input.clipboard.ClipboardWindow
-import org.fcitx.fcitx5.android.input.dependency.*
+import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
+import org.fcitx.fcitx5.android.input.dependency.context
+import org.fcitx.fcitx5.android.input.dependency.inputMethodService
+import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.editing.TextEditingWindow
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
@@ -51,7 +54,6 @@ import timber.log.Timber
 class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(),
     InputBroadcastReceiver {
 
-    private val fcitx by manager.fcitx()
     private val context by manager.context()
     private val theme by manager.theme()
     private val windowManager: InputWindowManager by manager.must()
@@ -64,6 +66,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     private val clipboardItemTimeout = AppPrefs.getInstance().clipboard.clipboardItemTimeout
     private val expandedCandidateStyle by AppPrefs.getInstance().keyboard.expandedCandidateStyle
     private val expandToolbarByDefault = AppPrefs.getInstance().keyboard.expandToolbarByDefault
+    private val toolbarNumRowOnPassword by AppPrefs.getInstance().keyboard.toolbarNumRowOnPassword
 
     private var clipboardTimeoutJob: Job? = null
 
@@ -290,7 +293,10 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             idleUi.privateMode(info.imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING))
         }
         idleUiStateMachine.push(KawaiiBarShown)
-        barStateMachine.setBooleanState(CapFlagsPassword, capFlags.has(CapabilityFlag.Password))
+        barStateMachine.setBooleanState(
+            CapFlagsPassword,
+            toolbarNumRowOnPassword && capFlags.has(CapabilityFlag.Password)
+        )
         barStateMachine.push(CapFlagsUpdated)
     }
 

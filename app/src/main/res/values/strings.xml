@@ -196,4 +196,5 @@
     <string name="exception_table_import_both_files">Please select both of above files before importing</string>
     <string name="notification_permission_message">Without the permission to post notifications, we are not able to notify you when some time-consuming operations are done.</string>
     <string name="notification_permission_title">No Notification Permission</string>
+    <string name="toolbar_num_row_on_password">Show number row on toolbar when input password</string>
 </resources>
