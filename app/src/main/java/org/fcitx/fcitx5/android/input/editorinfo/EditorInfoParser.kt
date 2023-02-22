@@ -7,17 +7,20 @@ import android.text.TextUtils
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.SurroundingText
 import splitties.bitflags.hasFlag
+import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 
 object EditorInfoParser {
 
+    private fun Field.isStatic() = Modifier.isStatic(modifiers)
+
     private val EDITOR_INFO_MEMBER = EditorInfo::class.java.declaredFields
-        .filter { !Modifier.isStatic(it.modifiers) }
+        .filter { !it.isStatic() }
 
     ////////// EditorInfo constants
 
     private val EDITOR_INFO_STATIC = EditorInfo::class.java.declaredFields
-        .filter { Modifier.isStatic(it.modifiers) }
+        .filter { it.isStatic() }
 
     private val IME_ACTION = EDITOR_INFO_STATIC
         .filter { it.name.startsWith("IME_ACTION_") }
@@ -28,21 +31,21 @@ object EditorInfoParser {
     ////////// InputType constants
 
     private val INPUT_TYPE_STATIC = InputType::class.java.declaredFields
-        .filter { Modifier.isStatic(it.modifiers) }
+        .filter { it.isStatic() }
 
     private val TYPE_CLASS = INPUT_TYPE_STATIC
-        .filter { it.name.run { startsWith("TYPE_") && contains("_CLASS_") } }
+        .filter { it.name.contains("_CLASS_") || it.name == "TYPE_NULL" }
 
     private val TYPE_FLAGS = INPUT_TYPE_STATIC
-        .filter { it.name.run { startsWith("TYPE_") && contains("_FLAG_") } }
+        .filter { it.name.contains("_FLAG_") }
 
     private val TYPE_VARIATION = INPUT_TYPE_STATIC
-        .filter { it.name.run { startsWith("TYPE_") && contains("_VARIATION_") } }
+        .filter { it.name.contains("_VARIATION_") }
 
     ////////// TextUtils constants
 
     private val CAP_MODE = TextUtils::class.java.declaredFields
-        .filter { Modifier.isStatic(it.modifiers) && it.name.startsWith("CAP_MODE_") }
+        .filter { it.isStatic() && it.name.startsWith("CAP_MODE_") }
 
     private fun parseImeOptions(imeOptions: Int): String {
         val action = imeOptions and EditorInfo.IME_MASK_ACTION
@@ -61,8 +64,9 @@ object EditorInfoParser {
             .filter { flags.hasFlag(it.getInt(null)) }
             .joinToString("\n  ") { it.name }
         val variation = inputType and InputType.TYPE_MASK_VARIATION
+        val variationPrefix = classString.replace("_CLASS", "")
         val variationString = TYPE_VARIATION
-            .filter { variation.hasFlag(it.getInt(null)) }
+            .filter { variation == it.getInt(null) && it.name.startsWith(variationPrefix) }
             .joinToString("\n  ") { it.name }
         return "class=$classString\nflags=$flagsString\nvariation=$variationString"
     }
