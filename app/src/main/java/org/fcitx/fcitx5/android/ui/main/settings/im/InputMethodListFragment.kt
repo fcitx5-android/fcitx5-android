@@ -49,8 +49,6 @@ class InputMethodListFragment : ProgressFragment(), OnItemChangedListener<InputM
             show = { it.displayName }
         )
         ui.addOnItemChangedListener(this@InputMethodListFragment)
-        // English keyboard shouldn't be removed
-        ui.removable = { it.uniqueName != "keyboard-us" }
         return ui.root
     }
 
