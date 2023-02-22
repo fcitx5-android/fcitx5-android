@@ -160,12 +160,14 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
         currentKeyboard?.let {
             it.keyActionListener = keyActionListener
             it.popupActionListener = popupActionListener
+            it.onAttach()
         }
         notifyBarLayoutChanged()
     }
 
     override fun onDetached() {
         currentKeyboard?.let {
+            it.onDetach()
             it.keyActionListener = null
             it.popupActionListener = null
         }

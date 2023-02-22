@@ -75,7 +75,7 @@ class CommonKeyActionListener :
                         if (it.enabledIme().size < 2) {
                             inputView.showDialog(AddMoreInputMethodsPrompt.build(context))
                         } else {
-                            it.toggleIme()
+                            it.enumerateIme()
                         }
                     }
                     is ShowInputMethodPickerAction -> {
