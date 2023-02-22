@@ -136,6 +136,7 @@ class TextKeyboard(
     }
 
     override fun onAttach() {
+        capsState = CapsState.None;
         updateCapsButtonIcon()
         updateAlphabetKeys()
     }
