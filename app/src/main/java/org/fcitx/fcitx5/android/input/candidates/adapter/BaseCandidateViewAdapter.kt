@@ -19,6 +19,9 @@ abstract class BaseCandidateViewAdapter :
     var offset = 0
         private set
 
+    var limit = -1
+        private set
+
     fun getCandidateAt(position: Int) = candidates[offset + position]
 
     @SuppressLint("NotifyDataSetChanged")
@@ -29,6 +32,11 @@ abstract class BaseCandidateViewAdapter :
 
     fun updateCandidatesWithOffset(data: Array<String>, offset: Int) {
         this.offset = offset
+        updateCandidates(data)
+    }
+
+    fun updateCandidatesWithLimit(data: Array<String>, limit: Int) {
+        this.limit = limit
         updateCandidates(data)
     }
 
@@ -47,7 +55,11 @@ abstract class BaseCandidateViewAdapter :
 
     abstract val theme: Theme
 
-    override fun getItemCount() = candidates.size - offset
+    override fun getItemCount(): Int {
+        val offsetSize = candidates.size - offset
+        if (limit < 0) return offsetSize
+        return if (limit > offsetSize) offsetSize else limit
+    }
 
     abstract fun onSelect(idx: Int)
 }

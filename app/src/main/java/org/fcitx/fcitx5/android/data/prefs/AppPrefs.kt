@@ -3,6 +3,7 @@ package org.fcitx.fcitx5.android.data.prefs
 import android.content.SharedPreferences
 import android.os.Build
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateMode
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
 import org.fcitx.fcitx5.android.input.keyboard.SpaceLongPressBehavior
 import org.fcitx.fcitx5.android.input.keyboard.SwipeSymbolDirection
@@ -198,8 +199,22 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             keyboardBottomPaddingLandscape = secondary
         }
 
-        val horizontalCandidateGrowth =
-            switch(R.string.horizontal_candidate_growth, "horizontal_candidate_growth", true)
+        val horizontalCandidateStyle = list(
+            R.string.horizontal_candidate_style,
+            "horizontal_candidate_style",
+            HorizontalCandidateMode.AutoFillWidth,
+            HorizontalCandidateMode,
+            listOf(
+                HorizontalCandidateMode.NeverFillWidth,
+                HorizontalCandidateMode.AutoFillWidth,
+                HorizontalCandidateMode.AlwaysFillWidth,
+            ),
+            listOf(
+                R.string.horizontal_candidate_never_fill,
+                R.string.horizontal_candidate_auto_fill,
+                R.string.horizontal_candidate_always_fill
+            )
+        )
         val expandedCandidateStyle = list(
             R.string.expanded_candidate_style,
             "expanded_candidate_style",
