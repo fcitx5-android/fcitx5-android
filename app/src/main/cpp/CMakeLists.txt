@@ -35,11 +35,6 @@ find_package(LibIntl)
 # prebuilt libevent
 set(Libevent_DIR "${PREBUILT_DIR}/libevent/${ANDROID_ABI}/lib/cmake/libevent")
 set(LIBEVENT_STATIC_LINK ON)
-# LibeventTargets-static.cmake uses find_path and find_library, but NDK's android{,-legacy}.toolchain.cmake
-# set CMAKE_SYSROOT and CMAKE_FIND_ROOT_PATH cause find_* commands to re-root input paths.
-# turn off re-root behavior because we want to find libevent in prebuilt instead of NDK sysroot
-set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE NEVER)
-set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY NEVER)
 find_package(Libevent)
 
 option(ENABLE_TEST "" OFF)
