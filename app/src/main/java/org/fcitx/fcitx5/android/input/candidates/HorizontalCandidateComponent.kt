@@ -140,7 +140,7 @@ class HorizontalCandidateComponent :
             }
             AutoFillWidth -> {
                 layoutMinWidth = view.width / maxSpanCount - dividerDrawable.intrinsicWidth
-                layoutFlexGrow = if (secondLayoutPassNeeded) 0f else 1f
+                layoutFlexGrow = if (data.size < maxSpanCount) 0f else 1f
                 // [^1] total candidates count < maxSpanCount
                 secondLayoutPassNeeded = data.size < maxSpanCount
                 secondLayoutPassDone = false
