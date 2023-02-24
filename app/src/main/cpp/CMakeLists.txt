@@ -96,6 +96,8 @@ set_target_properties(scel2org5 PROPERTIES OUTPUT_NAME libscel2org5.so)
 option(ENABLE_TEST "" OFF)
 option(ENABLE_QT "" OFF)
 add_subdirectory(fcitx5-unikey)
+# suppress "illegal character encoding in character literal" warning in unikey/data.cpp
+target_compile_options(unikey-lib PRIVATE "-Wno-invalid-source-encoding")
 
 add_library(native-lib SHARED native-lib.cpp)
 target_link_libraries(native-lib
