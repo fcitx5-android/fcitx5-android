@@ -20,10 +20,10 @@ fun exec(cmd: String): String = ByteArrayOutputStream().use {
 plugins {
     id("com.android.application")
     kotlin("android")
-    id("com.google.devtools.ksp") version "1.8.0-1.0.8"
-    id("com.cookpad.android.plugin.license-tools") version "1.2.8"
-    kotlin("plugin.serialization") version "1.8.0"
     kotlin("plugin.parcelize")
+    kotlin("plugin.serialization") version "1.8.0"
+    id("com.google.devtools.ksp") version "1.8.0-1.0.8"
+    id("com.mikepenz.aboutlibraries.plugin")
 }
 
 val dataDescriptorName = "descriptor.json"
@@ -163,6 +163,13 @@ kotlin {
     }
 }
 
+aboutLibraries {
+    excludeFields = arrayOf("metadata", "funding", "description", "scm", "website", "developers", "name")
+    fetchRemoteLicense = false
+    fetchRemoteFunding = false
+    includePlatform = false
+}
+
 kotlin.sourceSets.all {
     languageSettings.optIn("kotlin.RequiresOptIn")
 }
@@ -195,7 +202,6 @@ val generateDataDescriptor by tasks.register<DataDescriptorTask>("generateDataDe
     inputDir.set(file("src/main/assets"))
     outputFile.set(file("src/main/assets/${dataDescriptorName}"))
     dependsOn(installFcitxComponent)
-    dependsOn(tasks.findByName("generateLicenseJson"))
 }
 /**
  * Note *Graph*
@@ -289,7 +295,6 @@ tasks.register<Delete>("cleanGeneratedAssets") {
         }
     })
     delete(file("src/main/assets/${dataDescriptorName}"))
-    delete(file("src/main/assets/licenses.json"))
 }.also { tasks.clean.dependsOn(it) }
 
 tasks.register<Delete>("cleanCxxIntermediates") {
@@ -299,7 +304,7 @@ tasks.register<Delete>("cleanCxxIntermediates") {
 dependencies {
     implementation("org.ini4j:ini4j:0.5.4")
     ksp(project(":codegen"))
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.0")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.2")
     implementation("io.arrow-kt:arrow-core:1.1.5")
     implementation("androidx.activity:activity-ktx:1.6.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
@@ -313,7 +318,7 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
     implementation("com.jakewharton.timber:timber:5.0.1")
     implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.appcompat:appcompat:1.6.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     val lifecycleVersion = "2.5.1"
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
@@ -334,6 +339,7 @@ dependencies {
     implementation("com.louiscad.splitties:splitties-views-dsl-recyclerview:$splittiesVersion")
     implementation("com.louiscad.splitties:splitties-views-recyclerview:$splittiesVersion")
     implementation("com.louiscad.splitties:splitties-views-dsl-material:$splittiesVersion")
+    implementation("com.mikepenz:aboutlibraries-core:10.6.1")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.5.2")
     androidTestImplementation("androidx.test:rules:1.5.0")

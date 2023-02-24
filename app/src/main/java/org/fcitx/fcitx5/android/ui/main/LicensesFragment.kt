@@ -1,14 +1,14 @@
 package org.fcitx.fcitx5.android.ui.main
 
-import android.content.Intent
-import android.net.Uri
+import android.app.AlertDialog
 import android.os.Bundle
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
+import com.mikepenz.aboutlibraries.Libs
+import com.mikepenz.aboutlibraries.entity.License
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.data.Licenses
 import org.fcitx.fcitx5.android.ui.common.PaddingPreferenceFragment
 
 class LicensesFragment : PaddingPreferenceFragment() {
@@ -23,23 +23,36 @@ class LicensesFragment : PaddingPreferenceFragment() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         lifecycleScope.launch {
-            Licenses.getAll().onSuccess { licenses ->
-                val context = preferenceManager.context
-                val screen = preferenceManager.createPreferenceScreen(context)
-                licenses.forEach { license ->
+            val context = preferenceManager.context
+            val screen = preferenceManager.createPreferenceScreen(context)
+            val jsonString = resources.openRawResource(R.raw.aboutlibraries)
+                .bufferedReader()
+                .use { it.readText() }
+            Libs.Builder()
+                .withJson(jsonString)
+                .build()
+                .libraries.forEach {
                     screen.addPreference(Preference(context).apply {
                         isIconSpaceReserved = false
-                        title = license.libraryName
-                        summary = license.artifactId.group
+                        title = "${it.uniqueId}:${it.artifactVersion}"
+                        val license = it.licenses.firstOrNull() ?: return@forEach
+                        summary = license.spdxId ?: license.name
                         setOnPreferenceClickListener {
-                            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(license.licenseUrl)))
-                            true
+                            showLicenseDialog(license)
                         }
                     })
                 }
-                preferenceScreen = screen
-            }
+            preferenceScreen = screen
         }
+    }
+
+    private fun showLicenseDialog(license: License): Boolean {
+        AlertDialog.Builder(context)
+            .setTitle(license.name)
+            .setMessage(license.licenseContent)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+        return true
     }
 
 }
