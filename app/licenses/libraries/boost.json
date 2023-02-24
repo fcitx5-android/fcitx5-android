@@ -1,0 +1,11 @@
+{
+    "uniqueId": "boostorg/boost",
+    "artifactVersion": "1.80.0",
+    "description": "Free peer-reviewed portable C++ source libraries",
+    "name": "boostorg/boost",
+    "website": "https://www.boost.org/",
+    "tag": "native",
+    "licenses": [
+        "BSL-1.0"
+    ]
+}

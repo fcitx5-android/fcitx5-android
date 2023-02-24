@@ -1,0 +1,11 @@
+{
+    "uniqueId": "j-jorge/libintl-lite",
+    "artifactVersion": "5750d92",
+    "description": "simple (but less powerful) GNU gettext libintl replacement",
+    "name": "j-jorge/libintl-lite",
+    "website": "https://github.com/j-jorge/libintl-lite",
+    "tag": "native",
+    "licenses": [
+        "BSL-1.0"
+    ]
+}

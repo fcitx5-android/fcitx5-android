@@ -1,0 +1,11 @@
+{
+    "uniqueId": "fcitx/fcitx5",
+    "artifactVersion": "5.0.21",
+    "description": "Next generation of fcitx",
+    "name": "fcitx/fcitx5",
+    "website": "https://github.com/fcitx/fcitx5",
+    "tag": "native",
+    "licenses": [
+        "LGPL-2.1-or-later"
+    ]
+}

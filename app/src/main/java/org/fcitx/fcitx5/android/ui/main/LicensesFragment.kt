@@ -1,6 +1,8 @@
 package org.fcitx.fcitx5.android.ui.main
 
 import android.app.AlertDialog
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -31,14 +33,17 @@ class LicensesFragment : PaddingPreferenceFragment() {
             Libs.Builder()
                 .withJson(jsonString)
                 .build()
-                .libraries.forEach {
+                .libraries
+                .sortedBy {
+                    if (it.tag == "native") it.uniqueId.uppercase() else it.uniqueId.lowercase()
+                }
+                .forEach {
                     screen.addPreference(Preference(context).apply {
                         isIconSpaceReserved = false
                         title = "${it.uniqueId}:${it.artifactVersion}"
-                        val license = it.licenses.firstOrNull() ?: return@forEach
-                        summary = license.spdxId ?: license.name
-                        setOnPreferenceClickListener {
-                            showLicenseDialog(license)
+                        summary = it.licenses.joinToString { l -> l.spdxId ?: l.name }
+                        setOnPreferenceClickListener { _ ->
+                            showLicenseDialog(it.uniqueId, it.licenses)
                         }
                     })
                 }
@@ -46,13 +51,29 @@ class LicensesFragment : PaddingPreferenceFragment() {
         }
     }
 
-    private fun showLicenseDialog(license: License): Boolean {
-        AlertDialog.Builder(context)
-            .setTitle(license.name)
-            .setMessage(license.licenseContent)
-            .setPositiveButton(android.R.string.ok, null)
-            .show()
+    private fun showLicenseDialog(uniqueId: String, licenses: Set<License>): Boolean {
+        when (licenses.size) {
+            0 -> {}
+            1 -> showLicenseContent(licenses.first())
+            else -> {
+                val licenseArray = licenses.toTypedArray()
+                val licenseNames = licenseArray.map { it.spdxId ?: it.name }.toTypedArray()
+                AlertDialog.Builder(context)
+                    .setTitle(uniqueId)
+                    .setItems(licenseNames) { _, idx ->
+                        showLicenseContent(licenseArray[idx])
+                    }
+                    .setPositiveButton(android.R.string.cancel, null)
+                    .show()
+            }
+        }
         return true
+    }
+
+    private fun showLicenseContent(license: License) {
+        if (license.url?.isNotBlank() == true) {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(license.url)))
+        }
     }
 
 }

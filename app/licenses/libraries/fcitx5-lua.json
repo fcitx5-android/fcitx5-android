@@ -1,0 +1,11 @@
+{
+    "uniqueId": "fcitx/fcitx5-lua",
+    "artifactVersion": "5.0.10",
+    "description": "Lua support for fcitx5",
+    "name": "fcitx/fcitx5-lua",
+    "website": "https://github.com/fcitx/fcitx5-lua",
+    "tag": "native",
+    "licenses": [
+        "LGPL-2.1-or-later"
+    ]
+}

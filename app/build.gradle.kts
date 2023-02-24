@@ -164,7 +164,8 @@ kotlin {
 }
 
 aboutLibraries {
-    excludeFields = arrayOf("metadata", "funding", "description", "scm", "website", "developers", "name")
+    configPath = "app/licenses"
+    excludeFields = arrayOf("generated", "developers", "organization", "scm", "funding", "content")
     fetchRemoteLicense = false
     fetchRemoteFunding = false
     includePlatform = false

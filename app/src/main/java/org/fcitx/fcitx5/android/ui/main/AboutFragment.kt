@@ -60,11 +60,11 @@ class AboutFragment : PaddingPreferenceFragment() {
 
         screen.addPreference(Preference(context).apply {
             setTitle(R.string.license)
-            summary = Const.lgpl
+            summary = Const.licenseSpdxId
             isIconSpaceReserved = false
             isSingleLineTitle = false
             setOnPreferenceClickListener {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Const.lgplLicenseUrl)))
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Const.licenseUrl)))
                 true
             }
         })
