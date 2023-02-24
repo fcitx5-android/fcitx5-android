@@ -13,10 +13,6 @@ import java.util.zip.ZipInputStream
 
 object TableManager {
 
-    init {
-        System.loadLibrary("tabledictionaryutils")
-    }
-
     private val inputMethodDir = File(
         appContext.getExternalFilesDir(null)!!, "data/inputmethod"
     ).also { it.mkdirs() }

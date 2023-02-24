@@ -11,9 +11,6 @@ import java.io.IOException
 import java.io.InputStream
 
 object PinyinDictManager {
-    init {
-        System.loadLibrary("pinyindictionaryutils")
-    }
 
     private val pinyinDicDir = File(
         appContext.getExternalFilesDir(null)!!, "data/pinyin/dictionaries"

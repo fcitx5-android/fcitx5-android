@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.ColorFilter
@@ -26,7 +25,6 @@ import android.widget.Toast
 import androidx.annotation.AttrRes
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.ViewCompat
@@ -38,14 +36,10 @@ import androidx.navigation.NavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import arrow.core.toOption
-import com.sun.jna.Library
-import com.sun.jna.Native
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.FcitxApplication
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.core.CapabilityFlag
-import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import splitties.experimental.InternalSplittiesApi
 import splitties.resources.withResolvedThemeAttribute
 import splitties.views.bottomPadding
@@ -79,10 +73,6 @@ fun Uri.queryFileName(contentResolver: ContentResolver) =
         it.moveToFirst()
         it.getString(index)
     }.toOption()
-
-inline fun <reified T : Library> nativeLib(name: String): Lazy<T> = lazy {
-    Native.load(name, T::class.java)
-}
 
 val EditText.str: String get() = editableText.toString()
 
@@ -252,17 +242,6 @@ fun ZipInputStream.extract(destDir: File): List<File> {
     return extracted
 }
 
-fun Context.getHostActivity(): AppCompatActivity? {
-    var context = this
-    while (context is ContextWrapper) {
-        if (context is AppCompatActivity)
-            return context
-        else
-            context = context.baseContext
-    }
-    return null
-}
-
 inline fun <T> withTempDir(block: (File) -> T): T {
     // creates /data/user/<userId>/<packageName>/cache/<randomId>
     val dir = File(createTempDirectory().pathString)
@@ -272,6 +251,3 @@ inline fun <T> withTempDir(block: (File) -> T): T {
         dir.delete()
     }
 }
-
-val FcitxInputMethodService.isInPasswordMode
-    get() = capabilityFlags.has(CapabilityFlag.Password)

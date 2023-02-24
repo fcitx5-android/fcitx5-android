@@ -108,13 +108,6 @@ target_link_libraries(native-lib
         Fcitx5::Core
         Fcitx5::Module::QuickPhrase
         Fcitx5::Module::Unicode
-        Fcitx5::Module::Clipboard)
-
-add_library(pinyindictionaryutils SHARED pinyindictionaryutils.cpp)
-target_link_libraries(pinyindictionaryutils LibIME::Pinyin)
-
-add_library(utf8utils SHARED utf8utils.cpp)
-target_link_libraries(utf8utils Fcitx5::Utils)
-
-add_library(tabledictionaryutils SHARED tabledictionaryutils.cpp)
-target_link_libraries(tabledictionaryutils LibIME::Table)
+        Fcitx5::Module::Clipboard
+        LibIME::Pinyin
+        LibIME::Table)

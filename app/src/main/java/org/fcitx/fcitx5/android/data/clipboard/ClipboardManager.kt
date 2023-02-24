@@ -11,7 +11,6 @@ import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardDatabase
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
-import org.fcitx.fcitx5.android.utils.UTF8Utils
 import org.fcitx.fcitx5.android.utils.WeakHashSet
 import splitties.systemservices.clipboardManager
 
@@ -114,7 +113,7 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     override fun onPrimaryClipChanged() {
         clipboardManager.primaryClip
             ?.let { ClipboardEntry.fromClipData(it) }
-            ?.takeIf { it.text.isNotBlank() && UTF8Utils.instance.validateUTF8(it.text) }
+            ?.takeIf { it.text.isNotBlank() }
             ?.let { e ->
                 launch {
                     mutex.withLock {
