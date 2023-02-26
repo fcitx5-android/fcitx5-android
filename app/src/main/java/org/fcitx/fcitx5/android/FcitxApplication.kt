@@ -23,11 +23,19 @@ class FcitxApplication : Application() {
                 startActivity(Intent(applicationContext, LogActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     putExtra(LogActivity.FROM_CRASH, true)
-                    putExtra(LogActivity.CRASH_STACK_TRACE, e.stackTraceToString())
+                    // avoid transaction overflow
+                    val truncated = e.stackTraceToString().let {
+                        if (it.length > MAX_STACKTRACE_SIZE)
+                            it.take(MAX_STACKTRACE_SIZE) + "<truncated>"
+                        else
+                            it
+                    }
+                    putExtra(LogActivity.CRASH_STACK_TRACE, truncated)
                 })
                 exitProcess(10)
             }
         }
+
         instance = this
         // we don't have AppPrefs available yet
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
@@ -72,5 +80,6 @@ class FcitxApplication : Application() {
             instance ?: throw IllegalStateException("Fcitx application is not created!")
 
         fun getLastPid() = lastPid
+        private const val MAX_STACKTRACE_SIZE = 128000
     }
 }
