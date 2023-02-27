@@ -117,13 +117,6 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         popup.listener
     }
 
-    init {
-        ClipboardManager.addOnUpdateListener(onClipboardUpdateListener)
-        clipboardSuggestion.registerOnChangeListener(onClipboardSuggestionUpdateListener)
-        clipboardItemTimeout.registerOnChangeListener(onClipboardTimeoutUpdateListener)
-        expandToolbarByDefault.registerOnChangeListener(onExpandToolbarByDefaultUpdateListener)
-    }
-
     private fun launchClipboardTimeoutJob() {
         clipboardTimeoutJob?.cancel()
         val timeout = clipboardItemTimeout.getValue() * 1000L
@@ -286,6 +279,10 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                 onClipboardUpdateListener.onUpdate(it)
             }
         }
+        ClipboardManager.addOnUpdateListener(onClipboardUpdateListener)
+        clipboardSuggestion.registerOnChangeListener(onClipboardSuggestionUpdateListener)
+        clipboardItemTimeout.registerOnChangeListener(onClipboardTimeoutUpdateListener)
+        expandToolbarByDefault.registerOnChangeListener(onExpandToolbarByDefaultUpdateListener)
     }
 
     override fun onStartInput(info: EditorInfo, capFlags: CapabilityFlags) {
