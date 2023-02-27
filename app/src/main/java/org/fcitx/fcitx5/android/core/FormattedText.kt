@@ -54,7 +54,7 @@ data class FormattedText(
                 StringBuilder().apply {
                     var byteSize = 0
                     strings.forEach {
-                        val bytes = it.encodeToByteArray()
+                        val bytes = it.toByteArray()
                         val total = byteSize + bytes.size
                         if (total < byteCursor) {
                             append(it)

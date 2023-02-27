@@ -23,10 +23,10 @@ public:
               commit_(std::move(commit)) {}
 
     void select(InputContext *inputContext) const override {
+        inputContext->commitString(commit_);
         inputContext->inputPanel().reset();
         inputContext->updatePreedit();
         inputContext->updateUserInterface(UserInterfaceComponent::InputPanel);
-        inputContext->commitString(commit_);
         engine_->resetState(inputContext, true);
     }
 

@@ -51,6 +51,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     val composing = CursorRange()
     private var composingText = FormattedText.Empty
 
+    private fun resetComposingState() {
+        composing.clear()
+        composingText = FormattedText.Empty
+    }
+
     private var cursorUpdateIndex: Int = 0
 
     private var highlightColor: Int = 0x66008577 // material_deep_teal_500 with alpha 0.4
@@ -193,13 +198,18 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     fun commitText(text: String) {
+        if (composing.isNotEmpty() && composingText.toString() == text) {
+            // when composing text equals commit content, finish composing text as-is
+            selection.predict(composing.end)
+            resetComposingState()
+            inputConnection?.finishComposingText()
+            return
+        }
         // committed text should replace composing (if any), replace selected range (if any),
         // or simply prepend before cursor
         val start = if (composing.isEmpty()) selection.latest.start else composing.start
         selection.predict(start + text.length)
-        // clear composing range
-        composing.clear()
-        composingText = FormattedText.Empty
+        resetComposingState()
         inputConnection?.commitText(text, 1)
     }
 
@@ -383,8 +393,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // initialSel{Start,End} is outdated. but it's the client app's responsibility to send
         // right cursor position, try to workaround this would simply introduce more bugs.
         selection.resetTo(attribute.initialSelStart, attribute.initialSelEnd)
-        composing.clear()
-        composingText = FormattedText.Empty
+        resetComposingState()
         val flags = CapabilityFlags.fromEditorInfo(attribute)
         editorInfo = attribute
         capabilityFlags = flags
@@ -469,8 +478,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             }
         } else {
             Timber.d("handleCursorUpdate: focus out/in")
-            composing.clear()
-            composingText = FormattedText.Empty
+            resetComposingState()
             // cursor outside composing range, finish composing as-is
             inputConnection?.finishComposingText()
             // `fcitx.reset()` here would commit preedit after new cursor position
