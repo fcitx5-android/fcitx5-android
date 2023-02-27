@@ -1,11 +1,11 @@
 package org.fcitx.fcitx5.android
 
 import android.app.Application
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Process
 import android.util.Log
 import androidx.preference.PreferenceManager
-import cat.ereza.customactivityoncrash.config.CaocConfig
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
@@ -13,14 +13,29 @@ import org.fcitx.fcitx5.android.ui.main.LogActivity
 import org.fcitx.fcitx5.android.utils.Locales
 import org.fcitx.fcitx5.android.utils.isDarkMode
 import timber.log.Timber
+import kotlin.system.exitProcess
 
 class FcitxApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        CaocConfig.Builder.create()
-            .enabled(!BuildConfig.DEBUG)
-            .errorActivity(LogActivity::class.java)
-            .apply()
+        if (!BuildConfig.DEBUG) {
+            Thread.setDefaultUncaughtExceptionHandler { _, e ->
+                startActivity(Intent(applicationContext, LogActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    putExtra(LogActivity.FROM_CRASH, true)
+                    // avoid transaction overflow
+                    val truncated = e.stackTraceToString().let {
+                        if (it.length > MAX_STACKTRACE_SIZE)
+                            it.take(MAX_STACKTRACE_SIZE) + "<truncated>"
+                        else
+                            it
+                    }
+                    putExtra(LogActivity.CRASH_STACK_TRACE, truncated)
+                })
+                exitProcess(10)
+            }
+        }
+
         instance = this
         // we don't have AppPrefs available yet
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
@@ -65,5 +80,6 @@ class FcitxApplication : Application() {
             instance ?: throw IllegalStateException("Fcitx application is not created!")
 
         fun getLastPid() = lastPid
+        private const val MAX_STACKTRACE_SIZE = 128000
     }
 }

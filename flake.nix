@@ -22,7 +22,6 @@
         buildInputs = [
           androidComposition.androidsdk
           extra-cmake-modules
-          glibc
           gettext
           python39
           icu

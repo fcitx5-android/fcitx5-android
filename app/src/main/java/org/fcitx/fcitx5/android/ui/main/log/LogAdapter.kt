@@ -2,7 +2,6 @@ package org.fcitx.fcitx5.android.ui.main.log
 
 import android.graphics.Typeface
 import android.os.Build
-import android.text.SpannableString
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import android.view.textclassifier.TextClassifier
@@ -14,11 +13,11 @@ import splitties.views.dsl.core.startMargin
 import splitties.views.dsl.core.textView
 import splitties.views.dsl.core.wrapContent
 
-class LogAdapter(private val entries: ArrayList<SpannableString> = ArrayList()) :
+class LogAdapter(private val entries: ArrayList<CharSequence> = ArrayList()) :
     RecyclerView.Adapter<LogAdapter.Holder>() {
     inner class Holder(val textView: TextView) : RecyclerView.ViewHolder(textView)
 
-    fun append(line: SpannableString) {
+    fun append(line: CharSequence) {
         val size = entries.size
         entries.add(line)
         notifyItemInserted(size)
