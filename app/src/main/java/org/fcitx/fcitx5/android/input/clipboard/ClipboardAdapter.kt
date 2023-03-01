@@ -10,6 +10,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
@@ -18,13 +19,28 @@ import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardEntry
 import org.fcitx.fcitx5.android.data.theme.Theme
 import splitties.resources.drawable
 import splitties.resources.styledColor
-import kotlin.collections.set
 import kotlin.math.min
 
 abstract class ClipboardAdapter :
-    RecyclerView.Adapter<ClipboardAdapter.ViewHolder>() {
+    PagingDataAdapter<ClipboardEntry, ClipboardAdapter.ViewHolder>(diffCallback) {
 
     companion object {
+        private val diffCallback = object : DiffUtil.ItemCallback<ClipboardEntry>() {
+            override fun areItemsTheSame(
+                oldItem: ClipboardEntry,
+                newItem: ClipboardEntry
+            ): Boolean {
+                return true
+            }
+
+            override fun areContentsTheSame(
+                oldItem: ClipboardEntry,
+                newItem: ClipboardEntry
+            ): Boolean {
+                return oldItem == newItem
+            }
+        }
+
         /**
          * excerpt text to show on ClipboardEntryUi, to reduce render time of very long text
          * @param str text to excerpt
@@ -49,19 +65,6 @@ abstract class ClipboardAdapter :
         }
     }
 
-    private val _entries = mutableListOf<ClipboardEntry>()
-
-    // maps entry id to list index
-    // since we don't have much data, we are not using sparse int array here
-    private val _entriesId = mutableMapOf<Int, Int>()
-
-    val entries: List<ClipboardEntry>
-        get() = _entries
-
-    fun getPositionById(id: Int) = _entriesId.getValue(id)
-
-    fun getEntryById(id: Int) = entries[getPositionById(id)]
-
     private var popupMenu: PopupMenu? = null
 
     inner class ViewHolder(val entryUi: ClipboardEntryUi) :
@@ -72,11 +75,11 @@ abstract class ClipboardAdapter :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         with(holder.entryUi) {
-            val entry = _entries[position]
+            val entry = getItem(position) ?: return
             text.text = excerptText(entry.text)
             pin.visibility = if (entry.pinned) View.VISIBLE else View.INVISIBLE
             root.setOnClickListener {
-                onPaste(entry.id)
+                onPaste(entry)
             }
             root.setOnLongClickListener {
                 popupMenu?.dismiss()
@@ -95,17 +98,13 @@ abstract class ClipboardAdapter :
                 }
                 if (entry.pinned) menuItem(R.string.unpin, R.drawable.ic_outline_push_pin_24) {
                     onUnpin(entry.id)
-                    setPinStatus(entry.id, false)
                 } else menuItem(R.string.pin, R.drawable.ic_baseline_push_pin_24) {
                     onPin(entry.id)
-                    setPinStatus(entry.id, true)
                 }
                 menuItem(R.string.edit, R.drawable.ic_baseline_edit_24) {
                     onEdit(entry.id)
                 }
                 menuItem(R.string.delete, R.drawable.ic_baseline_delete_24) {
-                    delete(entry.id)
-                    // make `onDelete` access entries after delete
                     onDelete(entry.id)
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -121,53 +120,13 @@ abstract class ClipboardAdapter :
         }
     }
 
-    private fun delete(id: Int) {
-        val position = _entriesId.getValue(id)
-        _entries.removeAt(position)
-        _entriesId.remove(id)
-        // Update indices after the removed item
-        for (i in position until _entries.size) {
-            _entriesId[_entries[i].id] = i
-        }
-        notifyItemRemoved(position)
-    }
-
-    private fun setPinStatus(id: Int, pinned: Boolean) {
-        val position = _entriesId.getValue(id)
-        _entries[position] = _entries[position].copy(pinned = pinned)
-        notifyItemChanged(position)
-        // pin will cause a change of order
-        updateEntries(_entries)
-    }
-
-    fun updateEntries(entries: List<ClipboardEntry>) {
-        val sorted = entries.sortedWith { o1, o2 ->
-            when {
-                o1.pinned && !o2.pinned -> -1
-                !o1.pinned && o2.pinned -> 1
-                else -> o2.timestamp.compareTo(o1.timestamp)
-            }
-        }
-        val callback = ClipboardEntryDiffCallback(_entries, sorted)
-        val diff = DiffUtil.calculateDiff(callback)
-        _entries.clear()
-        _entries.addAll(sorted)
-        _entriesId.clear()
-        _entries.forEachIndexed { index, clipboardEntry ->
-            _entriesId[clipboardEntry.id] = index
-        }
-        diff.dispatchUpdatesTo(this)
-    }
-
     fun onDetached() {
         popupMenu?.dismiss()
     }
 
     abstract val theme: Theme
 
-    override fun getItemCount(): Int = _entries.size
-
-    abstract fun onPaste(id: Int)
+    abstract fun onPaste(entry: ClipboardEntry)
 
     abstract suspend fun onPin(id: Int)
 

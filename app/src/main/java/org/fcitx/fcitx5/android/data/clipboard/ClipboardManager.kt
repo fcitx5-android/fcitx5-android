@@ -77,7 +77,9 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
 
     suspend fun get(id: Int) = clbDao.get(id)
 
-    suspend fun getAll() = clbDao.getAll()
+    suspend fun haveUnpinned() = clbDao.haveUnpinned()
+
+    fun allEntries() = clbDao.allEntries()
 
     suspend fun pin(id: Int) = clbDao.updatePinStatus(id, true)
 
@@ -134,7 +136,7 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
 
     private suspend fun removeOutdated() {
         val limit = limitPref.getValue()
-        val unpinned = clbDao.getAll().filter { !it.pinned }
+        val unpinned = clbDao.getAllUnpinned()
         if (unpinned.size > limit) {
             // the last one we will keep
             val last = unpinned

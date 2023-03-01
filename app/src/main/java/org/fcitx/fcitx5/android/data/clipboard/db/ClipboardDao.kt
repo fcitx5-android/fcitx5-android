@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.data.clipboard.db
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -27,8 +28,14 @@ interface ClipboardDao {
     @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME} WHERE rowId=:rowId LIMIT 1")
     suspend fun get(rowId: Long): ClipboardEntry?
 
-    @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME}")
-    suspend fun getAll(): List<ClipboardEntry>
+    @Query("SELECT EXISTS(SELECT 1 FROM ${ClipboardEntry.TABLE_NAME} WHERE pinned=0)")
+    suspend fun haveUnpinned(): Boolean
+
+    @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME} WHERE pinned=0")
+    suspend fun getAllUnpinned(): List<ClipboardEntry>
+
+    @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME} ORDER BY pinned DESC, timestamp DESC")
+    fun allEntries(): PagingSource<Int, ClipboardEntry>
 
     @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME} WHERE text=:text LIMIT 1")
     suspend fun find(text: String): ClipboardEntry?

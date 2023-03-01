@@ -314,6 +314,7 @@ dependencies {
     implementation("org.mechdancer:dependency:0.1.2")
     val roomVersion = "2.5.0"
     implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-paging:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     implementation("com.jakewharton.timber:timber:5.0.1")
@@ -328,6 +329,7 @@ dependencies {
     implementation("androidx.preference:preference-ktx:1.2.0")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("androidx.viewpager2:viewpager2:1.0.0")
+    implementation("androidx.paging:paging-runtime-ktx:3.1.1")
     val navVersion = "2.5.3"
     implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
     implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
