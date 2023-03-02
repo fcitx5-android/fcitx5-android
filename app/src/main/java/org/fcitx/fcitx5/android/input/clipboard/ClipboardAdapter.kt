@@ -8,12 +8,9 @@ import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.lifecycle.findViewTreeLifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardEntry
 import org.fcitx.fcitx5.android.data.theme.Theme
@@ -86,12 +83,11 @@ abstract class ClipboardAdapter :
                 val iconColor = ctx.styledColor(android.R.attr.colorControlNormal)
                 val iconColorFilter = PorterDuffColorFilter(iconColor, PorterDuff.Mode.SRC_IN)
                 val popup = PopupMenu(root.context, root)
-                val scope = root.findViewTreeLifecycleOwner()!!.lifecycleScope
-                fun menuItem(@StringRes title: Int, @DrawableRes ic: Int, cb: suspend () -> Unit) {
+                fun menuItem(@StringRes title: Int, @DrawableRes ic: Int, callback: () -> Unit) {
                     popup.menu.add(title).apply {
                         icon = ctx.drawable(ic)?.apply { colorFilter = iconColorFilter }
                         setOnMenuItemClickListener {
-                            scope.launch { cb() }
+                            callback()
                             true
                         }
                     }
@@ -120,6 +116,8 @@ abstract class ClipboardAdapter :
         }
     }
 
+    fun getEntryAt(position: Int) = getItem(position)
+
     fun onDetached() {
         popupMenu?.dismiss()
     }
@@ -128,12 +126,12 @@ abstract class ClipboardAdapter :
 
     abstract fun onPaste(entry: ClipboardEntry)
 
-    abstract suspend fun onPin(id: Int)
+    abstract fun onPin(id: Int)
 
-    abstract suspend fun onUnpin(id: Int)
+    abstract fun onUnpin(id: Int)
 
     abstract fun onEdit(id: Int)
 
-    abstract suspend fun onDelete(id: Int)
+    abstract fun onDelete(id: Int)
 
 }

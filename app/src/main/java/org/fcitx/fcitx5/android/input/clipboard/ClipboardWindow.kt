@@ -8,6 +8,8 @@ import androidx.core.text.color
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
@@ -67,11 +69,25 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     private val adapter: ClipboardAdapter by lazy {
         object : ClipboardAdapter() {
             override val theme = this@ClipboardWindow.theme
-            override suspend fun onPin(id: Int) = ClipboardManager.pin(id)
-            override suspend fun onUnpin(id: Int) = ClipboardManager.unpin(id)
-            override fun onEdit(id: Int) = AppUtil.launchClipboardEdit(context, id)
-            override suspend fun onDelete(id: Int) = ClipboardManager.delete(id)
-            override fun onPaste(entry: ClipboardEntry) = service.commitText(entry.text)
+            override fun onPin(id: Int) {
+                service.lifecycleScope.launch { ClipboardManager.pin(id) }
+            }
+
+            override fun onUnpin(id: Int) {
+                service.lifecycleScope.launch { ClipboardManager.unpin(id) }
+            }
+
+            override fun onEdit(id: Int) {
+                AppUtil.launchClipboardEdit(context, id)
+            }
+
+            override fun onDelete(id: Int) {
+                service.lifecycleScope.launch { ClipboardManager.delete(id) }
+            }
+
+            override fun onPaste(entry: ClipboardEntry) {
+                service.commitText(entry.text)
+            }
         }
     }
 
@@ -81,6 +97,29 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
                 layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
                 adapter = this@ClipboardWindow.adapter
             }
+            ItemTouchHelper(object : ItemTouchHelper.Callback() {
+                override fun getMovementFlags(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder
+                ): Int {
+                    return makeMovementFlags(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT)
+                }
+
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder
+                ): Boolean {
+                    return false
+                }
+
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                    val entry = adapter.getEntryAt(viewHolder.bindingAdapterPosition) ?: return
+                    service.lifecycleScope.launch {
+                        ClipboardManager.delete(entry.id)
+                    }
+                }
+            }).attachToRecyclerView(recyclerView)
             enableUi.enableButton.setOnClickListener {
                 clipboardEnabledPref.setValue(true)
             }
