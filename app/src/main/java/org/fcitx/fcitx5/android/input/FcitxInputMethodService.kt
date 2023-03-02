@@ -200,9 +200,15 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     fun commitText(text: String) {
         if (composing.isNotEmpty() && composingText.toString() == text) {
             // when composing text equals commit content, finish composing text as-is
-            selection.predict(composing.end)
+            val cursor = composing.end
+            selection.predict(cursor)
             resetComposingState()
-            inputConnection?.finishComposingText()
+            inputConnection?.apply {
+                beginBatchEdit()
+                finishComposingText()
+                setSelection(cursor, cursor)
+                endBatchEdit()
+            }
             return
         }
         // committed text should replace composing (if any), replace selected range (if any),
