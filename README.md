@@ -16,6 +16,10 @@ GitHub: [![release version](https://img.shields.io/github/v/release/fcitx5-andro
     alt="Get it on F-Droid"
     width="207" height="80">](https://f-droid.org/packages/org.fcitx.fcitx5.android)
 
+[<img alt="Get it on Google Play"
+      src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
+        width="207" height="80">](https://play.google.com/store/apps/details?id=org.fcitx.fcitx5.android&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1)
+
 ## Project status
 
 ### Implemented
