@@ -233,8 +233,11 @@ fun getSystemProperty(key: String): String {
 fun ZipInputStream.extract(destDir: File): List<File> {
     val extracted = mutableListOf<File>()
     var entry = nextEntry
+    val canonicalDest = destDir.canonicalPath
     while (entry != null && !entry.isDirectory) {
         val file = File(destDir, entry.name)
+        if (!file.canonicalPath.startsWith(canonicalDest))
+            throw SecurityException()
         copyTo(file.outputStream())
         extracted.add(file)
         entry = nextEntry
