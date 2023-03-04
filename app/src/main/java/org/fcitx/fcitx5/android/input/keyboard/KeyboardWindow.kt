@@ -12,8 +12,6 @@ import org.fcitx.fcitx5.android.core.CapabilityFlags
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.KeyboardSwitchedOutNumber
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.KeyboardSwitchedToNumber
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.broadcast.ReturnKeyDrawableComponent
 import org.fcitx.fcitx5.android.input.dependency.fcitx
@@ -178,9 +176,6 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
     // 1) the keyboard window was newly attached
     // 2) currently keyboard window is attached and switchLayout was used
     private fun notifyBarLayoutChanged() {
-        if (currentKeyboardName == NumberKeyboard.Name)
-            bar.barStateMachine.push(KeyboardSwitchedToNumber)
-        else
-            bar.barStateMachine.push(KeyboardSwitchedOutNumber)
+        bar.onKeyboardLayoutSwitched(currentKeyboardName == NumberKeyboard.Name)
     }
 }

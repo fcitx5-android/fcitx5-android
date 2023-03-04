@@ -25,7 +25,7 @@
           gettext
           python39
           icu
-          androidStudioPackages.beta
+          androidStudioPackages.stable
         ];
         ANDROID_SDK_ROOT =
           "${androidComposition.androidsdk}/libexec/android-sdk";

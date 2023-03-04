@@ -9,7 +9,7 @@ import org.fcitx.fcitx5.android.input.candidates.CandidateItemUi
 
 abstract class BaseCandidateViewAdapter :
     RecyclerView.Adapter<BaseCandidateViewAdapter.ViewHolder>() {
-    inner class ViewHolder(val ui: CandidateItemUi) : RecyclerView.ViewHolder(ui.root) {
+    class ViewHolder(val ui: CandidateItemUi) : RecyclerView.ViewHolder(ui.root) {
         var idx = -1
     }
 

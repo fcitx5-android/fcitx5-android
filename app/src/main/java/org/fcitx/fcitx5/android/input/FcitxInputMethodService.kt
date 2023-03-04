@@ -1,20 +1,35 @@
 package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
+import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.graphics.Color
+import android.graphics.drawable.Icon
 import android.os.Build
+import android.os.Bundle
 import android.os.SystemClock
 import android.text.InputType
 import android.util.LruCache
+import android.util.Size
 import android.view.*
 import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InlineSuggestionsRequest
+import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.FrameLayout
+import android.widget.inline.InlinePresentationSpec
+import androidx.annotation.RequiresApi
+import androidx.autofill.inline.UiVersions
+import androidx.autofill.inline.common.ImageViewStyle
+import androidx.autofill.inline.common.TextViewStyle
+import androidx.autofill.inline.common.ViewStyle
+import androidx.autofill.inline.v1.InlineSuggestionUi
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.*
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.daemon.FcitxDaemon
@@ -28,9 +43,11 @@ import org.fcitx.fcitx5.android.input.cursor.CursorTracker
 import org.fcitx.fcitx5.android.utils.alpha
 import org.fcitx.fcitx5.android.utils.inputConnection
 import splitties.bitflags.hasFlag
+import splitties.dimensions.dp
 import splitties.resources.styledColor
 import timber.log.Timber
 import kotlin.math.max
+
 
 class FcitxInputMethodService : LifecycleInputMethodService() {
 
@@ -61,6 +78,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private var highlightColor: Int = 0x66008577 // material_deep_teal_500 with alpha 0.4
 
     private val ignoreSystemCursor by AppPrefs.getInstance().advanced.ignoreSystemCursor
+    private val inlineSuggestions by AppPrefs.getInstance().keyboard.inlineSuggestions
 
     private val recreateInputViewListener = ManagedPreference.OnChangeListener<Any> { _, _ ->
         recreateInputView(ThemeManager.getActiveTheme())
@@ -192,6 +210,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             when (val action = imeOptions and EditorInfo.IME_MASK_ACTION) {
                 EditorInfo.IME_ACTION_UNSPECIFIED,
                 EditorInfo.IME_ACTION_NONE -> commitText("\n")
+
                 else -> inputConnection?.performEditorAction(action)
             }
         }
@@ -553,6 +572,68 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         ic.endBatchEdit()
     }
 
+    @SuppressLint("RestrictedApi")
+    @RequiresApi(Build.VERSION_CODES.R)
+    override fun onCreateInlineSuggestionsRequest(uiExtras: Bundle): InlineSuggestionsRequest? {
+        if (!inlineSuggestions) return null
+        val theme = inputView?.theme ?: return null
+        val chipDrawable = if (theme.isDark) R.drawable.bkg_inline_suggestion_dark else R.drawable.bkg_inline_suggestion_light
+        val chipBg = Icon.createWithResource(this, chipDrawable).setTint(theme.keyTextColor)
+        val style = InlineSuggestionUi.newStyleBuilder()
+            .setSingleIconChipStyle(
+                ViewStyle.Builder()
+                    .setBackgroundColor(Color.TRANSPARENT)
+                    .setPadding(0, 0, 0, 0)
+                    .build()
+            )
+            .setChipStyle(
+                ViewStyle.Builder()
+                    .setBackground(chipBg)
+                    .setPadding(dp(10), 0, dp(10), 0)
+                    .build()
+            )
+            .setTitleStyle(
+                TextViewStyle.Builder()
+                    .setLayoutMargin(dp(4), 0, dp(4), 0)
+                    .setTextColor(theme.keyTextColor)
+                    .setTextSize(14f)
+                    .build()
+            )
+            .setSubtitleStyle(
+                TextViewStyle.Builder()
+                    .setTextColor(theme.altKeyTextColor)
+                    .setTextSize(12f)
+                    .build()
+            )
+            .setStartIconStyle(
+                ImageViewStyle.Builder()
+                    .setTintList(ColorStateList.valueOf(theme.altKeyTextColor))
+                    .build()
+            )
+            .setEndIconStyle(
+                ImageViewStyle.Builder()
+                    .setTintList(ColorStateList.valueOf(theme.altKeyTextColor))
+                    .build()
+            )
+            .build()
+        val styleBundle = UiVersions.newStylesBuilder()
+            .addStyle(style)
+            .build()
+        val spec = InlinePresentationSpec
+            .Builder(InlinePresentationSpecMinSize, InlinePresentationSpecMaxSize)
+            .setStyle(styleBundle)
+            .build()
+        return InlineSuggestionsRequest.Builder(listOf(spec))
+            .setMaxSuggestionCount(InlineSuggestionsRequest.SUGGESTION_COUNT_UNLIMITED)
+            .build()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    override fun onInlineSuggestionsResponse(response: InlineSuggestionsResponse): Boolean {
+        if (!inlineSuggestions) return false
+        return inputView?.handleInlineSuggestions(response) ?: false
+    }
+
     override fun onFinishInputView(finishingInput: Boolean) {
         Timber.d("onFinishInputView: finishingInput=$finishingInput")
         inputConnection?.finishComposingText()
@@ -597,5 +678,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     companion object {
         val EmptyEditorInfo = EditorInfo()
         const val DeleteSurroundingFlag = "org.fcitx.fcitx5.android.DELETE_SURROUNDING"
+        private val InlinePresentationSpecMinSize = Size(0, 0)
+        private val InlinePresentationSpecMaxSize = Size(Int.MAX_VALUE, Int.MAX_VALUE)
     }
 }

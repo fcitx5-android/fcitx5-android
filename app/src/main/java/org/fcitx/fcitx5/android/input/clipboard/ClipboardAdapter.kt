@@ -56,7 +56,12 @@ abstract class ClipboardAdapter :
                     break
                 } else {
                     // append one line exactly
-                    appendLine(str.substring(start, min(min(lineBreak, start + chars), totalLength)))
+                    appendLine(
+                        str.substring(
+                            start,
+                            min(min(lineBreak, start + chars), totalLength)
+                        )
+                    )
                 }
             }
         }
@@ -64,8 +69,7 @@ abstract class ClipboardAdapter :
 
     private var popupMenu: PopupMenu? = null
 
-    inner class ViewHolder(val entryUi: ClipboardEntryUi) :
-        RecyclerView.ViewHolder(entryUi.root)
+    class ViewHolder(val entryUi: ClipboardEntryUi) : RecyclerView.ViewHolder(entryUi.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(ClipboardEntryUi(parent.context, theme))

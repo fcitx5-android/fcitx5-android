@@ -207,4 +207,5 @@
     <string name="horizontal_candidate_never_fill">Never fill width</string>
     <string name="horizontal_candidate_auto_fill">Fill width on demand</string>
     <string name="horizontal_candidate_always_fill">Always fill width</string>
+    <string name="inline_suggestions">Inline suggestions</string>
 </resources>

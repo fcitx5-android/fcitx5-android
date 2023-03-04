@@ -8,8 +8,10 @@ import android.os.Build
 import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.ImageView
 import android.widget.Space
+import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.*
 import androidx.lifecycle.lifecycleScope
@@ -221,7 +223,7 @@ class InputView(
                 centerVertically()
                 centerHorizontally()
             })
-            add(kawaiiBar.view, lParams(matchParent, dp(40)) {
+            add(kawaiiBar.view, lParams(matchParent, dp(KawaiiBarComponent.HEIGHT)) {
                 topOfParent()
                 centerHorizontally()
             })
@@ -350,6 +352,11 @@ class InputView(
      */
     fun finishInput() {
         showingDialog?.dismiss()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    fun handleInlineSuggestions(response: InlineSuggestionsResponse): Boolean {
+        return kawaiiBar.handleInlineSuggestions(response)
     }
 
     override fun onDetachedFromWindow() {

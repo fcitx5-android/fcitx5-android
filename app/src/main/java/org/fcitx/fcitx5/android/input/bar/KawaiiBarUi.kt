@@ -1,29 +1,34 @@
 package org.fcitx.fcitx5.android.input.bar
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
+import android.os.Build
 import android.text.TextUtils
 import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.AnimationSet
-import android.view.animation.ScaleAnimation
 import android.view.animation.TranslateAnimation
+import android.widget.HorizontalScrollView
 import android.widget.ViewAnimator
+import android.widget.inline.InlineContentView
 import androidx.annotation.DrawableRes
+import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayout
+import com.google.android.flexbox.JustifyContent
+import kotlinx.coroutines.*
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.input.bar.IdleUiStateMachine.State.*
-import org.fcitx.fcitx5.android.input.keyboard.BaseKeyboard
-import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
-import org.fcitx.fcitx5.android.input.keyboard.KeyAction
-import org.fcitx.fcitx5.android.input.keyboard.KeyDef
+import org.fcitx.fcitx5.android.input.keyboard.*
+import org.fcitx.fcitx5.android.input.popup.PopupActionListener
+import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.utils.rippleDrawable
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.*
@@ -67,24 +72,32 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
     class Idle(
         ctx: Context,
         theme: Theme,
-        private val getCurrentState: () -> IdleUiStateMachine.State,
+        private val popupActionListener: PopupActionListener,
+        private val popup: PopupComponent,
+        private val commonKeyActionListener: CommonKeyActionListener
     ) : KawaiiBarUi(ctx, theme) {
 
-        private val IdleUiStateMachine.State.menuButtonRotation
+        enum class State {
+            Clipboard, Empty, NumberRow, InlineSuggestion
+        }
+
+        var currentState = State.Empty
+            private set
+        private val menuButtonRotation
             get() =
-                if (inPrivate) 0f
-                else when (this) {
-                    Empty -> -90f
-                    Clipboard -> -90f
-                    Toolbar -> 90f
-                    ToolbarWithClip -> 90f
-                    ClipboardTimedOut -> -90f
+                when {
+                    inPrivate -> 0f
+                    isToolbarExpanded -> 90f
+                    else -> -90f
                 }
 
         private var inPrivate = false
 
+        var isToolbarExpanded = false
+            private set
+
         val menuButton = toolButton(R.drawable.ic_baseline_expand_more_24) {
-            rotation = getCurrentState().menuButtonRotation
+            rotation = menuButtonRotation
         }
 
         val undoButton = toolButton(R.drawable.ic_baseline_undo_24)
@@ -140,7 +153,6 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
 
         val clipboardSuggestionItem = object : CustomGestureView(ctx) {
             init {
-                visibility = View.GONE
                 isHapticFeedbackEnabled = false
                 background = rippleDrawable(theme.keyPressHighlightColor)
                 add(clipboardSuggestionLayout, lParams(wrapContent, matchParent))
@@ -149,17 +161,93 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
 
         private val clipboardBar = constraintLayout {
             add(clipboardSuggestionItem, lParams(wrapContent, matchConstraints) {
-                topOfParent()
-                startOfParent()
-                endOfParent()
-                bottomOfParent()
+                centerInParent()
                 verticalMargin = dp(4)
             })
         }
 
+        private val emptyBar = constraintLayout()
+
+        private val numberRowBar = object : BaseKeyboard(
+            ctx,
+            theme,
+            listOf(listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0").map { digit ->
+                KeyDef(
+                    KeyDef.Appearance.Text(
+                        displayText = digit,
+                        textSize = 21f,
+                        border = KeyDef.Appearance.Border.Off,
+                        margin = false
+                    ),
+                    setOf(
+                        KeyDef.Behavior.Press(KeyAction.SymAction(KeySym(digit.codePointAt(0))))
+                    ),
+                    arrayOf(KeyDef.Popup.Preview(digit))
+                )
+            })
+        ) {}
+
+        class InlineSuggestionsUi(override val ctx: Context) : Ui {
+
+            private val scrollView = ctx.view(::HorizontalScrollView) {
+                isFillViewport = true
+                scrollBarSize = dp(1)
+            }
+
+            private val pinnedView = frameLayout()
+
+            override val root = constraintLayout {
+                add(scrollView, lParams(matchConstraints, matchParent) {
+                    startOfParent()
+                    before(pinnedView)
+                    centerVertically()
+                })
+                add(pinnedView, lParams(wrapContent, matchParent) {
+                    endOfParent()
+                    centerVertically()
+                })
+            }
+
+            fun clear() {
+                scrollView.removeAllViews()
+                pinnedView.removeAllViews()
+            }
+
+            @RequiresApi(Build.VERSION_CODES.R)
+            fun setPinnedView(view: InlineContentView?) {
+                pinnedView.removeAllViews()
+                if (view != null) {
+                    pinnedView.addView(view)
+                }
+            }
+
+            @RequiresApi(Build.VERSION_CODES.R)
+            fun setScrollableViews(views: List<InlineContentView>) {
+                val flexbox = view(::FlexboxLayout) {
+                    flexWrap = FlexWrap.NOWRAP
+                    justifyContent = JustifyContent.CENTER
+                    views.forEach {
+                        addView(it)
+                        it.updateLayoutParams<FlexboxLayout.LayoutParams> {
+                            flexShrink = 0f
+                        }
+                    }
+                }
+                scrollView.apply {
+                    scrollTo(0, 0)
+                    removeAllViews()
+                    add(flexbox, lParams(wrapContent, matchParent))
+                }
+            }
+        }
+
+        val inlineSuggestionsBar = InlineSuggestionsUi(ctx)
+
         private val animator = ViewAnimator(ctx).apply {
+            add(emptyBar, lParams(matchParent, matchParent))
             add(clipboardBar, lParams(matchParent, matchParent))
             add(buttonsBar, lParams(matchParent, matchParent))
+            add(inlineSuggestionsBar.root, lParams(matchParent, matchParent))
 
             if (disableAnimation) {
                 inAnimation = null
@@ -168,13 +256,14 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
                 inAnimation = AnimationSet(true).apply {
                     duration = 200L
                     addAnimation(AlphaAnimation(0f, 1f))
-                    addAnimation(ScaleAnimation(0f, 1f, 0f, 1f, 0f, dp(20f)))
+                    // TODO: rework InlineContentView animation
+//                    addAnimation(ScaleAnimation(0f, 1f, 0f, 1f, 0f, dp(20f)))
                     addAnimation(TranslateAnimation(dp(-100f), 0f, 0f, 0f))
                 }
                 outAnimation = AnimationSet(true).apply {
                     duration = 200L
                     addAnimation(AlphaAnimation(1f, 0f))
-                    addAnimation(ScaleAnimation(1f, 0f, 1f, 0f, 0f, dp(20f)))
+//                    addAnimation(ScaleAnimation(1f, 0f, 1f, 0f, 0f, dp(20f)))
                     addAnimation(TranslateAnimation(0f, dp(-100f), 0f, 0f))
                 }
             }
@@ -182,11 +271,13 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
 
         override val root = constraintLayout {
             addButton(menuButton) { startOfParent() }
-            add(animator, lParams(matchConstraints, dp(40)) {
+            add(animator, lParams(matchConstraints, matchParent) {
                 after(menuButton)
                 before(hideKeyboardButton)
             })
             addButton(hideKeyboardButton) { endOfParent() }
+            numberRowBar.visibility = View.GONE
+            add(numberRowBar, lParams(matchParent, matchParent))
         }
 
         fun privateMode(activate: Boolean = true) {
@@ -203,7 +294,7 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
         }
 
         private fun updateMenuButtonRotation(instant: Boolean = false) {
-            val targetRotation = getCurrentState().menuButtonRotation
+            val targetRotation = menuButtonRotation
             menuButton.apply {
                 if (targetRotation == rotation) return
                 if (instant || disableAnimation) {
@@ -214,52 +305,63 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
             }
         }
 
-        private fun transitionToClipboardBar() {
-            animator.displayedChild = 0
+        fun expandToolbar() {
+            Timber.d("Expand idle ui toolbar at $currentState")
+            if (animator.displayedChild != 2)
+                animator.displayedChild = 2
+            isToolbarExpanded = true
+            updateMenuButtonRotation()
         }
 
-        private fun transitionToButtonsBar() {
-            animator.displayedChild = 1
+        fun collapseToolbar() {
+            Timber.d("Collapse idle ui toolbar at $currentState")
+            switchUiByState(currentState)
+            isToolbarExpanded = false
+            updateMenuButtonRotation()
         }
 
-        fun switchUiByState(state: IdleUiStateMachine.State) {
+        fun toggleToolbar() {
+            if (isToolbarExpanded)
+                collapseToolbar()
+            else
+                expandToolbar()
+        }
+
+        fun updateState(state: State) {
+            currentState = state
+            switchUiByState(state)
+        }
+
+        private fun switchUiByState(state: State) {
             Timber.d("Switch idle ui to $state")
             when (state) {
-                Clipboard -> {
-                    transitionToClipboardBar()
-                    enableClipboardItem()
-                }
-
-                Toolbar -> {
-                    transitionToButtonsBar()
-                    disableClipboardItem()
-                }
-
-                Empty -> {
-                    // empty and clipboard share the same view
-                    transitionToClipboardBar()
-                    disableClipboardItem()
-                    setClipboardItemText("")
-                }
-
-                ToolbarWithClip -> {
-                    transitionToButtonsBar()
-                }
-
-                ClipboardTimedOut -> {
-                    transitionToClipboardBar()
-                }
+                State.Clipboard -> animator.displayedChild = 1
+                State.Empty -> animator.displayedChild = 0
+                State.NumberRow -> {}
+                State.InlineSuggestion -> animator.displayedChild = 3
+            }
+            if (state != State.Empty) {
+                isToolbarExpanded = false
+            }
+            if (state == State.NumberRow) {
+                menuButton.visibility = View.GONE
+                hideKeyboardButton.visibility = View.GONE
+                animator.visibility = View.GONE
+                numberRowBar.visibility = View.VISIBLE
+                numberRowBar.keyActionListener = commonKeyActionListener.listener
+                numberRowBar.popupActionListener = popupActionListener
+            } else {
+                menuButton.visibility = View.VISIBLE
+                hideKeyboardButton.visibility = View.VISIBLE
+                animator.visibility = View.VISIBLE
+                numberRowBar.visibility = View.GONE
+                numberRowBar.keyActionListener = null
+                numberRowBar.popupActionListener = null
+                popup.dismissAll()
             }
             updateMenuButtonRotation()
         }
 
-        private fun enableClipboardItem() {
-            clipboardSuggestionItem.visibility = View.VISIBLE
-        }
-
-        private fun disableClipboardItem() {
-            clipboardSuggestionItem.visibility = View.GONE
-        }
 
         fun setClipboardItemText(text: String) {
             clipboardText.text = text
@@ -329,26 +431,4 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
         }
     }
 
-    class NumberRowUi(ctx: Context, theme: Theme) : KawaiiBarUi(ctx, theme) {
-        @SuppressLint("ViewConstructor")
-        class Keyboard(ctx: Context, theme: Theme) : BaseKeyboard(
-            ctx,
-            theme,
-            listOf(listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0").map(::NumKey))
-        ) {
-            class NumKey(digit: String) : KeyDef(
-                Appearance.Text(
-                    displayText = digit,
-                    textSize = 21f,
-                    border = Appearance.Border.Off,
-                    margin = false
-                ),
-                setOf(Behavior.Press(KeyAction.SymAction(KeySym(digit.codePointAt(0))))),
-                arrayOf(Popup.Preview(digit))
-            )
-        }
-
-        override val root = Keyboard(ctx, theme)
-
-    }
 }

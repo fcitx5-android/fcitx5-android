@@ -142,6 +142,8 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
         val keyboardHeightPercent: ManagedPreference.PInt
         val keyboardHeightPercentLandscape: ManagedPreference.PInt
 
+        val inlineSuggestions = switch(R.string.inline_suggestions, "inline_suggestions", true)
+
         init {
             val (primary, secondary) = twinInt(
                 R.string.keyboard_height,
