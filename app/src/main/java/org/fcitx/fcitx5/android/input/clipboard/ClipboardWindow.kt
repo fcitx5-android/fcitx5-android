@@ -1,16 +1,19 @@
 package org.fcitx.fcitx5.android.input.clipboard
 
 import android.view.View
+import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import androidx.core.text.color
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -31,13 +34,19 @@ import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.EventStateMachine
+import splitties.dimensions.dp
 import splitties.resources.styledColor
+import splitties.views.dsl.core.withTheme
 import kotlin.properties.Delegates
 
 class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
 
     private val service: FcitxInputMethodService by manager.inputMethodService()
     private val theme by manager.theme()
+
+    private val snackbarCtx by lazy {
+        context.withTheme(R.style.InputViewSnackbarTheme)
+    }
 
     private lateinit var stateMachine: EventStateMachine<ClipboardStateMachine.State, ClipboardStateMachine.TransitionEvent, ClipboardStateMachine.BooleanKey>
 
@@ -117,6 +126,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
                     val entry = adapter.getEntryAt(viewHolder.bindingAdapterPosition) ?: return
                     service.lifecycleScope.launch {
                         ClipboardManager.delete(entry.id)
+                        showUndoSnackbar()
                     }
                 }
             }).attachToRecyclerView(recyclerView)
@@ -125,11 +135,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
             }
             deleteAllButton.setOnClickListener {
                 service.lifecycleScope.launch {
-                    if (ClipboardManager.haveUnpinned()) {
-                        deleteAllEntries(skipPinned = true)
-                    } else {
-                        promptDeleteAllPinned()
-                    }
+                    promptDeleteAll(ClipboardManager.haveUnpinned())
                 }
             }
         }
@@ -139,14 +145,14 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
 
     private var promptMenu: PopupMenu? = null
 
-    private fun promptDeleteAllPinned() {
+    private fun promptDeleteAll(skipPinned: Boolean) {
         promptMenu?.dismiss()
         promptMenu = PopupMenu(context, ui.deleteAllButton).apply {
             menu.apply {
                 add(buildSpannedString {
                     bold {
                         color(context.styledColor(android.R.attr.colorAccent)) {
-                            append(context.getString(R.string.delete_all_pinned_items))
+                            append(context.getString(if (skipPinned) R.string.delete_all_except_pinned else R.string.delete_all_pinned_items))
                         }
                     }
                 }).apply {
@@ -157,7 +163,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
                 }
                 add(android.R.string.ok).apply {
                     setOnMenuItemClickListener {
-                        deleteAllEntries(skipPinned = false)
+                        deleteAllEntries(skipPinned)
                         true
                     }
                 }
@@ -167,6 +173,26 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
             }
             show()
         }
+    }
+
+    private fun showUndoSnackbar() {
+        val str = context.resources.getString(R.string.removed_x, "")
+        Snackbar.make(snackbarCtx, ui.root, str, Snackbar.LENGTH_LONG)
+            .setAction(R.string.undo) {
+                // TODO: implement delete undo
+            }
+            .setBackgroundTint(theme.keyBackgroundColor)
+            .setTextColor(theme.keyTextColor)
+            .setActionTextColor(theme.genericActiveBackgroundColor).apply {
+                val hMargin = snackbarCtx.dp(24)
+                val vMargin = snackbarCtx.dp(16)
+                view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    leftMargin = hMargin
+                    rightMargin = hMargin
+                    bottomMargin = vMargin
+                }
+                show()
+            }
     }
 
     override fun onAttached() {

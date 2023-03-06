@@ -208,4 +208,5 @@
     <string name="horizontal_candidate_auto_fill">Fill width on demand</string>
     <string name="horizontal_candidate_always_fill">Always fill width</string>
     <string name="inline_suggestions">Inline suggestions</string>
+    <string name="delete_all_except_pinned">Delete all items except pinned ones?</string>
 </resources>
