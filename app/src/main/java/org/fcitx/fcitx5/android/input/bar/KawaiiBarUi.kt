@@ -6,10 +6,13 @@ import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
 import android.os.Build
 import android.text.TextUtils
+import android.view.SurfaceControl
+import android.view.SurfaceView
 import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.AnimationSet
 import android.view.animation.TranslateAnimation
+import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
 import android.widget.ViewAnimator
 import android.widget.inline.InlineContentView
@@ -194,7 +197,19 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
                 scrollBarSize = dp(1)
             }
 
+            private val scrollSurfaceView = ctx.view(::SurfaceView) {
+                setZOrderOnTop(true)
+            }
+
+            private val scrollableContentViews = mutableListOf<InlineContentView>()
+
             private val pinnedView = frameLayout()
+
+            private val pinnedSurfaceView = ctx.view(::SurfaceView) {
+                setZOrderOnTop(true)
+            }
+
+            private var pinnedContentView: InlineContentView? = null
 
             override val root = constraintLayout {
                 add(scrollView, lParams(matchConstraints, matchParent) {
@@ -202,35 +217,81 @@ sealed class KawaiiBarUi(override val ctx: Context, protected val theme: Theme) 
                     before(pinnedView)
                     centerVertically()
                 })
+                add(scrollSurfaceView, lParams(matchConstraints, matchParent) {
+                    centerOn(scrollView)
+                })
                 add(pinnedView, lParams(wrapContent, matchParent) {
                     endOfParent()
                     centerVertically()
                 })
+                add(pinnedSurfaceView, lParams(matchConstraints, matchParent) {
+                    centerOn(pinnedView)
+                })
             }
 
+            @RequiresApi(Build.VERSION_CODES.R)
+            private fun clearScrollView() {
+                scrollView.scrollTo(0, 0)
+                scrollableContentViews.forEach { v ->
+                    scrollView.removeView(v)
+                    v.surfaceControl?.let { sc ->
+                        SurfaceControl.Transaction().reparent(sc, null).apply()
+                    }
+                }
+                scrollableContentViews.clear()
+            }
+
+            @RequiresApi(Build.VERSION_CODES.R)
+            private fun clearPinnedView() {
+                pinnedContentView?.let { v ->
+                    pinnedView.removeView(v)
+                    v.surfaceControl?.let { sc ->
+                        SurfaceControl.Transaction().reparent(sc, null).apply()
+                    }
+                    pinnedContentView = null
+                }
+            }
+
+            @RequiresApi(Build.VERSION_CODES.R)
             fun clear() {
-                scrollView.removeAllViews()
-                pinnedView.removeAllViews()
+                clearScrollView()
+                clearPinnedView()
             }
 
             @RequiresApi(Build.VERSION_CODES.R)
             fun setPinnedView(view: InlineContentView?) {
-                pinnedView.removeAllViews()
-                if (view != null) {
-                    pinnedView.addView(view)
+                clearPinnedView()
+                if (view == null) return
+                pinnedView.addView(view)
+                view.updateLayoutParams<FrameLayout.LayoutParams> {
+                    val hMargin = ctx.dp(10)
+                    leftMargin = hMargin
+                    rightMargin = hMargin
                 }
             }
 
             @RequiresApi(Build.VERSION_CODES.R)
             fun setScrollableViews(views: List<InlineContentView>) {
+                clearScrollView()
                 val flexbox = view(::FlexboxLayout) {
                     flexWrap = FlexWrap.NOWRAP
                     justifyContent = JustifyContent.CENTER
-                    views.forEach {
-                        addView(it)
-                        it.updateLayoutParams<FlexboxLayout.LayoutParams> {
-                            flexShrink = 0f
+                }
+                val parentSurfaceControl = scrollSurfaceView.surfaceControl
+                views.forEach {
+                    scrollableContentViews.add(it)
+                    it.setSurfaceControlCallback(object : InlineContentView.SurfaceControlCallback {
+                        override fun onCreated(surfaceControl: SurfaceControl) {
+                            SurfaceControl.Transaction()
+                                .reparent(surfaceControl, parentSurfaceControl)
+                                .apply()
                         }
+
+                        override fun onDestroyed(surfaceControl: SurfaceControl) {}
+                    })
+                    flexbox.addView(it)
+                    it.updateLayoutParams<FlexboxLayout.LayoutParams> {
+                        flexShrink = 0f
                     }
                 }
                 scrollView.apply {

@@ -312,7 +312,9 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         }
         isCapabilityFlagsPassword = toolbarNumRowOnPassword && capFlags.has(CapabilityFlag.Password)
         isInlineSuggestionEmpty = true
-        idleUi.inlineSuggestionsBar.clear()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            idleUi.inlineSuggestionsBar.clear()
+        }
         evalIdleUiState()
         if (idleUi.currentState == KawaiiBarUi.Idle.State.Empty && expandToolbarByDefault)
             idleUi.expandToolbar()
