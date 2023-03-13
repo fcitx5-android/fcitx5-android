@@ -15,7 +15,9 @@ data class ClipboardEntry(
     @ColumnInfo(defaultValue = "-1")
     val timestamp: Long = System.currentTimeMillis(),
     @ColumnInfo(defaultValue = ClipDescription.MIMETYPE_TEXT_PLAIN)
-    val type: String = ClipDescription.MIMETYPE_TEXT_PLAIN
+    val type: String = ClipDescription.MIMETYPE_TEXT_PLAIN,
+    @ColumnInfo(defaultValue = "0")
+    val deleted: Boolean = false,
 ) {
     companion object {
         const val TABLE_NAME = "clipboard"

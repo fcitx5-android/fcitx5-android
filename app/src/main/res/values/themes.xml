@@ -18,4 +18,6 @@
     <style name="Theme.InputViewTheme" parent="@android:style/Theme.DeviceDefault.Settings" />
 
     <style name="Theme.DialogTheme" parent="@android:style/Theme.DeviceDefault.Light.Dialog" />
+
+    <style name="InputViewSnackbarTheme" parent="Theme.MaterialComponents.Light.NoActionBar" />
 </resources>

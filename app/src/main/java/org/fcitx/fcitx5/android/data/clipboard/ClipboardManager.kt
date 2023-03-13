@@ -93,16 +93,28 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     }
 
     suspend fun delete(id: Int) {
-        clbDao.delete(id)
+        clbDao.markAsDeleted(id)
         updateItemCount()
     }
 
-    suspend fun deleteAll(skipPinned: Boolean = true) {
-        if (skipPinned)
-            clbDao.deleteAllUnpinned()
-        else
-            clbDao.deleteAll()
+    suspend fun deleteAll(skipPinned: Boolean = true): IntArray {
+        val ids = if (skipPinned) {
+            clbDao.findUnpinnedIds()
+        } else {
+            clbDao.findAllIds()
+        }
+        clbDao.markAsDeleted(*ids)
         updateItemCount()
+        return ids
+    }
+
+    suspend fun undoDelete(vararg ids: Int) {
+        clbDao.undoDelete(*ids)
+        updateItemCount()
+    }
+
+    suspend fun realDelete() {
+        clbDao.realDelete()
     }
 
     suspend fun nukeTable() {
@@ -143,7 +155,7 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
                 .sortedBy { it.id }
                 .getOrNull(unpinned.size - limit)
             // delete all unpinned before that, or delete all when limit <= 0
-            clbDao.deleteUnpinnedIdLessThan(last?.timestamp ?: System.currentTimeMillis())
+            clbDao.markUnpinnedAsDeletedEarlierThan(last?.timestamp ?: System.currentTimeMillis())
         }
     }
 
