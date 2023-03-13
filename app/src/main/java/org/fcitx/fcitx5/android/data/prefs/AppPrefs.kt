@@ -85,6 +85,7 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             switch(R.string.system_touch_sounds, "system_touch_sounds", true)
         val expandToolbarByDefault =
             switch(R.string.expand_toolbar_by_default, "expand_toolbar_by_default", false)
+        val inlineSuggestions = switch(R.string.inline_suggestions, "inline_suggestions", true)
         val toolbarNumRowOnPassword =
             switch(R.string.toolbar_num_row_on_password, "toolbar_num_row_on_password", true)
         val popupOnKeyPress = switch(R.string.popup_on_key_press, "popup_on_key_press", true)
@@ -141,8 +142,6 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
 
         val keyboardHeightPercent: ManagedPreference.PInt
         val keyboardHeightPercentLandscape: ManagedPreference.PInt
-
-        val inlineSuggestions = switch(R.string.inline_suggestions, "inline_suggestions", true)
 
         init {
             val (primary, secondary) = twinInt(

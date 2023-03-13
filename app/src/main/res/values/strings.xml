@@ -207,7 +207,7 @@
     <string name="horizontal_candidate_never_fill">Never fill width</string>
     <string name="horizontal_candidate_auto_fill">Fill width on demand</string>
     <string name="horizontal_candidate_always_fill">Always fill width</string>
-    <string name="inline_suggestions">Inline suggestions</string>
+    <string name="inline_suggestions">Show inline autofill suggestions</string>
     <string name="delete_all_except_pinned">Delete all items except pinned ones?</string>
     <string name="num_items_deleted">%1$d item(s) deleted</string>
 </resources>
