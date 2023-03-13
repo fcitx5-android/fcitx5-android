@@ -27,7 +27,7 @@ abstract class ClipboardAdapter :
                 oldItem: ClipboardEntry,
                 newItem: ClipboardEntry
             ): Boolean {
-                return true
+                return oldItem.id == newItem.id
             }
 
             override fun areContentsTheSame(
@@ -45,23 +45,19 @@ abstract class ClipboardAdapter :
          * @param chars max chars per output line
          */
         fun excerptText(str: String, lines: Int = 4, chars: Int = 128) = buildString {
-            val totalLength = str.length
+            val length = str.length
             var lineBreak = -1
             for (i in 1..lines) {
                 val start = lineBreak + 1   // skip previous '\n'
+                val excerptEnd = min(start + chars, length)
                 lineBreak = str.indexOf('\n', start)
                 if (lineBreak < 0) {
                     // no line breaks remaining, substring to end of text
-                    append(str.substring(start, min(start + chars, totalLength)))
+                    append(str.substring(start, excerptEnd))
                     break
                 } else {
                     // append one line exactly
-                    appendLine(
-                        str.substring(
-                            start,
-                            min(min(lineBreak, start + chars), totalLength)
-                        )
-                    )
+                    appendLine(str.substring(start, min(excerptEnd, lineBreak)))
                 }
             }
         }
