@@ -11,22 +11,23 @@ object InputMethodUtil {
     private val serviceName =
         ComponentName(appContext, FcitxInputMethodService::class.java).flattenToShortString()
 
-    fun isEnabled() = serviceName in (Settings.Secure.getString(
-        appContext.contentResolver,
-        Settings.Secure.ENABLED_INPUT_METHODS
-    ) ?: "").split(':')
+    private fun getSecureSettings(name: String) =
+        Settings.Secure.getString(appContext.contentResolver, name)
 
-    fun isSelected() = serviceName == Settings.Secure.getString(
-        appContext.contentResolver,
-        Settings.Secure.DEFAULT_INPUT_METHOD
-    )
+    fun isEnabled(): Boolean =
+        getSecureSettings(Settings.Secure.ENABLED_INPUT_METHODS)
+            ?.split(":")?.contains(serviceName)
+            ?: false
+
+    fun isSelected(): Boolean =
+        getSecureSettings(Settings.Secure.DEFAULT_INPUT_METHOD) == serviceName
 
     fun startSettingsActivity(context: Context) =
         context.startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         })
 
-    fun showSelector(context: Context) =
+    fun showPicker(context: Context) =
         (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
             .showInputMethodPicker()
 }
