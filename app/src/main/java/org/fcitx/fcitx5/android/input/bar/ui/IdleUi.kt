@@ -44,11 +44,15 @@ class IdleUi(
 
     private var inPrivate = false
 
+    private val translateDirection by lazy {
+        if (ctx.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR) 1f else -1f
+    }
+
     private val menuButtonRotation
         get() = when {
             inPrivate -> 0f
-            currentState == State.Toolbar -> 90f
-            else -> -90f
+            currentState == State.Toolbar -> 90f * translateDirection
+            else -> -90f * translateDirection
         }
 
     val menuButton = ToolButton(ctx, R.drawable.ic_baseline_expand_more_24, theme).apply {
@@ -80,7 +84,8 @@ class IdleUi(
         AnimationSet(true).apply {
             duration = 200L
             addAnimation(AlphaAnimation(0f, 1f))
-            addAnimation(TranslateAnimation(ctx.dp(-100f), 0f, 0f, 0f))
+            // 2 stands for Animation.RELATIVE_TO_PARENT
+            addAnimation(TranslateAnimation(2, -0.3f * translateDirection, 2, 0f, 0, 0f, 0, 0f))
         }
     }
 
@@ -88,7 +93,7 @@ class IdleUi(
         AnimationSet(true).apply {
             duration = 200L
             addAnimation(AlphaAnimation(1f, 0f))
-            addAnimation(TranslateAnimation(0f, ctx.dp(-100f), 0f, 0f))
+            addAnimation(TranslateAnimation(2, 0f, 2, -0.3f * translateDirection, 0, 0f, 0, 0f))
         }
     }
 

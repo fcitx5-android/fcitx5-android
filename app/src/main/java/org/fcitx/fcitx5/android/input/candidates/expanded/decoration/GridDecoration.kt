@@ -20,7 +20,18 @@ class GridDecoration(val drawable: Drawable) : RecyclerView.ItemDecoration() {
         val layoutManager = parent.layoutManager as GridLayoutManager
         // add space for items except last in each row
         if (lp.spanIndex + lp.spanSize != layoutManager.spanCount) {
-            outRect.right = drawable.intrinsicWidth
+            when (view.layoutDirection) {
+                View.LAYOUT_DIRECTION_LTR -> {
+                    outRect.right = drawable.intrinsicWidth
+                }
+                View.LAYOUT_DIRECTION_RTL -> {
+                    outRect.left = drawable.intrinsicWidth
+                }
+                else -> {
+                    // should not reach here
+                    outRect.set(0, 0, 0, 0)
+                }
+            }
         } else {
             outRect.set(0, 0, 0, 0)
         }
@@ -37,8 +48,23 @@ class GridDecoration(val drawable: Drawable) : RecyclerView.ItemDecoration() {
             // skip if it is the last item in each row
             if (lp.spanIndex + lp.spanSize == layoutManager.spanCount)
                 continue
-            val left = view.right + lp.rightMargin
-            val right = left + drawable.intrinsicWidth
+            val left: Int
+            val right: Int
+            when (parent.layoutDirection) {
+                View.LAYOUT_DIRECTION_LTR -> {
+                    left = view.right + lp.rightMargin
+                    right = left + drawable.intrinsicWidth
+                }
+                View.LAYOUT_DIRECTION_RTL -> {
+                    right = view.left + lp.leftMargin
+                    left = right - drawable.intrinsicWidth
+                }
+                else -> {
+                    // should not reach here
+                    left = view.left
+                    right = left + drawable.intrinsicWidth
+                }
+            }
             val top = view.top - lp.topMargin
             val bottom = view.bottom + lp.bottomMargin
             // make the divider shorter

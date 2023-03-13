@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.input.popup
 
 import android.graphics.Rect
+import android.view.View
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -56,6 +57,8 @@ class PopupComponent :
 
     val root by lazy {
         context.frameLayout {
+            // we want (0, 0) at top left
+            layoutDirection = View.LAYOUT_DIRECTION_LTR
             isClickable = false
             isFocusable = false
         }

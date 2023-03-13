@@ -124,80 +124,80 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
     override val root = constraintLayout {
         add(leftButton, lParams {
             topOfParent()
-            startOfParent()
+            leftOfParent()
             above(homeButton)
-            before(selectButton)
+            rightToLeftOf(selectButton)
         })
         add(upButton, lParams {
             topOfParent()
-            after(leftButton)
+            leftToRightOf(leftButton)
             above(selectButton)
-            before(rightButton)
+            rightToLeftOf(rightButton)
         })
         add(selectButton, lParams {
             below(upButton)
-            after(leftButton)
+            leftToRightOf(leftButton)
             above(downButton)
-            before(rightButton)
+            rightToLeftOf(rightButton)
         })
         add(downButton, lParams {
             below(selectButton)
-            after(leftButton)
+            leftToRightOf(leftButton)
             above(homeButton)
-            before(rightButton)
+            rightToLeftOf(rightButton)
         })
         add(rightButton, lParams {
             topOfParent()
-            after(selectButton)
+            leftToRightOf(selectButton)
             above(endButton)
-            before(copyButton)
+            rightToLeftOf(copyButton)
         })
 
         add(homeButton, lParams {
             below(downButton)
-            startOfParent()
+            leftOfParent()
             bottomOfParent()
-            before(endButton)
+            rightToLeftOf(endButton)
         })
         add(endButton, lParams {
             below(downButton)
-            after(homeButton)
+            leftToRightOf(homeButton)
             bottomOfParent()
-            before(backspaceButton)
+            rightToLeftOf(backspaceButton)
         })
 
         add(selectAllButton, lParams {
             topOfParent()
-            after(rightButton)
-            endOfParent()
+            leftToRightOf(rightButton)
+            rightOfParent()
             above(cutButton)
             matchConstraintPercentWidth = 0.3f
         })
         add(cutButton, lParams {
             below(selectAllButton)
-            after(rightButton)
-            endOfParent()
+            leftToRightOf(rightButton)
+            rightOfParent()
             above(copyButton)
             matchConstraintPercentWidth = 0.3f
         })
         add(copyButton, lParams {
             below(cutButton)
-            after(rightButton)
-            endOfParent()
+            leftToRightOf(rightButton)
+            rightOfParent()
             above(pasteButton)
             matchConstraintPercentWidth = 0.3f
         })
         add(pasteButton, lParams {
             below(copyButton)
-            after(rightButton)
-            endOfParent()
+            leftToRightOf(rightButton)
+            rightOfParent()
             above(backspaceButton)
             matchConstraintPercentWidth = 0.3f
         })
         add(backspaceButton, lParams {
             below(pasteButton)
-            after(rightButton)
-            endOfParent()
+            leftToRightOf(rightButton)
+            rightOfParent()
             bottomOfParent()
             matchConstraintPercentWidth = 0.3f
         })

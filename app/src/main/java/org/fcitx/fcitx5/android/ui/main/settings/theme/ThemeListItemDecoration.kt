@@ -18,11 +18,24 @@ class ThemeListItemDecoration(val itemWidth: Int, val spanCount: Int) :
         val position = parent.getChildAdapterPosition(view)
         val rowCount = parent.adapter?.run { itemCount / spanCount } ?: -1
         val n = position % spanCount
-        outRect.set(
-            (n + 1) * offset + n * (itemWidth - columnWidth),
-            if (position < spanCount) offset else halfOffset,
-            0, // (n + 1) * (columnWidth - itemWidth - offset)
-            if (position / spanCount == rowCount - 1) offset else halfOffset
-        )
+
+        when (parent.layoutDirection) {
+            View.LAYOUT_DIRECTION_LTR -> {
+                outRect.set(
+                    (n + 1) * offset + n * (itemWidth - columnWidth),
+                    if (position < spanCount) offset else halfOffset,
+                    0, // (n + 1) * (columnWidth - itemWidth - offset)
+                    if (position / spanCount == rowCount - 1) offset else halfOffset
+                )
+            }
+            View.LAYOUT_DIRECTION_RTL -> {
+                outRect.set(
+                    0,
+                    if (position < spanCount) offset else halfOffset,
+                    (n + 1) * offset + n * (itemWidth - columnWidth),
+                    if (position / spanCount == rowCount - 1) offset else halfOffset
+                )
+            }
+        }
     }
 }

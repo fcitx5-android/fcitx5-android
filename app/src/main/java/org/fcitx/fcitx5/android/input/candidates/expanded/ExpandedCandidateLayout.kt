@@ -80,15 +80,15 @@ class ExpandedCandidateLayout(context: Context, theme: Theme) : ConstraintLayout
 
         add(recyclerView, lParams {
             topOfParent()
-            startOfParent()
-            before(embeddedKeyboard)
+            leftOfParent()
+            rightToLeftOf(embeddedKeyboard)
             bottomOfParent()
         })
         add(embeddedKeyboard, lParams {
             matchConstraintPercentWidth = 0.15f
             topOfParent()
-            after(recyclerView)
-            endOfParent()
+            leftToRightOf(recyclerView)
+            rightOfParent()
             bottomOfParent()
         })
     }

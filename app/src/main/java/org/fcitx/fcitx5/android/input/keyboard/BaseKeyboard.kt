@@ -59,14 +59,20 @@ abstract class BaseKeyboard(
             constraintLayout Row@{
                 keyViews.forEachIndexed { index, view ->
                     add(view, lParams {
-                        topOfParent()
-                        bottomOfParent()
+                        centerVertically()
                         if (index == 0) {
-                            startOfParent()
+                            leftOfParent()
                             horizontalChainStyle = LayoutParams.CHAIN_PACKED
-                        } else after(keyViews[index - 1])
-                        if (index == keyViews.size - 1) endOfParent()
-                        else before(keyViews[index + 1])
+                        } else {
+                            leftToRightOf(keyViews[index - 1])
+                        }
+                        if (index == keyViews.size - 1) {
+                            rightOfParent()
+                            // for RTL
+                            horizontalChainStyle = LayoutParams.CHAIN_PACKED
+                        } else {
+                            rightToLeftOf(keyViews[index + 1])
+                        }
                         val def = row[index]
                         matchConstraintPercentWidth = def.appearance.percentWidth
                     })
@@ -79,8 +85,7 @@ abstract class BaseKeyboard(
                 else below(keyRows[index - 1])
                 if (index == keyRows.size - 1) bottomOfParent()
                 else above(keyRows[index + 1])
-                startOfParent()
-                endOfParent()
+                centerHorizontally()
             })
         }
     }

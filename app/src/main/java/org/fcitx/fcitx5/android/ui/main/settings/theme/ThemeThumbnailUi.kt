@@ -48,21 +48,19 @@ class ThemeThumbnailUi(override val ctx: Context) : Ui {
         add(bkg, lParams(matchParent, matchParent))
         add(bar, lParams(matchParent, dp(14)))
         add(spaceBar, lParams(height = dp(10)) {
-            startOfParent()
-            endOfParent()
+            centerHorizontally()
             bottomOfParent(dp(6))
             matchConstraintPercentWidth = 0.5f
         })
         add(returnKey, lParams(dp(14), dp(14)) {
-            endOfParent(dp(4))
+            rightOfParent(dp(4))
             bottomOfParent(dp(4))
         })
         add(checkMark, lParams(dp(60), dp(60)) {
             centerInParent()
         })
         add(editButton, lParams(dp(44), dp(44)) {
-            topOfParent()
-            endOfParent()
+            centerVertically()
         })
     }
 

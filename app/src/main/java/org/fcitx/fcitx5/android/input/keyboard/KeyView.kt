@@ -6,6 +6,7 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.drawable.*
+import android.view.View
 import androidx.annotation.ColorInt
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.updateLayoutParams
@@ -210,6 +211,7 @@ open class TextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Text) 
         background = null
         text = def.displayText
         textSize = def.textSize
+        textDirection = View.TEXT_DIRECTION_FIRST_STRONG_LTR
         // keep original typeface, apply textStyle only
         setTypeface(typeface, def.textStyle)
         setTextColor(
@@ -240,6 +242,7 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
         textSize = 10.7f
         setTypeface(typeface, Typeface.BOLD)
         text = def.altText
+        textDirection = View.TEXT_DIRECTION_FIRST_STRONG_LTR
         // TODO darken altText color
         setTextColor(
             when (def.variant) {
@@ -268,8 +271,8 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
             bottomToBottom = unset; bottomMargin = 0
             // set
             topToTop = parentId; topMargin = vMargin
-            startToStart = unset
-            endToEnd = parentId; endMargin = hMargin + dp(4)
+            leftToLeft = unset
+            rightToRight = parentId; rightMargin = hMargin + dp(4)
         }
     }
 
@@ -284,10 +287,10 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
         altText.updateLayoutParams<ConstraintLayout.LayoutParams> {
             // reset
             topToTop = unset; topMargin = 0
-            endMargin = 0
+            rightMargin = 0
             // set
-            startToStart = parentId
-            endToEnd = parentId
+            leftToLeft = parentId
+            rightToRight = parentId
             bottomToBottom = parentId; bottomMargin = vMargin + dp(2)
         }
     }

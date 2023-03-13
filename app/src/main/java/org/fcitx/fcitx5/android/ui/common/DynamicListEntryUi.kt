@@ -55,27 +55,27 @@ class DynamicListEntryUi(override val ctx: Context) : Ui {
 
         add(handleImage, lParams {
             width = dp(30)
-            height = 0
+            height = matchConstraints
             centerVertically()
             startOfParent(paddingStart)
         })
 
         add(multiselectCheckBox, lParams {
             width = dp(30)
-            height = 0
+            height = matchConstraints
             centerVertically()
             after(handleImage, paddingStart)
         })
 
         add(checkBox, lParams {
             width = dp(30)
-            height = 0
+            height = matchConstraints
             centerVertically()
             after(multiselectCheckBox, paddingStart)
         })
 
         add(nameText, lParams {
-            width = 0
+            width = matchConstraints
             height = wrapContent
             centerVertically()
             after(checkBox, paddingStart)
@@ -84,15 +84,14 @@ class DynamicListEntryUi(override val ctx: Context) : Ui {
 
         add(editButton, lParams {
             width = dp(53)
-            height = 0
+            height = matchConstraints
             centerVertically()
             before(settingsButton)
-            after(nameText)
         })
 
         add(settingsButton, lParams {
             width = dp(53)
-            height = 0
+            height = matchConstraints
             centerVertically()
             endOfParent()
         })
