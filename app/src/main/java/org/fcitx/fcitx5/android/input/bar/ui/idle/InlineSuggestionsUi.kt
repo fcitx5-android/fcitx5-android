@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.view.SurfaceControl
 import android.view.SurfaceView
+import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
 import android.widget.inline.InlineContentView
 import androidx.annotation.RequiresApi
@@ -14,7 +15,6 @@ import com.google.android.flexbox.JustifyContent
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
-import splitties.views.horizontalPadding
 
 class InlineSuggestionsUi(override val ctx: Context) : Ui {
 
@@ -29,9 +29,7 @@ class InlineSuggestionsUi(override val ctx: Context) : Ui {
 
     private val scrollableContentViews = mutableListOf<InlineContentView>()
 
-    private val pinnedView = frameLayout {
-        horizontalPadding = dp(10)
-    }
+    private val pinnedView = frameLayout { }
 
     private var pinnedContentView: InlineContentView? = null
 
@@ -79,6 +77,9 @@ class InlineSuggestionsUi(override val ctx: Context) : Ui {
         pinnedView.removeAllViews()
         pinnedContentView = view?.also {
             pinnedView.addView(it)
+            it.updateLayoutParams<FrameLayout.LayoutParams> {
+                horizontalMargin = ctx.dp(10)
+            }
         }
     }
 
