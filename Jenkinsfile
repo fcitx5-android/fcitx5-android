@@ -84,7 +84,9 @@ node("android") {
                                                                    parentCredentials  : true,
                                                                    recursiveSubmodules: true,
                                                                    reference          : '',
-                                                                   trackingSubmodules : false]],
+                                                                   trackingSubmodules : false],
+                                                                  [$class             : 'CleanBeforeCheckout',
+                                                                   deleteUntrackedNestedRepositories: true]],
                               submoduleCfg                     : [],
                               userRemoteConfigs                : scm.userRemoteConfigs])
                     sh "git config --get remote.origin.url > .git/remote-url"
