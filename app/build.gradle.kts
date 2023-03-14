@@ -158,15 +158,8 @@ android {
 }
 
 kotlin {
-    jvmToolchain(11)
     sourceSets.configureEach {
         kotlin.srcDir("$buildDir/generated/ksp/$name/kotlin/")
-    }
-}
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
     }
 }
 
