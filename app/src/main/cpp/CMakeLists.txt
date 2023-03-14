@@ -17,16 +17,17 @@ set(LIBIME_INSTALL_PKGDATADIR table)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 # extra-cmake-modules
-if (DEFINED ENV{ECM_DIR})
+if(DEFINED ENV{ECM_DIR})
     set(ECM_DIR $ENV{ECM_DIR})
-else ()
+else()
     set(ECM_DIR /usr/share/ECM/cmake)
-endif ()
+endif()
 
 set(PREBUILT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/prebuilt")
 
 # prebuilt fmt
 set(fmt_DIR "${PREBUILT_DIR}/fmt/${ANDROID_ABI}/lib/cmake/fmt")
+find_package(fmt)
 
 # prebuilt libintl-lite
 set(LibIntl_DIR "${PREBUILT_DIR}/libintl-lite/${ANDROID_ABI}/lib/cmake")
@@ -34,7 +35,6 @@ find_package(LibIntl)
 
 # prebuilt libevent
 set(Libevent_DIR "${PREBUILT_DIR}/libevent/${ANDROID_ABI}/lib/cmake/libevent")
-set(LIBEVENT_STATIC_LINK ON)
 find_package(Libevent)
 
 option(ENABLE_TEST "" OFF)
@@ -62,9 +62,9 @@ set(BOOST_VERSION "1.80.0")
 set(BOOST_MODULES headers filesystem atomic iostreams regex)
 set(BOOST_ROOT "${PREBUILT_DIR}/boost/${ANDROID_ABI}")
 set(Boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
-foreach (mod IN LISTS BOOST_MODULES)
+foreach(mod IN LISTS BOOST_MODULES)
     set("boost_${mod}_DIR" "${BOOST_ROOT}/lib/cmake/boost_${mod}-${BOOST_VERSION}")
-endforeach ()
+endforeach()
 
 option(ENABLE_TEST "" OFF)
 set(_Fcitx5Macro_SELF_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fcitx5/src/lib/fcitx-utils)
@@ -79,6 +79,7 @@ include("${PREBUILT_DIR}/lua/${ANDROID_ABI}/lib/cmake/LuaConfig.cmake")
 option(USE_DLOPEN "" OFF)
 add_subdirectory(fcitx5-lua)
 
+# prebuilt opencc
 set(OpenCC_DIR "${PREBUILT_DIR}/opencc/${ANDROID_ABI}/lib/cmake/opencc")
 find_package(OpenCC)
 
