@@ -21,8 +21,8 @@ plugins {
     id("com.android.application")
     kotlin("android")
     kotlin("plugin.parcelize")
-    kotlin("plugin.serialization") version "1.8.0"
-    id("com.google.devtools.ksp") version "1.8.0-1.0.8"
+    kotlin("plugin.serialization") version "1.8.10"
+    id("com.google.devtools.ksp") version "1.8.10-1.0.9"
     id("com.mikepenz.aboutlibraries.plugin")
 }
 
@@ -228,6 +228,9 @@ project.gradle.taskGraph.whenReady {
 android.applicationVariants.all {
     val variantName = name.capitalizeUS()
     tasks.findByName("merge${variantName}Assets")?.dependsOn(generateDataDescriptor)
+    tasks.findByName("lintAnalyze${variantName}")?.dependsOn(generateDataDescriptor)
+    tasks.findByName("lintReport${variantName}")?.dependsOn(generateDataDescriptor)
+    tasks.findByName("lintVitalAnalyzeRelease")?.dependsOn(generateDataDescriptor)
     tasks.findByName("assemble${variantName}")?.dependsOn(generateBuildMetadata)
 }
 
@@ -310,7 +313,7 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.2")
     implementation("io.arrow-kt:arrow-core:1.1.5")
     implementation("androidx.activity:activity-ktx:1.6.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
     implementation("com.github.CanHub:Android-Image-Cropper:4.2.1")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("org.mechdancer:dependency:0.1.2")
@@ -323,13 +326,13 @@ dependencies {
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    val lifecycleVersion = "2.5.1"
+    val lifecycleVersion = "2.6.0"
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-service:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     implementation("androidx.preference:preference-ktx:1.2.0")
-    implementation("androidx.recyclerview:recyclerview:1.2.1")
+    implementation("androidx.recyclerview:recyclerview:1.3.0")
     implementation("androidx.viewpager2:viewpager2:1.0.0")
     implementation("androidx.paging:paging-runtime-ktx:3.1.1")
     val navVersion = "2.5.3"
@@ -347,7 +350,7 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.5.2")
     androidTestImplementation("androidx.test:rules:1.5.0")
-    androidTestImplementation("androidx.lifecycle:lifecycle-runtime-testing:2.5.1")
+    androidTestImplementation("androidx.lifecycle:lifecycle-runtime-testing:2.6.0")
     androidTestImplementation("junit:junit:4.13.2")
 }
 
