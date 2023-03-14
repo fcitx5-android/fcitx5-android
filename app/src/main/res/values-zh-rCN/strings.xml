@@ -196,4 +196,18 @@
     <string name="exception_table_import_both_files">请先选择以上两个文件再导入</string>
     <string name="notification_permission_message">没有发送通知的权限，我们无法在一些耗时操作完成时通知您。</string>
     <string name="notification_permission_title">没有通知权限</string>
+    <string name="toolbar_num_row_on_password">输入密码时在工具栏上显示数字行</string>
+    <string name="space_long_press_behavior">空格键长按行为</string>
+    <string name="space_behavior_none">无</string>
+    <string name="space_behavior_enumerate">轮换输入法</string>
+    <string name="space_behavior_activate">在当前输入法和第一个输入法之间切换</string>
+    <string name="space_behavior_picker">显示输入法选择对话框</string>
+    <string name="show_lang_switch_key">显示语言切换键</string>
+    <string name="horizontal_candidate_style">横向候选词样式</string>
+    <string name="horizontal_candidate_never_fill">从不填充宽度</string>
+    <string name="horizontal_candidate_auto_fill">按需填充宽度</string>
+    <string name="horizontal_candidate_always_fill">总是填充宽度</string>
+    <string name="inline_suggestions">显示内嵌自动填充建议</string>
+    <string name="delete_all_except_pinned">要删除所有未置顶条目吗？</string>
+    <string name="num_items_deleted">已删除 %1$d 项</string>
 </resources>
