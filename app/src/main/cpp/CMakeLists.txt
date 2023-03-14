@@ -68,9 +68,9 @@ endforeach()
 
 option(ENABLE_TEST "" OFF)
 set(_Fcitx5Macro_SELF_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fcitx5/src/lib/fcitx-utils)
-# kenlm/util/exception.hh uses __FILE__ macro
-add_compile_options(-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.)
 add_subdirectory(libime)
+# kenlm/util/exception.hh uses __FILE__ macro
+target_compile_options(kenlm PRIVATE "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.")
 
 # prebuilt lua
 include("${PREBUILT_DIR}/lua/${ANDROID_ABI}/lib/cmake/LuaConfig.cmake")
