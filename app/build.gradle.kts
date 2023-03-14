@@ -146,14 +146,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    kotlin {
-        jvmToolchain(11)
-    }
-
-    java {
-        toolchain {
-            languageVersion.set(JavaLanguageVersion.of(11))
-        }
+    kotlinOptions {
+        jvmTarget = "11"
     }
 
     packagingOptions {
@@ -164,8 +158,15 @@ android {
 }
 
 kotlin {
+    jvmToolchain(11)
     sourceSets.configureEach {
         kotlin.srcDir("$buildDir/generated/ksp/$name/kotlin/")
+    }
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
     }
 }
 

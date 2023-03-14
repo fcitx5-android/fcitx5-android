@@ -26,6 +26,7 @@ def setBuildStatus(String message, String state, String ctx, String commitSha) {
 }
 
 def sendMessageToTelegramGroup(String message) {
+    return
     withCredentials([string(credentialsId: 'fcitx5-android-telegram-group', variable: 'chatId'),
                      string(credentialsId: 'fcitx5-android-telegram-bot', variable: 'token')]) {
         def body = """{
