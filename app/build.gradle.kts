@@ -150,6 +150,12 @@ android {
         jvmToolchain(11)
     }
 
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(11))
+        }
+    }
+
     packagingOptions {
         jniLibs {
             useLegacyPackaging = true
