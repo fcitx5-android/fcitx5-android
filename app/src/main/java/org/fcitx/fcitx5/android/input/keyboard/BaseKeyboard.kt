@@ -53,9 +53,7 @@ abstract class BaseKeyboard(
 
     init {
         keyRows = keyLayout.map { row ->
-            val keyViews = row.map { def ->
-                createKeyView(def)
-            }
+            val keyViews = row.map(::createKeyView)
             constraintLayout Row@{
                 keyViews.forEachIndexed { index, view ->
                     add(view, lParams {

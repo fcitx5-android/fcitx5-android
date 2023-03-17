@@ -38,7 +38,7 @@ import splitties.views.dsl.core.wrapContent
 import splitties.views.gravityVerticalCenter
 import splitties.views.imageDrawable
 import splitties.views.textAppearance
-import java.util.*
+import java.util.UUID
 
 class ThemeListFragment : Fragment() {
 

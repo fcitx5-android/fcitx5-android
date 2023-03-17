@@ -71,15 +71,28 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
 
     private val fakeInputView = constraintLayout {
         add(bkg, lParams {
-            centerVertically()
-            centerHorizontally()
+            centerInParent()
         })
         add(fakeKawaiiBar, lParams(height = dp(40)) {
             centerHorizontally()
         })
     }
 
-    override val root: FrameLayout
+    override val root = object : FrameLayout(ctx) {
+        init {
+            add(fakeInputView, lParams())
+        }
+
+        override fun onAttachedToWindow() {
+            super.onAttachedToWindow()
+            recalculateSize()
+            onSizeMeasured?.invoke(intrinsicWidth, intrinsicHeight)
+        }
+
+        override fun onConfigurationChanged(newConfig: Configuration?) {
+            recalculateSize()
+        }
+    }
 
     var onSizeMeasured: ((Int, Int) -> Unit)? = null
 
@@ -110,19 +123,6 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
         keyboardWidth = w
         keyboardHeight = h
         setTheme(theme)
-        root = object : FrameLayout(ctx) {
-            override fun onAttachedToWindow() {
-                super.onAttachedToWindow()
-                recalculateSize()
-                onSizeMeasured?.invoke(intrinsicWidth, intrinsicHeight)
-            }
-
-            override fun onConfigurationChanged(newConfig: Configuration?) {
-                recalculateSize()
-            }
-        }.apply {
-            add(fakeInputView, lParams())
-        }
     }
 
     fun recalculateSize() {
@@ -167,7 +167,9 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
             fakeInputView.removeView(fakeKeyboardWindow)
         }
         fakeKawaiiBar.backgroundColor = if (keyBorder) Color.TRANSPARENT else theme.barColor
-        fakeKeyboardWindow = TextKeyboard(ctx, theme)
+        fakeKeyboardWindow = TextKeyboard(ctx, theme).also {
+            it.onAttach()
+        }
         fakeInputView.apply {
             add(fakeKeyboardWindow, lParams(matchConstraints, keyboardHeight) {
                 below(fakeKawaiiBar)
