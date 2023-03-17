@@ -136,15 +136,11 @@ object DataManager {
     }
 
     private fun copyFile(filename: String) {
-        with(appContext.assets) {
-            open(filename).use { i ->
-                File(dataDir, filename)
-                    .also { it.parentFile?.mkdirs() }
-                    .outputStream().use { o ->
-                        i.copyTo(o)
-                        Unit
-                    }
-            }
+        appContext.assets.open(filename).use { i ->
+            File(dataDir, filename)
+                .also { it.parentFile?.mkdirs() }
+                .outputStream()
+                .use { o -> i.copyTo(o) }
         }
     }
 

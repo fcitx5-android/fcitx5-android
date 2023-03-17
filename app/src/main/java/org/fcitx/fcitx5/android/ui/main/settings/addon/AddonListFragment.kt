@@ -25,14 +25,11 @@ class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
     private val addonDisplayNames = mutableMapOf<String, String>()
 
     private fun updateAddonState() {
-        if (!isInitialized)
-            return
-        with(entries) {
-            val ids = map { it.uniqueName }.toTypedArray()
-            val state = map { it.enabled }.toBooleanArray()
-            lifecycleScope.launchOnFcitxReady(fcitx) {
-                it.setAddonState(ids, state)
-            }
+        if (!isInitialized) return
+        val ids = entries.map { it.uniqueName }.toTypedArray()
+        val state = entries.map { it.enabled }.toBooleanArray()
+        lifecycleScope.launchOnFcitxReady(fcitx) {
+            it.setAddonState(ids, state)
         }
     }
 

@@ -343,16 +343,15 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
 
     private val dispatcher = FcitxDispatcher(object : FcitxDispatcher.FcitxController {
         override fun nativeStartup() {
+            DataManager.sync()
+            val locale = Locales.fcitxLocale
+            Timber.i("Current locale is $locale")
             with(context) {
-                DataManager.sync()
-                val locale = Locales.fcitxLocale
-                Timber.i("Current locale is $locale")
-                val externalFilesDir = getExternalFilesDir(null)!!
                 startupFcitx(
                     locale,
                     applicationInfo.dataDir,
                     applicationInfo.nativeLibraryDir,
-                    externalFilesDir.absolutePath,
+                    (getExternalFilesDir(null) ?: filesDir).absolutePath,
                     (externalCacheDir ?: cacheDir).absolutePath
                 )
             }
