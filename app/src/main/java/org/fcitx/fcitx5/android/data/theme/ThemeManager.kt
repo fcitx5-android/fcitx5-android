@@ -15,7 +15,7 @@ import java.io.File
 import java.io.FileFilter
 import java.io.InputStream
 import java.io.OutputStream
-import java.util.*
+import java.util.UUID
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
@@ -217,6 +217,15 @@ object ThemeManager {
 
         val keyRadius = int(R.string.key_radius, "key_radius", 4, 0, 48, "dp")
 
+        enum class PunctuationPosition {
+            Bottom,
+            TopRight;
+
+            companion object : ManagedPreference.StringLikeCodec<PunctuationPosition> {
+                override fun decode(raw: String): PunctuationPosition = valueOf(raw)
+            }
+        }
+
         val punctuationPosition = list(
             R.string.punctuation_position,
             "punctuation_position",
@@ -232,12 +241,13 @@ object ThemeManager {
             )
         )
 
-        enum class PunctuationPosition {
-            Bottom,
-            TopRight;
+        enum class NavbarBackground {
+            None,
+            ColorOnly,
+            Full;
 
-            companion object : ManagedPreference.StringLikeCodec<PunctuationPosition> {
-                override fun decode(raw: String): PunctuationPosition = valueOf(raw)
+            companion object : ManagedPreference.StringLikeCodec<NavbarBackground> {
+                override fun decode(raw: String): NavbarBackground = valueOf(raw)
             }
         }
 
@@ -281,15 +291,11 @@ object ThemeManager {
                 followSystemDayNightTheme.getValue()
             })
 
-        enum class NavbarBackground {
-            None,
-            ColorOnly,
-            Full;
-
-            companion object : ManagedPreference.StringLikeCodec<NavbarBackground> {
-                override fun decode(raw: String): NavbarBackground = valueOf(raw)
-            }
-        }
+        val dayNightModePrefNames = setOf(
+            followSystemDayNightTheme.key,
+            lightModeTheme.key,
+            darkModeTheme.key
+        )
 
     }
 
@@ -321,22 +327,21 @@ object ThemeManager {
     private val onActiveThemeNameChange = ManagedPreference.OnChangeListener<String> { _, it ->
         currentTheme = getTheme(internalPrefs.activeThemeName.getValue())
             ?: errorState(R.string.exception_theme_unknown, it)
-        this@ThemeManager.fireChange()
+        fireChange()
     }
 
-    private val prefsChange = ManagedPreference.OnChangeListener<Any> { _, _ ->
-        this@ThemeManager.fireChange()
-    }
-
-    private val dayLightThemePrefsChange = ManagedPreference.OnChangeListener<Any> { _, _ ->
-        onSystemDarkModeChanged()
+    private val onThemePrefsChange = ManagedPreference.OnChangeListener<Any> { key, _ ->
+        fireChange()
+        if (prefs.dayNightModePrefNames.contains(key)) {
+            onSystemDarkModeChange()
+        }
     }
 
     fun init(configuration: Configuration) {
         isCurrentDark = configuration.isDarkMode()
         // fire all `OnThemeChangedListener`s on theme preferences change
         prefs.managedPreferences.values.forEach {
-            it.registerOnChangeListener(prefsChange)
+            it.registerOnChangeListener(onThemePrefsChange)
         }
         currentTheme = if (prefs.followSystemDayNightTheme.getValue()) {
             (if (isCurrentDark) prefs.darkModeTheme else prefs.lightModeTheme).getValue()
@@ -349,14 +354,11 @@ object ThemeManager {
             }
         }
         internalPrefs.activeThemeName.registerOnChangeListener(onActiveThemeNameChange)
-        prefs.followSystemDayNightTheme.registerOnChangeListener(dayLightThemePrefsChange)
-        prefs.lightModeTheme.registerOnChangeListener(dayLightThemePrefsChange)
-        prefs.darkModeTheme.registerOnChangeListener(dayLightThemePrefsChange)
     }
 
     private lateinit var currentTheme: Theme
 
-    fun fireChange() {
+    private fun fireChange() {
         onChangeListeners.forEach { it.onThemeChanged(currentTheme) }
     }
 
@@ -366,7 +368,7 @@ object ThemeManager {
 
     private var isCurrentDark = false
 
-    fun onSystemDarkModeChanged(isDark: Boolean = isCurrentDark) {
+    fun onSystemDarkModeChange(isDark: Boolean = isCurrentDark) {
         isCurrentDark = isDark
         if (prefs.followSystemDayNightTheme.getValue()) {
             switchTheme((if (isDark) prefs.darkModeTheme else prefs.lightModeTheme).getValue())
