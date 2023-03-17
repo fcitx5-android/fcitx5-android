@@ -22,8 +22,6 @@ abstract class ManagedPreference<T : Any>(
         fun onChange(key: String, value: T)
     }
 
-    private val listeners by lazy { WeakHashSet<OnChangeListener<T>>() }
-
     abstract fun setValue(value: T)
 
     abstract fun getValue(): T
@@ -32,8 +30,15 @@ abstract class ManagedPreference<T : Any>(
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) = setValue(value)
 
+    private val listeners by lazy {
+        WeakHashSet<OnChangeListener<T>>()
+    }
+
     /**
      * **WARN:** No anonymous listeners, please **KEEP** the reference!
+     *
+     * You may need to reference the listener once outside of it's container's constructor,
+     * to force kotlin compiler generate a field for the listener
      */
     fun registerOnChangeListener(listener: OnChangeListener<T>) {
         listeners.add(listener)
@@ -44,7 +49,9 @@ abstract class ManagedPreference<T : Any>(
     }
 
     fun fireChange() {
-        listeners.forEach { it.onChange(key, getValue()) }
+        if (listeners.isEmpty()) return
+        val newValue = getValue()
+        listeners.forEach { it.onChange(key, newValue) }
     }
 
     class PBool(sharedPreferences: SharedPreferences, key: String, defaultValue: Boolean) :
@@ -71,9 +78,8 @@ abstract class ManagedPreference<T : Any>(
         sharedPreferences: SharedPreferences,
         key: String,
         defaultValue: T,
-        val codec: StringLikeCodec<T>
-    ) :
-        ManagedPreference<T>(sharedPreferences, key, defaultValue) {
+        private val codec: StringLikeCodec<T>
+    ) : ManagedPreference<T>(sharedPreferences, key, defaultValue) {
 
         override fun setValue(value: T) {
             sharedPreferences.edit { putString(key, codec.encode(value)) }

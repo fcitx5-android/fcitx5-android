@@ -13,6 +13,7 @@ import org.fcitx.fcitx5.android.input.popup.PopupAction
 import splitties.resources.drawable
 import splitties.views.imageDrawable
 import splitties.views.imageResource
+import timber.log.Timber
 
 @SuppressLint("ViewConstructor")
 class TextKeyboard(
@@ -83,15 +84,11 @@ class TextKeyboard(
         updateLangSwitchKey(v)
     }
 
-    private val keepLettersUppercase = AppPrefs.getInstance().keyboard.keepLettersUppercase
-    private val keepLettersUppercaseListener = ManagedPreference.OnChangeListener<Boolean> { _, _ ->
-        updateAlphabetKeys()
-    }
+    private val keepLettersUppercase by AppPrefs.getInstance().keyboard.keepLettersUppercase
 
     init {
         updateLangSwitchKey(showLangSwitchKey.getValue())
         showLangSwitchKey.registerOnChangeListener(showLangSwitchKeyListener)
-        keepLettersUppercase.registerOnChangeListener(keepLettersUppercaseListener)
     }
 
     private val textKeys: List<TextKeyView> by lazy {
@@ -198,6 +195,8 @@ class TextKeyboard(
 
     private fun updateLangSwitchKey(visible: Boolean) {
         lang.visibility = if (visible) View.VISIBLE else View.GONE
+        // reference the listener here to force kotlin compiler generate a property for it
+        Timber.d(showLangSwitchKeyListener.toString())
     }
 
     private fun updateAlphabetKeys() {
@@ -205,7 +204,7 @@ class TextKeyboard(
             if (it.def !is KeyDef.Appearance.AltText) return
             it.mainText.text = it.def.displayText.let { str ->
                 if (str.length != 1 || !str[0].isLetter()) return@forEach
-                if (keepLettersUppercase.getValue()) str.uppercase() else transformAlphabet(str)
+                if (keepLettersUppercase) str.uppercase() else transformAlphabet(str)
             }
         }
     }

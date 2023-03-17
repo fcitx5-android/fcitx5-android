@@ -294,9 +294,7 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
     private val onSharedPreferenceChangeListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             providers.forEach {
-                it.managedPreferences[key]?.apply {
-                    fireChange()
-                }
+                it.managedPreferences[key]?.fireChange()
             }
         }
 

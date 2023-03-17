@@ -254,3 +254,6 @@ inline fun <T> withTempDir(block: (File) -> T): T {
         dir.delete()
     }
 }
+
+@Suppress("FunctionName")
+fun <T> WeakHashSet(): MutableSet<T> = Collections.newSetFromMap(WeakHashMap<T, Boolean>())
