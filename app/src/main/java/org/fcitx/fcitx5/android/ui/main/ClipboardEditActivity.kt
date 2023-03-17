@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.ui.main
 
 import android.app.Activity
+import android.content.ClipData
 import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
@@ -11,6 +12,7 @@ import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardEntry
 import org.fcitx.fcitx5.android.databinding.ActivityClipboardEditBinding
 import org.fcitx.fcitx5.android.utils.str
+import splitties.systemservices.clipboardManager
 import splitties.systemservices.inputMethodManager
 
 class ClipboardEditActivity : Activity() {
@@ -28,17 +30,20 @@ class ClipboardEditActivity : Activity() {
             editText = clipboardEditText
             clipboardEditCancel.setOnClickListener { finish() }
             clipboardEditOk.setOnClickListener { finishEditing() }
-            clipboardEditCopy.setOnClickListener { finishEditing() }
+            clipboardEditCopy.setOnClickListener { finishEditing(copy = true) }
         }
         setContentView(binding.root)
         inputMethodManager.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
         processIntent(intent)
     }
 
-    private fun finishEditing() {
+    private fun finishEditing(copy: Boolean = false) {
         val str = editText.str
         scope.launch(NonCancellable) {
             ClipboardManager.updateText(entryId, str)
+            if (copy) {
+                clipboardManager.setPrimaryClip(ClipData.newPlainText("", str))
+            }
         }
         finish()
     }
