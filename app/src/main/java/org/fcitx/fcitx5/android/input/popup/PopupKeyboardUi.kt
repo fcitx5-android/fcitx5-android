@@ -42,6 +42,22 @@ class PopupKeyboardUi(
     private val labels: Array<String>
 ) : PopupContainerUi(ctx, theme, bounds, onDismissSelf) {
 
+    class PopupKeyUi(override val ctx: Context, val theme: Theme, val text: String) : Ui {
+
+        val textView = textView {
+            text = this@PopupKeyUi.text
+            textSize = 23f
+            isSingleLine = true
+            setTextColor(theme.keyTextColor)
+        }
+
+        override val root = frameLayout {
+            add(textView, lParams {
+                gravity = gravityCenter
+            })
+        }
+    }
+
     private val inactiveBackground = GradientDrawable().apply {
         cornerRadius = radius
         setColor(theme.popupBackgroundColor)
@@ -121,14 +137,8 @@ class PopupKeyboardUi(
 
     private var focusedIndex = keyOrders[focusRow][focusColumn]
 
-    private val keyViews = labels.map {
-        textView {
-            text = it
-            textSize = 23f
-            isSingleLine = true
-            gravity = gravityCenter
-            setTextColor(theme.keyTextColor)
-        }
+    private val keyUis = labels.map {
+        PopupKeyUi(ctx, theme, it)
     }
 
     init {
@@ -144,14 +154,14 @@ class PopupKeyboardUi(
             val order = keyOrders[i]
             add(horizontalLayout row@{
                 for (j in 0 until columnCount) {
-                    val view = keyViews.getOrNull(order[j])
-                    if (view == null) {
+                    val keyUi = keyUis.getOrNull(order[j])
+                    if (keyUi == null) {
                         // align columns to right (end) when first column is empty, eg.
                         // |   | 6 | 5 | 4 |(no free space)
                         // | 3 | 2 | 1 | 0 |(no free space)
                         gravity = if (j == 0) gravityEnd else gravityStart
                     } else {
-                        add(view, lParams(keyWidth, keyHeight))
+                        add(keyUi.root, lParams(keyWidth, keyHeight))
                     }
                 }
             }, lParams(width = matchParent))
@@ -159,16 +169,16 @@ class PopupKeyboardUi(
     }
 
     private fun markFocus(index: Int) {
-        keyViews.getOrNull(index)?.apply {
-            background = focusBackground
-            setTextColor(theme.genericActiveForegroundColor)
+        keyUis.getOrNull(index)?.apply {
+            root.background = focusBackground
+            textView.setTextColor(theme.genericActiveForegroundColor)
         }
     }
 
     private fun markInactive(index: Int) {
-        keyViews.getOrNull(index)?.apply {
-            background = null
-            setTextColor(theme.popupTextColor)
+        keyUis.getOrNull(index)?.apply {
+            root.background = null
+            textView.setTextColor(theme.popupTextColor)
         }
     }
 
@@ -185,7 +195,7 @@ class PopupKeyboardUi(
         newRow = limitIndex(newRow, rowCount)
         newColumn = limitIndex(newColumn, columnCount)
         val newFocus = keyOrders[newRow][newColumn]
-        if (newFocus < keyViews.size) {
+        if (newFocus < keyUis.size) {
             markInactive(focusedIndex)
             markFocus(newFocus)
             focusedIndex = newFocus
