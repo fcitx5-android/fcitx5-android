@@ -26,7 +26,7 @@ class NewThemeEntryUi(override val ctx: Context) : Ui {
     }
 
     override val root = constraintLayout {
-        foreground = styledDrawable(androidx.appcompat.R.attr.selectableItemBackground)
+        foreground = styledDrawable(android.R.attr.selectableItemBackground)
         background = ctx.drawable(R.drawable.bkg_theme_choose_image)
         outlineProvider = ViewOutlineProvider.BOUNDS
         elevation = dp(2f)

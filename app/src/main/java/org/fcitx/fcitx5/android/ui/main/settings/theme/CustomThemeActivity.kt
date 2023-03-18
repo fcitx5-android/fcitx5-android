@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.ui.main.settings.theme
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -79,10 +80,10 @@ class CustomThemeActivity : AppCompatActivity() {
             setText(string)
         }
         gravity = gravityVerticalCenter
-        textAppearance = resolveThemeAttribute(androidx.appcompat.R.attr.textAppearanceListItem)
+        textAppearance = resolveThemeAttribute(android.R.attr.textAppearanceListItem)
         horizontalPadding = dp(16)
         if (ripple) {
-            background = styledDrawable(androidx.appcompat.R.attr.selectableItemBackground)
+            background = styledDrawable(android.R.attr.selectableItemBackground)
         }
     }
 
@@ -358,7 +359,7 @@ class CustomThemeActivity : AppCompatActivity() {
         } else {
             deleteButton.apply {
                 visibility = View.VISIBLE
-                setOnClickListener { delete() }
+                setOnClickListener { promptDelete() }
             }
             whenHasBackground {
                 updateState()
@@ -461,6 +462,17 @@ class CustomThemeActivity : AppCompatActivity() {
             }
         )
         finish()
+    }
+
+    private fun promptDelete() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.delete_theme)
+            .setMessage(getString(R.string.delete_theme_msg, theme.name))
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                delete()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {

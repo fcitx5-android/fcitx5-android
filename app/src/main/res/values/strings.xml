@@ -210,4 +210,6 @@
     <string name="inline_suggestions">Show inline autofill suggestions</string>
     <string name="delete_all_except_pinned">Delete all items except pinned ones?</string>
     <string name="num_items_deleted">%1$d item(s) deleted</string>
+    <string name="delete_theme">Delete Theme</string>
+    <string name="delete_theme_msg">Do you really want to delete theme \"%1$s\"?</string>
 </resources>
