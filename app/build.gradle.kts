@@ -57,7 +57,10 @@ fun propertyOrDefault(prop: String, default: () -> String): String {
 
 val buildABI = envOrDefault("BUILD_ABI") {
     propertyOrDefault("buildABI") {
+//        "armeabi-v7a"
         "arm64-v8a"
+//        "x86"
+//        "x86_64"
     }
 }
 
