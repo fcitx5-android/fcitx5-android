@@ -60,7 +60,8 @@ class ThemeThumbnailUi(override val ctx: Context) : Ui {
             centerInParent()
         })
         add(editButton, lParams(dp(44), dp(44)) {
-            centerVertically()
+            topOfParent()
+            endOfParent()
         })
     }
 
