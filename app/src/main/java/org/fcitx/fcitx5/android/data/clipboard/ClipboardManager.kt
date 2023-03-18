@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.data.clipboard
 
 import android.content.ClipboardManager
 import android.content.Context
+import androidx.annotation.Keep
 import androidx.room.Room
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
@@ -43,6 +44,8 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     }
 
     private val enabledPref = AppPrefs.getInstance().clipboard.clipboardListening
+
+    @Keep
     private val enabledListener = ManagedPreference.OnChangeListener<Boolean> { _, value ->
         if (value) {
             clipboardManager.addPrimaryClipChangedListener(this)
@@ -52,6 +55,8 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     }
 
     private val limitPref = AppPrefs.getInstance().clipboard.clipboardHistoryLimit
+
+    @Keep
     private val limitListener = ManagedPreference.OnChangeListener<Int> { _, _ ->
         launch { removeOutdated() }
     }

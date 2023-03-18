@@ -8,6 +8,7 @@ import android.view.ViewOutlineProvider
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.Keep
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -58,7 +59,8 @@ class ThemeListFragment : Fragment() {
 
     private var beingExported: Theme.Custom? = null
 
-    private val onThemeChangedListener = ThemeManager.OnThemeChangedListener {
+    @Keep
+    private val onThemeChangeListener = ThemeManager.OnThemeChangeListener {
         lifecycleScope.launch {
             previewUi.setTheme(it)
             adapter.setCheckedTheme(it)
@@ -207,7 +209,7 @@ class ThemeListFragment : Fragment() {
             applyNavBarInsetsBottomPadding()
         }
 
-        ThemeManager.addOnChangedListener(onThemeChangedListener)
+        ThemeManager.addOnChangedListener(onThemeChangeListener)
 
         constraintLayout {
             add(previewWrapper, lParams(height = wrapContent) {
@@ -284,7 +286,7 @@ class ThemeListFragment : Fragment() {
     }
 
     override fun onDestroy() {
-        ThemeManager.removeOnChangedListener(onThemeChangedListener)
+        ThemeManager.removeOnChangedListener(onThemeChangeListener)
         super.onDestroy()
     }
 }

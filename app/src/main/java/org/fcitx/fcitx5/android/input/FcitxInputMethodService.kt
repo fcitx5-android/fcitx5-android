@@ -18,6 +18,7 @@ import android.view.inputmethod.InlineSuggestionsRequest
 import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.FrameLayout
 import android.widget.inline.InlinePresentationSpec
+import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.autofill.inline.UiVersions
 import androidx.autofill.inline.common.ImageViewStyle
@@ -80,11 +81,13 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private val ignoreSystemCursor by AppPrefs.getInstance().advanced.ignoreSystemCursor
     private val inlineSuggestions by AppPrefs.getInstance().keyboard.inlineSuggestions
 
+    @Keep
     private val recreateInputViewListener = ManagedPreference.OnChangeListener<Any> { _, _ ->
         recreateInputView(ThemeManager.getActiveTheme())
     }
 
-    private val onThemeChangedListener = ThemeManager.OnThemeChangedListener {
+    @Keep
+    private val onThemeChangeListener = ThemeManager.OnThemeChangeListener {
         recreateInputView(it)
     }
 
@@ -107,7 +110,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             keyboard.systemTouchSounds.registerOnChangeListener(recreateInputViewListener)
             advanced.disableAnimation.registerOnChangeListener(recreateInputViewListener)
         }
-        ThemeManager.addOnChangedListener(onThemeChangedListener)
+        ThemeManager.addOnChangedListener(onThemeChangeListener)
         super.onCreate()
     }
 
@@ -666,7 +669,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             keyboard.systemTouchSounds.unregisterOnChangeListener(recreateInputViewListener)
             advanced.disableAnimation.unregisterOnChangeListener(recreateInputViewListener)
         }
-        ThemeManager.removeOnChangedListener(onThemeChangedListener)
+        ThemeManager.removeOnChangedListener(onThemeChangeListener)
         inputView?.onDestroy()
         eventHandlerJob?.cancel()
         eventHandlerJob = null

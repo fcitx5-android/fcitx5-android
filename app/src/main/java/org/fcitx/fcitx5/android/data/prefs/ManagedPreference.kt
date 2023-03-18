@@ -38,7 +38,8 @@ abstract class ManagedPreference<T : Any>(
      * **WARN:** No anonymous listeners, please **KEEP** the reference!
      *
      * You may need to reference the listener once outside of it's container's constructor,
-     * to force kotlin compiler generate a field for the listener
+     * to prevent R8 from removing the field;
+     * or simply mark the listener with [@Keep][androidx.annotation.Keep] .
      */
     fun registerOnChangeListener(listener: OnChangeListener<T>) {
         listeners.add(listener)

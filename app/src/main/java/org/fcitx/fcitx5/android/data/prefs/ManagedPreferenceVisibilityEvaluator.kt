@@ -1,5 +1,7 @@
 package org.fcitx.fcitx5.android.data.prefs
 
+import androidx.annotation.Keep
+
 class ManagedPreferenceVisibilityEvaluator(
     private val provider: ManagedPreferenceProvider,
     private val onVisibilityChanged: (Map<String, Boolean>) -> Unit
@@ -8,6 +10,7 @@ class ManagedPreferenceVisibilityEvaluator(
     private val visibility = mutableMapOf<String, Boolean>()
 
     // it would be better to declare the dependency relationship, rather than reevaluating on each value changed
+    @Keep
     private val onValueChangeListener = ManagedPreference.OnChangeListener<Any> { _, _ ->
         evaluateVisibility()
     }

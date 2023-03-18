@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.data.theme
 
 import android.content.SharedPreferences
 import android.content.res.Configuration
+import androidx.annotation.Keep
 import androidx.annotation.StringRes
 import kotlinx.serialization.json.Json
 import org.fcitx.fcitx5.android.R
@@ -22,19 +23,19 @@ import java.util.zip.ZipOutputStream
 
 object ThemeManager {
 
-    fun interface OnThemeChangedListener {
-        fun onThemeChanged(theme: Theme)
+    fun interface OnThemeChangeListener {
+        fun onThemeChange(theme: Theme)
     }
 
     private val dir = File(appContext.getExternalFilesDir(null), "theme").also { it.mkdirs() }
 
-    private val onChangeListeners = WeakHashSet<OnThemeChangedListener>()
+    private val onChangeListeners = WeakHashSet<OnThemeChangeListener>()
 
-    fun addOnChangedListener(listener: OnThemeChangedListener) {
+    fun addOnChangedListener(listener: OnThemeChangeListener) {
         onChangeListeners.add(listener)
     }
 
-    fun removeOnChangedListener(listener: OnThemeChangedListener) {
+    fun removeOnChangedListener(listener: OnThemeChangeListener) {
         onChangeListeners.remove(listener)
     }
 
@@ -324,12 +325,14 @@ object ThemeManager {
         ThemePreset.AMOLEDBlack,
     )
 
+    @Keep
     private val onActiveThemeNameChange = ManagedPreference.OnChangeListener<String> { _, it ->
         currentTheme = getTheme(internalPrefs.activeThemeName.getValue())
             ?: errorState(R.string.exception_theme_unknown, it)
         fireChange()
     }
 
+    @Keep
     private val onThemePrefsChange = ManagedPreference.OnChangeListener<Any> { key, _ ->
         fireChange()
         if (prefs.dayNightModePrefNames.contains(key)) {
@@ -359,7 +362,7 @@ object ThemeManager {
     private lateinit var currentTheme: Theme
 
     private fun fireChange() {
-        onChangeListeners.forEach { it.onThemeChanged(currentTheme) }
+        onChangeListeners.forEach { it.onThemeChange(currentTheme) }
     }
 
     fun getAllThemes() = customThemes + builtinThemes

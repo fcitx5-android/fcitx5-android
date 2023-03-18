@@ -11,6 +11,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.ImageView
 import android.widget.Space
+import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.*
@@ -154,6 +155,7 @@ class InputView(
             return dp(value)
         }
 
+    @Keep
     private val onKeyboardSizeChangeListener = ManagedPreference.OnChangeListener<Int> { _, _ ->
         updateKeyboardSize()
     }

@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.core
 
 import android.content.Context
+import androidx.annotation.Keep
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -376,6 +377,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
             block()
         }
 
+    @Keep
     private val onClipboardUpdate = ClipboardManager.OnClipboardUpdateListener {
         lifecycle.lifecycleScope.launch { setClipboard(it.text) }
     }

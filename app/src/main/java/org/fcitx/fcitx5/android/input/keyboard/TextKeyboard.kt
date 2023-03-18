@@ -3,6 +3,7 @@ package org.fcitx.fcitx5.android.input.keyboard
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.View
+import androidx.annotation.Keep
 import androidx.core.view.allViews
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
@@ -13,7 +14,6 @@ import org.fcitx.fcitx5.android.input.popup.PopupAction
 import splitties.resources.drawable
 import splitties.views.imageDrawable
 import splitties.views.imageResource
-import timber.log.Timber
 
 @SuppressLint("ViewConstructor")
 class TextKeyboard(
@@ -80,6 +80,8 @@ class TextKeyboard(
     val `return`: ImageKeyView by lazy { findViewById(R.id.button_return) }
 
     private val showLangSwitchKey = AppPrefs.getInstance().keyboard.showLangSwitchKey
+
+    @Keep
     private val showLangSwitchKeyListener = ManagedPreference.OnChangeListener<Boolean> { _, v ->
         updateLangSwitchKey(v)
     }
@@ -195,8 +197,6 @@ class TextKeyboard(
 
     private fun updateLangSwitchKey(visible: Boolean) {
         lang.visibility = if (visible) View.VISIBLE else View.GONE
-        // reference the listener here to force kotlin compiler generate a property for it
-        Timber.d(showLangSwitchKeyListener.toString())
     }
 
     private fun updateAlphabetKeys() {

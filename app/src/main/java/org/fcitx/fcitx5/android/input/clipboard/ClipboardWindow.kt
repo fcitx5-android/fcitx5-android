@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.PopupMenu
+import androidx.annotation.Keep
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import androidx.core.text.color
@@ -59,6 +60,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         )
     }
 
+    @Keep
     private val clipboardEnabledListener = ManagedPreference.OnChangeListener<Boolean> { _, it ->
         stateMachine.push(
             ClipboardListeningUpdated, ClipboardListeningEnabled to it

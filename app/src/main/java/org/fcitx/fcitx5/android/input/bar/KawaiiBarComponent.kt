@@ -12,6 +12,7 @@ import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.FrameLayout
 import android.widget.ViewAnimator
 import android.widget.inline.InlineContentView
+import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
@@ -85,6 +86,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     private var isKeyboardLayoutNumber: Boolean = false
     private var isToolbarManuallyExpanded: Boolean = false
 
+    @Keep
     private val onClipboardUpdateListener =
         ClipboardManager.OnClipboardUpdateListener {
             if (!clipboardSuggestion.getValue()) return@OnClipboardUpdateListener
@@ -101,6 +103,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             }
         }
 
+    @Keep
     private val onClipboardSuggestionUpdateListener =
         ManagedPreference.OnChangeListener<Boolean> { _, it ->
             if (!it) {
@@ -111,6 +114,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             }
         }
 
+    @Keep
     private val onClipboardTimeoutUpdateListener =
         ManagedPreference.OnChangeListener<Int> { _, _ ->
             when (idleUi.currentState) {
