@@ -107,7 +107,7 @@
     <string name="key_horizontal_margin">按鍵橫向邊距</string>
     <string name="key_vertical_margin">按鍵垂直邊距</string>
     <string name="configure_theme">配置主題</string>
-    <string name="choose_image">選擇圖片</string>
+    <string name="choose_image">選擇圖片…</string>
     <string name="dark_keys">深色按鍵</string>
     <string name="recrop_image">重新裁剪圖片</string>
     <string name="navbar_background">導航欄背景</string>
@@ -120,7 +120,7 @@
     <string name="expand_toolbar_by_default">預設展開工具欄</string>
     <string name="popup_on_key_press">按鍵時彈出顯示字元</string>
     <string name="disable_animation">禁用動畫</string>
-    <string name="duplicate_builtin_theme">複製內建主題</string>
+    <string name="duplicate_builtin_theme">複製內建主題…</string>
     <string name="exception_logcat_created">Logcat 程序已經建立</string>
     <string name="exception_quickphrase_parse">解析字典失敗：%1$s</string>
     <string name="exception_quickphrase_filename">%1$s 副檔名並不是一個字典檔</string>

@@ -167,12 +167,12 @@ class ThemeListFragment : Fragment() {
 
         val settingsText = textView {
             setText(R.string.configure_theme)
-            textAppearance = resolveThemeAttribute(androidx.appcompat.R.attr.textAppearanceListItem)
+            textAppearance = resolveThemeAttribute(android.R.attr.textAppearanceListItem)
             gravity = gravityVerticalCenter
         }
         val settingsButton = imageButton {
             imageDrawable = drawable(R.drawable.ic_baseline_settings_24)
-            background = styledDrawable(androidx.appcompat.R.attr.actionBarItemBackground)
+            background = styledDrawable(android.R.attr.actionBarItemBackground)
             setOnClickListener {
                 findNavController().navigate(R.id.action_themeListFragment_to_themeSettingsFragment)
             }
@@ -192,7 +192,7 @@ class ThemeListFragment : Fragment() {
                 endOfParent(dp(64))
                 bottomOfParent(dp(4))
             })
-            backgroundColor = styledColor(androidx.appcompat.R.attr.colorPrimary)
+            backgroundColor = styledColor(android.R.attr.colorPrimary)
             elevation = dp(4f)
         }
 
@@ -232,13 +232,13 @@ class ThemeListFragment : Fragment() {
     }
 
     private fun addTheme() {
-        val actions =
-            arrayOf(
-                getString(R.string.choose_image),
-                getString(R.string.import_from_file),
-                getString(R.string.duplicate_builtin_theme)
-            )
-        AlertDialog.Builder(requireContext())
+        val ctx = requireContext()
+        val actions = arrayOf(
+            getString(R.string.choose_image),
+            getString(R.string.import_from_file),
+            getString(R.string.duplicate_builtin_theme)
+        )
+        AlertDialog.Builder(ctx)
             .setTitle(R.string.new_theme)
             .setNegativeButton(android.R.string.cancel, null)
             .setItems(actions) { _, i ->
@@ -246,12 +246,12 @@ class ThemeListFragment : Fragment() {
                     0 -> imageLauncher.launch(null)
                     1 -> importLauncher.launch("application/zip")
                     2 -> {
-                        val view = ResponsiveThemeListView(requireContext()).apply {
+                        val view = ResponsiveThemeListView(ctx).apply {
                             // force AlertDialog's customPanel to grow
                             minimumHeight = Int.MAX_VALUE
                         }
-                        val dialog = AlertDialog.Builder(requireContext())
-                            .setTitle(R.string.duplicate_builtin_theme)
+                        val dialog = AlertDialog.Builder(ctx)
+                            .setTitle(getString(R.string.duplicate_builtin_theme).removeSuffix("…"))
                             .setNegativeButton(android.R.string.cancel, null)
                             .setView(view)
                             .create()

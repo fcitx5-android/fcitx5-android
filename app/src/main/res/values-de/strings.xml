@@ -66,7 +66,7 @@
     <string name="key_horizontal_margin">Horizontaler Tastenrand</string>
     <string name="key_vertical_margin">Vertikaler Tastenrand</string>
     <string name="configure_theme">Thema konfigurieren</string>
-    <string name="choose_image">Bild auswählen</string>
+    <string name="choose_image">Bild auswählen…</string>
     <string name="dark_keys">Dunkle Tasten</string>
     <string name="recrop_image">Bild neu zuschneiden</string>
     <string name="navbar_background">Hintergrund der Navigationsleiste</string>
@@ -74,7 +74,7 @@
     <string name="navbar_bkg_full">Hintergrundbild der Tastatur</string>
     <string name="punctuation_pos_top_right">Oben rechts</string>
     <string name="disable_animation">Animation deaktivieren</string>
-    <string name="import_from_file">Aus Datei importieren</string>
+    <string name="import_from_file">Aus Datei importieren…</string>
     <string name="exception_theme_unknown">Thema %1$s ist unbekannt</string>
     <string name="light_mode_theme">Thema für hellen Modus</string>
     <string name="dark_mode_theme">Thema für dunklen Modus</string>

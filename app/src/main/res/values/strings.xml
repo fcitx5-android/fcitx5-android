@@ -112,7 +112,7 @@
     <string name="key_horizontal_margin">Key horizontal margin</string>
     <string name="key_vertical_margin">Key vertical margin</string>
     <string name="configure_theme">Configure Theme</string>
-    <string name="choose_image">Choose Image</string>
+    <string name="choose_image">Choose Image…</string>
     <string name="dark_keys">Dark Keys</string>
     <string name="recrop_image">Re-Crop Image</string>
     <string name="navbar_background">Navigation bar background</string>
@@ -125,8 +125,8 @@
     <string name="expand_toolbar_by_default">Expand toolbar by default</string>
     <string name="popup_on_key_press">Popup on key press</string>
     <string name="disable_animation">Disable animation</string>
-    <string name="import_from_file">Import from file</string>
-    <string name="duplicate_builtin_theme">Duplicate builtin theme</string>
+    <string name="import_from_file">Import from file…</string>
+    <string name="duplicate_builtin_theme">Duplicate builtin theme…</string>
     <string name="exception_logcat_created">Logcat process is already created</string>
     <string name="exception_quickphrase_parse">Failed to parse quick phrase line: %1$s</string>
     <string name="exception_quickphrase_filename">The filename extension of %1$s does not indicate a quick phrase</string>
@@ -186,9 +186,9 @@
     <string name="table_file_does_not_exist_title">Table unavailable</string>
     <string name="table_file_does_not_exist_message">Table dictionary \"%1$s\" does not exist. Please check the table dict file or delete and re-import.</string>
     <string name="import_table">Import Table</string>
-    <string name="table_from_zip">From zip …</string>
-    <string name="table_select_files">From separate files …</string>
-    <string name="table_file_placeholder">Select file …</string>
+    <string name="table_from_zip">From zip…</string>
+    <string name="table_select_files">From separate files…</string>
+    <string name="table_file_placeholder">Select file…</string>
     <string name="table_conf_select_title">Input method configuration file (.conf or .conf.in)</string>
     <string name="table_dict_select_title">Table dictionary (.dict or .txt)</string>
     <string name="exception_table_conf_filename">The extension of \"%1$s\" does not indicate a table input method configuration file (.conf or .conf.in)</string>

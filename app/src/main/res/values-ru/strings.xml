@@ -112,7 +112,7 @@
     <string name="key_horizontal_margin">Горизонтальное поле клавиш</string>
     <string name="key_vertical_margin">Вертикальное поле клавиш</string>
     <string name="configure_theme">Настроить тему</string>
-    <string name="choose_image">Выбрать изображение</string>
+    <string name="choose_image">Выбрать изображение…</string>
     <string name="dark_keys">Темные клавиши</string>
     <string name="recrop_image">Повторное кадрирование изображения</string>
     <string name="navbar_background">Фон панели навигации</string>
@@ -125,8 +125,8 @@
     <string name="expand_toolbar_by_default">Развернуть панель инструментов по умолчанию</string>
     <string name="popup_on_key_press">Всплывающее окно при нажатии клавиши</string>
     <string name="disable_animation">Отключить анимацию</string>
-    <string name="import_from_file">Импорт из файла</string>
-    <string name="duplicate_builtin_theme">Дублировать встроенную тему</string>
+    <string name="import_from_file">Импорт из файла…</string>
+    <string name="duplicate_builtin_theme">Дублировать встроенную тему…</string>
     <string name="exception_logcat_created">Процесс Logcat уже создан</string>
     <string name="exception_quickphrase_parse">Не удалось разобрать строку быстрой фразы: %1$s</string>
     <string name="exception_quickphrase_filename">Расширение имени файла %1$s не указывает на быструю фразу</string>
@@ -186,9 +186,9 @@
     <string name="table_file_does_not_exist_title">Таблица недоступна</string>
     <string name="table_file_does_not_exist_message">Словарь кодовых таблиц \"%1$s\" не существует. Пожалуйста, проверьте файл таблицы dict или удалите и повторно импортируйте.</string>
     <string name="import_table">Импорт кодовой таблицы</string>
-    <string name="table_from_zip">Из zip …</string>
-    <string name="table_select_files">Из отдельных файлов …</string>
-    <string name="table_file_placeholder">Выбрать файл …</string>
+    <string name="table_from_zip">Из zip…</string>
+    <string name="table_select_files">Из отдельных файлов…</string>
+    <string name="table_file_placeholder">Выбрать файл…</string>
     <string name="table_conf_select_title">Файл конфигурации метода ввода (.conf или .conf.in)</string>
     <string name="table_dict_select_title">Словарь кодовой таблицы (.dict или .txt)</string>
     <string name="exception_table_conf_filename">Расширение \"%1$s\" не указывает на файл конфигурации метода ввода кодовой таблицы (.conf или .conf.in)</string>

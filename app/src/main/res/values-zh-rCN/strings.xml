@@ -112,7 +112,7 @@
     <string name="key_horizontal_margin">按键横向边距</string>
     <string name="key_vertical_margin">按键纵向边距</string>
     <string name="configure_theme">配置主题</string>
-    <string name="choose_image">选择图片</string>
+    <string name="choose_image">选择图片…</string>
     <string name="dark_keys">暗色按键</string>
     <string name="recrop_image">重新裁剪图片</string>
     <string name="navbar_background">导航栏背景</string>
@@ -125,8 +125,8 @@
     <string name="expand_toolbar_by_default">默认展开工具栏</string>
     <string name="popup_on_key_press">按键时弹出显示字符</string>
     <string name="disable_animation">禁用动画</string>
-    <string name="import_from_file">导入文件</string>
-    <string name="duplicate_builtin_theme">复制内置主题</string>
+    <string name="import_from_file">导入文件…</string>
+    <string name="duplicate_builtin_theme">复制内置主题…</string>
     <string name="exception_logcat_created">Logcat 进程已创建</string>
     <string name="exception_quickphrase_parse">无法解析快速输入条目： %1$s</string>
     <string name="exception_quickphrase_filename">文件 %1$s 的拓展名不是快速输入</string>
@@ -186,9 +186,9 @@
     <string name="table_file_does_not_exist_title">码表不可用</string>
     <string name="table_file_does_not_exist_message">码表词典 \"%1$s\" 不存在。请检查词典文件，或删除并重新导入。</string>
     <string name="import_table">导入码表</string>
-    <string name="table_from_zip">从 zip 导入 …</string>
-    <string name="table_select_files">从单独的文件导入 …</string>
-    <string name="table_file_placeholder">选择文件 …</string>
+    <string name="table_from_zip">从 zip 导入…</string>
+    <string name="table_select_files">从单独的文件导入…</string>
+    <string name="table_file_placeholder">选择文件…</string>
     <string name="table_conf_select_title">输入法配置文件（ .conf 或 .conf.in ）</string>
     <string name="table_dict_select_title">码表词典（ .dict 或 .txt ）</string>
     <string name="exception_table_conf_filename">\"%1$s\" 的拓展名不是码表输入法配置文件（ .conf 或 .conf.in ）</string>
