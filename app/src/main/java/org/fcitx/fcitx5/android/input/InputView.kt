@@ -22,6 +22,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.CapabilityFlags
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
+import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
@@ -165,6 +166,11 @@ class InputView(
     init {
         // MUST call before any operation
         setupScope()
+
+        // restore punctuation mapping in case of InputView recreation
+        service.lifecycleScope.launchOnFcitxReady(fcitx) {
+            punctuation.updatePunctuationMapping(it.statusAreaActionsCached)
+        }
 
         keyboardSizePrefs.forEach {
             it.registerOnChangeListener(onKeyboardSizeChangeListener)
