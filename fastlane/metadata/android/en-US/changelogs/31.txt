@@ -1,0 +1,27 @@
+# 0.0.5 - OpenCC and Inline Suggestions
+
+## Highlights
+
+- OpenCC: convert between Traditional and Simplified Chinese in phrase-level, with multiple regional presets
+- Inline Suggestions: display suggestions form autofill service on toolbar, requires Android 11+
+
+## New features
+
+- Show number row on toolbar when inputing password
+- Use OpenCC for Traditional-Simplified Chinese conversion
+- Refined horizontal candidate layout
+- Option to hide language switch key
+- Customizable space long press behavior
+- Show autofill results as inline suggestion
+- Clipboard delete confirmation, swipe to delete, and undo deleting
+- RTL layout direction support
+
+## Bug fixes
+
+- Cannot delete input methods with multi-select checkbox
+- Cannot disable addons without dependencies
+- Selected text may be cleared when switching input method
+- Crash when clipboard updates before InputView setup finish
+- "Copy" button in clipboard edit dialog doesn't work
+- Some preferences does not take effect until restarting input method (recreate InputView actually)
+- Popup keyboard's background highlight misalign when using some fonts

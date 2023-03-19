@@ -1,0 +1,37 @@
+# 0.0.4 - Table Manager and Reproducible Build
+
+## Highlights
+
+- Table Manager: import/delete table input methods conveniently, it can also tell you whether the table file is malformatted
+- Reproducible Build: with provided `build-metadata.json`, you can build the exact same APK as we do on CI
+
+## New features
+
+- Restore default value for a specific preference option
+- Show fcitx configuration's annotation message
+- Show a prompt before delete all clipboard items
+- Sort clipboard items by time
+- Add grave accent (`) to z longpress
+- A optional, alternative touch event distribution routine, to workaround key press detection on some devices
+- Table input methods management UI
+- Long press return key to enter emoji picker
+- Preedit/Composing text format
+- More precise selection range tracking
+- Use application package name (or shared uid name) for InputContext program
+- Implement reproducible build
+
+## Bug fixes
+
+- Fcitx's configuration cannot be changed via settings UI sometimes
+- Expanded candidate items got clipped when row count too much
+- Crash when dismissing multiple popups
+- Crash when attaching PickerWindow
+- Crash on some wried "Multi-screen mode" mode
+- Crash when clipboard limit set to 0
+- Keyboard becomes very laggy when clipboard content toooooo looooong
+- Crash when enter punctuation mapping editor
+- Popup misalignment when changing keyboard bottom/side padding
+- Popup stays on screen after touch up
+- Composing text comitted incorrectly when switch from a normal input to a password input
+- Clipboard longpress menu stays on screen when keyboard hides and shows again
+- Divider in input method picker dialog filckers on scroll
