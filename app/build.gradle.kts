@@ -29,7 +29,7 @@ plugins {
 val dataDescriptorName = "descriptor.json"
 
 // NOTE: increase this value to bump version code
-val baseVersionCode = 2
+val baseVersionCode = 3
 
 fun calculateVersionCode(abi: String): Int {
     val abiId = when (abi) {

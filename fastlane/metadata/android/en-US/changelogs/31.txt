@@ -25,3 +25,4 @@
 - "Copy" button in clipboard edit dialog doesn't work
 - Some preferences does not take effect until restarting input method (recreate InputView actually)
 - Popup keyboard's background highlight misalign when using some fonts
+- Punctuation mapping lost after rotating screen (recreate InputView actually)
