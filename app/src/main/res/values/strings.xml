@@ -212,4 +212,5 @@
     <string name="num_items_deleted">%1$d item(s) deleted</string>
     <string name="delete_theme">Delete Theme</string>
     <string name="delete_theme_msg">Do you really want to delete theme \"%1$s\"?</string>
+    <string name="capture_heap_dump">Capture heap dump</string>
 </resources>

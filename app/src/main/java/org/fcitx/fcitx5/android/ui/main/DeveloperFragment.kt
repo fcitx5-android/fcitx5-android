@@ -1,13 +1,19 @@
 package org.fcitx.fcitx5.android.ui.main
 
 import android.os.Bundle
+import android.os.Debug
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
+import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreference
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.DataManager
@@ -15,44 +21,58 @@ import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.ui.common.PaddingPreferenceFragment
 import org.fcitx.fcitx5.android.utils.AppUtil
+import org.fcitx.fcitx5.android.utils.iso8601UTCDateTime
+import org.fcitx.fcitx5.android.utils.toast
+import org.fcitx.fcitx5.android.utils.withTempDir
+import java.io.File
 
 class DeveloperFragment : PaddingPreferenceFragment() {
 
     private val viewModel: MainViewModel by activityViewModels()
 
-    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        val context = preferenceManager.context
-        val screen = preferenceManager.createPreferenceScreen(context)
-        screen.addPreference(Preference(context).apply {
-            setTitle(R.string.real_time_logs)
-            isIconSpaceReserved = false
+    private lateinit var hprofFile: File
+    private lateinit var launcher: ActivityResultLauncher<String>
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val ctx = requireContext()
+        launcher = registerForActivityResult(CreateDocument("application/octet-stream")) { uri ->
+            lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
+                uri?.runCatching {
+                    ctx.contentResolver.openOutputStream(uri)?.use { o ->
+                        hprofFile.inputStream().use { i -> i.copyTo(o) }
+                    }
+                }?.toast(ctx)
+            }
+        }
+    }
+
+    private fun PreferenceScreen.addPreference(@StringRes title: Int, onClick: () -> Unit = {}) {
+        addPreference(Preference(context).apply {
             isSingleLineTitle = false
+            isIconSpaceReserved = false
+            setTitle(getString(title))
             setOnPreferenceClickListener {
-                AppUtil.launchLog(context)
+                onClick()
                 true
             }
         })
-        screen.addPreference(SwitchPreference(context).apply {
-            key = AppPrefs.getInstance().internal.verboseLog.key
-            setTitle(R.string.verbose_log)
-            setSummary(R.string.verbose_log_summary)
-            setDefaultValue(false)
-            isIconSpaceReserved = false
-            isSingleLineTitle = false
-        })
-        screen.addPreference(SwitchPreference(context).apply {
-            key = AppPrefs.getInstance().internal.editorInfoInspector.key
-            setTitle(R.string.editor_info_inspector)
-            setDefaultValue(false)
-            isIconSpaceReserved = false
-            isSingleLineTitle = false
-        })
+    }
 
-        screen.addPreference(Preference(context).apply {
-            setTitle(R.string.delete_and_sync_data)
-            isIconSpaceReserved = false
-            isSingleLineTitle = false
-            setOnPreferenceClickListener {
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        preferenceScreen = preferenceManager.createPreferenceScreen(requireContext()).apply {
+            addPreference(R.string.real_time_logs) {
+                AppUtil.launchLog(context)
+            }
+            addPreference(SwitchPreference(context).apply {
+                key = AppPrefs.getInstance().internal.verboseLog.key
+                setTitle(R.string.verbose_log)
+                setSummary(R.string.verbose_log_summary)
+                setDefaultValue(false)
+                isIconSpaceReserved = false
+                isSingleLineTitle = false
+            })
+            addPreference(R.string.delete_and_sync_data) {
                 AlertDialog.Builder(context)
                     .setTitle(R.string.delete_and_sync_data)
                     .setMessage(R.string.delete_and_sync_data_message)
@@ -64,31 +84,30 @@ class DeveloperFragment : PaddingPreferenceFragment() {
                                     context,
                                     getString(R.string.synced),
                                     Toast.LENGTH_SHORT
-                                )
-                                    .show()
+                                ).show()
                             }
                         }
                     }
-                    .setNegativeButton(android.R.string.cancel) { _, _ -> }
+                    .setNegativeButton(android.R.string.cancel, null)
                     .show()
-                true
             }
-        })
-        screen.addPreference(Preference(context).apply {
-            setTitle(R.string.clear_clb_db)
-            isIconSpaceReserved = false
-            isSingleLineTitle = false
-            setOnPreferenceClickListener {
+            addPreference(R.string.clear_clb_db) {
                 lifecycleScope.launch {
                     ClipboardManager.nukeTable()
                     Toast.makeText(context, getString(R.string.done), Toast.LENGTH_SHORT).show()
                 }
-                true
             }
-        })
-        preferenceScreen = screen
+            addPreference(R.string.capture_heap_dump) {
+                withTempDir {
+                    val fileName = "${context.packageName}_${iso8601UTCDateTime()}.hprof"
+                    hprofFile = it.resolve(fileName)
+                    System.gc()
+                    Debug.dumpHprofData(hprofFile.absolutePath)
+                    launcher.launch(fileName)
+                }
+            }
+        }
     }
-
 
     override fun onResume() {
         super.onResume()
