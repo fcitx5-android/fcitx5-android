@@ -16,8 +16,7 @@ import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.*
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.CapabilityFlags
 import org.fcitx.fcitx5.android.core.FcitxEvent
@@ -71,8 +70,11 @@ class InputView(
 
     private val bottomPaddingSpace = view(::Space)
 
-    private val eventHandlerJob = fcitx.runImmediately { eventFlow }
-        .onEach(::handleFcitxEvent).launchIn(service.lifecycleScope)
+    private val eventHandlerJob = service.lifecycleScope.launch {
+        fcitx.runImmediately { eventFlow }.collect {
+            handleFcitxEvent(it)
+        }
+    }
 
     private val scope = DynamicScope()
     private val themedContext = context.withTheme(R.style.Theme_InputViewTheme)
@@ -372,13 +374,12 @@ class InputView(
             it.unregisterOnChangeListener(onKeyboardSizeChangeListener)
         }
         ViewCompat.setOnApplyWindowInsetsListener(this, null)
-        super.onDetachedFromWindow()
-    }
-
-    fun onDestroy() {
         showingDialog?.dismiss()
+        // cancel eventHandlerJob and then clear DynamicScope,
+        // implies that InputView should not be attached again after detached.
         eventHandlerJob.cancel()
         scope.clear()
+        super.onDetachedFromWindow()
     }
 
 }

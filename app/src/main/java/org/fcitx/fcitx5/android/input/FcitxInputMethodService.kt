@@ -94,7 +94,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private fun recreateInputView(theme: Theme) {
         // InputView should be created first in onCreateInputView
         // setInputView should be used to 'replace' current InputView only
-        inputView?.onDestroy() ?: return
         InputView(this, fcitx, theme).also {
             inputView = it
             setInputView(it)
@@ -329,6 +328,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onCreateInputView(): View {
         super.onCreateInputView()
+        // onCreateInputView will be called once, when the input area is first displayed,
+        // during each onConfigurationChanged period.
+        // That is, onCreateInputView would be called again, after system dark mode changes,
+        // or screen orientation changes.
         return InputView(this, fcitx, ThemeManager.getActiveTheme()).also {
             inputView = it
         }
@@ -579,7 +582,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreateInlineSuggestionsRequest(uiExtras: Bundle): InlineSuggestionsRequest? {
         if (!inlineSuggestions) return null
-        val theme = inputView?.theme ?: return null
+        val theme = ThemeManager.getActiveTheme()
         val chipDrawable = if (theme.isDark) R.drawable.bkg_inline_suggestion_dark else R.drawable.bkg_inline_suggestion_light
         val chipBg = Icon.createWithResource(this, chipDrawable).setTint(theme.keyTextColor)
         val style = InlineSuggestionUi.newStyleBuilder()
@@ -670,7 +673,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             advanced.disableAnimation.unregisterOnChangeListener(recreateInputViewListener)
         }
         ThemeManager.removeOnChangedListener(onThemeChangeListener)
-        inputView?.onDestroy()
         eventHandlerJob?.cancel()
         eventHandlerJob = null
         super.onDestroy()
