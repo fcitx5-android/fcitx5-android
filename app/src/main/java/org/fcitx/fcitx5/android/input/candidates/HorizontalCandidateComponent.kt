@@ -1,7 +1,10 @@
 package org.fcitx.fcitx5.android.input.candidates
 
 import android.content.res.Configuration
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.RectShape
 import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexboxLayoutManager
 import kotlinx.coroutines.channels.BufferOverflow
@@ -9,25 +12,28 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.runBlocking
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.FcitxEvent
+import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
-import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.BooleanKey.CandidatesEmpty
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.BooleanKey.ExpandedCandidatesEmpty
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesUpdated
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateMode.*
-import org.fcitx.fcitx5.android.input.candidates.adapter.BaseCandidateViewAdapter
+import org.fcitx.fcitx5.android.input.candidates.adapter.HorizontalCandidateViewAdapter
 import org.fcitx.fcitx5.android.input.candidates.expanded.decoration.FlexboxVerticalDecoration
-import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
-import org.fcitx.fcitx5.android.input.dependency.context
+import org.fcitx.fcitx5.android.input.dependency.*
 import org.mechdancer.dependency.manager.must
-import splitties.views.dsl.core.matchParent
-import splitties.views.dsl.core.wrapContent
+import splitties.dimensions.dp
+import kotlin.math.max
 
 class HorizontalCandidateComponent :
     UniqueViewComponent<HorizontalCandidateComponent, RecyclerView>(), InputBroadcastReceiver {
 
+    private val service by manager.inputMethodService()
     private val context by manager.context()
-    private val builder: CandidateViewBuilder by manager.must()
+    private val fcitx by manager.fcitx()
+    private val theme by manager.theme()
     private val bar: KawaiiBarComponent by manager.must()
 
     private val fillStyle by AppPrefs.getInstance().keyboard.horizontalCandidateStyle
@@ -67,11 +73,17 @@ class HorizontalCandidateComponent :
         }
     }
 
-    val adapter: BaseCandidateViewAdapter by lazy {
-        builder.flexAdapter {
-            FlexboxLayoutManager.LayoutParams(wrapContent, matchParent).apply {
-                minWidth = layoutMinWidth
-                flexGrow = layoutFlexGrow
+    val adapter: HorizontalCandidateViewAdapter by lazy {
+        object : HorizontalCandidateViewAdapter(theme) {
+            override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+                super.onBindViewHolder(holder, position)
+                holder.itemView.updateLayoutParams<FlexboxLayoutManager.LayoutParams> {
+                    minWidth = layoutMinWidth
+                    flexGrow = layoutFlexGrow
+                }
+                holder.itemView.setOnClickListener {
+                    service.lifecycleScope.launchOnFcitxReady(fcitx) { it.select(holder.idx) }
+                }
             }
         }
     }
@@ -101,7 +113,7 @@ class HorizontalCandidateComponent :
                 refreshExpanded()
                 bar.expandButtonStateMachine.push(
                     ExpandedCandidatesUpdated,
-                    CandidatesEmpty to (adapter.candidates.size - childCount <= 0)
+                    ExpandedCandidatesEmpty to (adapter.total <= childCount)
                 )
             }
             // no need to override `generate{,Default}LayoutParams`, because builder.flexAdapter()
@@ -110,7 +122,12 @@ class HorizontalCandidateComponent :
     }
 
     private val dividerDrawable by lazy {
-        builder.dividerDrawable()
+        ShapeDrawable(RectShape()).apply {
+            val intrinsicSize = max(1, context.dp(1))
+            intrinsicWidth = intrinsicSize
+            intrinsicHeight = intrinsicSize
+            paint.color = theme.dividerColor
+        }
     }
 
     override val view by lazy {

@@ -1,26 +1,30 @@
 package org.fcitx.fcitx5.android.input.candidates.expanded.window
 
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.RectShape
+import android.view.View
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
-import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.BooleanKey.CandidatesEmpty
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.BooleanKey.ExpandedCandidatesEmpty
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesAttached
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesDetached
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.broadcast.ReturnKeyDrawableComponent
-import org.fcitx.fcitx5.android.input.candidates.CandidateViewBuilder
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
-import org.fcitx.fcitx5.android.input.candidates.adapter.BaseCandidateViewAdapter
+import org.fcitx.fcitx5.android.input.candidates.adapter.PagingCandidateViewAdapter
+import org.fcitx.fcitx5.android.input.candidates.expanded.CandidatesPagingSource
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateLayout
 import org.fcitx.fcitx5.android.input.dependency.fcitx
+import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction
@@ -29,13 +33,15 @@ import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.mechdancer.dependency.manager.must
+import splitties.dimensions.dp
+import kotlin.math.max
 
 abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
     InputWindow.SimpleInputWindow<T>(), InputBroadcastReceiver {
 
-    protected val builder: CandidateViewBuilder by manager.must()
+    protected val service by manager.inputMethodService()
     protected val theme by manager.theme()
-    private val fcitx by manager.fcitx()
+    protected val fcitx by manager.fcitx()
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
     private val bar: KawaiiBarComponent by manager.must()
     private val horizontalCandidate: HorizontalCandidateComponent by manager.must()
@@ -47,9 +53,26 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
     private lateinit var lifecycleCoroutineScope: LifecycleCoroutineScope
     private lateinit var candidateLayout: ExpandedCandidateLayout
 
+    protected val dividerDrawable by lazy {
+        ShapeDrawable(RectShape()).apply {
+            val intrinsicSize = max(1, context.dp(1))
+            intrinsicWidth = intrinsicSize
+            intrinsicHeight = intrinsicSize
+            paint.color = theme.dividerColor
+        }
+    }
+
     abstract fun onCreateCandidateLayout(): ExpandedCandidateLayout
 
-    final override fun onCreateView() = onCreateCandidateLayout().also { candidateLayout = it }
+    final override fun onCreateView(): View {
+        candidateLayout = onCreateCandidateLayout().apply {
+            recyclerView.apply {
+                // disable item cross-fade animation
+                itemAnimator = null
+            }
+        }
+        return candidateLayout
+    }
 
     private val keyActionListener = KeyActionListener { it, source ->
         if (it is KeyAction.LayoutSwitchAction) {
@@ -62,10 +85,21 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
         }
     }
 
-    abstract val adapter: BaseCandidateViewAdapter
+    abstract val adapter: PagingCandidateViewAdapter
     abstract val layoutManager: RecyclerView.LayoutManager
 
     private var offsetJob: Job? = null
+
+    private val candidatesPager by lazy {
+        Pager(PagingConfig(pageSize = 16)) {
+            CandidatesPagingSource(
+                fcitx,
+                total = horizontalCandidate.adapter.total,
+                offset = adapter.offset
+            )
+        }
+    }
+    private var candidatesSubmitJob: Job? = null
 
     abstract fun prevPage()
 
@@ -78,9 +112,16 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
             it.onReturnDrawableUpdate(returnKeyDrawable.resourceId)
             it.keyActionListener = keyActionListener
         }
-        offsetJob = horizontalCandidate.expandedCandidateOffset
-            .onEach(this::updateCandidatesWithOffset)
-            .launchIn(lifecycleCoroutineScope)
+        offsetJob = lifecycleCoroutineScope.launch {
+            horizontalCandidate.expandedCandidateOffset.collect {
+                updateCandidatesWithOffset(it)
+            }
+        }
+        candidatesSubmitJob = lifecycleCoroutineScope.launch {
+            candidatesPager.flow.collect {
+                adapter.submitData(it)
+            }
+        }
     }
 
     private fun updateCandidatesWithOffset(offset: Int) {
@@ -88,7 +129,7 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
         if (candidates.isEmpty()) {
             windowManager.attachWindow(KeyboardWindow)
         } else {
-            adapter.updateCandidatesWithOffset(candidates, offset)
+            adapter.refreshWithOffset(offset)
             lifecycleCoroutineScope.launch(Dispatchers.Main) {
                 candidateLayout.resetPosition()
             }
@@ -98,10 +139,10 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
     override fun onDetached() {
         bar.expandButtonStateMachine.push(
             ExpandedCandidatesDetached,
-            CandidatesEmpty to (adapter.candidates.size <= adapter.offset)
+            ExpandedCandidatesEmpty to (horizontalCandidate.adapter.total <= adapter.offset)
         )
+        candidatesSubmitJob?.cancel()
         offsetJob?.cancel()
-        offsetJob = null
         candidateLayout.embeddedKeyboard.keyActionListener = null
     }
 

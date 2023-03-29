@@ -1,22 +1,43 @@
 package org.fcitx.fcitx5.android.input.candidates.expanded.window
 
 import android.util.DisplayMetrics
+import android.view.ViewGroup
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
+import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
+import org.fcitx.fcitx5.android.input.candidates.adapter.PagingCandidateViewAdapter
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateLayout
 import org.fcitx.fcitx5.android.input.candidates.expanded.decoration.FlexboxHorizontalDecoration
 import splitties.dimensions.dp
 import splitties.views.dsl.core.wrapContent
+import splitties.views.setPaddingDp
 
 class FlexboxExpandedCandidateWindow :
     BaseExpandedCandidateWindow<FlexboxExpandedCandidateWindow>() {
 
     override val adapter by lazy {
-        builder.flexAdapter {
-            FlexboxLayoutManager.LayoutParams(wrapContent, dp(40)).apply { flexGrow = 1f }
+        object : PagingCandidateViewAdapter(theme) {
+            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+                return super.onCreateViewHolder(parent, viewType).apply {
+                    itemView.apply {
+                        minimumWidth = dp(40)
+                        setPaddingDp(10, 0, 10, 0)
+                        layoutParams = FlexboxLayoutManager.LayoutParams(wrapContent, dp(40))
+                            .apply { flexGrow = 1f }
+                    }
+                }
+            }
+
+            override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+                super.onBindViewHolder(holder, position)
+                holder.itemView.setOnClickListener {
+                    service.lifecycleScope.launchOnFcitxReady(fcitx) { it.select(holder.idx) }
+                }
+            }
         }
     }
 
@@ -32,7 +53,7 @@ class FlexboxExpandedCandidateWindow :
             recyclerView.apply {
                 adapter = this@FlexboxExpandedCandidateWindow.adapter
                 layoutManager = this@FlexboxExpandedCandidateWindow.layoutManager
-                addItemDecoration(FlexboxHorizontalDecoration(builder.dividerDrawable()))
+                addItemDecoration(FlexboxHorizontalDecoration(dividerDrawable))
                 addOnScrollListener(object : RecyclerView.OnScrollListener() {
                     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                         this@FlexboxExpandedCandidateWindow.layoutManager.apply {

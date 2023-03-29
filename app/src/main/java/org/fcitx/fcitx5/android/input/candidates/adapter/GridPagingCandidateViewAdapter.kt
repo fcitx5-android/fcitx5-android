@@ -5,16 +5,17 @@ import android.graphics.Rect
 import android.util.LruCache
 import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
+import org.fcitx.fcitx5.android.data.theme.Theme
 import splitties.dimensions.dp
 import splitties.views.dsl.core.matchParent
 
-abstract class GridCandidateViewAdapter : BaseCandidateViewAdapter() {
+abstract class GridPagingCandidateViewAdapter(theme: Theme) : PagingCandidateViewAdapter(theme) {
 
     // cache measureWidth
     private val measuredWidths = LruCache<String, Float>(200)
 
     fun measureWidth(position: Int): Float {
-        val candidate = getCandidateAt(position)
+        val candidate = getItem(position) ?: return 0f
         return measuredWidths[candidate] ?: run {
             val paint = Paint()
             val bounds = Rect()
@@ -27,7 +28,7 @@ abstract class GridCandidateViewAdapter : BaseCandidateViewAdapter() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return super.onCreateViewHolder(parent, viewType).apply {
-            ui.root.apply {
+            itemView.apply {
                 layoutParams = GridLayoutManager.LayoutParams(matchParent, dp(40))
             }
         }
