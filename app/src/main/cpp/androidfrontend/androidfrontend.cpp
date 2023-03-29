@@ -62,25 +62,28 @@ public:
                 filterText(ip.auxDown())
         );
         std::vector<std::string> candidates;
+        int size = 0;
         const auto &list = ip.candidateList();
         if (list) {
             const auto &bulk = list->toBulk();
             if (bulk) {
-                const int size = bulk->totalSize();
-                for (int i = 0; i < size; i++) {
+                size = bulk->totalSize();
+                // limit candidate count to 16 (for paging)
+                const int limit = std::min(size, 16);
+                for (int i = 0; i < limit; i++) {
                     auto &candidate = bulk->candidateFromAll(i);
                     // maybe unnecessary; I don't see anywhere using `CandidateWord::setPlaceHolder`
                     // if (candidate.isPlaceHolder()) continue;
                     candidates.emplace_back(filterString(candidate.text()));
                 }
             } else {
-                const int size = list->size();
+                size = list->size();
                 for (int i = 0; i < size; i++) {
                     candidates.emplace_back(filterString(list->candidate(i).text()));
                 }
             }
         }
-        frontend_->updateCandidateList(candidates);
+        frontend_->updateCandidateList(candidates, size);
     }
 
     bool selectCandidate(int idx) {
@@ -100,6 +103,27 @@ public:
             return false;
         }
         return true;
+    }
+
+    std::vector<std::string> getCandidates(const int offset, const int limit) {
+        std::vector<std::string> candidates;
+        const auto &list = inputPanel().candidateList();
+        if (list) {
+            const auto &bulk = list->toBulk();
+            if (bulk) {
+                const int _limit = std::min(bulk->totalSize(), offset + limit + 1);
+                for (int i = offset; i < _limit; i++) {
+                    auto &candidate = bulk->candidateFromAll(i);
+                    candidates.emplace_back(filterString(candidate.text()));
+                }
+            } else {
+                const int _limit = std::min(list->size(), offset + limit + 1);
+                for (int i = offset; i < _limit; i++) {
+                    candidates.emplace_back(filterString(list->candidate(i).text()));
+                }
+            }
+        }
+        return candidates;
     }
 
 private:
@@ -179,8 +203,8 @@ void AndroidFrontend::commitString(const std::string &str) {
     commitStringCallback(str);
 }
 
-void AndroidFrontend::updateCandidateList(const std::vector<std::string> &candidates) {
-    candidateListCallback(candidates);
+void AndroidFrontend::updateCandidateList(const std::vector<std::string> &candidates, const int size) {
+    candidateListCallback(candidates, size);
 }
 
 void AndroidFrontend::updateClientPreedit(const Text &clientPreedit) {
@@ -262,6 +286,12 @@ void AndroidFrontend::setCapabilityFlags(uint64_t flag) {
 
 void AndroidFrontend::setCandidateListCallback(const CandidateListCallback &callback) {
     candidateListCallback = callback;
+}
+
+std::vector<std::string> AndroidFrontend::getCandidates(const int offset, const int limit) {
+    auto *ic = dynamic_cast<AndroidInputContext *>(focusGroup_.focusedInputContext());
+    if (!ic) return {};
+    return ic->getCandidates(offset, limit);
 }
 
 void AndroidFrontend::setCommitStringCallback(const CommitStringCallback &callback) {

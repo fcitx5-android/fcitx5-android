@@ -4,7 +4,7 @@
 #include <fcitx/text.h>
 #include <fcitx-utils/key.h>
 
-typedef std::function<void(const std::vector<std::string> &)> CandidateListCallback;
+typedef std::function<void(const std::vector<std::string> &, const int)> CandidateListCallback;
 typedef std::function<void(const std::string &)> CommitStringCallback;
 typedef std::function<void(const fcitx::Text &)> ClientPreeditCallback;
 typedef std::function<void(const fcitx::Text &, const fcitx::Text &, const fcitx::Text &)> InputPanelCallback;
@@ -41,6 +41,9 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, deactivateInputContext,
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setCapabilityFlags,
                              void(uint64_t))
+
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, getCandidates,
+                             std::vector<std::string>(const int, const int))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setCandidateListCallback,
                              void(const CandidateListCallback &))

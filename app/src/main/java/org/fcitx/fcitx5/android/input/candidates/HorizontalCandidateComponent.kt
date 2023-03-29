@@ -130,7 +130,9 @@ class HorizontalCandidateComponent :
         }
     }
 
-    override fun onCandidateUpdate(data: Array<String>) {
+    override fun onCandidateUpdate(data: FcitxEvent.CandidateListEvent.Data) {
+        val candidates = data.candidates
+        val total = data.total
         val maxSpanCount = maxSpanCountPref.getValue()
         when (fillStyle) {
             NeverFillWidth -> {
@@ -140,9 +142,9 @@ class HorizontalCandidateComponent :
             }
             AutoFillWidth -> {
                 layoutMinWidth = view.width / maxSpanCount - dividerDrawable.intrinsicWidth
-                layoutFlexGrow = if (data.size < maxSpanCount) 0f else 1f
+                layoutFlexGrow = if (candidates.size < maxSpanCount) 0f else 1f
                 // [^1] total candidates count < maxSpanCount
-                secondLayoutPassNeeded = data.size < maxSpanCount
+                secondLayoutPassNeeded = candidates.size < maxSpanCount
                 secondLayoutPassDone = false
             }
             AlwaysFillWidth -> {
@@ -151,6 +153,6 @@ class HorizontalCandidateComponent :
                 secondLayoutPassNeeded = false
             }
         }
-        adapter.updateCandidatesWithLimit(data, maxSpanCount)
+        adapter.updateCandidates(candidates, total)
     }
 }

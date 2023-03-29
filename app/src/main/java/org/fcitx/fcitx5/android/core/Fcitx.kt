@@ -34,7 +34,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         InputMethodEntry(context.getString(R.string._not_available_))
         private set
 
-    override var statusAreaActionsCached: Array<Action> = arrayOf()
+    override var statusAreaActionsCached: Array<Action> = emptyArray()
         private set
 
     override var clientPreeditCached = FormattedText.Empty
@@ -83,10 +83,10 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
     override suspend fun reset() = withFcitxContext { resetInputContext() }
     override suspend fun moveCursor(position: Int) = withFcitxContext { repositionCursor(position) }
     override suspend fun availableIme() =
-        withFcitxContext { availableInputMethods() ?: arrayOf() }
+        withFcitxContext { availableInputMethods() ?: emptyArray() }
 
     override suspend fun enabledIme() =
-        withFcitxContext { listInputMethods() ?: arrayOf() }
+        withFcitxContext { listInputMethods() ?: emptyArray() }
 
     override suspend fun setEnabledIme(array: Array<String>) =
         withFcitxContext { setEnabledInputMethods(array) }
@@ -130,7 +130,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         setFcitxInputMethodConfig(key, config)
     }
 
-    override suspend fun addons() = withFcitxContext { getFcitxAddons() ?: arrayOf() }
+    override suspend fun addons() = withFcitxContext { getFcitxAddons() ?: emptyArray() }
     override suspend fun setAddonState(name: Array<String>, state: BooleanArray) =
         withFcitxContext { setFcitxAddonState(name, state) }
 
@@ -148,10 +148,13 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         withFcitxContext { setCapabilityFlags(flags.toLong()) }
 
     override suspend fun statusArea(): Array<Action> =
-        withFcitxContext { getFcitxStatusAreaActions() ?: arrayOf() }
+        withFcitxContext { getFcitxStatusAreaActions() ?: emptyArray() }
 
     override suspend fun activateAction(id: Int) =
         withFcitxContext { activateUserInterfaceAction(id) }
+
+    override suspend fun getCandidates(offset: Int, limit: Int): Array<String> =
+        withFcitxContext { getFcitxCandidates(offset, limit) ?: emptyArray() }
 
     init {
         if (lifecycle.currentState != FcitxLifecycle.State.STOPPED)
@@ -297,6 +300,9 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
 
         @JvmStatic
         external fun activateUserInterfaceAction(id: Int)
+
+        @JvmStatic
+        external fun getFcitxCandidates(offset: Int, limit: Int): Array<String>?
 
         @JvmStatic
         external fun loopOnce()

@@ -17,7 +17,7 @@ public:
 
     Instance *instance() { return instance_; }
 
-    void updateCandidateList(const std::vector<std::string> &candidates);
+    void updateCandidateList(const std::vector<std::string> &candidates, const int size);
     void commitString(const std::string &str);
     void updateClientPreedit(const Text &clientPreedit);
     void updateInputPanel(const Text &preedit, const Text &auxUp, const Text &auxDown);
@@ -34,6 +34,7 @@ public:
     void deactivateInputContext(const int uid);
     InputContext *activeInputContext() const;
     void setCapabilityFlags(uint64_t flag);
+    std::vector<std::string> getCandidates(const int offset, const int limit);
     void setCandidateListCallback(const CandidateListCallback &callback);
     void setCommitStringCallback(const CommitStringCallback &callback);
     void setPreeditCallback(const ClientPreeditCallback &callback);
@@ -53,6 +54,7 @@ private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, activeInputContext);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, deactivateInputContext);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCapabilityFlags);
+    FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, getCandidates);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCandidateListCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCommitStringCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setPreeditCallback);
@@ -71,7 +73,7 @@ private:
 
     void handleStatusAreaUpdate();
 
-    CandidateListCallback candidateListCallback = [](const std::vector<std::string> &) {};
+    CandidateListCallback candidateListCallback = [](const std::vector<std::string> &, const int) {};
     CommitStringCallback commitStringCallback = [](const std::string &) {};
     ClientPreeditCallback preeditCallback = [](const Text &) {};
     InputPanelCallback inputPanelAuxCallback = [](const fcitx::Text &, const fcitx::Text &, const Text &) {};

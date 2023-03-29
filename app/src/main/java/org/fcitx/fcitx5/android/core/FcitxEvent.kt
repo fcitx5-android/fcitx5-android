@@ -4,27 +4,35 @@ sealed class FcitxEvent<T>(open val data: T) {
 
     abstract val eventType: EventType
 
-    data class CandidateListEvent(override val data: Array<String>) :
-        FcitxEvent<Array<String>>(data) {
+    data class CandidateListEvent(override val data: Data) :
+        FcitxEvent<CandidateListEvent.Data>(data) {
+
         override val eventType: EventType
             get() = EventType.Candidate
 
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
+        data class Data(val total: Int, val candidates: Array<String>) {
 
-            other as CandidateListEvent
+            override fun toString(): String =
+                "total=$total, candidates=[${candidates.joinToString(limit = 5)}]"
 
-            if (!data.contentEquals(other.data)) return false
+            override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (javaClass != other?.javaClass) return false
 
-            return true
+                other as Data
+
+                if (total != other.total) return false
+                if (!candidates.contentEquals(other.candidates)) return false
+
+                return true
+            }
+
+            override fun hashCode(): Int {
+                var result = total
+                result = 31 * result + candidates.contentHashCode()
+                return result
+            }
         }
-
-        override fun hashCode(): Int {
-            return data.contentHashCode()
-        }
-
-        override fun toString(): String = "CandidateListEvent(${data.joinToString(limit = 5)})"
     }
 
     data class CommitStringEvent(override val data: String) :
@@ -143,7 +151,12 @@ sealed class FcitxEvent<T>(open val data: T) {
         @Suppress("UNCHECKED_CAST")
         fun create(type: Int, params: Array<Any>) =
             when (Types[type]) {
-                EventType.Candidate -> CandidateListEvent(params as Array<String>)
+                EventType.Candidate -> CandidateListEvent(
+                    CandidateListEvent.Data(
+                        params[0] as Int,
+                        params[1] as Array<String>
+                    )
+                )
                 EventType.Commit -> CommitStringEvent(params[0] as String)
                 EventType.ClientPreedit -> ClientPreeditEvent(params[0] as FormattedText)
                 EventType.InputPanel -> InputPanelEvent(

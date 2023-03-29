@@ -396,6 +396,10 @@ public:
         action->activate(ic);
     }
 
+    std::vector<std::string> getCandidates(int offset, int limit) {
+        return p_frontend->call<fcitx::IAndroidFrontend::getCandidates>(offset, limit);
+    }
+
     void save() {
         p_instance->save();
     }
@@ -531,13 +535,17 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
     fcitx::registerDomain("fcitx5-unikey", locale_dir_char);
     fcitx::registerDomain("fcitx5-android", locale_dir_char);
 
-    auto candidateListCallback = [](const std::vector<std::string> &candidateList) {
+    auto candidateListCallback = [](const std::vector<std::string> &candidates, const int size) {
         auto env = GlobalRef->AttachEnv();
-        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(static_cast<int>(candidateList.size()), GlobalRef->String, nullptr));
+        auto candidatesArray = JRef<jobjectArray>(env, env->NewObjectArray(static_cast<int>(candidates.size()), GlobalRef->String, nullptr));
         int i = 0;
-        for (const auto &s: candidateList) {
-            env->SetObjectArrayElement(vararg, i++, JString(env, s));
+        for (const auto &s: candidates) {
+            env->SetObjectArrayElement(candidatesArray, i++, JString(env, s));
         }
+        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(2, GlobalRef->Object, nullptr));
+        auto candidatesCount = JRef(env, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, size));
+        env->SetObjectArrayElement(vararg, 0, *candidatesCount);
+        env->SetObjectArrayElement(vararg, 1, *candidatesArray);
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 0, *vararg);
     };
     auto commitStringCallback = [](const std::string &str) {
@@ -903,8 +911,9 @@ JNIEXPORT jobjectArray JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_getFcitxStatusAreaActions(JNIEnv *env, jclass clazz) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     const auto actions = Fcitx::Instance().statusAreaActions();
-    jobjectArray array = env->NewObjectArray(static_cast<int>(actions.size()), GlobalRef->Action, nullptr);
-    for (int i = 0; i < actions.size(); i++) {
+    int size = static_cast<int>(actions.size());
+    jobjectArray array = env->NewObjectArray(size, GlobalRef->Action, nullptr);
+    for (int i = 0; i < size; i++) {
         auto obj = JRef(env, fcitxActionToJObject(env, actions[i]));
         env->SetObjectArrayElement(array, i, obj);
     }
@@ -916,6 +925,20 @@ JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_activateUserInterfaceAction(JNIEnv *env, jclass clazz, jint id) {
     RETURN_IF_NOT_RUNNING
     Fcitx::Instance().activateAction(static_cast<int>(id));
+}
+
+extern "C"
+JNIEXPORT jobjectArray JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_getFcitxCandidates(JNIEnv *env, jclass clazz, jint offset, jint limit) {
+    RETURN_VALUE_IF_NOT_RUNNING(nullptr)
+    auto candidates = Fcitx::Instance().getCandidates(static_cast<int>(offset), static_cast<int>(limit));
+    int size = static_cast<int>(candidates.size());
+    jobjectArray array = env->NewObjectArray(size, GlobalRef->String, nullptr);
+    for (int i = 0; i < size; i++) {
+        auto str = JString(env, candidates[i]);
+        env->SetObjectArrayElement(array, i, str);
+    }
+    return array;
 }
 
 extern "C"

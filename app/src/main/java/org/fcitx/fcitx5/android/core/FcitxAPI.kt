@@ -94,4 +94,6 @@ interface FcitxAPI {
 
     suspend fun activateAction(id: Int)
 
+    suspend fun getCandidates(offset: Int, limit: Int): Array<String>
+
 }
