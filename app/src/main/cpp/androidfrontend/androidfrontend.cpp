@@ -111,13 +111,13 @@ public:
         if (list) {
             const auto &bulk = list->toBulk();
             if (bulk) {
-                const int _limit = std::min(bulk->totalSize(), offset + limit + 1);
+                const int _limit = std::min(bulk->totalSize(), offset + limit);
                 for (int i = offset; i < _limit; i++) {
                     auto &candidate = bulk->candidateFromAll(i);
                     candidates.emplace_back(filterString(candidate.text()));
                 }
             } else {
-                const int _limit = std::min(list->size(), offset + limit + 1);
+                const int _limit = std::min(list->size(), offset + limit);
                 for (int i = offset; i < _limit; i++) {
                     candidates.emplace_back(filterString(list->candidate(i).text()));
                 }
