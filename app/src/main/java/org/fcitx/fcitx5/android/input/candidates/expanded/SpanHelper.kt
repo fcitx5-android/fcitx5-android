@@ -13,9 +13,7 @@ class SpanHelper(
 
     data class ItemLayout(val spanIndex: Int, val spanSize: Int, val groupIndex: Int)
 
-    private var layout: Array<ItemLayout?> = arrayOfNulls(adapter.itemCount)
-
-    private var layoutCount = 0
+    private val layout = ArrayList<ItemLayout>()
 
     private fun getMinSpanSize(position: Int) = min(
         // approximately three characters or one Chinese characters per span
@@ -27,11 +25,7 @@ class SpanHelper(
      * clear calculated layout
      */
     private fun invalidate() {
-        // reallocate array only when space not enough
-        if (adapter.itemCount > layout.size) {
-            layout = arrayOfNulls(adapter.itemCount)
-        }
-        layoutCount = 0
+        layout.clear()
     }
 
     override fun invalidateSpanIndexCache() {
@@ -40,22 +34,16 @@ class SpanHelper(
     }
 
     /**
-     * Calculate layout for all items currently in [adapter]
+     * Ensure layout of item at [position] in [adapter] have been calculated and return its layout
      */
-    private fun layoutItems() {
-        val itemCount = adapter.itemCount
+    private fun layoutItem(position: Int): ItemLayout {
         // skip calculation if we already have the result
-        if (layoutCount >= itemCount) return
-        // Sometimes `GridLayoutManager` won't call `invalidateSpanIndexCache()` when adapter
-        // changes occurs for the first time (ie. from itemCount==0 to itemCount!=0)
-        // So we need to call `invalidate()` ourselves
-        if (layout.size < itemCount) invalidate()
+        if (layout.size > position) return layout[position]
         val spanCount = manager.spanCount
         var span = 0
         var group = 0
         // start layout from the last known position
-        if (layoutCount > 0) {
-            val last = layout[layoutCount - 1]!!
+        layout.lastOrNull()?.also { last ->
             val lastSpan = last.spanIndex + last.spanSize
             if (lastSpan == spanCount) {
                 // the last known item is at the end of its group
@@ -67,7 +55,10 @@ class SpanHelper(
                 group = last.groupIndex
             }
         }
-        for (i in layoutCount until itemCount) {
+        val itemCount = adapter.itemCount
+        // layout a row of items each time
+        val batchEnd = min(spanCount * (position / spanCount + 1), adapter.itemCount)
+        for (i in layout.size until batchEnd) {
             var size = getMinSpanSize(i)
             val nextSize = if (i + 1 < itemCount) getMinSpanSize(i + 1) else null
             // we still have rest span spaces,
@@ -77,8 +68,7 @@ class SpanHelper(
                 size = spanCount - span
             }
             // save calculated layout
-            layout[i] = ItemLayout(span, size, group)
-            layoutCount++
+            layout.add(ItemLayout(span, size, group))
             // accumulate span size
             span += size
             // bump group index
@@ -87,20 +77,18 @@ class SpanHelper(
                 group++
             }
         }
+        return layout[position]
     }
 
     override fun getSpanIndex(position: Int, spanCount: Int): Int {
-        layoutItems()
-        return layout[position]!!.spanIndex
+        return layoutItem(position).spanIndex
     }
 
     override fun getSpanGroupIndex(adapterPosition: Int, spanCount: Int): Int {
-        layoutItems()
-        return layout[adapterPosition]!!.groupIndex
+        return layoutItem(adapterPosition).groupIndex
     }
 
     override fun getSpanSize(position: Int): Int {
-        layoutItems()
-        return layout[position]!!.spanSize
+        return layoutItem(position).spanSize
     }
 }

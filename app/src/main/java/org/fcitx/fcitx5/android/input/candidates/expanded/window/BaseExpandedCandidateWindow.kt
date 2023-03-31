@@ -91,7 +91,7 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
     private var offsetJob: Job? = null
 
     private val candidatesPager by lazy {
-        Pager(PagingConfig(pageSize = 16)) {
+        Pager(PagingConfig(pageSize = 48)) {
             CandidatesPagingSource(
                 fcitx,
                 total = horizontalCandidate.adapter.total,
