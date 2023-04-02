@@ -315,12 +315,12 @@ dependencies {
     ksp(project(":codegen"))
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.2")
     implementation("io.arrow-kt:arrow-core:1.1.5")
-    implementation("androidx.activity:activity-ktx:1.6.1")
+    implementation("androidx.activity:activity-ktx:1.7.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
     implementation("com.github.CanHub:Android-Image-Cropper:4.2.1")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("org.mechdancer:dependency:0.1.2")
-    val roomVersion = "2.5.0"
+    val roomVersion = "2.5.1"
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-paging:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
@@ -329,7 +329,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    val lifecycleVersion = "2.6.0"
+    val lifecycleVersion = "2.6.1"
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-service:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
@@ -353,7 +353,7 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.5.2")
     androidTestImplementation("androidx.test:rules:1.5.0")
-    androidTestImplementation("androidx.lifecycle:lifecycle-runtime-testing:2.6.0")
+    androidTestImplementation("androidx.lifecycle:lifecycle-runtime-testing:$lifecycleVersion")
     androidTestImplementation("junit:junit:4.13.2")
 }
 
