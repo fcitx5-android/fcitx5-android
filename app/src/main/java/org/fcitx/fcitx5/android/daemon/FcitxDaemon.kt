@@ -68,7 +68,7 @@ object FcitxDaemon {
         if (name in clients)
             return@withLock clients.getValue(name)
         if (realFcitx.lifecycle.currentState == FcitxLifecycle.State.STOPPED) {
-            Timber.d("Start fcitx")
+            Timber.d("FcitxDaemon start fcitx")
             realFcitx.start()
         }
         val new = mkConnection(name)
@@ -84,7 +84,7 @@ object FcitxDaemon {
             return
         clients -= name
         if (clients.isEmpty()) {
-            Timber.d("Stop fcitx")
+            Timber.d("FcitxDaemon stop fcitx")
             realFcitx.stop()
         }
     }

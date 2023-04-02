@@ -303,28 +303,22 @@ class InputView(
             is FcitxEvent.CandidateListEvent -> {
                 broadcaster.onCandidateUpdate(it.data)
             }
-
             is FcitxEvent.ClientPreeditEvent -> {
                 preeditEmptyState.updatePreeditEmptyState(clientPreedit = it.data)
                 broadcaster.onClientPreeditUpdate(it.data)
             }
-
             is FcitxEvent.InputPanelEvent -> {
                 preeditEmptyState.updatePreeditEmptyState(preedit = it.data.preedit)
                 broadcaster.onInputPanelUpdate(it.data)
             }
-
             is FcitxEvent.IMChangeEvent -> {
                 broadcaster.onImeUpdate(it.data)
             }
-
             is FcitxEvent.StatusAreaEvent -> {
                 punctuation.updatePunctuationMapping(it.data)
                 broadcaster.onStatusAreaUpdate(it.data)
             }
-
-            else -> {
-            }
+            else -> {}
         }
     }
 

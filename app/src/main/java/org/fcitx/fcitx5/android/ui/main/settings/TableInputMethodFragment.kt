@@ -21,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
 import org.fcitx.fcitx5.android.data.table.TableBasedInputMethod
 import org.fcitx.fcitx5.android.data.table.TableManager
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
@@ -290,16 +291,15 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
     }
 
     private fun reloadConfig() {
-        if (!dustman.dirty)
-            return
+        if (!dustman.dirty) return
         resetDustman()
-        lifecycleScope.launch {
-            viewModel.fcitx.runOnReady { reloadConfig() }
+        lifecycleScope.launchOnFcitxReady(viewModel.fcitx) {
+            it.reloadConfig()
         }
     }
 
     private fun resetDustman() {
-        dustman.reset((entries.associateBy { it.name }))
+        dustman.reset(entries.associateBy { it.name })
     }
 
     override fun onItemAdded(idx: Int, item: TableBasedInputMethod) {

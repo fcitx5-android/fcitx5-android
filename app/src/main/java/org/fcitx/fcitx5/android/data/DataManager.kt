@@ -115,7 +115,7 @@ object DataManager {
 
         copyFile(Const.dataDescriptorName)
 
-        Timber.i("Synced!")
+        Timber.i("DataManager Synced!")
     }
 
     fun deleteAndSync() {

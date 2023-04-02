@@ -60,9 +60,9 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
     fun start() {
         internalScope.launch {
             runningLock.withLock {
-                Timber.i("Start")
+                Timber.i("FcitxDispatcher start()")
                 if (isRunning.compareAndSet(false, true)) {
-                    Timber.d("Calling native startup")
+                    Timber.d("nativeStartup()")
                     controller.nativeStartup()
                     while (isActive && isRunning.get()) {
                         // blocking...
@@ -75,7 +75,7 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
                             block.run()
                         }
                     }
-                    Timber.i("Calling native exit")
+                    Timber.i("nativeExit()")
                     controller.nativeExit()
                 }
             }
@@ -100,15 +100,6 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
         } else emptyList()
     }
 
-    private fun dispatchInternal(block: Runnable, name: String? = null): WrappedRunnable {
-        if (!isRunning.get())
-            throw IllegalStateException("Dispatcher is not in running state!")
-        val wrapped = WrappedRunnable(block, name)
-        queue.offer(wrapped)
-        bypass()
-        return wrapped
-    }
-
     // bypass nativeLoopOnce if no code is executing in native dispatcher
     private fun bypass() {
         if (nativeLoopLock.isLocked)
@@ -116,7 +107,11 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
     }
 
     override fun dispatch(context: CoroutineContext, block: Runnable) {
-        this@FcitxDispatcher.dispatchInternal(block)
+        if (!isRunning.get()) {
+            throw IllegalStateException("Dispatcher is not in running state!")
+        }
+        queue.offer(WrappedRunnable(block))
+        bypass()
     }
 
     companion object {

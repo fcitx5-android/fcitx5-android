@@ -60,7 +60,7 @@ class TableBasedInputMethod(private val ini: FcitxIni, val file: File) {
 
         fun new(configFile: File): TableBasedInputMethod {
             val im = TableBasedInputMethod(FcitxIni(configFile), configFile)
-            Timber.i("Importing table im name=${im.name} tableFileName=${im.tableFileName}")
+            Timber.d("new TableBasedInputMethod(name=${im.name}, tableFileName=${im.tableFileName})")
             return im
         }
     }

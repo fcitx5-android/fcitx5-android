@@ -94,13 +94,12 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             service.lifecycleScope.launch {
                 if (it.text.isEmpty()) {
                     isClipboardFresh = true
-                    evalIdleUiState()
                 } else {
                     idleUi.clipboardUi.text.text = it.text.take(42)
                     isClipboardFresh = false
-                    evalIdleUiState()
                     launchClipboardTimeoutJob()
                 }
+                evalIdleUiState()
             }
         }
 
@@ -194,7 +193,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                     clipboardTimeoutJob?.cancel()
                     clipboardTimeoutJob = null
                     isClipboardFresh = true
-                    evalIdleUiState()
+                    evalIdleUiState(fromUser = true)
                 }
                 setOnLongClickListener {
                     ClipboardManager.lastEntry?.let {
@@ -326,8 +325,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                 }
                 barStateMachine.push(ExtendedWindowAttached)
             }
-            is InputWindow.SimpleInputWindow<*> -> {
-            }
+            else -> {}
         }
     }
 
