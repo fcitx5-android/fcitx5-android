@@ -5,8 +5,6 @@ import androidx.annotation.Keep
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -173,6 +171,8 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
                 onBufferOverflow = BufferOverflow.DROP_OLDEST
             )
 
+        private val fcitxEventHandlers = ArrayList<(FcitxEvent<*>) -> Unit>()
+
         init {
             System.loadLibrary("native-lib")
             setupLogStream(AppPrefs.getInstance().internal.verboseLog.getValue())
@@ -327,6 +327,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
                     onFirstRun()
                 }
             }
+            fcitxEventHandlers.forEach { it.invoke(event) }
             eventFlow_.tryEmit(event)
         }
 
@@ -344,6 +345,18 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
                 setFcitxAddonConfig("pinyin", this)
             }
             firstRun = false
+        }
+
+        /**
+         * register a [FcitxEvent] handler that will fire before events go into [eventFlow_]
+         */
+        private fun registerFcitxEventHandler(handler: (FcitxEvent<*>) -> Unit) {
+            if (fcitxEventHandlers.contains(handler)) return
+            fcitxEventHandlers.add(handler)
+        }
+
+        private fun unregisterFcitxEventHandler(handler: (FcitxEvent<*>) -> Unit) {
+            fcitxEventHandlers.remove(handler)
         }
 
     }
@@ -398,23 +411,23 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         }.let { ImmutableGraph(it) }
     }
 
+    private fun handleFcitxEvent(event: FcitxEvent<*>) {
+        when (event) {
+            is FcitxEvent.ReadyEvent -> lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_READY)
+            is FcitxEvent.IMChangeEvent -> inputMethodEntryCached = event.data
+            is FcitxEvent.StatusAreaEvent -> statusAreaActionsCached = event.data
+            is FcitxEvent.ClientPreeditEvent -> clientPreeditCached = event.data
+            is FcitxEvent.InputPanelEvent -> inputPanelCached = event.data
+            else -> {}
+        }
+    }
+
     fun start() {
         if (lifecycle.currentState != FcitxLifecycle.State.STOPPED) {
             Timber.w("Skip starting fcitx: not at stopped state!")
             return
         }
-        // launch before dispatcher started to update internal states in this class
-        // the job gets cancelled automatically on stop
-        eventFlow.onEach {
-            when (it) {
-                is FcitxEvent.ReadyEvent -> lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_READY)
-                is FcitxEvent.IMChangeEvent -> inputMethodEntryCached = it.data
-                is FcitxEvent.StatusAreaEvent -> statusAreaActionsCached = it.data
-                is FcitxEvent.ClientPreeditEvent -> clientPreeditCached = it.data
-                is FcitxEvent.InputPanelEvent -> inputPanelCached = it.data
-                else -> {}
-            }
-        }.launchIn(lifeCycleScope)
+        registerFcitxEventHandler(::handleFcitxEvent)
         lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_START)
         ClipboardManager.addOnUpdateListener(onClipboardUpdate)
         dispatcher.start()
@@ -433,6 +446,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
                 Timber.w("${it.size} job(s) didn't get a chance to run!")
         }
         lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_STOPPED)
+        unregisterFcitxEventHandler(::handleFcitxEvent)
         // clear addon graph
         addonGraph = null
         addonReverseDependencies.clear()
