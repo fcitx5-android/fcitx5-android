@@ -1,7 +1,6 @@
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -18,12 +17,15 @@ import org.jetbrains.kotlin.com.google.common.io.ByteSource
 import java.io.File
 import java.nio.charset.Charset
 
+/**
+ * Add task generateDataDescriptor
+ */
 class DataDescriptorPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             tasks.register<DataDescriptorTask>("generateDataDescriptor") {
                 inputDir.set(file("src/main/assets"))
-                outputFile.set(file("src/main/assets/descriptor.json"))
+                outputFile.set(file("src/main/assets/${dataDescriptorName}"))
             }
         }
     }

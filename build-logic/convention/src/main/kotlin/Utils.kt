@@ -1,6 +1,8 @@
 import kotlinx.serialization.json.Json
 import org.gradle.api.Project
+import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.kotlin.dsl.extra
+import org.gradle.kotlin.dsl.getByType
 import java.io.ByteArrayOutputStream
 
 inline fun envOrDefault(env: String, default: () -> String) =
@@ -24,7 +26,7 @@ fun Project.runCmd(cmd: String): String = ByteArrayOutputStream().use {
 
 val json = Json { prettyPrint = true }
 
-private inline fun Project.eep(name: String, envName: String, block: () -> String) =
+internal inline fun Project.eep(name: String, envName: String, block: () -> String) =
     extOrDefault(name) {
         envOrDefault(envName) {
             propertyOrDefault(envName) {
@@ -33,16 +35,5 @@ private inline fun Project.eep(name: String, envName: String, block: () -> Strin
         }
     }
 
-val Project.buildVersionName
-    get() = eep("buildVersionName", "BUILD_VERSION_NAME") {
-        runCmd("git describe --tags --long --always")
-    }
-
-val Project.buildCommitHash
-    get() = eep("buildCommitHash", "BUILD_COMMIT_HASH") {
-        runCmd("git rev-parse HEAD")
-    }
-val Project.buildTimestamp
-    get() = eep("buildTimestamp", "BUILD_TIMESTAMP") {
-        System.currentTimeMillis().toString()
-    }
+val Project.versionCatalog
+    get() = extensions.getByType<VersionCatalogsExtension>().named("libs")

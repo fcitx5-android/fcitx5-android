@@ -1,3 +1,4 @@
+import com.android.build.api.variant.AndroidComponentsExtension
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import org.gradle.api.DefaultTask
@@ -9,11 +10,23 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.register
 import org.gradle.work.InputChanges
 
+/**
+ * Add task generateBuildMetadata
+ */
 class BuildMetadataPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             tasks.register<BuildMetadataTask>("generateBuildMetadata") {
                 outputFile.set(file("build/outputs/apk/build-metadata.json"))
+            }
+            val androidComponents =
+                project.extensions.getByType(AndroidComponentsExtension::class.java)
+            androidComponents.finalizeDsl {
+                it.defaultConfig {
+                    buildConfigField("String", "BUILD_GIT_HASH", "\"${buildCommitHash}\"")
+                    buildConfigField("long", "BUILD_TIME", buildTimestamp)
+                    buildConfigField("String", "DATA_DESCRIPTOR_NAME", "\"${dataDescriptorName}\"")
+                }
             }
         }
     }

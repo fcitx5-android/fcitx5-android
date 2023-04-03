@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     `kotlin-dsl`
     kotlin("plugin.serialization") version embeddedKotlinVersion
@@ -5,9 +7,8 @@ plugins {
 
 group = "org.fcitx.fcitx5.android.buildlogic"
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+kotlin {
+    jvmToolchain(11)
 }
 
 dependencies {
@@ -30,5 +31,19 @@ gradlePlugin {
             id = "build-metadata"
             implementationClass = "BuildMetadataPlugin"
         }
+        register("androidConvention") {
+            id = "android-convention"
+            implementationClass = "AndroidConventionPlugin"
+        }
+        register("nativeConvention") {
+            id = "native-convention"
+            implementationClass = "NativeConventionPlugin"
+        }
+    }
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
+        jvmTarget = "11"
     }
 }
