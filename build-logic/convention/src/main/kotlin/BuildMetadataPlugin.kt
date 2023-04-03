@@ -34,22 +34,6 @@ class BuildMetadataPlugin : Plugin<Project> {
         @TaskAction
         fun execute(inputChanges: InputChanges) {
             with(project) {
-                val buildVersionName = envOrDefault("BUILD_VERSION_NAME") {
-                    propertyOrDefault("buildVersionName") {
-                        runCmd("git describe --tags --long --always")
-                    }
-                }
-
-                val buildCommitHash = envOrDefault("BUILD_COMMIT_HASH") {
-                    propertyOrDefault("buildCommitHash") {
-                        runCmd("git rev-parse HEAD")
-                    }
-                }
-                val buildTimestamp = envOrDefault("BUILD_TIMESTAMP") {
-                    propertyOrDefault("buildTimestamp") {
-                        System.currentTimeMillis().toString()
-                    }
-                }
                 val metadata = BuildMetadata(buildVersionName, buildCommitHash, buildTimestamp)
                 file.writeText(json.encodeToString(metadata))
             }

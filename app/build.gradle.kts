@@ -24,6 +24,7 @@ plugins {
     kotlin("plugin.serialization") version "1.8.10"
     id("com.google.devtools.ksp") version "1.8.10-1.0.9"
     id("com.mikepenz.aboutlibraries.plugin")
+    id("build-metadata")
 }
 
 val dataDescriptorName = "descriptor.json"
@@ -41,19 +42,19 @@ fun calculateVersionCode(abi: String): Int {
     }
     return baseVersionCode * 10 + abiId
 }
-
-fun envOrDefault(env: String, default: () -> String): String {
-    val v = System.getenv(env)
-    return if (v.isNullOrBlank()) default() else v
-}
-
-fun propertyOrDefault(prop: String, default: () -> String): String {
-    return try {
-        project.property(prop)!!.toString()
-    } catch (e: Exception) {
-        default()
-    }
-}
+//
+//fun envOrDefault(env: String, default: () -> String): String {
+//    val v = System.getenv(env)
+//    return if (v.isNullOrBlank()) default() else v
+//}
+//
+//fun propertyOrDefault(prop: String, default: () -> String): String {
+//    return try {
+//        project.property(prop)!!.toString()
+//    } catch (e: Exception) {
+//        default()
+//    }
+//}
 
 val buildABI = envOrDefault("BUILD_ABI") {
     propertyOrDefault("buildABI") {
@@ -63,24 +64,24 @@ val buildABI = envOrDefault("BUILD_ABI") {
 //        "x86_64"
     }
 }
-
-val buildVersionName = envOrDefault("BUILD_VERSION_NAME") {
-    propertyOrDefault("buildVersionName") {
-        exec("git describe --tags --long --always")
-    }
-}
-
-val buildCommitHash = envOrDefault("BUILD_COMMIT_HASH") {
-    propertyOrDefault("buildCommitHash") {
-        exec("git rev-parse HEAD")
-    }
-}
-
-val buildTimestamp = envOrDefault("BUILD_TIMESTAMP") {
-    propertyOrDefault("buildTimestamp") {
-        System.currentTimeMillis().toString()
-    }
-}
+//
+//val buildVersionName = envOrDefault("BUILD_VERSION_NAME") {
+//    propertyOrDefault("buildVersionName") {
+//        exec("git describe --tags --long --always")
+//    }
+//}
+//
+//val buildCommitHash = envOrDefault("BUILD_COMMIT_HASH") {
+//    propertyOrDefault("buildCommitHash") {
+//        exec("git rev-parse HEAD")
+//    }
+//}
+//
+//val buildTimestamp = envOrDefault("BUILD_TIMESTAMP") {
+//    propertyOrDefault("buildTimestamp") {
+//        System.currentTimeMillis().toString()
+//    }
+//}
 
 android {
     namespace = "org.fcitx.fcitx5.android"
