@@ -34,17 +34,18 @@ class AndroidConventionPlugin : Plugin<Project> {
             androidComponents.onVariants { v ->
                 // Evaluation should be delayed as we need be able to see other tasks
                 afterEvaluate {
-                    val generateDataDescriptor =
-                        tasks.findByName("generateDataDescriptor")
-                    val generateBuildMetadata =
-                        tasks.findByName("generateBuildMetadata")
+                    val generateDataDescriptor = tasks.findByName("generateDataDescriptor")
+                    val generateBuildMetadata = tasks.findByName("generateBuildMetadata")
                     val variantName = v.name.capitalized()
-                    tasks.getByName("merge${variantName}Assets")
-                        .dependsOn(generateDataDescriptor)
-                    tasks.getByName("lintAnalyze${variantName}").dependsOn(generateDataDescriptor)
-                    tasks.getByName("lintReport${variantName}").dependsOn(generateDataDescriptor)
-                    tasks.getByName("lintVitalAnalyzeRelease").dependsOn(generateDataDescriptor)
-                    tasks.getByName("assemble${variantName}").dependsOn(generateBuildMetadata)
+                    generateDataDescriptor?.let {
+                        tasks.getByName("merge${variantName}Assets").dependsOn(it)
+                        tasks.getByName("lintAnalyze${variantName}").dependsOn(it)
+                        tasks.getByName("lintReport${variantName}").dependsOn(it)
+                        tasks.getByName("lintVitalAnalyzeRelease").dependsOn(it)
+                    }
+                    generateBuildMetadata?.let {
+                        tasks.getByName("assemble${variantName}").dependsOn(it)
+                    }
                 }
 
             }
