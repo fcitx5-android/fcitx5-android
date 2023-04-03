@@ -3,6 +3,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Delete
 import org.gradle.configurationcache.extensions.capitalized
+import org.gradle.kotlin.dsl.extra
 import org.gradle.kotlin.dsl.register
 import java.io.File
 
@@ -12,27 +13,41 @@ import java.io.File
 class FcitxComponentPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
+            /**
+             * Note *Graph*
+             * Installing fcitx components depends .cxx dir.
+             * Since the native task `buildCMake$Variant$ABI` depend on the current variant and ABI,
+             * we should have registered installFcitxComponent tasks for the cartesian product of $Variant and $ABI, e.g. installFcitxComponentDebug\[x86\]
+             * However, this would be way more tedious, as the build variant and ABI actually do not affect components we are going to install.
+             * The essential cause of this situation is that it's impossible for gradle to handle dynamic dependencies,
+             * where we cannot add dependency when running a task. So a trick is used here: when the task graph
+             * is evaluated, we look into it to find out the name of the native task which will be executed, and then store its output
+             * path in global variable. This results in our tasks can not be executed directly without executing the dependent of the native task,
+             * i.e. they are implicitly depending on the native task.
+             */
+            gradle.taskGraph.whenReady {
+                val buildCMakeABITask = allTasks
+                    .find { it.name.startsWith("buildCMakeDebug[") || it.name.startsWith("buildCMakeRelWithDebInfo[") }
+                if (buildCMakeABITask != null) {
+                    val cmakeDir = buildCMakeABITask.outputs.files.first().parentFile
+                    extra.set("cmakeDir", cmakeDir)
+                }
+            }
             val all = tasks.register("installFcitxComponent")
             fun regTask(target: String, component: String) {
                 tasks.register("installFcitx${component.capitalized()}") {
-                    // Make sure that this task runs after than the native task
-                    // We should have used dependsOn. See the note below
+                    /**
+                     * Important: make sure that this task runs after than the native task
+                     * Since we can't declare the dependency relationship, a weaker running order constraint must be enforced
+                     * See the note above
+                     */
                     mustRunAfter("buildCMakeDebug[$buildABI]")
                     mustRunAfter("buildCMakeRelWithDebInfo[$buildABI]")
+
                     doLast {
-                        /**
-                         * Tasks registered implicitly depend .cxx dir to install generated files.
-                         * Since the native task `buildCMake$Variant$ABI` depend on the current variant and ABI,
-                         * we should have registered [installFcitxComponent] tasks for the cartesian product of $Variant and $ABI.
-                         * However, this would be way more tedious, as the build variant and ABI do not affect components we are going to install.
-                         * The essential cause of this situation is that it's impossible for gradle to handle dynamic dependencies,
-                         * where once the build graph was evaluated, no dependencies can be changed. So we delay the process of obtaining the output
-                         * of cmake to the evaluation of theses tasks, which means that installFcitxComponent can not be run independently.
-                         */
-                        val cmakeDir = tasks.find {
-                            it.name.startsWith("buildCMakeDebug[") || it.name.startsWith("buildCMakeRelWithDebInfo[")
-                        }?.outputs?.files?.firstOrNull()?.parentFile?.takeIf { it.isDirectory }
-                            ?: error("Cannot find cmake dir. Did you run this task independently?")
+                        val cmakeDir =
+                            runCatching { (extra.get("cmakeDir") as? File)?.takeIf { it.isDirectory } }.getOrNull()
+                                ?: error("Cannot find cmake dir. Did you run this task independently?")
                         exec {
                             workingDir = cmakeDir
                             commandLine(
