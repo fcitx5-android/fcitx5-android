@@ -15,6 +15,10 @@ class FcitxComponentPlugin : Plugin<Project> {
             val all = tasks.register("installFcitxComponent")
             fun regTask(target: String, component: String) {
                 tasks.register("installFcitx${component.capitalized()}") {
+                    // Make sure that this task runs after than the native task
+                    // We should have used dependsOn. See the note below
+                    mustRunAfter("buildCMakeDebug[$buildABI]")
+                    mustRunAfter("buildCMakeRelWithDebInfo[$buildABI]")
                     doLast {
                         /**
                          * Tasks registered implicitly depend .cxx dir to install generated files.
