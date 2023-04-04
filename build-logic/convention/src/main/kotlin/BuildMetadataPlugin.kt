@@ -8,7 +8,6 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.register
-import org.gradle.work.InputChanges
 
 /**
  * Add task generateBuildMetadata
@@ -45,7 +44,7 @@ class BuildMetadataPlugin : Plugin<Project> {
         private val file by lazy { outputFile.get().asFile }
 
         @TaskAction
-        fun execute(inputChanges: InputChanges) {
+        fun execute() {
             with(project) {
                 val metadata = BuildMetadata(buildVersionName, buildCommitHash, buildTimestamp)
                 file.writeText(json.encodeToString(metadata))
