@@ -44,7 +44,8 @@ class FcitxComponentPlugin : Plugin<Project> {
                     mustRunAfter("buildCMakeRelWithDebInfo[$buildABI]")
 
                     doLast {
-                        val dir = cmakeDir ?: error("Cannot find cmake dir. Did you run this task independently?")
+                        val dir = cmakeDir
+                            ?: error("Cannot find cmake dir. Did you run this task independently?")
                         exec {
                             workingDir = dir
                             commandLine(
@@ -66,15 +67,15 @@ class FcitxComponentPlugin : Plugin<Project> {
             regTask("generate-desktop-file", "config")
             regTask("translation-file", "translation")
             tasks.register<Delete>("cleanFcitxComponents") {
-                delete(file("src/main/assets/usr/share/locale"))
+                val locale = file("src/main/assets/usr/share/locale")
                 // delete all non symlink dirs
-                delete(file("src/main/assets/usr/share/fcitx5").listFiles()?.filter {
+                val fcitx = file("src/main/assets/usr/share/fcitx5").listFiles()?.filter {
                     // https://stackoverflow.com/questions/813710/java-1-6-determine-symbolic-links
                     File(it.parentFile.canonicalFile, it.name).let { s ->
                         s.canonicalFile == s.absoluteFile
                     }
-                })
-                delete(file("src/main/assets/${dataDescriptorName}"))
+                }
+                delete(locale, fcitx)
             }.also { tasks.named("clean").dependsOn(it) }
         }
     }
