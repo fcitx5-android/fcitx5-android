@@ -56,6 +56,12 @@ class AndroidConventionPlugin : Plugin<Project> {
                 tasks.findByName("installFcitxComponent")?.let {
                     tasks.findByName("generateDataDescriptor")?.dependsOn(it)
                 }
+                // applicationId is not set upon apply
+                extensions.configure<ApplicationExtension> {
+                    defaultConfig {
+                        setProperty("archivesBaseName", "$applicationId-$buildVersionName")
+                    }
+                }
             }
 
             with(Versions) {
@@ -67,7 +73,6 @@ class AndroidConventionPlugin : Plugin<Project> {
                         targetSdk = targetSdkVersion
                         versionCode = calculateVersionCode(buildABI)
                         versionName = buildVersionName
-                        setProperty("archivesBaseName", "$applicationId-$buildVersionName")
                     }
                     compileOptions {
                         sourceCompatibility = JavaVersion.VERSION_11
