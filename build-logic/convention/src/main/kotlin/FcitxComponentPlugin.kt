@@ -3,6 +3,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Delete
 import org.gradle.configurationcache.extensions.capitalized
+import org.gradle.kotlin.dsl.extra
 import org.gradle.kotlin.dsl.register
 import java.io.File
 
@@ -24,12 +25,13 @@ class FcitxComponentPlugin : Plugin<Project> {
              * path in global variable. This results in our tasks can not be executed directly without executing the dependent of the native task,
              * i.e. they are implicitly depending on the native task.
              */
-            var cmakeDir: File? = null
             gradle.taskGraph.whenReady {
-                val buildCMakeABITask = allTasks
-                    .find { it.name.startsWith("buildCMakeDebug[") || it.name.startsWith("buildCMakeRelWithDebInfo[") }
+                val buildCMakeABITask = allTasks.find {
+                    it.project.name == project.name &&
+                            (it.name.startsWith("buildCMakeDebug[") || it.name.startsWith("buildCMakeRelWithDebInfo["))
+                }
                 if (buildCMakeABITask != null) {
-                    cmakeDir = buildCMakeABITask.outputs.files.first().parentFile
+                    project.extra["cmakeDir"] = buildCMakeABITask.outputs.files.first().parentFile
                 }
             }
             val all = tasks.register("installFcitxComponent")
@@ -44,17 +46,11 @@ class FcitxComponentPlugin : Plugin<Project> {
                     mustRunAfter("buildCMakeRelWithDebInfo[$buildABI]")
 
                     doLast {
-                        val dir = cmakeDir
+                        val dir = project.extra["cmakeDir"] as? File
                             ?: error("Cannot find cmake dir. Did you run this task independently?")
                         exec {
                             workingDir = dir
-                            commandLine(
-                                "cmake",
-                                "--build",
-                                ".",
-                                "--target",
-                                target
-                            )
+                            commandLine("cmake", "--build", ".", "--target", target)
                         }
                         exec {
                             workingDir = dir
