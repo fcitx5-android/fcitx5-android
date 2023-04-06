@@ -16,3 +16,9 @@
 [submodule "app/src/main/cpp/fcitx5-unikey"]
 	path = app/src/main/cpp/fcitx5-unikey
 	url = git@github.com:fcitx/fcitx5-unikey.git
+[submodule "plugin/anthy/src/main/cpp/anthy-cmake"]
+	path = plugin/anthy/src/main/cpp/anthy-cmake
+	url = git@github.com:fcitx5-android/anthy-cmake.git
+[submodule "plugin/anthy/src/main/cpp/fcitx5-anthy"]
+	path = plugin/anthy/src/main/cpp/fcitx5-anthy
+	url = git@github.com:fcitx5-android/fcitx5-anthy.git

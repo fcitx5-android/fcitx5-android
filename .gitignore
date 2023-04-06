@@ -1,7 +1,3 @@
-# Module :lib:fcitx5
-# Installed headers
-/lib/fcitx5/src/main/cpp/headers
-
 # Module :app
 # Installed data
 /app/src/main/assets/usr/share/fcitx5/addon
@@ -15,6 +11,15 @@
 /app/src/main/assets/usr/share/locale
 # Generated asset descriptor
 /app/src/main/assets/descriptor.json
+
+# Module :plugin:anthy
+# Installed data
+/plugin/anthy/src/main/assets/usr/share/fcitx5/addon
+/plugin/anthy/src/main/assets/usr/share/fcitx5/anthy
+/plugin/anthy/src/main/assets/usr/share/fcitx5/inputmethod
+/plugin/anthy/src/main/assets/usr/share/locale
+# Generated asset descriptor
+/plugin/anthy/src/main/assets/descriptor.json
 
 # Intellij
 .idea/*
