@@ -5,7 +5,7 @@
     <content url="file://$MODULE_DIR$/../..">
       <excludeFolder url="file://$MODULE_DIR$/../../.gradle" />
       <excludeFolder url="file://$MODULE_DIR$/../../build" />
-      <excludeFolder url="file://$MODULE_DIR$/../../app/src/main/cpp/prebuilt" />
+      <excludeFolder url="file://$MODULE_DIR$/../../lib/fcitx5/src/main/cpp/prebuilt" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -13,9 +13,9 @@ import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 /**
  * The prototype of an Android Application
  *
- * * Configure dependency for [BuildMetadataPlugin] task and [DataDescriptorPlugin]  task (If have)
- * * Provide default configuration for `android {...}`
- * * Add desugar JDK libs
+ * - Configure dependency for [BuildMetadataPlugin] task and [DataDescriptorPlugin]  task (If have)
+ * - Provide default configuration for `android {...}`
+ * - Add desugar JDK libs
  */
 class AndroidConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -34,8 +34,8 @@ class AndroidConventionPlugin : Plugin<Project> {
             androidComponents.onVariants { v ->
                 // Evaluation should be delayed as we need be able to see other tasks
                 afterEvaluate {
-                    val generateDataDescriptor = tasks.findByName("generateDataDescriptor")
-                    val generateBuildMetadata = tasks.findByName("generateBuildMetadata")
+                    val generateDataDescriptor = tasks.findByName(DataDescriptorPlugin.TASK)
+                    val generateBuildMetadata = tasks.findByName(BuildMetadataPlugin.TASK)
                     val variantName = v.name.capitalized()
                     generateDataDescriptor?.let {
                         tasks.getByName("merge${variantName}Assets").dependsOn(it)
@@ -53,8 +53,8 @@ class AndroidConventionPlugin : Plugin<Project> {
             // Make data descriptor depend on fcitx component if have
             // Since we are using finalizeDsl, there is no need to do afterEvaluate
             androidComponents.finalizeDsl {
-                tasks.findByName("installFcitxComponent")?.let {
-                    tasks.findByName("generateDataDescriptor")?.dependsOn(it)
+                tasks.findByName(FcitxComponentPlugin.INSTALL_TASK)?.let {
+                    tasks.findByName(DataDescriptorPlugin.TASK)?.dependsOn(it)
                 }
                 // applicationId is not set upon apply
                 extensions.configure<ApplicationExtension> {

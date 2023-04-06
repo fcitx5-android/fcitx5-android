@@ -13,9 +13,14 @@ import org.gradle.kotlin.dsl.register
  * Add task generateBuildMetadata
  */
 class BuildMetadataPlugin : Plugin<Project> {
+
+    companion object {
+        const val TASK = "generateBuildMetadata"
+    }
+
     override fun apply(target: Project) {
         with(target) {
-            tasks.register<BuildMetadataTask>("generateBuildMetadata") {
+            tasks.register<BuildMetadataTask>(TASK) {
                 outputFile.set(file("build/outputs/apk/build-metadata.json"))
             }
             val androidComponents =

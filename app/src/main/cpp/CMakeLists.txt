@@ -7,55 +7,33 @@ set(CMAKE_CXX_STANDARD 17)
 # For reproducible build
 add_link_options("LINKER:--hash-style=gnu,--build-id=none")
 
+# prefab dependency
+find_package(fcitx5 REQUIRED CONFIG)
+get_target_property(FCITX5_CMAKE_MODULES fcitx5::cmake INTERFACE_INCLUDE_DIRECTORIES)
+set(CMAKE_MODULE_PATH ${FCITX5_CMAKE_MODULES} ${CMAKE_MODULE_PATH})
+
+find_package(Fcitx5Core MODULE)
+find_package(Fcitx5Module MODULE)
+
+# install prefix for addon conf and locale
 set(CMAKE_INSTALL_PREFIX /usr)
-# fcitx-utils/standardpath.cpp uses FCITX_INSTALL_LIBDATADIR,
-# which is CMAKE_INSTALL_LIBDATADIR's absolute path
-set(CMAKE_INSTALL_LIBDATADIR /usr/lib)
 set(FCITX_INSTALL_PKGDATADIR /usr/share/fcitx5)
 set(FCITX_INSTALL_LOCALEDIR /usr/share/locale)
-set(LIBIME_INSTALL_PKGDATADIR table)
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
-# extra-cmake-modules
-if(DEFINED ENV{ECM_DIR})
-    set(ECM_DIR $ENV{ECM_DIR})
-else()
-    set(ECM_DIR /usr/share/ECM/cmake)
-endif()
+add_subdirectory(po)
+add_subdirectory(androidfrontend)
+add_subdirectory(androidkeyboard)
 
-set(PREBUILT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/prebuilt")
+# prebuilt dir. at least it works.
+set(PREBUILT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../lib/fcitx5/src/main/cpp/prebuilt")
 
 # prebuilt fmt
 set(fmt_DIR "${PREBUILT_DIR}/fmt/${ANDROID_ABI}/lib/cmake/fmt")
 find_package(fmt)
 
-# prebuilt libintl-lite
-set(LibIntl_DIR "${PREBUILT_DIR}/libintl-lite/${ANDROID_ABI}/lib/cmake")
-find_package(LibIntl)
-
 # prebuilt libevent
 set(Libevent_DIR "${PREBUILT_DIR}/libevent/${ANDROID_ABI}/lib/cmake/libevent")
 find_package(Libevent)
-
-option(ENABLE_TEST "" OFF)
-option(ENABLE_COVERAGE "" OFF)
-option(ENABLE_ENCHANT "" OFF)
-option(ENABLE_X11 "" OFF)
-option(ENABLE_WAYLAND "" OFF)
-option(ENABLE_DBUS "" OFF)
-option(ENABLE_DOC "" OFF)
-option(ENABLE_SERVER "" OFF)
-option(ENABLE_KEYBOARD "" OFF)
-option(USE_SYSTEMD "" OFF)
-option(ENABLE_XDGAUTOSTART "" OFF)
-option(ENABLE_EMOJI "" OFF)
-option(ENABLE_LIBUUID "" OFF)
-add_subdirectory(fcitx5)
-
-include(fcitx5/src/lib/fcitx-utils/Fcitx5Macros.cmake)
-add_subdirectory(po)
-add_subdirectory(androidfrontend)
-add_subdirectory(androidkeyboard)
 
 # prebuilt boost
 set(BOOST_VERSION "1.80.0")
@@ -67,10 +45,10 @@ foreach(mod IN LISTS BOOST_MODULES)
 endforeach()
 
 option(ENABLE_TEST "" OFF)
-set(_Fcitx5Macro_SELF_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fcitx5/src/lib/fcitx-utils)
+set(LIBIME_INSTALL_PKGDATADIR table)
 add_subdirectory(libime)
 # kenlm/util/exception.hh uses __FILE__ macro
-target_compile_options(kenlm PRIVATE "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.")
+target_compile_options(kenlm PRIVATE "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}/libime/src/libime/core/kenlm=.")
 
 # prebuilt lua
 include("${PREBUILT_DIR}/lua/${ANDROID_ABI}/lib/cmake/LuaConfig.cmake")
@@ -112,3 +90,12 @@ target_link_libraries(native-lib
         Fcitx5::Module::Clipboard
         LibIME::Pinyin
         LibIME::Table)
+
+add_custom_target(copy-fcitx5-modules
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::clipboard,IMPORTED_LOCATION> $<TARGET_FILE_DIR:native-lib>
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::imselector,IMPORTED_LOCATION> $<TARGET_FILE_DIR:native-lib>
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::quickphrase,IMPORTED_LOCATION> $<TARGET_FILE_DIR:native-lib>
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::spell,IMPORTED_LOCATION> $<TARGET_FILE_DIR:native-lib>
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::unicode,IMPORTED_LOCATION> $<TARGET_FILE_DIR:native-lib>
+        COMMENT "Copying fcitx5 module libraries to :app"
+        )

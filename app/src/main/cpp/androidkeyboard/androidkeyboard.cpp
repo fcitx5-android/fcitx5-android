@@ -5,8 +5,8 @@
 #include <fcitx/inputpanel.h>
 #include <fcitx/userinterfacemanager.h>
 
-#include "../fcitx5/src/modules/spell/spell_public.h"
-#include "../fcitx5/src/im/keyboard/chardata.h"
+#include "spell_public.h"
+#include "../../../../../lib/fcitx5/src/main/cpp/fcitx5/src/im/keyboard/chardata.h" // dirty but works
 
 #include "androidkeyboard.h"
 

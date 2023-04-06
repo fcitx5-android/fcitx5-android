@@ -2,7 +2,7 @@
 
 plugins {
     id("android-convention")
-    id("native-convention")
+    id("app-native-convention")
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
@@ -18,6 +18,32 @@ android {
     defaultConfig {
         applicationId = "org.fcitx.fcitx5.android"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        externalNativeBuild {
+            cmake {
+                targets(
+                    // jni
+                    "native-lib",
+                    // copy fcitx5 built-in addon libraries
+                    "copy-fcitx5-modules",
+                    // android specific modules
+                    "androidfrontend",
+                    "androidkeyboard",
+                    // fcitx5-chinese-addons
+                    "pinyin",
+                    "scel2org5",
+                    "table",
+                    "chttrans",
+                    "fullwidth",
+                    "pinyinhelper",
+                    "punctuation",
+                    // fcitx5-lua
+                    "luaaddonloader",
+                    // fcitx5-unikey
+                    "unikey"
+                )
+            }
+        }
     }
 
     buildTypes {
@@ -44,6 +70,7 @@ android {
 
     buildFeatures {
         viewBinding = true
+        prefab = true
     }
 }
 
@@ -61,12 +88,16 @@ aboutLibraries {
     includePlatform = false
 }
 
+fcitxComponent {
+    installFcitx5Data = true
+}
 
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
+    implementation(project(":lib:fcitx5"))
     implementation(libs.autofill)
     implementation(libs.ini4j)
     ksp(project(":codegen"))

@@ -35,9 +35,21 @@ gradlePlugin {
             id = "android-convention"
             implementationClass = "AndroidConventionPlugin"
         }
-        register("nativeConvention") {
-            id = "native-convention"
-            implementationClass = "NativeConventionPlugin"
+        register("appNativeConvention") {
+            id = "app-native-convention"
+            implementationClass = "AppNativeConventionPlugin"
+        }
+        register("fcitxHeaders") {
+            id = "fcitx-headers"
+            implementationClass = "FcitxHeadersPlugin"
+        }
+        register("libNativeConvention") {
+            id = "lib-native-convention"
+            implementationClass = "LibNativeConventionPlugin"
+        }
+        register("cmakeDir") {
+            id = "cmake-dir"
+            implementationClass = "CMakeDirPlugin"
         }
     }
 }

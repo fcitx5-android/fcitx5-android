@@ -1,5 +1,5 @@
-[submodule "app/src/main/cpp/fcitx5"]
-	path = app/src/main/cpp/fcitx5
+[submodule "lib/fcitx5/src/main/cpp/fcitx5"]
+	path = lib/fcitx5/src/main/cpp/fcitx5
 	url = git@github.com:fcitx/fcitx5.git
 [submodule "app/src/main/cpp/fcitx5-chinese-addons"]
 	path = app/src/main/cpp/fcitx5-chinese-addons
@@ -7,8 +7,8 @@
 [submodule "app/src/main/cpp/libime"]
 	path = app/src/main/cpp/libime
 	url = git@github.com:fcitx/libime.git
-[submodule "app/src/main/cpp/prebuilt"]
-	path = app/src/main/cpp/prebuilt
+[submodule "lib/fcitx5/src/main/cpp/prebuilt"]
+	path = lib/fcitx5/src/main/cpp/prebuilt
 	url = git@github.com:fcitx5-android/prebuilt
 [submodule "app/src/main/cpp/fcitx5-lua"]
 	path = app/src/main/cpp/fcitx5-lua

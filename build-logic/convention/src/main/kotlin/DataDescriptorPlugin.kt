@@ -22,13 +22,19 @@ import java.nio.charset.Charset
  * Add task generateDataDescriptor
  */
 class DataDescriptorPlugin : Plugin<Project> {
+
+    companion object {
+        const val TASK = "generateDataDescriptor"
+        const val CLEAN_TASK = "cleanDataDescriptor"
+    }
+
     override fun apply(target: Project) {
         with(target) {
-            tasks.register<DataDescriptorTask>("generateDataDescriptor") {
+            tasks.register<DataDescriptorTask>(TASK) {
                 inputDir.set(file("src/main/assets"))
                 outputFile.set(file("src/main/assets/${dataDescriptorName}"))
             }
-            tasks.register<Delete>("cleanDataDescriptor") {
+            tasks.register<Delete>(CLEAN_TASK) {
                 delete(file("src/main/assets/${dataDescriptorName}"))
             }.also { tasks.named("clean").dependsOn(it) }
         }
