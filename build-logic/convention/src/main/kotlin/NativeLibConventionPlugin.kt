@@ -1,0 +1,33 @@
+import com.android.build.gradle.LibraryExtension
+import org.gradle.api.Project
+import org.gradle.configurationcache.extensions.capitalized
+import org.gradle.kotlin.dsl.configure
+
+class NativeLibConventionPlugin : NativeBaseConventionPlugin() {
+
+    override fun apply(target: Project) {
+        super.apply(target)
+
+        target.pluginManager.apply("com.android.library")
+
+        @Suppress("UnstableApiUsage")
+        target.extensions.configure<LibraryExtension> {
+            packagingOptions {
+                jniLibs {
+                    excludes.add("**/*.so")
+                }
+            }
+            buildFeatures {
+                prefabPublishing = true
+            }
+            libraryVariants.all {
+                // The output of PrefabConfigurePackageTask is up-to-date even after running clean.
+                // This is probably a bug of AGP. To work around, we need always rerun this task.
+                target.tasks.named("prefab${name.capitalized()}ConfigurePackage").configure {
+                    doNotTrackState("The up-to-date checking of PrefabConfigurePackageTask is incorrect")
+                }
+            }
+        }
+    }
+
+}

@@ -1,15 +1,15 @@
 @file:Suppress("UnstableApiUsage")
 
 plugins {
-    id("android-convention")
-    id("app-native-convention")
+    id("android-app-convention")
+    id("native-app-convention")
+    id("build-metadata")
+    id("data-descriptor")
+    id("fcitx-component")
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.aboutlibraries)
-    id("build-metadata")
-    id("data-descriptor")
-    id("fcitx-component")
 }
 
 android {
@@ -47,9 +47,7 @@ android {
     }
 
     buildTypes {
-        getByName("release") {
-            isMinifyEnabled = true
-            isShrinkResources = true
+        release {
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -59,9 +57,7 @@ android {
             resValue("mipmap", "app_icon_round", "@mipmap/ic_launcher_round")
             resValue("string", "app_name", "@string/app_name_release")
         }
-        getByName("debug") {
-            applicationIdSuffix = ".debug"
-
+        debug {
             resValue("mipmap", "app_icon", "@mipmap/ic_launcher_debug")
             resValue("mipmap", "app_icon_round", "@mipmap/ic_launcher_round_debug")
             resValue("string", "app_name", "@string/app_name_debug")
@@ -70,7 +66,6 @@ android {
 
     buildFeatures {
         viewBinding = true
-        prefab = true
     }
 }
 

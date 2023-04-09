@@ -1,3 +1,4 @@
+
 import org.gradle.api.Project
 
 val Project.buildVersionName
@@ -9,6 +10,7 @@ val Project.buildCommitHash
     get() = eep("buildCommitHash", "BUILD_COMMIT_HASH") {
         runCmd("git rev-parse HEAD")
     }
+
 val Project.buildTimestamp
     get() = eep("buildTimestamp", "BUILD_TIMESTAMP") {
         System.currentTimeMillis().toString()

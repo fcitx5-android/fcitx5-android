@@ -2,8 +2,9 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Delete
 import org.gradle.configurationcache.extensions.capitalized
+import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.task
-import java.io.File
 import kotlin.io.path.isSymbolicLink
 
 /**
@@ -25,9 +26,9 @@ class FcitxComponentPlugin : Plugin<Project> {
         registerCMakeTask(target, "generate-desktop-file", "config")
         registerCMakeTask(target, "translation-file", "translation")
         registerCleanTask(target)
-        target.extensions.create("fcitxComponent", FcitxComponentExtension::class.java)
+        target.extensions.create<FcitxComponentExtension>("fcitxComponent")
         target.afterEvaluate {
-            val ext = extensions.getByType(FcitxComponentExtension::class.java)
+            val ext = extensions.getByName<FcitxComponentExtension>("fcitxComponent")
             if (ext.installFcitx5Data) {
                 val libFcitx5 = rootProject.project(":lib:fcitx5")
                 registerCMakeTask(target, "generate-desktop-file", "config", libFcitx5)
@@ -35,9 +36,6 @@ class FcitxComponentPlugin : Plugin<Project> {
             }
         }
     }
-
-    private val Project.assetsDir: File
-        get() = file("src/main/assets")
 
     /**
      * build [sourceProject]'s cmake [target], and install its [component] to [project]'s assets
@@ -70,7 +68,6 @@ class FcitxComponentPlugin : Plugin<Project> {
     }
 
     private fun registerCleanTask(project: Project) {
-        val cleanTask = project.tasks.getByName("clean")
         project.task<Delete>(CLEAN_TASK) {
             delete(project.assetsDir.resolve("usr/share/locale"))
             // delete all non symlink dirs
@@ -78,7 +75,7 @@ class FcitxComponentPlugin : Plugin<Project> {
                 !it.toPath().isSymbolicLink()
             })
         }.also {
-            cleanTask.dependsOn(it)
+            project.cleanTask.dependsOn(it)
         }
     }
 

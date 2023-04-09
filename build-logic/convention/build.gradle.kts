@@ -19,6 +19,22 @@ dependencies {
 
 gradlePlugin {
     plugins {
+        register("androidAppConvention") {
+            id = "android-app-convention"
+            implementationClass = "AndroidAppConventionPlugin"
+        }
+        register("androidLibConvention") {
+            id = "android-lib-convention"
+            implementationClass = "AndroidLibConventionPlugin"
+        }
+        register("buildMetadata") {
+            id = "build-metadata"
+            implementationClass = "BuildMetadataPlugin"
+        }
+        register("cmakeDir") {
+            id = "cmake-dir"
+            implementationClass = "CMakeDirPlugin"
+        }
         register("dataDescriptor") {
             id = "data-descriptor"
             implementationClass = "DataDescriptorPlugin"
@@ -27,29 +43,17 @@ gradlePlugin {
             id = "fcitx-component"
             implementationClass = "FcitxComponentPlugin"
         }
-        register("buildMetadata") {
-            id = "build-metadata"
-            implementationClass = "BuildMetadataPlugin"
-        }
-        register("androidConvention") {
-            id = "android-convention"
-            implementationClass = "AndroidConventionPlugin"
-        }
-        register("appNativeConvention") {
-            id = "app-native-convention"
-            implementationClass = "AppNativeConventionPlugin"
-        }
         register("fcitxHeaders") {
             id = "fcitx-headers"
             implementationClass = "FcitxHeadersPlugin"
         }
-        register("libNativeConvention") {
-            id = "lib-native-convention"
-            implementationClass = "LibNativeConventionPlugin"
+        register("nativeAppConvention") {
+            id = "native-app-convention"
+            implementationClass = "NativeAppConventionPlugin"
         }
-        register("cmakeDir") {
-            id = "cmake-dir"
-            implementationClass = "CMakeDirPlugin"
+        register("nativeLibConvention") {
+            id = "native-lib-convention"
+            implementationClass = "NativeLibConventionPlugin"
         }
     }
 }

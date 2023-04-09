@@ -1,4 +1,4 @@
-import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.dsl.ApplicationExtension
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import org.gradle.api.DefaultTask
@@ -7,7 +7,8 @@ import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
-import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.task
 
 /**
  * Add task generateBuildMetadata
@@ -19,18 +20,14 @@ class BuildMetadataPlugin : Plugin<Project> {
     }
 
     override fun apply(target: Project) {
-        with(target) {
-            tasks.register<BuildMetadataTask>(TASK) {
-                outputFile.set(file("build/outputs/apk/build-metadata.json"))
-            }
-            val androidComponents =
-                project.extensions.getByType(AndroidComponentsExtension::class.java)
-            androidComponents.finalizeDsl {
-                it.defaultConfig {
-                    buildConfigField("String", "BUILD_GIT_HASH", "\"${buildCommitHash}\"")
-                    buildConfigField("long", "BUILD_TIME", buildTimestamp)
-                    buildConfigField("String", "DATA_DESCRIPTOR_NAME", "\"${dataDescriptorName}\"")
-                }
+        target.task<BuildMetadataTask>(TASK) {
+            outputFile.set(target.file("build/outputs/apk/build-metadata.json"))
+        }
+        target.extensions.configure<ApplicationExtension> {
+            defaultConfig {
+                buildConfigField("String", "BUILD_GIT_HASH", "\"${target.buildCommitHash}\"")
+                buildConfigField("long", "BUILD_TIME", target.buildTimestamp)
+                buildConfigField("String", "DATA_DESCRIPTOR_NAME", "\"${dataDescriptorName}\"")
             }
         }
     }

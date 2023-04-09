@@ -1,8 +1,8 @@
 @file:Suppress("UnstableApiUsage")
 
 plugins {
-    id("android-convention")
-    id("app-native-convention")
+    id("android-app-convention")
+    id("native-app-convention")
     id("build-metadata")
     id("data-descriptor")
     id("fcitx-component")
@@ -24,23 +24,12 @@ android {
     }
 
     buildTypes {
-        getByName("release") {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+        release {
             resValue("string", "app_name", "@string/app_name_release")
         }
-        getByName("debug") {
-            applicationIdSuffix = ".debug"
+        debug {
             resValue("string", "app_name", "@string/app_name_debug")
         }
-    }
-
-    buildFeatures {
-        prefab = true
     }
 
     packagingOptions {

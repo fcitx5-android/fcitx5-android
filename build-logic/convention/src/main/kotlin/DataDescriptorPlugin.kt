@@ -1,4 +1,3 @@
-import com.android.build.gradle.internal.tasks.factory.dependsOn
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -9,7 +8,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.*
-import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.task
 import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
@@ -29,14 +28,14 @@ class DataDescriptorPlugin : Plugin<Project> {
     }
 
     override fun apply(target: Project) {
-        with(target) {
-            tasks.register<DataDescriptorTask>(TASK) {
-                inputDir.set(file("src/main/assets"))
-                outputFile.set(file("src/main/assets/${dataDescriptorName}"))
-            }
-            tasks.register<Delete>(CLEAN_TASK) {
-                delete(file("src/main/assets/${dataDescriptorName}"))
-            }.also { tasks.named("clean").dependsOn(it) }
+        target.task<DataDescriptorTask>(TASK) {
+            inputDir.set(target.assetsDir)
+            outputFile.set(target.assetsDir.resolve(dataDescriptorName))
+        }
+        target.task<Delete>(CLEAN_TASK) {
+            delete(target.assetsDir.resolve(dataDescriptorName))
+        }.also {
+            target.cleanTask.dependsOn(it)
         }
     }
 

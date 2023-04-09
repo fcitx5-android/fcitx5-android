@@ -1,17 +1,17 @@
 import Versions.cmakeVersion
 import Versions.ndkVersion
-import com.android.build.api.dsl.LibraryExtension
+import com.android.build.api.dsl.CommonExtension
+import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.configure
+import org.gradle.api.tasks.Delete
+import org.gradle.kotlin.dsl.task
 
-open class LibNativeConventionPlugin : NativeConventionPlugin() {
+open class NativeBaseConventionPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
-        target.pluginManager.apply("com.android.library")
         @Suppress("UnstableApiUsage")
-        target.extensions.configure<LibraryExtension> {
-            compileSdk = Versions.compileSdkVersion
-            buildToolsVersion = Versions.buildToolsVersion
+        target.extensions.configure(CommonExtension::class.java) {
+            ndkVersion = target.ndkVersion
             defaultConfig {
                 minSdk = Versions.minSdkVersion
                 externalNativeBuild {
@@ -20,7 +20,6 @@ open class LibNativeConventionPlugin : NativeConventionPlugin() {
                     }
                 }
             }
-            ndkVersion = target.ndkVersion
             externalNativeBuild {
                 cmake {
                     version = target.cmakeVersion
@@ -35,16 +34,16 @@ open class LibNativeConventionPlugin : NativeConventionPlugin() {
                     isUniversalApk = false
                 }
             }
-            buildFeatures {
-                prefabPublishing = true
-            }
-            packagingOptions {
-                jniLibs {
-                    excludes.add("**/*.so")
-                }
-            }
         }
         registerCleanCxxTask(target)
+    }
+
+    private fun registerCleanCxxTask(project: Project) {
+        project.task<Delete>("cleanCxxIntermediates") {
+            delete(project.file(".cxx"))
+        }.also {
+            project.cleanTask.dependsOn(it)
+        }
     }
 
 }

@@ -1,9 +1,12 @@
 import kotlinx.serialization.json.Json
 import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.artifacts.VersionCatalog
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.kotlin.dsl.extra
 import org.gradle.kotlin.dsl.getByType
 import java.io.ByteArrayOutputStream
+import java.io.File
 
 inline fun envOrDefault(env: String, default: () -> String) =
     System.getenv(env)?.takeIf { it.isNotBlank() } ?: default()
@@ -35,5 +38,11 @@ internal inline fun Project.eep(name: String, envName: String, block: () -> Stri
         }
     }
 
-val Project.versionCatalog
+val Project.versionCatalog: VersionCatalog
     get() = extensions.getByType<VersionCatalogsExtension>().named("libs")
+
+val Project.assetsDir: File
+    get() = file("src/main/assets")
+
+val Project.cleanTask: Task
+    get() = tasks.getByName("clean")

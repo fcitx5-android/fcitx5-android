@@ -1,9 +1,9 @@
-import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Delete
 import org.gradle.configurationcache.extensions.capitalized
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.task
 
 class FcitxHeadersPlugin : Plugin<Project> {
@@ -35,34 +35,28 @@ class FcitxHeadersPlugin : Plugin<Project> {
             }
         }
 
-        val androidComponents =
-            project.extensions.getByType(AndroidComponentsExtension::class.java)
-
-        androidComponents.onVariants { v ->
-            val variantName = v.name.capitalized()
-            project.afterEvaluate {
-                project.tasks.findByName("prefab${variantName}ConfigurePackage")
-                    ?.dependsOn(installHeadersTask)
+        project.extensions.configure<LibraryAndroidComponentsExtension> {
+            onVariants {
+                val variantName = it.name.capitalized()
+                project.afterEvaluate {
+                    project.tasks.findByName("prefab${variantName}ConfigurePackage")
+                        ?.dependsOn(installHeadersTask)
+                }
             }
-        }
-
-        val libraryAndroidComponents =
-            project.extensions.getByType(LibraryAndroidComponentsExtension::class.java)
-
-        @Suppress("UnstableApiUsage")
-        libraryAndroidComponents.finalizeDsl {
-            it.prefab.forEach { library ->
-                library.headers?.let { path -> project.file(path).mkdirs() }
+            finalizeDsl {
+                @Suppress("UnstableApiUsage")
+                it.prefab.forEach { library ->
+                    library.headers?.let { path -> project.file(path).mkdirs() }
+                }
             }
         }
     }
 
     private fun registerCleanTask(project: Project) {
-        val cleanTask = project.tasks.getByName("clean")
         project.task<Delete>(CLEAN_TASK) {
             delete(project.headersInstallDir)
         }.also {
-            cleanTask.dependsOn(it)
+            project.cleanTask.dependsOn(it)
         }
     }
 

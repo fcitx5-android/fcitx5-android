@@ -1,9 +1,8 @@
 @file:Suppress("UnstableApiUsage")
 
-import org.gradle.configurationcache.extensions.capitalized
-
 plugins {
-    id("lib-native-convention")
+    id("android-lib-convention")
+    id("native-lib-convention")
     id("fcitx-headers")
 }
 
@@ -13,7 +12,7 @@ android {
     defaultConfig {
         externalNativeBuild {
             cmake {
-                targets += setOf(
+                targets(
                     // dummy "cmake" target
                     "cmake",
                     // fcitx5
@@ -75,13 +74,6 @@ android {
         create("unicode") {
             libraryName = "libunicode"
             headers = "$moduleHeadersPrefix/unicode"
-        }
-    }
-    libraryVariants.all {
-        // The output of PrefabConfigurePackageTask is up-to-date even after running clean.
-        // This is probably a bug of AGP. To work around, we need always rerun this task.
-        tasks.named("prefab${name.capitalized()}ConfigurePackage").configure {
-            doNotTrackState("The up-to-date checking of PrefabConfigurePackageTask is incorrect")
         }
     }
 }
