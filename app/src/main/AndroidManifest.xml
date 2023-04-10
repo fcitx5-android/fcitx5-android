@@ -6,8 +6,9 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <queries>
-        <package android:name="org.fcitx.fcitx5.android.plugin.anthy" />
-        <package android:name="org.fcitx.fcitx5.android.plugin.anthy.debug" />
+        <intent>
+            <action android:name="org.fcitx.fcitx5.android.plugin.MANIFEST" />
+        </intent>
     </queries>
 
     <application

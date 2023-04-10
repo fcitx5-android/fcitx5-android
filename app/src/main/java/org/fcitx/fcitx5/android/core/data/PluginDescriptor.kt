@@ -20,7 +20,7 @@ data class PluginDescriptor(
      */
     val domain: String?,
     /**
-     * Can use string resource, e.g. `@/string...`
+     * Can use string resource, e.g. `@string/description`
      */
     val description: String,
     val versionName: String,

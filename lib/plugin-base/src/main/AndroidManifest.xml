@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <activity
+            android:name=".AboutActivity"
+            android:exported="true"
+            android:theme="@style/DeviceSettingsTheme">
+            <intent-filter>
+                <action android:name="org.fcitx.fcitx5.android.plugin.MANIFEST" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

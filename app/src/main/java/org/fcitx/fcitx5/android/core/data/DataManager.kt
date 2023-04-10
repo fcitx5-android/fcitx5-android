@@ -103,11 +103,9 @@ object DataManager {
             pm.getInstalledPackages(PackageManager.GET_META_DATA)
         }.filter {
             // Only consider plugin with the same build variant as app's
-            it.packageName.startsWith(PluginDescriptor.pluginPackagePrefix) && (
-                    if (Const.buildType == "debug")
-                        it.packageName.endsWith("debug")
-                    else true
-                    )
+            if (Const.buildType == "debug")
+                it.packageName.endsWith("debug")
+            else true
         }
 
         Timber.d("Detected packages: ${detectedPackages.joinToString { it.packageName }}")
@@ -145,12 +143,11 @@ object DataManager {
             // Replace @string/ with string resource
             description = description?.let { d ->
                 d.removePrefix("@string/").let { s ->
-                    s.takeIf { it.matches(javaIdRegex) }?.let {
-                        res.getIdentifier(it, "string", packageName).takeIf { id -> id != 0 }
-                            ?.let { id ->
-                                res.getString(id)
-                            }
-                    } ?: d
+                    if (s.matches(javaIdRegex)) {
+                        res.getIdentifier(s, "string", packageName).let { id ->
+                            if (id != 0) res.getString(id) else d
+                        }
+                    } else d
                 }
             }
 

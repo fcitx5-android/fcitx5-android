@@ -19,5 +19,6 @@ dependencyResolutionManagement {
 include(":lib:fcitx5")
 include(":codegen")
 include(":app")
+include(":lib:plugin-base")
 include(":plugin:anthy")
 rootProject.name = "fcitx5-android"

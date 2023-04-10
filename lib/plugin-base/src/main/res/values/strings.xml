@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pkg_name">Package name</string>
+    <string name="api_version">Plugin API version</string>
+    <string name="gettext_domain">Gettext domain</string>
+    <string name="plugin_description">Plugin description</string>
+</resources>

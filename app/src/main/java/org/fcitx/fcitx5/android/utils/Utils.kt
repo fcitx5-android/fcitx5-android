@@ -258,4 +258,4 @@ inline fun <T> withTempDir(block: (File) -> T): T {
 @Suppress("FunctionName")
 fun <T> WeakHashSet(): MutableSet<T> = Collections.newSetFromMap(WeakHashMap<T, Boolean>())
 
-val javaIdRegex = "(?:\\b[_a-zA-Z]|\\B\\$)\\w*+".toRegex()
+val javaIdRegex = Regex("(?:\\b[_a-zA-Z]|\\B\\$)\\w*+")
