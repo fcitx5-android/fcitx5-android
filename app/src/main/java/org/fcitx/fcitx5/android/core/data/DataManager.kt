@@ -28,6 +28,9 @@ object DataManager {
 
     private val json by lazy { Json { prettyPrint = true } }
 
+    var synced = false
+        private set
+
     // should be consistent with the deserialization in build.gradle.kts (:app)
     private fun deserializeDataDescriptor(raw: String) = runCatching {
         json.decodeFromString<DataDescriptor>(raw)
@@ -53,9 +56,18 @@ object DataManager {
     fun getLoadedPlugins(): Set<PluginDescriptor> = loadedPlugins
     fun getFailedPlugins(): Map<String, PluginLoadFailed> = failedPlugins
 
+    /**
+     * Will be cleared after each sync
+     */
+    private val callbacks = mutableListOf<() -> Unit>()
+
+    fun addOnNextSyncedCallback(block: () -> Unit) =
+        callbacks.add(block)
+
     @Suppress("DEPRECATION")
     @SuppressLint("QueryPermissionsNeeded", "DiscouragedApi")
     fun sync() = lock.withLock {
+        synced = false
         loadedPlugins.clear()
         failedPlugins.clear()
 
@@ -91,9 +103,11 @@ object DataManager {
             pm.getInstalledPackages(PackageManager.GET_META_DATA)
         }.filter {
             // Only consider plugin with the same build variant as app's
-            it.packageName.startsWith(PluginDescriptor.pluginPackagePrefix) && it.packageName.endsWith(
-                Const.buildType
-            )
+            it.packageName.startsWith(PluginDescriptor.pluginPackagePrefix) && (
+                    if (Const.buildType == "debug")
+                        it.packageName.endsWith("debug")
+                    else true
+                    )
         }
 
         Timber.d("Detected packages: ${detectedPackages.joinToString { it.packageName }}")
@@ -148,6 +162,7 @@ object DataManager {
                             apiVersion,
                             domain,
                             description,
+                            info.versionName,
                             info.applicationInfo.nativeLibraryDir
                         )
                     )
@@ -220,6 +235,9 @@ object DataManager {
         }
         // save the new hierarchy as the data descriptor to be used in the next run
         destDescriptorFile.writeText(serializeDataDescriptor(newHierarchy.downToDataDescriptor()).getOrThrow())
+        callbacks.forEach { it() }
+        callbacks.clear()
+        synced = true
         Timber.i("Synced!")
     }
 

@@ -213,4 +213,14 @@
     <string name="delete_theme">Delete Theme</string>
     <string name="delete_theme_msg">Do you really want to delete theme \"%1$s\"?</string>
     <string name="capture_heap_dump">Capture heap dump</string>
+    <string name="plugins">Plugins</string>
+    <string name="loaded">Loaded</string>
+    <string name="failed">Failed</string>
+    <string name="missing_plugin_descriptor">Missing plugin descriptor</string>
+    <string name="invalid_plugin_descriptor">Invalid plugin descriptor</string>
+    <string name="missing_data_descriptor">Missing data descriptor</string>
+    <string name="invalid_data_descriptor">Invalid data descriptor</string>
+    <string name="incompatible_api">Incompatible api: %1$s</string>
+    <string name="path_conflict">Path \"%1$s\" is already owned by %2$s</string>
+    <string name="main_program">main program</string>
 </resources>

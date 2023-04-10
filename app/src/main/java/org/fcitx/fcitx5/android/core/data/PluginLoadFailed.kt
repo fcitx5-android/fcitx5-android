@@ -12,7 +12,7 @@ sealed interface PluginLoadFailed {
     }
 
     object PluginDescriptorParseError : PluginLoadFailed {
-        override fun toString(): String = "MissingPluginDescriptor"
+        override fun toString(): String = "PluginDescriptorParseError"
     }
 
     data class MissingDataDescriptor(

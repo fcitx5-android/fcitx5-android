@@ -85,6 +85,14 @@ class MainFragment : PaddingPreferenceFragment() {
             }
         })
         androidCategory.addPreference(Preference(context).apply {
+            setTitle(R.string.plugins)
+            setIcon(R.drawable.ic_baseline_android_24)
+            setOnPreferenceClickListener {
+                findNavController().navigate(R.id.action_mainFragment_to_pluginFragment)
+                true
+            }
+        })
+        androidCategory.addPreference(Preference(context).apply {
             setTitle(R.string.advanced)
             setIcon(R.drawable.ic_baseline_more_horiz_24)
             setOnPreferenceClickListener {
