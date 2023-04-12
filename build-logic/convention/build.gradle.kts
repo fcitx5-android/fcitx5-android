@@ -27,6 +27,10 @@ gradlePlugin {
             id = "android-lib-convention"
             implementationClass = "AndroidLibConventionPlugin"
         }
+        register("androidPluginAppConvention") {
+            id = "android-plugin-app-convention"
+            implementationClass = "AndroidPluginAppConventionPlugin"
+        }
         register("buildMetadata") {
             id = "build-metadata"
             implementationClass = "BuildMetadataPlugin"

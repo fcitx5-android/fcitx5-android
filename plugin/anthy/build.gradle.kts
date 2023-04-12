@@ -2,6 +2,7 @@
 
 plugins {
     id("android-app-convention")
+    id("android-plugin-app-convention")
     id("native-app-convention")
     id("build-metadata")
     id("data-descriptor")

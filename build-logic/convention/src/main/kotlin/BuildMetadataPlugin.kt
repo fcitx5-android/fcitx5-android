@@ -1,4 +1,4 @@
-import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import org.gradle.api.DefaultTask
@@ -7,27 +7,35 @@ import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.task
 
 /**
- * Add task generateBuildMetadata
+ * Add task `generateBuildMetadata${Variant}`
  */
 class BuildMetadataPlugin : Plugin<Project> {
 
-    companion object {
-        const val TASK = "generateBuildMetadata"
-    }
-
     override fun apply(target: Project) {
-        target.task<BuildMetadataTask>(TASK) {
-            outputFile.set(target.file("build/outputs/apk/build-metadata.json"))
-        }
-        target.extensions.configure<ApplicationExtension> {
+        target.extensions.configure<BaseAppModuleExtension> {
             defaultConfig {
                 buildConfigField("String", "BUILD_GIT_HASH", "\"${target.buildCommitHash}\"")
                 buildConfigField("long", "BUILD_TIME", target.buildTimestamp)
                 buildConfigField("String", "DATA_DESCRIPTOR_NAME", "\"${dataDescriptorName}\"")
+            }
+            applicationVariants.all {
+                val variantName = name.capitalized()
+                target.afterEvaluate {
+                    target.task<BuildMetadataTask>("generateBuildMetadata${variantName}") {
+                        val packageTask = packageApplicationProvider.get() // package${Variant} task
+                        // create metadata file after package, because it's outputDirectory would
+                        // be cleared at some time before package
+                        mustRunAfter(packageTask)
+                        outputFile.set(packageTask.outputDirectory.file("build-metadata.json"))
+                    }.also {
+                        assembleProvider.get().dependsOn(it) // assemble${Variant} task
+                    }
+                }
             }
         }
     }
