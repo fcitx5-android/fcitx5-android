@@ -1,0 +1,77 @@
+name: Pull Request
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      # pull request's head branch was updated
+      - synchronize
+
+jobs:
+  build_pull_request:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        abi:
+          - armeabi-v7a
+          - arm64-v8a
+          - x86
+          - x86_64
+    env:
+      BUILD_ABI: ${{ matrix.abi }}
+    steps:
+      - name: Fetch source code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Setup Android environment
+        uses: android-actions/setup-android@v2
+
+      - name: Install Android NDK
+        run: |
+          sdkmanager --install "cmake;3.22.1"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt update
+          sudo apt install extra-cmake-modules gettext
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Build Debug APK
+        run: |
+          ./gradlew :app:assembleDebug
+          ./gradlew :assembleDebugPlugins
+
+      - name: Upload app
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-${{ matrix.abi }}
+          path: app/build/outputs/apk/debug/
+
+      - name: Pack plugins
+        run: |
+          mkdir plugins-to-upload
+          for i in $(ls plugin)
+          do
+            if [ -d "plugin/${i}" ]
+            then
+              mv "plugin/${i}/build/outputs/apk/debug" "plugins-to-upload/${i}"
+            fi
+          done
+
+      - name: Upload plugins
+        uses: actions/upload-artifact@v3
+        with:
+          name: plugins-${{ matrix.abi }}
+          path: plugins-to-upload
