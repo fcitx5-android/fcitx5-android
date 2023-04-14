@@ -277,7 +277,8 @@ public:
         const auto &enabledAddons = globalConfig.enabledAddons();
         std::unordered_set<std::string> enabledSet(enabledAddons.begin(), enabledAddons.end());
         const auto &disabledAddons = globalConfig.disabledAddons();
-        std::unordered_set<std::string> disabledSet(disabledAddons.begin(), disabledAddons.end());
+        std::unordered_set<std::string>
+                disabledSet(disabledAddons.begin(), disabledAddons.end());
         std::vector<AddonStatus> addons;
         for (const auto category: {fcitx::AddonCategory::InputMethod,
                                    fcitx::AddonCategory::Frontend,
@@ -466,7 +467,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_setupLogStream(JNIEnv *env, jclass claz
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, jstring locale, jstring appData, jstring appLib, jstring extData, jstring extCache) {
+Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, jstring locale, jstring appData, jstring appLib, jstring extData, jstring extCache, jobjectArray extDomains) {
     if (Fcitx::Instance().isRunning()) {
         FCITX_ERROR() << "Fcitx is already running!";
         return;
@@ -534,6 +535,12 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
     fcitx::registerDomain("fcitx5-lua", locale_dir_char);
     fcitx::registerDomain("fcitx5-unikey", locale_dir_char);
     fcitx::registerDomain("fcitx5-android", locale_dir_char);
+
+    int extDomainsSize = env->GetArrayLength(extDomains);
+    for (int i = 0; i < extDomainsSize; i++) {
+        auto domain = JRef<jstring>(env, env->GetObjectArrayElement(extDomains, i));
+        fcitx::registerDomain(CString(env, domain), locale_dir_char);
+    }
 
     auto candidateListCallback = [](const std::vector<std::string> &candidates, const int size) {
         auto env = GlobalRef->AttachEnv();

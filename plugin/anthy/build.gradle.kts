@@ -31,9 +31,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            resValue("string", "app_name", "@string/app_name_release")
         }
         getByName("debug") {
             applicationIdSuffix = ".debug"
+            resValue("string", "app_name", "@string/app_name_debug")
         }
     }
 

@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.data.DataManager
+import org.fcitx.fcitx5.android.core.data.DataManager
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.utils.ImmutableGraph
@@ -187,7 +187,8 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
             appData: String,
             appLib: String,
             extData: String,
-            extCache: String
+            extCache: String,
+            extDomains: Array<String>
         )
 
         @JvmStatic
@@ -366,13 +367,19 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
             DataManager.sync()
             val locale = Locales.fcitxLocale
             Timber.i("Current locale is $locale")
+            val nativeLibDir =
+                (listOf(context.applicationInfo.nativeLibraryDir) + DataManager.getLoadedPlugins()
+                    .map { it.nativeLibraryDir }).joinToString(separator = ":")
+            Timber.i("Native library dir is $nativeLibDir")
+            val extDomains = DataManager.getLoadedPlugins().mapNotNull { it.domain }.toTypedArray()
             with(context) {
                 startupFcitx(
                     locale,
                     applicationInfo.dataDir,
-                    applicationInfo.nativeLibraryDir,
+                    nativeLibDir,
                     (getExternalFilesDir(null) ?: filesDir).absolutePath,
-                    (externalCacheDir ?: cacheDir).absolutePath
+                    (externalCacheDir ?: cacheDir).absolutePath,
+                    extDomains
                 )
             }
         }

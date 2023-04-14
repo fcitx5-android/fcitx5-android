@@ -5,6 +5,11 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <queries>
+        <package android:name="org.fcitx.fcitx5.android.plugin.anthy" />
+        <package android:name="org.fcitx.fcitx5.android.plugin.anthy.debug" />
+    </queries>
+
     <application
         android:name=".FcitxApplication"
         android:allowBackup="true"

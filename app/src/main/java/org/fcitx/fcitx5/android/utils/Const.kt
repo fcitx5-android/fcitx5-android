@@ -12,4 +12,5 @@ object Const {
     const val licenseUrl = "https://www.gnu.org/licenses/old-licenses/lgpl-2.1"
     const val privacyPolicyUrl = "https://fcitx5-android.github.io/privacy/"
     const val faqUrl = "https://fcitx5-android.github.io/faq/"
+    const val buildType = BuildConfig.BUILD_TYPE
 }
