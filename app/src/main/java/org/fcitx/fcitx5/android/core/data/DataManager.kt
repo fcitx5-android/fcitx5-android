@@ -1,9 +1,9 @@
 package org.fcitx.fcitx5.android.core.data
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.AssetManager
-import android.os.Build
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -23,6 +23,8 @@ import kotlin.concurrent.withLock
  * Operations are synchronized
  */
 object DataManager {
+
+    private const val PLUGIN_INTENT = "org.fcitx.fcitx5.android.plugin.MANIFEST"
 
     private val lock = ReentrantLock()
 
@@ -92,29 +94,22 @@ object DataManager {
 
         val pm = appContext.packageManager
 
-        // Get plugins' package
-        val detectedPackages = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            pm.getInstalledPackages(
-                PackageManager.PackageInfoFlags.of(
-                    PackageManager.GET_META_DATA.toLong()
-                )
-            )
-        } else {
-            pm.getInstalledPackages(PackageManager.GET_META_DATA)
-        }.filter {
+        val isDebugBuild = Const.buildType == "debug"
+        val pluginPackages = pm.queryIntentActivities(
+            Intent(PLUGIN_INTENT),
+            PackageManager.MATCH_ALL
+        ).mapNotNull {
             // Only consider plugin with the same build variant as app's
-            if (Const.buildType == "debug")
-                it.packageName.endsWith("debug")
-            else true
+            val packageName = it.activityInfo.packageName
+            if (isDebugBuild == packageName.endsWith(".debug")) packageName else null
         }
 
-        Timber.d("Detected packages: ${detectedPackages.joinToString { it.packageName }}")
+        Timber.d("Detected plugin packages: ${pluginPackages.joinToString()}")
 
         val parsedDescriptors = mutableListOf<PluginDescriptor>()
 
         // Parse plugin.xml
-        for (info in detectedPackages) {
-            val packageName = info.packageName
+        for (packageName in pluginPackages) {
             val res = pm.getResourcesForApplication(packageName)
             val resId = res.getIdentifier("plugin", "xml", packageName)
             if (resId == 0) {
@@ -152,7 +147,8 @@ object DataManager {
             }
 
             if (apiVersion != null && description != null) {
-                if (PluginDescriptor.pluginAPI == apiVersion)
+                if (PluginDescriptor.pluginAPI == apiVersion) {
+                    val info = pm.getPackageInfo(packageName, PackageManager.GET_META_DATA)
                     parsedDescriptors.add(
                         PluginDescriptor(
                             packageName,
@@ -163,7 +159,7 @@ object DataManager {
                             info.applicationInfo.nativeLibraryDir
                         )
                     )
-                else {
+                } else {
                     Timber.w("$packageName's api version [$apiVersion] doesn't match with the current [${PluginDescriptor.pluginAPI}]")
                     failedPlugins[packageName] = PluginLoadFailed.PluginAPIIncompatible(apiVersion)
                 }

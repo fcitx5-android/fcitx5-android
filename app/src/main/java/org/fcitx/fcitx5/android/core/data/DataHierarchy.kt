@@ -21,17 +21,19 @@ class DataHierarchy {
      * @throws Conflict if a non-directory path is existing in the file list
      */
     fun install(descriptor: DataDescriptor, src: FileSource) {
-        if (descriptor.sha256 in descriptorSHA256)
-            return
-        descriptor.files.forEach { (path, sha256) ->
-            if (path in files) {
-                val old = files.getValue(path)
-                if (old.first.isNotBlank() || sha256.isNotBlank())
-                    throw Conflict(path, files[path]!!.second)
+        val newFiles = descriptor.files.mapValues { (path, sha256) ->
+            files[path]?.also { old ->
+                // path conflict when at least one of them is not a directory (empty sha256)
+                if (old.first.isNotEmpty() || sha256.isNotEmpty()) {
+                    throw Conflict(path, old.second)
+                }
             }
-            if (src is FileSource.Plugin)
-                plugins += src.descriptor
-            files[path] = sha256 to src
+            Pair(sha256, src)
+        }
+        // merge new files only when there is no conflict with existing files
+        files.putAll(newFiles)
+        if (src is FileSource.Plugin) {
+            plugins += src.descriptor
         }
         descriptorSHA256.add(descriptor.sha256)
     }
@@ -54,7 +56,7 @@ class DataHierarchy {
         private fun sha256(h: DataHierarchy): String =
             digest.digest(h.descriptorSHA256.joinToString(separator = "").encodeToByteArray())
                 .let {
-                    Base64.encodeToString(it, 0)
+                    Base64.encodeToString(it, 0).trim()
                 }
 
         /**
