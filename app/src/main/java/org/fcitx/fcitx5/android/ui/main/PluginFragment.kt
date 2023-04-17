@@ -1,7 +1,12 @@
 package org.fcitx.fcitx5.android.ui.main
 
+import android.content.ComponentName
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
+import android.provider.Settings
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -23,7 +28,7 @@ class PluginFragment : PaddingPreferenceFragment() {
                     isIconSpaceReserved = false
                     DataManager.getLoadedPlugins().forEach {
                         addPreference(it.name, "${it.versionName}\n${it.description}") {
-                            Toast.makeText(context, it.packageName, Toast.LENGTH_SHORT).show()
+                            startPluginAboutActivity(it.packageName)
                         }
                     }
                 }
@@ -59,7 +64,9 @@ class PluginFragment : PaddingPreferenceFragment() {
                                     getString(R.string.invalid_plugin_descriptor)
                                 }
                             }
-                            addPreference(packageName, summary)
+                            addPreference(packageName, summary) {
+                                startPluginAboutActivity(packageName)
+                            }
                         }
                     }
                 }
@@ -75,4 +82,33 @@ class PluginFragment : PaddingPreferenceFragment() {
                 it.resumeWith(Result.success(Unit))
             }
     }
+
+    private fun startPluginAboutActivity(pkg: String): Boolean {
+        val ctx = requireContext()
+        val pm = ctx.packageManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            pm.queryIntentActivities(
+                Intent(DataManager.PLUGIN_INTENT),
+                PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_ALL.toLong())
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            pm.queryIntentActivities(Intent(DataManager.PLUGIN_INTENT), PackageManager.MATCH_ALL)
+        }.firstOrNull {
+            it.activityInfo.packageName == pkg
+        }?.also {
+            ctx.startActivity(Intent().apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                component = ComponentName(it.activityInfo.packageName, it.activityInfo.name)
+            })
+        } ?: run {
+            // fallback to settings app info page if activity not found
+            startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                data = Uri.fromParts("package", pkg, null)
+            })
+        }
+        return true
+    }
+
 }

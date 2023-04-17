@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.AssetManager
+import android.os.Build
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -24,7 +25,7 @@ import kotlin.concurrent.withLock
  */
 object DataManager {
 
-    private const val PLUGIN_INTENT = "org.fcitx.fcitx5.android.plugin.MANIFEST"
+    const val PLUGIN_INTENT = "org.fcitx.fcitx5.android.plugin.MANIFEST"
 
     private val lock = ReentrantLock()
 
@@ -66,8 +67,7 @@ object DataManager {
     fun addOnNextSyncedCallback(block: () -> Unit) =
         callbacks.add(block)
 
-    @Suppress("DEPRECATION")
-    @SuppressLint("QueryPermissionsNeeded", "DiscouragedApi")
+    @SuppressLint("DiscouragedApi")
     fun sync() = lock.withLock {
         synced = false
         loadedPlugins.clear()
@@ -95,10 +95,15 @@ object DataManager {
         val pm = appContext.packageManager
 
         val isDebugBuild = Const.buildType == "debug"
-        val pluginPackages = pm.queryIntentActivities(
-            Intent(PLUGIN_INTENT),
-            PackageManager.MATCH_ALL
-        ).mapNotNull {
+        val pluginPackages = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            pm.queryIntentActivities(
+                Intent(PLUGIN_INTENT),
+                PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_ALL.toLong())
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            pm.queryIntentActivities(Intent(PLUGIN_INTENT), PackageManager.MATCH_ALL)
+        }.mapNotNull {
             // Only consider plugin with the same build variant as app's
             val packageName = it.activityInfo.packageName
             if (isDebugBuild == packageName.endsWith(".debug")) packageName else null
@@ -148,7 +153,15 @@ object DataManager {
 
             if (apiVersion != null && description != null) {
                 if (PluginDescriptor.pluginAPI == apiVersion) {
-                    val info = pm.getPackageInfo(packageName, PackageManager.GET_META_DATA)
+                    val info = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        pm.getPackageInfo(
+                            packageName,
+                            PackageManager.PackageInfoFlags.of(PackageManager.GET_META_DATA.toLong())
+                        )
+                    } else {
+                        @Suppress("DEPRECATION")
+                        pm.getPackageInfo(packageName, PackageManager.GET_META_DATA)
+                    }
                     parsedDescriptors.add(
                         PluginDescriptor(
                             packageName,
