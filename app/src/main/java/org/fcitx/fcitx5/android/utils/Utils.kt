@@ -51,8 +51,6 @@ import java.util.zip.ZipInputStream
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.io.path.createTempDirectory
-import kotlin.io.path.pathString
 import kotlin.math.roundToInt
 
 val InputMethodService.inputConnection: InputConnection?
@@ -246,12 +244,13 @@ fun ZipInputStream.extract(destDir: File): List<File> {
 }
 
 inline fun <T> withTempDir(block: (File) -> T): T {
-    // creates /data/user/<userId>/<packageName>/cache/<randomId>
-    val dir = File(createTempDirectory().pathString)
+    val dir = appContext.cacheDir.resolve(System.currentTimeMillis().toString()).also {
+        it.mkdirs()
+    }
     try {
         return block(dir)
     } finally {
-        dir.delete()
+        dir.deleteRecursively()
     }
 }
 

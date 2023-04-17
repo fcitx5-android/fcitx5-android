@@ -20,7 +20,6 @@ import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.addPreference
 import org.fcitx.fcitx5.android.utils.iso8601UTCDateTime
 import org.fcitx.fcitx5.android.utils.toast
-import org.fcitx.fcitx5.android.utils.withTempDir
 import java.io.File
 
 class DeveloperFragment : PaddingPreferenceFragment() {
@@ -38,6 +37,7 @@ class DeveloperFragment : PaddingPreferenceFragment() {
                         hprofFile.inputStream().use { i -> i.copyTo(o) }
                     }
                 }?.toast(ctx)
+                hprofFile.delete()
             }
         }
     }
@@ -81,13 +81,11 @@ class DeveloperFragment : PaddingPreferenceFragment() {
                 }
             }
             addPreference(R.string.capture_heap_dump) {
-                withTempDir {
-                    val fileName = "${context.packageName}_${iso8601UTCDateTime()}.hprof"
-                    hprofFile = it.resolve(fileName)
-                    System.gc()
-                    Debug.dumpHprofData(hprofFile.absolutePath)
-                    launcher.launch(fileName)
-                }
+                val fileName = "${context.packageName}_${iso8601UTCDateTime()}.hprof"
+                hprofFile = context.cacheDir.resolve(fileName)
+                System.gc()
+                Debug.dumpHprofData(hprofFile.absolutePath)
+                launcher.launch(fileName)
             }
         }
     }
