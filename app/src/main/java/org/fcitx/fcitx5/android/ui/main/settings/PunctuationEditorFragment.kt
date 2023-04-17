@@ -158,7 +158,6 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
 
     override fun onResume() {
         super.onResume()
-        viewModel.disableToolbarSaveButton()
         viewModel.setToolbarTitle(requireArguments().getString(TITLE)!!)
         if (::ui.isInitialized)
             viewModel.enableToolbarEditButton {

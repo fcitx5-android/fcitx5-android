@@ -131,7 +131,6 @@ class ListFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         viewModel.setToolbarTitle(descriptor.description ?: descriptor.name)
-        viewModel.disableToolbarSaveButton()
         viewModel.enableToolbarEditButton {
             ui.enterMultiSelect(
                 requireActivity().onBackPressedDispatcher,

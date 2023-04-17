@@ -106,7 +106,6 @@
     <string name="theme">Theme</string>
     <string name="key_ripple_effect">Enable key ripple effect</string>
     <string name="key_border">Enable key border</string>
-    <string name="theme_manager">Theme Manager</string>
     <string name="brightness">Brightness</string>
     <string name="key_radius">Key radius</string>
     <string name="key_horizontal_margin">Key horizontal margin</string>

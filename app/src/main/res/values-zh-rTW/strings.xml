@@ -101,7 +101,6 @@
     <string name="theme">主題</string>
     <string name="key_ripple_effect">啟用按鍵水波紋特效</string>
     <string name="key_border">啟用按鍵邊框</string>
-    <string name="theme_manager">主題管理</string>
     <string name="brightness">亮度</string>
     <string name="key_radius">按鍵圓角半徑</string>
     <string name="key_horizontal_margin">按鍵橫向邊距</string>

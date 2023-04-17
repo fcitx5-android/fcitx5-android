@@ -54,8 +54,6 @@ class InputMethodListFragment : ProgressFragment(), OnItemChangedListener<InputM
 
     override fun onResume() {
         super.onResume()
-        viewModel.disableToolbarSaveButton()
-        viewModel.setToolbarTitle(requireContext().getString(R.string.input_methods_conf))
         viewModel.enableToolbarEditButton {
             ui.enterMultiSelect(
                 requireActivity().onBackPressedDispatcher,

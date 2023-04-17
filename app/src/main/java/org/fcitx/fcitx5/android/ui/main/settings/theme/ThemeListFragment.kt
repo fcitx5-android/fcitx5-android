@@ -11,7 +11,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.Keep
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
@@ -23,15 +22,26 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
-import org.fcitx.fcitx5.android.ui.main.MainViewModel
-import org.fcitx.fcitx5.android.utils.*
+import org.fcitx.fcitx5.android.utils.applyNavBarInsetsBottomPadding
+import org.fcitx.fcitx5.android.utils.bindOnNotNull
+import org.fcitx.fcitx5.android.utils.errorArg
+import org.fcitx.fcitx5.android.utils.errorDialog
+import org.fcitx.fcitx5.android.utils.identity
+import org.fcitx.fcitx5.android.utils.queryFileName
+import org.fcitx.fcitx5.android.utils.toast
 import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.resources.resolveThemeAttribute
 import splitties.resources.styledColor
 import splitties.resources.styledDrawable
 import splitties.views.backgroundColor
-import splitties.views.dsl.constraintlayout.*
+import splitties.views.dsl.constraintlayout.below
+import splitties.views.dsl.constraintlayout.bottomOfParent
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.endOfParent
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.startOfParent
+import splitties.views.dsl.constraintlayout.topOfParent
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.imageButton
 import splitties.views.dsl.core.textView
@@ -42,8 +52,6 @@ import splitties.views.textAppearance
 import java.util.UUID
 
 class ThemeListFragment : Fragment() {
-
-    private val viewModel: MainViewModel by activityViewModels()
 
     private lateinit var imageLauncher: ActivityResultLauncher<Theme.Custom?>
 
@@ -224,11 +232,6 @@ class ThemeListFragment : Fragment() {
                 bottomOfParent()
             })
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        viewModel.setToolbarTitle(requireContext().getString(R.string.theme))
     }
 
     private fun addTheme() {

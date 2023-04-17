@@ -106,7 +106,6 @@
     <string name="theme">Тема</string>
     <string name="key_ripple_effect">Активироватьть эффект пульсации клавиш</string>
     <string name="key_border">Активировать ограничение клавиш</string>
-    <string name="theme_manager">Менеджер тем</string>
     <string name="brightness">Яркость</string>
     <string name="key_radius">Радиус клавиш</string>
     <string name="key_horizontal_margin">Горизонтальное поле клавиш</string>

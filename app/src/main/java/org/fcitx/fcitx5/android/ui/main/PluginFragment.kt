@@ -2,10 +2,7 @@ package org.fcitx.fcitx5.android.ui.main
 
 import android.os.Bundle
 import android.widget.Toast
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.preference.Preference
-import androidx.preference.PreferenceCategory
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.fcitx.fcitx5.android.R
@@ -15,8 +12,6 @@ import org.fcitx.fcitx5.android.core.data.PluginLoadFailed
 import org.fcitx.fcitx5.android.ui.common.PaddingPreferenceFragment
 
 class PluginFragment : PaddingPreferenceFragment() {
-
-    private val viewModel: MainViewModel by activityViewModels()
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         lifecycleScope.launch {
@@ -85,13 +80,7 @@ class PluginFragment : PaddingPreferenceFragment() {
                         }
                     })
             }
-            preferenceScreen = screen
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        viewModel.setToolbarTitle(requireContext().getString(R.string.plugins))
     }
 
     private suspend fun DataManager.waitSynced() = suspendCancellableCoroutine {

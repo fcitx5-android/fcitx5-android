@@ -97,8 +97,6 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
         savedInstanceState: Bundle?
     ): View {
         createNotificationChannel()
-        viewModel.disableToolbarSaveButton()
-        viewModel.setToolbarTitle(getString(R.string.pinyin_dict))
         registerLauncher()
         ui.addOnItemChangedListener(this)
         resetDustman()

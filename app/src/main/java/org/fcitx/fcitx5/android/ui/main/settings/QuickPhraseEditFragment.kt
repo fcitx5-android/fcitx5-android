@@ -146,9 +146,7 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
 
     override fun onResume() {
         super.onResume()
-        viewModel.disableToolbarSaveButton()
         viewModel.setToolbarTitle(quickPhrase.name)
-
         if (::ui.isInitialized)
             viewModel.enableToolbarEditButton {
                 ui.enterMultiSelect(

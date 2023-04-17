@@ -135,12 +135,6 @@ class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
         return ui.root
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.setToolbarTitle(requireContext().getString(R.string.addons_conf))
-        viewModel.disableToolbarSaveButton()
-    }
-
     override fun onItemUpdated(idx: Int, old: AddonInfo, new: AddonInfo) {
         updateAddonState()
     }

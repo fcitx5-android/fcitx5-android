@@ -5,12 +5,8 @@ import android.os.Debug
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
-import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.preference.Preference
-import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -27,8 +23,6 @@ import org.fcitx.fcitx5.android.utils.withTempDir
 import java.io.File
 
 class DeveloperFragment : PaddingPreferenceFragment() {
-
-    private val viewModel: MainViewModel by activityViewModels()
 
     private lateinit var hprofFile: File
     private lateinit var launcher: ActivityResultLauncher<String>
@@ -109,9 +103,4 @@ class DeveloperFragment : PaddingPreferenceFragment() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.setToolbarTitle(getString(R.string.developer))
-        viewModel.disableToolbarSaveButton()
-    }
 }

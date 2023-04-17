@@ -14,8 +14,6 @@ class MainFragment : PaddingPreferenceFragment() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.setToolbarTitle(requireContext().getString(R.string.app_name))
-        viewModel.disableToolbarSaveButton()
         viewModel.enableAboutButton()
     }
 

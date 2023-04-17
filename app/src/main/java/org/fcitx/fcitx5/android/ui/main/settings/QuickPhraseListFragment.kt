@@ -37,7 +37,12 @@ import org.fcitx.fcitx5.android.utils.NaiveDustman
 import org.fcitx.fcitx5.android.utils.queryFileName
 import splitties.dimensions.dp
 import splitties.systemservices.notificationManager
-import splitties.views.dsl.constraintlayout.*
+import splitties.views.dsl.constraintlayout.bottomOfParent
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.leftOfParent
+import splitties.views.dsl.constraintlayout.rightOfParent
+import splitties.views.dsl.constraintlayout.topOfParent
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.editText
 import splitties.views.dsl.core.matchParent
@@ -350,8 +355,6 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
 
     override fun onResume() {
         super.onResume()
-        viewModel.disableToolbarSaveButton()
-        viewModel.setToolbarTitle(getString(R.string.quickphrase_editor))
         viewModel.enableToolbarEditButton {
             ui.enterMultiSelect(
                 requireActivity().onBackPressedDispatcher,

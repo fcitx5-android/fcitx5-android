@@ -6,7 +6,8 @@
 
     <fragment
         android:id="@+id/mainFragment"
-        android:name="org.fcitx.fcitx5.android.ui.main.MainFragment">
+        android:name="org.fcitx.fcitx5.android.ui.main.MainFragment"
+        android:label="@string/app_name">
         <action
             android:id="@+id/action_mainFragment_to_globalConfigFragment"
             app:destination="@id/globalConfigFragment"
@@ -107,7 +108,8 @@
 
     <fragment
         android:id="@+id/imListFragment"
-        android:name="org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodListFragment">
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodListFragment"
+        android:label="@string/input_methods_conf">
         <action
             android:id="@+id/action_imListFragment_to_imConfigFragment"
             app:destination="@id/imConfigFragment"
@@ -158,7 +160,8 @@
 
     <fragment
         android:id="@+id/addonListFragment"
-        android:name="org.fcitx.fcitx5.android.ui.main.settings.addon.AddonListFragment">
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.addon.AddonListFragment"
+        android:label="@string/addons_conf">
         <action
             android:id="@+id/action_addonListFragment_to_addonConfigFragment"
             app:destination="@id/addonConfigFragment"
@@ -216,16 +219,20 @@
 
     <fragment
         android:id="@+id/keyboardSettingsFragment"
-        android:name="org.fcitx.fcitx5.android.ui.main.settings.behavior.KeyboardSettingsFragment" />
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.behavior.KeyboardSettingsFragment"
+        android:label="@string/keyboard" />
     <fragment
         android:id="@+id/clipboardSettingsFragment"
-        android:name="org.fcitx.fcitx5.android.ui.main.settings.behavior.ClipboardSettingsFragment" />
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.behavior.ClipboardSettingsFragment"
+        android:label="@string/clipboard" />
     <fragment
         android:id="@+id/advancedSettingsFragment"
-        android:name="org.fcitx.fcitx5.android.ui.main.settings.behavior.AdvancedSettingsFragment" />
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.behavior.AdvancedSettingsFragment"
+        android:label="@string/advanced" />
     <fragment
         android:id="@+id/themeListFragment"
-        android:name="org.fcitx.fcitx5.android.ui.main.settings.theme.ThemeListFragment">
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.theme.ThemeListFragment"
+        android:label="@string/theme">
         <action
             android:id="@+id/action_themeListFragment_to_themeSettingsFragment"
             app:destination="@id/themeSettingsFragment"
@@ -236,25 +243,27 @@
     </fragment>
     <fragment
         android:id="@+id/themeSettingsFragment"
-        android:name="org.fcitx.fcitx5.android.ui.main.settings.theme.ThemeSettingsFragment" />
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.theme.ThemeSettingsFragment"
+        android:label="@string/theme" />
 
     <fragment
         android:id="@+id/listFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.settings.ListFragment" />
     <fragment
         android:id="@+id/pinyinDictionaryFragment"
-        android:name="org.fcitx.fcitx5.android.ui.main.settings.PinyinDictionaryFragment" />
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.PinyinDictionaryFragment"
+        android:label="@string/pinyin_dict" />
     <fragment
         android:id="@+id/punctuationEditorFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.settings.PunctuationEditorFragment" />
     <fragment
         android:id="@+id/developerFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.DeveloperFragment"
-        android:label="" />
+        android:label="@string/developer" />
     <fragment
         android:id="@+id/aboutFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.AboutFragment"
-        android:label="">
+        android:label="@string/about">
         <action
             android:id="@+id/action_aboutFragment_to_licensesFragment"
             app:destination="@id/licensesFragment"
@@ -266,11 +275,11 @@
     <fragment
         android:id="@+id/licensesFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.LicensesFragment"
-        android:label="" />
+        android:label="@string/open_source_licenses" />
     <fragment
         android:id="@+id/quickPhraseListFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.settings.QuickPhraseListFragment"
-        android:label="">
+        android:label="@string/quickphrase_editor">
         <action
             android:id="@+id/action_quickPhraseListFragment_to_quickPhraseEditFragment"
             app:destination="@id/quickPhraseEditFragment"
@@ -281,15 +290,13 @@
     </fragment>
     <fragment
         android:id="@+id/quickPhraseEditFragment"
-        android:name="org.fcitx.fcitx5.android.ui.main.settings.QuickPhraseEditFragment"
-        android:label="" />
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.QuickPhraseEditFragment" />
     <fragment
         android:id="@+id/tableInputMethodFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.settings.TableInputMethodFragment"
-        android:label="" />
+        android:label="@string/table_im" />
     <fragment
         android:id="@+id/pluginFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.PluginFragment"
-        android:label="" />
-
+        android:label="@string/plugins" />
 </navigation>

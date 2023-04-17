@@ -4,9 +4,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.preference.Preference
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.entity.License
 import kotlinx.coroutines.launch
@@ -14,14 +12,6 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.ui.common.PaddingPreferenceFragment
 
 class LicensesFragment : PaddingPreferenceFragment() {
-
-    private val viewModel: MainViewModel by activityViewModels()
-
-    override fun onResume() {
-        super.onResume()
-        viewModel.setToolbarTitle(getString(R.string.open_source_licenses))
-        viewModel.disableToolbarSaveButton()
-    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         lifecycleScope.launch {

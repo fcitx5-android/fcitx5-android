@@ -3,24 +3,13 @@ package org.fcitx.fcitx5.android.ui.main
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import androidx.preference.Preference
-import androidx.preference.PreferenceCategory
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.ui.common.PaddingPreferenceFragment
 import org.fcitx.fcitx5.android.utils.Const
 import org.fcitx.fcitx5.android.utils.formatDateTime
 
 class AboutFragment : PaddingPreferenceFragment() {
-
-    private val viewModel: MainViewModel by activityViewModels()
-
-    override fun onResume() {
-        super.onResume()
-        viewModel.setToolbarTitle(getString(R.string.about))
-        viewModel.disableToolbarSaveButton()
-    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         val context = preferenceManager.context
