@@ -1,0 +1,11 @@
+{
+    "uniqueId": "fujiwarat/anthy-unicode",
+    "artifactVersion": "1.0.0",
+    "description": "Anthy Unicode - Another Anthy",
+    "name": "fujiwarat/anthy-unicode",
+    "website": "https://github.com/fujiwarat/anthy-unicode",
+    "tag": "native",
+    "licenses": [
+        "LGPL-2.1-or-later"
+    ]
+}

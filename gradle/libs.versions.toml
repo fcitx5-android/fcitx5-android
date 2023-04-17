@@ -2,7 +2,7 @@
 androidGradlePlugin = "7.4.2"
 kotlin = "1.8.10"
 ksp = "1.8.10-1.0.9"
-aboutlibraries = "10.6.1"
+aboutlibraries = "10.6.2"
 androidDesugarJDKLibs = "2.0.2"
 room = "2.5.1"
 lifecycle = "2.6.1"
@@ -48,6 +48,7 @@ splitties-views-dsl-recyclerview = { module = "com.louiscad.splitties:splitties-
 splitties-views-dsl-material = { module = "com.louiscad.splitties:splitties-views-dsl-material", version.ref = "splitties" }
 splitties-views-recyclerview = { module = "com.louiscad.splitties:splitties-views-recyclerview", version.ref = "splitties" }
 aboutlibraries = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutlibraries" }
+aboutlibrariesPlugin = { module = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin", version.ref = "aboutlibraries" }
 junit = { module = "junit:junit", version = "4.13.2" }
 androidx-test-runner = { module = "androidx.test:runner", version = "1.5.2" }
 androidx-test-rules = { module = "androidx.test:rules", version = "1.5.0" }

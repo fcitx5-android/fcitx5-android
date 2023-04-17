@@ -49,6 +49,10 @@ android {
     }
 }
 
+aboutLibraries {
+    configPath = "plugin/anthy/licenses"
+}
+
 dependencies {
     implementation(project(":lib:fcitx5"))
     implementation(project(":lib:plugin-base"))

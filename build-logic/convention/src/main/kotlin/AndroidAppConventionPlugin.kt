@@ -1,5 +1,6 @@
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
+import com.mikepenz.aboutlibraries.plugin.AboutLibrariesExtension
 import org.gradle.api.Project
 import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.kotlin.dsl.configure
@@ -65,6 +66,18 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
                     target.setProperty("archivesBaseName", "$applicationId-$versionName")
                 }
             }
+        }
+
+        target.pluginManager.apply(
+            target.versionCatalog.findPlugin("aboutlibraries").get().get().pluginId
+        )
+        target.configure<AboutLibrariesExtension> {
+            excludeFields = arrayOf(
+                "generated", "developers", "organization", "scm", "funding", "content"
+            )
+            fetchRemoteLicense = false
+            fetchRemoteFunding = false
+            includePlatform = false
         }
 
         target.dependencies {

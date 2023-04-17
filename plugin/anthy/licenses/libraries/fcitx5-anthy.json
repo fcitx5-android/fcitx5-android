@@ -1,0 +1,11 @@
+{
+    "uniqueId": "fcitx/fcitx5-anthy",
+    "artifactVersion": "5.0.14",
+    "description": "Anthy Wrapper for Fcitx",
+    "name": "fcitx/fcitx5-anthy",
+    "website": "https://github.com/fcitx/fcitx5-anthy",
+    "tag": "native",
+    "licenses": [
+        "GPL-2.0-or-later"
+    ]
+}

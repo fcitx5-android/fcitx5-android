@@ -14,6 +14,7 @@ kotlin {
 dependencies {
     compileOnly(libs.android.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
+    compileOnly(libs.aboutlibrariesPlugin)
     implementation(libs.kotlinx.serialization.json)
 }
 

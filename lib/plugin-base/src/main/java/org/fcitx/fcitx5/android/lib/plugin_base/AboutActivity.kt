@@ -3,12 +3,23 @@
 package org.fcitx.fcitx5.android.lib.plugin_base
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.preference.Preference
+import android.preference.Preference.OnPreferenceClickListener
 import android.preference.PreferenceActivity
+import android.preference.PreferenceCategory
 import android.preference.PreferenceFragment
 import android.preference.PreferenceScreen
+import android.widget.Toast
+import com.mikepenz.aboutlibraries.Libs
+import com.mikepenz.aboutlibraries.entity.License
 import org.xmlpull.v1.XmlPullParser
 
 @SuppressLint("ExportedPreferenceActivity")
@@ -23,7 +34,29 @@ class AboutActivity : PreferenceActivity() {
 
     class AboutContentFragment : PreferenceFragment() {
 
-        private fun PreferenceScreen.addPreference(title: String, summary: String) {
+        private val copyPreferenceSummaryListener = OnPreferenceClickListener {
+            (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
+                .setPrimaryClip(ClipData.newPlainText("", it.summary))
+            Toast.makeText(context, R.string.copied, Toast.LENGTH_SHORT).show()
+            true
+        }
+
+        private fun PreferenceScreen.addCategory(
+            title: String,
+            init: PreferenceCategory.() -> Unit
+        ) {
+            PreferenceCategory(context).also {
+                it.title = title
+                addPreference(it)
+                init.invoke(it)
+            }
+        }
+
+        private fun PreferenceCategory.addPreference(
+            title: String,
+            summary: String,
+            onClick: OnPreferenceClickListener? = null
+        ) {
             addPreference(Preference(context).apply {
                 setTitle(title)
                 setSummary(summary)
@@ -31,12 +64,14 @@ class AboutActivity : PreferenceActivity() {
                     isSingleLineTitle = false
                     isIconSpaceReserved = false
                 }
+                onPreferenceClickListener = onClick ?: copyPreferenceSummaryListener
             })
         }
 
+        @SuppressLint("DiscouragedApi")
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
-
+            val screen = preferenceManager.createPreferenceScreen(context)
             val pkg = context.packageName
             val pluginXmlRes = resources.getIdentifier("plugin", "xml", pkg)
             if (pluginXmlRes == 0) return
@@ -63,11 +98,60 @@ class AboutActivity : PreferenceActivity() {
                 }
                 eventType = parser.next()
             }
-            preferenceScreen = preferenceManager.createPreferenceScreen(context).apply {
+            screen.addCategory(getString(R.string.plugin_info)) {
                 addPreference(getString(R.string.pkg_name), pkg)
                 addPreference(getString(R.string.api_version), apiVersion)
                 addPreference(getString(R.string.gettext_domain), domain)
                 addPreference(getString(R.string.plugin_description), description)
+            }
+            resources.getIdentifier("aboutlibraries", "raw", pkg).also { resId ->
+                if (resId == 0) return@also
+                val jsonString = resources.openRawResource(resId)
+                    .bufferedReader()
+                    .use { reader -> reader.readText() }
+                val libraries = Libs.Builder()
+                    .withJson(jsonString)
+                    .build()
+                    .libraries
+                    .sortedBy {
+                        if (it.tag == "native") it.uniqueId.uppercase() else it.uniqueId.lowercase()
+                    }
+                screen.addCategory(getString(R.string.licenses)) {
+                    libraries.forEach {
+                        addPreference(
+                            title = "${it.uniqueId}:${it.artifactVersion}",
+                            summary = it.licenses.joinToString { l -> l.spdxId ?: l.name }
+                        ) { _ ->
+                            showLicenseDialog(it.uniqueId, it.licenses)
+                        }
+                    }
+                }
+            }
+            preferenceScreen = screen
+        }
+
+        private fun showLicenseDialog(uniqueId: String, licenses: Set<License>): Boolean {
+            when (licenses.size) {
+                0 -> {}
+                1 -> showLicenseContent(licenses.first())
+                else -> {
+                    val licenseArray = licenses.toTypedArray()
+                    val licenseNames = licenseArray.map { it.spdxId ?: it.name }.toTypedArray()
+                    AlertDialog.Builder(context)
+                        .setTitle(uniqueId)
+                        .setItems(licenseNames) { _, idx ->
+                            showLicenseContent(licenseArray[idx])
+                        }
+                        .setPositiveButton(android.R.string.cancel, null)
+                        .show()
+                }
+            }
+            return true
+        }
+
+        private fun showLicenseContent(license: License) {
+            if (license.url?.isNotBlank() == true) {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(license.url)))
             }
         }
     }
