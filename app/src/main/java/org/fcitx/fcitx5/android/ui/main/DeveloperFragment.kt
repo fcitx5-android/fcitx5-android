@@ -17,6 +17,7 @@ import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.ui.common.PaddingPreferenceFragment
 import org.fcitx.fcitx5.android.utils.AppUtil
+import org.fcitx.fcitx5.android.utils.addPreference
 import org.fcitx.fcitx5.android.utils.iso8601UTCDateTime
 import org.fcitx.fcitx5.android.utils.toast
 import org.fcitx.fcitx5.android.utils.withTempDir
@@ -39,18 +40,6 @@ class DeveloperFragment : PaddingPreferenceFragment() {
                 }?.toast(ctx)
             }
         }
-    }
-
-    private fun PreferenceScreen.addPreference(@StringRes title: Int, onClick: () -> Unit = {}) {
-        addPreference(Preference(context).apply {
-            isSingleLineTitle = false
-            isIconSpaceReserved = false
-            setTitle(getString(title))
-            setOnPreferenceClickListener {
-                onClick()
-                true
-            }
-        })
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {

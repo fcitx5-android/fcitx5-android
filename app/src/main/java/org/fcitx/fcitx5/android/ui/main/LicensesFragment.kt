@@ -10,34 +10,32 @@ import com.mikepenz.aboutlibraries.entity.License
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.ui.common.PaddingPreferenceFragment
+import org.fcitx.fcitx5.android.utils.addPreference
 
 class LicensesFragment : PaddingPreferenceFragment() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         lifecycleScope.launch {
-            val context = preferenceManager.context
-            val screen = preferenceManager.createPreferenceScreen(context)
-            val jsonString = resources.openRawResource(R.raw.aboutlibraries)
-                .bufferedReader()
-                .use { it.readText() }
-            Libs.Builder()
-                .withJson(jsonString)
-                .build()
-                .libraries
-                .sortedBy {
-                    if (it.tag == "native") it.uniqueId.uppercase() else it.uniqueId.lowercase()
-                }
-                .forEach {
-                    screen.addPreference(Preference(context).apply {
-                        isIconSpaceReserved = false
-                        title = "${it.uniqueId}:${it.artifactVersion}"
-                        summary = it.licenses.joinToString { l -> l.spdxId ?: l.name }
-                        setOnPreferenceClickListener { _ ->
+            preferenceScreen = preferenceManager.createPreferenceScreen(requireContext()).apply {
+                val jsonString = resources.openRawResource(R.raw.aboutlibraries)
+                    .bufferedReader()
+                    .use { it.readText() }
+                Libs.Builder()
+                    .withJson(jsonString)
+                    .build()
+                    .libraries
+                    .sortedBy {
+                        if (it.tag == "native") it.uniqueId.uppercase() else it.uniqueId.lowercase()
+                    }
+                    .forEach {
+                        addPreference(
+                            title = "${it.uniqueId}:${it.artifactVersion}",
+                            summary = it.licenses.joinToString { l -> l.spdxId ?: l.name }
+                        ) {
                             showLicenseDialog(it.uniqueId, it.licenses)
                         }
-                    })
-                }
-            preferenceScreen = screen
+                    }
+            }
         }
     }
 

@@ -10,75 +10,59 @@ import org.fcitx.fcitx5.android.core.data.DataManager
 import org.fcitx.fcitx5.android.core.data.FileSource
 import org.fcitx.fcitx5.android.core.data.PluginLoadFailed
 import org.fcitx.fcitx5.android.ui.common.PaddingPreferenceFragment
+import org.fcitx.fcitx5.android.utils.addCategory
+import org.fcitx.fcitx5.android.utils.addPreference
 
 class PluginFragment : PaddingPreferenceFragment() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         lifecycleScope.launch {
             DataManager.waitSynced()
-            val context = preferenceManager.context
-            val screen = preferenceManager.createPreferenceScreen(context)
-            val loadedCategory = PreferenceCategory(context).apply {
-                isIconSpaceReserved = false
-                setTitle(R.string.loaded)
-            }
-            screen.addPreference(loadedCategory)
-            DataManager.getLoadedPlugins().forEach {
-                loadedCategory.addPreference(
-                    Preference(context).apply {
-                        isIconSpaceReserved = false
-                        title = it.name
-                        summary = "${it.versionName}\n${it.description}"
-                        setOnPreferenceClickListener { _ ->
+            preferenceScreen = preferenceManager.createPreferenceScreen(requireContext()).apply {
+                addCategory(R.string.loaded) {
+                    isIconSpaceReserved = false
+                    DataManager.getLoadedPlugins().forEach {
+                        addPreference(it.name, "${it.versionName}\n${it.description}") {
                             Toast.makeText(context, it.packageName, Toast.LENGTH_SHORT).show()
-                            true
                         }
-                    })
-            }
-            val failedCategory = PreferenceCategory(context).apply {
-                isIconSpaceReserved = false
-                setTitle(R.string.failed)
-            }
-            screen.addPreference(failedCategory)
-            DataManager.getFailedPlugins().forEach { (packageName, reason) ->
-                failedCategory.addPreference(
-                    Preference(context).apply {
+                    }
+                }
+                DataManager.getFailedPlugins().also { failedPlugins ->
+                    if (failedPlugins.isEmpty()) return@also
+                    addCategory(R.string.failed) {
                         isIconSpaceReserved = false
-                        isSingleLineTitle = false
-                        title = packageName
-                        setOnPreferenceClickListener { _ ->
-                            Toast.makeText(context, packageName, Toast.LENGTH_SHORT).show()
-                            true
-                        }
-                        when (reason) {
-                            is PluginLoadFailed.DataDescriptorParseError -> {
-                                setSummary(R.string.invalid_data_descriptor)
-                            }
-                            is PluginLoadFailed.MissingDataDescriptor -> {
-                                setSummary(R.string.missing_data_descriptor)
-                            }
-                            PluginLoadFailed.MissingPluginDescriptor -> {
-                                setSummary(R.string.missing_plugin_descriptor)
-                            }
-                            is PluginLoadFailed.PathConflict -> {
-                                summary = getString(
-                                    R.string.path_conflict,
-                                    reason.path,
-                                    reason.existingSrc.let { src ->
-                                        when (src) {
+                        failedPlugins.forEach { (packageName, reason) ->
+                            val summary = when (reason) {
+                                is PluginLoadFailed.DataDescriptorParseError -> {
+                                    getString(R.string.invalid_data_descriptor)
+                                }
+                                is PluginLoadFailed.MissingDataDescriptor -> {
+                                    getString(R.string.missing_data_descriptor)
+                                }
+                                PluginLoadFailed.MissingPluginDescriptor -> {
+                                    getString(R.string.missing_plugin_descriptor)
+                                }
+                                is PluginLoadFailed.PathConflict -> {
+                                    getString(
+                                        R.string.path_conflict,
+                                        reason.path,
+                                        when (val src = reason.existingSrc) {
                                             FileSource.Main -> R.string.main_program
                                             is FileSource.Plugin -> src.descriptor.name
                                         }
-                                    })
+                                    )
+                                }
+                                is PluginLoadFailed.PluginAPIIncompatible -> {
+                                    getString(R.string.incompatible_api, reason.api)
+                                }
+                                PluginLoadFailed.PluginDescriptorParseError -> {
+                                    getString(R.string.invalid_plugin_descriptor)
+                                }
                             }
-                            is PluginLoadFailed.PluginAPIIncompatible -> {
-                                summary = getString(R.string.incompatible_api, reason.api)
-                            }
-                            PluginLoadFailed.PluginDescriptorParseError -> {
-                                setSummary(R.string.invalid_plugin_descriptor)
-                            }
+                            addPreference(packageName, summary)
                         }
-                    })
+                    }
+                }
             }
         }
     }
