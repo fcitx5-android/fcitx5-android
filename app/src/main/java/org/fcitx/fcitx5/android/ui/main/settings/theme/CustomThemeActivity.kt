@@ -34,6 +34,7 @@ import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageOptions
 import com.canhub.cropper.CropImageView
+import com.google.android.material.appbar.AppBarLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
@@ -56,7 +57,6 @@ import splitties.views.dsl.appcompat.switch
 import splitties.views.dsl.appcompat.toolbar
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
-import splitties.views.dsl.material.appBarLayout
 import splitties.views.dsl.material.defaultLParams
 import java.io.File
 
@@ -88,7 +88,7 @@ class CustomThemeActivity : AppCompatActivity() {
     }
 
     private val appBar by lazy {
-        appBarLayout {
+        view(::AppBarLayout) {
             add(toolbar, defaultLParams())
         }
     }
