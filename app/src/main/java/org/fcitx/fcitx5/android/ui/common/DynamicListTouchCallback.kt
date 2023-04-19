@@ -1,44 +1,47 @@
 package org.fcitx.fcitx5.android.ui.common
 
-import android.graphics.*
+import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
+import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import androidx.core.graphics.drawable.toBitmap
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.R
 import splitties.dimensions.dp
-import splitties.resources.appColor
-import splitties.resources.appDrawable
-import splitties.resources.appStyledColor
+import splitties.resources.color
+import splitties.resources.drawable
+import splitties.resources.styledColor
 import kotlin.math.absoluteValue
 
-open class DynamicListTouchCallback<T>(private val adapter: DynamicListAdapter<T>) :
-    ItemTouchHelper.SimpleCallback(
-        if (adapter.enableOrder)
-            ItemTouchHelper.UP or ItemTouchHelper.DOWN
-        else ItemTouchHelper.ACTION_STATE_IDLE,
-        if (adapter.enableAddAndDelete)
-            ItemTouchHelper.LEFT
-        else ItemTouchHelper.ACTION_STATE_IDLE
-    ) {
+open class DynamicListTouchCallback<T>(
+    private val ctx: Context,
+    private val adapter: DynamicListAdapter<T>
+) : ItemTouchHelper.SimpleCallback(
+    /* dragDirs = */ if (adapter.enableOrder) ItemTouchHelper.UP or ItemTouchHelper.DOWN else 0,
+    /* swipeDirs = */ if (adapter.enableAddAndDelete) ItemTouchHelper.LEFT else 0
+) {
 
     private var selected = true
     private var reset = false
 
     private val deleteBackground by lazy {
         ColorDrawable().apply {
-            color = appColor(R.color.red_400)
+            color = ctx.color(R.color.red_400)
         }
     }
 
     private val deleteIcon by lazy {
-        appDrawable(R.drawable.ic_baseline_delete_24)!!.toBitmap()
+        ctx.drawable(R.drawable.ic_baseline_delete_24)!!.toBitmap()
     }
 
     private val deleteIconPaint by lazy {
         Paint().apply {
             colorFilter = PorterDuffColorFilter(
-                appStyledColor(android.R.attr.colorBackground),
+                ctx.styledColor(android.R.attr.colorBackground),
                 PorterDuff.Mode.SRC_IN
             )
         }

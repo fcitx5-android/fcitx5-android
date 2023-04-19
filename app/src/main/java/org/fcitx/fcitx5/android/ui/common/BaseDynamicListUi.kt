@@ -226,8 +226,7 @@ abstract class BaseDynamicListUi<T>(
     }
 
     fun addTouchCallback(
-        touchCallback: DynamicListTouchCallback<T> =
-            DynamicListTouchCallback(this@BaseDynamicListUi)
+        touchCallback: DynamicListTouchCallback<T> = DynamicListTouchCallback(ctx, this)
     ) {
         itemTouchHelper = ItemTouchHelper(touchCallback).also {
             it.attachToRecyclerView(recyclerView)
