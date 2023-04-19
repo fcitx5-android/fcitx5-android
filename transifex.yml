@@ -6,6 +6,16 @@ git:
       source_file: app/src/main/res/values/strings.xml
       translation_files_expression: app/src/main/res/values-<lang>/strings.xml
     - filter_type: file
+      file_format: Android
+      source_language: en
+      source_file: lib/plugin-base/src/main/res/values/strings.xml
+      translation_files_expression: lib/plugin-base/src/main/res/values-<lang>/strings.xml
+    - filter_type: file
+      file_format: Android
+      source_language: en
+      source_file: plugin/anthy/src/main/res/values/strings.xml
+      translation_files_expression: plugin/anthy/src/main/res/values-<lang>/strings.xml
+    - filter_type: file
       file_format: po
       source_language: en
       source_file: app/src/main/cpp/po/fcitx5-android.pot
