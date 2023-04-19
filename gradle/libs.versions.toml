@@ -19,7 +19,7 @@ ini4j = { module = "org.ini4j:ini4j", version = "0.5.4" }
 autofill = { module = "androidx.autofill:autofill", version = "1.1.0" }
 arrow = { module = "io.arrow-kt:arrow-core", version = "1.1.5" }
 activity = { module = "androidx.activity:activity-ktx", version = "1.7.0" }
-imagecropper = { module = "com.github.CanHub:Android-Image-Cropper", version = "4.2.1" }
+imagecropper = { module = "com.vanniktech:android-image-cropper", version = "4.5.0" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version = "3.0.0" }
 dependency = { module = "org.mechdancer:dependency", version = "0.1.2" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }

@@ -11,6 +11,7 @@ import kotlinx.serialization.Serializable
 import org.fcitx.fcitx5.android.utils.RectSerializer
 import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.darkenColorFilter
+import java.io.File
 
 @Serializable
 sealed class Theme : Parcelable {
@@ -85,7 +86,9 @@ sealed class Theme : Parcelable {
             val cropRect: @Serializable(RectSerializer::class) Rect?,
         ) : Parcelable {
             fun toDrawable(): Drawable? {
-                val bitmap = BitmapFactory.decodeFile(croppedFilePath) ?: return null
+                val cropped = File(croppedFilePath)
+                if (!cropped.exists()) return null
+                val bitmap = BitmapFactory.decodeStream(cropped.inputStream()) ?: return null
                 return BitmapDrawable(appContext.resources, bitmap).apply {
                     colorFilter = darkenColorFilter(100 - brightness)
                 }

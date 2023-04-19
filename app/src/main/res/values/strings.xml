@@ -222,4 +222,5 @@
     <string name="incompatible_api">Incompatible api: %1$s</string>
     <string name="path_conflict">Path \"%1$s\" is already owned by %2$s</string>
     <string name="main_program">main program</string>
+    <string name="edit_theme">Edit Theme</string>
 </resources>

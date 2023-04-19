@@ -5,6 +5,9 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- remove intent queries merged from library manifest (namely Android-Image-Cropper) -->
+    <queries tools:node="removeAll" />
+
     <queries>
         <intent>
             <action android:name="org.fcitx.fcitx5.android.plugin.MANIFEST" />
@@ -35,10 +38,14 @@
         <activity
             android:name=".ui.main.settings.theme.CustomThemeActivity"
             android:configChanges="orientation|screenSize"
-            android:exported="false" />
+            android:exported="false"
+            android:label="@string/edit_theme" />
+        <!-- don't export CropImageActivity -->
         <activity
             android:name="com.canhub.cropper.CropImageActivity"
-            android:theme="@style/Theme.AppCompat" />
+            android:exported="false"
+            android:theme="@style/Theme.CropActivityTheme"
+            tools:replace="android:exported" />
         <activity
             android:name=".ui.main.MainActivity"
             android:exported="true"
