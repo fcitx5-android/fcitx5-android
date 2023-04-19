@@ -366,12 +366,21 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         override fun nativeStartup() {
             DataManager.sync()
             val locale = Locales.fcitxLocale
-            Timber.i("Current locale is $locale")
-            val nativeLibDir =
-                (listOf(context.applicationInfo.nativeLibraryDir) + DataManager.getLoadedPlugins()
-                    .map { it.nativeLibraryDir }).joinToString(separator = ":")
-            Timber.i("Native library dir is $nativeLibDir")
-            val extDomains = DataManager.getLoadedPlugins().mapNotNull { it.domain }.toTypedArray()
+            val plugins = DataManager.getLoadedPlugins()
+            val nativeLibDir = buildString {
+                append(context.applicationInfo.nativeLibraryDir)
+                plugins.forEach {
+                    append(':')
+                    append(it.nativeLibraryDir)
+                }
+            }
+            val extDomains = plugins.mapNotNull { it.domain }.toTypedArray()
+            Timber.d("""
+               Starting fcitx with:
+               locale=$locale
+               nativeLibDir=$nativeLibDir
+               extDomains=${extDomains.joinToString()}
+            """.trimIndent())
             with(context) {
                 startupFcitx(
                     locale,

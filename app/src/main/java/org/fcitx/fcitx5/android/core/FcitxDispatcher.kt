@@ -1,6 +1,12 @@
 package org.fcitx.fcitx5.android.core
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import timber.log.Timber
@@ -60,7 +66,7 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
     fun start() {
         internalScope.launch {
             runningLock.withLock {
-                Timber.i("FcitxDispatcher start()")
+                Timber.d("FcitxDispatcher start()")
                 if (isRunning.compareAndSet(false, true)) {
                     Timber.d("nativeStartup()")
                     controller.nativeStartup()

@@ -244,7 +244,7 @@ object DataManager {
         callbacks.forEach { it() }
         callbacks.clear()
         synced = true
-        Timber.i("Synced!")
+        Timber.d("Synced")
     }
 
     private fun deleteFile(path: String) {
