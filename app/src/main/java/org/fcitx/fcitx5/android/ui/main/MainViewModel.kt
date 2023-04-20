@@ -11,7 +11,7 @@ class MainViewModel : ViewModel() {
 
     val toolbarTitle = MutableLiveData(appContext.getString(R.string.app_name))
 
-    val appbarShadow = MutableLiveData(true)
+    val toolbarShadow = MutableLiveData(true)
 
     val toolbarSaveButtonOnClickListener = MutableLiveData<(() -> Unit)?>()
 
@@ -29,12 +29,12 @@ class MainViewModel : ViewModel() {
         toolbarTitle.value = title
     }
 
-    fun enableAppbarShadow() {
-        appbarShadow.value = true
+    fun enableToolbarShadow() {
+        toolbarShadow.value = true
     }
 
-    fun disableAppbarShadow() {
-        appbarShadow.value = false
+    fun disableToolbarShadow() {
+        toolbarShadow.value = false
     }
 
     fun enableToolbarSaveButton(onClick: () -> Unit) {

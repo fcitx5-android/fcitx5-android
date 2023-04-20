@@ -1,8 +1,6 @@
 package org.fcitx.fcitx5.android.ui.main
 
 import android.Manifest
-import android.animation.ObjectAnimator
-import android.animation.StateListAnimator
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -32,6 +30,7 @@ import org.fcitx.fcitx5.android.utils.Const
 import org.fcitx.fcitx5.android.utils.applyTranslucentSystemBars
 import org.fcitx.fcitx5.android.utils.navigateFromMain
 import splitties.dimensions.dp
+import splitties.views.topPadding
 import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
@@ -47,17 +46,11 @@ class MainActivity : AppCompatActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
             val statusBars = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
             val navBars = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            binding.appbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            binding.root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = navBars.left
                 rightMargin = navBars.right
             }
-            binding.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = statusBars.top
-            }
-            binding.navHostFragment.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = navBars.left
-                rightMargin = navBars.right
-            }
+            binding.toolbar.topPadding = statusBars.top
             windowInsets
         }
         setContentView(binding.root)
@@ -80,18 +73,13 @@ class MainActivity : AppCompatActivity() {
         viewModel.toolbarTitle.observe(this) {
             binding.toolbar.title = it
         }
-        viewModel.appbarShadow.observe(this) {
-            binding.appbar.stateListAnimator = StateListAnimator().apply {
-                addState(
-                    intArrayOf(android.R.attr.state_enabled),
-                    ObjectAnimator.ofFloat(binding.appbar, "elevation", dp(if (it) 4f else 0f))
-                )
-            }
+        viewModel.toolbarShadow.observe(this) {
+            binding.toolbar.elevation = dp(if (it) 4f else 0f)
         }
         navController.addOnDestinationChangedListener { _, dest, _ ->
             when (dest.id) {
-                R.id.themeListFragment -> viewModel.disableAppbarShadow()
-                else -> viewModel.enableAppbarShadow()
+                R.id.themeListFragment -> viewModel.disableToolbarShadow()
+                else -> viewModel.enableToolbarShadow()
             }
         }
         if (SetupActivity.shouldShowUp() && intent.action == Intent.ACTION_MAIN)

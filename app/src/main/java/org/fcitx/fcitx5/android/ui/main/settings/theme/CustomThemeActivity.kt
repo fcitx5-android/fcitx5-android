@@ -34,7 +34,6 @@ import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageOptions
 import com.canhub.cropper.CropImageView
-import com.google.android.material.appbar.AppBarLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
@@ -57,7 +56,6 @@ import splitties.views.dsl.appcompat.switch
 import splitties.views.dsl.appcompat.toolbar
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
-import splitties.views.dsl.material.defaultLParams
 import java.io.File
 
 class CustomThemeActivity : AppCompatActivity() {
@@ -84,12 +82,9 @@ class CustomThemeActivity : AppCompatActivity() {
     }
 
     private val toolbar by lazy {
-        toolbar()
-    }
-
-    private val appBar by lazy {
-        view(::AppBarLayout) {
-            add(toolbar, defaultLParams())
+        toolbar {
+            backgroundColor = styledColor(android.R.attr.colorPrimary)
+            elevation = dp(4f)
         }
     }
 
@@ -178,12 +173,12 @@ class CustomThemeActivity : AppCompatActivity() {
 
     private val ui by lazy {
         constraintLayout {
-            add(appBar, lParams(matchParent, wrapContent) {
+            add(toolbar, lParams(matchParent, wrapContent) {
                 topOfParent()
                 centerHorizontally()
             })
             add(scrollView, lParams {
-                below(appBar)
+                below(toolbar)
                 centerHorizontally()
                 bottomOfParent()
             })
@@ -294,17 +289,12 @@ class CustomThemeActivity : AppCompatActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(ui) { _, windowInsets ->
             val statusBars = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
             val navBars = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            appBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            ui.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = navBars.left
                 rightMargin = navBars.right
             }
-            toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = statusBars.top
-            }
-            scrollView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = navBars.left
-                rightMargin = navBars.right
-            }
+            toolbar.topPadding = statusBars.top
+            scrollView.bottomPadding = navBars.bottom
             windowInsets
         }
         // show Activity label on toolbar

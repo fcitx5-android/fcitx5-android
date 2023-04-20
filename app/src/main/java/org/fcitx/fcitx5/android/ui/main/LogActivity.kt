@@ -18,7 +18,12 @@ import org.fcitx.fcitx5.android.FcitxApplication
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.databinding.ActivityLogBinding
 import org.fcitx.fcitx5.android.ui.main.log.LogView
-import org.fcitx.fcitx5.android.utils.*
+import org.fcitx.fcitx5.android.utils.DeviceInfo
+import org.fcitx.fcitx5.android.utils.Logcat
+import org.fcitx.fcitx5.android.utils.applyTranslucentSystemBars
+import org.fcitx.fcitx5.android.utils.iso8601UTCDateTime
+import org.fcitx.fcitx5.android.utils.toast
+import splitties.views.topPadding
 
 class LogActivity : AppCompatActivity() {
 
@@ -52,9 +57,7 @@ class LogActivity : AppCompatActivity() {
                 rightMargin = navBars.right
                 bottomMargin = navBars.bottom
             }
-            binding.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = statusBars.top
-            }
+            binding.toolbar.topPadding = statusBars.top
             windowInsets
         }
         setContentView(binding.root)
