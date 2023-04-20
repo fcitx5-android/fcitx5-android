@@ -41,7 +41,6 @@ paging = { module = "androidx.paging:paging-runtime-ktx", version = "3.1.1" }
 navigation-fragment = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationUI" }
 navigation-ui = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationUI" }
 splitties-bitflags = { module = "com.louiscad.splitties:splitties-bitflags", version.ref = "splitties" }
-splitties-systemservices = { module = "com.louiscad.splitties:splitties-systemservices", version.ref = "splitties" }
 splitties-views-dsl = { module = "com.louiscad.splitties:splitties-views-dsl", version.ref = "splitties" }
 splitties-views-dsl-constraintlayout = { module = "com.louiscad.splitties:splitties-views-dsl-constraintlayout", version.ref = "splitties" }
 splitties-views-dsl-recyclerview = { module = "com.louiscad.splitties:splitties-views-dsl-recyclerview", version.ref = "splitties" }

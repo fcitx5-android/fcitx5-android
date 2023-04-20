@@ -134,6 +134,11 @@
             android:exported="false"
             tools:ignore="MissingClass"
             tools:node="merge">
+            <!-- do not inject splitties appCtx -->
+            <meta-data
+                android:name="splitties.init.AppCtxInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
             <!-- do not inject material view factory -->
             <meta-data
                 android:name="splitties.views.dsl.material.experimental.MaterialViewInstantiatorInjecter"

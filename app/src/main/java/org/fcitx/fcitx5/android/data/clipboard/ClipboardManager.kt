@@ -4,16 +4,21 @@ import android.content.ClipboardManager
 import android.content.Context
 import androidx.annotation.Keep
 import androidx.room.Room
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardDao
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardDatabase
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.utils.WeakHashSet
-import splitties.systemservices.clipboardManager
+import org.fcitx.fcitx5.android.utils.appContext
+import org.fcitx.fcitx5.android.utils.clipboardManager
 
 object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
@@ -23,6 +28,8 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     fun interface OnClipboardUpdateListener {
         fun onUpdate(entry: ClipboardEntry)
     }
+
+    private val clipboardManager = appContext.clipboardManager
 
     private val mutex = Mutex()
 

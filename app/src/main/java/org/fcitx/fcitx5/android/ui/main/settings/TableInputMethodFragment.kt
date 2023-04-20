@@ -31,9 +31,9 @@ import org.fcitx.fcitx5.android.utils.NaiveDustman
 import org.fcitx.fcitx5.android.utils.bindOnNotNull
 import org.fcitx.fcitx5.android.utils.errorArg
 import org.fcitx.fcitx5.android.utils.errorDialog
+import org.fcitx.fcitx5.android.utils.notificationManager
 import org.fcitx.fcitx5.android.utils.queryFileName
 import splitties.resources.styledDrawable
-import splitties.systemservices.notificationManager
 import splitties.views.imageDrawable
 
 class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInputMethod> {

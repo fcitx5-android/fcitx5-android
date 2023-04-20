@@ -18,7 +18,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListener
-import splitties.systemservices.vibrator
+import org.fcitx.fcitx5.android.utils.vibrator
 
 open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
 

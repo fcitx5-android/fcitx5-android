@@ -8,8 +8,9 @@ import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
 import org.fcitx.fcitx5.android.input.keyboard.SpaceLongPressBehavior
 import org.fcitx.fcitx5.android.input.keyboard.SwipeSymbolDirection
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
+import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.getSystemProperty
-import splitties.systemservices.vibrator
+import org.fcitx.fcitx5.android.utils.vibrator
 
 class AppPrefs(private val sharedPreferences: SharedPreferences) {
 
@@ -75,7 +76,7 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             ) {
                 buttonHapticFeedback.getValue()
                         && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-                        && vibrator.hasAmplitudeControl()
+                        && appContext.vibrator.hasAmplitudeControl()
             }
             buttonPressVibrationAmplitude = primary
             buttonLongPressVibrationAmplitude = secondary

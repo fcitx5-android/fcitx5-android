@@ -117,7 +117,6 @@ dependencies {
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation(libs.splitties.bitflags)
-    implementation(libs.splitties.systemservices)
     implementation(libs.splitties.views.dsl)
     implementation(libs.splitties.views.dsl.constraintlayout)
     implementation(libs.splitties.views.dsl.recyclerview)
