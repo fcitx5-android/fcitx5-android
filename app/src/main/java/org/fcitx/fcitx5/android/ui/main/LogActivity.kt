@@ -1,7 +1,8 @@
 package org.fcitx.fcitx5.android.ui.main
 
 import android.os.Bundle
-import android.view.View
+import android.view.Menu
+import android.view.MenuItem
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
@@ -26,6 +27,8 @@ import org.fcitx.fcitx5.android.utils.toast
 import splitties.views.topPadding
 
 class LogActivity : AppCompatActivity() {
+
+    private var fromCrash = false
 
     private lateinit var launcher: ActivityResultLauncher<String>
     private lateinit var logView: LogView
@@ -55,9 +58,9 @@ class LogActivity : AppCompatActivity() {
             binding.root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = navBars.left
                 rightMargin = navBars.right
-                bottomMargin = navBars.bottom
             }
             binding.toolbar.topPadding = statusBars.top
+            binding.logView.setBottomPadding(navBars.bottom)
             windowInsets
         }
         setContentView(binding.root)
@@ -66,8 +69,8 @@ class LogActivity : AppCompatActivity() {
             setSupportActionBar(toolbar)
             this@LogActivity.logView = logView
             if (intent.hasExtra(FROM_CRASH)) {
+                fromCrash = true
                 supportActionBar!!.setTitle(R.string.crash_logs)
-                clearButton.visibility = View.GONE
                 AlertDialog.Builder(this@LogActivity)
                     .setTitle(R.string.app_crash)
                     .setMessage(R.string.app_crash_message)
@@ -83,14 +86,30 @@ class LogActivity : AppCompatActivity() {
                 }
                 logView.setLogcat(Logcat())
             }
-            clearButton.setOnClickListener {
-                logView.clear()
-            }
-            exportButton.setOnClickListener {
-                launcher.launch("$packageName-${iso8601UTCDateTime()}.txt")
-            }
         }
         registerLauncher()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        if (!fromCrash) {
+            menu.add(R.string.clear).apply {
+                setIcon(R.drawable.ic_baseline_delete_24)
+                setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
+                setOnMenuItemClickListener {
+                    logView.clear()
+                    true
+                }
+            }
+        }
+        menu.add(R.string.export).apply {
+            setIcon(R.drawable.ic_baseline_save_24)
+            setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
+            setOnMenuItemClickListener {
+                launcher.launch("$packageName-${iso8601UTCDateTime()}.txt")
+                true
+            }
+        }
+        return true
     }
 
     companion object {

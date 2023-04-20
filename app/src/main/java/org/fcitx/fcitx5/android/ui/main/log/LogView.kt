@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.onEach
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.utils.Logcat
 import splitties.resources.styledColor
+import splitties.views.bottomPadding
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
@@ -72,5 +73,10 @@ class LogView @JvmOverloads constructor(context: Context, attributeSet: Attribut
 
     fun clear() {
         logAdapter.clear()
+    }
+
+    fun setBottomPadding(padding: Int) {
+        rv.clipToPadding = false
+        rv.bottomPadding = padding
     }
 }
