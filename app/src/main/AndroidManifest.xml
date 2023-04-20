@@ -139,11 +139,6 @@
                 android:name="splitties.init.AppCtxInitializer"
                 android:value="androidx.startup"
                 tools:node="remove" />
-            <!-- do not inject material view factory -->
-            <meta-data
-                android:name="splitties.views.dsl.material.experimental.MaterialViewInstantiatorInjecter"
-                android:value="androidx.startup"
-                tools:node="remove" />
         </provider>
     </application>
 

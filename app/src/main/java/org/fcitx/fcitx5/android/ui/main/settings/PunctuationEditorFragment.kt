@@ -3,8 +3,6 @@ package org.fcitx.fcitx5.android.ui.main.settings
 import android.app.AlertDialog
 import android.view.View
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.core.getPunctuationConfig
 import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
@@ -13,13 +11,12 @@ import org.fcitx.fcitx5.android.data.punctuation.PunctuationMapEntry
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.utils.NaiveDustman
+import org.fcitx.fcitx5.android.utils.materialTextInput
 import org.fcitx.fcitx5.android.utils.str
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.verticalLayout
-import splitties.views.dsl.core.view
-import splitties.views.dsl.material.addInput
 import splitties.views.setPaddingDp
 
 class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<PunctuationMapEntry> {
@@ -92,20 +89,14 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
                 entry: PunctuationMapEntry?,
                 block: (PunctuationMapEntry) -> Unit
             ) {
-                val keyField: TextInputEditText
-                val keyLayout = view(::TextInputLayout) {
+                val (keyLayout, keyField) = materialTextInput {
                     hint = keyDesc
-                    keyField = addInput(View.NO_ID)
                 }
-                val mappingField: TextInputEditText
-                val mappingLayout = view(::TextInputLayout) {
+                val (mappingLayout, mappingField) = materialTextInput {
                     hint = mappingDesc
-                    mappingField = addInput(View.NO_ID)
                 }
-                val altMappingField: TextInputEditText
-                val altMappingLayout = view(::TextInputLayout) {
+                val (altMappingLayout, altMappingField) = materialTextInput {
                     hint = altMappingDesc
-                    altMappingField = addInput(View.NO_ID)
                 }
                 entry?.apply {
                     keyField.setText(key)

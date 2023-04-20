@@ -6,7 +6,7 @@ import android.graphics.PorterDuffColorFilter
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import splitties.dimensions.dp
-import splitties.views.dsl.appcompat.AppCompatStyles
+import splitties.views.dsl.core.styles.AndroidStyles
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.imageResource
@@ -16,7 +16,7 @@ sealed class ClipboardInstructionUi(override val ctx: Context, protected val the
 
     class Enable(ctx: Context, theme: Theme) : ClipboardInstructionUi(ctx, theme) {
 
-        private val appCompatStyles = AppCompatStyles(ctx)
+        private val androidStyles = AndroidStyles(ctx)
 
         private val instructionText = textView {
             setText(R.string.instruction_enable_clipboard_listening)
@@ -24,7 +24,7 @@ sealed class ClipboardInstructionUi(override val ctx: Context, protected val the
             setTextColor(theme.keyTextColor)
         }
 
-        val enableButton = appCompatStyles.button.borderless {
+        val enableButton = androidStyles.button.borderless {
             setText(R.string.clipboard_enable)
             setTextColor(theme.accentKeyBackgroundColor)
         }

@@ -5,8 +5,6 @@ import android.view.View
 import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -18,14 +16,13 @@ import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseEntry
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.utils.NaiveDustman
+import org.fcitx.fcitx5.android.utils.materialTextInput
 import org.fcitx.fcitx5.android.utils.serializable
 import org.fcitx.fcitx5.android.utils.str
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.verticalLayout
-import splitties.views.dsl.core.view
-import splitties.views.dsl.material.addInput
 import splitties.views.setPaddingDp
 
 class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickPhraseEntry> {
@@ -61,15 +58,11 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
                 entry: QuickPhraseEntry?,
                 block: (QuickPhraseEntry) -> Unit
             ) {
-                val keywordField: TextInputEditText
-                val keywordLayout = view(::TextInputLayout).apply {
+                val (keywordLayout, keywordField) = materialTextInput {
                     setHint(R.string.quickphrase_keyword)
-                    keywordField = addInput(View.NO_ID)
                 }
-                val phraseField: TextInputEditText
-                val phraseLayout = view(::TextInputLayout).apply {
+                val (phraseLayout, phraseField) = materialTextInput {
                     setHint(R.string.quickphrase_phrase)
-                    phraseField = addInput(View.NO_ID)
                 }
                 entry?.apply {
                     keywordField.setText(keyword)
