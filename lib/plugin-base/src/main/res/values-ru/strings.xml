@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pkg_name">Имя пакета</string>
+    <string name="api_version">Версия API плагина</string>
+    <string name="gettext_domain">Домен Gettext</string>
+    <string name="plugin_description">Описание плагина</string>
+    <string name="copied">Скопировано в буфер обмена</string>
+    <string name="plugin_info">Информация о плагине</string>
+    <string name="licenses">Лицензии с открытым исходным кодом</string>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pkg_name">包名</string>
+    <string name="api_version">插件 API 版本</string>
+    <string name="gettext_domain">Gettext 域</string>
+    <string name="plugin_description">插件描述</string>
+    <string name="copied">已复制到剪贴板</string>
+    <string name="plugin_info">插件信息</string>
+    <string name="licenses">开源许可</string>
+</resources>

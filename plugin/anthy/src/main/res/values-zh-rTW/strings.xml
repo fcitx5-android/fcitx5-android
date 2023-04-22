@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name_debug">Android 版的 Fcitx5（Anthy 外掛程式 | 除錯模式）</string>
+    <string name="app_name_release">Android 版的 Fcitx5（Anthy 外掛程式）</string>
+    <string name="description">Fcitx5 的 Anthy 相容層</string>
+</resources>
