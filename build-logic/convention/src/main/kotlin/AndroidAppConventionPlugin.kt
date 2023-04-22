@@ -4,7 +4,6 @@ import com.mikepenz.aboutlibraries.plugin.AboutLibrariesExtension
 import org.gradle.api.Project
 import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.dependencies
 
 /**
  * The prototype of an Android Application
@@ -79,12 +78,10 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
             includePlatform = false
         }
 
-        target.dependencies {
-            add(
-                "coreLibraryDesugaring",
-                target.versionCatalog.findLibrary("android.desugarJDKLibs").get()
-            )
-        }
+        target.dependencies.add(
+            "coreLibraryDesugaring",
+            target.versionCatalog.findLibrary("android.desugarJDKLibs").get()
+        )
     }
 
 }

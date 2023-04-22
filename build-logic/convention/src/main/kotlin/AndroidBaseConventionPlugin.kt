@@ -24,9 +24,14 @@ open class AndroidBaseConventionPlugin : Plugin<Project> {
             }
         }
 
-        // https://youtrack.jetbrains.com/issue/KT-55947
         target.tasks.withType<KotlinCompile> {
-            kotlinOptions.jvmTarget = Versions.java.toString()
+            kotlinOptions {
+                // https://youtrack.jetbrains.com/issue/KT-55947
+                jvmTarget = Versions.java.toString()
+                // https://issuetracker.google.com/issues/250197571
+                // https://kotlinlang.org/docs/whatsnew1520.html#string-concatenation-via-invokedynamic
+                freeCompilerArgs += "-Xstring-concat=inline"
+            }
         }
 
         target.extensions.configure<KotlinProjectExtension> {
