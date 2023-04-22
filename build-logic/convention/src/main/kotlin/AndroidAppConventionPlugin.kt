@@ -20,10 +20,9 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
 
         super.apply(target)
 
-        @Suppress("UnstableApiUsage")
         target.extensions.configure<BaseAppModuleExtension> {
             defaultConfig {
-                targetSdk = Versions.targetSdkVersion
+                targetSdk = Versions.targetSdk
                 versionCode = Versions.calculateVersionCode(target.buildABI)
                 versionName = target.buildVersionName
             }

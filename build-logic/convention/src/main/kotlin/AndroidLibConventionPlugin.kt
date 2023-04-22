@@ -9,7 +9,6 @@ class AndroidLibConventionPlugin : AndroidBaseConventionPlugin() {
 
         super.apply(target)
 
-        @Suppress("UnstableApiUsage")
         target.extensions.configure<LibraryExtension> {
             buildTypes {
                 release {

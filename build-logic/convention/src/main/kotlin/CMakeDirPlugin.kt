@@ -1,3 +1,6 @@
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -15,6 +18,7 @@ fun Task.runAfterNativeBuild(project: Project) {
     mustRunAfter("${project.path}:buildCMakeDebug[${project.buildABI}]")
     mustRunAfter("${project.path}:buildCMakeRelWithDebInfo[${project.buildABI}]")
 }
+
 fun Task.runAfterNativeConfigure(project: Project) {
     mustRunAfter("${project.path}:configureCMakeDebug[${project.buildABI}]")
     mustRunAfter("${project.path}:configureCMakeRelWithDebInfo[${project.buildABI}]")
@@ -51,8 +55,13 @@ class CMakeDirPlugin : Plugin<Project> {
         target.gradle.taskGraph.whenReady {
             allTasks.find {
                 it.project.name == target.name &&
-                        (it.name.startsWith("buildCMakeDebug[") || it.name.startsWith("buildCMakeRelWithDebInfo["))
-            }?.also { target.setCmakeDir(it.outputs.files.first().parentFile) }
+                        (it.name.startsWith("configureCMakeDebug[") || it.name.startsWith("configureCMakeRelWithDebInfo["))
+            }?.doLast {
+                val buildModelFile = outputs.files.first().resolve("build_model.json")
+                val buildModel = Json.parseToJsonElement(buildModelFile.readText()).jsonObject
+                val cxxBuildFolder = buildModel["cxxBuildFolder"]!!.jsonPrimitive.content
+                target.setCmakeDir(File(cxxBuildFolder))
+            }
         }
     }
 

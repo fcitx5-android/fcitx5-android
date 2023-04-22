@@ -12,7 +12,7 @@ class NativeLibConventionPlugin : NativeBaseConventionPlugin() {
 
         @Suppress("UnstableApiUsage")
         target.extensions.configure<LibraryExtension> {
-            packagingOptions {
+            packaging {
                 jniLibs {
                     excludes.add("**/*.so")
                 }

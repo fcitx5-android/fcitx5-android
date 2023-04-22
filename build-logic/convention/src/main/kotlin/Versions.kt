@@ -1,17 +1,19 @@
+import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 
 object Versions {
 
-    const val jvmVersion = "11"
-    const val compileSdkVersion = 33
-    const val buildToolsVersion = "33.0.0"
-    const val minSdkVersion = 23
-    const val targetSdkVersion = 33
+    val java = JavaVersion.VERSION_11
+    const val compileSdk = 33
+    const val buildTools = "33.0.2"
+    const val minSdk = 23
+    const val targetSdk = 33
+
+    private const val defaultCMake = "3.22.1"
+    private const val defaultNDK = "25.2.9519653"
 
     // NOTE: increase this value to bump version code
     private const val baseVersionCode = 3
-    private const val defaultCmakeVersion = "3.22.1"
-    private const val defaultNDKVersion = "25.0.8775105"
 
     fun calculateVersionCode(abi: String): Int {
         val abiId = when (abi) {
@@ -25,8 +27,8 @@ object Versions {
     }
 
     val Project.cmakeVersion
-        get() = eep("cmakeVersion", "CMAKE_VERSION") { defaultCmakeVersion }
+        get() = ep("CMAKE_VERSION", "cmakeVersion") { defaultCMake }
 
     val Project.ndkVersion
-        get() = eep("ndkVersion", "NDK_VERSION") { defaultNDKVersion }
+        get() = ep("NDK_VERSION", "ndkVersion") { defaultNDK }
 }

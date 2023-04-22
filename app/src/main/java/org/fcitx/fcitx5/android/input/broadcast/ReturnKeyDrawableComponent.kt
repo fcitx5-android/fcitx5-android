@@ -15,7 +15,7 @@ class ReturnKeyDrawableComponent :
 
     companion object {
         @DrawableRes
-        const val DEFAULT_DRAWABLE = R.drawable.ic_baseline_keyboard_return_24
+        val DEFAULT_DRAWABLE = R.drawable.ic_baseline_keyboard_return_24
     }
 
     private val broadcaster: InputBroadcaster by manager.must()

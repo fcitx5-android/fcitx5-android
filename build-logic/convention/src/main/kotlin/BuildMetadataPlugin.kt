@@ -17,11 +17,15 @@ import org.gradle.kotlin.dsl.task
 class BuildMetadataPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
+        @Suppress("UnstableApiUsage")
         target.extensions.configure<BaseAppModuleExtension> {
+            buildFeatures {
+                buildConfig = true
+            }
             defaultConfig {
                 buildConfigField("String", "BUILD_GIT_HASH", "\"${target.buildCommitHash}\"")
                 buildConfigField("long", "BUILD_TIME", target.buildTimestamp)
-                buildConfigField("String", "DATA_DESCRIPTOR_NAME", "\"${dataDescriptorName}\"")
+                buildConfigField("String", "DATA_DESCRIPTOR_NAME", "\"${DataDescriptorPlugin.FILE_NAME}\"")
             }
             applicationVariants.all {
                 val variantName = name.capitalized()

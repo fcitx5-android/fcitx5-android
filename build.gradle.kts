@@ -12,12 +12,3 @@ plugins {
 tasks.register("clean", Delete::class) {
     delete(rootProject.buildDir)
 }
-
-// https://youtrack.jetbrains.com/issue/KT-55947
-allprojects {
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = "11"
-        }
-    }
-}

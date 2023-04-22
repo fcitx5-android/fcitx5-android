@@ -10,13 +10,16 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
         @Suppress("UnstableApiUsage")
-        target.extensions.configure(CommonExtension::class.java) {
+        target.extensions.configure<CommonExtension<*, *, *, *>>("android") {
             ndkVersion = target.ndkVersion
             defaultConfig {
-                minSdk = Versions.minSdkVersion
+                minSdk = Versions.minSdk
                 externalNativeBuild {
                     cmake {
-                        arguments("-DANDROID_STL=c++_shared")
+                        arguments(
+                            "-DANDROID_STL=c++_shared",
+                            "-DANDROID_USE_LEGACY_TOOLCHAIN_FILE=OFF"
+                        )
                     }
                 }
             }

@@ -3,7 +3,6 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.VersionCatalog
 import org.gradle.api.artifacts.VersionCatalogsExtension
-import org.gradle.kotlin.dsl.extra
 import org.gradle.kotlin.dsl.getByType
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -16,9 +15,6 @@ inline fun Project.propertyOrDefault(prop: String, default: () -> String) =
         default()
     }
 
-inline fun Project.extOrDefault(name: String, default: () -> String) =
-    runCatching { extra.get(name) as String }.getOrElse { default().also { extra.set(name, it) } }
-
 fun Project.runCmd(cmd: String): String = ByteArrayOutputStream().use {
     project.exec {
         commandLine = cmd.split(" ")
@@ -29,12 +25,10 @@ fun Project.runCmd(cmd: String): String = ByteArrayOutputStream().use {
 
 val json = Json { prettyPrint = true }
 
-internal inline fun Project.eep(name: String, envName: String, block: () -> String) =
-    extOrDefault(name) {
-        envOrDefault(envName) {
-            propertyOrDefault(envName) {
-                block()
-            }
+internal inline fun Project.ep(env: String, prop: String, block: () -> String) =
+    envOrDefault(env) {
+        propertyOrDefault(prop) {
+            block()
         }
     }
 
@@ -46,3 +40,27 @@ val Project.assetsDir: File
 
 val Project.cleanTask: Task
     get() = tasks.getByName("clean")
+
+// Change default ABI here
+val Project.buildABI
+    get() = ep("BUILD_ABI", "buildABI") {
+//        "armeabi-v7a"
+        "arm64-v8a"
+//        "x86"
+//        "x86_64"
+    }
+
+val Project.buildVersionName
+    get() = ep("BUILD_VERSION_NAME", "buildVersionName") {
+        runCmd("git describe --tags --long --always")
+    }
+
+val Project.buildCommitHash
+    get() = ep("BUILD_COMMIT_HASH", "buildCommitHash") {
+        runCmd("git rev-parse HEAD")
+    }
+
+val Project.buildTimestamp
+    get() = ep("BUILD_TIMESTAMP", "buildTimestamp") {
+        System.currentTimeMillis().toString()
+    }

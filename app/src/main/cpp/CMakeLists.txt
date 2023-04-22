@@ -92,10 +92,10 @@ target_link_libraries(native-lib
         LibIME::Table)
 
 add_custom_target(copy-fcitx5-modules
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::clipboard,IMPORTED_LOCATION> $<TARGET_FILE_DIR:native-lib>
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::imselector,IMPORTED_LOCATION> $<TARGET_FILE_DIR:native-lib>
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::quickphrase,IMPORTED_LOCATION> $<TARGET_FILE_DIR:native-lib>
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::spell,IMPORTED_LOCATION> $<TARGET_FILE_DIR:native-lib>
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::unicode,IMPORTED_LOCATION> $<TARGET_FILE_DIR:native-lib>
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::clipboard,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::imselector,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::quickphrase,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::spell,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::unicode,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
         COMMENT "Copying fcitx5 module libraries to :app"
         )

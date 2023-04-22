@@ -33,7 +33,7 @@ android {
         }
     }
 
-    packagingOptions {
+    packaging {
         jniLibs {
             excludes += setOf(
                 "**/libc++_shared.so",

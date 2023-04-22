@@ -25,15 +25,16 @@ class DataDescriptorPlugin : Plugin<Project> {
     companion object {
         const val TASK = "generateDataDescriptor"
         const val CLEAN_TASK = "cleanDataDescriptor"
+        const val FILE_NAME = "descriptor.json"
     }
 
     override fun apply(target: Project) {
         target.task<DataDescriptorTask>(TASK) {
             inputDir.set(target.assetsDir)
-            outputFile.set(target.assetsDir.resolve(dataDescriptorName))
+            outputFile.set(target.assetsDir.resolve(FILE_NAME))
         }
         target.task<Delete>(CLEAN_TASK) {
-            delete(target.assetsDir.resolve(dataDescriptorName))
+            delete(target.assetsDir.resolve(FILE_NAME))
         }.also {
             target.cleanTask.dependsOn(it)
         }

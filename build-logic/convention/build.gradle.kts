@@ -1,15 +1,9 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     `kotlin-dsl`
     kotlin("plugin.serialization") version embeddedKotlinVersion
 }
 
-group = "org.fcitx.fcitx5.android.buildlogic"
-
-kotlin {
-    jvmToolchain(11)
-}
+group = "org.fcitx.fcitx5.android.build_logic"
 
 dependencies {
     compileOnly(libs.android.gradlePlugin)
@@ -60,11 +54,5 @@ gradlePlugin {
             id = "native-lib-convention"
             implementationClass = "NativeLibConventionPlugin"
         }
-    }
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "11"
     }
 }
