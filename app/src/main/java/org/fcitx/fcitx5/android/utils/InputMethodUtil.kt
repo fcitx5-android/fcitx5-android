@@ -3,9 +3,12 @@ package org.fcitx.fcitx5.android.utils
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.provider.Settings
-import android.view.inputmethod.InputMethodManager
+import android.view.inputmethod.InputMethodSubtype
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
+import timber.log.Timber
+import java.util.TimeZone
 
 object InputMethodUtil {
     private val serviceName =
@@ -27,7 +30,27 @@ object InputMethodUtil {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         })
 
-    fun showPicker(context: Context) =
-        (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-            .showInputMethodPicker()
+    fun showPicker() = appContext.inputMethodManager.showInputMethodPicker()
+
+    fun firstVoiceInput(): Pair<String, InputMethodSubtype>? =
+        appContext.inputMethodManager
+            .shortcutInputMethodsAndSubtypes
+            .firstNotNullOfOrNull {
+                it.value.find { subType -> subType.mode.lowercase() == "voice" }
+                    ?.let { subType -> it.key.id to subType }
+            }
+
+    fun switchInputMethod(
+        service: FcitxInputMethodService,
+        id: String,
+        subtype: InputMethodSubtype
+    ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            service.switchInputMethod(id, subtype)
+        } else {
+            @Suppress("DEPRECATION")
+            appContext.inputMethodManager
+                .setInputMethodAndSubtype(service.window.window!!.attributes.token, id, subtype)
+        }
+    }
 }

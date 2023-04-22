@@ -24,7 +24,7 @@ enum class SetupPage {
 
     fun getButtonAction(context: Context) = when (this) {
         Enable -> InputMethodUtil.startSettingsActivity(context)
-        Select -> InputMethodUtil.showPicker(context)
+        Select -> InputMethodUtil.showPicker()
     }
 
     fun isDone() = when (this) {

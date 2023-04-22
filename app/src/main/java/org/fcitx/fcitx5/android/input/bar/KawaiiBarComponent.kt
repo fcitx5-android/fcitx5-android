@@ -49,6 +49,7 @@ import org.fcitx.fcitx5.android.input.status.StatusAreaWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.AppUtil
+import org.fcitx.fcitx5.android.utils.InputMethodUtil
 import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.must
 import splitties.bitflags.hasFlag
@@ -78,6 +79,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     private val expandedCandidateStyle by AppPrefs.getInstance().keyboard.expandedCandidateStyle
     private val expandToolbarByDefault by AppPrefs.getInstance().keyboard.expandToolbarByDefault
     private val toolbarNumRowOnPassword by AppPrefs.getInstance().keyboard.toolbarNumRowOnPassword
+    private val showVoiceInputButton by AppPrefs.getInstance().keyboard.showVoiceInputButton
 
     private var clipboardTimeoutJob: Job? = null
 
@@ -150,6 +152,15 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         idleUi.updateState(newState, fromUser)
     }
 
+    private val hideKeyboardCallback = View.OnClickListener {
+        service.requestHideSelf(0)
+    }
+
+    private val switchToVoiceInputCallback = View.OnClickListener {
+        val (id, subtype) = InputMethodUtil.firstVoiceInput() ?: return@OnClickListener
+        InputMethodUtil.switchInputMethod(service, id, subtype)
+    }
+
     private val idleUi: IdleUi by lazy {
         IdleUi(context, theme, popup, commonKeyActionListener).apply {
             menuButton.setOnClickListener {
@@ -165,9 +176,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                     launchClipboardTimeoutJob()
                 }
             }
-            hideKeyboardButton.setOnClickListener {
-                service.requestHideSelf(0)
-            }
+            hideKeyboardButton.setOnClickListener(hideKeyboardCallback)
             buttonsUi.apply {
                 undoButton.setOnClickListener {
                     service.sendCombinationKeyEvents(KeyEvent.KEYCODE_Z, ctrl = true)
@@ -304,6 +313,11 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             idleUi.inlineSuggestionsBar.clear()
         }
+        val shouldShowVoiceInput = showVoiceInputButton && !capFlags.has(CapabilityFlag.Password)
+        idleUi.setHideKeyboardIsVoiceInput(
+            shouldShowVoiceInput,
+            if (showVoiceInputButton) switchToVoiceInputCallback else hideKeyboardCallback
+        )
         evalIdleUiState()
     }
 

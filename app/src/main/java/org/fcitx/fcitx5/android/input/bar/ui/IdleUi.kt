@@ -141,6 +141,15 @@ class IdleUi(
         }
     }
 
+    fun setHideKeyboardIsVoiceInput(isVoiceInput: Boolean, callback: View.OnClickListener) {
+        hideKeyboardButton.setIcon(
+            if (isVoiceInput) R.drawable.ic_baseline_keyboard_voice_24
+            else R.drawable.ic_baseline_arrow_drop_down_24,
+            theme.altKeyTextColor
+        )
+        hideKeyboardButton.setOnClickListener(callback)
+    }
+
     private fun clearAnimation() {
         animator.inAnimation = null
         animator.outAnimation = null
