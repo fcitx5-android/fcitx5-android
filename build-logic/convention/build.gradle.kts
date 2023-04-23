@@ -8,7 +8,7 @@ group = "org.fcitx.fcitx5.android.build_logic"
 dependencies {
     compileOnly(libs.android.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
-    compileOnly(libs.aboutlibrariesPlugin)
+    compileOnly(libs.aboutlibraries.plugin)
     implementation(libs.kotlinx.serialization.json)
 }
 

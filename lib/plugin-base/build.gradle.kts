@@ -14,5 +14,5 @@ android {
 }
 
 dependencies {
-    implementation(libs.aboutlibraries)
+    implementation(libs.aboutlibraries.core)
 }
