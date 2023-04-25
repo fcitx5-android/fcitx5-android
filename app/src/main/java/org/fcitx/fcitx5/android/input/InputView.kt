@@ -6,11 +6,11 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.ImageView
-import android.widget.Space
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -67,7 +67,20 @@ class InputView(
         scaleType = ImageView.ScaleType.CENTER_CROP
     }
 
-    private val bottomPaddingSpace = view(::Space)
+    private val placeholderOnClickListener = OnClickListener { }
+
+    // use clickable view as padding, so MotionEvent can be split to padding view and keyboard view
+    private val leftPaddingSpace = view(::View) {
+        setOnClickListener(placeholderOnClickListener)
+    }
+    private val rightPaddingSpace = view(::View) {
+        setOnClickListener(placeholderOnClickListener)
+    }
+    private val bottomPaddingSpace = view(::View) {
+        // height as keyboardBottomPadding
+        // bottomMargin as WindowInsets (Navigation Bar) offset
+        setOnClickListener(placeholderOnClickListener)
+    }
 
     private val eventHandlerJob = service.lifecycleScope.launch {
         fcitx.runImmediately { eventFlow }.collect {
@@ -191,7 +204,6 @@ class InputView(
                         it.isNavigationBarContrastEnforced = true
                     }
                 }
-
                 NavbarBackground.ColorOnly -> {
                     shouldUpdateNavbarForeground = true
                     shouldUpdateNavbarBackground = true
@@ -200,7 +212,6 @@ class InputView(
                         it.isNavigationBarContrastEnforced = false
                     }
                 }
-
                 NavbarBackground.Full -> {
                     shouldUpdateNavbarForeground = true
                     // allow draw behind navigation bar
@@ -214,7 +225,7 @@ class InputView(
                     ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
                         insets.getInsets(WindowInsetsCompat.Type.navigationBars()).let {
                             bottomPaddingSpace.updateLayoutParams<LayoutParams> {
-                                height = it.bottom
+                                bottomMargin = it.bottom
                             }
                         }
                         WindowInsetsCompat.CONSUMED
@@ -226,6 +237,10 @@ class InputView(
         customBackground.imageDrawable = theme.backgroundDrawable(keyBorder)
 
         keyboardView = constraintLayout {
+            // allow MotionEvent to be delivered to keyboard while pressing on padding views.
+            // although it should be default for apps targeting Honeycomb (3.0, API 11) and higher,
+            // but it's not the case on some devices ... just set it here
+            isMotionEventSplittingEnabled = true
             add(customBackground, lParams {
                 centerVertically()
                 centerHorizontally()
@@ -234,13 +249,25 @@ class InputView(
                 topOfParent()
                 centerHorizontally()
             })
-            add(windowManager.view, lParams(matchParent, keyboardHeightPx) {
+            add(leftPaddingSpace, lParams {
                 below(kawaiiBar.view)
-                centerHorizontally()
+                startOfParent()
+                bottomOfParent()
+            })
+            add(rightPaddingSpace, lParams {
+                below(kawaiiBar.view)
+                endOfParent()
+                bottomOfParent()
+            })
+            add(windowManager.view, lParams {
+                below(kawaiiBar.view)
+                startToEndOf(leftPaddingSpace)
+                endToStartOf(rightPaddingSpace)
                 above(bottomPaddingSpace)
             })
-            add(bottomPaddingSpace, lParams(matchParent) {
-                centerHorizontally()
+            add(bottomPaddingSpace, lParams {
+                startToEndOf(leftPaddingSpace)
+                endToStartOf(rightPaddingSpace)
                 bottomOfParent()
             })
         }
@@ -265,12 +292,17 @@ class InputView(
         windowManager.view.updateLayoutParams {
             height = keyboardHeightPx
         }
-        bottomPaddingSpace.updateLayoutParams<MarginLayoutParams> {
-            bottomMargin = keyboardBottomPaddingPx
+        bottomPaddingSpace.updateLayoutParams {
+            height = keyboardBottomPaddingPx
         }
         val sidePadding = keyboardSidePaddingPx
+        leftPaddingSpace.updateLayoutParams {
+            width = sidePadding
+        }
+        rightPaddingSpace.updateLayoutParams {
+            width = sidePadding
+        }
         kawaiiBar.view.setPadding(sidePadding, 0, sidePadding, 0)
-        windowManager.view.setPadding(sidePadding, 0, sidePadding, 0)
     }
 
     /**

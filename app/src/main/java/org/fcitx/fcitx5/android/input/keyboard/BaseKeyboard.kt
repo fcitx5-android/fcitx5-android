@@ -61,11 +61,12 @@ abstract class BaseKeyboard(
     private val keyRows: List<ConstraintLayout>
 
     /**
-     * HashMap of [PointerId (Int)][MotionEvent.getPointerId] and [KeyView]
+     * HashMap of [PointerId (Int)][MotionEvent.getPointerId] to [KeyView]
      */
     private val touchTarget = hashMapOf<Int, View>()
 
     init {
+        isMotionEventSplittingEnabled = true
         keyRows = keyLayout.map { row ->
             val keyViews = row.map(::createKeyView)
             constraintLayout Row@{
