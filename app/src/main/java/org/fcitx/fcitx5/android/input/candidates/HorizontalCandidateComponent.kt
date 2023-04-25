@@ -19,10 +19,16 @@ import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.BooleanKey.Ex
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesUpdated
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
-import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateMode.*
+import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateMode.AlwaysFillWidth
+import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateMode.AutoFillWidth
+import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateMode.NeverFillWidth
 import org.fcitx.fcitx5.android.input.candidates.adapter.HorizontalCandidateViewAdapter
 import org.fcitx.fcitx5.android.input.candidates.expanded.decoration.FlexboxVerticalDecoration
-import org.fcitx.fcitx5.android.input.dependency.*
+import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
+import org.fcitx.fcitx5.android.input.dependency.context
+import org.fcitx.fcitx5.android.input.dependency.fcitx
+import org.fcitx.fcitx5.android.input.dependency.inputMethodService
+import org.fcitx.fcitx5.android.input.dependency.theme
 import org.mechdancer.dependency.manager.must
 import splitties.dimensions.dp
 import kotlin.math.max
@@ -116,7 +122,7 @@ class HorizontalCandidateComponent :
                     ExpandedCandidatesEmpty to (adapter.total <= childCount)
                 )
             }
-            // no need to override `generate{,Default}LayoutParams`, because builder.flexAdapter()
+            // no need to override `generate{,Default}LayoutParams`, because HorizontalCandidateViewAdapter
             // guarantees ViewHolder's layoutParams to be `FlexboxLayoutManager.LayoutParams`
         }
     }

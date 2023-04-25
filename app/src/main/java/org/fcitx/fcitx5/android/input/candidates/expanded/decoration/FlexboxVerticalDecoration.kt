@@ -15,7 +15,7 @@ class FlexboxVerticalDecoration(val drawable: Drawable) : RecyclerView.ItemDecor
         parent: RecyclerView,
         state: RecyclerView.State
     ) {
-        when (view.layoutDirection) {
+        when (parent.layoutDirection) {
             View.LAYOUT_DIRECTION_LTR -> {
                 outRect.right = drawable.intrinsicWidth
             }
