@@ -3,11 +3,11 @@ package org.fcitx.fcitx5.android.data.table
 import cc.ekblad.konbini.ParserResult
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.table.dict.LibIMEDictionary
-import org.fcitx.fcitx5.android.utils.Ini
 import org.fcitx.fcitx5.android.utils.IniParser
 import org.fcitx.fcitx5.android.utils.IniPrettyPrinter
 import org.fcitx.fcitx5.android.utils.Locales
 import org.fcitx.fcitx5.android.utils.errorRuntime
+import org.fcitx.fcitx5.android.utils.getValue
 import timber.log.Timber
 import java.io.File
 
@@ -17,31 +17,24 @@ class TableBasedInputMethod(val file: File) {
         is ParserResult.Error -> errorRuntime(R.string.invalid_im, file.name)
         is ParserResult.Ok -> x.result
     }
+
     var table: LibIMEDictionary? = null
 
     val name: String by lazy {
         ini.sections[InputMethod]?.let { im ->
-            im.data.find {
-                val name = it.data.name
-                name == NameI18n.format(Locales.languageWithCountry) || name == NameI18n.format(
-                    Locales.language
-                ) || name == Name
-            }?.data?.value
+            val properties = im.data
+            properties.getValue(NameI18n.format(Locales.languageWithCountry))
+                ?: properties.getValue(NameI18n.format(Locales.language))
+                ?: properties.getValue(Name)
         } ?: errorRuntime(R.string.invalid_im, ERROR_MISSING_INPUT_METHOD_OR_NAME)
     }
 
     var tableFileName: String
-        get() =
-            ini.sections[Table]?.data?.find { it.data.name == File }
-                ?.let { File(it.data.value).name }
-                ?: errorRuntime(R.string.invalid_im, ERROR_MISSING_TABLE_OR_FILE)
+        get() = ini.getValue(Table, File)
+            ?.substringAfterLast('/')
+            ?: errorRuntime(R.string.invalid_im, ERROR_MISSING_TABLE_OR_FILE)
         set(value) {
-            val idx = ini.sections[Table]?.data?.indexOfFirst { it.data.name == File }
-                ?.takeIf { it != -1 } ?: errorRuntime(
-                R.string.invalid_im,
-                ERROR_MISSING_TABLE_OR_FILE
-            )
-            ini.sections[Table]!!.data[idx] = Ini.Annotated(Ini.Property(File, "table/$value"))
+            ini.setValue(File, "table/$value")
         }
 
     val tableFileExists

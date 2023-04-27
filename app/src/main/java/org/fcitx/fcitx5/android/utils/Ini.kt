@@ -3,12 +3,29 @@ package org.fcitx.fcitx5.android.utils
 import cc.ekblad.konbini.*
 import org.intellij.lang.annotations.Language
 
+typealias IniProperties = MutableList<Ini.Annotated<Ini.Property>>
+
+fun IniProperties.getValue(key: String): String? {
+    val prop = find { it.data.name == key } ?: return null
+    return prop.data.value
+}
+
+fun IniProperties.setValue(key: String, newValue: String) {
+    val idx = indexOfFirst { it.data.name == key }
+    val prop = Ini.Property(key, newValue)
+    if (idx >= 0) {
+        set(idx, Ini.Annotated(get(idx).comments, prop))
+    } else {
+        add(Ini.Annotated(prop))
+    }
+}
 
 data class Ini(
-    val properties: MutableList<Annotated<Property>>,
-    val sections: MutableMap<String, Annotated<MutableList<Annotated<Property>>>>,
+    val properties: IniProperties,
+    val sections: MutableMap<String, Annotated<IniProperties>>,
     val trailingComments: MutableList<String>
 ) {
+
     data class Property(var name: String, var value: String)
 
     data class Annotated<T>(
@@ -16,6 +33,19 @@ data class Ini(
         val data: T
     ) {
         constructor(data: T) : this(mutableListOf(), data)
+    }
+
+    fun getValue(key: String) = properties.getValue(key)
+
+    fun getValue(section: String, key: String) = sections[section]?.data?.getValue(key)
+
+    fun setValue(key: String, newValue: String) = properties.setValue(key, newValue)
+
+    fun setValue(section: String, key: String, newValue: String) {
+        val s = sections[section] ?: Annotated(mutableListOf<Annotated<Property>>()).also {
+            sections[section] = it
+        }
+        s.data.setValue(key, newValue)
     }
 
 }
