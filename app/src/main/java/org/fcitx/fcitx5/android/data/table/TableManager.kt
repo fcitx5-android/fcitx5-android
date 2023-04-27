@@ -41,12 +41,12 @@ object TableManager {
             ZipInputStream(src).use { zipStream ->
                 withTempDir { tempDir ->
                     val extracted = zipStream.extract(tempDir)
-                    val confFile =
-                        extracted.find { it.name.endsWith(".conf") || it.name.endsWith(".conf.in") }
-                            ?: errorRuntime(R.string.exception_table_im)
-                    val dictFile =
-                        extracted.find { it.name.endsWith(".dict") || it.name.endsWith(".txt") }
-                            ?: errorRuntime(R.string.exception_table)
+                    val confFile = extracted.find { it.name.endsWith(".conf") }
+                        ?: extracted.find { it.name.endsWith(".conf.in") }
+                        ?: errorRuntime(R.string.exception_table_im)
+                    val dictFile = extracted.find { it.name.endsWith(".dict") }
+                        ?: extracted.find { it.name.endsWith(".txt") }
+                        ?: errorRuntime(R.string.exception_table)
                     importFiles(confFile, dictFile)
                 }
             }
@@ -79,7 +79,7 @@ object TableManager {
             TableBasedInputMethod.new(importedConfFile)
         }.getOrElse {
             importedConfFile.delete()
-            errorRuntime(R.string.invalid_im, it.message)
+            throw it
         }
         val table = Dictionary.new(dictFile)!!
         im.tableFileName = TableBasedInputMethod.fixedTableFileName(table.name)
