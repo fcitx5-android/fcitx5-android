@@ -78,6 +78,7 @@ object IniPrettyPrinter {
                 prettyProperty(it.data)
             }
         }
+        prettyComments(ini.trailingComments)
         return sb.toString()
     }
 }
