@@ -1,40 +1,47 @@
 package org.fcitx.fcitx5.android.data.table
 
+import cc.ekblad.konbini.ParserResult
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.table.dict.LibIMEDictionary
-import org.fcitx.fcitx5.android.utils.FcitxIni
+import org.fcitx.fcitx5.android.utils.IniParser
+import org.fcitx.fcitx5.android.utils.IniPrettyPrinter
 import org.fcitx.fcitx5.android.utils.Locales
 import org.fcitx.fcitx5.android.utils.errorRuntime
+import org.fcitx.fcitx5.android.utils.getValue
 import timber.log.Timber
 import java.io.File
 
-class TableBasedInputMethod(private val ini: FcitxIni, val file: File) {
+class TableBasedInputMethod(val file: File) {
+
+    private var ini = when (val x = IniParser.parse(file.readText())) {
+        is ParserResult.Error -> errorRuntime(R.string.invalid_im, file.name)
+        is ParserResult.Ok -> x.result
+    }
 
     var table: LibIMEDictionary? = null
 
     val name: String by lazy {
-        Name.format()
-        ini[InputMethod]?.let { im ->
-            im[NameI18n.format(Locales.languageWithCountry)]
-                ?: im[NameI18n.format(Locales.language)]
-                ?: im[Name]
+        ini.sections[InputMethod]?.let { im ->
+            val properties = im.data
+            properties.getValue(NameI18n.format(Locales.languageWithCountry))
+                ?: properties.getValue(NameI18n.format(Locales.language))
+                ?: properties.getValue(Name)
         } ?: errorRuntime(R.string.invalid_im, ERROR_MISSING_INPUT_METHOD_OR_NAME)
     }
 
     var tableFileName: String
-        get() =
-            ini.get(Table, File)?.let { File(it).name }
-                ?: errorRuntime(R.string.invalid_im, ERROR_MISSING_TABLE_OR_FILE)
+        get() = ini.getValue(Table, File)
+            ?.substringAfterLast('/')
+            ?: errorRuntime(R.string.invalid_im, ERROR_MISSING_TABLE_OR_FILE)
         set(value) {
-            ini.put(Table, File, "table/$value")
-                ?: errorRuntime(R.string.invalid_im, ERROR_MISSING_TABLE_OR_FILE)
+            ini.setValue(File, "table/$value")
         }
 
     val tableFileExists
         get() = table != null
 
     fun save() {
-        ini.store()
+        file.writeText(IniPrettyPrinter.pretty(ini))
     }
 
     fun delete() {
@@ -59,7 +66,7 @@ class TableBasedInputMethod(private val ini: FcitxIni, val file: File) {
                 .lowercase() + ".main.dict"
 
         fun new(configFile: File): TableBasedInputMethod {
-            val im = TableBasedInputMethod(FcitxIni(configFile), configFile)
+            val im = TableBasedInputMethod(configFile)
             Timber.d("new TableBasedInputMethod(name=${im.name}, tableFileName=${im.tableFileName})")
             return im
         }

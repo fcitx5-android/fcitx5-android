@@ -4,7 +4,6 @@ import android.os.Parcelable
 import arrow.core.Either
 import arrow.core.continuations.either
 import kotlinx.parcelize.Parcelize
-import org.fcitx.fcitx5.android.utils.MyParser
 
 sealed class ConfigType<T> : Parcelable {
     @Parcelize
@@ -43,7 +42,7 @@ sealed class ConfigType<T> : Parcelable {
     @Parcelize
     data class TyList(val subtype: ConfigType<*>) : ConfigType<TyList>()
 
-    companion object : MyParser<String, ConfigType<*>, Companion.UnknownConfigTypeException> {
+    companion object : ConfigParser<String, ConfigType<*>, Companion.UnknownConfigTypeException> {
 
         data class UnknownConfigTypeException(val type: String) : Exception()
 

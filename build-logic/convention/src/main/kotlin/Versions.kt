@@ -5,12 +5,12 @@ object Versions {
 
     val java = JavaVersion.VERSION_11
     const val compileSdk = 33
-    const val buildTools = "33.0.2"
     const val minSdk = 23
     const val targetSdk = 33
 
     private const val defaultCMake = "3.22.1"
     private const val defaultNDK = "25.2.9519653"
+    private const val defaultBuildTools = "33.0.2"
 
     // NOTE: increase this value to bump version code
     private const val baseVersionCode = 3
@@ -31,4 +31,7 @@ object Versions {
 
     val Project.ndkVersion
         get() = ep("NDK_VERSION", "ndkVersion") { defaultNDK }
+
+    val Project.buildTools
+        get() = ep("BUILD_TOOLS_VERSION", "buildTools") { defaultBuildTools }
 }

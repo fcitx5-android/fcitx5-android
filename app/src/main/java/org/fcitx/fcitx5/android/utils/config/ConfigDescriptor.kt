@@ -7,7 +7,6 @@ import arrow.core.flatMap
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import org.fcitx.fcitx5.android.core.RawConfig
-import org.fcitx.fcitx5.android.utils.MyParser
 
 sealed class ConfigDescriptor<T, U> : Parcelable {
     abstract val name: String
@@ -159,7 +158,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
     }
 
     companion object :
-        MyParser<RawConfig, ConfigDescriptor<*, *>, Companion.ParseException> {
+        ConfigParser<RawConfig, ConfigDescriptor<*, *>, Companion.ParseException> {
 
         private val RawConfig.type
             get() = findByName("Type")?.value?.let { ConfigType.parse(it) }
