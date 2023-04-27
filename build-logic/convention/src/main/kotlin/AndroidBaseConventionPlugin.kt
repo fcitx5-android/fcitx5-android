@@ -1,3 +1,4 @@
+import Versions.buildTools
 import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -14,7 +15,7 @@ open class AndroidBaseConventionPlugin : Plugin<Project> {
         @Suppress("UnstableApiUsage")
         target.extensions.configure<CommonExtension<*, *, *, *>>("android") {
             compileSdk = Versions.compileSdk
-            buildToolsVersion = Versions.buildTools
+            buildToolsVersion = target.buildTools
             defaultConfig {
                 minSdk = Versions.minSdk
             }
