@@ -439,7 +439,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             // EditorInfo can be different in onStartInput and onStartInputView,
             // especially in browsers
             it.setCapFlags(flags)
-            it.focus(true)
         }
     }
 
