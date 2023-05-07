@@ -34,7 +34,7 @@ class TableBasedInputMethod(val file: File) {
             ?.substringAfterLast('/')
             ?: errorRuntime(R.string.invalid_im, ERROR_MISSING_TABLE_OR_FILE)
         set(value) {
-            ini.setValue(File, "table/$value")
+            ini.setValue(Table, File, "table/$value")
         }
 
     val tableFileExists
