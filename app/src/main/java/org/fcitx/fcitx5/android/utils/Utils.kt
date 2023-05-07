@@ -183,30 +183,37 @@ suspend fun errorDialog(context: Context, title: String, message: String) {
 }
 
 inline fun <reified T : Serializable> Bundle.serializable(key: String): T? {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        getSerializable(key, T::class.java)
-    } else {
-        @Suppress("DEPRECATION")
-        getSerializable(key) as? T
-    }
+    @Suppress("DEPRECATION")
+    return getSerializable(key) as? T
+//    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//        getSerializable(key, T::class.java)
+//    } else {
+//        @Suppress("DEPRECATION")
+//        getSerializable(key) as? T
+//    }
 }
 
 inline fun <reified T : Parcelable> Bundle.parcelable(key: String): T? {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        getParcelable(key, T::class.java)
-    } else {
-        @Suppress("DEPRECATION")
-        getParcelable(key) as? T
-    }
+    // https://issuetracker.google.com/issues/240585930#comment6
+    @Suppress("DEPRECATION")
+    return getParcelable(key) as? T
+//    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//        getParcelable(key, T::class.java)
+//    } else {
+//        @Suppress("DEPRECATION")
+//        getParcelable(key) as? T
+//    }
 }
 
 inline fun <reified T : Parcelable> Bundle.parcelableArray(key: String): Array<T>? {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        getParcelableArray(key, T::class.java)
-    } else {
-        @Suppress("DEPRECATION", "UNCHECKED_CAST")
-        getParcelableArray(key) as? Array<T>
-    }
+    @Suppress("DEPRECATION", "UNCHECKED_CAST")
+    return getParcelableArray(key) as? Array<T>
+//    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//        getParcelableArray(key, T::class.java)
+//    } else {
+//        @Suppress("DEPRECATION", "UNCHECKED_CAST")
+//        getParcelableArray(key) as? Array<T>
+//    }
 }
 
 fun Int.alpha(a: Float) = ColorUtils.setAlphaComponent(this, (a * 0xff).roundToInt())
