@@ -198,7 +198,8 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
         filesSelectionDialog = null
     }
 
-    private fun importZipFromUri(uri: Uri) =
+    private fun importZipFromUri(uri: Uri) {
+        val nm = notificationManager
         lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
             val importId = IMPORT_ID++
             runCatching {
@@ -213,7 +214,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
                     .setOngoing(true)
                     .setProgress(100, 0, true)
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .build().let { notificationManager.notify(importId, it) }
+                    .build().let { nm.notify(importId, it) }
                 contentResolver.openInputStream(uri)
             }.bindOnNotNull {
                 TableManager.importFromZip(it)
@@ -224,8 +225,9 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
                     ui.addItem(item = it)
                 }
             }
-            notificationManager.cancel(importId)
+            nm.cancel(importId)
         }
+    }
 
     private fun prepareConfFromUri(uri: Uri) {
         lifecycleScope.launch {
@@ -254,6 +256,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
     }
 
     private fun importConfAndDictUri() {
+        val nm = notificationManager
         lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
             if (confUri == null || dictUri == null) {
                 importErrorDialog(getString(R.string.exception_table_import_both_files))
@@ -270,7 +273,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
                     .setOngoing(true)
                     .setProgress(100, 0, true)
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .build().let { notificationManager.notify(importId, it) }
+                    .build().let { nm.notify(importId, it) }
                 val confStream = contentResolver.openInputStream(confUri!!) ?: return@launch
                 val dictStream = contentResolver.openInputStream(dictUri!!) ?: return@launch
                 withContext(Dispatchers.Main) {
@@ -288,7 +291,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
                     ui.addItem(item = it)
                 }
             }
-            notificationManager.cancel(importId)
+            nm.cancel(importId)
             withContext(Dispatchers.Main) {
                 filesSelectionDialog?.apply {
                     getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = true
