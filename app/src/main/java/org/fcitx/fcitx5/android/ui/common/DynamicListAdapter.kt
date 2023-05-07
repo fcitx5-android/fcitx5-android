@@ -34,12 +34,7 @@ abstract class DynamicListAdapter<T>(
     private val selected = mutableListOf<T>()
 
     private var listener: OnItemChangedListener<T>? = null
-    protected var itemTouchHelper: ItemTouchHelper? = null
 
-    var removable: (T) -> Boolean = { true }
-    private var onBackPressedCallback: OnBackPressedCallback? = null
-
-    abstract fun showEntry(x: T): String
     fun removeItemChangedListener() {
         listener = null
     }
@@ -48,6 +43,13 @@ abstract class DynamicListAdapter<T>(
         listener = listener?.let { OnItemChangedListener.merge(it, x) } ?: x
     }
 
+    protected var itemTouchHelper: ItemTouchHelper? = null
+
+    var removable: (T) -> Boolean = { true }
+
+    private var onBackPressedCallback: OnBackPressedCallback? = null
+
+    abstract fun showEntry(x: T): String
 
     inner class ViewHolder(entryUi: DynamicListEntryUi) : RecyclerView.ViewHolder(entryUi.root) {
         val multiselectCheckBox = entryUi.multiselectCheckBox

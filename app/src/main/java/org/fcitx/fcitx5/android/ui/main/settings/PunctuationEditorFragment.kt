@@ -150,21 +150,30 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
     override fun onResume() {
         super.onResume()
         viewModel.setToolbarTitle(requireArguments().getString(TITLE)!!)
-        if (::ui.isInitialized)
+        if (::ui.isInitialized) {
             viewModel.enableToolbarEditButton {
                 ui.enterMultiSelect(
                     requireActivity().onBackPressedDispatcher,
                     viewModel
                 )
             }
+        }
     }
 
     override fun onPause() {
         saveConfig()
-        if (::ui.isInitialized)
+        if (::ui.isInitialized) {
             ui.exitMultiSelect(viewModel)
+        }
         viewModel.disableToolbarEditButton()
         super.onPause()
+    }
+
+    override fun onStop() {
+        if (::ui.isInitialized) {
+            ui.removeItemChangedListener()
+        }
+        super.onStop()
     }
 
     companion object {

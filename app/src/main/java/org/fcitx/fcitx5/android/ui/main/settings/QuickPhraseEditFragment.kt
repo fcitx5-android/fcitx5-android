@@ -151,10 +151,18 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
 
     override fun onPause() {
         saveConfig()
-        if (::ui.isInitialized)
+        if (::ui.isInitialized) {
             ui.exitMultiSelect(viewModel)
+        }
         viewModel.disableToolbarEditButton()
         super.onPause()
+    }
+
+    override fun onStop() {
+        if (::ui.isInitialized) {
+            ui.removeItemChangedListener()
+        }
+        super.onStop()
     }
 
     companion object {

@@ -334,6 +334,12 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
         super.onPause()
     }
 
+    override fun onStop() {
+        // prevent dustman calling viewModel after Fragment detached
+        ui.removeItemChangedListener()
+        super.onStop()
+    }
+
     companion object {
         private var IMPORT_ID = 0
         const val CHANNEL_ID = "table_dict"

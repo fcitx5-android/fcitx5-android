@@ -226,6 +226,11 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
         super.onPause()
     }
 
+    override fun onStop() {
+        ui.removeItemChangedListener()
+        super.onStop()
+    }
+
     companion object {
         private var RELOAD_ID = 0
         private var IMPORT_ID = 0
