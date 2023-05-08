@@ -1,26 +1,26 @@
 [versions]
-androidGradlePlugin = "8.0.0"
+androidGradlePlugin = "8.0.1"
 androidDesugarJDKLibs = "2.0.3"
-kotlin = "1.8.20"
-ksp = "1.8.20-1.0.10"
+kotlin = "1.8.21"
+ksp = "1.8.21-1.0.11"
 lifecycle = "2.6.1"
 navigation = "2.5.3"
 room = "2.5.1"
 splitties = "3.0.0"
-aboutlibraries = "10.6.2"
+aboutlibraries = "10.6.3"
 
 [libraries]
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 android-desugarJDKLibs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "androidDesugarJDKLibs" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
-kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version = "1.6.4" }
+kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version = "1.7.0" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.5.0" }
-androidx-activity = { module = "androidx.activity:activity-ktx", version = "1.7.0" }
+androidx-activity = { module = "androidx.activity:activity-ktx", version = "1.7.1" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.6.1" }
 androidx-autofill = { module = "androidx.autofill:autofill", version = "1.1.0" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.1.4" }
 androidx-coordinatorlayout = { module = "androidx.coordinatorlayout:coordinatorlayout", version = "1.2.0" }
-androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.9.0" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.10.0" }
 androidx-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-livedata = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
@@ -36,7 +36,7 @@ androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version = "1.0.0" }
-material = { module = "com.google.android.material:material", version = "1.8.0" }
+material = { module = "com.google.android.material:material", version = "1.9.0" }
 konbini = { group = "cc.ekblad.konbini", name = "konbini", version = "0.1.3" }
 arrow = { module = "io.arrow-kt:arrow-core", version = "1.1.5" }
 imagecropper = { module = "com.vanniktech:android-image-cropper", version = "4.5.0" }
@@ -58,7 +58,7 @@ junit = { module = "junit:junit", version = "4.13.2" }
 androidx-test-runner = { module = "androidx.test:runner", version = "1.5.2" }
 androidx-test-rules = { module = "androidx.test:rules", version = "1.5.0" }
 androidx-lifecycle-testing = { module = "androidx.lifecycle:lifecycle-runtime-testing", version.ref = "lifecycle" }
-kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version = "1.13.0" }
+kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version = "1.13.2" }
 ksp = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 
 [plugins]
