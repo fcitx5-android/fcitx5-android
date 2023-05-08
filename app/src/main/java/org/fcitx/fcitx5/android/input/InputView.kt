@@ -42,6 +42,7 @@ import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.styledFloat
+import org.fcitx.fcitx5.android.utils.unset
 import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.wrapToUniqueComponent
 import org.mechdancer.dependency.plusAssign
@@ -261,9 +262,10 @@ class InputView(
             })
             add(windowManager.view, lParams {
                 below(kawaiiBar.view)
-                startToEndOf(leftPaddingSpace)
-                endToStartOf(rightPaddingSpace)
                 above(bottomPaddingSpace)
+                /**
+                 * set start and end constrain in [updateKeyboardSize]
+                 */
             })
             add(bottomPaddingSpace, lParams {
                 startToEndOf(leftPaddingSpace)
@@ -296,11 +298,31 @@ class InputView(
             height = keyboardBottomPaddingPx
         }
         val sidePadding = keyboardSidePaddingPx
-        leftPaddingSpace.updateLayoutParams {
-            width = sidePadding
-        }
-        rightPaddingSpace.updateLayoutParams {
-            width = sidePadding
+        if (sidePadding == 0) {
+            // hide side padding space views when unnecessary
+            leftPaddingSpace.visibility = View.GONE
+            rightPaddingSpace.visibility = View.GONE
+            windowManager.view.updateLayoutParams<LayoutParams> {
+                startToEnd = unset
+                endToStart = unset
+                startOfParent()
+                endOfParent()
+            }
+        } else {
+            leftPaddingSpace.visibility = View.VISIBLE
+            rightPaddingSpace.visibility = View.VISIBLE
+            leftPaddingSpace.updateLayoutParams {
+                width = sidePadding
+            }
+            rightPaddingSpace.updateLayoutParams {
+                width = sidePadding
+            }
+            windowManager.view.updateLayoutParams<LayoutParams> {
+                startToStart = unset
+                endToEnd = unset
+                startToEndOf(leftPaddingSpace)
+                endToStartOf(rightPaddingSpace)
+            }
         }
         kawaiiBar.view.setPadding(sidePadding, 0, sidePadding, 0)
     }

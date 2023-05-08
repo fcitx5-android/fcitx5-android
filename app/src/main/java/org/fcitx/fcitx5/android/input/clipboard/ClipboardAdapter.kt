@@ -3,7 +3,6 @@ package org.fcitx.fcitx5.android.input.clipboard
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.os.Build
-import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.annotation.DrawableRes
@@ -71,10 +70,9 @@ abstract class ClipboardAdapter :
         ViewHolder(ClipboardEntryUi(parent.context, theme))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val entry = getItem(position) ?: return
         with(holder.entryUi) {
-            val entry = getItem(position) ?: return
-            text.text = excerptText(entry.text)
-            pin.visibility = if (entry.pinned) View.VISIBLE else View.INVISIBLE
+            setEntry(excerptText(entry.text), entry.pinned)
             root.setOnClickListener {
                 onPaste(entry)
             }
@@ -82,7 +80,7 @@ abstract class ClipboardAdapter :
                 popupMenu?.dismiss()
                 val iconColor = ctx.styledColor(android.R.attr.colorControlNormal)
                 val iconColorFilter = PorterDuffColorFilter(iconColor, PorterDuff.Mode.SRC_IN)
-                val popup = PopupMenu(root.context, root)
+                val popup = PopupMenu(ctx, root)
                 fun menuItem(@StringRes title: Int, @DrawableRes ic: Int, callback: () -> Unit) {
                     popup.menu.add(title).apply {
                         icon = ctx.drawable(ic)?.apply { colorFilter = iconColorFilter }

@@ -1,22 +1,35 @@
 package org.fcitx.fcitx5.android.input.clipboard
 
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.RippleDrawable
 import android.text.TextUtils
-import androidx.cardview.widget.CardView
+import android.view.View
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.utils.rippleDrawable
 import splitties.dimensions.dp
-import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.*
+import splitties.views.dsl.constraintlayout.bottomOfParent
+import splitties.views.dsl.constraintlayout.centerVertically
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.endOfParent
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.core.Ui
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.imageView
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.wrapContent
 import splitties.views.imageResource
 import splitties.views.setPaddingDp
 
 class ClipboardEntryUi(override val ctx: Context, private val theme: Theme) : Ui {
 
-    val text = textView {
+    val textView = textView {
+        minLines = 1
         maxLines = 4
         textSize = 14f
         setPaddingDp(8, 4, 8, 4)
@@ -30,12 +43,23 @@ class ClipboardEntryUi(override val ctx: Context, private val theme: Theme) : Ui
         alpha = 0.3f
     }
 
-    val wrapper = constraintLayout {
-        add(text, lParams(matchParent, wrapContent) {
-            topOfParent()
-            bottomOfParent()
-            startOfParent()
-            endOfParent()
+    override val root = constraintLayout {
+        isClickable = true
+        minimumHeight = dp(30)
+        val radius = dp(2f)
+        foreground = RippleDrawable(
+            ColorStateList.valueOf(theme.keyPressHighlightColor), null,
+            GradientDrawable().apply {
+                cornerRadius = radius
+                setColor(Color.WHITE)
+            }
+        )
+        background = GradientDrawable().apply {
+            cornerRadius = radius
+            setColor(theme.clipboardEntryColor)
+        }
+        add(textView, lParams(matchParent, wrapContent) {
+            centerVertically()
         })
         add(pin, lParams(dp(12), dp(12)) {
             bottomOfParent(dp(2))
@@ -43,13 +67,8 @@ class ClipboardEntryUi(override val ctx: Context, private val theme: Theme) : Ui
         })
     }
 
-    override val root = view(::CardView) {
-        minimumWidth = dp(40)
-        minimumHeight = dp(30)
-        isClickable = true
-        foreground = rippleDrawable(theme.keyPressHighlightColor)
-        setCardBackgroundColor(theme.clipboardEntryColor)
-        cardElevation = 0f
-        add(wrapper, lParams(matchParent, wrapContent))
+    fun setEntry(text: String, pinned: Boolean) {
+        textView.text = text
+        pin.visibility = if (pinned) View.VISIBLE else View.GONE
     }
 }

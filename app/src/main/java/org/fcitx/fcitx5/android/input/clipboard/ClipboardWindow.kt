@@ -19,8 +19,6 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.SnackbarContentLayout
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
@@ -228,9 +226,11 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         adapter.addLoadStateListener {
             isClipboardDbEmpty = it.append.endOfPaginationReached && adapter.itemCount < 1
         }
-        adapterSubmitJob = clipboardEntriesPager.flow
-            .onEach { adapter.submitData(it) }
-            .launchIn(service.lifecycleScope)
+        adapterSubmitJob = service.lifecycleScope.launch {
+            clipboardEntriesPager.flow.collect {
+                adapter.submitData(it)
+            }
+        }
         clipboardEnabledPref.registerOnChangeListener(clipboardEnabledListener)
     }
 
