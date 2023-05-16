@@ -83,7 +83,7 @@ class AlphabetDigitKey(
     ) : this(
         char,
         digit.toString(),
-        0xffb0 + digit,
+        FcitxKeyMapping.FcitxKey_KP_0 + digit,
         popup
     )
 }

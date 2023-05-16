@@ -4,10 +4,19 @@ import android.content.Context
 import android.graphics.Rect
 import android.graphics.drawable.GradientDrawable
 import android.view.ViewOutlineProvider
+import org.fcitx.fcitx5.android.core.FcitxKeyMapping
+import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction
 import splitties.dimensions.dp
-import splitties.views.dsl.core.*
+import splitties.views.dsl.core.Ui
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.frameLayout
+import splitties.views.dsl.core.horizontalLayout
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.verticalLayout
 import splitties.views.gravityCenter
 import splitties.views.gravityEnd
 import splitties.views.gravityStart
@@ -203,5 +212,16 @@ class PopupKeyboardUi(
         return false
     }
 
-    override fun onTrigger() = keys.getOrNull(focusedIndex)?.let { KeyAction.FcitxKeyAction(it) }
+    override fun onTrigger(): KeyAction? {
+        val key = keys.getOrNull(focusedIndex) ?: return null
+        /**
+         * send `KP_*` KeySym for numeric characters in popup
+         * see also [org.fcitx.fcitx5.android.input.keyboard.AlphabetDigitKey]
+         */
+        return if (key.length == 1 && key[0].isDigit())
+            KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_KP_0 + key[0].digitToInt()))
+        else
+            KeyAction.FcitxKeyAction(key)
+    }
+
 }
