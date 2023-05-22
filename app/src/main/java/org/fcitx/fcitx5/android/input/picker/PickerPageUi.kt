@@ -10,16 +10,33 @@ import org.fcitx.fcitx5.android.core.FcitxKeyMapping
 import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.input.keyboard.*
+import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListener
-import org.fcitx.fcitx5.android.input.keyboard.KeyAction.*
+import org.fcitx.fcitx5.android.input.keyboard.ImageKeyView
+import org.fcitx.fcitx5.android.input.keyboard.KeyAction.CommitAction
+import org.fcitx.fcitx5.android.input.keyboard.KeyAction.FcitxKeyAction
+import org.fcitx.fcitx5.android.input.keyboard.KeyAction.SymAction
+import org.fcitx.fcitx5.android.input.keyboard.KeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyActionListener.Source
+import org.fcitx.fcitx5.android.input.keyboard.KeyDef
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Border
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Variant
+import org.fcitx.fcitx5.android.input.keyboard.KeyView
+import org.fcitx.fcitx5.android.input.keyboard.TextKeyView
 import org.fcitx.fcitx5.android.input.popup.PopupAction
 import org.fcitx.fcitx5.android.input.popup.PopupActionListener
-import splitties.views.dsl.constraintlayout.*
+import splitties.views.dsl.constraintlayout.below
+import splitties.views.dsl.constraintlayout.bottomOfParent
+import splitties.views.dsl.constraintlayout.bottomToTopOf
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.endOfParent
+import splitties.views.dsl.constraintlayout.endToStartOf
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.startOfParent
+import splitties.views.dsl.constraintlayout.startToEndOf
+import splitties.views.dsl.constraintlayout.topOfParent
+import splitties.views.dsl.constraintlayout.topToBottomOf
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.matchParent
@@ -262,21 +279,17 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, private val dens
     }
 
     private fun onPopupChangeFocus(viewId: Int, x: Float, y: Float): Boolean {
-        var result = false
-        popupActionListener?.onPopupAction(PopupAction.ChangeFocusAction(viewId, x, y) {
-            result = it
-        })
-        return result
+        val changeFocusAction = PopupAction.ChangeFocusAction(viewId, x, y)
+        popupActionListener?.onPopupAction(changeFocusAction)
+        return changeFocusAction.outResult
     }
 
     private fun onPopupTrigger(viewId: Int): Boolean {
-        var action: FcitxKeyAction? = null
+        val triggerAction = PopupAction.TriggerAction(viewId)
         // TODO: maybe popup keyboard should just yield String value?
-        onPopupAction(PopupAction.TriggerAction(viewId) {
-            action = it as? FcitxKeyAction
-        })
-        if (action == null) return false
-        onSymbolClick(action!!.act)
+        onPopupAction(triggerAction)
+        val action = triggerAction.outAction as? FcitxKeyAction ?: return false
+        onSymbolClick(action.act)
         onPopupAction(PopupAction.DismissAction(viewId))
         return true
     }

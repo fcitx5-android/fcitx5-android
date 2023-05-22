@@ -39,12 +39,11 @@ sealed class PopupAction {
         override val viewId: Int,
         val x: Float,
         val y: Float,
-        val cont: ((Boolean) -> Unit) = {}
+        var outResult: Boolean = false
     ) : PopupAction()
 
     data class TriggerAction(
         override val viewId: Int,
-        val cont: ((KeyAction?) -> Unit) = {}
+        var outAction: KeyAction? = null
     ) : PopupAction()
 }
-
