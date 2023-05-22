@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InlineSuggestion
 import android.view.inputmethod.InlineSuggestionsResponse
+import android.view.inputmethod.InputMethodSubtype
 import android.widget.FrameLayout
 import android.widget.ViewAnimator
 import android.widget.inline.InlineContentView
@@ -156,8 +157,10 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         service.requestHideSelf(0)
     }
 
+    private var voiceInputSubtype: Pair<String, InputMethodSubtype>? = null
+
     private val switchToVoiceInputCallback = View.OnClickListener {
-        val (id, subtype) = InputMethodUtil.firstVoiceInput() ?: return@OnClickListener
+        val (id, subtype) = voiceInputSubtype ?: return@OnClickListener
         InputMethodUtil.switchInputMethod(service, id, subtype)
     }
 
@@ -313,10 +316,12 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             idleUi.inlineSuggestionsBar.clear()
         }
-        val shouldShowVoiceInput = showVoiceInputButton && !capFlags.has(CapabilityFlag.Password)
+        voiceInputSubtype = InputMethodUtil.firstVoiceInput()
+        val shouldShowVoiceInput =
+            showVoiceInputButton && voiceInputSubtype != null && !capFlags.has(CapabilityFlag.Password)
         idleUi.setHideKeyboardIsVoiceInput(
             shouldShowVoiceInput,
-            if (showVoiceInputButton) switchToVoiceInputCallback else hideKeyboardCallback
+            if (shouldShowVoiceInput) switchToVoiceInputCallback else hideKeyboardCallback
         )
         evalIdleUiState()
     }
