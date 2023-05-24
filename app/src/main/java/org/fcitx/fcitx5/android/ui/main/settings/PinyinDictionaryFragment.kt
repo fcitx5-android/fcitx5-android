@@ -41,9 +41,6 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
 
     private val viewModel: MainViewModel by activityViewModels()
 
-    private val entries: List<LibIMEDictionary>
-        get() = ui.entries
-
     private val contentResolver: ContentResolver
         get() = requireContext().contentResolver
 
@@ -57,6 +54,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
             viewModel.disableToolbarSaveButton()
         }
     }
+
     private val busy: AtomicBoolean = AtomicBoolean(false)
 
     private val ui: BaseDynamicListUi<LibIMEDictionary> by lazy {
@@ -131,7 +129,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
             option {
                 val file = uri.queryFileName(contentResolver).bind().let { File(it) }
                 when {
-                    file.nameWithoutExtension in entries.map { it.name } -> {
+                    file.nameWithoutExtension in ui.entries.map { it.name } -> {
                         importErrorDialog(getString(R.string.dict_already_exists))
                         shift(None)
                     }
@@ -201,7 +199,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
     }
 
     private fun resetDustman() {
-        dustman.reset((entries.associate { it.name to it.isEnabled }))
+        dustman.reset((ui.entries.associate { it.name to it.isEnabled }))
     }
 
     override fun onItemAdded(idx: Int, item: LibIMEDictionary) {
@@ -226,9 +224,9 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
         super.onPause()
     }
 
-    override fun onStop() {
+    override fun onDestroy() {
         ui.removeItemChangedListener()
-        super.onStop()
+        super.onDestroy()
     }
 
     companion object {

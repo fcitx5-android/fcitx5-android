@@ -14,14 +14,12 @@ import org.fcitx.fcitx5.android.ui.main.settings.ProgressFragment
 
 class InputMethodListFragment : ProgressFragment(), OnItemChangedListener<InputMethodEntry> {
 
-    val entries: List<InputMethodEntry>
-        get() = ui.entries
-
     private fun updateIMState() {
-        if (isInitialized)
+        if (isInitialized) {
             lifecycleScope.launchOnFcitxReady(fcitx) { f ->
-                f.setEnabledIme(entries.map { it.uniqueName }.toTypedArray())
+                f.setEnabledIme(ui.entries.map { it.uniqueName }.toTypedArray())
             }
+        }
     }
 
     private lateinit var ui: BaseDynamicListUi<InputMethodEntry>
@@ -63,10 +61,16 @@ class InputMethodListFragment : ProgressFragment(), OnItemChangedListener<InputM
     }
 
     override fun onPause() {
-        if (::ui.isInitialized)
+        if (::ui.isInitialized) {
             ui.exitMultiSelect(viewModel)
+        }
         viewModel.disableToolbarEditButton()
         super.onPause()
+    }
+
+    override fun onDestroy() {
+        ui.removeItemChangedListener()
+        super.onDestroy()
     }
 
     override fun onItemSwapped(fromIdx: Int, toIdx: Int, item: InputMethodEntry) {

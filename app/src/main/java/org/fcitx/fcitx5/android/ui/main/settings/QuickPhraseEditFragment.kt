@@ -29,9 +29,6 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
 
     private lateinit var ui: BaseDynamicListUi<QuickPhraseEntry>
 
-    private val entries: List<QuickPhraseEntry>
-        get() = ui.entries
-
     private lateinit var quickPhrase: QuickPhrase
 
     private val dustman = NaiveDustman<QuickPhraseEntry>().apply {
@@ -119,13 +116,10 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
     }
 
     private fun saveConfig() {
-        if (!dustman.dirty)
-            return
+        if (!dustman.dirty) return
         resetDustman()
         lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
-            quickPhrase.saveData(
-                QuickPhraseData(entries)
-            )
+            quickPhrase.saveData(QuickPhraseData(ui.entries))
             launch(Dispatchers.Main) {
                 // tell parent that we need to reload
                 setFragmentResult(RESULT, bundleOf(RESULT to true))
@@ -134,7 +128,7 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
     }
 
     private fun resetDustman() {
-        dustman.reset(entries.associateBy { it.serialize() })
+        dustman.reset(ui.entries.associateBy { it.serialize() })
     }
 
     override fun onResume() {
@@ -158,11 +152,11 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
         super.onPause()
     }
 
-    override fun onStop() {
+    override fun onDestroy() {
         if (::ui.isInitialized) {
             ui.removeItemChangedListener()
         }
-        super.onStop()
+        super.onDestroy()
     }
 
     companion object {

@@ -51,9 +51,6 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
 
     private val viewModel: MainViewModel by activityViewModels()
 
-    private val entries: List<QuickPhrase>
-        get() = ui.entries
-
     private val contentResolver: ContentResolver
         get() = requireContext().contentResolver
 
@@ -217,7 +214,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
             option {
                 val file = uri.queryFileName(contentResolver).bind().let { File(it) }
                 when {
-                    file.nameWithoutExtension in entries.map { it.name } -> {
+                    file.nameWithoutExtension in ui.entries.map { it.name } -> {
                         errorDialog(getString(R.string.quickphrase_already_exists))
                         shift(None)
                     }
@@ -293,9 +290,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
     }
 
     private fun resetDustman() {
-        dustman.reset(entries.associate {
-            it.name to it.isEnabled
-        })
+        dustman.reset(ui.entries.associate { it.name to it.isEnabled })
     }
 
     override fun onCreateView(
@@ -344,9 +339,9 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
         super.onPause()
     }
 
-    override fun onStop() {
+    override fun onDestroy() {
         ui.removeItemChangedListener()
-        super.onStop()
+        super.onDestroy()
     }
 
     companion object {

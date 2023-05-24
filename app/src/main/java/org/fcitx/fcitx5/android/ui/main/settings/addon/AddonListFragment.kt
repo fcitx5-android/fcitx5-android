@@ -17,17 +17,14 @@ import org.fcitx.fcitx5.android.ui.main.settings.ProgressFragment
 
 class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
 
-    private val entries: List<AddonInfo>
-        get() = ui.entries
-
     private lateinit var ui: BaseDynamicListUi<AddonInfo>
 
     private val addonDisplayNames = mutableMapOf<String, String>()
 
     private fun updateAddonState() {
         if (!isInitialized) return
-        val ids = entries.map { it.uniqueName }.toTypedArray()
-        val state = entries.map { it.enabled }.toBooleanArray()
+        val ids = ui.entries.map { it.uniqueName }.toTypedArray()
+        val state = ui.entries.map { it.enabled }.toBooleanArray()
         lifecycleScope.launchOnFcitxReady(fcitx) {
             it.setAddonState(ids, state)
         }
@@ -75,11 +72,11 @@ class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
                         reset()
                     }
                     .setPositiveButton(android.R.string.ok) { _, _ ->
-                        entries.mapIndexedNotNull { idx, x ->
-                            x.takeIf { it.uniqueName in depU }?.uniqueName?.let { idx }
-                        }.forEach {
+                        ui.entries.forEachIndexed { idx, addonInfo ->
                             // TODO: combine update addon states
-                            ui.updateItem(it, entries[it].copy(enabled = false))
+                            if (addonInfo.uniqueName in depU) {
+                                ui.updateItem(idx, addonInfo.copy(enabled = false))
+                            }
                         }
                         ui.updateItem(ui.indexItem(entry), entry.copy(enabled = false))
                     }
@@ -137,6 +134,11 @@ class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
 
     override fun onItemUpdated(idx: Int, old: AddonInfo, new: AddonInfo) {
         updateAddonState()
+    }
+
+    override fun onDestroy() {
+        ui.removeItemChangedListener()
+        super.onDestroy()
     }
 
 }

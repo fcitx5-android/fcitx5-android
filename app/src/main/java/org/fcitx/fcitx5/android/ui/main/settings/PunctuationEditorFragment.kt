@@ -35,9 +35,6 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
         }
     }
 
-    private val entries
-        get() = ui.entries
-
     private fun findDesc(raw: RawConfig) {
         // parse config desc to get description text of the options
         raw["desc"][PunctuationManager.MAP_ENTRY_CONFIG].subItems!!.forEach {
@@ -51,8 +48,7 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
     }
 
     private fun saveConfig() {
-        if (!dustman.dirty)
-            return
+        if (!dustman.dirty) return
         resetDustman()
         lifecycleScope.launchOnFcitxReady(fcitx) {
             PunctuationManager.save(it, lang, ui.entries)
@@ -62,7 +58,7 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
     private lateinit var ui: BaseDynamicListUi<PunctuationMapEntry>
 
     private fun resetDustman() {
-        dustman.reset((entries.associateBy { it.key }))
+        dustman.reset((ui.entries.associateBy { it.key }))
     }
 
     override suspend fun initialize(): View {
@@ -169,11 +165,11 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
         super.onPause()
     }
 
-    override fun onStop() {
+    override fun onDestroy() {
         if (::ui.isInitialized) {
             ui.removeItemChangedListener()
         }
-        super.onStop()
+        super.onDestroy()
     }
 
     companion object {

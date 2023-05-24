@@ -40,9 +40,6 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
 
     private val viewModel: MainViewModel by activityViewModels()
 
-    private val entries: List<TableBasedInputMethod>
-        get() = ui.entries
-
     private val contentResolver: ContentResolver
         get() = requireContext().contentResolver
 
@@ -110,15 +107,19 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        createNotificationChannel()
+        registerLauncher()
+        super.onCreate(savedInstanceState)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        createNotificationChannel()
-        registerLauncher()
-        ui.addOnItemChangedListener(this)
         resetDustman()
+        ui.addOnItemChangedListener(this)
         return ui.root
     }
 
@@ -313,7 +314,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
     }
 
     private fun resetDustman() {
-        dustman.reset(entries.associateBy { it.name })
+        dustman.reset(ui.entries.associateBy { it.name })
     }
 
     override fun onItemAdded(idx: Int, item: TableBasedInputMethod) {
@@ -334,10 +335,10 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
         super.onPause()
     }
 
-    override fun onStop() {
+    override fun onDestroy() {
         // prevent dustman calling viewModel after Fragment detached
         ui.removeItemChangedListener()
-        super.onStop()
+        super.onDestroy()
     }
 
     companion object {
