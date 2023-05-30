@@ -41,8 +41,7 @@ import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.cursor.CursorRange
 import org.fcitx.fcitx5.android.input.cursor.CursorTracker
 import org.fcitx.fcitx5.android.utils.alpha
-import org.fcitx.fcitx5.android.utils.concurrent.Barrier
-import org.fcitx.fcitx5.android.utils.concurrent.barrier
+import org.fcitx.fcitx5.android.utils.concurrent.MVar
 import org.fcitx.fcitx5.android.utils.inputConnection
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
@@ -59,7 +58,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private val cachedKeyEvents = LruCache<Int, KeyEvent>(78)
     private var cachedKeyEventIndex = 0
 
-    private val inputContextBarrier = barrier<Unit>()
+    private val inputContextBarrier = MVar<Unit>()
 
     private lateinit var pkgNameCache: PackageNameCache
 
@@ -421,7 +420,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             // ensure InputContext has been created before focusing it
             fcitx.runOnReady {
                 activate(uid, pkgName)
-                inputContextBarrier.signal(Unit)
+                inputContextBarrier.put(Unit)
             }
         }
     }
@@ -439,7 +438,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         Timber.d("onStartInput: initialSel=${selection.current}, restarting=$restarting")
         lifecycleScope.launch {
             // wait until InputContext created/activated
-            inputContextBarrier.wait()
+            inputContextBarrier.read()
             fcitx.runOnReady {
                 if (restarting) {
                     // when input restarts in the same editor, focus out to clear previous state
@@ -457,7 +456,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     override fun onStartInputView(info: EditorInfo, restarting: Boolean) {
         Timber.d("onStartInputView: restarting=$restarting")
         lifecycleScope.launch {
-            inputContextBarrier.wait()
+            inputContextBarrier.read()
             fcitx.runOnReady {
                 focus(true)
             }
@@ -659,7 +658,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         Timber.d("onFinishInputView: finishingInput=$finishingInput")
         inputConnection?.finishComposingText()
         lifecycleScope.launch {
-            inputContextBarrier.wait()
+            inputContextBarrier.read()
             fcitx.runOnReady {
                 focus(false)
             }
@@ -681,11 +680,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         val uid = currentInputBinding?.uid ?: return
         Timber.d("onUnbindInput: uid=$uid")
         lifecycleScope.launch {
-            inputContextBarrier.wait()
+            inputContextBarrier.read()
             fcitx.runOnReady {
                 deactivate(uid)
             }
-            inputContextBarrier.reset()
+            inputContextBarrier.take()
         }
     }
 

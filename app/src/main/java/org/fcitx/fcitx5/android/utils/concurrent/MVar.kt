@@ -5,8 +5,12 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class MVar<T : Any> {
+class MVar<T : Any>(data: T? = null) {
     private val core = Channel<T>(1)
+
+    init {
+        data?.let { runBlocking { core.send(data) } }
+    }
 
     val isEmpty
         get() = core.isEmpty
