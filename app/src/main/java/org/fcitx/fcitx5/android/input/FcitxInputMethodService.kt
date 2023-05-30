@@ -29,8 +29,6 @@ import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.*
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
@@ -43,6 +41,8 @@ import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.cursor.CursorRange
 import org.fcitx.fcitx5.android.input.cursor.CursorTracker
 import org.fcitx.fcitx5.android.utils.alpha
+import org.fcitx.fcitx5.android.utils.concurrent.Barrier
+import org.fcitx.fcitx5.android.utils.concurrent.barrier
 import org.fcitx.fcitx5.android.utils.inputConnection
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
@@ -59,7 +59,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private val cachedKeyEvents = LruCache<Int, KeyEvent>(78)
     private var cachedKeyEventIndex = 0
 
-    private val inputContextMutex = Mutex()
+    private val inputContextBarrier = barrier<Unit>()
 
     private lateinit var pkgNameCache: PackageNameCache
 
@@ -419,10 +419,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         Timber.d("onBindInput: uid=$uid pkg=$pkgName")
         lifecycleScope.launch {
             // ensure InputContext has been created before focusing it
-            inputContextMutex.withLock {
-                fcitx.runOnReady {
-                    activate(uid, pkgName)
-                }
+            fcitx.runOnReady {
+                activate(uid, pkgName)
+                inputContextBarrier.signal(Unit)
             }
         }
     }
@@ -440,18 +439,17 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         Timber.d("onStartInput: initialSel=${selection.current}, restarting=$restarting")
         lifecycleScope.launch {
             // wait until InputContext created/activated
-            inputContextMutex.withLock {
-                fcitx.runOnReady {
-                    if (restarting) {
-                        // when input restarts in the same editor, focus out to clear previous state
-                        focus(false)
-                        // try focus out before changing CapabilityFlags,
-                        // to avoid confusing state of different text fields
-                    }
-                    // EditorInfo can be different in onStartInput and onStartInputView,
-                    // especially in browsers
-                    setCapFlags(flags)
+            inputContextBarrier.wait()
+            fcitx.runOnReady {
+                if (restarting) {
+                    // when input restarts in the same editor, focus out to clear previous state
+                    focus(false)
+                    // try focus out before changing CapabilityFlags,
+                    // to avoid confusing state of different text fields
                 }
+                // EditorInfo can be different in onStartInput and onStartInputView,
+                // especially in browsers
+                setCapFlags(flags)
             }
         }
     }
@@ -459,10 +457,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     override fun onStartInputView(info: EditorInfo, restarting: Boolean) {
         Timber.d("onStartInputView: restarting=$restarting")
         lifecycleScope.launch {
-            inputContextMutex.withLock {
-                fcitx.runOnReady {
-                    focus(true)
-                }
+            inputContextBarrier.wait()
+            fcitx.runOnReady {
+                focus(true)
             }
         }
         // because onStartInputView will always be called after onStartInput,
@@ -600,7 +597,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     override fun onCreateInlineSuggestionsRequest(uiExtras: Bundle): InlineSuggestionsRequest? {
         if (!inlineSuggestions) return null
         val theme = ThemeManager.getActiveTheme()
-        val chipDrawable = if (theme.isDark) R.drawable.bkg_inline_suggestion_dark else R.drawable.bkg_inline_suggestion_light
+        val chipDrawable =
+            if (theme.isDark) R.drawable.bkg_inline_suggestion_dark else R.drawable.bkg_inline_suggestion_light
         val chipBg = Icon.createWithResource(this, chipDrawable).setTint(theme.keyTextColor)
         val style = InlineSuggestionUi.newStyleBuilder()
             .setSingleIconChipStyle(
@@ -661,10 +659,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         Timber.d("onFinishInputView: finishingInput=$finishingInput")
         inputConnection?.finishComposingText()
         lifecycleScope.launch {
-            inputContextMutex.withLock {
-                fcitx.runOnReady {
-                    focus(false)
-                }
+            inputContextBarrier.wait()
+            fcitx.runOnReady {
+                focus(false)
             }
         }
         inputView?.finishInput()
@@ -684,11 +681,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         val uid = currentInputBinding?.uid ?: return
         Timber.d("onUnbindInput: uid=$uid")
         lifecycleScope.launch {
-            inputContextMutex.withLock {
-                fcitx.runOnReady {
-                    deactivate(uid)
-                }
+            inputContextBarrier.wait()
+            fcitx.runOnReady {
+                deactivate(uid)
             }
+            inputContextBarrier.reset()
         }
     }
 
