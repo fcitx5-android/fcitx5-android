@@ -28,8 +28,9 @@ import androidx.autofill.inline.v1.InlineSuggestionUi
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.*
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
@@ -57,6 +58,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     private val cachedKeyEvents = LruCache<Int, KeyEvent>(78)
     private var cachedKeyEventIndex = 0
+
+    private val inputContextMutex = Mutex(true)
 
     private lateinit var pkgNameCache: PackageNameCache
 
@@ -102,8 +105,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onCreate() {
         fcitx = FcitxDaemon.connect(javaClass.name)
-        eventHandlerJob = fcitx.runImmediately { eventFlow }
-            .onEach(::handleFcitxEvent).launchIn(lifecycleScope)
+        eventHandlerJob = lifecycleScope.launch {
+            fcitx.runImmediately { eventFlow }.collect {
+                handleFcitxEvent(it)
+            }
+        }
         pkgNameCache = PackageNameCache(this)
         AppPrefs.getInstance().apply {
             keyboard.systemTouchSounds.registerOnChangeListener(recreateInputViewListener)
@@ -118,7 +124,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             is FcitxEvent.CommitStringEvent -> {
                 commitText(event.data)
             }
-
             is FcitxEvent.KeyEvent -> event.data.let event@{
                 if (it.states.virtual) {
                     // KeyEvent from virtual keyboard
@@ -154,13 +159,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     }
                 }
             }
-
             is FcitxEvent.ClientPreeditEvent -> {
                 updateComposingText(event.data)
             }
-
-            else -> {
-            }
+            else -> {}
         }
     }
 
@@ -394,7 +396,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
         val keySym = KeySym.fromKeyEvent(event)
         if (keySym != null) {
-            lifecycleScope.launchOnFcitxReady(fcitx) { it.sendKey(keySym, states, up, timestamp) }
+            lifecycleScope.launchOnFcitxReady(fcitx) {
+                it.sendKey(keySym, states, up, timestamp)
+            }
             return true
         }
         Timber.d("Skipped KeyEvent: $event")
@@ -415,6 +419,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         Timber.d("onBindInput: uid=$uid pkg=$pkgName")
         lifecycleScope.launchOnFcitxReady(fcitx) {
             it.activate(uid, pkgName)
+            // ensure InputContext has been created before focusing it
+            inputContextMutex.unlock()
         }
     }
 
@@ -429,23 +435,32 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         editorInfo = attribute
         capabilityFlags = flags
         Timber.d("onStartInput: initialSel=${selection.current}, restarting=$restarting")
-        lifecycleScope.launchOnFcitxReady(fcitx) {
-            if (restarting) {
-                // when input restarts in the same editor, focus out to clear previous state
-                it.focus(false)
-                // try focus out before changing CapabilityFlags,
-                // to avoid confusing state of different text fields
+        lifecycleScope.launch {
+            // wait until InputContext created/activated
+            inputContextMutex.withLock {
+                fcitx.runOnReady {
+                    if (restarting) {
+                        // when input restarts in the same editor, focus out to clear previous state
+                        focus(false)
+                        // try focus out before changing CapabilityFlags,
+                        // to avoid confusing state of different text fields
+                    }
+                    // EditorInfo can be different in onStartInput and onStartInputView,
+                    // especially in browsers
+                    setCapFlags(flags)
+                }
             }
-            // EditorInfo can be different in onStartInput and onStartInputView,
-            // especially in browsers
-            it.setCapFlags(flags)
         }
     }
 
     override fun onStartInputView(info: EditorInfo, restarting: Boolean) {
         Timber.d("onStartInputView: restarting=$restarting")
-        lifecycleScope.launchOnFcitxReady(fcitx) {
-            it.focus(true)
+        lifecycleScope.launch {
+            inputContextMutex.withLock {
+                fcitx.runOnReady {
+                    focus(true)
+                }
+            }
         }
         // because onStartInputView will always be called after onStartInput,
         // editorInfo and capFlags should be up-to-date
@@ -642,8 +657,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     override fun onFinishInputView(finishingInput: Boolean) {
         Timber.d("onFinishInputView: finishingInput=$finishingInput")
         inputConnection?.finishComposingText()
-        lifecycleScope.launchOnFcitxReady(fcitx) {
-            it.focus(false)
+        lifecycleScope.launch {
+            inputContextMutex.withLock {
+                fcitx.runOnReady {
+                    focus(false)
+                }
+            }
         }
         inputView?.finishInput()
     }
@@ -663,6 +682,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         Timber.d("onUnbindInput: uid=$uid")
         lifecycleScope.launchOnFcitxReady(fcitx) {
             it.deactivate(uid)
+            inputContextMutex.lock()
         }
     }
 
