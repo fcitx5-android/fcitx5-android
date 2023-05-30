@@ -59,7 +59,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private val cachedKeyEvents = LruCache<Int, KeyEvent>(78)
     private var cachedKeyEventIndex = 0
 
-    private val inputContextMutex = Mutex(true)
+    private val inputContextMutex = Mutex()
 
     private lateinit var pkgNameCache: PackageNameCache
 
@@ -417,10 +417,13 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         val uid = currentInputBinding.uid
         val pkgName = pkgNameCache.forUid(uid)
         Timber.d("onBindInput: uid=$uid pkg=$pkgName")
-        lifecycleScope.launchOnFcitxReady(fcitx) {
-            it.activate(uid, pkgName)
+        lifecycleScope.launch {
             // ensure InputContext has been created before focusing it
-            inputContextMutex.unlock()
+            inputContextMutex.withLock {
+                fcitx.runOnReady {
+                    activate(uid, pkgName)
+                }
+            }
         }
     }
 
@@ -680,9 +683,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // currentInputBinding can be null on some devices under some special Multi-screen mode
         val uid = currentInputBinding?.uid ?: return
         Timber.d("onUnbindInput: uid=$uid")
-        lifecycleScope.launchOnFcitxReady(fcitx) {
-            it.deactivate(uid)
-            inputContextMutex.lock()
+        lifecycleScope.launch {
+            inputContextMutex.withLock {
+                fcitx.runOnReady {
+                    deactivate(uid)
+                }
+            }
         }
     }
 
