@@ -173,6 +173,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                         .setNegativeButton(android.R.string.cancel, null)
                         .show()
                 }
+                setViewModel(viewModel)
             }
 
             override fun updateFAB() {
@@ -324,17 +325,16 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
 
     override fun onResume() {
         super.onResume()
-        viewModel.enableToolbarEditButton {
+        viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
             ui.enterMultiSelect(
-                requireActivity().onBackPressedDispatcher,
-                viewModel
+                requireActivity().onBackPressedDispatcher
             )
         }
     }
 
     override fun onPause() {
         reloadQuickPhrase()
-        ui.exitMultiSelect(viewModel)
+        ui.exitMultiSelect()
         viewModel.disableToolbarEditButton()
         super.onPause()
     }

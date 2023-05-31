@@ -74,6 +74,7 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
             init {
                 addTouchCallback()
                 addOnItemChangedListener(this@PunctuationEditorFragment)
+                setViewModel(viewModel)
             }
 
             override fun showEntry(x: PunctuationMapEntry) = x.run {
@@ -118,10 +119,9 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
             }
         }
         resetDustman()
-        viewModel.enableToolbarEditButton {
+        viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
             ui.enterMultiSelect(
                 requireActivity().onBackPressedDispatcher,
-                viewModel
             )
         }
         return ui.root
@@ -147,10 +147,9 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
         super.onResume()
         viewModel.setToolbarTitle(requireArguments().getString(TITLE)!!)
         if (::ui.isInitialized) {
-            viewModel.enableToolbarEditButton {
+            viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
                 ui.enterMultiSelect(
-                    requireActivity().onBackPressedDispatcher,
-                    viewModel
+                    requireActivity().onBackPressedDispatcher
                 )
             }
         }
@@ -159,7 +158,7 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
     override fun onPause() {
         saveConfig()
         if (::ui.isInitialized) {
-            ui.exitMultiSelect(viewModel)
+            ui.exitMultiSelect()
         }
         viewModel.disableToolbarEditButton()
         super.onPause()

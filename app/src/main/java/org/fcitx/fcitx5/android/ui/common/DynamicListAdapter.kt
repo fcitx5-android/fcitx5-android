@@ -51,6 +51,12 @@ abstract class DynamicListAdapter<T>(
 
     abstract fun showEntry(x: T): String
 
+    private var mainViewModel: MainViewModel? = null
+
+    fun setViewModel(model: MainViewModel) {
+        mainViewModel = model
+    }
+
     inner class ViewHolder(entryUi: DynamicListEntryUi) : RecyclerView.ViewHolder(entryUi.root) {
         val multiselectCheckBox = entryUi.multiselectCheckBox
         val handleImage = entryUi.handleImage
@@ -126,24 +132,25 @@ abstract class DynamicListAdapter<T>(
 
     @SuppressLint("NotifyDataSetChanged")
     fun enterMultiSelect(
-        onBackPressedDispatcher: OnBackPressedDispatcher,
-        mainViewModel: MainViewModel
+        onBackPressedDispatcher: OnBackPressedDispatcher
     ) {
-        if (multiselect)
-            return
-        onBackPressedCallback = object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                exitMultiSelect(mainViewModel)
+        mainViewModel?.let {
+            if (multiselect)
+                return
+            onBackPressedCallback = object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    exitMultiSelect()
+                }
             }
+            onBackPressedDispatcher.addCallback(onBackPressedCallback!!)
+            it.enableToolbarDeleteButton {
+                deleteSelected()
+                exitMultiSelect()
+            }
+            it.hideToolbarEditButton()
+            multiselect = true
+            notifyDataSetChanged()
         }
-        onBackPressedDispatcher.addCallback(onBackPressedCallback!!)
-        mainViewModel.enableToolbarDeleteButton {
-            deleteSelected()
-            exitMultiSelect(mainViewModel)
-        }
-        mainViewModel.hideToolbarEditButton()
-        multiselect = true
-        notifyDataSetChanged()
     }
 
 
@@ -161,15 +168,18 @@ abstract class DynamicListAdapter<T>(
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun exitMultiSelect(viewModel: MainViewModel) {
-        if (!multiselect)
-            return
-        onBackPressedCallback?.remove()
-        viewModel.disableToolbarDeleteButton()
-        multiselect = false
-        selected.clear()
-        notifyDataSetChanged()
-        viewModel.showToolbarEditButton()
+    fun exitMultiSelect() {
+        mainViewModel?.let {
+            if (!multiselect)
+                return
+            onBackPressedCallback?.remove()
+            it.disableToolbarDeleteButton()
+            multiselect = false
+            selected.clear()
+            notifyDataSetChanged()
+            if (entries.isNotEmpty())
+                it.showToolbarEditButton()
+        }
     }
 
     override fun getItemCount(): Int = entries.size
@@ -179,6 +189,7 @@ abstract class DynamicListAdapter<T>(
         _entries.add(idx, item)
         notifyItemInserted(idx)
         listener?.onItemAdded(idx, item)
+        mainViewModel?.showToolbarEditButton()
     }
 
     @CallSuper
@@ -186,6 +197,8 @@ abstract class DynamicListAdapter<T>(
         val item = _entries.removeAt(idx)
         notifyItemRemoved(idx)
         listener?.onItemRemoved(idx, item)
+        if (entries.isEmpty())
+            mainViewModel?.hideToolbarEditButton()
         return item
     }
 

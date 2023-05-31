@@ -45,14 +45,13 @@ class MainViewModel : ViewModel() {
         toolbarSaveButtonOnClickListener.value = null
     }
 
-    fun enableToolbarEditButton(onClick: () -> Unit) {
+    fun enableToolbarEditButton(visible: Boolean = true, onClick: () -> Unit) {
         toolbarEditButtonOnClickListener.value = onClick
-        toolbarEditButtonVisible.value = true
-        showToolbarEditButton()
+        toolbarEditButtonVisible.value = visible
     }
 
     fun disableToolbarEditButton() {
-        toolbarEditButtonVisible.value = false
+        toolbarEditButtonOnClickListener.value = null
         hideToolbarEditButton()
     }
 

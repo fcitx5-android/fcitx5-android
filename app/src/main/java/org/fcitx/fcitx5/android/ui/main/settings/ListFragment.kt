@@ -119,7 +119,7 @@ class ListFragment : Fragment() {
                 }
             }
             else -> throw IllegalArgumentException("$descriptor is not a list-like descriptor")
-        }
+        }.also { it.setViewModel(viewModel) }
     }
 
     override fun onCreateView(
@@ -131,16 +131,15 @@ class ListFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         viewModel.setToolbarTitle(descriptor.description ?: descriptor.name)
-        viewModel.enableToolbarEditButton {
+        viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
             ui.enterMultiSelect(
-                requireActivity().onBackPressedDispatcher,
-                viewModel
+                requireActivity().onBackPressedDispatcher
             )
         }
     }
 
     override fun onPause() {
-        ui.exitMultiSelect(viewModel)
+        ui.exitMultiSelect()
         viewModel.disableToolbarEditButton()
         super.onPause()
     }
