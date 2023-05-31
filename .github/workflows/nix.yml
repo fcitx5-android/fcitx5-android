@@ -1,0 +1,22 @@
+name: Nix
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+jobs:
+  nix-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch source code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: recursive
+      - uses: cachix/install-nix-action@v20
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - name: Build Debug APK
+        run: |
+          nix develop --command ./gradlew :app:assembleDebug
+          nix develop --command ./gradlew :assembleDebugPlugins
