@@ -6,6 +6,9 @@ import android.content.res.Configuration
 import android.os.Process
 import android.util.Log
 import androidx.preference.PreferenceManager
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.plus
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
@@ -16,6 +19,9 @@ import timber.log.Timber
 import kotlin.system.exitProcess
 
 class FcitxApplication : Application() {
+
+    val coroutineScope = MainScope() + CoroutineName("FcitxApplication")
+
     override fun onCreate() {
         super.onCreate()
         if (!BuildConfig.DEBUG) {

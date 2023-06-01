@@ -3,7 +3,9 @@ package org.fcitx.fcitx5.android.core
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
@@ -27,9 +29,8 @@ class FcitxLifecycleRegistry : FcitxLifecycle {
 
     private var internalState = FcitxLifecycle.State.STOPPED
 
-    override val lifecycleScope: CoroutineScope by lazy {
+    override val lifecycleScope: CoroutineScope =
         FcitxLifecycleCoroutineScope(this).also { addObserver(it) }
-    }
 
     fun postEvent(event: FcitxLifecycle.Event) = synchronized(internalState) {
         when (event) {
@@ -98,7 +99,6 @@ class FcitxLifecycleCoroutineScope(
 ) :
     CoroutineScope, FcitxLifecycleObserver {
     override fun onStateChanged(event: FcitxLifecycle.Event) {
-
         if (lifecycle.currentState >= FcitxLifecycle.State.STOPPING) {
             coroutineContext.cancelChildren()
         }

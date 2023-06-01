@@ -2,10 +2,9 @@ package org.fcitx.fcitx5.android.ui.main.settings
 
 import android.app.AlertDialog
 import android.view.View
-import androidx.lifecycle.lifecycleScope
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.core.getPunctuationConfig
-import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
+import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.punctuation.PunctuationManager
 import org.fcitx.fcitx5.android.data.punctuation.PunctuationMapEntry
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
@@ -50,7 +49,7 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
     private fun saveConfig() {
         if (!dustman.dirty) return
         resetDustman()
-        lifecycleScope.launchOnFcitxReady(fcitx) {
+        fcitx.launchOnReady {
             PunctuationManager.save(it, lang, ui.entries)
         }
     }

@@ -4,10 +4,11 @@ import android.view.View
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
-import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
+import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
@@ -18,7 +19,10 @@ import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.editorinfo.EditorInfoWindow
-import org.fcitx.fcitx5.android.input.status.StatusAreaEntry.Android.Type.*
+import org.fcitx.fcitx5.android.input.status.StatusAreaEntry.Android.Type.InputMethod
+import org.fcitx.fcitx5.android.input.status.StatusAreaEntry.Android.Type.Keyboard
+import org.fcitx.fcitx5.android.input.status.StatusAreaEntry.Android.Type.ReloadConfig
+import org.fcitx.fcitx5.android.input.status.StatusAreaEntry.Android.Type.ThemeList
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.AppUtil
@@ -67,7 +71,7 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
     }
 
     private fun activateAction(action: Action) {
-        service.lifecycleScope.launchOnFcitxReady(fcitx) { f ->
+        fcitx.launchOnReady { f ->
             f.activateAction(action.id)
         }
     }
@@ -99,9 +103,11 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
                                 context, it.uniqueName, it.displayName
                             )
                         }
-                        ReloadConfig -> service.lifecycleScope.launchOnFcitxReady(fcitx) { f ->
+                        ReloadConfig -> fcitx.launchOnReady { f ->
                             f.reloadConfig()
-                            Toast.makeText(service, R.string.done, Toast.LENGTH_SHORT).show()
+                            service.lifecycleScope.launch {
+                                Toast.makeText(service, R.string.done, Toast.LENGTH_SHORT).show()
+                            }
                         }
                         Keyboard -> AppUtil.launchMainToKeyboard(context)
                         ThemeList -> AppUtil.launchMainToThemeList(context)
@@ -159,8 +165,11 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
     override fun onCreateBarExtension() = barExtension
 
     override fun onAttached() {
-        service.lifecycleScope.launchOnFcitxReady(fcitx) {
-            onStatusAreaUpdate(it.statusArea())
+        fcitx.launchOnReady {
+            val data = it.statusArea()
+            service.lifecycleScope.launch {
+                onStatusAreaUpdate(data)
+            }
         }
     }
 

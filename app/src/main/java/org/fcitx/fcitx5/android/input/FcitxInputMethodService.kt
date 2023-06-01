@@ -35,7 +35,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.*
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.daemon.FcitxDaemon
-import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
+import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
@@ -325,7 +325,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        lifecycleScope.launchOnFcitxReady(fcitx) { it.reset() }
+        fcitx.launchOnReady { it.reset() }
     }
 
     override fun onCreateInputView(): View {
@@ -389,14 +389,14 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // skip \t, because it's charCode is different from KeySym
         // skip \n, because fcitx wants \r for return
         if (charCode > 0 && charCode != '\t'.code && charCode != '\n'.code) {
-            lifecycleScope.launchOnFcitxReady(fcitx) {
+            fcitx.launchOnReady {
                 it.sendKey(charCode, states.states, up, timestamp)
             }
             return true
         }
         val keySym = KeySym.fromKeyEvent(event)
         if (keySym != null) {
-            lifecycleScope.launchOnFcitxReady(fcitx) {
+            fcitx.launchOnReady {
                 it.sendKey(keySym, states, up, timestamp)
             }
             return true
@@ -501,7 +501,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         if (newSelStart != newSelEnd) return
         // do reset if composing is empty && input panel is not empty
         if (composing.isEmpty()) {
-            lifecycleScope.launchOnFcitxReady(fcitx) {
+            fcitx.launchOnReady {
                 if (!it.isEmpty()) {
                     Timber.d("handleCursorUpdate: reset")
                     it.reset()
@@ -518,8 +518,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             if (position != composingText.cursor) {
                 // cursor in InvokeActionEvent counts by "UTF-8 characters"
                 val codePointPosition = composingText.codePointCountUntil(position)
-                lifecycleScope.launchOnFcitxReady(fcitx) {
-                    if (updateIndex != cursorUpdateIndex) return@launchOnFcitxReady
+                fcitx.launchOnReady {
+                    if (updateIndex != cursorUpdateIndex) return@launchOnReady
                     Timber.d("handleCursorUpdate: move fcitx cursor to $codePointPosition")
                     it.moveCursor(codePointPosition)
                 }
@@ -531,7 +531,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             inputConnection?.finishComposingText()
             // `fcitx.reset()` here would commit preedit after new cursor position
             // since we have `ClientUnfocusCommit`, focus out and in would do the trick
-            lifecycleScope.launchOnFcitxReady(fcitx) {
+            fcitx.launchOnReady {
                 it.focus(false)
                 it.focus(true)
             }
@@ -600,7 +600,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     override fun onCreateInlineSuggestionsRequest(uiExtras: Bundle): InlineSuggestionsRequest? {
         if (!inlineSuggestions) return null
         val theme = ThemeManager.getActiveTheme()
-        val chipDrawable = if (theme.isDark) R.drawable.bkg_inline_suggestion_dark else R.drawable.bkg_inline_suggestion_light
+        val chipDrawable =
+            if (theme.isDark) R.drawable.bkg_inline_suggestion_dark else R.drawable.bkg_inline_suggestion_light
         val chipBg = Icon.createWithResource(this, chipDrawable).setTint(theme.keyTextColor)
         val style = InlineSuggestionUi.newStyleBuilder()
             .setSingleIconChipStyle(
@@ -711,4 +712,5 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         private val InlinePresentationSpecMinSize = Size(0, 0)
         private val InlinePresentationSpecMaxSize = Size(Int.MAX_VALUE, Int.MAX_VALUE)
     }
+
 }

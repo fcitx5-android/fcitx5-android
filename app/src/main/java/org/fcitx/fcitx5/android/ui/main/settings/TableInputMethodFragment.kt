@@ -21,7 +21,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
+import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.table.TableBasedInputMethod
 import org.fcitx.fcitx5.android.data.table.TableManager
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
@@ -308,7 +308,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
     private fun reloadConfig() {
         if (!dustman.dirty) return
         resetDustman()
-        lifecycleScope.launchOnFcitxReady(viewModel.fcitx) {
+        viewModel.fcitx.launchOnReady {
             it.reloadConfig()
         }
     }

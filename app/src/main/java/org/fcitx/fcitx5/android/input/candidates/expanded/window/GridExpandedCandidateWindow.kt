@@ -2,11 +2,10 @@ package org.fcitx.fcitx5.android.input.candidates.expanded.window
 
 import android.content.res.Configuration
 import android.util.DisplayMetrics
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
-import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
+import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.candidates.adapter.GridPagingCandidateViewAdapter
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateLayout
@@ -26,11 +25,11 @@ class GridExpandedCandidateWindow :
     }
 
     override val adapter by lazy {
-        object: GridPagingCandidateViewAdapter(theme) {
+        object : GridPagingCandidateViewAdapter(theme) {
             override fun onBindViewHolder(holder: ViewHolder, position: Int) {
                 super.onBindViewHolder(holder, position)
                 holder.itemView.setOnClickListener {
-                    service.lifecycleScope.launchOnFcitxReady(fcitx) { it.select(holder.idx) }
+                    fcitx.launchOnReady { it.select(holder.idx) }
                 }
             }
         }

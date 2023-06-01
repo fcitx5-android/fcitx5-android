@@ -2,13 +2,12 @@ package org.fcitx.fcitx5.android.input.candidates.expanded.window
 
 import android.util.DisplayMetrics
 import android.view.ViewGroup
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
-import org.fcitx.fcitx5.android.daemon.launchOnFcitxReady
+import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.input.candidates.adapter.PagingCandidateViewAdapter
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateLayout
 import org.fcitx.fcitx5.android.input.candidates.expanded.decoration.FlexboxHorizontalDecoration
@@ -35,7 +34,7 @@ class FlexboxExpandedCandidateWindow :
             override fun onBindViewHolder(holder: ViewHolder, position: Int) {
                 super.onBindViewHolder(holder, position)
                 holder.itemView.setOnClickListener {
-                    service.lifecycleScope.launchOnFcitxReady(fcitx) { it.select(holder.idx) }
+                    fcitx.launchOnReady { it.select(holder.idx) }
                 }
             }
         }
