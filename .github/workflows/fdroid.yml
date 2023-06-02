@@ -2,7 +2,6 @@ name: F-Droid
 
 on:
   repository_dispatch:
-    types: [fdroid_build_fcitx5]
 
 defaults:
   run:
@@ -15,10 +14,10 @@ jobs:
     strategy:
       matrix:
         abi:
-          - 1
-          - 2
-          - 3
-          - 4
+          - armeabi-v7a
+          - arm64-v8a
+          - x86
+          - x86_64
       fail-fast: false
     env:
       APP_ID: org.fcitx.fcitx5.android
@@ -41,7 +40,7 @@ jobs:
           mv $GITHUB_WORKSPACE/fdroidserver $fdroidserver 
 
           rm -rf $ANDROID_HOME/tools
-          sdkmanager "tools" "platform-tools" "build-tools;31.0.0"
+          sdkmanager "tools" "platform-tools"
           for d in logs tmp unsigned $home_vagrant/metadata $home_vagrant/.android $home_vagrant/.gradle $ANDROID_HOME; do
               test -d $d || mkdir $d;
               chown -R vagrant $d;
@@ -53,36 +52,32 @@ jobs:
           ln -s $home_vagrant/build $GITHUB_WORKSPACE/build
           chown -R vagrant $GITHUB_WORKSPACE
 
-      - name: Setup fdroiddata
+      - name: Build
         run: |
           set -x
-          source /etc/profile.d/bsenv.sh
           curl -Lo /usr/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           chmod +x /usr/bin/yq
-          metadata="$home_vagrant/metadata/$APP_ID.yml"
-          curl -Lo $metadata "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/app/$APP_ID.yml"
           build_metadata=$(curl https://jenkins.fcitx-im.org/job/android/job/fcitx5-android/lastSuccessfulBuild/artifact/out/build-metadata.json)
           versionName=$(echo $build_metadata | yq ".versionName")
-          echo "versionName: $versionName"
           commitHash=$(echo $build_metadata | yq ".commitHash")
           timestamp=$(echo $build_metadata | yq ".timestamp")
-          baseVersionCode=$(curl https://raw.githubusercontent.com/fcitx5-android/fcitx5-android/master/build-logic/convention/src/main/kotlin/Versions.kt | grep "baseVersionCode =" | sed 's/.*= //')
-          abi=("armeabi-v7a" "arm64-v8a" "x86" "x86_64")
-
-          i=${{ matrix.abi }}
+          baseVersionCode=$(curl https://raw.githubusercontent.com/fcitx5-android/fcitx5-android/$commitHash/build-logic/convention/src/main/kotlin/Versions.kt | grep "baseVersionCode =" | sed 's/.*= //')
+          declare -A abi_list
+          abi_list=([armeabi-v7a]=1 [arm64-v8a]=2 [x86]=3 [x86_64]=4)
+          i=${abi_list[${{ matrix.abi }}]}
           versionCode=$(expr $baseVersionCode \* 10 + $i)
-          yq -i ".Builds[$(expr $i - 5)] |=
+
+          source /etc/profile.d/bsenv.sh
+          metadata="$home_vagrant/metadata/$APP_ID.yml"
+          curl -Lo $metadata "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/app/$APP_ID.yml"
+          sed -i s/%abi/${{ matrix.abi }}/g $metadata
+          yq -i ".Builds[0] |=
               (.versionName = \"$versionName\") |=
               (.versionCode = $versionCode) |=
               (.commit = \"$commitHash\")
           " $metadata
-          yq ".Builds[$(expr $i - 5)]" $metadata
-
+          yq ".Builds[0]" $metadata
           cp $metadata $GITHUB_WORKSPACE/metadata
-
-      - name: Build
-        run: |
-          source /etc/profile.d/bsenv.sh
           export PATH="$fdroidserver:$PATH"
           export PYTHONPATH="$fdroidserver:$fdroidserver/examples"
           export PYTHONUNBUFFERED=true
@@ -95,13 +90,7 @@ jobs:
               env HOME=$home_vagrant
               fdroid"
 
-          baseVersionCode=$(curl https://raw.githubusercontent.com/fcitx5-android/fcitx5-android/master/build-logic/convention/src/main/kotlin/Versions.kt | grep "baseVersionCode =" | sed 's/.*= //')
-
-          i=${{ matrix.abi }}
-          versionCode=$(expr $baseVersionCode \* 10 + $i)
           build="$APP_ID:$versionCode"
-          set -x
-          apt-get install sudo
           chown -R vagrant $home_vagrant
           $fdroid fetchsrclibs $build --verbose
           cd $home_vagrant
@@ -111,5 +100,5 @@ jobs:
         uses: actions/upload-artifact@v3
         if: ${{ success() || failure() }}
         with:
+          name: fdroid-${{ matrix.abi }}
           path: tmp/
-          retention-days: 7
