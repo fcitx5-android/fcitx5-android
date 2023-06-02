@@ -326,9 +326,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
     override fun onResume() {
         super.onResume()
         viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
-            ui.enterMultiSelect(
-                requireActivity().onBackPressedDispatcher
-            )
+            ui.enterMultiSelect(requireActivity().onBackPressedDispatcher)
         }
     }
 

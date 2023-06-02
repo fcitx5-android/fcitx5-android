@@ -148,9 +148,7 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
         viewModel.setToolbarTitle(requireArguments().getString(TITLE)!!)
         if (::ui.isInitialized) {
             viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
-                ui.enterMultiSelect(
-                    requireActivity().onBackPressedDispatcher
-                )
+                ui.enterMultiSelect(requireActivity().onBackPressedDispatcher)
             }
         }
     }

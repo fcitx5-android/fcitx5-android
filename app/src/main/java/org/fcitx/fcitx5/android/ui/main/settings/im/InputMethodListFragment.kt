@@ -53,10 +53,10 @@ class InputMethodListFragment : ProgressFragment(), OnItemChangedListener<InputM
 
     override fun onResume() {
         super.onResume()
-        viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
-            ui.enterMultiSelect(
-                requireActivity().onBackPressedDispatcher
-            )
+        if (::ui.isInitialized) {
+            viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
+                ui.enterMultiSelect(requireActivity().onBackPressedDispatcher)
+            }
         }
     }
 
@@ -69,7 +69,9 @@ class InputMethodListFragment : ProgressFragment(), OnItemChangedListener<InputM
     }
 
     override fun onDestroy() {
-        ui.removeItemChangedListener()
+        if (::ui.isInitialized) {
+            ui.removeItemChangedListener()
+        }
         super.onDestroy()
     }
 

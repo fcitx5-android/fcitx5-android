@@ -22,8 +22,6 @@ abstract class ProgressFragment : Fragment() {
 
     abstract suspend fun initialize(): View
 
-    open fun beforeCreateView() {}
-
     protected val viewModel: MainViewModel by activityViewModels()
 
     protected val fcitx
@@ -34,7 +32,6 @@ abstract class ProgressFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        beforeCreateView()
         return requireContext().frameLayout().also { root = it }
     }
 

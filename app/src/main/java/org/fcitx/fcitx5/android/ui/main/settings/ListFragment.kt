@@ -29,11 +29,8 @@ class ListFragment : Fragment() {
     private val viewModel: MainViewModel by activityViewModels()
 
     private val ui: BaseDynamicListUi<*> by lazy {
-
         val ctx = requireContext()
-
         when (descriptor) {
-
             is ConfigDescriptor.ConfigEnumList -> {
                 val d = descriptor as ConfigDescriptor.ConfigEnumList
                 val available = d.entries.toSet()
@@ -46,7 +43,6 @@ class ListFragment : Fragment() {
                     show = { d.entriesI18n?.get(d.entries.indexOf(it)) ?: it }
                 )
             }
-
             is ConfigDescriptor.ConfigList -> {
                 val ty = descriptor.type as ConfigType.TyList
                 when (ty.subtype) {
@@ -132,9 +128,7 @@ class ListFragment : Fragment() {
         super.onResume()
         viewModel.setToolbarTitle(descriptor.description ?: descriptor.name)
         viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
-            ui.enterMultiSelect(
-                requireActivity().onBackPressedDispatcher
-            )
+            ui.enterMultiSelect(requireActivity().onBackPressedDispatcher)
         }
     }
 
