@@ -137,6 +137,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
         ) {
             init {
                 enableUndo = false
+                shouldShowFab = true
                 fab.setOnClickListener {
                     // TODO use expandable fab instead
                     val actions = arrayOf(

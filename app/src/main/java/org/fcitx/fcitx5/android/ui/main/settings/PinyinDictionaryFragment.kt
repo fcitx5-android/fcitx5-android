@@ -73,6 +73,9 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
         ) {
             init {
                 addTouchCallback()
+                // since FAB is always shown in this fragment,
+                // set shouldShowFab to true to hide it when entering multi select mode
+                shouldShowFab = true
                 fab.setOnClickListener {
                     launcher.launch("*/*")
                 }

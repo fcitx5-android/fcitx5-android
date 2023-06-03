@@ -131,9 +131,8 @@ abstract class DynamicListAdapter<T>(
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun enterMultiSelect(
-        onBackPressedDispatcher: OnBackPressedDispatcher
-    ) {
+    @CallSuper
+    open fun enterMultiSelect(onBackPressedDispatcher: OnBackPressedDispatcher) {
         mainViewModel?.let {
             if (multiselect)
                 return
@@ -168,7 +167,8 @@ abstract class DynamicListAdapter<T>(
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun exitMultiSelect() {
+    @CallSuper
+    open fun exitMultiSelect() {
         mainViewModel?.let {
             if (!multiselect)
                 return

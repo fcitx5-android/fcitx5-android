@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageButton
+import androidx.activity.OnBackPressedDispatcher
 import androidx.appcompat.app.AlertDialog
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.*
@@ -48,6 +49,8 @@ abstract class BaseDynamicListUi<T>(
         initEditButton = {},
         initSettingsButton
     ) {
+
+    protected var shouldShowFab = false
 
     protected val fab = view(::FloatingActionButton) {
         imageResource = R.drawable.ic_baseline_plus_24
@@ -151,8 +154,10 @@ abstract class BaseDynamicListUi<T>(
             is Mode.ChooseOne -> {
                 val candidatesSource = mode.candidatesSource(this)
                 if (candidatesSource.isEmpty()) {
+                    shouldShowFab = false
                     fab.hide()
                 } else {
+                    shouldShowFab = true
                     fab.show()
                     fab.setOnClickListener {
                         val items = candidatesSource.map { showEntry(it) }.toTypedArray()
@@ -164,15 +169,33 @@ abstract class BaseDynamicListUi<T>(
                 }
             }
             is Mode.FreeAdd -> {
+                shouldShowFab = true
                 fab.show()
                 fab.setOnClickListener {
                     showEditDialog(ctx.getString(R.string.add)) { addItem(item = it) }
                 }
             }
-            is Mode.Immutable -> fab.hide()
+            is Mode.Immutable -> {
+                shouldShowFab = false
+                fab.hide()
+            }
             is Mode.Custom -> {
             }
         }
+    }
+
+    override fun enterMultiSelect(onBackPressedDispatcher: OnBackPressedDispatcher) {
+        if (shouldShowFab) {
+            fab.hide()
+        }
+        super.enterMultiSelect(onBackPressedDispatcher)
+    }
+
+    override fun exitMultiSelect() {
+        if (shouldShowFab) {
+            fab.show()
+        }
+        super.exitMultiSelect()
     }
 
     open fun showEditDialog(

@@ -82,6 +82,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
         ) {
             init {
                 addTouchCallback()
+                shouldShowFab = true
                 fab.setOnClickListener {
                     showImportDialog()
                 }
