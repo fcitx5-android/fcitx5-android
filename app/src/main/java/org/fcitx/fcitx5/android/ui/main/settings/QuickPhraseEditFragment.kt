@@ -88,7 +88,7 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
         ui.addTouchCallback()
         resetDustman()
         ui.setViewModel(viewModel)
-        viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
+        viewModel.enableToolbarEditButton(initialEntries.isNotEmpty()) {
             ui.enterMultiSelect(requireActivity().onBackPressedDispatcher)
         }
         return ui.root
@@ -129,27 +129,27 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
         dustman.reset(ui.entries.associateBy { it.serialize() })
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
         viewModel.setToolbarTitle(quickPhrase.name)
-        if (::ui.isInitialized) {
+        if (isInitialized) {
             viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
                 ui.enterMultiSelect(requireActivity().onBackPressedDispatcher)
             }
         }
     }
 
-    override fun onPause() {
+    override fun onStop() {
         saveConfig()
-        if (::ui.isInitialized) {
+        if (isInitialized) {
             ui.exitMultiSelect()
         }
         viewModel.disableToolbarEditButton()
-        super.onPause()
+        super.onStop()
     }
 
     override fun onDestroy() {
-        if (::ui.isInitialized) {
+        if (isInitialized) {
             ui.removeItemChangedListener()
         }
         super.onDestroy()

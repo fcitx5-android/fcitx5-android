@@ -28,6 +28,8 @@ class ListFragment : Fragment() {
 
     private val viewModel: MainViewModel by activityViewModels()
 
+    private var uiInitialized = false
+
     private val ui: BaseDynamicListUi<*> by lazy {
         val ctx = requireContext()
         when (descriptor) {
@@ -115,7 +117,10 @@ class ListFragment : Fragment() {
                 }
             }
             else -> throw IllegalArgumentException("$descriptor is not a list-like descriptor")
-        }.also { it.setViewModel(viewModel) }
+        }.also {
+            it.setViewModel(viewModel)
+            uiInitialized = true
+        }
     }
 
     override fun onCreateView(
@@ -124,18 +129,22 @@ class ListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View = ui.root
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
         viewModel.setToolbarTitle(descriptor.description ?: descriptor.name)
-        viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
-            ui.enterMultiSelect(requireActivity().onBackPressedDispatcher)
+        if (uiInitialized) {
+            viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
+                ui.enterMultiSelect(requireActivity().onBackPressedDispatcher)
+            }
         }
     }
 
-    override fun onPause() {
-        ui.exitMultiSelect()
+    override fun onStop() {
         viewModel.disableToolbarEditButton()
-        super.onPause()
+        if (uiInitialized) {
+            ui.exitMultiSelect()
+        }
+        super.onStop()
     }
 
     override fun onDestroy() {

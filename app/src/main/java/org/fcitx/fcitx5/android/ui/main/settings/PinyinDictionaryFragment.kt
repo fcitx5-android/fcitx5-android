@@ -57,6 +57,8 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
 
     private val busy: AtomicBoolean = AtomicBoolean(false)
 
+    private var uiInitialized = false
+
     private val ui: BaseDynamicListUi<LibIMEDictionary> by lazy {
         object : BaseDynamicListUi<LibIMEDictionary>(
             requireContext(),
@@ -86,6 +88,8 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
             }
 
             override fun showEntry(x: LibIMEDictionary): String = x.name
+        }.also {
+            uiInitialized = true
         }
     }
 
@@ -222,13 +226,15 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
         dustman.addOrUpdate(new.name, new.isEnabled)
     }
 
-    override fun onPause() {
+    override fun onStop() {
         reloadDict()
-        super.onPause()
+        super.onStop()
     }
 
     override fun onDestroy() {
-        ui.removeItemChangedListener()
+        if (uiInitialized) {
+            ui.removeItemChangedListener()
+        }
         super.onDestroy()
     }
 

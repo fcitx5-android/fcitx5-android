@@ -60,6 +60,8 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
         }
     }
 
+    private var uiInitialized = false
+
     private val ui: BaseDynamicListUi<TableBasedInputMethod> by lazy {
         object : BaseDynamicListUi<TableBasedInputMethod>(
             requireContext(),
@@ -94,6 +96,8 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
             }
 
             override fun showEntry(x: TableBasedInputMethod): String = x.name
+        }.also {
+            uiInitialized = true
         }
     }
 
@@ -334,14 +338,16 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
         dustman.addOrUpdate(new.name, new)
     }
 
-    override fun onPause() {
+    override fun onStop() {
         reloadConfig()
-        super.onPause()
+        super.onStop()
     }
 
     override fun onDestroy() {
-        // prevent dustman calling viewModel after Fragment detached
-        ui.removeItemChangedListener()
+        if (uiInitialized) {
+            // prevent dustman calling viewModel after Fragment detached
+            ui.removeItemChangedListener()
+        }
         super.onDestroy()
     }
 

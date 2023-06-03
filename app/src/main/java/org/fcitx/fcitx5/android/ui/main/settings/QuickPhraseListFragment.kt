@@ -66,6 +66,8 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
         }
     }
 
+    private var uiInitialized = false
+
     private val ui: BaseDynamicListUi<QuickPhrase> by lazy {
         object : BaseDynamicListUi<QuickPhrase>(
             requireContext(),
@@ -175,6 +177,10 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                         .show()
                 }
                 setViewModel(viewModel)
+                // Builtin quick phrase shouldn't be removed
+                // But it can be disabled
+                removable = { e -> e !is BuiltinQuickPhrase }
+                addTouchCallback()
             }
 
             override fun updateFAB() {
@@ -184,10 +190,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
             override fun showEntry(x: QuickPhrase): String = x.name
 
         }.also {
-            // Builtin quick phrase shouldn't be removed
-            // But it can be disabled
-            it.removable = { e -> e !is BuiltinQuickPhrase }
-            it.addTouchCallback()
+            uiInitialized = true
         }
     }
 
@@ -324,22 +327,28 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
         dustman.addOrUpdate(new.name, new.isEnabled)
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
-            ui.enterMultiSelect(requireActivity().onBackPressedDispatcher)
+    override fun onStart() {
+        super.onStart()
+        if (uiInitialized) {
+            viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
+                ui.enterMultiSelect(requireActivity().onBackPressedDispatcher)
+            }
         }
     }
 
-    override fun onPause() {
+    override fun onStop() {
         reloadQuickPhrase()
-        ui.exitMultiSelect()
         viewModel.disableToolbarEditButton()
-        super.onPause()
+        if (uiInitialized) {
+            ui.exitMultiSelect()
+        }
+        super.onStop()
     }
 
     override fun onDestroy() {
-        ui.removeItemChangedListener()
+        if (uiInitialized) {
+            ui.removeItemChangedListener()
+        }
         super.onDestroy()
     }
 

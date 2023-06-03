@@ -118,10 +118,8 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
             }
         }
         resetDustman()
-        viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
-            ui.enterMultiSelect(
-                requireActivity().onBackPressedDispatcher,
-            )
+        viewModel.enableToolbarEditButton(initialEntries.isNotEmpty()) {
+            ui.enterMultiSelect(requireActivity().onBackPressedDispatcher)
         }
         return ui.root
     }
@@ -142,27 +140,27 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
         dustman.addOrUpdate(new.key, new)
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
         viewModel.setToolbarTitle(requireArguments().getString(TITLE)!!)
-        if (::ui.isInitialized) {
+        if (isInitialized) {
             viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
                 ui.enterMultiSelect(requireActivity().onBackPressedDispatcher)
             }
         }
     }
 
-    override fun onPause() {
+    override fun onStop() {
         saveConfig()
-        if (::ui.isInitialized) {
+        viewModel.disableToolbarEditButton()
+        if (isInitialized) {
             ui.exitMultiSelect()
         }
-        viewModel.disableToolbarEditButton()
-        super.onPause()
+        super.onStop()
     }
 
     override fun onDestroy() {
-        if (::ui.isInitialized) {
+        if (isInitialized) {
             ui.removeItemChangedListener()
         }
         super.onDestroy()

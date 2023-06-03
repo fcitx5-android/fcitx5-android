@@ -136,7 +136,9 @@ class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
     }
 
     override fun onDestroy() {
-        ui.removeItemChangedListener()
+        if (isInitialized) {
+            ui.removeItemChangedListener()
+        }
         super.onDestroy()
     }
 
