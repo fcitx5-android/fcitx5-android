@@ -120,6 +120,7 @@ object FcitxDaemon {
         realFcitx.stop()
         realFcitx.start()
         FcitxApplication.getInstance().coroutineScope.launch {
+            // cancel notification on ready
             realFcitx.lifecycle.whenReady {
                 appContext.notificationManager.cancel(id)
             }

@@ -68,29 +68,9 @@ object DataManager {
         callbacks.add(block)
 
     @SuppressLint("DiscouragedApi")
-    fun sync() = lock.withLock {
-        synced = false
-        loadedPlugins.clear()
-        failedPlugins.clear()
-
-        // load last run's data descriptor
-        val oldDescriptor =
-            destDescriptorFile
-                .takeIf { it.exists() && it.isFile }
-                ?.runCatching { readText() }
-                ?.getOrNull()
-                ?.let { deserializeDataDescriptor(it) }
-                ?.getOrNull()
-                ?: DataDescriptor("", mapOf())
-
-        // load app's data descriptor
-        val mainDescriptor =
-            appContext.assets
-                .open(Const.dataDescriptorName)
-                .bufferedReader()
-                .use { it.readText() }
-                .let { deserializeDataDescriptor(it) }
-                .getOrThrow()
+    fun detectPlugins(): Pair<Set<PluginDescriptor>, Map<String, PluginLoadFailed>> {
+        val toLoad = mutableSetOf<PluginDescriptor>()
+        val preloadFailed = mutableMapOf<String, PluginLoadFailed>()
 
         val pm = appContext.packageManager
 
@@ -110,8 +90,6 @@ object DataManager {
         }
 
         Timber.d("Detected plugin packages: ${pluginPackages.joinToString()}")
-
-        val parsedDescriptors = mutableListOf<PluginDescriptor>()
 
         // Parse plugin.xml
         for (packageName in pluginPackages) {
@@ -162,7 +140,7 @@ object DataManager {
                         @Suppress("DEPRECATION")
                         pm.getPackageInfo(packageName, PackageManager.GET_META_DATA)
                     }
-                    parsedDescriptors.add(
+                    toLoad.add(
                         PluginDescriptor(
                             packageName,
                             apiVersion,
@@ -174,13 +152,42 @@ object DataManager {
                     )
                 } else {
                     Timber.w("$packageName's api version [$apiVersion] doesn't match with the current [${PluginDescriptor.pluginAPI}]")
-                    failedPlugins[packageName] = PluginLoadFailed.PluginAPIIncompatible(apiVersion)
+                    preloadFailed[packageName] = PluginLoadFailed.PluginAPIIncompatible(apiVersion)
                 }
             } else {
                 Timber.w("Failed to parse plugin descriptor of $packageName")
-                failedPlugins[packageName] = PluginLoadFailed.PluginDescriptorParseError
+                preloadFailed[packageName] = PluginLoadFailed.PluginDescriptorParseError
             }
         }
+        return toLoad to preloadFailed
+    }
+
+    fun sync() = lock.withLock {
+        synced = false
+        loadedPlugins.clear()
+        failedPlugins.clear()
+
+        // load last run's data descriptor
+        val oldDescriptor =
+            destDescriptorFile
+                .takeIf { it.exists() && it.isFile }
+                ?.runCatching { readText() }
+                ?.getOrNull()
+                ?.let { deserializeDataDescriptor(it) }
+                ?.getOrNull()
+                ?: DataDescriptor("", mapOf())
+
+        // load app's data descriptor
+        val mainDescriptor =
+            appContext.assets
+                .open(Const.dataDescriptorName)
+                .bufferedReader()
+                .use { it.readText() }
+                .let { deserializeDataDescriptor(it) }
+                .getOrThrow()
+
+        val (parsedDescriptors, failed) = detectPlugins()
+        failedPlugins.putAll(failed)
 
         Timber.d("Plugins to load: $parsedDescriptors")
 

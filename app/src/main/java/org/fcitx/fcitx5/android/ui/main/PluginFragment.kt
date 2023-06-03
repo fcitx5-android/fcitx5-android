@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.ui.main
 
+import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -8,12 +9,14 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceScreen
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.data.DataManager
 import org.fcitx.fcitx5.android.core.data.FileSource
 import org.fcitx.fcitx5.android.core.data.PluginLoadFailed
+import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.ui.common.PaddingPreferenceFragment
 import org.fcitx.fcitx5.android.utils.addCategory
 import org.fcitx.fcitx5.android.utils.addPreference
@@ -22,57 +25,91 @@ class PluginFragment : PaddingPreferenceFragment() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         lifecycleScope.launch {
-            DataManager.waitSynced()
-            preferenceScreen = preferenceManager.createPreferenceScreen(requireContext()).apply {
+            val needsReload = if (DataManager.synced) {
+                val (newPluginsToLoad, _) = DataManager.detectPlugins()
+                newPluginsToLoad != DataManager.getLoadedPlugins()
+            } else {
+                DataManager.waitSynced()
+                false
+            }
+            preferenceScreen = createPreferenceScreen(needsReload)
+        }
+    }
+
+    private fun createPreferenceScreen(needsReload: Boolean): PreferenceScreen =
+        preferenceManager.createPreferenceScreen(requireContext()).apply {
+            if (needsReload) {
+                addPreference(R.string.plugin_needs_reload, icon = R.drawable.ic_baseline_info_24) {
+                    DataManager.addOnNextSyncedCallback {
+                        // recreate the plugin list
+                        // we only check new plugins on the first creation
+                        preferenceScreen = createPreferenceScreen(false)
+                    }
+                    // DataManager.sync and and restart fcitx
+                    FcitxDaemon.restartFcitx()
+                }
+            }
+            val loaded = DataManager.getLoadedPlugins()
+            val failed = DataManager.getFailedPlugins()
+            if (loaded.isEmpty() && failed.isEmpty()) {
+                // use PreferenceCategory to show a divider below the "reload" preference
+                addCategory(R.string.no_plugins) {
+                    isIconSpaceReserved = false
+                    @SuppressLint("PrivateResource")
+                    // we can't hide PreferenceCategory's title,
+                    // but we can make it looks like a normal preference
+                    layoutResource = androidx.preference.R.layout.preference_material
+                }
+                return@apply
+            }
+            if (loaded.isNotEmpty()) {
                 addCategory(R.string.loaded) {
                     isIconSpaceReserved = false
-                    DataManager.getLoadedPlugins().forEach {
+                    loaded.forEach {
                         addPreference(it.name, "${it.versionName}\n${it.description}") {
                             startPluginAboutActivity(it.packageName)
                         }
                     }
                 }
-                DataManager.getFailedPlugins().also { failedPlugins ->
-                    if (failedPlugins.isEmpty()) return@also
-                    addCategory(R.string.failed) {
-                        isIconSpaceReserved = false
-                        failedPlugins.forEach { (packageName, reason) ->
-                            val summary = when (reason) {
-                                is PluginLoadFailed.DataDescriptorParseError -> {
-                                    getString(R.string.invalid_data_descriptor)
-                                }
-                                is PluginLoadFailed.MissingDataDescriptor -> {
-                                    getString(R.string.missing_data_descriptor)
-                                }
-                                PluginLoadFailed.MissingPluginDescriptor -> {
-                                    getString(R.string.missing_plugin_descriptor)
-                                }
-                                is PluginLoadFailed.PathConflict -> {
-                                    getString(
-                                        R.string.path_conflict,
-                                        reason.path,
-                                        when (val src = reason.existingSrc) {
-                                            FileSource.Main -> R.string.main_program
-                                            is FileSource.Plugin -> src.descriptor.name
-                                        }
-                                    )
-                                }
-                                is PluginLoadFailed.PluginAPIIncompatible -> {
-                                    getString(R.string.incompatible_api, reason.api)
-                                }
-                                PluginLoadFailed.PluginDescriptorParseError -> {
-                                    getString(R.string.invalid_plugin_descriptor)
-                                }
+            }
+            if (failed.isNotEmpty()) {
+                addCategory(R.string.failed) {
+                    isIconSpaceReserved = false
+                    failed.forEach { (packageName, reason) ->
+                        val summary = when (reason) {
+                            is PluginLoadFailed.DataDescriptorParseError -> {
+                                getString(R.string.invalid_data_descriptor)
                             }
-                            addPreference(packageName, summary) {
-                                startPluginAboutActivity(packageName)
+                            is PluginLoadFailed.MissingDataDescriptor -> {
+                                getString(R.string.missing_data_descriptor)
                             }
+                            PluginLoadFailed.MissingPluginDescriptor -> {
+                                getString(R.string.missing_plugin_descriptor)
+                            }
+                            is PluginLoadFailed.PathConflict -> {
+                                getString(
+                                    R.string.path_conflict,
+                                    reason.path,
+                                    when (val src = reason.existingSrc) {
+                                        FileSource.Main -> R.string.main_program
+                                        is FileSource.Plugin -> src.descriptor.name
+                                    }
+                                )
+                            }
+                            is PluginLoadFailed.PluginAPIIncompatible -> {
+                                getString(R.string.incompatible_api, reason.api)
+                            }
+                            PluginLoadFailed.PluginDescriptorParseError -> {
+                                getString(R.string.invalid_plugin_descriptor)
+                            }
+                        }
+                        addPreference(packageName, summary) {
+                            startPluginAboutActivity(packageName)
                         }
                     }
                 }
             }
         }
-    }
 
     private suspend fun DataManager.waitSynced() = suspendCancellableCoroutine {
         if (synced)

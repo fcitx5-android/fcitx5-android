@@ -1,6 +1,6 @@
 package org.fcitx.fcitx5.android.core.data
 
-interface FileAction {
+sealed interface FileAction {
     val path: String
 
     /**
