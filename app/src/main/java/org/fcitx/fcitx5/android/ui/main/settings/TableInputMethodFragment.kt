@@ -21,7 +21,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.daemon.launchOnReady
+import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.data.table.TableBasedInputMethod
 import org.fcitx.fcitx5.android.data.table.TableManager
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
@@ -286,10 +286,15 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
                     .getOrThrow()
             }.onFailure {
                 importErrorDialog(it.localizedMessage ?: it.stackTraceToString())
-            }.onSuccess {
+            }.onSuccess { new ->
                 launch(Dispatchers.Main) {
                     dismissFilesSelectionDialog()
-                    ui.addItem(item = it)
+                    // add or update
+                    ui.entries
+                        .indexOfFirst { it.name == new.name }
+                        .takeIf { it != -1 }
+                        ?.let { ui.updateItem(it, new) }
+                        ?: run { ui.addItem(item = new) }
                 }
             }
             nm.cancel(importId)
@@ -308,9 +313,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
     private fun reloadConfig() {
         if (!dustman.dirty) return
         resetDustman()
-        viewModel.fcitx.launchOnReady {
-            it.reloadConfig()
-        }
+        FcitxDaemon.restartFcitx()
     }
 
     private fun resetDustman() {
