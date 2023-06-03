@@ -150,7 +150,11 @@ public:
     }
 
     void setInputMethod(const std::string &ime) {
-        p_instance->setCurrentInputMethod(ime);
+        auto *ic = p_frontend->call<fcitx::IAndroidFrontend::activeInputContext>();
+        if (!ic) return;
+        // this method remembers input method for each InputContext,
+        // while Instance::setCurrentInputMethod(std::string) doesn't
+        p_instance->setCurrentInputMethod(ic, ime, true);
     }
 
     std::vector<const fcitx::InputMethodEntry *> availableInputMethods() {
