@@ -16,6 +16,7 @@ import org.fcitx.fcitx5.android.core.data.DataManager
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.ui.common.PaddingPreferenceFragment
+import org.fcitx.fcitx5.android.ui.main.modified.MySwitchPreference
 import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.addPreference
 import org.fcitx.fcitx5.android.utils.iso8601UTCDateTime
@@ -47,7 +48,7 @@ class DeveloperFragment : PaddingPreferenceFragment() {
             addPreference(R.string.real_time_logs) {
                 AppUtil.launchLog(context)
             }
-            addPreference(SwitchPreference(context).apply {
+            addPreference(MySwitchPreference(context).apply {
                 key = AppPrefs.getInstance().internal.verboseLog.key
                 setTitle(R.string.verbose_log)
                 setSummary(R.string.verbose_log_summary)

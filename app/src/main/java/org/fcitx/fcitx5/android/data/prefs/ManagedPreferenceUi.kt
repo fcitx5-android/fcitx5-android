@@ -6,6 +6,7 @@ import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.SwitchPreference
+import org.fcitx.fcitx5.android.ui.main.modified.MySwitchPreference
 import org.fcitx.fcitx5.android.ui.main.settings.DialogSeekBarPreference
 import org.fcitx.fcitx5.android.ui.main.settings.EditTextIntPreference
 import org.fcitx.fcitx5.android.ui.main.settings.TwinSeekBarPreference
@@ -27,8 +28,8 @@ abstract class ManagedPreferenceUi<T : Preference>(
         @StringRes
         val summary: Int? = null,
         enableUiOn: (() -> Boolean)? = null
-    ) : ManagedPreferenceUi<SwitchPreference>(key, enableUiOn) {
-        override fun createUi(context: Context) = SwitchPreference(context).apply {
+    ) : ManagedPreferenceUi<MySwitchPreference>(key, enableUiOn) {
+        override fun createUi(context: Context) = MySwitchPreference(context).apply {
             key = this@Switch.key
             isIconSpaceReserved = false
             isSingleLineTitle = false

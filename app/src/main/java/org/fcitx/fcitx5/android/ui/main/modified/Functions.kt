@@ -7,6 +7,7 @@ import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceDialogFragmentCompat
+import androidx.preference.SwitchPreference
 import splitties.dimensions.dp
 import splitties.views.dsl.core.verticalMargin
 
@@ -25,6 +26,10 @@ fun <T : EditTextPreference> T.restore() {
 
 fun <T : ListPreference> T.restore() {
     def()?.let { it as? String }?.let { value = it }
+}
+
+fun <T : SwitchPreference> T.restore() {
+    def()?.let { it as? Boolean }?.let { isChecked = it }
 }
 
 fun PreferenceDialogFragmentCompat.fixDialogMargin(contentView: View) {
