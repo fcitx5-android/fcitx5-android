@@ -71,6 +71,8 @@ object TableManager {
 
     private fun importFiles(confFile: File, dictFile: File): TableBasedInputMethod {
         val importedConfFile = File(inputMethodDir, confFile.name.removeSuffix(".in")).also {
+            if (it.exists())
+                errorRuntime(R.string.table_already_exists, it.name)
             confFile.copyTo(it)
         }
         val im = runCatching {

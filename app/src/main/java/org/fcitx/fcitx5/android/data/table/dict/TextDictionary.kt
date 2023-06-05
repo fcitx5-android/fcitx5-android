@@ -6,6 +6,7 @@ import org.fcitx.fcitx5.android.utils.errorArg
 import java.io.File
 
 class TextDictionary(file: File) : Dictionary() {
+
     override var file: File = file
         private set
 

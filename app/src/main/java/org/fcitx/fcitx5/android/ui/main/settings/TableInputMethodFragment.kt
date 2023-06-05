@@ -51,14 +51,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
     private var dictUri: Uri? = null
     private var filesSelectionDialog: AlertDialog? = null
 
-    private val dustman = NaiveDustman<TableBasedInputMethod>().apply {
-        onDirty = {
-            viewModel.enableToolbarSaveButton { reloadConfig() }
-        }
-        onClean = {
-            viewModel.disableToolbarSaveButton()
-        }
-    }
+    private val dustman = NaiveDustman<TableBasedInputMethod>()
 
     private var uiInitialized = false
 
@@ -89,6 +82,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
                     showImportDialog()
                 }
                 enableUndo = false
+                setViewModel(viewModel)
             }
 
             override fun updateFAB() {
@@ -338,8 +332,25 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
         dustman.addOrUpdate(new.name, new)
     }
 
+    override fun onItemRemovedBatch(indexed: List<Pair<Int, TableBasedInputMethod>>) {
+        batchRemove(indexed)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (uiInitialized) {
+            viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
+                ui.enterMultiSelect(requireActivity().onBackPressedDispatcher)
+            }
+        }
+    }
+
     override fun onStop() {
         reloadConfig()
+        viewModel.disableToolbarEditButton()
+        if (uiInitialized) {
+            ui.exitMultiSelect()
+        }
         super.onStop()
     }
 
