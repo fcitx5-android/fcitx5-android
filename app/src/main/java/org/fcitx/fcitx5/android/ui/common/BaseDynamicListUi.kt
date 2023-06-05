@@ -88,8 +88,15 @@ abstract class BaseDynamicListUi<T>(
         }
     }
 
-
+    /**
+     * whether to show "undo" snackbar after item update
+     */
     var enableUndo = true
+
+    /**
+     * suspend "undo" snackbar temporarily to prevent undo undo
+     */
+    private var suspendUndo = false
 
     init {
         initEditButton = when (mode) {
@@ -130,13 +137,23 @@ abstract class BaseDynamicListUi<T>(
 
             override fun onItemRemovedBatch(indexed: List<Pair<Int, T>>) {
                 updateFAB()
+                showUndoSnackbar(ctx.getString(R.string.removed_n_items, indexed.size)) {
+                    indexed.sortedBy { it.first }.forEach {
+                        addItem(it.first, it.second)
+                    }
+                }
             }
         })
     }
 
-    private fun showUndoSnackbar(text: String, action: View.OnClickListener) {
+    private fun showUndoSnackbar(text: String, action: () -> Unit) {
+        if (!enableUndo || suspendUndo) return
         Snackbar.make(root, text, Snackbar.LENGTH_SHORT)
-            .apply { if (enableUndo) setAction(R.string.undo, action) }
+            .setAction(R.string.undo) {
+                suspendUndo = true
+                action.invoke()
+                suspendUndo = false
+            }
             .addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                 override fun onShown(transientBottomBar: Snackbar) {
                     // snackbar is invisible when it attached to parent,

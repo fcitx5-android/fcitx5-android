@@ -228,4 +228,5 @@
     <string name="restarting_fcitx">Restarting Fcitx</string>
     <string name="plugin_needs_reload">Plugin changes detected, click here to reload</string>
     <string name="no_plugins">No plugins available</string>
+    <string name="removed_n_items">Removed %1$d item(s)</string>
 </resources>
