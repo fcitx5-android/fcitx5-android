@@ -25,14 +25,7 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
     private lateinit var mappingDesc: String
     private lateinit var altMappingDesc: String
 
-    private val dustman = NaiveDustman<PunctuationMapEntry>().apply {
-        onDirty = {
-            viewModel.enableToolbarSaveButton { saveConfig() }
-        }
-        onClean = {
-            viewModel.disableToolbarSaveButton()
-        }
-    }
+    private val dustman = NaiveDustman<PunctuationMapEntry>()
 
     private fun findDesc(raw: RawConfig) {
         // parse config desc to get description text of the options
@@ -57,7 +50,7 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
     private lateinit var ui: BaseDynamicListUi<PunctuationMapEntry>
 
     private fun resetDustman() {
-        dustman.reset((ui.entries.associateBy { it.key }))
+        dustman.reset(ui.entries.associateBy { it.key })
     }
 
     override suspend fun initialize(): View {

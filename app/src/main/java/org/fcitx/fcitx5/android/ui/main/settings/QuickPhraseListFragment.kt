@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.app.NotificationCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -57,14 +58,8 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
     private lateinit var launcher: ActivityResultLauncher<String>
 
     private val busy: AtomicBoolean = AtomicBoolean(false)
-    private val dustman = NaiveDustman<Boolean>().apply {
-        onDirty = {
-            viewModel.enableToolbarSaveButton { reloadQuickPhrase() }
-        }
-        onClean = {
-            viewModel.disableToolbarSaveButton()
-        }
-    }
+
+    private val dustman = NaiveDustman<Boolean>()
 
     private var uiInitialized = false
 
@@ -103,21 +98,20 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                         if (entry.override != null) {
                             imageResource = R.drawable.ic_baseline_expand_more_24
                             setOnClickListener {
-                                val actions =
-                                    arrayOf(getString(R.string.edit), getString(R.string.reset))
-                                AlertDialog.Builder(requireContext())
-                                    .setItems(actions) { _, i ->
-                                        when (i) {
-                                            0 -> edit()
-                                            1 -> {
-                                                entry.deleteOverride()
-                                                ui.updateItem(ui.indexItem(entry), entry)
-                                                // not sure if the content changes
-                                                dustman.forceDirty()
-                                            }
-                                        }
+                                PopupMenu(requireContext(), this).apply {
+                                    menu.add(getString(R.string.edit)).setOnMenuItemClickListener {
+                                        edit()
+                                        true
                                     }
-                                    .show()
+                                    menu.add(getString(R.string.reset)).setOnMenuItemClickListener {
+                                        entry.deleteOverride()
+                                        ui.updateItem(ui.indexItem(entry), entry)
+                                        // not sure if the content changes
+                                        dustman.forceDirty()
+                                        true
+                                    }
+                                    show()
+                                }
                             }
                         } else {
                             imageResource = R.drawable.ic_baseline_edit_24

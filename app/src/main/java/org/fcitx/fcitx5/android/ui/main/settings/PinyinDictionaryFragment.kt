@@ -46,14 +46,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
 
     private lateinit var launcher: ActivityResultLauncher<String>
 
-    private val dustman = NaiveDustman<Boolean>().apply {
-        onDirty = {
-            viewModel.enableToolbarSaveButton { reloadDict() }
-        }
-        onClean = {
-            viewModel.disableToolbarSaveButton()
-        }
-    }
+    private val dustman = NaiveDustman<Boolean>()
 
     private val busy: AtomicBoolean = AtomicBoolean(false)
 
@@ -74,6 +67,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
             }
         ) {
             init {
+                enableUndo = false
                 addTouchCallback()
                 // since FAB is always shown in this fragment,
                 // set shouldShowFab to true to hide it when entering multi select mode
@@ -81,6 +75,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                 fab.setOnClickListener {
                     launcher.launch("*/*")
                 }
+                setViewModel(viewModel)
             }
 
             override fun updateFAB() {
@@ -206,7 +201,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
     }
 
     private fun resetDustman() {
-        dustman.reset((ui.entries.associate { it.name to it.isEnabled }))
+        dustman.reset(ui.entries.associate { it.name to it.isEnabled })
     }
 
     override fun onItemAdded(idx: Int, item: LibIMEDictionary) {
@@ -226,8 +221,21 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
         dustman.addOrUpdate(new.name, new.isEnabled)
     }
 
+    override fun onStart() {
+        super.onStart()
+        if (uiInitialized) {
+            viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
+                ui.enterMultiSelect(requireActivity().onBackPressedDispatcher)
+            }
+        }
+    }
+
     override fun onStop() {
         reloadDict()
+        viewModel.disableToolbarEditButton()
+        if (uiInitialized) {
+            ui.exitMultiSelect()
+        }
         super.onStop()
     }
 

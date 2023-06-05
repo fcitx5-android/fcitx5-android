@@ -3,7 +3,6 @@ package org.fcitx.fcitx5.android.ui.main.settings
 import android.app.AlertDialog
 import android.view.View
 import androidx.core.os.bundleOf
-import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -31,14 +30,7 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
 
     private lateinit var quickPhrase: QuickPhrase
 
-    private val dustman = NaiveDustman<QuickPhraseEntry>().apply {
-        onDirty = {
-            viewModel.enableToolbarSaveButton { saveConfig() }
-        }
-        onClean = {
-            viewModel.disableToolbarSaveButton()
-        }
-    }
+    private val dustman = NaiveDustman<QuickPhraseEntry>()
 
     override suspend fun initialize(): View {
         quickPhrase = requireArguments().serializable(ARG)!!
@@ -120,7 +112,7 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
             quickPhrase.saveData(QuickPhraseData(ui.entries))
             launch(Dispatchers.Main) {
                 // tell parent that we need to reload
-                setFragmentResult(RESULT, bundleOf(RESULT to true))
+                parentFragmentManager.setFragmentResult(RESULT, bundleOf(RESULT to true))
             }
         }
     }
