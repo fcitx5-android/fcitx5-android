@@ -4,9 +4,9 @@ import kotlin.properties.Delegates
 
 class NaiveDustman<T> {
 
-    private val initialValues: MutableMap<String, T> = mutableMapOf()
-    private val dirtyStatus: MutableMap<String, Boolean> = mutableMapOf()
-    private val newKeys = mutableListOf<String>()
+    private val initialValues = mutableMapOf<String, T>()
+
+    private val dirtyStatus = mutableSetOf<String>()
 
     var dirty by Delegates.observable(false) { _, old, new ->
         if (old != new) {
@@ -26,36 +26,28 @@ class NaiveDustman<T> {
     }
 
     private fun updateDirtyStatus(key: String, boolean: Boolean) {
-        dirtyStatus[key] = boolean
-        dirty = newKeys.isNotEmpty() || dirtyStatus.any { it.value }
+        if (boolean) {
+            dirtyStatus.add(key)
+        } else {
+            dirtyStatus.remove(key)
+        }
+        dirty = dirtyStatus.isNotEmpty()
     }
 
     fun addOrUpdate(key: String, value: T) {
-        when {
-            (key !in initialValues) -> {
-                initialValues[key] = value
-                newKeys.add(key)
-                updateDirtyStatus(key, false)
-            }
-            initialValues[key] == value -> {
-                updateDirtyStatus(key, false)
-            }
-            else -> {
-                updateDirtyStatus(key, true)
-            }
+        if (initialValues.containsKey(key)) {
+            updateDirtyStatus(key, initialValues[key] != value)
+        } else {
+            updateDirtyStatus(key, true)
         }
     }
 
     fun remove(key: String) {
-        val a = initialValues.remove(key) != null
-        val b = newKeys.remove(key)
-        updateDirtyStatus(key, a || !b)
+        updateDirtyStatus(key, initialValues.containsKey(key))
     }
-
 
     fun reset(initial: Map<String, T>) {
         dirty = false
-        newKeys.clear()
         dirtyStatus.clear()
         initialValues.putAll(initial)
     }
