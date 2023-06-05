@@ -11,6 +11,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Key
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.ui.main.modified.MySwitchPreference
 import org.fcitx.fcitx5.android.ui.main.settings.addon.AddonConfigFragment
 import org.fcitx.fcitx5.android.ui.main.settings.global.GlobalConfigFragment
 import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
@@ -182,7 +183,7 @@ object PreferenceScreenFactory {
         }
 
         when (descriptor) {
-            is ConfigBool -> SwitchPreferenceCompat(context).apply {
+            is ConfigBool -> MySwitchPreference(context).apply {
                 summary = descriptor.tooltip
                 setDefaultValue(descriptor.defaultValue)
             }
