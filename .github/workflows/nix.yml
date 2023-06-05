@@ -5,8 +5,11 @@ on:
   push:
     branches: [master]
 jobs:
-  nix-build:
-    runs-on: ubuntu-latest
+  develop:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Fetch source code
         uses: actions/checkout@v3
