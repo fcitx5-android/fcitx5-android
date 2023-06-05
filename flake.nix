@@ -17,9 +17,15 @@
           config.allowUnfree = true;
           overlays = [ self.overlays.default ];
         };
-      in { devShells.default = pkgs.fcitx5-android-shell; }) // {
+      in {
+        devShells = {
+          default = pkgs.fcitx5-android-shell { };
+          noAS = pkgs.fcitx5-android-shell { enableAndroidStudio = false; };
+        };
+      }) // {
         overlays.default = final: prev: {
-          fcitx5-android-shell = with final;
+          fcitx5-android-shell = { enableAndroidStudio ? true }:
+            with final;
             with fcitx5-android-sdk;
             mkShell {
               buildInputs = [
@@ -28,8 +34,10 @@
                 gettext
                 python39
                 icu
-                androidStudioPackages.stable
-              ];
+              ] ++ (if enableAndroidStudio then
+                [ androidStudioPackages.stable ]
+              else
+                [ ]);
               ANDROID_SDK_ROOT =
                 "${androidComposition.androidsdk}/libexec/android-sdk";
               NDK_VERSION = ndkVersion;
