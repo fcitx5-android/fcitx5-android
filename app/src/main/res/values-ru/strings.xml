@@ -223,4 +223,11 @@
     <string name="path_conflict">Путь \"%1$s\" уже принадлежит %2$s</string>
     <string name="main_program">основная программа</string>
     <string name="edit_theme">Изменить тему</string>
+    <string name="show_voice_input_button">Показывать кнопку голосового ввода</string>
+    <string name="fcitx_daemon">Демон Fcitx</string>
+    <string name="restarting_fcitx">Перезапуск Fcitx</string>
+    <string name="plugin_needs_reload">Обнаружены изменения плагина, нажмите здесь, чтобы перезагрузить</string>
+    <string name="no_plugins">Нет доступных плагинов</string>
+    <string name="removed_n_items">Удаленный %1$d элемент(ы)</string>
+    <string name="whether_reset_switch_preference">Вы хотите сбросить этот параметр по умолчанию?</string>
 </resources>

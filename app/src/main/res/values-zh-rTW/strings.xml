@@ -195,7 +195,7 @@
     <string name="exception_table_import_both_files">請選擇以上兩個檔案後再導入</string>
     <string name="notification_permission_message">尚未賦予通知權限，因此無法在耗時較長的操作完成後給您發送通知。</string>
     <string name="notification_permission_title">沒有通知權限</string>
-    <string name="toolbar_num_row_on_password">輸入密碼時在工具欄上顯示數字</string>
+    <string name="toolbar_num_row_on_password">輸入密碼時在工具欄上顯示數字列</string>
     <string name="space_long_press_behavior">空格鍵長按行為</string>
     <string name="space_behavior_none">無</string>
     <string name="space_behavior_enumerate">輪換輸入法</string>
@@ -223,4 +223,11 @@
     <string name="path_conflict">路徑 “%1$s” 已被 %2$s 佔用</string>
     <string name="main_program">主程式</string>
     <string name="edit_theme">編輯主題</string>
+    <string name="show_voice_input_button">顯示語音輸入鍵</string>
+    <string name="fcitx_daemon">Fcitx 常駐程式</string>
+    <string name="restarting_fcitx">重新啟動 Fcitx</string>
+    <string name="plugin_needs_reload">偵測到有外掛程式變化，點此重新加載</string>
+    <string name="no_plugins">無可用外掛程式</string>
+    <string name="removed_n_items">已移除 %1$d 個項目</string>
+    <string name="whether_reset_switch_preference">是否要將此偏好設定重置為默認選項？</string>
 </resources>
