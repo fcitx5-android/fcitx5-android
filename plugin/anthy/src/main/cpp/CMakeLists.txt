@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(fcitx5-android-plugin-anthy VERSION 0.0.5)
+project(fcitx5-android-plugin-anthy VERSION 0.0.6)
 
 # For reproducible build
 add_link_options("LINKER:--hash-style=gnu,--build-id=none")

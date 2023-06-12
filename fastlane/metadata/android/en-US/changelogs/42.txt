@@ -1,0 +1,24 @@
+# 0.0.6 - Candidates Paging and Plugin System
+
+## Highlights
+
+- Candidates Paging: candidates are loaded on demand while scrolling through expanded candidate list
+- Plugin System: load fcitx addon from plugin apk to support more languages. Currently "Anthy Plugin" is available for Japanese input
+
+## New features
+
+- Load candidates on demand
+- Plugin System for build/detect/load fcitx addon from installed apk
+- Redesign CustomThemeActivity and LogActivity to look like AppCompact style
+- Show a button to switch to Google Voice Input if available
+- Automatically restart fcitx to reload input methods after import/delete table input methods
+- Support multi-select and delete in TableInputMethodFragment
+- Long press on switch preference to restore default value
+
+## Bug fixes
+
+- InputView won't be destroyed when switching theme, causing memory leak
+- Buttons on keyboard toolbar would disappear sometimes
+- Settings activity toolbar title would flash when enter/leave certain fragment
+- Keyboard keys won't accept touch events while pressing keyboard padding space
+- Selecting numeric characters from keyboard long-press popup would select candidate
