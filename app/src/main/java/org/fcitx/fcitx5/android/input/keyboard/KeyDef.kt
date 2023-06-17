@@ -63,6 +63,23 @@ open class KeyDef(
             margin: Boolean = true,
             viewId: Int = -1
         ) : Appearance(percentWidth, variant, border, margin, viewId)
+
+        class ImageText(
+            displayText: String,
+            textSize: Float,
+            /**
+             * `Int` constants in [Typeface].
+             * Can be `NORMAL`(default), `BOLD`, `ITALIC` or `BOLD_ITALIC`
+             */
+            textStyle: Int = Typeface.NORMAL,
+            @DrawableRes
+            val src: Int,
+            percentWidth: Float = 0.1f,
+            variant: Variant = Variant.Normal,
+            border: Border = Border.Default,
+            margin: Boolean = true,
+            viewId: Int = -1
+        ) : Text(displayText, textSize, textStyle, percentWidth, variant, border, margin, viewId)
     }
 
     sealed class Behavior {

@@ -152,11 +152,12 @@ class CommaKey(
     percentWidth: Float,
     variant: Variant,
 ) : KeyDef(
-    Appearance.Text(
+    Appearance.ImageText(
         displayText = ",",
         textSize = 23f,
         percentWidth = percentWidth,
-        variant = variant
+        variant = variant,
+        src = R.drawable.ic_baseline_tag_faces_24
     ),
     setOf(
         Behavior.Press(KeyAction.FcitxKeyAction(","))

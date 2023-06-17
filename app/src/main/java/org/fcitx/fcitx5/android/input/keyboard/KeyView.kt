@@ -7,7 +7,9 @@ import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.drawable.*
 import android.view.View
+import android.widget.ImageView
 import androidx.annotation.ColorInt
+import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.updateLayoutParams
 import org.fcitx.fcitx5.android.R
@@ -20,6 +22,7 @@ import org.fcitx.fcitx5.android.utils.styledFloat
 import org.fcitx.fcitx5.android.utils.unset
 import splitties.dimensions.dp
 import splitties.resources.drawable
+import splitties.views.dsl.constraintlayout.centerHorizontally
 import splitties.views.dsl.constraintlayout.centerInParent
 import splitties.views.dsl.constraintlayout.constraintLayout
 import splitties.views.dsl.constraintlayout.lParams
@@ -296,7 +299,6 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
     }
 
     private fun applyLayout(orientation: Int) {
-        Configuration.ORIENTATION_PORTRAIT
         when (ThemeManager.prefs.punctuationPosition.getValue()) {
             PunctuationPosition.Bottom -> when (orientation) {
                 Configuration.ORIENTATION_LANDSCAPE -> applyTopRightAltTextPosition()
@@ -317,21 +319,73 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
 @SuppressLint("ViewConstructor")
 class ImageKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Image) :
     KeyView(ctx, theme, def) {
-    val img = imageView {
-        isClickable = false
-        isFocusable = false
-        imageDrawable = drawable(def.src)
-        colorFilter = PorterDuffColorFilter(
-            when (def.variant) {
-                Variant.Normal -> theme.keyTextColor
-                Variant.AltForeground, Variant.Alternative -> theme.altKeyTextColor
-                Variant.Accent -> theme.accentKeyTextColor
-            },
-            PorterDuff.Mode.SRC_IN
-        )
-    }
+    val img = imageView { configure(theme, def.src, def.variant) }
 
     init {
         layout.apply { add(img, lParams(wrapContent, wrapContent) { centerInParent() }) }
+    }
+}
+
+private fun ImageView.configure(theme: Theme, @DrawableRes src: Int, variant: Variant) = apply {
+    isClickable = false
+    isFocusable = false
+    imageDrawable = drawable(src)
+    colorFilter = PorterDuffColorFilter(
+        when (variant) {
+            Variant.Normal -> theme.keyTextColor
+            Variant.AltForeground, Variant.Alternative -> theme.altKeyTextColor
+            Variant.Accent -> theme.accentKeyTextColor
+        },
+        PorterDuff.Mode.SRC_IN
+    )
+}
+
+@SuppressLint("ViewConstructor")
+class ImageTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.ImageText) :
+    TextKeyView(ctx, theme, def) {
+    val img = imageView {
+        configure(theme, def.src, def.variant)
+    }
+
+    init {
+        layout.apply {
+            add(img, lParams(dp(12), dp(12)))
+            mainText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                centerHorizontally()
+                bottomToBottom = parentId
+                bottomMargin = vMargin + dp(4)
+                topToTop = unset
+            }
+            img.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                centerHorizontally()
+                topToTop = parentId
+            }
+        }
+        updateMargins(resources.configuration.orientation)
+    }
+
+    private fun updateMargins(orientation: Int) {
+        when (orientation) {
+            Configuration.ORIENTATION_LANDSCAPE -> {
+                mainText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                    bottomMargin = vMargin + dp(2)
+                }
+                img.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                    topMargin = vMargin + dp(4)
+                }
+            }
+            else -> {
+                mainText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                    bottomMargin = vMargin + dp(4)
+                }
+                img.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                    topMargin = vMargin + dp(8)
+                }
+            }
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        updateMargins(newConfig.orientation)
     }
 }
