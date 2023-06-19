@@ -16,6 +16,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.data.theme.ThemeManager.Prefs.PunctuationPosition
+import org.fcitx.fcitx5.android.input.AutoScaleTextView
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Border
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Variant
 import org.fcitx.fcitx5.android.utils.styledFloat
@@ -208,7 +209,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
 @SuppressLint("ViewConstructor")
 open class TextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Text) :
     KeyView(ctx, theme, def) {
-    val mainText = textView {
+    val mainText = view(::AutoScaleTextView) {
         isClickable = false
         isFocusable = false
         background = null
@@ -238,7 +239,7 @@ open class TextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Text) 
 @SuppressLint("ViewConstructor")
 class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText) :
     TextKeyView(ctx, theme, def) {
-    val altText = textView {
+    val altText = view(::AutoScaleTextView) {
         isClickable = false
         isFocusable = false
         // TODO hardcoded alt text size
@@ -349,7 +350,7 @@ class ImageTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.ImageT
 
     init {
         layout.apply {
-            add(img, lParams(dp(12), dp(12)))
+            add(img, lParams(dp(13), dp(13)))
             mainText.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 centerHorizontally()
                 bottomToBottom = parentId

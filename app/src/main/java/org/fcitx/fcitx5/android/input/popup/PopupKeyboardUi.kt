@@ -7,6 +7,7 @@ import android.view.ViewOutlineProvider
 import org.fcitx.fcitx5.android.core.FcitxKeyMapping
 import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.input.AutoScaleTextView
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction
 import splitties.dimensions.dp
 import splitties.views.dsl.core.Ui
@@ -15,8 +16,8 @@ import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.horizontalLayout
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
-import splitties.views.dsl.core.textView
 import splitties.views.dsl.core.verticalLayout
+import splitties.views.dsl.core.view
 import splitties.views.gravityCenter
 import splitties.views.gravityEnd
 import splitties.views.gravityStart
@@ -53,10 +54,10 @@ class PopupKeyboardUi(
 
     class PopupKeyUi(override val ctx: Context, val theme: Theme, val text: String) : Ui {
 
-        val textView = textView {
+        val textView = view(::AutoScaleTextView) {
             text = this@PopupKeyUi.text
+            scaleMode = AutoScaleTextView.Mode.Proportional
             textSize = 23f
-            isSingleLine = true
             setTextColor(theme.keyTextColor)
         }
 

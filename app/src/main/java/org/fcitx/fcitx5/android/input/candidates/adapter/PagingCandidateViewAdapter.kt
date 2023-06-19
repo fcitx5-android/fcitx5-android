@@ -39,7 +39,7 @@ open class PagingCandidateViewAdapter(val theme: Theme) :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.ui.text.text = getItem(position)
+        holder.ui.text.text = getItem(position)!!
         holder.idx = position + offset
     }
 }

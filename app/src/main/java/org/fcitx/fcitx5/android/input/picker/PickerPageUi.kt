@@ -1,15 +1,13 @@
 package org.fcitx.fcitx5.android.input.picker
 
 import android.content.Context
-import android.util.TypedValue
 import android.view.ViewGroup
-import androidx.core.view.updateLayoutParams
-import androidx.core.widget.TextViewCompat
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxKeyMapping
 import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.input.AutoScaleTextView
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListener
 import org.fcitx.fcitx5.android.input.keyboard.ImageKeyView
@@ -40,8 +38,6 @@ import splitties.views.dsl.constraintlayout.topToBottomOf
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.matchParent
-import splitties.views.gravityCenter
-import splitties.views.lines
 
 class PickerPageUi(override val ctx: Context, val theme: Theme, private val density: Density) : Ui {
 
@@ -89,16 +85,9 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, private val dens
         TextKeyView(ctx, theme, keyAppearance).apply {
             if (density == Density.Low) {
                 mainText.apply {
-                    lines = 1
-                    gravity = gravityCenter
-                    updateLayoutParams {
-                        width = matchParent
-                        height = matchParent
-                    }
+                    scaleMode = AutoScaleTextView.Mode.Proportional
+                    setPadding(hMargin, vMargin, hMargin, vMargin)
                 }
-                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
-                    mainText, 4, density.textSize.toInt(), 1, TypedValue.COMPLEX_UNIT_SP
-                )
             }
         }
     }
