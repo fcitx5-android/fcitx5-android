@@ -16,7 +16,7 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
-      - uses: cachix/install-nix-action@v20
+      - uses: cachix/install-nix-action@v22
         with:
           nix_path: nixpkgs=channel:nixos-unstable
       - name: Build dev shell
