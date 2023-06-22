@@ -22,7 +22,7 @@ class EditorInfoWindow : InputWindow.ExtendedInputWindow<EditorInfoWindow>() {
     override fun onCreateView() = ui.root
 
     override fun onAttached() {
-        ui.setValues(EditorInfoParser.parse(service.editorInfo))
+        ui.setValues(EditorInfoParser.parse(service.currentInputEditorInfo))
     }
 
     override fun onDetached() {}

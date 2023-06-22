@@ -65,11 +65,14 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     private var inputView: InputView? = null
 
-    var editorInfo = EmptyEditorInfo
-    var capabilityFlags = CapabilityFlags.DefaultFlags
+    private var capabilityFlags = CapabilityFlags.DefaultFlags
 
-    val selection = CursorTracker()
-    val composing = CursorRange()
+    private val selection = CursorTracker()
+
+    val currentInputSelection: CursorRange
+        get() = selection.latest
+
+    private val composing = CursorRange()
     private var composingText = FormattedText.Empty
 
     private fun resetComposingState() {
@@ -176,8 +179,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // In practice nobody (apart form us) would set `privateImeOptions` to our
         // `DeleteSurroundingFlag`, leading to a behavior of simulating backspace key pressing
         // in almost every EditText.
-        if (editorInfo.privateImeOptions != DeleteSurroundingFlag ||
-            editorInfo.inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL
+        if (currentInputEditorInfo.privateImeOptions != DeleteSurroundingFlag ||
+            currentInputEditorInfo.inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL
         ) {
             sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
             return
@@ -198,7 +201,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     private fun handleReturnKey() {
-        editorInfo.run {
+        currentInputEditorInfo.run {
             if (inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL) {
                 sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
                 return
@@ -214,7 +217,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             when (val action = imeOptions and EditorInfo.IME_MASK_ACTION) {
                 EditorInfo.IME_ACTION_UNSPECIFIED,
                 EditorInfo.IME_ACTION_NONE -> commitText("\n")
-
                 else -> inputConnection?.performEditorAction(action)
             }
         }
@@ -435,7 +437,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         selection.resetTo(attribute.initialSelStart, attribute.initialSelEnd)
         resetComposingState()
         val flags = CapabilityFlags.fromEditorInfo(attribute)
-        editorInfo = attribute
         capabilityFlags = flags
         Timber.d("onStartInput: initialSel=${selection.current}, restarting=$restarting")
         lifecycleScope.launch {
@@ -467,7 +468,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
         // because onStartInputView will always be called after onStartInput,
         // editorInfo and capFlags should be up-to-date
-        inputView?.startInput(editorInfo, capabilityFlags, restarting)
+        inputView?.startInput(info, capabilityFlags, restarting)
     }
 
     override fun onUpdateSelection(
@@ -479,7 +480,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         candidatesEnd: Int
     ) {
         // onUpdateSelection can left behind when user types quickly enough, eg. long press backspace
-        // TODO: call InputConnection#beginBatchEdit() before starting key repeat
         cursorUpdateIndex += 1
         Timber.d("onUpdateSelection: old=[$oldSelStart,$oldSelEnd] new=[$newSelStart,$newSelEnd] cand=[$candidatesStart,$candidatesEnd]")
         handleCursorUpdate(newSelStart, newSelEnd, cursorUpdateIndex)
@@ -673,7 +673,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onFinishInput() {
         Timber.d("onFinishInput")
-        editorInfo = EmptyEditorInfo
         capabilityFlags = CapabilityFlags.DefaultFlags
     }
 
@@ -707,7 +706,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     companion object {
-        val EmptyEditorInfo = EditorInfo()
         const val DeleteSurroundingFlag = "org.fcitx.fcitx5.android.DELETE_SURROUNDING"
         private val InlinePresentationSpecMinSize = Size(0, 0)
         private val InlinePresentationSpecMaxSize = Size(Int.MAX_VALUE, Int.MAX_VALUE)
