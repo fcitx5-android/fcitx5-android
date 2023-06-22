@@ -1,6 +1,6 @@
 # fcitx5-android
 
-An attempt to run fcitx5 on Android.
+[Fcitx5](https://github.com/fcitx/fcitx5) input method framework and engines ported to Android.
 
 ## Download
 
@@ -12,17 +12,19 @@ Jenkins: [![build status](https://img.shields.io/jenkins/build.svg?jobUrl=https:
 
 GitHub: [![release version](https://img.shields.io/github/v/release/fcitx5-android/fcitx5-android)](https://github.com/fcitx5-android/fcitx5-android/releases)
 
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
-    alt="Get it on F-Droid"
-    width="207" height="80">](https://f-droid.org/packages/org.fcitx.fcitx5.android)
-
-[<img alt="Get it on Google Play"
-      src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
-        width="207" height="80">](https://play.google.com/store/apps/details?id=org.fcitx.fcitx5.android&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1)
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" width="207" height="80">](https://f-droid.org/packages/org.fcitx.fcitx5.android)
+[<img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" width="207" height="80">](https://play.google.com/store/apps/details?id=org.fcitx.fcitx5.android)
 
 ## Project status
 
-### Implemented
+### Supported Languages
+
+- English (with spell check)
+- Chinese (Pinyin, Shuangpin, Wubi, Cangjie and custom tables)
+- Vietnamese (Based on UniKey, supports Telex, VNI and VIQR)
+- Japanese (via [Anthy Plugin](./plugin/anthy))
+
+### Implemented Features
 
 - Virtual Keyboard (layout not customizable yet)
 - Expandable candidate view
@@ -31,11 +33,12 @@ GitHub: [![release version](https://img.shields.io/github/v/release/fcitx5-andro
 - Popup preview on key press
 - Long press popup keyboard for convenient symbol input
 - Symbol and Emoji picker
+- Plugin System for loading addons from other installed apk
 
-### Work in progress
+### Planned Features
 
 - Customizable keyboard layout
-- More input methods
+- More input methods (via plugin)
 
 ## Screenshots
 
