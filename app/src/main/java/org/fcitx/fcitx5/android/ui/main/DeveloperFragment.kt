@@ -56,6 +56,13 @@ class DeveloperFragment : PaddingPreferenceFragment() {
                 isIconSpaceReserved = false
                 isSingleLineTitle = false
             })
+            addPreference(MySwitchPreference(context).apply {
+                key = AppPrefs.getInstance().internal.editorInfoInspector.key
+                setTitle(R.string.editor_info_inspector)
+                setDefaultValue(false)
+                isIconSpaceReserved = false
+                isSingleLineTitle = false
+            })
             addPreference(R.string.delete_and_sync_data) {
                 AlertDialog.Builder(context)
                     .setTitle(R.string.delete_and_sync_data)

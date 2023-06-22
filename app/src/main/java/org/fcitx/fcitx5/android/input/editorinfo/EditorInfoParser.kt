@@ -12,6 +12,8 @@ import java.lang.reflect.Modifier
 
 object EditorInfoParser {
 
+    private const val NULL = "null"
+
     private fun Field.isStatic() = Modifier.isStatic(modifiers)
 
     private val EDITOR_INFO_MEMBER = EditorInfo::class.java.declaredFields
@@ -78,7 +80,7 @@ object EditorInfoParser {
     }
 
     private fun parseSurroundingText(st: Any?): String {
-        if (st == null) return "null"
+        if (st == null) return NULL
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || st !is SurroundingText) return st.toString()
         return st.run {
             "text=$text\noffset=$offset\nselectionStart=$selectionStart\nselectionEnd=$selectionEnd"
@@ -86,20 +88,19 @@ object EditorInfoParser {
     }
 
     private fun parseStringArray(arr: Any?): String {
-        if (arr == null) return "null"
+        if (arr == null) return NULL
         if (arr !is Array<*> || arr[0] !is String) return arr.toString()
         return arr.joinToString()
     }
 
     private fun parseBundle(bundle: Any?): String {
-        if (bundle == null) return "null"
+        if (bundle == null) return NULL
         if (bundle !is Bundle) return bundle.toString()
         @Suppress("DEPRECATION")
         return bundle.keySet().joinToString("\n") { "$it => ${bundle.get(it)}" }
     }
 
     fun parse(info: EditorInfo): Map<String, String> = EDITOR_INFO_MEMBER
-        .filter { !Modifier.isStatic(it.modifiers) && it.name != "CREATOR" }
         .associate {
             it.isAccessible = true
             val name = it.name
@@ -110,7 +111,7 @@ object EditorInfoParser {
                 "initialCapsMode" -> parseCapsMode(it.getInt(info))
                 "inputType" -> parseInputType(it.getInt(info))
                 "mInitialSurroundingText" -> parseSurroundingText(it.get(info))
-                else -> it.get(info)?.toString() ?: "null"
+                else -> it.get(info)?.toString() ?: NULL
             }
         }
 }
