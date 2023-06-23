@@ -37,32 +37,32 @@ object InputFeedbacks {
     private val buttonPressVibrationAmplitude by AppPrefs.getInstance().keyboard.buttonPressVibrationAmplitude
     private val buttonLongPressVibrationAmplitude by AppPrefs.getInstance().keyboard.buttonLongPressVibrationAmplitude
 
+    private val vibrator = appContext.vibrator
+
+    private val hasAmplitudeControl =
+        (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) && vibrator.hasAmplitudeControl()
+
     private val audioManager = appContext.audioManager
 
     fun hapticFeedback(view: View, longPress: Boolean = false) {
-        if (hapticOnKeyPress == InputFeedbackMode.Disabled)
-            return
-        val vibrator = view.vibrator
-        val (duration, amplitude) =
-            if (longPress) buttonLongPressVibrationMilliseconds to buttonPressVibrationMilliseconds
-            else buttonLongPressVibrationAmplitude to buttonPressVibrationAmplitude
+        if (hapticOnKeyPress == InputFeedbackMode.Disabled) return
 
-        val useVibrator = when (hapticOnKeyPress) {
-            // TODO: support always enable
-            InputFeedbackMode.Enabled,
-            InputFeedbackMode.FollowingSystem -> duration != 0
-            InputFeedbackMode.Disabled -> return
+        val duration: Long
+        val amplitude: Int
+        if (longPress) {
+            duration = buttonLongPressVibrationMilliseconds.toLong()
+            amplitude = buttonLongPressVibrationAmplitude
+        } else {
+            duration = buttonPressVibrationMilliseconds.toLong()
+            amplitude = buttonPressVibrationAmplitude
         }
 
-        if (useVibrator) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val amp =
-                    amplitude.takeIf { vibrator.hasAmplitudeControl() && it != 0 }
-                        ?: VibrationEffect.DEFAULT_AMPLITUDE
-                vibrator.vibrate(VibrationEffect.createOneShot(duration.toLong(), amp))
+        if (duration != 0L) {
+            if (hasAmplitudeControl && amplitude != 0) {
+                vibrator.vibrate(VibrationEffect.createOneShot(duration, amplitude))
             } else {
                 @Suppress("DEPRECATION")
-                view.vibrator.vibrate(duration.toLong())
+                vibrator.vibrate(duration)
             }
         } else {
             view.performHapticFeedback(
