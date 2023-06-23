@@ -2,7 +2,6 @@ package org.fcitx.fcitx5.android.data.prefs
 
 import android.content.SharedPreferences
 import android.os.Build
-import androidx.annotation.StringRes
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.InputFeedbacks.InputFeedbackMode
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateMode
@@ -38,7 +37,20 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
 
     inner class Keyboard : ManagedPreferenceCategory(R.string.keyboard, sharedPreferences) {
         val hapticOnKeyPress =
-            inputFeedbackPref(R.string.button_haptic_feedback, "button_haptic_feedback")
+            list(
+                R.string.button_haptic_feedback,
+                "haptic_on_keypress",
+                InputFeedbackMode.FollowingSystem,
+                InputFeedbackMode,
+                listOf(
+                    InputFeedbackMode.FollowingSystem,
+                    InputFeedbackMode.Disabled
+                ),
+                listOf(
+                    R.string.following_system_settings,
+                    R.string.disabled
+                )
+            )
         val buttonPressVibrationMilliseconds: ManagedPreference.PInt
         val buttonLongPressVibrationMilliseconds: ManagedPreference.PInt
 
@@ -86,10 +98,10 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             buttonLongPressVibrationAmplitude = secondary
         }
 
-        private fun inputFeedbackPref(@StringRes title: Int, key: String) = list(
-            title,
-            key,
-            InputFeedbackMode.Disabled,
+        val soundOnKeyPress = list(
+            R.string.button_sound,
+            "sound_on_keypress",
+            InputFeedbackMode.FollowingSystem,
             InputFeedbackMode,
             listOf(
                 InputFeedbackMode.FollowingSystem,
@@ -102,8 +114,6 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
                 R.string.disabled
             )
         )
-
-        val soundOnKeyPress = inputFeedbackPref(R.string.button_sound, "button_sound")
         val soundOnKeyPressVolume =
             int(R.string.button_sound_volume, "button_sound_volume", 50, 0, 100, "%") {
                 soundOnKeyPress.getValue() != InputFeedbackMode.Disabled

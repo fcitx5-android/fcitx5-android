@@ -8,9 +8,9 @@ import android.view.HapticFeedbackConstants
 import android.view.View
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
+import org.fcitx.fcitx5.android.utils.audioManager
 import org.fcitx.fcitx5.android.utils.getSystemSetting
 import org.fcitx.fcitx5.android.utils.vibrator
-import splitties.systemservices.audioManager
 
 object InputFeedbacks {
 
@@ -42,7 +42,8 @@ object InputFeedbacks {
             else buttonLongPressVibrationAmplitude to buttonPressVibrationAmplitude
 
         val useVibrator = when (hapticOnKeyPress) {
-            InputFeedbackMode.Enabled -> true
+            // TODO: support always enable
+            InputFeedbackMode.Enabled,
             InputFeedbackMode.FollowingSystem -> duration != 0
             InputFeedbackMode.Disabled -> return
         }
@@ -70,7 +71,7 @@ object InputFeedbacks {
         Delete, Return, SpaceBar, Standard
     }
 
-    fun soundEffect(effect: SoundEffect) {
+    fun soundEffect(view: View, effect: SoundEffect) {
         when (soundOnKeyPress) {
             InputFeedbackMode.Enabled -> {}
             InputFeedbackMode.Disabled -> return
@@ -78,7 +79,7 @@ object InputFeedbacks {
                 if (!systemSoundEffectsEnabled) return
             }
         }
-        audioManager.playSoundEffect(
+        view.context.audioManager.playSoundEffect(
             when (effect) {
                 SoundEffect.Delete -> AudioManager.FX_KEYPRESS_DELETE
                 SoundEffect.Return -> AudioManager.FX_KEYPRESS_RETURN

@@ -3,6 +3,7 @@ package org.fcitx.fcitx5.android.utils
 import android.app.NotificationManager
 import android.content.ClipboardManager
 import android.content.Context
+import android.media.AudioManager
 import android.os.Vibrator
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -23,6 +24,9 @@ val Context.inputMethodManager
 
 val Context.notificationManager
     get() = getSystemService<NotificationManager>()!!
+
+val Context.audioManager
+    get() = getSystemService<AudioManager>()!!
 
 val Fragment.notificationManager
     get() = requireContext().notificationManager

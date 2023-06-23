@@ -134,7 +134,7 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                 drawableHotspotChanged(x, y)
                 isPressed = true
                 InputFeedbacks.hapticFeedback(this)
-                soundEffect?.let { InputFeedbacks.soundEffect(it) }
+                soundEffect?.let { InputFeedbacks.soundEffect(this, it) }
                 dispatchGestureEvent(GestureType.Down, x, y)
                 if (longPressEnabled) {
                     longPressJob?.cancel()
