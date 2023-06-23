@@ -8,6 +8,7 @@ import android.view.HapticFeedbackConstants
 import android.view.View
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
+import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.audioManager
 import org.fcitx.fcitx5.android.utils.getSystemSetting
 import org.fcitx.fcitx5.android.utils.vibrator
@@ -22,8 +23,11 @@ object InputFeedbacks {
         }
     }
 
-    private val systemSoundEffectsEnabled
-        get() = getSystemSetting(Settings.System.SOUND_EFFECTS_ENABLED)
+    private var systemSoundEffectsEnabled = false
+
+    fun syncSystemPrefs() {
+        systemSoundEffectsEnabled = getSystemSetting(Settings.System.SOUND_EFFECTS_ENABLED)
+    }
 
     private val soundOnKeyPress by AppPrefs.getInstance().keyboard.soundOnKeyPress
     private val soundOnKeyPressVolume by AppPrefs.getInstance().keyboard.soundOnKeyPressVolume
@@ -32,6 +36,8 @@ object InputFeedbacks {
     private val buttonLongPressVibrationMilliseconds by AppPrefs.getInstance().keyboard.buttonLongPressVibrationMilliseconds
     private val buttonPressVibrationAmplitude by AppPrefs.getInstance().keyboard.buttonPressVibrationAmplitude
     private val buttonLongPressVibrationAmplitude by AppPrefs.getInstance().keyboard.buttonLongPressVibrationAmplitude
+
+    private val audioManager = appContext.audioManager
 
     fun hapticFeedback(view: View, longPress: Boolean = false) {
         if (hapticOnKeyPress == InputFeedbackMode.Disabled)
@@ -68,10 +74,10 @@ object InputFeedbacks {
     }
 
     enum class SoundEffect {
-        Delete, Return, SpaceBar, Standard
+        Standard, SpaceBar, Delete, Return
     }
 
-    fun soundEffect(view: View, effect: SoundEffect) {
+    fun soundEffect(effect: SoundEffect) {
         when (soundOnKeyPress) {
             InputFeedbackMode.Enabled -> {}
             InputFeedbackMode.Disabled -> return
@@ -79,14 +85,18 @@ object InputFeedbacks {
                 if (!systemSoundEffectsEnabled) return
             }
         }
-        view.context.audioManager.playSoundEffect(
-            when (effect) {
-                SoundEffect.Delete -> AudioManager.FX_KEYPRESS_DELETE
-                SoundEffect.Return -> AudioManager.FX_KEYPRESS_RETURN
-                SoundEffect.SpaceBar -> AudioManager.FX_KEYPRESS_SPACEBAR
-                SoundEffect.Standard -> AudioManager.FX_KEYPRESS_STANDARD
-            }, soundOnKeyPressVolume.toFloat() / 100
-        )
+        val fx = when (effect) {
+            SoundEffect.Standard -> AudioManager.FX_KEYPRESS_STANDARD
+            SoundEffect.SpaceBar -> AudioManager.FX_KEYPRESS_SPACEBAR
+            SoundEffect.Delete -> AudioManager.FX_KEYPRESS_DELETE
+            SoundEffect.Return -> AudioManager.FX_KEYPRESS_RETURN
+        }
+        val volume = soundOnKeyPressVolume
+        if (volume == 0) {
+            audioManager.playSoundEffect(fx, -1f)
+        } else {
+            audioManager.playSoundEffect(fx, volume / 100f)
+        }
     }
 
 }

@@ -230,7 +230,7 @@
     <string name="removed_n_items">Removed %1$d item(s)</string>
     <string name="whether_reset_switch_preference">Would you like to reset this preference to default?</string>
     <string name="enabled">Enabled</string>
-    <string name="following_system_settings">Following system settings</string>
+    <string name="following_system_settings">Follow system settings</string>
     <string name="button_sound">Sound on keypress</string>
     <string name="button_sound_volume">Keypress sound volume</string>
 </resources>

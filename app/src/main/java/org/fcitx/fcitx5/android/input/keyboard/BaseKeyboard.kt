@@ -12,6 +12,7 @@ import org.fcitx.fcitx5.android.core.FcitxKeyMapping
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
+import org.fcitx.fcitx5.android.data.InputFeedbacks
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.GestureType
@@ -110,6 +111,13 @@ abstract class BaseKeyboard(
             is KeyDef.Appearance.Text -> TextKeyView(context, theme, def.appearance)
             is KeyDef.Appearance.Image -> ImageKeyView(context, theme, def.appearance)
         }.apply {
+            soundEffect = when (def) {
+                is SpaceKey -> InputFeedbacks.SoundEffect.SpaceBar
+                is MiniSpaceKey -> InputFeedbacks.SoundEffect.SpaceBar
+                is BackspaceKey -> InputFeedbacks.SoundEffect.Delete
+                is ReturnKey -> InputFeedbacks.SoundEffect.Return
+                else -> InputFeedbacks.SoundEffect.Standard
+            }
             if (def is SpaceKey) {
                 swipeEnabled = true
                 swipeRepeatEnabled = true

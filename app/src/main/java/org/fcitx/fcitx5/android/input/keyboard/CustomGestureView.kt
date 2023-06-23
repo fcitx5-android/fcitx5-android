@@ -81,9 +81,13 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
     var onRepeatListener: ((View) -> Unit)? = null
     var onGestureListener: OnGestureListener? = null
 
-    var soundEffect: InputFeedbacks.SoundEffect? = InputFeedbacks.SoundEffect.Standard
+    var soundEffect: InputFeedbacks.SoundEffect = InputFeedbacks.SoundEffect.Standard
 
     private val touchSlop: Float = ViewConfiguration.get(ctx).scaledTouchSlop.toFloat()
+
+    init {
+        isSoundEffectsEnabled = false
+    }
 
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
@@ -134,7 +138,7 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                 drawableHotspotChanged(x, y)
                 isPressed = true
                 InputFeedbacks.hapticFeedback(this)
-                soundEffect?.let { InputFeedbacks.soundEffect(this, it) }
+                InputFeedbacks.soundEffect(soundEffect)
                 dispatchGestureEvent(GestureType.Down, x, y)
                 if (longPressEnabled) {
                     longPressJob?.cancel()
@@ -292,6 +296,5 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
     companion object {
         val longPressDelay by AppPrefs.getInstance().keyboard.longPressDelay
         const val RepeatInterval = 50L
-
     }
 }

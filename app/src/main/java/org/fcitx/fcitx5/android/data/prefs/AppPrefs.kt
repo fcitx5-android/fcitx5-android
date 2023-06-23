@@ -114,10 +114,17 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
                 R.string.disabled
             )
         )
-        val soundOnKeyPressVolume =
-            int(R.string.button_sound_volume, "button_sound_volume", 50, 0, 100, "%") {
-                soundOnKeyPress.getValue() != InputFeedbackMode.Disabled
-            }
+        val soundOnKeyPressVolume = int(
+            R.string.button_sound_volume,
+            "button_sound_volume",
+            0,
+            0,
+            100,
+            "%",
+            defaultLabel = R.string.system_default
+        ) {
+            soundOnKeyPress.getValue() != InputFeedbackMode.Disabled
+        }
         val expandToolbarByDefault =
             switch(R.string.expand_toolbar_by_default, "expand_toolbar_by_default", false)
         val inlineSuggestions = switch(R.string.inline_suggestions, "inline_suggestions", true)
