@@ -66,6 +66,7 @@
               cmakeVersions = [ cmakeVersion ];
               includeNDK = true;
               includeEmulator = false;
+              includeSources = true;
             };
           };
         };

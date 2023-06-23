@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.input.keyboard
 
 import android.graphics.Typeface
 import androidx.annotation.DrawableRes
+import org.fcitx.fcitx5.android.data.InputFeedbacks
 
 open class KeyDef(
     val appearance: Appearance,
@@ -14,6 +15,7 @@ open class KeyDef(
         val border: Border,
         val margin: Boolean,
         val viewId: Int,
+        val soundEffect: InputFeedbacks.SoundEffect
     ) {
         enum class Variant {
             Normal, AltForeground, Alternative, Accent
@@ -35,8 +37,9 @@ open class KeyDef(
             variant: Variant = Variant.Normal,
             border: Border = Border.Default,
             margin: Boolean = true,
-            viewId: Int = -1
-        ) : Appearance(percentWidth, variant, border, margin, viewId)
+            viewId: Int = -1,
+            soundEffect: InputFeedbacks.SoundEffect = InputFeedbacks.SoundEffect.Standard
+        ) : Appearance(percentWidth, variant, border, margin, viewId, soundEffect)
 
         class AltText(
             displayText: String,
@@ -51,7 +54,7 @@ open class KeyDef(
             variant: Variant = Variant.Normal,
             border: Border = Border.Default,
             margin: Boolean = true,
-            viewId: Int = -1
+            viewId: Int = -1,
         ) : Text(displayText, textSize, textStyle, percentWidth, variant, border, margin, viewId)
 
         class Image(
@@ -61,8 +64,9 @@ open class KeyDef(
             variant: Variant = Variant.Normal,
             border: Border = Border.Default,
             margin: Boolean = true,
-            viewId: Int = -1
-        ) : Appearance(percentWidth, variant, border, margin, viewId)
+            viewId: Int = -1,
+            soundEffect: InputFeedbacks.SoundEffect = InputFeedbacks.SoundEffect.Standard
+        ) : Appearance(percentWidth, variant, border, margin, viewId, soundEffect)
 
         class ImageText(
             displayText: String,
