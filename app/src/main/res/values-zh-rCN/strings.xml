@@ -146,7 +146,6 @@
     <string name="new_theme">新增主题</string>
     <string name="skip">跳过</string>
     <string name="horizontal_candidate_growth">拉伸横向候选词以填充宽度</string>
-    <string name="system_touch_sounds">系统按键音</string>
     <string name="none">无</string>
     <string name="theme_migrated">主题已迁移到当前版本</string>
     <string name="keep_keyboard_letters_uppercase">键盘字母保持大写</string>
