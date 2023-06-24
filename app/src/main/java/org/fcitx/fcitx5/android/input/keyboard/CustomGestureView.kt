@@ -2,10 +2,7 @@ package org.fcitx.fcitx5.android.input.keyboard
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Build
 import android.os.SystemClock
-import android.os.VibrationEffect
-import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
@@ -16,9 +13,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import org.fcitx.fcitx5.android.data.InputFeedbacks
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListener
-import org.fcitx.fcitx5.android.utils.vibrator
 
 open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
 
@@ -84,44 +81,18 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
     var onRepeatListener: ((View) -> Unit)? = null
     var onGestureListener: OnGestureListener? = null
 
+    var soundEffect: InputFeedbacks.SoundEffect = InputFeedbacks.SoundEffect.Standard
+
     private val touchSlop: Float = ViewConfiguration.get(ctx).scaledTouchSlop.toFloat()
 
     init {
-        isSoundEffectsEnabled = systemTouchSounds
+        isSoundEffectsEnabled = false
     }
 
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
         if (!enabled) {
             isPressed = false
-        }
-    }
-
-    private fun hapticFeedback(feedback: Int = HapticFeedbackConstants.KEYBOARD_TAP) {
-        if (!buttonHapticFeedback) return
-        val ms = when (feedback) {
-            HapticFeedbackConstants.KEYBOARD_TAP -> buttonPressVibrationMilliseconds
-            HapticFeedbackConstants.LONG_PRESS -> buttonLongPressVibrationMilliseconds
-            else -> return
-        }.toLong()
-        if (ms == 0L) {
-            performHapticFeedback(feedback, HapticFeedbackFlags)
-            return
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val amp = if (vibrator.hasAmplitudeControl()) {
-                when (feedback) {
-                    HapticFeedbackConstants.KEYBOARD_TAP -> buttonPressVibrationAmplitude
-                    HapticFeedbackConstants.LONG_PRESS -> buttonLongPressVibrationAmplitude
-                    else -> return
-                }.let { if (it == 0) VibrationEffect.DEFAULT_AMPLITUDE else it }
-            } else {
-                VibrationEffect.DEFAULT_AMPLITUDE
-            }
-            vibrator.vibrate(VibrationEffect.createOneShot(ms, amp))
-        } else {
-            @Suppress("DEPRECATION")
-            vibrator.vibrate(ms)
         }
     }
 
@@ -166,13 +137,14 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                 if (!isEnabled) return false
                 drawableHotspotChanged(x, y)
                 isPressed = true
-                hapticFeedback()
+                InputFeedbacks.hapticFeedback(this)
+                InputFeedbacks.soundEffect(soundEffect)
                 dispatchGestureEvent(GestureType.Down, x, y)
                 if (longPressEnabled) {
                     longPressJob?.cancel()
                     longPressJob = lifecycleScope.launch {
                         delay(longPressDelay.toLong())
-                        hapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                        InputFeedbacks.hapticFeedback(this@CustomGestureView, true)
                         longPressTriggered = performLongClick()
                     }
                 }
@@ -323,20 +295,6 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
 
     companion object {
         val longPressDelay by AppPrefs.getInstance().keyboard.longPressDelay
-        val systemTouchSounds by AppPrefs.getInstance().keyboard.systemTouchSounds
-        val buttonHapticFeedback by AppPrefs.getInstance().keyboard.buttonHapticFeedback
-        val buttonPressVibrationMilliseconds by AppPrefs.getInstance().keyboard.buttonPressVibrationMilliseconds
-        val buttonLongPressVibrationMilliseconds by AppPrefs.getInstance().keyboard.buttonLongPressVibrationMilliseconds
-        val buttonPressVibrationAmplitude by AppPrefs.getInstance().keyboard.buttonPressVibrationAmplitude
-        val buttonLongPressVibrationAmplitude by AppPrefs.getInstance().keyboard.buttonLongPressVibrationAmplitude
-
         const val RepeatInterval = 50L
-
-        val HapticFeedbackFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
-        } else {
-            @Suppress("DEPRECATION")
-            HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING or HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
-        }
     }
 }

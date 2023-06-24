@@ -62,7 +62,13 @@ abstract class ManagedPreference<T : Any>(
             sharedPreferences.edit { putBoolean(key, value) }
         }
 
-        override fun getValue(): Boolean = sharedPreferences.getBoolean(key, defaultValue)
+        override fun getValue(): Boolean = sharedPreferences.all[key]?.let {
+            it.let { x -> x as? Boolean }
+                ?: run {
+                    setValue(defaultValue)
+                    defaultValue
+                }
+        } ?: defaultValue
     }
 
     class PString(sharedPreferences: SharedPreferences, key: String, defaultValue: String) :
@@ -72,7 +78,13 @@ abstract class ManagedPreference<T : Any>(
             sharedPreferences.edit { putString(key, value) }
         }
 
-        override fun getValue(): String = sharedPreferences.getString(key, defaultValue)!!
+        override fun getValue(): String = sharedPreferences.all[key]?.let {
+            it.let { x -> x as? String }
+                ?: run {
+                    setValue(defaultValue)
+                    defaultValue
+                }
+        } ?: defaultValue
     }
 
     class PStringLike<T : Any>(
@@ -87,11 +99,14 @@ abstract class ManagedPreference<T : Any>(
         }
 
         override fun getValue(): T =
-            sharedPreferences.getString(key, null).let { raw ->
-                raw?.runCatching { codec.decode(this) }
+            sharedPreferences.all[key]?.let { raw ->
+                if (raw !is String)
+                    setValue(defaultValue)
+                raw.let { it as? String }
+                    ?.runCatching { codec.decode(this) }
                     ?.onFailure { Timber.w("Failed to decode value '$raw' of preference $key") }
-                    ?.getOrNull() ?: defaultValue
-            }
+                    ?.getOrNull()
+            } ?: defaultValue
     }
 
 
@@ -102,7 +117,13 @@ abstract class ManagedPreference<T : Any>(
             sharedPreferences.edit { putInt(key, value) }
         }
 
-        override fun getValue(): Int = sharedPreferences.getInt(key, defaultValue)
+        override fun getValue(): Int = sharedPreferences.all[key]?.let {
+            it.let { x -> x as? Int }
+                ?: run {
+                    setValue(defaultValue)
+                    defaultValue
+                }
+        } ?: defaultValue
     }
 
     class PFloat(sharedPreferences: SharedPreferences, key: String, defaultValue: Float) :
@@ -111,7 +132,13 @@ abstract class ManagedPreference<T : Any>(
             sharedPreferences.edit { putFloat(key, value) }
         }
 
-        override fun getValue(): Float = sharedPreferences.getFloat(key, defaultValue)
+        override fun getValue(): Float = sharedPreferences.all[key]?.let {
+            it.let { x -> x as? Float }
+                ?: run {
+                    setValue(defaultValue)
+                    defaultValue
+                }
+        } ?: defaultValue
     }
 
 }

@@ -16,6 +16,7 @@ import android.os.Bundle
 import android.os.Looper
 import android.os.Parcelable
 import android.provider.OpenableColumns
+import android.provider.Settings
 import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputConnection
@@ -234,6 +235,9 @@ fun getSystemProperty(key: String): String {
         .getMethod("get", String::class.java)
         .invoke(null, key) as String
 }
+
+fun getSystemSetting(key: String): Boolean =
+    Settings.System.getInt(appContext.contentResolver, key) == 1
 
 fun ZipInputStream.extract(destDir: File): List<File> {
     val extracted = mutableListOf<File>()

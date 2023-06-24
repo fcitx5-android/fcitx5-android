@@ -146,7 +146,6 @@
     <string name="new_theme">New theme</string>
     <string name="skip">Skip</string>
     <string name="horizontal_candidate_growth">Stretch horizontal candidates to fill the remaining width</string>
-    <string name="system_touch_sounds">System touch sounds on keypress</string>
     <string name="none">None</string>
     <string name="theme_migrated">Theme has been migrated to the current version</string>
     <string name="keep_keyboard_letters_uppercase">Keep keyboard letters uppercase</string>
@@ -230,4 +229,8 @@
     <string name="no_plugins">No plugins available</string>
     <string name="removed_n_items">Removed %1$d item(s)</string>
     <string name="whether_reset_switch_preference">Would you like to reset this preference to default?</string>
+    <string name="enabled">Enabled</string>
+    <string name="following_system_settings">Follow system settings</string>
+    <string name="button_sound">Sound on keypress</string>
+    <string name="button_sound_volume">Keypress sound volume</string>
 </resources>

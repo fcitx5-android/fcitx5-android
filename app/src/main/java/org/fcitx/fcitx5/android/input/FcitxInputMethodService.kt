@@ -36,6 +36,7 @@ import org.fcitx.fcitx5.android.core.*
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.daemon.launchOnReady
+import org.fcitx.fcitx5.android.data.InputFeedbacks
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
@@ -115,7 +116,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
         pkgNameCache = PackageNameCache(this)
         AppPrefs.getInstance().apply {
-            keyboard.systemTouchSounds.registerOnChangeListener(recreateInputViewListener)
             advanced.disableAnimation.registerOnChangeListener(recreateInputViewListener)
         }
         ThemeManager.addOnChangedListener(onThemeChangeListener)
@@ -328,6 +328,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         fcitx.launchOnReady { it.reset() }
+    }
+
+    override fun onWindowShown() {
+        super.onWindowShown()
+        InputFeedbacks.syncSystemPrefs()
     }
 
     override fun onCreateInputView(): View {
@@ -694,7 +699,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onDestroy() {
         AppPrefs.getInstance().apply {
-            keyboard.systemTouchSounds.unregisterOnChangeListener(recreateInputViewListener)
             advanced.disableAnimation.unregisterOnChangeListener(recreateInputViewListener)
         }
         ThemeManager.removeOnChangedListener(onThemeChangeListener)

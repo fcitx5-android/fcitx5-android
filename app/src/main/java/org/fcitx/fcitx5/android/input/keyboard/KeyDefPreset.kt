@@ -7,6 +7,7 @@ import org.fcitx.fcitx5.android.core.FcitxKeyMapping
 import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
+import org.fcitx.fcitx5.android.data.InputFeedbacks
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Border
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Variant
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
@@ -128,7 +129,8 @@ class BackspaceKey(
         src = R.drawable.ic_baseline_backspace_24,
         percentWidth = percentWidth,
         variant = variant,
-        viewId = R.id.button_backspace
+        viewId = R.id.button_backspace,
+        soundEffect = InputFeedbacks.SoundEffect.Delete
     ),
     setOf(
         Behavior.Press(KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_BackSpace))),
@@ -204,7 +206,8 @@ class SpaceKey : KeyDef(
         textSize = 13f,
         percentWidth = 0f,
         border = Border.Special,
-        viewId = R.id.button_space
+        viewId = R.id.button_space,
+        soundEffect = InputFeedbacks.SoundEffect.SpaceBar
     ),
     setOf(
         Behavior.Press(KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_space))),
@@ -218,7 +221,8 @@ class ReturnKey(percentWidth: Float = 0.15f) : KeyDef(
         percentWidth = percentWidth,
         variant = Variant.Accent,
         border = Border.Special,
-        viewId = R.id.button_return
+        viewId = R.id.button_return,
+        soundEffect = InputFeedbacks.SoundEffect.Return
     ),
     setOf(
         Behavior.Press(KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_Return)))

@@ -1,7 +1,6 @@
 package org.fcitx.fcitx5.android.input.candidates
 
 import android.content.Context
-import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.AutoScaleTextView
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
@@ -16,10 +15,6 @@ import splitties.views.gravityCenter
 
 class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
 
-    companion object {
-        val systemTouchSounds by AppPrefs.getInstance().keyboard.systemTouchSounds
-    }
-
     val text = view(::AutoScaleTextView) {
         scaleMode = AutoScaleTextView.Mode.Proportional
         textSize = 20f // sp
@@ -29,7 +24,6 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
     }
 
     override val root = view(::CustomGestureView) {
-        isSoundEffectsEnabled = systemTouchSounds
         background = pressHighlightDrawable(theme.keyPressHighlightColor)
 
         add(text, lParams(wrapContent, matchParent) {

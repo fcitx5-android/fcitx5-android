@@ -3,6 +3,7 @@ package org.fcitx.fcitx5.android.data.prefs
 import android.content.SharedPreferences
 import android.os.Build
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.data.InputFeedbacks.InputFeedbackMode
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateMode
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
 import org.fcitx.fcitx5.android.input.keyboard.SpaceLongPressBehavior
@@ -35,8 +36,23 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
     }
 
     inner class Keyboard : ManagedPreferenceCategory(R.string.keyboard, sharedPreferences) {
-        val buttonHapticFeedback =
-            switch(R.string.button_haptic_feedback, "button_haptic_feedback", true)
+        val hapticOnKeyPress =
+            list(
+                R.string.button_haptic_feedback,
+                "haptic_on_keypress",
+                InputFeedbackMode.FollowingSystem,
+                InputFeedbackMode,
+                listOf(
+                    InputFeedbackMode.FollowingSystem,
+                    InputFeedbackMode.Enabled,
+                    InputFeedbackMode.Disabled
+                ),
+                listOf(
+                    R.string.following_system_settings,
+                    R.string.enabled,
+                    R.string.disabled
+                )
+            )
         val buttonPressVibrationMilliseconds: ManagedPreference.PInt
         val buttonLongPressVibrationMilliseconds: ManagedPreference.PInt
 
@@ -53,7 +69,7 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
                 100,
                 "ms",
                 defaultLabel = R.string.system_default
-            ) { buttonHapticFeedback.getValue() }
+            ) { hapticOnKeyPress.getValue() != InputFeedbackMode.Disabled }
             buttonPressVibrationMilliseconds = primary
             buttonLongPressVibrationMilliseconds = secondary
         }
@@ -74,16 +90,42 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
                 255,
                 defaultLabel = R.string.system_default
             ) {
-                buttonHapticFeedback.getValue()
-                        && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-                        && appContext.vibrator.hasAmplitudeControl()
+                (hapticOnKeyPress.getValue() != InputFeedbackMode.Disabled)
+                        // hide this if using default duration
+                        && (buttonPressVibrationMilliseconds.getValue() != 0 || buttonLongPressVibrationMilliseconds.getValue() != 0)
+                        && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && appContext.vibrator.hasAmplitudeControl())
             }
             buttonPressVibrationAmplitude = primary
             buttonLongPressVibrationAmplitude = secondary
         }
 
-        val systemTouchSounds =
-            switch(R.string.system_touch_sounds, "system_touch_sounds", true)
+        val soundOnKeyPress = list(
+            R.string.button_sound,
+            "sound_on_keypress",
+            InputFeedbackMode.FollowingSystem,
+            InputFeedbackMode,
+            listOf(
+                InputFeedbackMode.FollowingSystem,
+                InputFeedbackMode.Enabled,
+                InputFeedbackMode.Disabled
+            ),
+            listOf(
+                R.string.following_system_settings,
+                R.string.enabled,
+                R.string.disabled
+            )
+        )
+        val soundOnKeyPressVolume = int(
+            R.string.button_sound_volume,
+            "button_sound_volume",
+            0,
+            0,
+            100,
+            "%",
+            defaultLabel = R.string.system_default
+        ) {
+            soundOnKeyPress.getValue() != InputFeedbackMode.Disabled
+        }
         val expandToolbarByDefault =
             switch(R.string.expand_toolbar_by_default, "expand_toolbar_by_default", false)
         val inlineSuggestions = switch(R.string.inline_suggestions, "inline_suggestions", true)
