@@ -44,10 +44,12 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
                 InputFeedbackMode,
                 listOf(
                     InputFeedbackMode.FollowingSystem,
+                    InputFeedbackMode.Enabled,
                     InputFeedbackMode.Disabled
                 ),
                 listOf(
                     R.string.following_system_settings,
+                    R.string.enabled,
                     R.string.disabled
                 )
             )
@@ -90,9 +92,8 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             ) {
                 (hapticOnKeyPress.getValue() != InputFeedbackMode.Disabled)
                         // hide this if using default duration
-                        && buttonPressVibrationMilliseconds.getValue() != 0
-                        && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-                        && appContext.vibrator.hasAmplitudeControl()
+                        && (buttonPressVibrationMilliseconds.getValue() != 0 || buttonLongPressVibrationMilliseconds.getValue() != 0)
+                        && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && appContext.vibrator.hasAmplitudeControl())
             }
             buttonPressVibrationAmplitude = primary
             buttonLongPressVibrationAmplitude = secondary

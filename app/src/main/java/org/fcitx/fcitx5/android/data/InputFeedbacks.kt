@@ -24,9 +24,14 @@ object InputFeedbacks {
     }
 
     private var systemSoundEffectsEnabled = false
+    private var systemHapticFeedbackEnabled = false
 
     fun syncSystemPrefs() {
         systemSoundEffectsEnabled = getSystemSetting(Settings.System.SOUND_EFFECTS_ENABLED)
+        // it says "Replaced by using android.os.VibrationAttributes.USAGE_TOUCH"
+        // but gives no clue about how to use it, and this one still works
+        @Suppress("DEPRECATION")
+        systemHapticFeedbackEnabled = getSystemSetting(Settings.System.HAPTIC_FEEDBACK_ENABLED)
     }
 
     private val soundOnKeyPress by AppPrefs.getInstance().keyboard.soundOnKeyPress
@@ -45,19 +50,29 @@ object InputFeedbacks {
     private val audioManager = appContext.audioManager
 
     fun hapticFeedback(view: View, longPress: Boolean = false) {
-        if (hapticOnKeyPress == InputFeedbackMode.Disabled) return
+        when (hapticOnKeyPress) {
+            InputFeedbackMode.Enabled -> {}
+            InputFeedbackMode.Disabled -> return
+            InputFeedbackMode.FollowingSystem -> if (!systemHapticFeedbackEnabled) return
+        }
 
         val duration: Long
         val amplitude: Int
+        val hfc: Int
         if (longPress) {
             duration = buttonLongPressVibrationMilliseconds.toLong()
             amplitude = buttonLongPressVibrationAmplitude
+            hfc = HapticFeedbackConstants.LONG_PRESS
         } else {
             duration = buttonPressVibrationMilliseconds.toLong()
             amplitude = buttonPressVibrationAmplitude
+            hfc = HapticFeedbackConstants.KEYBOARD_TAP
         }
+        val useVibrator = duration != 0L
 
-        if (duration != 0L) {
+        if (useVibrator) {
+            // on Android 13, if system haptic feedback was disabled, `vibrator.vibrate()` won't work
+            // but `view.performHapticFeedback()` with `FLAG_IGNORE_GLOBAL_SETTING` still works
             if (hasAmplitudeControl && amplitude != 0) {
                 vibrator.vibrate(VibrationEffect.createOneShot(duration, amplitude))
             } else {
@@ -65,11 +80,12 @@ object InputFeedbacks {
                 vibrator.vibrate(duration)
             }
         } else {
-            view.performHapticFeedback(
-                if (longPress) HapticFeedbackConstants.LONG_PRESS
-                else HapticFeedbackConstants.KEYBOARD_TAP,
-                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
-            )
+            // it says "Starting TIRAMISU only privileged apps can ignore user settings for touch feedback"
+            // but we still seem to be able to use `FLAG_IGNORE_GLOBAL_SETTING`
+            @Suppress("DEPRECATION")
+            val flags =
+                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING or HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING
+            view.performHapticFeedback(hfc, flags)
         }
     }
 
@@ -81,9 +97,7 @@ object InputFeedbacks {
         when (soundOnKeyPress) {
             InputFeedbackMode.Enabled -> {}
             InputFeedbackMode.Disabled -> return
-            InputFeedbackMode.FollowingSystem -> {
-                if (!systemSoundEffectsEnabled) return
-            }
+            InputFeedbackMode.FollowingSystem -> if (!systemSoundEffectsEnabled) return
         }
         val fx = when (effect) {
             SoundEffect.Standard -> AudioManager.FX_KEYPRESS_STANDARD
