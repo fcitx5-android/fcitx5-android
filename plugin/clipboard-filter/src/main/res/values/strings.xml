@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name_debug">Fcitx5 for Android (Clipboard Filter Plugin | Debug)</string>
+    <string name="app_name_release">Fcitx5 for Android (Clipboard Filter Plugin)</string>
+    <string name="description">Apply ClearURLs on clipboard</string>
+</resources>

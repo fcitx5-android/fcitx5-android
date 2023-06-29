@@ -42,6 +42,8 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
 
     private val onUpdateListeners = WeakHashSet<OnClipboardUpdateListener>()
 
+    var transformer: ((String) -> String)? = null
+
     fun addOnUpdateListener(listener: OnClipboardUpdateListener) {
         onUpdateListeners.add(listener)
     }
@@ -138,7 +140,7 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
 
     override fun onPrimaryClipChanged() {
         clipboardManager.primaryClip
-            ?.let { ClipboardEntry.fromClipData(it) }
+            ?.let { ClipboardEntry.fromClipData(it, transformer) }
             ?.takeIf { it.text.isNotBlank() }
             ?.let { e ->
                 launch {
