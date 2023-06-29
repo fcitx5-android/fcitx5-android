@@ -399,8 +399,9 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
-    private suspend fun inflateInlineContentView(suggestion: InlineSuggestion): InlineContentView {
+    private suspend fun inflateInlineContentView(suggestion: InlineSuggestion): InlineContentView? {
         return suspendCoroutine { c ->
+            // callback view might be null
             suggestion.inflate(context, suggestionSize, directExecutor) { v ->
                 c.resume(v)
             }

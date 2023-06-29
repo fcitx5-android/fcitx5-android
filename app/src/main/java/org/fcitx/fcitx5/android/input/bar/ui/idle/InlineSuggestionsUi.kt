@@ -84,13 +84,14 @@ class InlineSuggestionsUi(override val ctx: Context) : Ui {
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
-    fun setScrollableViews(views: List<InlineContentView>) {
+    fun setScrollableViews(views: List<InlineContentView?>) {
         val flexbox = view(::FlexboxLayout) {
             flexWrap = FlexWrap.NOWRAP
             justifyContent = JustifyContent.CENTER
         }
         val parentSurfaceControl = scrollSurfaceView.surfaceControl
         views.forEach {
+            if (it == null) return@forEach
             scrollableContentViews.add(it)
             it.setSurfaceControlCallback(object : InlineContentView.SurfaceControlCallback {
                 override fun onCreated(surfaceControl: SurfaceControl) {
