@@ -1,5 +1,4 @@
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
@@ -7,7 +6,10 @@ import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.LogLevel
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.*
+import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.task
 import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
@@ -16,6 +18,14 @@ import org.jetbrains.kotlin.com.google.common.hash.Hashing
 import org.jetbrains.kotlin.com.google.common.io.ByteSource
 import java.io.File
 import java.nio.charset.Charset
+import kotlin.collections.set
+
+interface DataDescriptorPluginExtension {
+    /**
+     * paths relative to asset dir to be excluded
+     */
+    val excludes: ListProperty<String>
+}
 
 /**
  * Add task generateDataDescriptor
@@ -29,6 +39,8 @@ class DataDescriptorPlugin : Plugin<Project> {
     }
 
     override fun apply(target: Project) {
+        val extension = target.extensions.create<DataDescriptorPluginExtension>(TASK)
+        extension.excludes.convention(listOf())
         target.task<DataDescriptorTask>(TASK) {
             inputDir.set(target.assetsDir)
             outputFile.set(target.assetsDir.resolve(FILE_NAME))
@@ -56,6 +68,10 @@ class DataDescriptorPlugin : Plugin<Project> {
         abstract val outputFile: RegularFileProperty
 
         private val file by lazy { outputFile.get().asFile }
+
+        private val excludes by lazy {
+            project.extensions.getByName<DataDescriptorPluginExtension>(TASK).excludes.get()
+        }
 
         private fun serialize(map: Map<String, String>) {
             file.deleteOnExit()
@@ -103,7 +119,7 @@ class DataDescriptorPlugin : Plugin<Project> {
                 logger.log(LogLevel.DEBUG, "${change.changeType}: ${change.normalizedPath}")
                 val relativeFile = change.file.relativeTo(file.parentFile)
                 val key = relativeFile.path
-                if (change.changeType == ChangeType.REMOVED) {
+                if (change.changeType == ChangeType.REMOVED || key in excludes) {
                     map.remove(key)
                 } else {
                     map[key] = sha256(change.file)

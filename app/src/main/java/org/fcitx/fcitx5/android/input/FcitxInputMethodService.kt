@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Color
@@ -32,6 +33,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.common.Broadcasts
 import org.fcitx.fcitx5.android.core.*
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.daemon.FcitxDaemon
@@ -120,6 +122,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
         ThemeManager.addOnChangedListener(onThemeChangeListener)
         super.onCreate()
+        sendBroadcast(Intent(Broadcasts.FcitxInputMethodServiceCreated), Broadcasts.PERMISSION)
     }
 
     private fun handleFcitxEvent(event: FcitxEvent<*>) {
@@ -707,6 +710,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         super.onDestroy()
         // Fcitx might be used in super.onDestroy()
         FcitxDaemon.disconnect(javaClass.name)
+        sendBroadcast(Intent(Broadcasts.FcitxInputMethodServiceDestroyed), Broadcasts.PERMISSION)
     }
 
     companion object {

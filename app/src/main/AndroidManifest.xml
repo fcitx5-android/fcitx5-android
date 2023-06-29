@@ -23,6 +23,14 @@
         </intent>
     </queries>
 
+    <permission
+        android:name="org.fcitx.fcitx5.android.permission.IPC"
+        android:protectionLevel="signature" />
+
+    <permission
+        android:name="org.fcitx.fcitx5.android.permission.BROADCAST"
+        android:protectionLevel="signature" />
+
     <application
         android:name=".FcitxApplication"
         android:allowBackup="true"
@@ -114,6 +122,15 @@
             <meta-data
                 android:name="android.view.im"
                 android:resource="@xml/input_method" />
+        </service>
+
+        <service
+            android:name=".FcitxRemoteService"
+            android:exported="true"
+            android:permission="org.fcitx.fcitx5.android.permission.IPC">
+            <intent-filter>
+                <action android:name="org.fcitx.fcitx5.android.IPC" />
+            </intent-filter>
         </service>
 
         <provider

@@ -22,9 +22,15 @@ data class ClipboardEntry(
     companion object {
         const val TABLE_NAME = "clipboard"
 
-        fun fromClipData(clipData: ClipData): ClipboardEntry? {
+        fun fromClipData(
+            clipData: ClipData,
+            transformer: ((String) -> String)? = null
+        ): ClipboardEntry? {
             val str = clipData.getItemAt(0).text?.toString() ?: return null
-            return ClipboardEntry(text = str, type = clipData.description.getMimeType(0))
+            return ClipboardEntry(
+                text = transformer?.let { it(str) } ?: str,
+                type = clipData.description.getMimeType(0)
+            )
         }
     }
 }

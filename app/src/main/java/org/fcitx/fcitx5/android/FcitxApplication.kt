@@ -9,6 +9,7 @@ import androidx.preference.PreferenceManager
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.plus
+import org.fcitx.fcitx5.android.common.Broadcasts
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
@@ -71,6 +72,7 @@ class FcitxApplication : Application() {
         ClipboardManager.init(applicationContext)
         ThemeManager.init(resources.configuration)
         Locales.onLocaleChange(resources.configuration)
+        sendBroadcast(Intent(Broadcasts.FcitxApplicationCreated),Broadcasts.PERMISSION)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

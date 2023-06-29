@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "org.fcitx.fcitx5.android.lib.plugin_base"
+    namespace = "org.fcitx.fcitx5.android.lib.common"
 
     buildTypes {
         release {
@@ -11,9 +11,10 @@ android {
             consumerProguardFiles("proguard-rules.pro")
         }
     }
+
+    @Suppress("UnstableApiUsage")
+    buildFeatures {
+        aidl = true
+    }
 }
 
-dependencies {
-    api(project(":lib:common"))
-    implementation(libs.aboutlibraries.core)
-}
