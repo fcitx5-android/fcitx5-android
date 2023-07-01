@@ -1,0 +1,48 @@
+name: Publish
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'build-logic/**'
+      - 'lib/**'
+
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+    env:
+      GITHUB_TOKEN: ${{ secrets.PACKAGE_TOKEN }}
+      GITHUB_ACTOR: android-fcitx5
+    steps:
+      - name: Fetch source code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Setup Android environment
+        uses: android-actions/setup-android@v2
+
+      - name: Install Android NDK
+        run: |
+          sdkmanager --install "cmake;3.22.1"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt update
+          sudo apt install extra-cmake-modules gettext
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Publish build convention and libs
+        run: |
+          ./gradlew :build-logic:convention:publish
+          ./gradlew :lib:publish
+

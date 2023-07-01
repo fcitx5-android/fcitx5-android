@@ -66,9 +66,14 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
             }
         }
 
-        target.pluginManager.apply(
-            target.versionCatalog.findPlugin("aboutlibraries").get().get().pluginId
-        )
+        runCatching {
+            target.pluginManager.apply(
+                target.versionCatalog.findPlugin("aboutlibraries").get().get().pluginId
+            )
+        }.onFailure {
+            it.printStackTrace()
+        }
+
         target.configure<AboutLibrariesExtension> {
             excludeFields = arrayOf(
                 "generated", "developers", "organization", "scm", "funding", "content"
@@ -78,10 +83,14 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
             includePlatform = false
         }
 
-        target.dependencies.add(
-            "coreLibraryDesugaring",
-            target.versionCatalog.findLibrary("android.desugarJDKLibs").get()
-        )
+        runCatching {
+            target.dependencies.add(
+                "coreLibraryDesugaring",
+                target.versionCatalog.findLibrary("android.desugarJDKLibs").get()
+            )
+        }.onFailure {
+            it.printStackTrace()
+        }
     }
 
 }
