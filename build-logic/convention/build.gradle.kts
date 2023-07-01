@@ -1,9 +1,20 @@
 plugins {
     `kotlin-dsl`
     kotlin("plugin.serialization") version embeddedKotlinVersion
+    `maven-publish`
+    id("com.palantir.git-version") version "3.0.0"
+    `java-gradle-plugin`
 }
 
 group = "org.fcitx.fcitx5.android.build_logic"
+
+val versionDetails: groovy.lang.Closure<com.palantir.gradle.gitversion.VersionDetails> by extra
+val details = versionDetails()
+version = details.gitHash
+
+java {
+    withSourcesJar()
+}
 
 dependencies {
     compileOnly(libs.android.gradlePlugin)
@@ -53,6 +64,19 @@ gradlePlugin {
         register("nativeLibConvention") {
             id = "native-lib-convention"
             implementationClass = "NativeLibConventionPlugin"
+        }
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/fcitx5-android/fcitx5-android")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
         }
     }
 }
