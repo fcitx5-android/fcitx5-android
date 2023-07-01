@@ -10,11 +10,16 @@ interface IFcitxRemoteService {
    /** Get loaded plugins in fcitx app */
    Map<String, String> getLoadedPlugins();
 
-   /** Request to restart fcitx */
+   /** Request fcitx daemon to restart fcitx */
    void restartFcitx();
 
    /** Register a clipboard transformer to fcitx app */
    void registerClipboardEntryTransformer(IClipboardEntryTransformer transformer);
    /** Unregister a clipboard transformer to fcitx app */
    void unregisterClipboardEntryTransformer(IClipboardEntryTransformer transformer);
+
+   /** Reload fcitx pinyin dictionary */
+   void reloadPinyinDict();
+   /** Reload fcitx quick phrase */
+   void reloadQuickPhrase();
 }
