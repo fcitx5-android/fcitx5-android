@@ -142,6 +142,11 @@ object FcitxDaemon {
         }
     }
 
+    /**
+     * Reuse a connection for remote service
+     */
+    fun getFirstConnectionOrNull() = clients.firstNotNullOfOrNull { it.value }
+
 
     private const val CHANNEL_ID = "fcitx-daemon"
     private var RESTART_ID = 0
