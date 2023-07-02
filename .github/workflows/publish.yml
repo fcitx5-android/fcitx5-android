@@ -44,5 +44,6 @@ jobs:
       - name: Publish build convention and libs
         run: |
           ./gradlew :build-logic:convention:publish
-          ./gradlew :lib:publish
+          ./gradlew :lib:common:publish
+          ./gradlew :lib:plugin-base:publish
 
