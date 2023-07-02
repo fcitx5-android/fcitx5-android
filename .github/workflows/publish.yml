@@ -6,6 +6,7 @@ on:
     paths:
       - 'build-logic/**'
       - 'lib/**'
+      - '.github/workflows/publish.yml'
 
 jobs:
   publish:
