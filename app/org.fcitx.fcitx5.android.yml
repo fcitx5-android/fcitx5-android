@@ -39,6 +39,9 @@ Builds:
       - echo -e "\nbuildTimestamp=$buildTimestamp" >> ../gradle.properties
       - sed -i -e '/ImportQualifiedPost/d' -e 's/import \(.*\) qualified as/import
         qualified \1 as/g' $$fcitx5-android-prebuilder$$/Main.hs
+      - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' ../build-logic/convention/build.gradle.kts
+      - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' ../lib/common/build.gradle.kts
+      - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' ../lib/plugin-base/build.gradle.kts
     scanignore:
       - lib/fcitx5/src/main/cpp/fcitx5/src/modules/unicode/charselectdata
     scandelete:
