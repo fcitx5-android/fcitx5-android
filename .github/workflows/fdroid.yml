@@ -78,11 +78,13 @@ jobs:
           " $metadata
           yq ".Builds[0]" $metadata
           cp $metadata $GITHUB_WORKSPACE/metadata
-          export HOME="$home_vagrant"
-          export PYTHONPATH="$fdroidserver:$fdroidserver/examples"
-          export PYTHONUNBUFFERED=true
-          export GRADLE_USER_HOME=$home_vagrant/.gradle
-          fdroid="sudo --preserve-env --user vagrant $fdroidserver/fdroid"
+
+          fdroid="sudo --preserve-env --user vagrant
+              env HOME=$home_vagrant
+                  PYTHONPATH=$fdroidserver:$fdroidserver/examples
+                  PYTHONUNBUFFERED=true
+                  GRADLE_USER_HOME=$home_vagrant/.gradle
+              $fdroidserver/fdroid"
 
           build="org.fcitx.fcitx5.android:$versionCode"
           chown -R vagrant $home_vagrant
