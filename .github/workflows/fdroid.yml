@@ -19,8 +19,6 @@ jobs:
           - x86
           - x86_64
       fail-fast: false
-    env:
-      APP_ID: org.fcitx.fcitx5.android
     steps:
       - name: Fetch fdroiddata
         uses: actions/checkout@v3
@@ -68,8 +66,9 @@ jobs:
           versionCode=$(expr $baseVersionCode \* 10 + $i)
 
           source /etc/profile.d/bsenv.sh
-          metadata="$home_vagrant/metadata/$APP_ID.yml"
-          curl -Lo $metadata "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/app/$APP_ID.yml"
+          metadata="$home_vagrant/metadata/org.fcitx.fcitx5.android.yml"
+          curl -Lo $metadata "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/app/org.fcitx.fcitx5.android.yml"
+          sed -i s/%ts/$timestamp/g $metadata
           sed -i s/%abi/${{ matrix.abi }}/g $metadata
           yq -i ".Builds[0] |=
               (.versionName = \"$versionName\") |=
@@ -78,19 +77,15 @@ jobs:
           " $metadata
           yq ".Builds[0]" $metadata
           cp $metadata $GITHUB_WORKSPACE/metadata
-          export PATH="$fdroidserver:$PATH"
-          export PYTHONPATH="$fdroidserver:$fdroidserver/examples"
-          export PYTHONUNBUFFERED=true
-          export GRADLE_USER_HOME=$home_vagrant/.gradle
-          export fdroid="sudo --preserve-env --user vagrant
-              env PATH=$fdroidserver:$PATH
-              env PYTHONPATH=$fdroidserver:$fdroidserver/examples
-              env PYTHONUNBUFFERED=true
-              env TERM=$TERM
-              env HOME=$home_vagrant
-              fdroid"
 
-          build="$APP_ID:$versionCode"
+          fdroid="sudo --preserve-env --user vagrant
+              env HOME=$home_vagrant
+                  PYTHONPATH=$fdroidserver:$fdroidserver/examples
+                  PYTHONUNBUFFERED=true
+                  GRADLE_USER_HOME=$home_vagrant/.gradle
+              $fdroidserver/fdroid"
+
+          build="org.fcitx.fcitx5.android:$versionCode"
           chown -R vagrant $home_vagrant
           $fdroid fetchsrclibs $build --verbose
           cd $home_vagrant
