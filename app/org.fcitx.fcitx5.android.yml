@@ -34,11 +34,7 @@ Builds:
       - lib/fcitx5/src/main/cpp/prebuilt
     prebuild:
       - sdkmanager 'cmake;3.22.1' 'ndk;25.0.8775105'
-      - buildTimestamp=$(curl -L https://jenkins.fcitx-im.org/job/android/job/fcitx5-android/lastSuccessfulBuild/artifact/out/build-metadata.json
-        | sed -n -E 's/.*timestamp.*"(.*)"$/\1/p')
-      - echo -e "\nbuildTimestamp=$buildTimestamp" >> ../gradle.properties
-      - sed -i -e '/ImportQualifiedPost/d' -e 's/import \(.*\) qualified as/import
-        qualified \1 as/g' $$fcitx5-android-prebuilder$$/Main.hs
+      - sed -i -e '/ImportQualifiedPost/d' -e 's/import \(.*\) qualified as/import qualified \1 as/g' $$fcitx5-android-prebuilder$$/Main.hs
       - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' ../build-logic/convention/build.gradle.kts
       - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' ../lib/common/build.gradle.kts
       - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' ../lib/plugin-base/build.gradle.kts
@@ -51,12 +47,13 @@ Builds:
       - mkdir build
       - cd build
       - ABI=%abi ANDROID_NDK_ROOT=$$NDK$$/../25.0.8775105 CMAKE_VERSION=3.22.1 ANDROID_PLATFORM=23
-        COMP_SPELL_DICT=/usr/lib/x86_64-linux-gnu/fcitx5/libexec/comp-spell-dict runghc
-        ../Main.hs -j everything
+        COMP_SPELL_DICT=/usr/lib/x86_64-linux-gnu/fcitx5/libexec/comp-spell-dict
+        runghc ../Main.hs -j everything
       - popd
       - mv $$fcitx5-android-prebuilder$$/build ../lib/fcitx5/src/main/cpp/prebuilt
     ndk: 25.2.9519653
     gradleprops:
       - buildABI=%abi
+      - buildTimestamp=%ts
 
 AllowedAPKSigningKeys: e4db1e9edff13629d07de4bbf8165fe9bd8557ab55092672da8e40dbe484ecd7
