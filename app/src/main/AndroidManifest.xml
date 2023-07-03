@@ -19,16 +19,16 @@
 
     <queries>
         <intent>
-            <action android:name="org.fcitx.fcitx5.android.plugin.MANIFEST" />
+            <action android:name="${applicationId}.plugin.MANIFEST" />
         </intent>
     </queries>
 
     <permission
-        android:name="org.fcitx.fcitx5.android.permission.IPC"
+        android:name="${applicationId}.permission.IPC"
         android:protectionLevel="signature" />
 
     <permission
-        android:name="org.fcitx.fcitx5.android.permission.BROADCAST"
+        android:name="${applicationId}.permission.BROADCAST"
         android:protectionLevel="signature" />
 
     <application
@@ -127,9 +127,9 @@
         <service
             android:name=".FcitxRemoteService"
             android:exported="true"
-            android:permission="org.fcitx.fcitx5.android.permission.IPC">
+            android:permission="${applicationId}.permission.IPC">
             <intent-filter>
-                <action android:name="org.fcitx.fcitx5.android.IPC" />
+                <action android:name="${applicationId}.IPC" />
             </intent-filter>
         </service>
 

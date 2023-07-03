@@ -12,6 +12,24 @@ class AndroidPluginAppConventionPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
         target.extensions.configure<BaseAppModuleExtension> {
+            buildTypes {
+                release {
+                    buildConfigField("String", "MAIN_APPLICATION_ID", "\"org.fcitx.fcitx5.android\"")
+                    addManifestPlaceholders(
+                        mapOf(
+                            "mainApplicationId" to "org.fcitx.fcitx5.android",
+                        )
+                    )
+                }
+                debug {
+                    buildConfigField("String", "MAIN_APPLICATION_ID", "\"org.fcitx.fcitx5.android.debug\"")
+                    addManifestPlaceholders(
+                        mapOf(
+                            "mainApplicationId" to "org.fcitx.fcitx5.android.debug",
+                        )
+                    )
+                }
+            }
             applicationVariants.all {
                 val pluginsTaskName = "assemble${name.capitalized()}Plugins"
                 val pluginsTask = target.rootProject.tasks.findByName(pluginsTaskName)

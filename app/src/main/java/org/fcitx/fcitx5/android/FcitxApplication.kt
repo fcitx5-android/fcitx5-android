@@ -14,6 +14,7 @@ import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.ui.main.LogActivity
+import org.fcitx.fcitx5.android.utils.Broadcaster
 import org.fcitx.fcitx5.android.utils.Locales
 import org.fcitx.fcitx5.android.utils.isDarkMode
 import timber.log.Timber
@@ -72,7 +73,7 @@ class FcitxApplication : Application() {
         ClipboardManager.init(applicationContext)
         ThemeManager.init(resources.configuration)
         Locales.onLocaleChange(resources.configuration)
-        sendBroadcast(Intent(Broadcasts.FcitxApplicationCreated),Broadcasts.PERMISSION)
+        Broadcaster.broadcast(this) { it.FcitxApplicationCreated }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

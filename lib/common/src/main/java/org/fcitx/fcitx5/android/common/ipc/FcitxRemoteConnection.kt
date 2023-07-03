@@ -7,15 +7,14 @@ import android.content.ServiceConnection
 import android.os.IBinder
 
 fun Context.bindFcitxRemoteService(
-    debugBuild: Boolean,
+    mainApplicationId: String,
     onDisconnect: () -> Unit = {},
     onConnected: (IFcitxRemoteService) -> Unit
 ): FcitxRemoteConnection {
     val connection = FcitxRemoteConnection(onConnected, onDisconnect)
     bindService(
-        Intent("org.fcitx.fcitx5.android.IPC").apply {
-            val pkgName = "org.fcitx.fcitx5.android" + if (debugBuild) ".debug" else ""
-            setPackage(pkgName)
+        Intent("$mainApplicationId.IPC").apply {
+            setPackage(mainApplicationId)
         },
         connection,
         Context.BIND_AUTO_CREATE
