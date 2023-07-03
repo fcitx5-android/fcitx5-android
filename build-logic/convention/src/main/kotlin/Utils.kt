@@ -36,7 +36,7 @@ val Project.versionCatalog: VersionCatalog
     get() = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
 val Project.assetsDir: File
-    get() = file("src/main/assets")
+    get() = file("src/main/assets").also { it.mkdirs() }
 
 val Project.cleanTask: Task
     get() = tasks.getByName("clean")
