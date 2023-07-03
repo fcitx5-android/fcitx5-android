@@ -1,7 +1,6 @@
 name: F-Droid
 
 on:
-  pull_request:
   repository_dispatch:
 
 defaults:
