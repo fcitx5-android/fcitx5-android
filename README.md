@@ -90,6 +90,9 @@ Install Android SDK Platform, Android SDK Build-Tools, Android NDK and cmake via
 <details>
 <summary>Detailed steps (screenshots)</summary>
 
+These screenshots are for references and the versions in them may be out of date.
+The current recommended versions are recorded in [Versions.kt](build-logic/convention/src/main/kotlin/Versions.kt) file.
+
 ![Open SDK Manager](https://user-images.githubusercontent.com/13914967/202184493-3ee1546b-0a83-4cc9-9e41-d20b0904a0cf.png)
 
 ![Install SDK Platform](https://user-images.githubusercontent.com/13914967/202184534-340a9e7c-7c42-49bd-9cf5-1ec9dcafcf32.png)
@@ -101,6 +104,10 @@ Install Android SDK Platform, Android SDK Build-Tools, Android NDK and cmake via
 ![Install CMake](https://user-images.githubusercontent.com/13914967/202184655-3c1ab47c-432f-4bd7-a508-92096482de50.png)
 
 </details>
+
+### Trouble-shooting
+* Gradle error: "No variants found for ':app'. Check build files to ensure at least one variant exists."
+* * Examine if there are environment variables set such as `_JAVA_OPTIONS` or `JAVA_TOOL_OPTIONS`. You might want to clear them (maybe in the startup script `studio.sh` of Android Studio), as some gradle plugin treats anything in stderr as errors and aborts.
 
 ## Nix
 
