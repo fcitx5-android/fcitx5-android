@@ -25,7 +25,7 @@ class ClearURLsService : JobService() {
     }
 
     override fun onStartJob(params: JobParameters): Boolean {
-        connection = bindFcitxRemoteService(BuildConfig.BUILD_TYPE == "debug") {
+        connection = bindFcitxRemoteService(BuildConfig.MAIN_APPLICATION_ID) {
             Log.d("ClearURLsService", "bind to fcitx")
             it.registerClipboardEntryTransformer(transformer)
         }

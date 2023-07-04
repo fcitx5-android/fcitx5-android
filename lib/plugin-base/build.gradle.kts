@@ -14,7 +14,7 @@ android {
         }
     }
     publishing {
-        singleVariant("release")
+        multipleVariants { allVariants() }
     }
 }
 
@@ -39,7 +39,7 @@ publishing {
         }
     }
     publications {
-        register<MavenPublication>("release") {
+        register<MavenPublication>("default") {
             groupId = "org.fcitx.fcitx5.android.lib"
             artifactId = "plugin_base"
             pom {
@@ -49,7 +49,7 @@ publishing {
                 }
             }
             afterEvaluate {
-                from(components["release"])
+                from(components["default"])
             }
         }
     }

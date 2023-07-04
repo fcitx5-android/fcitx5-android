@@ -3,7 +3,6 @@
 
     <queries>
         <package android:name="org.fcitx.fcitx5.android"/>
-        <package android:name="org.fcitx.fcitx5.android.debug"/>
     </queries>
 
     <application>

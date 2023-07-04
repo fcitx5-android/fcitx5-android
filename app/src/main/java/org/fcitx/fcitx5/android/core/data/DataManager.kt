@@ -8,6 +8,7 @@ import android.os.Build
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.fcitx.fcitx5.android.BuildConfig
 import org.fcitx.fcitx5.android.core.data.DataManager.dataDir
 import org.fcitx.fcitx5.android.utils.Const
 import org.fcitx.fcitx5.android.utils.appContext
@@ -25,7 +26,7 @@ import kotlin.concurrent.withLock
  */
 object DataManager {
 
-    const val PLUGIN_INTENT = "org.fcitx.fcitx5.android.plugin.MANIFEST"
+    const val PLUGIN_INTENT = "${BuildConfig.APPLICATION_ID}.plugin.MANIFEST"
 
     private val lock = ReentrantLock()
 
@@ -74,7 +75,6 @@ object DataManager {
 
         val pm = appContext.packageManager
 
-        val isDebugBuild = Const.buildType == "debug"
         val pluginPackages = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             pm.queryIntentActivities(
                 Intent(PLUGIN_INTENT),
@@ -83,10 +83,8 @@ object DataManager {
         } else {
             @Suppress("DEPRECATION")
             pm.queryIntentActivities(Intent(PLUGIN_INTENT), PackageManager.MATCH_ALL)
-        }.mapNotNull {
-            // Only consider plugin with the same build variant as app's
-            val packageName = it.activityInfo.packageName
-            if (isDebugBuild == packageName.endsWith(".debug")) packageName else null
+        }.map {
+           it.activityInfo.packageName
         }
 
         Timber.d("Detected plugin packages: ${pluginPackages.joinToString()}")
