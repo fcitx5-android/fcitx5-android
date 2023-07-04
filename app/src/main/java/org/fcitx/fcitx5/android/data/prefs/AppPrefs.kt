@@ -315,6 +315,9 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             Int.MAX_VALUE,
             "s"
         ) { clipboardListening.getValue() && clipboardSuggestion.getValue() }
+        val clipboardReturnAfterPaste = switch(
+            R.string.clipboard_return_after_paste, "clipboard_return_after_paste", false
+        ) { clipboardListening.getValue() }
     }
 
     private val providers = mutableListOf<ManagedPreferenceProvider>()
