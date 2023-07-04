@@ -233,4 +233,5 @@
     <string name="following_system_settings">Follow system settings</string>
     <string name="button_sound">Sound on keypress</string>
     <string name="button_sound_volume">Keypress sound volume</string>
+    <string name="clipboard_return_after_paste">Return after paste</string>
 </resources>

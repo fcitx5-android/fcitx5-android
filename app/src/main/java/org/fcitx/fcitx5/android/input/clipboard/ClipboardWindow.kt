@@ -33,9 +33,12 @@ import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.Transition
 import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.TransitionEvent.ClipboardListeningUpdated
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
+import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
+import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.EventStateMachine
+import org.mechdancer.dependency.manager.must
 import splitties.dimensions.dp
 import splitties.resources.styledColor
 import splitties.views.dsl.core.withTheme
@@ -44,6 +47,7 @@ import kotlin.properties.Delegates
 class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
 
     private val service: FcitxInputMethodService by manager.inputMethodService()
+    private val windowManager: InputWindowManager by manager.must()
     private val theme by manager.theme()
 
     private val snackbarCtx by lazy {
@@ -66,6 +70,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     }
 
     private val clipboardEnabledPref = AppPrefs.getInstance().clipboard.clipboardListening
+    private val clipboardReturnAfterPaste by AppPrefs.getInstance().clipboard.clipboardReturnAfterPaste
 
     private val clipboardEntriesPager by lazy {
         Pager(PagingConfig(pageSize = 16)) { ClipboardManager.allEntries() }
@@ -96,6 +101,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
 
             override fun onPaste(entry: ClipboardEntry) {
                 service.commitText(entry.text)
+                if (clipboardReturnAfterPaste) windowManager.attachWindow(KeyboardWindow)
             }
         }
     }
