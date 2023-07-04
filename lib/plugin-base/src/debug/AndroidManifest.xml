@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <queries>
-        <package android:name="org.fcitx.fcitx5.android"/>
+        <package android:name="org.fcitx.fcitx5.android.debug"/>
     </queries>
 
     <application>
@@ -11,7 +11,7 @@
             android:exported="true"
             android:theme="@style/DeviceSettingsTheme">
             <intent-filter>
-                <action android:name="org.fcitx.fcitx5.android.plugin.MANIFEST" />
+                <action android:name="org.fcitx.fcitx5.android.debug.plugin.MANIFEST" />
             </intent-filter>
         </activity>
     </application>

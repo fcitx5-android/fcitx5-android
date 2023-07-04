@@ -26,7 +26,7 @@ import kotlin.concurrent.withLock
  */
 object DataManager {
 
-    const val PLUGIN_INTENT = "${BuildConfig.APPLICATION_ID}.MANIFEST"
+    const val PLUGIN_INTENT = "${BuildConfig.APPLICATION_ID}.plugin.MANIFEST"
 
     private val lock = ReentrantLock()
 
