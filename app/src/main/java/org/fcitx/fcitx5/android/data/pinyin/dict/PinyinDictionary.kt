@@ -2,7 +2,7 @@ package org.fcitx.fcitx5.android.data.pinyin.dict
 
 import java.io.File
 
-abstract class Dictionary {
+abstract class PinyinDictionary {
 
     enum class Type(val ext: String) {
         LibIME("dict"), Sougou("scel"), Text("txt");
@@ -60,7 +60,7 @@ abstract class Dictionary {
     override fun toString(): String = "${javaClass.simpleName}[$name -> ${file.path}]"
 
     companion object {
-        fun new(it: File): Dictionary? = when (Type.fromFileName(it.name)) {
+        fun new(it: File): PinyinDictionary? = when (Type.fromFileName(it.name)) {
             Type.LibIME -> LibIMEDictionary(it)
             Type.Sougou -> SougouDictionary(it)
             Type.Text -> TextDictionary(it)

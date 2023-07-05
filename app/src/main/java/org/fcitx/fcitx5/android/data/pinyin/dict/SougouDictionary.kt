@@ -5,7 +5,7 @@ import org.fcitx.fcitx5.android.data.pinyin.PinyinDictManager
 import org.fcitx.fcitx5.android.utils.errorArg
 import java.io.File
 
-class SougouDictionary(file: File) : Dictionary() {
+class SougouDictionary(file: File) : PinyinDictionary() {
     override var file: File = file
         private set
 

@@ -24,8 +24,9 @@ import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.reloadPinyinDict
 import org.fcitx.fcitx5.android.data.pinyin.PinyinDictManager
-import org.fcitx.fcitx5.android.data.pinyin.dict.Dictionary
+import org.fcitx.fcitx5.android.data.pinyin.dict.BuiltinDictionary
 import org.fcitx.fcitx5.android.data.pinyin.dict.LibIMEDictionary
+import org.fcitx.fcitx5.android.data.pinyin.dict.PinyinDictionary
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
@@ -37,7 +38,7 @@ import org.fcitx.fcitx5.android.utils.queryFileName
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
-class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDictionary> {
+class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDictionary> {
 
     private val viewModel: MainViewModel by activityViewModels()
 
@@ -52,17 +53,22 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
 
     private var uiInitialized = false
 
-    private val ui: BaseDynamicListUi<LibIMEDictionary> by lazy {
-        object : BaseDynamicListUi<LibIMEDictionary>(
+    private val ui: BaseDynamicListUi<PinyinDictionary> by lazy {
+        object : BaseDynamicListUi<PinyinDictionary>(
             requireContext(),
             Mode.Custom(),
-            PinyinDictManager.libIMEDictionaries(),
+            PinyinDictManager.listDictionaries(),
             initCheckBox = { entry ->
-                setOnCheckedChangeListener(null)
-                isChecked = entry.isEnabled
-                setOnCheckedChangeListener { _, isChecked ->
-                    if (isChecked) entry.enable() else entry.disable()
-                    ui.updateItem(ui.indexItem(entry), entry)
+                if (entry is LibIMEDictionary) {
+                    setOnCheckedChangeListener(null)
+                    isChecked = entry.isEnabled
+                    setOnCheckedChangeListener { _, isChecked ->
+                        if (isChecked) entry.enable() else entry.disable()
+                        ui.updateItem(ui.indexItem(entry), entry)
+                    }
+                } else {
+                    isChecked = true
+                    isEnabled = false
                 }
             }
         ) {
@@ -76,13 +82,14 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                     launcher.launch("*/*")
                 }
                 setViewModel(viewModel)
+                removable = { e -> e !is BuiltinDictionary }
             }
 
             override fun updateFAB() {
                 // do nothing
             }
 
-            override fun showEntry(x: LibIMEDictionary): String = x.name
+            override fun showEntry(x: PinyinDictionary): String = x.name
         }.also {
             uiInitialized = true
         }
@@ -135,7 +142,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
                         importErrorDialog(getString(R.string.dict_already_exists))
                         shift(None)
                     }
-                    Dictionary.Type.fromFileName(file.name) == null -> {
+                    PinyinDictionary.Type.fromFileName(file.name) == null -> {
                         importErrorDialog(getString(R.string.invalid_dict))
                         shift(None)
                     }
@@ -201,23 +208,27 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<LibIMEDiction
     }
 
     private fun resetDustman() {
-        dustman.reset(ui.entries.associate { it.name to it.isEnabled })
+        dustman.reset(ui.entries.mapNotNull { it as? LibIMEDictionary }
+            .associate { it.name to it.isEnabled })
     }
 
-    override fun onItemAdded(idx: Int, item: LibIMEDictionary) {
+    override fun onItemAdded(idx: Int, item: PinyinDictionary) {
+        item as LibIMEDictionary
         dustman.addOrUpdate(item.name, item.isEnabled)
     }
 
-    override fun onItemRemoved(idx: Int, item: LibIMEDictionary) {
+    override fun onItemRemoved(idx: Int, item: PinyinDictionary) {
+        item as LibIMEDictionary
         item.file.delete()
         dustman.remove(item.name)
     }
 
-    override fun onItemRemovedBatch(indexed: List<Pair<Int, LibIMEDictionary>>) {
+    override fun onItemRemovedBatch(indexed: List<Pair<Int, PinyinDictionary>>) {
         batchRemove(indexed)
     }
 
-    override fun onItemUpdated(idx: Int, old: LibIMEDictionary, new: LibIMEDictionary) {
+    override fun onItemUpdated(idx: Int, old: PinyinDictionary, new: PinyinDictionary) {
+        new as LibIMEDictionary
         dustman.addOrUpdate(new.name, new.isEnabled)
     }
 

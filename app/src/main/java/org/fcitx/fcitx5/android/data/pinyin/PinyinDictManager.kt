@@ -1,8 +1,10 @@
 package org.fcitx.fcitx5.android.data.pinyin
 
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.data.pinyin.dict.Dictionary
+import org.fcitx.fcitx5.android.core.data.DataManager
+import org.fcitx.fcitx5.android.data.pinyin.dict.BuiltinDictionary
 import org.fcitx.fcitx5.android.data.pinyin.dict.LibIMEDictionary
+import org.fcitx.fcitx5.android.data.pinyin.dict.PinyinDictionary
 import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.errorArg
 import timber.log.Timber
@@ -16,26 +18,33 @@ object PinyinDictManager {
         appContext.getExternalFilesDir(null)!!, "data/pinyin/dictionaries"
     ).also { it.mkdirs() }
 
+    private val builtinPinyinDictDir = File(
+        DataManager.dataDir, "usr/share/fcitx5/pinyin/dictionaries"
+    )
+
     private val nativeDir = File(appContext.applicationInfo.nativeLibraryDir)
 
     private val scel2org5 by lazy { File(nativeDir, scel2org5Name) }
 
-    fun dictionaries(): List<Dictionary> = pinyinDicDir
-        .listFiles()
-        ?.mapNotNull { Dictionary.new(it) }
-        ?.toList() ?: listOf()
-
-    fun libIMEDictionaries(): List<LibIMEDictionary> =
-        dictionaries().mapNotNull { it as? LibIMEDictionary }
+    fun listDictionaries(): List<PinyinDictionary> =
+        (builtinPinyinDictDir.listFiles()?.mapNotNull {
+            it.takeIf { it.extension == PinyinDictionary.Type.LibIME.ext }
+                ?.let(::BuiltinDictionary)
+        } ?: listOf()) +
+                (pinyinDicDir
+                    .listFiles()
+                    ?.mapNotNull { PinyinDictionary.new(it)?.takeIf { it is LibIMEDictionary } }
+                    ?.toList() ?: listOf())
 
     fun importFromFile(file: File): Result<LibIMEDictionary> = runCatching {
-        val raw = Dictionary.new(file) ?: errorArg(R.string.exception_dict_filename, file.path)
+        val raw =
+            PinyinDictionary.new(file) ?: errorArg(R.string.exception_dict_filename, file.path)
         // convert to libime format in dictionaries dir
         // preserve original file name
         val new = raw.toLibIMEDictionary(
             File(
                 pinyinDicDir,
-                file.nameWithoutExtension + ".${Dictionary.Type.LibIME.ext}"
+                file.nameWithoutExtension + ".${PinyinDictionary.Type.LibIME.ext}"
             )
         )
         Timber.d("Converted $raw to $new")
