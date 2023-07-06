@@ -23,9 +23,8 @@ dependencies {
     implementation(libs.aboutlibraries.core)
 }
 
-val versionDetails: groovy.lang.Closure<com.palantir.gradle.gitversion.VersionDetails> by extra
-val details = versionDetails()
-version = details.gitHash
+val gitVersion: groovy.lang.Closure<String> by extra
+version = gitVersion()
 
 publishing {
     repositories {
