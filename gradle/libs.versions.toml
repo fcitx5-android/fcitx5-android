@@ -5,15 +5,15 @@ kotlin = "1.8.22"
 ksp = "1.8.22-1.0.11"
 lifecycle = "2.6.1"
 navigation = "2.6.0"
-room = "2.5.1"
+room = "2.5.2"
 splitties = "3.0.0"
-aboutlibraries = "10.7.0"
+aboutlibraries = "10.8.0"
 
 [libraries]
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 android-desugarJDKLibs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "androidDesugarJDKLibs" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
-kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version = "1.7.1" }
+kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version = "1.7.2" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.5.1" }
 androidx-activity = { module = "androidx.activity:activity-ktx", version = "1.7.2" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.6.1" }
