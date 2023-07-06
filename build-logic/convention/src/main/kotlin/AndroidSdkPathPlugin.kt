@@ -7,7 +7,7 @@ import java.io.File
 
 val Project.androidSdkPath: File
     get() = extensions.extraProperties.get(AndroidSdkPathPlugin.ANDROID_SDK_PATH) as? File
-        ?: error("Cannot find Android SDK path. Did you apply android-sdk-path plugin?")
+        ?: error("Cannot find Android SDK path. Did you apply org.fcitx.fcitx5.android.android-sdk-path plugin?")
 
 val Project.cmakeBinary: String
     get() = androidSdkPath.resolve("cmake/$cmakeVersion/bin/cmake").absolutePath

@@ -1,11 +1,11 @@
 @file:Suppress("UnstableApiUsage")
 
 plugins {
-    id("android-app-convention")
-    id("native-app-convention")
-    id("build-metadata")
-    id("data-descriptor")
-    id("fcitx-component")
+    id("org.fcitx.fcitx5.android.app-convention")
+    id("org.fcitx.fcitx5.android.native-app-convention")
+    id("org.fcitx.fcitx5.android.build-metadata")
+    id("org.fcitx.fcitx5.android.data-descriptor")
+    id("org.fcitx.fcitx5.android.fcitx-component")
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)

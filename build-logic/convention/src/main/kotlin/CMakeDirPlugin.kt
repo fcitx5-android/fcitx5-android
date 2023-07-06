@@ -8,11 +8,18 @@ import java.io.File
 
 val Project.cmakeDir: File
     get() = extensions.extraProperties.get(CMakeDirPlugin.CMAKE_DIR) as? File
-        ?: error("Cannot find cmake dir. Did you apply cmake dir plugin and make your task run after cmake")
+        ?: error("Cannot find cmake dir. Did you apply org.fcitx.fcitx5.android.cmake-dir plugin and make your task `runAfterNativeConfigure`?")
 
 /**
  * Important: make sure that the task runs after than the native task
  * Since we can't declare the dependency relationship, a weaker running order constraint must be enforced
+ */
+
+/**
+ * Note: native build tasks would be called `:buildCMake$Variant[$ABI][$target1,$target2,etc]`
+ * if `externalNativeBuild.cmake.targets` is provided with cmake target names, causing this method
+ * to be inaccurate.
+ * Consider using [Task.runAfterNativeConfigure] instead.
  */
 fun Task.runAfterNativeBuild(project: Project) {
     mustRunAfter("${project.path}:buildCMakeDebug[${project.buildABI}]")
@@ -25,7 +32,7 @@ fun Task.runAfterNativeConfigure(project: Project) {
 }
 
 /**
- * To obtain the cmake dir, the project should apply this plugin and call [Task.runAfterNativeBuild]
+ * To obtain the cmake dir, the project should apply this plugin and call [Task.runAfterNativeConfigure]
  * in the task that accesses [cmakeDir]
  */
 class CMakeDirPlugin : Plugin<Project> {

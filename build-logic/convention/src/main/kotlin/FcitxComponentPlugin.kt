@@ -22,8 +22,8 @@ class FcitxComponentPlugin : Plugin<Project> {
     }
 
     override fun apply(target: Project) {
-        target.pluginManager.apply("android-sdk-path")
-        target.pluginManager.apply("cmake-dir")
+        target.pluginManager.apply("org.fcitx.fcitx5.android.android-sdk-path")
+        target.pluginManager.apply("org.fcitx.fcitx5.android.cmake-dir")
         registerCMakeTask(target, "generate-desktop-file", "config")
         registerCMakeTask(target, "translation-file", "translation")
         registerCleanTask(target)

@@ -1,9 +1,9 @@
 @file:Suppress("UnstableApiUsage")
 
 plugins {
-    id("android-lib-convention")
-    id("native-lib-convention")
-    id("fcitx-headers")
+    id("org.fcitx.fcitx5.android.lib-convention")
+    id("org.fcitx.fcitx5.android.native-lib-convention")
+    id("org.fcitx.fcitx5.android.fcitx-headers")
 }
 
 android {

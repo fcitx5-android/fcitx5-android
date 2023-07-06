@@ -1,5 +1,5 @@
 plugins {
-    id("android-lib-convention")
+    id("org.fcitx.fcitx5.android.lib-convention")
     `maven-publish`
     id("com.palantir.git-version") version "3.0.0"
 }
