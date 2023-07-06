@@ -17,6 +17,7 @@ class FcitxHeadersPlugin : Plugin<Project> {
         get() = file("build/headers")
 
     override fun apply(target: Project) {
+        target.pluginManager.apply("android-sdk-path")
         target.pluginManager.apply("cmake-dir")
         registerInstallTask(target)
         registerCleanTask(target)

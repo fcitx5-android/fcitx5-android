@@ -65,6 +65,10 @@ gradlePlugin {
             id = "native-lib-convention"
             implementationClass = "NativeLibConventionPlugin"
         }
+        register("androidSdkPath") {
+            id = "android-sdk-path"
+            implementationClass = "AndroidSdkPathPlugin"
+        }
     }
 }
 
