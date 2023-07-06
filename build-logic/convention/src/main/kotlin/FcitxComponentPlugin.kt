@@ -54,12 +54,12 @@ class FcitxComponentPlugin : Plugin<Project> {
             doLast {
                 project.exec {
                     workingDir = sourceProject.cmakeDir
-                    commandLine("cmake", "--build", ".", "--target", target)
+                    commandLine(project.cmakeBinary, "--build", ".", "--target", target)
                 }
                 project.exec {
                     workingDir = sourceProject.cmakeDir
                     environment("DESTDIR", project.assetsDir.absolutePath)
-                    commandLine("cmake", "--install", ".", "--component", component)
+                    commandLine(project.cmakeBinary, "--install", ".", "--component", component)
                 }
             }
         }.also {

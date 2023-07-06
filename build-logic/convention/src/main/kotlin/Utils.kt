@@ -1,3 +1,4 @@
+import Versions.cmakeVersion
 import kotlinx.serialization.json.Json
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -30,6 +31,16 @@ internal inline fun Project.ep(env: String, prop: String, block: () -> String) =
         propertyOrDefault(prop) {
             block()
         }
+    }
+
+val Project.cmakeBinary: String
+    get() {
+        val sdkRoot = envOrDefault("ANDROID_HOME") {
+            envOrDefault("ANDROID_SDK_ROOT") {
+                return "cmake"
+            }
+        }
+        return "$sdkRoot/cmake/$cmakeVersion/bin/cmake"
     }
 
 val Project.versionCatalog: VersionCatalog

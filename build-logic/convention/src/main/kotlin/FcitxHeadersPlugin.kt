@@ -30,7 +30,7 @@ class FcitxHeadersPlugin : Plugin<Project> {
                 project.exec {
                     workingDir = project.cmakeDir
                     environment("DESTDIR", project.headersInstallDir.absolutePath)
-                    commandLine("cmake", "--install", ".", "--component", "header")
+                    commandLine(project.cmakeBinary, "--install", ".", "--component", "header")
                 }
             }
         }
