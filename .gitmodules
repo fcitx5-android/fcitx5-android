@@ -21,4 +21,4 @@
 	url = git@github.com:fcitx5-android/anthy-cmake.git
 [submodule "plugin/anthy/src/main/cpp/fcitx5-anthy"]
 	path = plugin/anthy/src/main/cpp/fcitx5-anthy
-	url = git@github.com:fcitx5-android/fcitx5-anthy.git
+	url = git@github.com:fcitx/fcitx5-anthy.git
