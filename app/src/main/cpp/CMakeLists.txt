@@ -37,7 +37,7 @@ find_package(Libevent)
 
 # prebuilt boost
 set(BOOST_VERSION "1.80.0")
-set(BOOST_MODULES headers filesystem atomic iostreams regex)
+set(BOOST_MODULES headers filesystem atomic iostreams)
 set(BOOST_ROOT "${PREBUILT_DIR}/boost/${ANDROID_ABI}")
 set(Boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
 foreach(mod IN LISTS BOOST_MODULES)
