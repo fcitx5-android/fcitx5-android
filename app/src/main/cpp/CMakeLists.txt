@@ -51,7 +51,8 @@ add_subdirectory(libime)
 target_compile_options(kenlm PRIVATE "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}/libime/src/libime/core/kenlm=.")
 
 # prebuilt lua
-include("${PREBUILT_DIR}/lua/${ANDROID_ABI}/lib/cmake/LuaConfig.cmake")
+set(Lua_DIR "${PREBUILT_DIR}/lua/${ANDROID_ABI}/share/cmake/Lua")
+find_package(Lua CONFIG)
 
 # we are using static linking
 option(USE_DLOPEN "" OFF)
