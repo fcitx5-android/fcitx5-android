@@ -1,6 +1,10 @@
 name: F-Droid
 
 on:
+  pull_request:
+    paths:
+      - '.github/workflows/fdroid.yml'
+  workflow_dispatch:
   repository_dispatch:
 
 defaults:
