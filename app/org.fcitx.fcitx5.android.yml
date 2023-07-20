@@ -22,7 +22,7 @@ Builds:
       - apt-get update
       - apt-get install -y g++ libtool make automake gettext bzip2 xz-utils
         extra-cmake-modules openjdk-17-jdk-headless opencc
-        ghc libghc-shake-dev libghc-aeson-pretty-dev
+        ghc libghc-shake-dev libghc-aeson-pretty-dev libghc-js-flot-data haskell-js-dgtable-utils
       - update-java-alternatives -a
       - apt-get install -y -t bullseye-backports libime-bin fcitx5-modules
     gradle:
