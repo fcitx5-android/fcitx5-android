@@ -1,6 +1,16 @@
 name: F-Droid
 
 on:
+  pull_request:
+    paths:
+      - '.github/workflows/fdroid.yml'
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: build number on Jenkins Job fcitx5-android
+        type: string
+        required: true
+        default: lastSuccessfulBuild
   repository_dispatch:
 
 defaults:
@@ -51,29 +61,41 @@ jobs:
           chown -R vagrant $GITHUB_WORKSPACE
 
       - name: Build
+        env:
+          BUILD_NUMBER: ${{ inputs.build_number || 'lastSuccessfulBuild' }}
         run: |
           set -x
-          curl -Lo /usr/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          curl -Lo /usr/bin/yq "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
           chmod +x /usr/bin/yq
-          build_metadata=$(curl https://jenkins.fcitx-im.org/job/android/job/fcitx5-android/lastSuccessfulBuild/artifact/out/build-metadata.json)
+          build_metadata=$(curl "https://jenkins.fcitx-im.org/job/android/job/fcitx5-android/$BUILD_NUMBER/artifact/out/build-metadata.json")
           versionName=$(echo $build_metadata | yq ".versionName")
           commitHash=$(echo $build_metadata | yq ".commitHash")
           timestamp=$(echo $build_metadata | yq ".timestamp")
-          baseVersionCode=$(curl https://raw.githubusercontent.com/fcitx5-android/fcitx5-android/$commitHash/build-logic/convention/src/main/kotlin/Versions.kt | grep "baseVersionCode =" | sed 's/.*= //')
+          baseVersionCode=$(curl -L "https://github.com/fcitx5-android/fcitx5-android/raw/$commitHash/build-logic/convention/src/main/kotlin/Versions.kt" | grep "baseVersionCode =" | sed 's/.*= //')
           declare -A abi_list
           abi_list=([armeabi-v7a]=1 [arm64-v8a]=2 [x86]=3 [x86_64]=4)
           i=${abi_list[${{ matrix.abi }}]}
-          versionCode=$(expr $baseVersionCode \* 10 + $i)
+          versionCode=$(($baseVersionCode * 10 + $i))
 
           source /etc/profile.d/bsenv.sh
           metadata="$home_vagrant/metadata/org.fcitx.fcitx5.android.yml"
-          curl -Lo $metadata "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/app/org.fcitx.fcitx5.android.yml"
+          curl -Lo $metadata "https://github.com/${{ github.repository }}/raw/${{ github.sha }}/app/org.fcitx.fcitx5.android.yml"
           sed -i s/%ts/$timestamp/g $metadata
           sed -i s/%abi/${{ matrix.abi }}/g $metadata
           yq -i ".Builds[0] |=
               (.versionName = \"$versionName\") |=
               (.versionCode = $versionCode) |=
               (.commit = \"$commitHash\")
+          " $metadata
+          prebuiltTreeURL=$(curl -L \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${{ github.token }}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/${{ github.repository }}/contents/lib/fcitx5/src/main/cpp/prebuilt?ref=${{ github.sha }}" \
+              | yq .html_url)
+          prebuilderSHA=$(curl -L "${prebuiltTreeURL/\/tree\//\/raw\/}/toolchain-versions.json" | yq ".prebuilder")
+          yq -i ".Builds[0].srclibs[0] |=
+              \"fcitx5-android-prebuilder@${prebuilderSHA}\"
           " $metadata
           yq ".Builds[0]" $metadata
           cp $metadata $GITHUB_WORKSPACE/metadata
