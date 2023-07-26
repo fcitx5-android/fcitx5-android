@@ -75,15 +75,16 @@ object IniPrettyPrinter {
         val sb = StringBuilder()
         fun prettyProperty(property: Ini.Property) {
             sb.append(property.name)
-            if (prettyOptions.spaceAroundSeparator)
+            if (prettyOptions.spaceAroundSeparator) {
                 sb.append(' ')
+            }
             when (prettyOptions.separator) {
                 PrettyOptions.Separator.Colon -> sb.append(':')
                 PrettyOptions.Separator.Equal -> sb.append('=')
             }
-            if (prettyOptions.spaceAroundSeparator)
-
+            if (prettyOptions.spaceAroundSeparator) {
                 sb.append(' ')
+            }
             sb.appendLine(property.value)
         }
 
@@ -100,6 +101,9 @@ object IniPrettyPrinter {
             prettyComments(it.comments)
             prettyProperty(it.data)
         }
+        if (ini.properties.isNotEmpty()) {
+            sb.appendLine()
+        }
         ini.sections.forEach { (n, properties) ->
             prettyComments(properties.comments)
             sb.appendLine("[$n]")
@@ -107,6 +111,7 @@ object IniPrettyPrinter {
                 prettyComments(it.comments)
                 prettyProperty(it.data)
             }
+            sb.appendLine()
         }
         prettyComments(ini.trailingComments)
         return sb.toString()
@@ -126,18 +131,29 @@ object IniParser {
     @Language("RegExp")
     private val sectionName = lexeme(regex("[a-zA-Z0-9._/]+"))
 
-    @Language("RegExp")
-    private val value = lexeme(regex(".+"))
+    private val value = parser {
+        @Language("RegExp")
+        val data = regex("[^\n]*")
+        whitespace()
+        data.trim()
+    }
 
-    @Language("RegExp")
-    private val comment = lexeme(regex("[;#].*"))
-    private val colon = lexeme(char(':'))
-    private val equal = lexeme(char('='))
-    private val bOpen = lexeme(char('['))
-    private val bClose = lexeme(char(']'))
+    private val hash = char('#')
+    private val semi = char(';')
+    private val comment = parser {
+        oneOf(hash, semi)
+        @Language("RegExp")
+        val data = regex("[^\n]*")
+        whitespace()
+        data
+    }
+    private val colon = char(':')
+    private val equal = char('=')
+    private val bOpen = parser { whitespace(); char('[') }
+    private val bClose = parser { char(']'); whitespace() }
 
     private inline fun <T> annotated(crossinline parser: Parser<T>) = parser {
-        val comments = many(comment).map { it.drop(1) }
+        val comments = many(comment)
         val data = parser()
         Ini.Annotated(comments.toMutableList(), data)
     }
@@ -156,9 +172,8 @@ object IniParser {
     })
 
     private val ini = parser {
-        val globals = mutableListOf<Ini.Annotated<Ini.Property>>()
-        val sections =
-            mutableMapOf<String, Ini.Annotated<MutableList<Ini.Annotated<Ini.Property>>>>()
+        val globals: IniProperties = mutableListOf()
+        val sections = mutableMapOf<String, Ini.Annotated<IniProperties>>()
         whitespace()
         many {
             oneOf(
