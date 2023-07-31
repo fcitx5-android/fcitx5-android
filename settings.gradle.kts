@@ -17,11 +17,12 @@ dependencyResolutionManagement {
     }
 }
 
+rootProject.name = "fcitx5-android"
+
+include(":lib:common")
 include(":lib:fcitx5")
 include(":codegen")
 include(":app")
 include(":lib:plugin-base")
 include(":plugin:anthy")
-rootProject.name = "fcitx5-android"
-include(":lib:common")
 include(":plugin:clipboard-filter")
