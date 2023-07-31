@@ -6,6 +6,7 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.drawable.*
+import android.util.TypedValue
 import android.view.View
 import android.widget.ImageView
 import androidx.annotation.ColorInt
@@ -214,7 +215,7 @@ open class TextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Text) 
         isFocusable = false
         background = null
         text = def.displayText
-        textSize = def.textSize
+        setTextSize(TypedValue.COMPLEX_UNIT_PX, def.textSize * 3.0f)
         textDirection = View.TEXT_DIRECTION_FIRST_STRONG_LTR
         // keep original typeface, apply textStyle only
         setTypeface(typeface, def.textStyle)
@@ -243,11 +244,10 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
         isClickable = false
         isFocusable = false
         // TODO hardcoded alt text size
-        textSize = 10.7f
+        setTextSize(TypedValue.COMPLEX_UNIT_PX, 32.0f)
         setTypeface(typeface, Typeface.BOLD)
         text = def.altText
         textDirection = View.TEXT_DIRECTION_FIRST_STRONG_LTR
-        // TODO darken altText color
         setTextColor(
             when (def.variant) {
                 Variant.Normal, Variant.AltForeground, Variant.Alternative -> theme.altKeyTextColor
