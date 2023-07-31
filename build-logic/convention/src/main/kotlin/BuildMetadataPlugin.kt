@@ -17,7 +17,6 @@ import org.gradle.kotlin.dsl.task
 class BuildMetadataPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
-        @Suppress("UnstableApiUsage")
         target.extensions.configure<BaseAppModuleExtension> {
             buildFeatures {
                 buildConfig = true

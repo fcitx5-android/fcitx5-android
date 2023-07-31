@@ -10,7 +10,6 @@ class NativeLibConventionPlugin : NativeBaseConventionPlugin() {
 
         target.pluginManager.apply("com.android.library")
 
-        @Suppress("UnstableApiUsage")
         target.extensions.configure<LibraryExtension> {
             packaging {
                 jniLibs {

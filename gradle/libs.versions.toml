@@ -1,13 +1,13 @@
 [versions]
-androidGradlePlugin = "8.0.2"
+androidGradlePlugin = "8.1.0"
 androidDesugarJDKLibs = "2.0.3"
-kotlin = "1.8.22"
-ksp = "1.8.22-1.0.11"
+kotlin = "1.9.0"
+ksp = "1.9.0-1.0.12"
 lifecycle = "2.6.1"
 navigation = "2.6.0"
 room = "2.5.2"
 splitties = "3.0.0"
-aboutlibraries = "10.8.0"
+aboutlibraries = "10.8.3"
 
 [libraries]
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
@@ -28,17 +28,17 @@ androidx-lifecycle-common = { module = "androidx.lifecycle:lifecycle-common-java
 androidx-lifecycle-service = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycle" }
 androidx-navigation-fragment = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigation" }
 androidx-navigation-ui = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigation" }
-androidx-paging = { module = "androidx.paging:paging-runtime-ktx", version = "3.1.1" }
+androidx-paging = { module = "androidx.paging:paging-runtime-ktx", version = "3.2.0" }
 androidx-preference = { module = "androidx.preference:preference-ktx", version = "1.2.0" }
-androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version = "1.3.0" }
+androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version = "1.3.1" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
-androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version = "1.0.0" }
+androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version = "1.1.0-beta02" }
 material = { module = "com.google.android.material:material", version = "1.9.0" }
 konbini = { group = "cc.ekblad.konbini", name = "konbini", version = "0.1.3" }
-arrow = { module = "io.arrow-kt:arrow-core", version = "1.1.5" }
+arrow = { module = "io.arrow-kt:arrow-core", version = "1.2.0" }
 imagecropper = { module = "com.vanniktech:android-image-cropper", version = "4.5.0" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version = "3.0.0" }
 dependency = { module = "org.mechdancer:dependency", version = "0.1.2" }

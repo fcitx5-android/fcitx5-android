@@ -9,7 +9,6 @@ class NativeAppConventionPlugin : NativeBaseConventionPlugin() {
 
         target.pluginManager.apply("com.android.application")
 
-        @Suppress("UnstableApiUsage")
         target.extensions.configure<BaseAppModuleExtension> {
             packaging {
                 jniLibs {

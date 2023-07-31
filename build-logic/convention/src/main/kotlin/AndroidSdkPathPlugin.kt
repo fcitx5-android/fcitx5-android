@@ -22,7 +22,6 @@ class AndroidSdkPathPlugin : Plugin<Project> {
         project.extensions.extraProperties.set(ANDROID_SDK_PATH, file)
     }
 
-    @Suppress("UnstableApiUsage")
     override fun apply(target: Project) {
         val androidComponents =
             target.extensions.getByName<AndroidComponentsExtension<*, *, *>>("androidComponents")

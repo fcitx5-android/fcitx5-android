@@ -12,8 +12,7 @@ open class AndroidBaseConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         target.pluginManager.apply("org.jetbrains.kotlin.android")
 
-        @Suppress("UnstableApiUsage")
-        target.extensions.configure<CommonExtension<*, *, *, *>>("android") {
+        target.extensions.configure<CommonExtension<*, *, *, *, *>>("android") {
             compileSdk = Versions.compileSdk
             buildToolsVersion = target.buildTools
             defaultConfig {
