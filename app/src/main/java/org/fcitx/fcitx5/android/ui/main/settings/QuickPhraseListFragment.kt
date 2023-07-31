@@ -19,12 +19,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import arrow.core.None
-import arrow.core.Option
-import arrow.core.continuations.option
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.reloadQuickPhrase
 import org.fcitx.fcitx5.android.data.quickphrase.BuiltinQuickPhrase
@@ -35,6 +33,7 @@ import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import org.fcitx.fcitx5.android.utils.NaiveDustman
+import org.fcitx.fcitx5.android.utils.errorDialog
 import org.fcitx.fcitx5.android.utils.materialTextInput
 import org.fcitx.fcitx5.android.utils.notificationManager
 import org.fcitx.fcitx5.android.utils.queryFileName
@@ -45,7 +44,6 @@ import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.verticalLayout
 import splitties.views.imageResource
 import splitties.views.setPaddingDp
-import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
 class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
@@ -210,56 +208,40 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
         val nm = notificationManager
         lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
             val id = IMPORT_ID++
-            option {
-                val file = uri.queryFileName(contentResolver).bind().let { File(it) }
-                when {
-                    file.nameWithoutExtension in ui.entries.map { it.name } -> {
-                        errorDialog(getString(R.string.quickphrase_already_exists))
-                        shift(None)
+            val fileName = uri.queryFileName(contentResolver) ?: return@launch
+            val extName = fileName.substringAfterLast('.')
+            if (extName != QuickPhrase.EXT) {
+                importErrorDialog(getString(R.string.invalid_quickphrase))
+            }
+            val entryName = fileName.substringBeforeLast('.')
+            if (ui.entries.any { it.name == entryName }) {
+                importErrorDialog(getString(R.string.quickphrase_already_exists))
+            }
+            NotificationCompat.Builder(requireContext(), CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_baseline_format_quote_24)
+                .setContentTitle(getString(R.string.quickphrase_editor))
+                .setContentText("${getString(R.string.importing)} $entryName")
+                .setOngoing(true)
+                .setProgress(100, 0, true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .build().let { nm.notify(id, it) }
+            contentResolver.openInputStream(uri)?.use {
+                QuickPhraseManager.importFromInputStream(it, entryName)
+                    .onSuccess {
+                        withContext(Dispatchers.Main) {
+                            ui.addItem(item = it)
+                        }
                     }
-                    file.extension != QuickPhrase.EXT -> {
-                        errorDialog(getString(R.string.invalid_quickphrase))
-                        shift(None)
+                    .onFailure { e ->
+                        importErrorDialog(e.localizedMessage ?: e.stackTraceToString())
                     }
-                    else -> Unit
-                }
-
-                NotificationCompat.Builder(requireContext(), CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ic_baseline_format_quote_24)
-                    .setContentTitle(getString(R.string.quickphrase_editor))
-                    .setContentText("${getString(R.string.importing)} ${file.nameWithoutExtension}")
-                    .setOngoing(true)
-                    .setProgress(100, 0, true)
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .build().let { nm.notify(id, it) }
-                val inputStream = Option.catch { contentResolver.openInputStream(uri) }
-                    .mapNotNull { it }
-                    .bind()
-                runCatching {
-                    inputStream.use { i ->
-                        QuickPhraseManager.importFromInputStream(i, file.name).getOrThrow()
-                    }
-                }.onFailure {
-                    errorDialog(it.localizedMessage ?: it.stackTraceToString())
-                }.onSuccess {
-                    launch(Dispatchers.Main) {
-                        ui.addItem(item = it)
-                    }
-                }
             }
             nm.cancel(id)
         }
     }
 
-    private fun errorDialog(message: String) {
-        lifecycleScope.launch {
-            AlertDialog.Builder(requireContext())
-                .setTitle(R.string.import_error)
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok) { _, _ -> }
-                .setIconAttribute(android.R.attr.alertDialogIcon)
-                .show()
-        }
+    private suspend fun importErrorDialog(message: String) {
+        errorDialog(requireContext(), getString(R.string.import_error), message)
     }
 
     private fun reloadQuickPhrase() {

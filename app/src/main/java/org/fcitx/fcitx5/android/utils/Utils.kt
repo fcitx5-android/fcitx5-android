@@ -25,6 +25,7 @@ import android.widget.SeekBar
 import android.widget.Toast
 import androidx.annotation.AttrRes
 import androidx.annotation.IdRes
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.ColorUtils
@@ -36,7 +37,6 @@ import androidx.fragment.app.FragmentManager
 import androidx.navigation.NavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
-import arrow.core.toOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.FcitxApplication
@@ -63,6 +63,14 @@ fun ViewPager2.getCurrentFragment(fragmentManager: FragmentManager): Fragment? =
 val appContext: Context
     get() = FcitxApplication.getInstance().applicationContext
 
+fun Context.toast(string: String, duration: Int = Toast.LENGTH_SHORT) {
+    Toast.makeText(this, string, duration).show()
+}
+
+fun Context.toast(@StringRes resId: Int, duration: Int = Toast.LENGTH_SHORT) {
+    toast(getString(resId), duration)
+}
+
 fun Uri.queryFileName(contentResolver: ContentResolver) =
     contentResolver.query(
         this,
@@ -71,7 +79,7 @@ fun Uri.queryFileName(contentResolver: ContentResolver) =
         val index = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
         it.moveToFirst()
         it.getString(index)
-    }.toOption()
+    }
 
 val EditText.str: String get() = editableText.toString()
 

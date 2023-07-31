@@ -4,9 +4,16 @@ import android.content.Context
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.findNavController
-import androidx.preference.*
+import androidx.preference.DialogPreference
+import androidx.preference.EditTextPreference
+import androidx.preference.ListPreference
+import androidx.preference.Preference
 import androidx.preference.Preference.SummaryProvider
-import arrow.core.redeem
+import androidx.preference.PreferenceCategory
+import androidx.preference.PreferenceDataStore
+import androidx.preference.PreferenceManager
+import androidx.preference.PreferenceScreen
+import arrow.core.getOrElse
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Key
 import org.fcitx.fcitx5.android.core.RawConfig
@@ -16,7 +23,15 @@ import org.fcitx.fcitx5.android.ui.main.settings.addon.AddonConfigFragment
 import org.fcitx.fcitx5.android.ui.main.settings.global.GlobalConfigFragment
 import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor
-import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.*
+import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.ConfigBool
+import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.ConfigCustom
+import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.ConfigEnum
+import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.ConfigEnumList
+import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.ConfigExternal
+import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.ConfigInt
+import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.ConfigKey
+import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.ConfigList
+import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.ConfigString
 import org.fcitx.fcitx5.android.utils.config.ConfigType
 import org.fcitx.fcitx5.android.utils.parcelableArray
 
@@ -38,7 +53,8 @@ object PreferenceScreenFactory {
 
         ConfigDescriptor
             .parseTopLevel(desc)
-            .redeem({ throw it }) {
+            .getOrElse { throw it }
+            .let {
                 screen.title = it.name
                 it.values.forEach { d ->
                     general(context, fragmentManager, cfg, screen, d, store, save)

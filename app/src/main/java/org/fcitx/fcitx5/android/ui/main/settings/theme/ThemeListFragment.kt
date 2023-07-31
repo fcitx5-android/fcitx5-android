@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.Keep
@@ -24,9 +23,7 @@ import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
 import org.fcitx.fcitx5.android.utils.applyNavBarInsetsBottomPadding
 import org.fcitx.fcitx5.android.utils.bindOnNotNull
-import org.fcitx.fcitx5.android.utils.errorArg
 import org.fcitx.fcitx5.android.utils.errorDialog
-import org.fcitx.fcitx5.android.utils.identity
 import org.fcitx.fcitx5.android.utils.queryFileName
 import org.fcitx.fcitx5.android.utils.toast
 import splitties.dimensions.dp
@@ -103,40 +100,31 @@ class ThemeListFragment : Fragment() {
         }
         importLauncher =
             registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-                lifecycleScope.withLoadingDialog(requireContext()) {
+                if (uri == null) return@registerForActivityResult
+                val ctx = requireContext()
+                lifecycleScope.withLoadingDialog(ctx) {
                     withContext(NonCancellable + Dispatchers.IO) {
-                        runCatching {
-                            uri?.let {
-                                it.queryFileName(requireContext().contentResolver)
-                                    .orNull()
-                                    ?.let { name ->
-                                        name.endsWith(".zip")
-                                            .takeIf(Boolean::identity)
-                                            ?: errorArg(R.string.exception_theme_filename, name)
-                                    }
-                                requireContext().contentResolver.openInputStream(it)
-                            }
-                        }.bindOnNotNull {
+                        val name = uri.queryFileName(ctx.contentResolver) ?: return@withContext
+                        if (!name.endsWith(".zip")) {
+                            importErrorDialog(getString(R.string.exception_theme_filename))
+                        }
+                        ctx.contentResolver.openInputStream(uri)?.use {
                             ThemeManager.importTheme(it)
-                        }?.onSuccess { (newCreated, theme, migrated) ->
-                            withContext(Dispatchers.Main) {
-                                if (newCreated)
-                                    adapter.prependTheme(theme)
-                                else
-                                    adapter.replaceTheme(theme)
-                                if (migrated)
-                                    Toast.makeText(
-                                        requireContext(),
-                                        getString(R.string.theme_migrated),
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                            }
-                        }?.onFailure {
-                            errorDialog(
-                                requireContext(),
-                                getString(R.string.import_error),
-                                it.localizedMessage ?: it.stackTraceToString()
-                            )
+                                .onSuccess { (newCreated, theme, migrated) ->
+                                    withContext(Dispatchers.Main) {
+                                        if (newCreated) {
+                                            adapter.prependTheme(theme)
+                                        } else {
+                                            adapter.replaceTheme(theme)
+                                        }
+                                        if (migrated) {
+                                            ctx.toast(R.string.theme_migrated)
+                                        }
+                                    }
+                                }
+                                .onFailure { e ->
+                                    importErrorDialog(e.localizedMessage ?: e.stackTraceToString())
+                                }
                         }
                     }
                 }
@@ -156,6 +144,10 @@ class ThemeListFragment : Fragment() {
                     }
                 }
             }
+    }
+
+    private suspend fun importErrorDialog(message: String) {
+        errorDialog(requireContext(), getString(R.string.import_error), message)
     }
 
     override fun onCreateView(

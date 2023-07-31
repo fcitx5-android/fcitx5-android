@@ -2,12 +2,10 @@ package org.fcitx.fcitx5.android.ui.main
 
 import android.os.Bundle
 import android.os.Debug
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
-import androidx.preference.SwitchPreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -71,11 +69,7 @@ class DeveloperFragment : PaddingPreferenceFragment() {
                         lifecycleScope.launch(Dispatchers.IO) {
                             DataManager.deleteAndSync()
                             launch(Dispatchers.Main) {
-                                Toast.makeText(
-                                    context,
-                                    getString(R.string.synced),
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                context.toast(R.string.synced)
                             }
                         }
                     }
@@ -85,7 +79,7 @@ class DeveloperFragment : PaddingPreferenceFragment() {
             addPreference(R.string.clear_clb_db) {
                 lifecycleScope.launch {
                     ClipboardManager.nukeTable()
-                    Toast.makeText(context, getString(R.string.done), Toast.LENGTH_SHORT).show()
+                    context.toast(R.string.done)
                 }
             }
             addPreference(R.string.capture_heap_dump) {

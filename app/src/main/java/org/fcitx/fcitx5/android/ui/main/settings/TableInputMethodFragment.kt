@@ -24,12 +24,11 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.data.table.TableBasedInputMethod
 import org.fcitx.fcitx5.android.data.table.TableManager
+import org.fcitx.fcitx5.android.data.table.dict.Dictionary
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import org.fcitx.fcitx5.android.utils.NaiveDustman
-import org.fcitx.fcitx5.android.utils.bindOnNotNull
-import org.fcitx.fcitx5.android.utils.errorArg
 import org.fcitx.fcitx5.android.utils.errorDialog
 import org.fcitx.fcitx5.android.utils.notificationManager
 import org.fcitx.fcitx5.android.utils.queryFileName
@@ -187,9 +186,10 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
             }
     }
 
-    private fun updateFilesSelectionDialogButton() {
+    private fun updateFilesSelectionDialogButton(importing: Boolean = false) {
         filesSelectionDialog?.apply {
-            getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = (confUri != null && dictUri != null)
+            getButton(AlertDialog.BUTTON_POSITIVE).isEnabled =
+                if (importing) false else (confUri != null && dictUri != null)
         }
     }
 
@@ -202,28 +202,28 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
         val nm = notificationManager
         lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
             val importId = IMPORT_ID++
-            runCatching {
-                val fileName = uri.queryFileName(contentResolver).orNull() ?: return@launch
-                if (!fileName.endsWith(".zip")) {
-                    errorArg(R.string.exception_table_im_filename, fileName)
-                }
-                NotificationCompat.Builder(requireContext(), CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ic_baseline_library_books_24)
-                    .setContentTitle(getString(R.string.table_im))
-                    .setContentText("${getString(R.string.importing)} $fileName")
-                    .setOngoing(true)
-                    .setProgress(100, 0, true)
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .build().let { nm.notify(importId, it) }
-                contentResolver.openInputStream(uri)
-            }.bindOnNotNull {
+            val fileName = uri.queryFileName(contentResolver) ?: return@launch
+            if (!fileName.endsWith(".zip")) {
+                importErrorDialog(getString(R.string.exception_table_im_filename, fileName))
+            }
+            NotificationCompat.Builder(requireContext(), CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_baseline_library_books_24)
+                .setContentTitle(getString(R.string.table_im))
+                .setContentText("${getString(R.string.importing)} $fileName")
+                .setOngoing(true)
+                .setProgress(100, 0, true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .build().let { nm.notify(importId, it) }
+            contentResolver.openInputStream(uri)?.use {
                 TableManager.importFromZip(it)
-            }?.onFailure {
-                importErrorDialog(it.localizedMessage ?: it.stackTraceToString())
-            }?.onSuccess {
-                launch(Dispatchers.Main) {
-                    ui.addItem(item = it)
-                }
+                    .onSuccess {
+                        withContext(Dispatchers.Main) {
+                            ui.addItem(item = it)
+                        }
+                    }
+                    .onFailure { e ->
+                        importErrorDialog(e.localizedMessage ?: e.stackTraceToString())
+                    }
             }
             nm.cancel(importId)
         }
@@ -231,7 +231,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
 
     private fun prepareConfFromUri(uri: Uri) {
         lifecycleScope.launch {
-            val fileName = uri.queryFileName(contentResolver).orNull() ?: return@launch
+            val fileName = uri.queryFileName(contentResolver) ?: ""
             if (!fileName.removeSuffix(".in").endsWith(".conf")) {
                 importErrorDialog(getString(R.string.exception_table_conf_filename, fileName))
                 return@launch
@@ -244,8 +244,8 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
 
     private fun prepareDictFromUri(uri: Uri) {
         lifecycleScope.launch {
-            val fileName = uri.queryFileName(contentResolver).orNull() ?: return@launch
-            if (!fileName.endsWith(".dict") && !fileName.endsWith(".txt")) {
+            val fileName = uri.queryFileName(contentResolver) ?: ""
+            if (Dictionary.Type.fromFileName(fileName) == null) {
                 importErrorDialog(getString(R.string.exception_table_dict_filename, fileName))
                 return@launch
             }
@@ -257,50 +257,44 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
 
     private fun importConfAndDictUri() {
         val nm = notificationManager
-        lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
-            if (confUri == null || dictUri == null) {
+        val confUri = this@TableInputMethodFragment.confUri
+        val dictUri = this@TableInputMethodFragment.dictUri
+        if (confUri == null || dictUri == null) {
+            lifecycleScope.launch {
                 importErrorDialog(getString(R.string.exception_table_import_both_files))
-                return@launch
             }
+            return
+        }
+        lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
             val importId = IMPORT_ID++
-            runCatching {
-                val confName = confUri?.queryFileName(contentResolver)?.orNull() ?: return@launch
-                val dictName = dictUri?.queryFileName(contentResolver)?.orNull() ?: return@launch
-                NotificationCompat.Builder(requireContext(), CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ic_baseline_library_books_24)
-                    .setContentTitle(getString(R.string.table_im))
-                    .setContentText("${getString(R.string.importing)} $confName")
-                    .setOngoing(true)
-                    .setProgress(100, 0, true)
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .build().let { nm.notify(importId, it) }
-                val confStream = contentResolver.openInputStream(confUri!!) ?: return@launch
-                val dictStream = contentResolver.openInputStream(dictUri!!) ?: return@launch
-                withContext(Dispatchers.Main) {
-                    filesSelectionDialog?.apply {
-                        getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = false
+            val confName = confUri.queryFileName(contentResolver) ?: return@launch
+            val dictName = dictUri.queryFileName(contentResolver) ?: return@launch
+            NotificationCompat.Builder(requireContext(), CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_baseline_library_books_24)
+                .setContentTitle(getString(R.string.table_im))
+                .setContentText("${getString(R.string.importing)} $confName")
+                .setOngoing(true)
+                .setProgress(100, 0, true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .build().let { nm.notify(importId, it) }
+            val confStream = contentResolver.openInputStream(confUri) ?: return@launch
+            val dictStream = contentResolver.openInputStream(dictUri) ?: return@launch
+            withContext(Dispatchers.Main) {
+                updateFilesSelectionDialogButton(importing = true)
+            }
+            TableManager.importFromConfAndDict(confName, confStream, dictName, dictStream)
+                .onSuccess {
+                    withContext(Dispatchers.Main) {
+                        dismissFilesSelectionDialog()
+                        ui.addItem(item = it)
                     }
                 }
-                TableManager.importFromConfAndDict(confName, confStream, dictName, dictStream)
-                    .getOrThrow()
-            }.onFailure {
-                importErrorDialog(it.localizedMessage ?: it.stackTraceToString())
-            }.onSuccess { new ->
-                launch(Dispatchers.Main) {
-                    dismissFilesSelectionDialog()
-                    // add or update
-                    ui.entries
-                        .indexOfFirst { it.name == new.name }
-                        .takeIf { it != -1 }
-                        ?.let { ui.updateItem(it, new) }
-                        ?: run { ui.addItem(item = new) }
+                .onFailure {
+                    importErrorDialog(it.localizedMessage ?: it.stackTraceToString())
                 }
-            }
             nm.cancel(importId)
             withContext(Dispatchers.Main) {
-                filesSelectionDialog?.apply {
-                    getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = true
-                }
+                updateFilesSelectionDialogButton(importing = false)
             }
         }
     }

@@ -15,9 +15,6 @@ import androidx.core.app.NotificationCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import arrow.core.None
-import arrow.core.Option
-import arrow.core.continuations.option
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -35,7 +32,6 @@ import org.fcitx.fcitx5.android.utils.errorDialog
 import org.fcitx.fcitx5.android.utils.notificationManager
 import org.fcitx.fcitx5.android.utils.parcelable
 import org.fcitx.fcitx5.android.utils.queryFileName
-import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
 class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDictionary> {
@@ -135,42 +131,32 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDiction
         val nm = notificationManager
         lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
             val id = IMPORT_ID++
-            option {
-                val file = uri.queryFileName(contentResolver).bind().let { File(it) }
-                when {
-                    file.nameWithoutExtension in ui.entries.map { it.name } -> {
-                        importErrorDialog(getString(R.string.dict_already_exists))
-                        shift(None)
+            val fileName = uri.queryFileName(contentResolver) ?: return@launch
+            if (PinyinDictionary.Type.fromFileName(fileName) == null) {
+                importErrorDialog(getString(R.string.invalid_dict))
+            }
+            val entryName = fileName.substringBeforeLast('.')
+            if (ui.entries.any { it.name == entryName }) {
+                importErrorDialog(getString(R.string.dict_already_exists))
+            }
+            NotificationCompat.Builder(requireContext(), CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_baseline_library_books_24)
+                .setContentTitle(getString(R.string.pinyin_dict))
+                .setContentText("${getString(R.string.importing)} $entryName")
+                .setOngoing(true)
+                .setProgress(100, 0, true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .build().let { nm.notify(id, it) }
+            contentResolver.openInputStream(uri)?.use {
+                PinyinDictManager.importFromInputStream(it, fileName)
+                    .onSuccess {
+                        launch(Dispatchers.Main) {
+                            ui.addItem(item = it)
+                        }
                     }
-                    PinyinDictionary.Type.fromFileName(file.name) == null -> {
-                        importErrorDialog(getString(R.string.invalid_dict))
-                        shift(None)
+                    .onFailure { e ->
+                        importErrorDialog(e.localizedMessage ?: e.stackTraceToString())
                     }
-                    else -> Unit
-                }
-                NotificationCompat.Builder(requireContext(), CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ic_baseline_library_books_24)
-                    .setContentTitle(getString(R.string.pinyin_dict))
-                    .setContentText("${getString(R.string.importing)} ${file.nameWithoutExtension}")
-                    .setOngoing(true)
-                    .setProgress(100, 0, true)
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .build().let { nm.notify(id, it) }
-                val inputStream = Option
-                    .catch { contentResolver.openInputStream(uri) }
-                    .mapNotNull { it }
-                    .bind()
-                runCatching {
-                    inputStream.use { i ->
-                        PinyinDictManager.importFromInputStream(i, file.name).getOrThrow()
-                    }
-                }.onFailure {
-                    importErrorDialog(it.localizedMessage ?: it.stackTraceToString())
-                }.onSuccess {
-                    launch(Dispatchers.Main) {
-                        ui.addItem(item = it)
-                    }
-                }
             }
             nm.cancel(id)
         }
