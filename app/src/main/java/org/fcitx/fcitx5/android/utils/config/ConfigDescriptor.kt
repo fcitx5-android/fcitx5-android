@@ -2,8 +2,8 @@ package org.fcitx.fcitx5.android.utils.config
 
 import android.os.Parcelable
 import arrow.core.Either
-import arrow.core.continuations.either
 import arrow.core.flatMap
+import arrow.core.raise.either
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import org.fcitx.fcitx5.android.core.RawConfig
@@ -190,7 +190,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
         override fun parse(raw: RawConfig): Either<ParseException, ConfigDescriptor<*, *>> =
             ((raw.type?.mapLeft { ParseException.TypeNoParse(it) })
                 ?: (Either.Left(ParseException.NoTypeExist(raw)))).flatMap {
-                either.eager {
+                either {
                     when (it) {
                         ConfigType.TyBool ->
                             ConfigBool(
@@ -204,7 +204,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                             raw.description
                         )
                         ConfigType.TyEnum -> {
-                            val entries = raw.enum ?: shift(ParseException.NoEnumFound(raw))
+                            val entries = raw.enum ?: raise(ParseException.NoEnumFound(raw))
                             ConfigEnum(
                                 raw.name,
                                 raw.description,
@@ -225,7 +225,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                         ConfigType.TyKey -> ConfigKey(raw.name, raw.description, raw.defaultValue)
                         is ConfigType.TyList ->
                             if (it.subtype == ConfigType.TyEnum) {
-                                val entries = raw.enum ?: shift(ParseException.NoEnumFound(raw))
+                                val entries = raw.enum ?: raise(ParseException.NoEnumFound(raw))
                                 ConfigEnumList(
                                     raw.name,
                                     raw.description,
@@ -247,7 +247,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                                             ConfigType.TyKey -> ele.value
                                             ConfigType.TyString -> ele.value
                                             ConfigType.TyEnum -> error("Impossible!")
-                                            else -> shift(ParseException.BadFormList(it))
+                                            else -> raise(ParseException.BadFormList(it))
                                         }
                                     }
                                 )
@@ -278,8 +278,8 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
 
 
         fun parseTopLevel(raw: RawConfig): Either<ParseException, ConfigTopLevelDef> =
-            either.eager {
-                val topLevel = raw.subItems?.get(0) ?: shift(ParseException.BadFormDesc(raw))
+            either {
+                val topLevel = raw.subItems?.get(0) ?: raise(ParseException.BadFormDesc(raw))
                 val customTypeDef = raw.subItems?.drop(1)?.mapNotNull {
                     it.subItems?.map { ele -> parse(ele).bind() }
                         ?.let { parsed -> ConfigCustomTypeDef(it.name, parsed) }

@@ -2,39 +2,27 @@ package org.fcitx.fcitx5.android.utils.config
 
 import android.os.Parcelable
 import arrow.core.Either
-import arrow.core.continuations.either
+import arrow.core.raise.either
 import kotlinx.parcelize.Parcelize
 
 sealed class ConfigType<T> : Parcelable {
     @Parcelize
-    object TyInt : ConfigType<TyInt>() {
-        override fun toString(): String = javaClass.simpleName
-    }
+    data object TyInt : ConfigType<TyInt>()
 
     @Parcelize
-    object TyString : ConfigType<TyString>() {
-        override fun toString(): String = javaClass.simpleName
-    }
+    data object TyString : ConfigType<TyString>()
 
     @Parcelize
-    object TyBool : ConfigType<TyBool>() {
-        override fun toString(): String = javaClass.simpleName
-    }
+    data object TyBool : ConfigType<TyBool>()
 
     @Parcelize
-    object TyKey : ConfigType<TyKey>() {
-        override fun toString(): String = javaClass.simpleName
-    }
+    data object TyKey : ConfigType<TyKey>()
 
     @Parcelize
-    object TyEnum : ConfigType<TyEnum>() {
-        override fun toString(): String = javaClass.simpleName
-    }
+    data object TyEnum : ConfigType<TyEnum>()
 
     @Parcelize
-    object TyExternal : ConfigType<TyExternal>() {
-        override fun toString(): String = javaClass.simpleName
-    }
+    data object TyExternal : ConfigType<TyExternal>()
 
     @Parcelize
     data class TyCustom(val typeName: String) : ConfigType<TyCustom>()
@@ -47,7 +35,7 @@ sealed class ConfigType<T> : Parcelable {
         data class UnknownConfigTypeException(val type: String) : Exception()
 
         override fun parse(raw: String): Either<UnknownConfigTypeException, ConfigType<*>> =
-            either.eager {
+            either {
                 when (raw) {
                     "Integer" -> TyInt
                     "String" -> TyString
@@ -59,7 +47,7 @@ sealed class ConfigType<T> : Parcelable {
                         when {
                             raw.startsWith("List|") -> parse(raw.drop(5)).map(::TyList).bind()
                             raw.contains("$") -> TyCustom(raw)
-                            else -> shift(UnknownConfigTypeException(raw))
+                            else -> raise(UnknownConfigTypeException(raw))
                         }
                     }
                 }
