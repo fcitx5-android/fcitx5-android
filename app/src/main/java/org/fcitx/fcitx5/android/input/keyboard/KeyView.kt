@@ -215,7 +215,7 @@ open class TextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Text) 
         isFocusable = false
         background = null
         text = def.displayText
-        setTextSize(TypedValue.COMPLEX_UNIT_PX, def.textSize * 3.0f)
+        setTextSize(TypedValue.COMPLEX_UNIT_DIP, def.textSize)
         textDirection = View.TEXT_DIRECTION_FIRST_STRONG_LTR
         // keep original typeface, apply textStyle only
         setTypeface(typeface, def.textStyle)
@@ -244,7 +244,7 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
         isClickable = false
         isFocusable = false
         // TODO hardcoded alt text size
-        setTextSize(TypedValue.COMPLEX_UNIT_PX, 32.0f)
+        setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10.666667f)
         setTypeface(typeface, Typeface.BOLD)
         text = def.altText
         textDirection = View.TEXT_DIRECTION_FIRST_STRONG_LTR
