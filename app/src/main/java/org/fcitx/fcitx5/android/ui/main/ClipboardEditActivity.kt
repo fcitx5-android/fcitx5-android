@@ -74,8 +74,8 @@ class ClipboardEditActivity : Activity() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onStop() {
+        super.onStop()
         finish()
     }
 
