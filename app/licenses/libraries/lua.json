@@ -1,6 +1,6 @@
 {
     "uniqueId": "lua/lua",
-    "artifactVersion": "5.4.4",
+    "artifactVersion": "5.4.6",
     "description": "Powerful lightweight programming language designed for extending applications",
     "name": "lua/lua",
     "website": "https://www.lua.org/",
