@@ -34,8 +34,15 @@ class PunctuationComponent :
         service.lifecycleScope.launch {
             mapping = if (enabled) {
                 fcitx.runOnReady {
-                    PunctuationManager.load(this, inputMethodEntryCached.languageCode)
-                        .associate { it.key to it.mapping }
+                    val items = PunctuationManager.load(this, inputMethodEntryCached.languageCode)
+                    val map = HashMap<String, String>()
+                    items.forEach {
+                        // use first entry as mapping value
+                        if (!map.containsKey(it.key)) {
+                            map[it.key] = it.mapping
+                        }
+                    }
+                    map
                 }
             } else emptyMap()
             broadcaster.onPunctuationUpdate(mapping)

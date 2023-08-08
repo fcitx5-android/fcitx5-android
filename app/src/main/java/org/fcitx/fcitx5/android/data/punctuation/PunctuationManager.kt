@@ -8,9 +8,8 @@ import org.fcitx.fcitx5.android.core.savePunctuationConfig
 object PunctuationManager {
 
     fun parseRawConfig(raw: RawConfig): List<PunctuationMapEntry> {
-        return raw.findByName("cfg")
-            ?.run { get(ENTRIES).subItems?.map { PunctuationMapEntry(it) } }
-            ?: listOf()
+        val items = raw.findByName("cfg")?.get(ENTRIES)?.subItems ?: return emptyList()
+        return items.map { PunctuationMapEntry(it) }
     }
 
     suspend fun load(fcitx: FcitxAPI, lang: String): List<PunctuationMapEntry> {
