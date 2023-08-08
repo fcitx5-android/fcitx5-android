@@ -40,9 +40,9 @@ set(BOOST_VERSION "1.80.0")
 set(BOOST_MODULES headers filesystem atomic iostreams)
 set(BOOST_ROOT "${PREBUILT_DIR}/boost/${ANDROID_ABI}")
 set(Boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
-foreach(mod IN LISTS BOOST_MODULES)
+foreach (mod IN LISTS BOOST_MODULES)
     set("boost_${mod}_DIR" "${BOOST_ROOT}/lib/cmake/boost_${mod}-${BOOST_VERSION}")
-endforeach()
+endforeach ()
 
 option(ENABLE_TEST "" OFF)
 set(LIBIME_INSTALL_PKGDATADIR table)
@@ -101,4 +101,12 @@ add_custom_target(copy-fcitx5-modules
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::spell,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::unicode,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
         COMMENT "Copying fcitx5 module libraries to :app"
+        )
+
+add_dependencies(copy-fcitx5-modules
+        fcitx5::clipboard
+        fcitx5::imselector
+        fcitx5::quickphrase
+        fcitx5::spell
+        fcitx5::unicode
         )
