@@ -227,15 +227,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     fun commitText(text: String) {
         if (composing.isNotEmpty() && composingText.toString() == text) {
             // when composing text equals commit content, finish composing text as-is
-            val cursor = composing.end
-            selection.predict(cursor)
             resetComposingState()
-            inputConnection?.apply {
-                beginBatchEdit()
-                finishComposingText()
-                setSelection(cursor, cursor)
-                endBatchEdit()
-            }
+            inputConnection?.finishComposingText()
             return
         }
         // committed text should replace composing (if any), replace selected range (if any),
@@ -291,7 +284,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         ctrl: Boolean = false,
         shift: Boolean = false
     ) {
-        inputConnection?.beginBatchEdit() ?: return
         var metaState = 0
         if (alt) metaState = KeyEvent.META_ALT_ON or KeyEvent.META_ALT_LEFT_ON
         if (ctrl) metaState = metaState or KeyEvent.META_CTRL_ON or KeyEvent.META_CTRL_LEFT_ON
@@ -305,7 +297,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         if (shift) sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_SHIFT_LEFT)
         if (ctrl) sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_CTRL_LEFT)
         if (alt) sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_ALT_LEFT)
-        inputConnection?.endBatchEdit()
     }
 
     fun applySelectionOffset(offsetStart: Int, offsetEnd: Int = 0) {
