@@ -1,7 +1,10 @@
 package org.fcitx.fcitx5.android
 
 import android.app.Application
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.Configuration
 import android.os.Process
 import android.util.Log
@@ -9,7 +12,7 @@ import androidx.preference.PreferenceManager
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.plus
-import org.fcitx.fcitx5.android.common.Broadcasts
+import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
@@ -23,6 +26,16 @@ import kotlin.system.exitProcess
 class FcitxApplication : Application() {
 
     val coroutineScope = MainScope() + CoroutineName("FcitxApplication")
+
+    private val shutdownReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action != Intent.ACTION_SHUTDOWN) return
+            Timber.d("Device shutting down, trying to save fcitx state...")
+            val fcitx = FcitxDaemon.getFirstConnectionOrNull()
+                ?: return Timber.d("No active fcitx connection, skipping")
+            fcitx.runImmediately { save() }
+        }
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -74,6 +87,7 @@ class FcitxApplication : Application() {
         ThemeManager.init(resources.configuration)
         Locales.onLocaleChange(resources.configuration)
         Broadcaster.broadcast(this) { it.FcitxApplicationCreated }
+        registerReceiver(shutdownReceiver, IntentFilter(Intent.ACTION_SHUTDOWN))
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -86,7 +100,7 @@ class FcitxApplication : Application() {
         private var lastPid: Int? = null
         private var instance: FcitxApplication? = null
         fun getInstance() =
-            instance ?: throw IllegalStateException("Fcitx application is not created!")
+            instance ?: throw IllegalStateException("FcitxApplication has not been created!")
 
         fun getLastPid() = lastPid
         private const val MAX_STACKTRACE_SIZE = 128000
