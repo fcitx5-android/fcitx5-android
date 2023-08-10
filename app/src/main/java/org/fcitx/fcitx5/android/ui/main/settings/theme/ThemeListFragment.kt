@@ -66,10 +66,11 @@ class ThemeListFragment : Fragment() {
     @Keep
     private val onThemeChangeListener = ThemeManager.OnThemeChangeListener {
         lifecycleScope.launch {
-            previewUi.setTheme(it)
-            adapter.setCheckedTheme(it)
+            updateSelectedThemes(it)
         }
     }
+
+    private var followSystemDayNightTheme by ThemeManager.prefs.followSystemDayNightTheme
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -204,9 +205,10 @@ class ThemeListFragment : Fragment() {
                 override fun onEditTheme(theme: Theme.Custom) = editTheme(theme)
                 override fun onExportTheme(theme: Theme.Custom) = exportTheme(theme)
             }.apply {
-                setThemes(ThemeManager.getAllThemes(), activeTheme)
+                setThemes(ThemeManager.getAllThemes())
             }
             adapter = this@ThemeListFragment.adapter
+            updateSelectedThemes()
             applyNavBarInsetsBottomPadding()
         }
 
@@ -225,6 +227,18 @@ class ThemeListFragment : Fragment() {
                 bottomOfParent()
             })
         }
+    }
+
+    private fun updateSelectedThemes(activeTheme: Theme? = null) {
+        val active = activeTheme ?: ThemeManager.getActiveTheme()
+        previewUi.setTheme(active)
+        var light: Theme? = null
+        var dark: Theme? = null
+        if (followSystemDayNightTheme) {
+            light = ThemeManager.prefs.lightModeTheme.getValue()
+            dark = ThemeManager.prefs.darkModeTheme.getValue()
+        }
+        adapter.setSelectedThemes(active, light, dark)
     }
 
     private fun addTheme() {
@@ -269,6 +283,22 @@ class ThemeListFragment : Fragment() {
     }
 
     private fun selectTheme(theme: Theme) {
+        if (followSystemDayNightTheme) {
+            val ctx = requireContext()
+            AlertDialog.Builder(ctx)
+                .setIcon(ctx.styledDrawable(android.R.attr.alertDialogIcon))
+                .setTitle(R.string.configure_theme)
+                .setMessage(R.string.theme_message_follow_system_day_night_mode_enabled)
+                .setPositiveButton(android.R.string.ok, null)
+                .setNegativeButton(R.string.disable_it) { _, _ ->
+                    followSystemDayNightTheme = false
+                    lifecycleScope.launch {
+                        updateSelectedThemes()
+                    }
+                }
+                .show()
+            return
+        }
         ThemeManager.switchTheme(theme)
     }
 

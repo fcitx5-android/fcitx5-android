@@ -9,18 +9,33 @@ import android.graphics.drawable.shapes.OvalShape
 import android.view.View
 import android.view.ViewOutlineProvider
 import android.widget.ImageView
+import androidx.core.view.isVisible
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.utils.rippleDrawable
 import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.views.backgroundColor
-import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.*
+import splitties.views.dsl.constraintlayout.bottomOfParent
+import splitties.views.dsl.constraintlayout.centerHorizontally
+import splitties.views.dsl.constraintlayout.centerInParent
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.endOfParent
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.rightOfParent
+import splitties.views.dsl.constraintlayout.topOfParent
+import splitties.views.dsl.core.Ui
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.imageView
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.view
 import splitties.views.imageDrawable
 import splitties.views.setPaddingDp
 
 class ThemeThumbnailUi(override val ctx: Context) : Ui {
+
+    enum class State { Normal, Selected, LightMode, DarkMode }
+
     val bkg = imageView {
         scaleType = ImageView.ScaleType.CENTER_CROP
     }
@@ -65,7 +80,7 @@ class ThemeThumbnailUi(override val ctx: Context) : Ui {
         })
     }
 
-    fun setTheme(theme: Theme, checked: Boolean = false) {
+    fun setTheme(theme: Theme) {
         root.apply {
             foreground = rippleDrawable(theme.keyPressHighlightColor)
         }
@@ -85,11 +100,23 @@ class ThemeThumbnailUi(override val ctx: Context) : Ui {
             colorFilter = foreground
             background = rippleDrawable(theme.keyPressHighlightColor)
         }
-        setChecked(checked)
         checkMark.colorFilter = foreground
     }
 
     fun setChecked(checked: Boolean) {
-        checkMark.visibility = if (checked) View.VISIBLE else View.GONE
+        checkMark.isVisible = checked
+        checkMark.imageDrawable = ctx.drawable(R.drawable.ic_baseline_check_24)
+    }
+
+    fun setChecked(state: State) {
+        checkMark.isVisible = state != State.Normal
+        checkMark.imageDrawable = ctx.drawable(
+            when (state) {
+                State.Normal -> R.drawable.ic_baseline_check_24
+                State.Selected -> R.drawable.ic_baseline_check_24
+                State.LightMode -> R.drawable.ic_baseline_light_mode_24
+                State.DarkMode -> R.drawable.ic_baseline_dark_mode_24
+            }
+        )
     }
 }
