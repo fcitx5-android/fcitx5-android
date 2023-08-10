@@ -45,7 +45,6 @@ import org.fcitx.fcitx5.android.input.cursor.CursorRange
 import org.fcitx.fcitx5.android.input.cursor.CursorTracker
 import org.fcitx.fcitx5.android.utils.Broadcaster
 import org.fcitx.fcitx5.android.utils.alpha
-import org.fcitx.fcitx5.android.utils.inputConnection
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
 import splitties.resources.styledColor
@@ -141,7 +140,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     // KeyEvent from physical keyboard (or input method engine forwardKey)
                     // use cached event if available
                     cachedKeyEvents.remove(it.timestamp)?.let { keyEvent ->
-                        inputConnection?.sendKeyEvent(keyEvent)
+                        currentInputConnection?.sendKeyEvent(keyEvent)
                         return@event
                     }
                     // simulate key event
@@ -193,12 +192,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 return
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                inputConnection?.deleteSurroundingTextInCodePoints(1, 0)
+                currentInputConnection.deleteSurroundingTextInCodePoints(1, 0)
             } else {
-                inputConnection?.deleteSurroundingText(1, 0)
+                currentInputConnection.deleteSurroundingText(1, 0)
             }
         } else {
-            inputConnection?.commitText("", 0)
+            currentInputConnection.commitText("", 0)
         }
     }
 
@@ -213,13 +212,13 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 return
             }
             if (actionLabel?.isNotEmpty() == true && actionId != EditorInfo.IME_ACTION_UNSPECIFIED) {
-                inputConnection?.performEditorAction(actionId)
+                currentInputConnection.performEditorAction(actionId)
                 return
             }
             when (val action = imeOptions and EditorInfo.IME_MASK_ACTION) {
                 EditorInfo.IME_ACTION_UNSPECIFIED,
                 EditorInfo.IME_ACTION_NONE -> commitText("\n")
-                else -> inputConnection?.performEditorAction(action)
+                else -> currentInputConnection.performEditorAction(action)
             }
         }
     }
@@ -228,7 +227,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         if (composing.isNotEmpty() && composingText.toString() == text) {
             // when composing text equals commit content, finish composing text as-is
             resetComposingState()
-            inputConnection?.finishComposingText()
+            currentInputConnection?.finishComposingText()
             return
         }
         // committed text should replace composing (if any), replace selected range (if any),
@@ -236,11 +235,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         val start = if (composing.isEmpty()) selection.latest.start else composing.start
         selection.predict(start + text.length)
         resetComposingState()
-        inputConnection?.commitText(text, 1)
+        currentInputConnection?.commitText(text, 1)
     }
 
     private fun sendDownKeyEvent(eventTime: Long, keyEventCode: Int, metaState: Int = 0) {
-        inputConnection?.sendKeyEvent(
+        currentInputConnection?.sendKeyEvent(
             KeyEvent(
                 eventTime,
                 eventTime,
@@ -256,7 +255,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     private fun sendUpKeyEvent(eventTime: Long, keyEventCode: Int, metaState: Int = 0) {
-        inputConnection?.sendKeyEvent(
+        currentInputConnection?.sendKeyEvent(
             KeyEvent(
                 eventTime,
                 SystemClock.uptimeMillis(),
@@ -275,7 +274,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         val lastSelection = selection.latest
         if (lastSelection.isEmpty()) return
         selection.predict(lastSelection.start)
-        inputConnection?.commitText("", 1)
+        currentInputConnection?.commitText("", 1)
     }
 
     fun sendCombinationKeyEvents(
@@ -301,7 +300,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     fun applySelectionOffset(offsetStart: Int, offsetEnd: Int = 0) {
         val lastSelection = selection.latest
-        inputConnection?.also {
+        currentInputConnection?.also {
             val start = max(lastSelection.start + offsetStart, 0)
             val end = max(lastSelection.end + offsetEnd, 0)
             if (start > end) return
@@ -315,7 +314,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         if (lastSelection.isEmpty()) return
         val end = lastSelection.end
         selection.predict(end)
-        inputConnection?.setSelection(end, end)
+        currentInputConnection?.setSelection(end, end)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -525,7 +524,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             Timber.d("handleCursorUpdate: focus out/in")
             resetComposingState()
             // cursor outside composing range, finish composing as-is
-            inputConnection?.finishComposingText()
+            currentInputConnection?.finishComposingText()
             // `fcitx.reset()` here would commit preedit after new cursor position
             // since we have `ClientUnfocusCommit`, focus out and in would do the trick
             fcitx.launchOnReady {
@@ -541,7 +540,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     // because of https://android.googlesource.com/platform/frameworks/base.git/+/refs/tags/android-11.0.0_r45/core/java/android/view/inputmethod/BaseInputConnection.java#851
     // it's not possible to set cursor inside composing text
     private fun updateComposingText(text: FormattedText) {
-        val ic = inputConnection ?: return
+        val ic = currentInputConnection ?: return
         val lastSelection = selection.latest
         ic.beginBatchEdit()
         if (!composingText.spanEquals(text)) {
@@ -657,7 +656,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onFinishInputView(finishingInput: Boolean) {
         Timber.d("onFinishInputView: finishingInput=$finishingInput")
-        inputConnection?.finishComposingText()
+        currentInputConnection?.finishComposingText()
         lifecycleScope.launch {
             inputContextMutex.withLock {
                 fcitx.runOnReady {

@@ -29,7 +29,6 @@ import org.fcitx.fcitx5.android.input.keyboard.KeyAction.SymAction
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction.UnicodeAction
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
-import org.fcitx.fcitx5.android.utils.inputConnection
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
@@ -60,7 +59,7 @@ class CommonKeyActionListener :
             reset()
         } else if (inputMethodEntryCached.uniqueName.let { it == "keyboard-us" || it == "unikey" }) {
             // androidkeyboard clears composing on reset, but we want to commit it as-is
-            service.inputConnection?.finishComposingText()
+            service.currentInputConnection?.finishComposingText()
             reset()
         } else {
             if (!select(0)) reset()

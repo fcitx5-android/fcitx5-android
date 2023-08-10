@@ -9,7 +9,6 @@ import android.graphics.Color
 import android.graphics.ColorFilter
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
-import android.inputmethodservice.InputMethodService
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -19,7 +18,6 @@ import android.provider.OpenableColumns
 import android.provider.Settings
 import android.util.TypedValue
 import android.view.View
-import android.view.inputmethod.InputConnection
 import android.widget.EditText
 import android.widget.SeekBar
 import android.widget.Toast
@@ -47,15 +45,13 @@ import splitties.views.bottomPadding
 import java.io.File
 import java.io.Serializable
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Collections
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
+import java.util.WeakHashMap
 import java.util.zip.ZipInputStream
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
 import kotlin.math.roundToInt
-
-val InputMethodService.inputConnection: InputConnection?
-    get() = currentInputConnection
 
 fun ViewPager2.getCurrentFragment(fragmentManager: FragmentManager): Fragment? =
     fragmentManager.findFragmentByTag("f$currentItem")
@@ -100,7 +96,7 @@ fun formatDateTime(timeMillis: Long? = null): String =
     SimpleDateFormat.getDateTimeInstance().format(timeMillis?.let { Date(it) } ?: Date())
 
 private val iso8601DateFormat by lazy {
-    SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
+    SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ROOT).apply {
         timeZone = TimeZone.getTimeZone("UTC")
     }
 }
@@ -129,10 +125,7 @@ inline fun <T, U> kotlin.reflect.KFunction1<T, U>.upcast(): (T) -> U = this
 inline fun <T> T.identity() = arrow.core.identity(this)
 
 fun Configuration.isDarkMode() =
-    when (uiMode.and(Configuration.UI_MODE_NIGHT_MASK)) {
-        Configuration.UI_MODE_NIGHT_YES -> true
-        else -> false
-    }
+    uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
 
 fun Activity.applyTranslucentSystemBars() {
     WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -153,18 +146,6 @@ fun RecyclerView.applyNavBarInsetsBottomPadding() {
             bottomPadding = it.bottom
         }
         windowInsets
-    }
-}
-
-@OptIn(ExperimentalContracts::class)
-inline fun <T : Any, U> Result<T?>.bindOnNotNull(block: (T) -> Result<U>): Result<U>? {
-    contract {
-        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
-    }
-    return when {
-        isSuccess && getOrThrow() != null -> block(getOrThrow()!!)
-        isSuccess && getOrThrow() == null -> null
-        else -> Result.failure(exceptionOrNull()!!)
     }
 }
 

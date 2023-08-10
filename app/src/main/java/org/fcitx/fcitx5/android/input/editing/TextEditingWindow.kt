@@ -15,7 +15,6 @@ import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
-import org.fcitx.fcitx5.android.utils.inputConnection
 import org.mechdancer.dependency.manager.must
 
 class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
@@ -63,20 +62,20 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
             selectAllButton.setOnClickListener {
                 // activate select button after operation
                 userSelection = true
-                service.inputConnection?.performContextMenuAction(android.R.id.selectAll)
+                service.currentInputConnection?.performContextMenuAction(android.R.id.selectAll)
             }
             cutButton.setOnClickListener {
                 // deactivate select button after operation
                 userSelection = false
-                service.inputConnection?.performContextMenuAction(android.R.id.cut)
+                service.currentInputConnection?.performContextMenuAction(android.R.id.cut)
             }
             copyButton.setOnClickListener {
                 userSelection = false
-                service.inputConnection?.performContextMenuAction(android.R.id.copy)
+                service.currentInputConnection?.performContextMenuAction(android.R.id.copy)
             }
             pasteButton.setOnClickListener {
                 userSelection = false
-                service.inputConnection?.performContextMenuAction(android.R.id.paste)
+                service.currentInputConnection?.performContextMenuAction(android.R.id.paste)
             }
             backspaceButton.onClickWithRepeating {
                 userSelection = false
