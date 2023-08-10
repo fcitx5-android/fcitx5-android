@@ -22,7 +22,6 @@ import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
 import org.fcitx.fcitx5.android.utils.applyNavBarInsetsBottomPadding
-import org.fcitx.fcitx5.android.utils.bindOnNotNull
 import org.fcitx.fcitx5.android.utils.errorDialog
 import org.fcitx.fcitx5.android.utils.queryFileName
 import org.fcitx.fcitx5.android.utils.toast
@@ -102,45 +101,47 @@ class ThemeListFragment : Fragment() {
             registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
                 if (uri == null) return@registerForActivityResult
                 val ctx = requireContext()
+                val cr = ctx.contentResolver
                 lifecycleScope.withLoadingDialog(ctx) {
                     withContext(NonCancellable + Dispatchers.IO) {
-                        val name = uri.queryFileName(ctx.contentResolver) ?: return@withContext
+                        val name = cr.queryFileName(uri) ?: return@withContext
                         if (!name.endsWith(".zip")) {
                             importErrorDialog(getString(R.string.exception_theme_filename))
                         }
-                        ctx.contentResolver.openInputStream(uri)?.use {
-                            ThemeManager.importTheme(it)
-                                .onSuccess { (newCreated, theme, migrated) ->
-                                    withContext(Dispatchers.Main) {
-                                        if (newCreated) {
-                                            adapter.prependTheme(theme)
-                                        } else {
-                                            adapter.replaceTheme(theme)
-                                        }
-                                        if (migrated) {
-                                            ctx.toast(R.string.theme_migrated)
-                                        }
-                                    }
+                        try {
+                            val inputStream = cr.openInputStream(uri)!!
+                            val (newCreated, theme, migrated) = ThemeManager.importTheme(inputStream)
+                                .getOrThrow()
+                            withContext(Dispatchers.Main) {
+                                if (newCreated) {
+                                    adapter.prependTheme(theme)
+                                } else {
+                                    adapter.replaceTheme(theme)
                                 }
-                                .onFailure { e ->
-                                    importErrorDialog(e.localizedMessage ?: e.stackTraceToString())
+                                if (migrated) {
+                                    ctx.toast(R.string.theme_migrated)
                                 }
+                            }
+                        } catch (e: Exception) {
+                            importErrorDialog(e.localizedMessage ?: e.stackTraceToString())
                         }
                     }
                 }
             }
         exportLauncher =
             registerForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
+                if (uri == null) return@registerForActivityResult
+                val ctx = requireContext()
+                val exported = beingExported ?: return@registerForActivityResult
+                beingExported = null
                 lifecycleScope.withLoadingDialog(requireContext()) {
                     withContext(NonCancellable + Dispatchers.IO) {
-                        runCatching {
-                            uri?.let { requireContext().contentResolver.openOutputStream(it) }
-                        }.bindOnNotNull {
-                            requireNotNull(beingExported)
-                            ThemeManager.exportTheme(beingExported!!, it).also {
-                                beingExported = null
-                            }
-                        }?.toast(requireContext())
+                        try {
+                            val outputStream = ctx.contentResolver.openOutputStream(uri)!!
+                            ThemeManager.exportTheme(exported, outputStream).getOrThrow()
+                        } catch (e: Exception) {
+                            ctx.toast(e.localizedMessage ?: e.stackTraceToString())
+                        }
                     }
                 }
             }

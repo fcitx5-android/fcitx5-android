@@ -10,7 +10,14 @@ import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceCategory
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceInternal
-import org.fcitx.fcitx5.android.utils.*
+import org.fcitx.fcitx5.android.utils.WeakHashSet
+import org.fcitx.fcitx5.android.utils.appContext
+import org.fcitx.fcitx5.android.utils.errorArg
+import org.fcitx.fcitx5.android.utils.errorRuntime
+import org.fcitx.fcitx5.android.utils.errorState
+import org.fcitx.fcitx5.android.utils.extract
+import org.fcitx.fcitx5.android.utils.isDarkMode
+import org.fcitx.fcitx5.android.utils.withTempDir
 import timber.log.Timber
 import java.io.File
 import java.io.FileFilter
@@ -114,39 +121,38 @@ object ThemeManager {
      */
     fun exportTheme(theme: Theme.Custom, dest: OutputStream) =
         runCatching {
-            ZipOutputStream(dest.buffered())
-                .use { zipStream ->
-                    // we don't export the internal path of images
-                    val tweakedTheme = theme.backgroundImage?.let {
-                        theme.copy(
-                            backgroundImage = theme.backgroundImage.copy(
-                                croppedFilePath = theme.backgroundImage.croppedFilePath
-                                    .substringAfterLast('/'),
-                                srcFilePath = theme.backgroundImage.srcFilePath
-                                    .substringAfterLast('/'),
-                            )
+            ZipOutputStream(dest.buffered()).use { zipStream ->
+                // we don't export the internal path of images
+                val tweakedTheme = theme.backgroundImage?.let {
+                    theme.copy(
+                        backgroundImage = theme.backgroundImage.copy(
+                            croppedFilePath = theme.backgroundImage.croppedFilePath
+                                .substringAfterLast('/'),
+                            srcFilePath = theme.backgroundImage.srcFilePath
+                                .substringAfterLast('/'),
                         )
-                    } ?: theme
-                    if (tweakedTheme.backgroundImage != null) {
-                        requireNotNull(theme.backgroundImage)
-                        // write cropped image
-                        zipStream.putNextEntry(ZipEntry(tweakedTheme.backgroundImage.croppedFilePath))
-                        File(theme.backgroundImage.croppedFilePath).inputStream()
-                            .use { it.copyTo(zipStream) }
-                        // write src image
-                        zipStream.putNextEntry(ZipEntry(tweakedTheme.backgroundImage.srcFilePath))
-                        File(theme.backgroundImage.srcFilePath).inputStream()
-                            .use { it.copyTo(zipStream) }
-                    }
-                    // write json
-                    zipStream.putNextEntry(ZipEntry("${tweakedTheme.name}.json"))
-                    zipStream.write(
-                        Json.encodeToString(CustomThemeSerializer, tweakedTheme)
-                            .encodeToByteArray()
                     )
-                    // done
-                    zipStream.closeEntry()
+                } ?: theme
+                if (tweakedTheme.backgroundImage != null) {
+                    requireNotNull(theme.backgroundImage)
+                    // write cropped image
+                    zipStream.putNextEntry(ZipEntry(tweakedTheme.backgroundImage.croppedFilePath))
+                    File(theme.backgroundImage.croppedFilePath).inputStream()
+                        .use { it.copyTo(zipStream) }
+                    // write src image
+                    zipStream.putNextEntry(ZipEntry(tweakedTheme.backgroundImage.srcFilePath))
+                    File(theme.backgroundImage.srcFilePath).inputStream()
+                        .use { it.copyTo(zipStream) }
                 }
+                // write json
+                zipStream.putNextEntry(ZipEntry("${tweakedTheme.name}.json"))
+                zipStream.write(
+                    Json.encodeToString(CustomThemeSerializer, tweakedTheme)
+                        .encodeToByteArray()
+                )
+                // done
+                zipStream.closeEntry()
+            }
         }
 
     /**
@@ -179,8 +185,9 @@ object ThemeManager {
                                 srcFilePath = srcFile.path
                             )
                         )
-                    } else
+                    } else {
                         decoded
+                    }
                     saveTheme(newTheme)
                     Triple(!exists, newTheme, migrated)
                 }

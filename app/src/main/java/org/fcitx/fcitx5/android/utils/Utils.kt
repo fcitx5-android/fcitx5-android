@@ -71,11 +71,8 @@ fun Context.toast(@StringRes resId: Int, duration: Int = Toast.LENGTH_SHORT) {
     toast(getString(resId), duration)
 }
 
-fun Uri.queryFileName(contentResolver: ContentResolver) =
-    contentResolver.query(
-        this,
-        null, null, null, null
-    )?.use {
+fun ContentResolver.queryFileName(uri: Uri) =
+    query(uri, null, null, null, null)?.use {
         val index = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
         it.moveToFirst()
         it.getString(index)

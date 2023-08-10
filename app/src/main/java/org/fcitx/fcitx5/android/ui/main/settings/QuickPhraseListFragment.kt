@@ -2,7 +2,6 @@ package org.fcitx.fcitx5.android.ui.main.settings
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.ContentResolver
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -49,9 +48,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
 
     private val viewModel: MainViewModel by activityViewModels()
-
-    private val contentResolver: ContentResolver
-        get() = requireContext().contentResolver
 
     private lateinit var launcher: ActivityResultLauncher<String>
 
@@ -205,10 +201,12 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
     }
 
     private fun importFromUri(uri: Uri) {
-        val nm = notificationManager
+        val ctx = requireContext()
+        val cr = ctx.contentResolver
+        val nm = ctx.notificationManager
         lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
             val id = IMPORT_ID++
-            val fileName = uri.queryFileName(contentResolver) ?: return@launch
+            val fileName = cr.queryFileName(uri) ?: return@launch
             val extName = fileName.substringAfterLast('.')
             if (extName != QuickPhrase.EXT) {
                 importErrorDialog(getString(R.string.invalid_quickphrase))
@@ -217,7 +215,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
             if (ui.entries.any { it.name == entryName }) {
                 importErrorDialog(getString(R.string.quickphrase_already_exists))
             }
-            NotificationCompat.Builder(requireContext(), CHANNEL_ID)
+            NotificationCompat.Builder(ctx, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_baseline_format_quote_24)
                 .setContentTitle(getString(R.string.quickphrase_editor))
                 .setContentText("${getString(R.string.importing)} $entryName")
@@ -225,16 +223,15 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                 .setProgress(100, 0, true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .build().let { nm.notify(id, it) }
-            contentResolver.openInputStream(uri)?.use {
-                QuickPhraseManager.importFromInputStream(it, entryName)
-                    .onSuccess {
-                        withContext(Dispatchers.Main) {
-                            ui.addItem(item = it)
-                        }
-                    }
-                    .onFailure { e ->
-                        importErrorDialog(e.localizedMessage ?: e.stackTraceToString())
-                    }
+            try {
+                val inputStream = cr.openInputStream(uri)!!
+                val imported = QuickPhraseManager.importFromInputStream(inputStream, entryName)
+                    .getOrThrow()
+                withContext(Dispatchers.Main) {
+                    ui.addItem(item = imported)
+                }
+            } catch (e: Exception) {
+                importErrorDialog(e.localizedMessage ?: e.stackTraceToString())
             }
             nm.cancel(id)
         }

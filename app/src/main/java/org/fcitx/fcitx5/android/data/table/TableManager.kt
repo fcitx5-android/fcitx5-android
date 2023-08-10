@@ -59,11 +59,11 @@ object TableManager {
         dictStream: InputStream
     ): Result<TableBasedInputMethod> = runCatching {
         withTempDir { tempDir ->
-            val confFile = File(tempDir, confName).apply {
-                outputStream().use { o -> confStream.use { i -> i.copyTo(o) } }
+            val confFile = File(tempDir, confName).also {
+                it.outputStream().use { o -> confStream.use { i -> i.copyTo(o) } }
             }
-            val dictFile = File(tempDir, dictName).apply {
-                outputStream().use { o -> dictStream.use { i -> i.copyTo(o) } }
+            val dictFile = File(tempDir, dictName).also {
+                it.outputStream().use { o -> dictStream.use { i -> i.copyTo(o) } }
             }
             importFiles(confFile, dictFile)
         }

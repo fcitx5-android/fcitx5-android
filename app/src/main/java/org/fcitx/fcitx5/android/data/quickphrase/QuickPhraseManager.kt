@@ -45,15 +45,16 @@ object QuickPhraseManager {
     }
 
     fun importFromInputStream(stream: InputStream, name: String): Result<CustomQuickPhrase> {
-        val tempFile = File(appContext.cacheDir, name)
-        tempFile.outputStream().use {
-            stream.copyTo(it)
+        return stream.use { inputStream ->
+            val tempFile = File(appContext.cacheDir, name)
+            tempFile.outputStream().use { outputStream ->
+                inputStream.copyTo(outputStream)
+            }
+            val new = importFromFile(tempFile)
+            tempFile.delete()
+            return@use new
         }
-        val new = importFromFile(tempFile)
-        tempFile.delete()
-        return new
     }
-
 
     private fun <T : QuickPhrase> listDir(
         dir: File,

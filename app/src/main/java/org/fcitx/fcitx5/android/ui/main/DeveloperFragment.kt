@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.data.DataManager
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
@@ -28,14 +29,15 @@ class DeveloperFragment : PaddingPreferenceFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val ctx = requireContext()
         launcher = registerForActivityResult(CreateDocument("application/octet-stream")) { uri ->
+            if (uri == null) return@registerForActivityResult
+            val ctx = requireContext()
             lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
-                uri?.runCatching {
-                    ctx.contentResolver.openOutputStream(uri)?.use { o ->
+                runCatching {
+                    ctx.contentResolver.openOutputStream(uri)!!.use { o ->
                         hprofFile.inputStream().use { i -> i.copyTo(o) }
                     }
-                }?.toast(ctx)
+                }.toast(ctx)
                 hprofFile.delete()
             }
         }
@@ -68,7 +70,7 @@ class DeveloperFragment : PaddingPreferenceFragment() {
                     .setPositiveButton(android.R.string.ok) { _, _ ->
                         lifecycleScope.launch(Dispatchers.IO) {
                             DataManager.deleteAndSync()
-                            launch(Dispatchers.Main) {
+                            withContext(Dispatchers.Main) {
                                 context.toast(R.string.synced)
                             }
                         }

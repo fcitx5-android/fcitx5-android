@@ -2,7 +2,6 @@ package org.fcitx.fcitx5.android.ui.main.settings
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.ContentResolver
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -18,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.reloadPinyinDict
 import org.fcitx.fcitx5.android.data.pinyin.PinyinDictManager
@@ -37,9 +37,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDictionary> {
 
     private val viewModel: MainViewModel by activityViewModels()
-
-    private val contentResolver: ContentResolver
-        get() = requireContext().contentResolver
 
     private lateinit var launcher: ActivityResultLauncher<String>
 
@@ -128,10 +125,12 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDiction
     }
 
     private fun importFromUri(uri: Uri) {
-        val nm = notificationManager
+        val ctx = requireContext()
+        val cr = ctx.contentResolver
+        val nm = ctx.notificationManager
         lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
             val id = IMPORT_ID++
-            val fileName = uri.queryFileName(contentResolver) ?: return@launch
+            val fileName = cr.queryFileName(uri) ?: return@launch
             if (PinyinDictionary.Type.fromFileName(fileName) == null) {
                 importErrorDialog(getString(R.string.invalid_dict))
             }
@@ -139,7 +138,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDiction
             if (ui.entries.any { it.name == entryName }) {
                 importErrorDialog(getString(R.string.dict_already_exists))
             }
-            NotificationCompat.Builder(requireContext(), CHANNEL_ID)
+            NotificationCompat.Builder(ctx, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_baseline_library_books_24)
                 .setContentTitle(getString(R.string.pinyin_dict))
                 .setContentText("${getString(R.string.importing)} $entryName")
@@ -147,16 +146,15 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDiction
                 .setProgress(100, 0, true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .build().let { nm.notify(id, it) }
-            contentResolver.openInputStream(uri)?.use {
-                PinyinDictManager.importFromInputStream(it, fileName)
-                    .onSuccess {
-                        launch(Dispatchers.Main) {
-                            ui.addItem(item = it)
-                        }
-                    }
-                    .onFailure { e ->
-                        importErrorDialog(e.localizedMessage ?: e.stackTraceToString())
-                    }
+            try {
+                val inputStream = cr.openInputStream(uri)!!
+                val imported = PinyinDictManager.importFromInputStream(inputStream, fileName)
+                    .getOrThrow()
+                withContext(Dispatchers.Main) {
+                    ui.addItem(item = imported)
+                }
+            } catch (e: Exception) {
+                importErrorDialog(e.localizedMessage ?: e.stackTraceToString())
             }
             nm.cancel(id)
         }
