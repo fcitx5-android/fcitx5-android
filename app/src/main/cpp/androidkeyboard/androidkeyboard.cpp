@@ -335,7 +335,7 @@ std::string AndroidKeyboardEngine::preeditString(InputContext *inputContext) {
 }
 
 void AndroidKeyboardEngine::invokeActionImpl(const InputMethodEntry &entry, InvokeActionEvent &event) {
-    size_t cursor = event.cursor();
+    int cursor = event.cursor();
     auto inputContext = event.inputContext();
     auto *state = inputContext->propertyFor(&factory_);
     if (event.action() != InvokeActionEvent::Action::LeftClick
@@ -344,7 +344,7 @@ void AndroidKeyboardEngine::invokeActionImpl(const InputMethodEntry &entry, Invo
         return InputMethodEngineV3::invokeActionImpl(entry, event);
     }
     event.filter();
-    state->buffer_.setCursor(event.cursor());
+    state->buffer_.setCursor(static_cast<size_t>(cursor));
     updateUI(inputContext);
 }
 

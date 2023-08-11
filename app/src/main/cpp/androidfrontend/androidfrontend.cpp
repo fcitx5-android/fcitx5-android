@@ -240,9 +240,8 @@ void AndroidFrontend::resetInputContext() {
 void AndroidFrontend::repositionCursor(int position) {
     auto *ic = focusGroup_.focusedInputContext();
     if (!ic) return;
-    auto engine = instance_->inputMethodEngine(ic);
     InvokeActionEvent event(InvokeActionEvent::Action::LeftClick, position, ic);
-    engine->invokeAction(*(instance_->inputMethodEntry(ic)), event);
+    ic->invokeAction(event);
 }
 
 void AndroidFrontend::focusInputContext(bool focus) {
