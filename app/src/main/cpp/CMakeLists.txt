@@ -72,8 +72,6 @@ set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
 add_subdirectory(fcitx5-chinese-addons)
 # rename to include executable in apk
 set_target_properties(scel2org5 PROPERTIES OUTPUT_NAME libscel2org5.so)
-# ship a different punctuation profile on Android
-add_subdirectory(androidpunctuation)
 
 option(ENABLE_TEST "" OFF)
 option(ENABLE_QT "" OFF)
