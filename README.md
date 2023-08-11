@@ -90,7 +90,7 @@ Install Android SDK Platform, Android SDK Build-Tools, Android NDK and cmake via
 <details>
 <summary>Detailed steps (screenshots)</summary>
 
-These screenshots are for references and the versions in them may be out of date.
+**Note:** These screenshots are for references and the versions in them may be out of date.
 The current recommended versions are recorded in [Versions.kt](build-logic/convention/src/main/kotlin/Versions.kt) file.
 
 ![Open SDK Manager](https://user-images.githubusercontent.com/13914967/202184493-3ee1546b-0a83-4cc9-9e41-d20b0904a0cf.png)
@@ -106,8 +106,14 @@ The current recommended versions are recorded in [Versions.kt](build-logic/conve
 </details>
 
 ### Trouble-shooting
-* Gradle error: "No variants found for ':app'. Check build files to ensure at least one variant exists."
-* * Examine if there are environment variables set such as `_JAVA_OPTIONS` or `JAVA_TOOL_OPTIONS`. You might want to clear them (maybe in the startup script `studio.sh` of Android Studio), as some gradle plugin treats anything in stderr as errors and aborts.
+
+- Android Studio indexing takes forever to complete and cosumes a lot of memory.
+
+    Switch to "Project" view in the "Project" tool window (namely the file tree side bar), right click `lib/fcitx5/src/main/cpp/prebuilt` directory, then select "Mark Directory as > Excluded". You may also need to restart the IDE to interrupt ongoing indexing process.
+
+- Gradle error: "No variants found for ':app'. Check build files to ensure at least one variant exists."
+
+    Examine if there are environment variables set such as `_JAVA_OPTIONS` or `JAVA_TOOL_OPTIONS`. You might want to clear them (maybe in the startup script `studio.sh` of Android Studio), as some gradle plugin treats anything in stderr as errors and aborts.
 
 ## Nix
 
