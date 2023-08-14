@@ -22,6 +22,15 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
                         )
                     }
                 }
+                // in this case, the version code of arm64-v8a will be used for the single production,
+                // unless `buildABI` is specified
+                if (!target.useSplit)
+                    ndk {
+                        abiFilters.add("arm64-v8a")
+                        abiFilters.add("armeabi-v7a")
+                        abiFilters.add("x86")
+                        abiFilters.add("x86_64")
+                    }
             }
             externalNativeBuild {
                 cmake {
@@ -29,14 +38,15 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
                     path("src/main/cpp/CMakeLists.txt")
                 }
             }
-            splits {
-                abi {
-                    isEnable = true
-                    reset()
-                    include(target.buildABI)
-                    isUniversalApk = false
+            if (target.useSplit)
+                splits {
+                    abi {
+                        isEnable = true
+                        reset()
+                        include(target.buildABI)
+                        isUniversalApk = false
+                    }
                 }
-            }
         }
         registerCleanCxxTask(target)
     }

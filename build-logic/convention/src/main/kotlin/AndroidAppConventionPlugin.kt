@@ -4,6 +4,7 @@ import com.mikepenz.aboutlibraries.plugin.AboutLibrariesExtension
 import org.gradle.api.Project
 import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.kotlin.dsl.configure
+import java.io.File
 
 /**
  * The prototype of an Android Application
@@ -29,6 +30,17 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
                 release {
                     isMinifyEnabled = true
                     isShrinkResources = true
+                    // config singing key for play release
+                    signingConfig = with(PlayRelease) {
+                        if (target.buildPlayRelease) {
+                            signingConfigs.create("playRelease") {
+                                storeFile = File(target.storeFile!!)
+                                storePassword = target.storePassword
+                                keyAlias = target.keyAlias
+                                keyPassword = target.keyPassword
+                            }
+                        } else null
+                    }
                 }
                 debug {
                     applicationIdSuffix = ".debug"
