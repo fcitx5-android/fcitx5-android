@@ -236,4 +236,5 @@
     <string name="clipboard_return_after_paste">Return after paste</string>
     <string name="theme_message_follow_system_day_night_mode_enabled">Cannot switch theme manually while \"Follow system dark mode\" is enabled.</string>
     <string name="disable_it">Disable it</string>
+    <string name="reset_keyboard_on_focus_change">Switch back to keyboard on change focus</string>
 </resources>

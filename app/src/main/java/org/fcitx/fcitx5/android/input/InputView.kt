@@ -126,6 +126,9 @@ class InputView(
     }
 
     private val keyboardPrefs = AppPrefs.getInstance().keyboard
+
+    private val focusChangeResetKeyboard by keyboardPrefs.focusChangeResetKeyboard
+
     private val keyboardHeightPercent = keyboardPrefs.keyboardHeightPercent
     private val keyboardHeightPercentLandscape = keyboardPrefs.keyboardHeightPercentLandscape
     private val keyboardSidePadding = keyboardPrefs.keyboardSidePadding
@@ -349,7 +352,9 @@ class InputView(
         }
         broadcaster.onStartInput(info, capFlags)
         returnKeyDrawable.updateDrawableOnEditorInfo(info)
-        windowManager.attachWindow(KeyboardWindow)
+        if (focusChangeResetKeyboard || !restarting) {
+            windowManager.attachWindow(KeyboardWindow)
+        }
     }
 
     private fun handleFcitxEvent(it: FcitxEvent<*>) {
