@@ -64,7 +64,3 @@ val Project.buildTimestamp
     get() = ep("BUILD_TIMESTAMP", "buildTimestamp") {
         System.currentTimeMillis().toString()
     }
-
-// split abi seems to conflict app bundle
-val Project.useSplit
-    get() = with(PlayRelease) { buildPlayRelease }
