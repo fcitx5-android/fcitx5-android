@@ -27,10 +27,6 @@
         android:name="${applicationId}.permission.IPC"
         android:protectionLevel="signature" />
 
-    <permission
-        android:name="${applicationId}.permission.BROADCAST"
-        android:protectionLevel="signature" />
-
     <application
         android:name=".FcitxApplication"
         android:allowBackup="true"

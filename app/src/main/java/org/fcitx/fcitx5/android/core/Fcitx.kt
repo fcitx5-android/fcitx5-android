@@ -375,12 +375,14 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
                 }
             }
             val extDomains = plugins.mapNotNull { it.domain }.toTypedArray()
-            Timber.d("""
+            Timber.d(
+                """
                Starting fcitx with:
                locale=$locale
                nativeLibDir=$nativeLibDir
                extDomains=${extDomains.joinToString()}
-            """.trimIndent())
+            """.trimIndent()
+            )
             with(context) {
                 startupFcitx(
                     locale,
@@ -391,6 +393,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
                     extDomains
                 )
             }
+            FcitxPluginServices.connectAll()
         }
 
         override fun nativeLoopOnce() {
@@ -402,6 +405,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         }
 
         override fun nativeExit() {
+            FcitxPluginServices.disconnectAll()
             exitFcitx()
         }
 
