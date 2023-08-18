@@ -6,6 +6,7 @@
     <application android:label="@string/app_name">
         <service
             android:name=".MainService"
+            android:permission="org.fcitx.fcitx5.android.permission.plugin"
             android:exported="true">
             <intent-filter>
                 <action android:name="${applicationId}.service" />

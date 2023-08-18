@@ -27,6 +27,8 @@
         android:name="${applicationId}.permission.IPC"
         android:protectionLevel="signature" />
 
+    <uses-permission android:name="org.fcitx.fcitx5.android.permission.plugin" />
+
     <application
         android:name=".FcitxApplication"
         android:allowBackup="true"
