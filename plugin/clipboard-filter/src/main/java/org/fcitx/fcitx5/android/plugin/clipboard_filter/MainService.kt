@@ -1,13 +1,12 @@
 package org.fcitx.fcitx5.android.plugin.clipboard_filter
 
-import android.app.job.JobParameters
-import android.app.job.JobService
 import android.util.Log
+import org.fcitx.fcitx5.android.common.FcitxPluginService
 import org.fcitx.fcitx5.android.common.ipc.FcitxRemoteConnection
 import org.fcitx.fcitx5.android.common.ipc.IClipboardEntryTransformer
 import org.fcitx.fcitx5.android.common.ipc.bindFcitxRemoteService
 
-class ClearURLsService : JobService() {
+class MainService : FcitxPluginService() {
 
     private lateinit var connection: FcitxRemoteConnection
 
@@ -24,21 +23,19 @@ class ClearURLsService : JobService() {
         ClearURLs.initCatalog(assets)
     }
 
-    override fun onStartJob(params: JobParameters): Boolean {
+    override fun start() {
         connection = bindFcitxRemoteService(BuildConfig.MAIN_APPLICATION_ID) {
-            Log.d("ClearURLsService", "bind to fcitx")
+            Log.d("ClearURLsService", "Bind to fcitx remote")
             it.registerClipboardEntryTransformer(transformer)
         }
-        return true
     }
 
-    override fun onStopJob(params: JobParameters): Boolean {
+    override fun stop() {
         runCatching {
             connection.remoteService?.unregisterClipboardEntryTransformer(transformer)
         }
         unbindService(connection)
-        Log.d("ClearURLsService", "unbind from fcitx")
-        return true
+        Log.d("ClearURLsService", "Unbind from fcitx remote")
     }
 
 }

@@ -2,18 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="${mainApplicationId}.permission.IPC" />
-    <uses-permission android:name="${mainApplicationId}.permission.BROADCAST" />
 
     <application android:label="@string/app_name">
         <service
-            android:name=".ClearURLsService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-        <receiver
-            android:name=".FcitxAppCreatedBroadcastReceiver"
+            android:name=".MainService"
+            android:permission="${mainApplicationId}.permission.PLUGIN"
             android:exported="true">
             <intent-filter>
-                <action android:name="${mainApplicationId}.APP_CREATED" />
+                <action android:name="${mainApplicationId}.plugin.SERVICE" />
             </intent-filter>
-        </receiver>
+        </service>
     </application>
 </manifest>

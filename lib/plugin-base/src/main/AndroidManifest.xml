@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!--
+        ${mainApplicationId} can only be used inside plugin,
+        because it's defined in AndroidPluginAppConventionPlugin
+    -->
     <queries>
-        <package android:name="org.fcitx.fcitx5.android"/>
+        <package android:name="org.fcitx.fcitx5.android" />
     </queries>
 
     <application>

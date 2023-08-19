@@ -28,8 +28,10 @@
         android:protectionLevel="signature" />
 
     <permission
-        android:name="${applicationId}.permission.BROADCAST"
+        android:name="${applicationId}.permission.PLUGIN"
         android:protectionLevel="signature" />
+
+    <uses-permission android:name="${applicationId}.permission.PLUGIN" />
 
     <application
         android:name=".FcitxApplication"

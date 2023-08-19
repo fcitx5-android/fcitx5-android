@@ -43,7 +43,6 @@ import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.cursor.CursorRange
 import org.fcitx.fcitx5.android.input.cursor.CursorTracker
-import org.fcitx.fcitx5.android.utils.Broadcaster
 import org.fcitx.fcitx5.android.utils.alpha
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
@@ -120,7 +119,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
         ThemeManager.addOnChangedListener(onThemeChangeListener)
         super.onCreate()
-        Broadcaster.broadcast(this) { it.FcitxInputMethodServiceCreated }
     }
 
     private fun handleFcitxEvent(event: FcitxEvent<*>) {
@@ -698,7 +696,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         super.onDestroy()
         // Fcitx might be used in super.onDestroy()
         FcitxDaemon.disconnect(javaClass.name)
-        Broadcaster.broadcast(this) { it.FcitxInputMethodServiceDestroyed }
     }
 
     companion object {
