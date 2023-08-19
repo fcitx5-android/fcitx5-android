@@ -12,6 +12,7 @@ abstract class FcitxPluginService : Service() {
     private lateinit var messenger: Messenger
 
     open val handler: Handler = Handler(Looper.getMainLooper())
+
     override fun onBind(intent: Intent): IBinder {
         messenger = Messenger(handler)
         start()

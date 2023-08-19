@@ -45,8 +45,11 @@ object FcitxPluginServices {
                     connection,
                     Context.BIND_AUTO_CREATE
                 )
-            }.getOrNull()?.takeIf { it }?.run {
+            }.onSuccess {
                 Timber.d("Bind to ${descriptor.name}'s service")
+            }.onFailure { e ->
+                Timber.w("Unable to bind ${descriptor.name}")
+                Timber.w(e.localizedMessage ?: e.stackTraceToString())
             }
         }
     }

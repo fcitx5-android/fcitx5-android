@@ -393,7 +393,6 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
                     extDomains
                 )
             }
-            FcitxPluginServices.connectAll()
         }
 
         override fun nativeLoopOnce() {
@@ -405,7 +404,6 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         }
 
         override fun nativeExit() {
-            FcitxPluginServices.disconnectAll()
             exitFcitx()
         }
 
@@ -450,6 +448,9 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         registerFcitxEventHandler(::handleFcitxEvent)
         lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_START)
         ClipboardManager.addOnUpdateListener(onClipboardUpdate)
+        DataManager.addOnNextSyncedCallback {
+            FcitxPluginServices.connectAll()
+        }
         dispatcher.start()
     }
 
@@ -461,6 +462,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_STOP)
         Timber.i("Fcitx stop()")
         ClipboardManager.removeOnUpdateListener(onClipboardUpdate)
+        FcitxPluginServices.disconnectAll()
         dispatcher.stop().let {
             if (it.isNotEmpty())
                 Timber.w("${it.size} job(s) didn't get a chance to run!")
