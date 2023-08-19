@@ -12,6 +12,9 @@ import org.fcitx.fcitx5.android.utils.appContext
 import timber.log.Timber
 
 object FcitxPluginServices {
+
+    val PluginServiceAction = "${appContext.packageName}.plugin.SERVICE"
+
     class PluginServiceConnection(private val pluginId: String) : ServiceConnection {
         private var messenger: Messenger? = null
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
@@ -41,7 +44,7 @@ object FcitxPluginServices {
             runCatching {
                 val connection = PluginServiceConnection(descriptor.name)
                 appContext.bindService(
-                    Intent("${descriptor.packageName}.service").also { it.setPackage(descriptor.packageName) },
+                    Intent(PluginServiceAction).apply { setPackage(descriptor.packageName) },
                     connection,
                     Context.BIND_AUTO_CREATE
                 )

@@ -9,7 +9,7 @@
             android:permission="${mainApplicationId}.permission.PLUGIN"
             android:exported="true">
             <intent-filter>
-                <action android:name="${applicationId}.service" />
+                <action android:name="${mainApplicationId}.plugin.SERVICE" />
             </intent-filter>
         </service>
     </application>
