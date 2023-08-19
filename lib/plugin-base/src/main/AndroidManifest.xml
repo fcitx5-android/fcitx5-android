@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!--
+        ${mainApplicationId} can only be used inside plugin,
+        because it's defined in AndroidPluginAppConventionPlugin
+    -->
     <queries>
-        <package android:name="${mainApplicationId}" />
+        <package android:name="org.fcitx.fcitx5.android" />
     </queries>
 
     <application>
@@ -11,7 +15,7 @@
             android:exported="true"
             android:theme="@style/DeviceSettingsTheme">
             <intent-filter>
-                <action android:name="${mainApplicationId}.plugin.MANIFEST" />
+                <action android:name="org.fcitx.fcitx5.android.plugin.MANIFEST" />
             </intent-filter>
         </activity>
     </application>
