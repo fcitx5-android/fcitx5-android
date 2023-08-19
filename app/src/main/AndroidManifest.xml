@@ -27,7 +27,11 @@
         android:name="${applicationId}.permission.IPC"
         android:protectionLevel="signature" />
 
-    <uses-permission android:name="org.fcitx.fcitx5.android.permission.plugin" />
+    <permission
+        android:name="${applicationId}.permission.PLUGIN"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="${applicationId}.permission.PLUGIN" />
 
     <application
         android:name=".FcitxApplication"
