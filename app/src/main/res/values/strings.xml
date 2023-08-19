@@ -237,4 +237,10 @@
     <string name="theme_message_follow_system_day_night_mode_enabled">Cannot switch theme manually while \"Follow system dark mode\" is enabled.</string>
     <string name="disable_it">Disable it</string>
     <string name="reset_keyboard_on_focus_change">Switch back to keyboard on change focus</string>
+    <string name="export_user_data">Export user data</string>
+    <string name="import_user_data">Import user data</string>
+    <string name="exception_user_data_filename">The filename extension of %1$s does not indicate fcitx user data</string>
+    <string name="exception_user_data_metadata">Unable to find metadata of user data</string>
+    <string name="exception_user_data_package_name_mismatch">User data mismatches with the current application</string>
+    <string name="user_data_imported">User data on %1$s has been imported. The app needs to restart for changes to take effect. Exit now?</string>
 </resources>

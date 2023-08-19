@@ -225,19 +225,25 @@ fun getSystemProperty(key: String): String {
 fun getSystemSetting(key: String): Boolean =
     Settings.System.getInt(appContext.contentResolver, key) == 1
 
+/**
+ * @return top-level files in zip file
+ */
 fun ZipInputStream.extract(destDir: File): List<File> {
-    val extracted = mutableListOf<File>()
     var entry = nextEntry
     val canonicalDest = destDir.canonicalPath
-    while (entry != null && !entry.isDirectory) {
-        val file = File(destDir, entry.name)
-        if (!file.canonicalPath.startsWith(canonicalDest))
-            throw SecurityException()
-        copyTo(file.outputStream())
-        extracted.add(file)
+    while (entry != null) {
+        if (!entry.isDirectory) {
+            val file = File(destDir, entry.name)
+            if (!file.canonicalPath.startsWith(canonicalDest))
+                throw SecurityException()
+            copyTo(file.outputStream())
+        } else {
+            val dir = File(destDir, entry.name)
+            dir.mkdir()
+        }
         entry = nextEntry
     }
-    return extracted
+    return destDir.listFiles().toList()
 }
 
 inline fun <T> withTempDir(block: (File) -> T): T {
