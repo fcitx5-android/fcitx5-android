@@ -11,6 +11,7 @@ import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.errorRuntime
 import org.fcitx.fcitx5.android.utils.extract
 import org.fcitx.fcitx5.android.utils.withTempDir
+import timber.log.Timber
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
@@ -51,7 +52,7 @@ object UserDataManager {
     private val recentlyUsedDir = appContext.filesDir.resolve(RecentlyUsed.DIR_NAME)
 
     @OptIn(ExperimentalSerializationApi::class)
-    fun export(dest: OutputStream) = runCatching {
+    fun export(dest: OutputStream, timestamp: Long = System.currentTimeMillis()) = runCatching {
         ZipOutputStream(dest.buffered()).use { zipStream ->
             // shared_prefs
             writeFileTree(sharedPrefsDir, "shared_prefs", zipStream)
@@ -67,7 +68,7 @@ object UserDataManager {
                 BuildConfig.APPLICATION_ID,
                 BuildConfig.VERSION_CODE,
                 Const.versionName,
-                System.currentTimeMillis()
+                timestamp
             )
             json.encodeToStream(metadata, zipStream)
             zipStream.closeEntry()
