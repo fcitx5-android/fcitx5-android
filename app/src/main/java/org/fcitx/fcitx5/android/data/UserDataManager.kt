@@ -35,11 +35,12 @@ object UserDataManager {
         srcDir.walkTopDown().forEach { f ->
             val related = f.relativeTo(srcDir)
             if (related.path != "") {
-                val entry =
-                    ZipEntry("$destPrefix/${related.path}${if (f.isDirectory) "/" else ""}")
-                dest.putNextEntry(entry)
-                if (f.isFile)
+                if (f.isDirectory) {
+                    dest.putNextEntry(ZipEntry("$destPrefix/${related.path}/"))
+                } else if (f.isFile) {
+                    dest.putNextEntry(ZipEntry("$destPrefix/${related.path}"))
                     f.inputStream().use { it.copyTo(dest) }
+                }
             }
         }
     }
@@ -73,6 +74,17 @@ object UserDataManager {
         }
     }
 
+    private fun copyDir(source: File, target: File) {
+        val exists = source.exists()
+        val isDir = source.isDirectory
+        if (exists && isDir) {
+            source.copyRecursively(target, overwrite = true)
+        } else {
+            source.toString()
+            Timber.w("Cannot import user data: path='${source.path}', exists=$exists, isDir=$isDir")
+        }
+    }
+
     fun import(src: InputStream) = runCatching {
         ZipInputStream(src).use { zipStream ->
             withTempDir { tempDir ->
@@ -82,14 +94,10 @@ object UserDataManager {
                 val metadata = json.decodeFromString<Metadata>(metadataFile.readText())
                 if (metadata.packageName != BuildConfig.APPLICATION_ID)
                     errorRuntime(R.string.exception_user_data_package_name_mismatch)
-                // shared_prefs
-                File(tempDir, "shared_prefs").copyRecursively(target = sharedPrefsDir, overwrite = true)
-                // databases
-                File(tempDir, "databases").copyRecursively(target = dataBasesDir, overwrite = true)
-                // external
-                File(tempDir, "external").copyRecursively(target = externalDir, overwrite = true)
-                // recently_used
-                File(tempDir, "recently_used").copyRecursively(target = recentlyUsedDir, overwrite = true)
+                copyDir(File(tempDir, "shared_prefs"), sharedPrefsDir)
+                copyDir(File(tempDir, "databases"), dataBasesDir)
+                copyDir(File(tempDir, "external"), externalDir)
+                copyDir(File(tempDir, "recently_used"), recentlyUsedDir)
                 metadata
             }
         }

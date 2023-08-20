@@ -243,7 +243,7 @@ fun ZipInputStream.extract(destDir: File): List<File> {
         }
         entry = nextEntry
     }
-    return destDir.listFiles().toList()
+    return destDir.listFiles()?.toList() ?: emptyList()
 }
 
 inline fun <T> withTempDir(block: (File) -> T): T {
