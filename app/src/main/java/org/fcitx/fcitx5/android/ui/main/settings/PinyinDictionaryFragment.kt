@@ -133,10 +133,12 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDiction
             val fileName = cr.queryFileName(uri) ?: return@launch
             if (PinyinDictionary.Type.fromFileName(fileName) == null) {
                 importErrorDialog(getString(R.string.invalid_dict))
+                return@launch
             }
             val entryName = fileName.substringBeforeLast('.')
             if (ui.entries.any { it.name == entryName }) {
                 importErrorDialog(getString(R.string.dict_already_exists))
+                return@launch
             }
             NotificationCompat.Builder(ctx, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_baseline_library_books_24)

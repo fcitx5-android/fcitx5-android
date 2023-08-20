@@ -108,26 +108,25 @@ class ThemeListFragment : Fragment() {
                         val name = cr.queryFileName(uri) ?: return@withContext
                         if (!name.endsWith(".zip")) {
                             importErrorDialog(getString(R.string.exception_theme_filename))
-                        } else
-                            try {
-                                val inputStream = cr.openInputStream(uri)!!
-                                val (newCreated, theme, migrated) = ThemeManager.importTheme(
-                                    inputStream
-                                )
-                                    .getOrThrow()
-                                withContext(Dispatchers.Main) {
-                                    if (newCreated) {
-                                        adapter.prependTheme(theme)
-                                    } else {
-                                        adapter.replaceTheme(theme)
-                                    }
-                                    if (migrated) {
-                                        ctx.toast(R.string.theme_migrated)
-                                    }
+                            return@withContext
+                        }
+                        try {
+                            val inputStream = cr.openInputStream(uri)!!
+                            val (newCreated, theme, migrated) = ThemeManager.importTheme(inputStream)
+                                .getOrThrow()
+                            withContext(Dispatchers.Main) {
+                                if (newCreated) {
+                                    adapter.prependTheme(theme)
+                                } else {
+                                    adapter.replaceTheme(theme)
                                 }
-                            } catch (e: Exception) {
-                                importErrorDialog(e.localizedMessage ?: e.stackTraceToString())
+                                if (migrated) {
+                                    ctx.toast(R.string.theme_migrated)
+                                }
                             }
+                        } catch (e: Exception) {
+                            importErrorDialog(e.localizedMessage ?: e.stackTraceToString())
+                        }
                     }
                 }
             }

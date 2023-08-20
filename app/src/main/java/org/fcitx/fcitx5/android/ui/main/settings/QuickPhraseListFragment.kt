@@ -210,10 +210,12 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
             val extName = fileName.substringAfterLast('.')
             if (extName != QuickPhrase.EXT) {
                 importErrorDialog(getString(R.string.invalid_quickphrase))
+                return@launch
             }
             val entryName = fileName.substringBeforeLast('.')
             if (ui.entries.any { it.name == entryName }) {
                 importErrorDialog(getString(R.string.quickphrase_already_exists))
+                return@launch
             }
             NotificationCompat.Builder(ctx, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_baseline_format_quote_24)
