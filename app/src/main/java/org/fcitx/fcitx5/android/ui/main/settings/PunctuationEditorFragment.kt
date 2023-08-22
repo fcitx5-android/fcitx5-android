@@ -61,7 +61,8 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
         ui = object : BaseDynamicListUi<PunctuationMapEntry>(
             requireContext(),
             Mode.FreeAdd(hint = "", converter = { PunctuationMapEntry(it, "", "") }),
-            initialEntries
+            initialEntries,
+            enableOrder = true
         ) {
             init {
                 addTouchCallback()
@@ -131,6 +132,10 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
 
     override fun onItemUpdated(idx: Int, old: PunctuationMapEntry, new: PunctuationMapEntry) {
         dustman.addOrUpdate(new.key, new)
+    }
+
+    override fun onItemSwapped(fromIdx: Int, toIdx: Int, item: PunctuationMapEntry) {
+        dustman.forceDirty()
     }
 
     override fun onStart() {
