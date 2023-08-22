@@ -74,7 +74,7 @@ object FcitxPluginServices {
 
     fun connectAll() {
         DataManager.getLoadedPlugins().forEach {
-            if (!connections.containsKey(it.name)) {
+            if (it.hasService && !connections.containsKey(it.name)) {
                 connectPlugin(it)
             }
         }

@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.os.Build
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.fcitx.fcitx5.android.BuildConfig
@@ -84,7 +83,7 @@ object DataManager {
             @Suppress("DEPRECATION")
             pm.queryIntentActivities(Intent(PLUGIN_INTENT), PackageManager.MATCH_ALL)
         }.map {
-           it.activityInfo.packageName
+            it.activityInfo.packageName
         }
 
         Timber.d("Detected plugin packages: ${pluginPackages.joinToString()}")
@@ -103,6 +102,7 @@ object DataManager {
             var domain: String? = null
             var apiVersion: String? = null
             var description: String? = null
+            var hasService = false
             var text: String? = null
             while ((eventType != XmlPullParser.END_DOCUMENT)) {
                 when (eventType) {
@@ -111,6 +111,7 @@ object DataManager {
                         "apiVersion" -> apiVersion = text
                         "domain" -> domain = text
                         "description" -> description = text
+                        "hasService" -> hasService = text?.lowercase() == "true"
                     }
                 }
                 eventType = parser.next()
@@ -144,6 +145,7 @@ object DataManager {
                             apiVersion,
                             domain,
                             description,
+                            hasService,
                             info.versionName,
                             info.applicationInfo.nativeLibraryDir
                         )
@@ -201,8 +203,8 @@ object DataManager {
             val pluginContext = appContext.createPackageContext(plugin.packageName, 0)
             val assets = pluginContext.assets
             val descriptor = runCatching { assets.getDataDescriptor() }.onFailure {
-                it.printStackTrace()
-                Timber.w("Failed to get and decode the data descriptor of ${plugin.name}")
+                Timber.w("Failed to get or decode data descriptor of ${plugin.name}")
+                Timber.w(it)
             }.getOrNull() ?: continue
             try {
                 newHierarchy.install(descriptor, FileSource.Plugin(plugin))

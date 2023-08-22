@@ -2,4 +2,5 @@
 <plugin xmlns="../../../../../pluginSchema.xsd">
     <apiVersion>0.1</apiVersion>
     <description>@string/description</description>
+    <hasService>true</hasService>
 </plugin>

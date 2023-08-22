@@ -2,12 +2,14 @@
     <xs:element name="apiVersion" type="xs:string" />
     <xs:element name="domain" type="xs:string" />
     <xs:element name="description" type="xs:string" />
+    <xs:element name="hasService" type="xs:boolean" />
     <xs:element name="plugin">
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="apiVersion" />
                 <xs:element ref="domain" />
                 <xs:element ref="description" />
+                <xs:element ref="hasService" />
             </xs:sequence>
         </xs:complexType>
     </xs:element>

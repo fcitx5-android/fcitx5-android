@@ -7,4 +7,5 @@
     <string name="copied">Copied to clipboard</string>
     <string name="plugin_info">Plugin Info</string>
     <string name="licenses">Open-source Licenses</string>
+    <string name="has_service">Contains IPC service</string>
 </resources>

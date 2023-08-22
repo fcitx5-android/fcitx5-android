@@ -42,11 +42,11 @@ class AboutActivity : PreferenceActivity() {
         }
 
         private fun PreferenceScreen.addCategory(
-            title: String,
+            title: Int,
             init: PreferenceCategory.() -> Unit
         ) {
             PreferenceCategory(context).also {
-                it.title = title
+                it.title = getString(title)
                 addPreference(it)
                 init.invoke(it)
             }
@@ -68,6 +68,14 @@ class AboutActivity : PreferenceActivity() {
             })
         }
 
+        private fun PreferenceCategory.addPreference(
+            title: Int,
+            summary: String,
+            onClick: OnPreferenceClickListener? = null
+        ) {
+            addPreference(getString(title), summary, onClick)
+        }
+
         @SuppressLint("DiscouragedApi")
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
@@ -81,6 +89,7 @@ class AboutActivity : PreferenceActivity() {
             var apiVersion = ""
             var description = ""
             var text = ""
+            var hasService = false
             while ((eventType != XmlPullParser.END_DOCUMENT)) {
                 when (eventType) {
                     XmlPullParser.TEXT -> text = parser.text
@@ -94,15 +103,17 @@ class AboutActivity : PreferenceActivity() {
                                 if (resId != 0) getString(resId) else it
                             } else it
                         }
+                        "hasService" -> hasService = text.lowercase() == "true"
                     }
                 }
                 eventType = parser.next()
             }
-            screen.addCategory(getString(R.string.plugin_info)) {
-                addPreference(getString(R.string.pkg_name), pkg)
-                addPreference(getString(R.string.api_version), apiVersion)
-                addPreference(getString(R.string.gettext_domain), domain)
-                addPreference(getString(R.string.plugin_description), description)
+            screen.addCategory(R.string.plugin_info) {
+                addPreference(R.string.pkg_name, pkg)
+                addPreference(R.string.api_version, apiVersion)
+                addPreference(R.string.gettext_domain, domain)
+                addPreference(R.string.plugin_description, description)
+                addPreference(R.string.has_service, hasService.toString())
             }
             resources.getIdentifier("aboutlibraries", "raw", pkg).also { resId ->
                 if (resId == 0) return@also
@@ -116,7 +127,7 @@ class AboutActivity : PreferenceActivity() {
                     .sortedBy {
                         if (it.tag == "native") it.uniqueId.uppercase() else it.uniqueId.lowercase()
                     }
-                screen.addCategory(getString(R.string.licenses)) {
+                screen.addCategory(R.string.licenses) {
                     libraries.forEach {
                         addPreference(
                             title = "${it.uniqueId}:${it.artifactVersion}",

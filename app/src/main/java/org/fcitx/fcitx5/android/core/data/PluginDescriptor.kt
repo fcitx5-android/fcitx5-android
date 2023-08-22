@@ -23,6 +23,10 @@ data class PluginDescriptor(
      * Can use string resource, e.g. `@string/description`
      */
     val description: String,
+    /**
+     * Contains IPC service with action `${mainApplicationId}.plugin.SERVICE`. Default to `false`.
+     */
+    val hasService: Boolean,
     val versionName: String,
     val nativeLibraryDir: String
 ) {

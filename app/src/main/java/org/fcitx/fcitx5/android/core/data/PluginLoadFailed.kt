@@ -7,13 +7,9 @@ sealed interface PluginLoadFailed {
         val existingSrc: FileSource
     ) : PluginLoadFailed
 
-    object MissingPluginDescriptor : PluginLoadFailed {
-        override fun toString(): String = "MissingPluginDescriptor"
-    }
+    data object MissingPluginDescriptor : PluginLoadFailed
 
-    object PluginDescriptorParseError : PluginLoadFailed {
-        override fun toString(): String = "PluginDescriptorParseError"
-    }
+    data object PluginDescriptorParseError : PluginLoadFailed
 
     data class MissingDataDescriptor(
         val plugin: PluginDescriptor
