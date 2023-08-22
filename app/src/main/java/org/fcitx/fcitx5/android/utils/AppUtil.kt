@@ -19,6 +19,7 @@ object AppUtil {
         context.startActivity(
             Intent(context, MainActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
             }
         )
     }
@@ -33,10 +34,14 @@ object AppUtil {
 
     private fun launchMainToDest(context: Context, @IdRes dest: Int, arguments: Bundle? = null) {
         NavDeepLinkBuilder(context)
+            .setComponentName(MainActivity::class.java)
             .setGraph(R.navigation.settings_nav)
             .addDestination(dest, arguments)
             .createPendingIntent()
-            .send()
+            .send(context, 0, Intent().apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+            })
     }
 
     fun launchMainToKeyboard(context: Context) =
