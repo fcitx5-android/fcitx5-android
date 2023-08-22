@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.ui.main.settings
 
 import android.content.Context
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.findNavController
@@ -266,7 +267,11 @@ object PreferenceScreenFactory {
                 dialogMessage = descriptor.tooltip
             }
             setOnPreferenceChangeListener { _, _ ->
-                save()
+                // setOnPreferenceChangeListener runs before preferenceDataStore was updated,
+                // post to save() to make sure store has been updated (hopefully)
+                ContextCompat.getMainExecutor(context).execute {
+                    save()
+                }
                 true
             }
             screen.addPreference(this)
