@@ -108,6 +108,7 @@ class ThemeListFragment : Fragment() {
                         val name = cr.queryFileName(uri) ?: return@withContext
                         if (!name.endsWith(".zip")) {
                             importErrorDialog(getString(R.string.exception_theme_filename))
+                            return@withContext
                         }
                         try {
                             val inputStream = cr.openInputStream(uri)!!
@@ -141,7 +142,9 @@ class ThemeListFragment : Fragment() {
                             val outputStream = ctx.contentResolver.openOutputStream(uri)!!
                             ThemeManager.exportTheme(exported, outputStream).getOrThrow()
                         } catch (e: Exception) {
-                            ctx.toast(e.localizedMessage ?: e.stackTraceToString())
+                            withContext(Dispatchers.Main) {
+                                ctx.toast(e.localizedMessage ?: e.stackTraceToString())
+                            }
                         }
                     }
                 }

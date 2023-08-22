@@ -11,6 +11,7 @@ import org.fcitx.fcitx5.android.ui.main.ClipboardEditActivity
 import org.fcitx.fcitx5.android.ui.main.LogActivity
 import org.fcitx.fcitx5.android.ui.main.MainActivity
 import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
+import kotlin.system.exitProcess
 
 object AppUtil {
 
@@ -65,4 +66,7 @@ object AppUtil {
         )
     }
 
+    fun exit() {
+        exitProcess(0)
+    }
 }

@@ -127,6 +127,25 @@ object FcitxDaemon {
         }
     }
 
+    /**
+     * Stop fcitx instance regardless of connected clients.
+     * Should only be used before importing user configuration files,
+     * then the App must be restarted as soon as possible.
+     *
+     * This method blocks until fully stopped.
+     */
+    fun stopFcitx() {
+        realFcitx.stop()
+    }
+
+    /**
+     * Start fcitx instance.
+     * Should only be used when it has been stopped **AND** user data importing failed.
+     */
+    fun startFcitx() {
+        realFcitx.start()
+    }
+
     init {
         createNotificationChannel()
     }

@@ -203,6 +203,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
             val fileName = cr.queryFileName(uri) ?: return@launch
             if (!fileName.endsWith(".zip")) {
                 importErrorDialog(getString(R.string.exception_table_im_filename, fileName))
+                return@launch
             }
             NotificationCompat.Builder(ctx, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_baseline_library_books_24)

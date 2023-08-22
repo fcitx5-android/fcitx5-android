@@ -275,7 +275,8 @@ object DataManager {
 
     fun deleteAndSync() {
         lock.withLock {
-            dataDir.deleteRecursively()
+            dataDir.resolve(Const.dataDescriptorName).delete()
+            dataDir.resolve("usr").deleteRecursively()
         }
         sync()
     }

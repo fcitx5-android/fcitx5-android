@@ -237,4 +237,13 @@
     <string name="theme_message_follow_system_day_night_mode_enabled">Cannot switch theme manually while \"Follow system dark mode\" is enabled.</string>
     <string name="disable_it">Disable it</string>
     <string name="reset_keyboard_on_focus_change">Switch back to keyboard on change focus</string>
+    <string name="export_user_data">Export user data</string>
+    <string name="import_user_data">Import user data</string>
+    <string name="exception_user_data_filename">The filename extension of %1$s does not indicate fcitx5-android user data</string>
+    <string name="exception_user_data_metadata">Unable to find metadata of user data</string>
+    <string name="exception_user_data_package_name_mismatch">User data does not match current application</string>
+    <string name="user_data_imported">User data on %1$s has been imported, restarting…</string>
+    <string name="confirm_import_user_data">Import user data would override local settings and input history, and requires restart the App for changes to take effect. Processed?</string>
+    <string name="restart_channel">App restart</string>
+    <string name="restart_notify_msg">App has been restarted, click here to open</string>
 </resources>
