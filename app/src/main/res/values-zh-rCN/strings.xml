@@ -212,8 +212,8 @@
     <string name="delete_theme_msg">确定要删除主题“%1$s”吗？</string>
     <string name="capture_heap_dump">捕获堆内存转储</string>
     <string name="plugins">插件</string>
-    <string name="loaded">已加载</string>
-    <string name="failed">失败</string>
+    <string name="plugins_loaded">已加载</string>
+    <string name="plugins_failed">失败</string>
     <string name="missing_plugin_descriptor">缺少插件描述文件</string>
     <string name="invalid_plugin_descriptor">无效的插件描述文件</string>
     <string name="missing_data_descriptor">缺少数据描述文件</string>

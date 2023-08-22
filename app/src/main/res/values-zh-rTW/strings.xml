@@ -212,8 +212,8 @@
     <string name="delete_theme_msg">確定要刪除主題 “%1$s” 嗎？</string>
     <string name="capture_heap_dump">捕獲 heap 傾印資料</string>
     <string name="plugins">外掛程式</string>
-    <string name="loaded">已加載</string>
-    <string name="failed">失敗</string>
+    <string name="plugins_loaded">已加載</string>
+    <string name="plugins_failed">失敗</string>
     <string name="missing_plugin_descriptor">缺少外掛程式描述檔</string>
     <string name="invalid_plugin_descriptor">無效的外掛程式描述檔</string>
     <string name="missing_data_descriptor">缺少數據描述檔</string>

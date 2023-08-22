@@ -212,8 +212,8 @@
     <string name="delete_theme_msg">Вы действительно хотите удалить тему \"%1$s\"?</string>
     <string name="capture_heap_dump">Захватить дамп кучи</string>
     <string name="plugins">Плагины</string>
-    <string name="loaded">Загружено</string>
-    <string name="failed">Не удалось</string>
+    <string name="plugins_loaded">Загружено</string>
+    <string name="plugins_failed">Не удалось</string>
     <string name="missing_plugin_descriptor">Отсутствует дескриптор плагина</string>
     <string name="invalid_plugin_descriptor">Неверный дескриптор плагина</string>
     <string name="missing_data_descriptor">Отсутствует дескриптор данных</string>

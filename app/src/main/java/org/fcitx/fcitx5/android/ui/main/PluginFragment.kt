@@ -63,7 +63,7 @@ class PluginFragment : PaddingPreferenceFragment() {
                 return@apply
             }
             if (loaded.isNotEmpty()) {
-                addCategory(R.string.loaded) {
+                addCategory(R.string.plugins_loaded) {
                     isIconSpaceReserved = false
                     loaded.forEach {
                         addPreference(it.name, "${it.versionName}\n${it.description}") {
@@ -73,7 +73,7 @@ class PluginFragment : PaddingPreferenceFragment() {
                 }
             }
             if (failed.isNotEmpty()) {
-                addCategory(R.string.failed) {
+                addCategory(R.string.plugins_failed) {
                     isIconSpaceReserved = false
                     failed.forEach { (packageName, reason) ->
                         val summary = when (reason) {
