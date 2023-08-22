@@ -66,6 +66,11 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    androidResources {
+        @Suppress("UnstableApiUsage")
+        generateLocaleConfig = true
+    }
 }
 
 kotlin {
