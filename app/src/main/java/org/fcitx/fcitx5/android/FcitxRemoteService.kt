@@ -20,6 +20,8 @@ import org.fcitx.fcitx5.android.core.reloadQuickPhrase
 import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.utils.Const
+import org.fcitx.fcitx5.android.utils.desc
+import org.fcitx.fcitx5.android.utils.descEquals
 import timber.log.Timber
 import java.util.PriorityQueue
 
@@ -32,30 +34,24 @@ class FcitxRemoteService : Service() {
     private val clipboardTransformers =
         PriorityQueue<IClipboardEntryTransformer>(3, compareByDescending { it.priority })
 
-    private val IClipboardEntryTransformer.desc
-        get() = runCatching { description }.getOrElse { FALLBACK_DESC }
-
-    companion object {
-        private const val FALLBACK_DESC = "x"
+    private fun transformClipboard(source: String): String {
+        MainScope()
+        var result = source
+        clipboardTransformers.forEach {
+            try {
+                result = it.transform(result)!!
+            } catch (e: Exception) {
+                Timber.w("Exception while calling clipboard transformer '${it.desc}'")
+                Timber.w(e)
+            }
+        }
+        return result
     }
 
     private suspend fun updateClipboardManager() = clipboardTransformerLock.withLock {
         ClipboardManager.transformer =
-            if (clipboardTransformers.isEmpty()) null else ({ s: String ->
-                var x = s
-                clipboardTransformers.forEach {
-                    x = runCatching { it.transform(x) }
-                        .onFailure { it.printStackTrace() }
-                        .getOrElse { x }
-                }
-                x
-            }).also {
-                Timber.d(
-                    "Apply transformers ${
-                        clipboardTransformers.joinToString { it.desc }
-                    }"
-                )
-            }
+            if (clipboardTransformers.isEmpty()) null else ::transformClipboard
+        Timber.d("All clipboard transformers: ${clipboardTransformers.joinToString { it.desc }}")
     }
 
     private val binder = object : IFcitxRemoteService.Stub() {
@@ -73,22 +69,32 @@ class FcitxRemoteService : Service() {
         }
 
         override fun registerClipboardEntryTransformer(transformer: IClipboardEntryTransformer) {
-            if (clipboardTransformers.any { runCatching { it.description }.getOrNull() == transformer.desc })
+            Timber.d("registerClipboardEntryTransformer: ${transformer.desc}")
+            try {
+                transformer.description!!.isNotEmpty() || throw Exception()
+            } catch (e: Exception) {
+                Timber.w("Cannot register ClipboardEntryTransformer of null or empty description")
                 return
+            }
+            if (clipboardTransformers.any { it.descEquals(transformer) }) {
+                Timber.w("ClipboardEntryTransformer ${transformer.desc} has already been registered")
+                return
+            }
             scope.launch {
                 transformer.asBinder().linkToDeath({
                     unregisterClipboardEntryTransformer(transformer)
                 }, 0)
                 clipboardTransformers.add(transformer)
-                Timber.d("registerClipboardEntryTransformer: ${transformer}[${transformer.desc}]")
                 updateClipboardManager()
             }
         }
 
         override fun unregisterClipboardEntryTransformer(transformer: IClipboardEntryTransformer) {
+            Timber.d("unregisterClipboardEntryTransformer: ${transformer.desc}")
             scope.launch {
                 clipboardTransformers.remove(transformer)
-                Timber.d("unregisterClipboardEntryTransformer: $transformer")
+                        || clipboardTransformers.removeIf { it.descEquals(transformer) }
+                        || return@launch
                 updateClipboardManager()
             }
         }
@@ -100,21 +106,25 @@ class FcitxRemoteService : Service() {
         override fun reloadQuickPhrase() {
             FcitxDaemon.getFirstConnectionOrNull()?.runIfReady { reloadQuickPhrase() }
         }
+    }
 
+    override fun onCreate() {
+        Timber.d("FcitxRemoteService onCreate")
+        super.onCreate()
     }
 
     override fun onBind(intent: Intent): IBinder {
-        Timber.d("onBind: $intent")
+        Timber.d("FcitxRemoteService onBind: $intent")
         return binder
     }
 
     override fun onUnbind(intent: Intent): Boolean {
-        Timber.d("onUnbind: $intent")
+        Timber.d("FcitxRemoteService onUnbind: $intent")
         return super.onUnbind(intent)
     }
 
     override fun onDestroy() {
-        Timber.d("onDestroy")
+        Timber.d("FcitxRemoteService onDestroy")
         scope.cancel()
         clipboardTransformers.clear()
         runBlocking { updateClipboardManager() }
