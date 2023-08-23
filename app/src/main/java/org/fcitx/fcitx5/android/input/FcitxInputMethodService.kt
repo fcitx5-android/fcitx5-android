@@ -85,6 +85,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private var highlightColor: Int = 0x66008577 // material_deep_teal_500 with alpha 0.4
 
     private val ignoreSystemCursor by AppPrefs.getInstance().advanced.ignoreSystemCursor
+    private val resetCursor by AppPrefs.getInstance().advanced.resetCursorAfterCommit
+
     private val inlineSuggestions by AppPrefs.getInstance().keyboard.inlineSuggestions
 
     @Keep
@@ -224,8 +226,13 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     fun commitText(text: String) {
         if (composing.isNotEmpty() && composingText.toString() == text) {
             // when composing text equals commit content, finish composing text as-is
+            val cursor = composing.end
             resetComposingState()
             currentInputConnection?.finishComposingText()
+            if (resetCursor) {
+                selection.predict(cursor)
+                currentInputConnection?.setSelection(cursor, cursor)
+            }
             return
         }
         // committed text should replace composing (if any), replace selected range (if any),
