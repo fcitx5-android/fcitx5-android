@@ -8,7 +8,6 @@ import androidx.core.os.bundleOf
 import androidx.navigation.NavDeepLinkBuilder
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.ui.main.ClipboardEditActivity
-import org.fcitx.fcitx5.android.ui.main.LogActivity
 import org.fcitx.fcitx5.android.ui.main.MainActivity
 import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
 import kotlin.system.exitProcess
@@ -20,14 +19,6 @@ object AppUtil {
             Intent(context, MainActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-            }
-        )
-    }
-
-    fun launchLog(context: Context, initIntent: Intent.() -> Unit = {}) {
-        context.startActivity(
-            Intent(context, LogActivity::class.java).apply {
-                initIntent.invoke(this)
             }
         )
     }

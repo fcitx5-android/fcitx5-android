@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.ui.main
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Debug
 import androidx.activity.result.ActivityResultLauncher
@@ -16,7 +17,6 @@ import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.ui.common.PaddingPreferenceFragment
 import org.fcitx.fcitx5.android.ui.main.modified.MySwitchPreference
-import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.addPreference
 import org.fcitx.fcitx5.android.utils.iso8601UTCDateTime
 import org.fcitx.fcitx5.android.utils.toast
@@ -46,7 +46,7 @@ class DeveloperFragment : PaddingPreferenceFragment() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceScreen = preferenceManager.createPreferenceScreen(requireContext()).apply {
             addPreference(R.string.real_time_logs) {
-                AppUtil.launchLog(context)
+                context.startActivity(Intent(context, LogActivity::class.java))
             }
             addPreference(MySwitchPreference(context).apply {
                 key = AppPrefs.getInstance().internal.verboseLog.key
@@ -79,10 +79,19 @@ class DeveloperFragment : PaddingPreferenceFragment() {
                     .show()
             }
             addPreference(R.string.clear_clb_db) {
-                lifecycleScope.launch {
-                    ClipboardManager.nukeTable()
-                    context.toast(R.string.done)
-                }
+                AlertDialog.Builder(context)
+                    .setTitle(R.string.clear_clb_db)
+                    .setMessage(R.string.clear_clp_db_confirm)
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            ClipboardManager.nukeTable()
+                            withContext(Dispatchers.Main) {
+                                context.toast(R.string.done)
+                            }
+                        }
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
             }
             addPreference(R.string.capture_heap_dump) {
                 val fileName = "${context.packageName}_${iso8601UTCDateTime()}.hprof"
