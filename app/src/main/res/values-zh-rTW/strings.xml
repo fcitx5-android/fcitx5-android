@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name_release">Android 版的 Fcitx5</string>
-    <string name="app_name_debug">Android 版的 Fcitx5（除錯模式）</string>
+    <string name="app_name_release">小企鵝輸入法5</string>
+    <string name="app_name_debug">小企鵝輸入法5 (除錯)</string>
     <string name="save">儲存</string>
     <string name="input_methods">輸入法</string>
     <string name="add_input_method">新增輸入法</string>
@@ -191,7 +191,7 @@
     <string name="table_dict_select_title">碼表字典（ .dict 或 .txt ）</string>
     <string name="exception_table_conf_filename">\"%1$s\" 的副檔名不是碼表輸入法的配置檔（ .conf 或 .conf.in ）</string>
     <string name="exception_table_dict_filename">\"%1$s\" 的副檔名不是碼表字典（ .dict 或 .txt ）</string>
-    <string name="exception_table_import_both_files">請選擇以上兩個檔案後再導入</string>
+    <string name="exception_table_import_both_files">請選擇以上兩個檔案後再匯入</string>
     <string name="notification_permission_message">尚未賦予通知權限，因此無法在耗時較長的操作完成後給您發送通知。</string>
     <string name="notification_permission_title">沒有通知權限</string>
     <string name="toolbar_num_row_on_password">輸入密碼時在工具欄上顯示數字列</string>
@@ -213,7 +213,7 @@
     <string name="capture_heap_dump">捕獲 heap 傾印資料</string>
     <string name="plugins">外掛程式</string>
     <string name="plugins_loaded">已加載</string>
-    <string name="plugins_failed">失敗</string>
+    <string name="plugins_failed">加載失敗</string>
     <string name="missing_plugin_descriptor">缺少外掛程式描述檔</string>
     <string name="invalid_plugin_descriptor">無效的外掛程式描述檔</string>
     <string name="missing_data_descriptor">缺少數據描述檔</string>
@@ -229,4 +229,17 @@
     <string name="no_plugins">無可用外掛程式</string>
     <string name="removed_n_items">已移除 %1$d 個項目</string>
     <string name="whether_reset_switch_preference">是否要將此偏好設定重置為默認選項？</string>
-</resources>
+    <string name="enabled">啟用</string>
+    <string name="following_system_settings">跟隨系統設定</string>
+    <string name="button_sound">按鍵音</string>
+    <string name="button_sound_volume">按鍵音音量</string>
+    <string name="clipboard_return_after_paste">貼上後返回</string>
+    <string name="theme_message_follow_system_day_night_mode_enabled">已設定「依據系統設定主題色調」，無法手動切換主題。</string>
+    <string name="disable_it">禁用它</string>
+    <string name="reset_keyboard_on_focus_change">焦點改變時切換回鍵盤</string>
+    <string name="export_user_data">導出用戶數據</string>
+    <string name="import_user_data">匯入用戶數據</string>
+    <string name="exception_user_data_filename">%1$s 副檔名並不是 fcitx5-android 用戶數據</string>
+    <string name="i_do_not_need_it">我不需要</string>
+    <string name="grant_permission">授予權限</string>
+    </resources>

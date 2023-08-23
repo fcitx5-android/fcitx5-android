@@ -139,7 +139,7 @@
     <string name="exception_theme_name_clash">Название темы конфликтует со встроенными темами</string>
     <string name="exception_theme_src_image">Не удалось сохранить исходное изображение фона темы</string>
     <string name="exception_theme_cropped_image">Не удалось сохранить обрезанное изображение фона темы</string>
-    <string name="follow_system_day_night_theme">Следовать теме дневного света системы</string>
+    <string name="follow_system_day_night_theme">Следовать системной теме «день-ночь»</string>
     <string name="follow_system_day_night_theme_summary">Переопределить выбор темы вручную</string>
     <string name="light_mode_theme">Светлая тема</string>
     <string name="dark_mode_theme">Темная тема</string>
@@ -229,4 +229,12 @@
     <string name="no_plugins">Нет доступных плагинов</string>
     <string name="removed_n_items">Удаленный %1$d элемент(ы)</string>
     <string name="whether_reset_switch_preference">Вы хотите сбросить этот параметр по умолчанию?</string>
-</resources>
+    <string name="enabled">Включено</string>
+    <string name="following_system_settings">Следовать системным настройкам</string>
+    <string name="button_sound">Звуковой эффект при нажатии клавиш</string>
+    <string name="button_sound_volume">Громкость звукового эффекта при нажатии клавиш</string>
+    <string name="clipboard_return_after_paste">Возврат в буфер обмена после вставки</string>
+    <string name="theme_message_follow_system_day_night_mode_enabled">Невозможно переключить тему вручную, пока включен режим «Следовать системному темному режиму».</string>
+    <string name="disable_it">Отключить это</string>
+    <string name="reset_keyboard_on_focus_change">Переключаться обратно на клавиатуру при смене фокуса</string>
+    </resources>

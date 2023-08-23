@@ -7,4 +7,5 @@
     <string name="copied">已复制到剪贴板</string>
     <string name="plugin_info">插件信息</string>
     <string name="licenses">开源许可</string>
+    <string name="has_service">包含跨进程通信服务</string>
 </resources>

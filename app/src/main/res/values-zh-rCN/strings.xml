@@ -24,7 +24,7 @@
     <string name="edit">编辑</string>
     <string name="undo">撤销</string>
     <string name="delete_and_sync_data">删除并同步运行数据</string>
-    <string name="delete_and_sync_data_message">删除当前的数据文件夹并从应用附带的资源中同步</string>
+    <string name="delete_and_sync_data_message">删除当前的数据目录，并从应用附带的资源中同步</string>
     <string name="enable_ime">启用输入法</string>
     <string name="enable_ime_hint">在“语言和输入法设置”中启用&lt;b>%1$s&lt;/b></string>
     <string name="select_ime">选择输入法</string>
@@ -213,7 +213,7 @@
     <string name="capture_heap_dump">捕获堆内存转储</string>
     <string name="plugins">插件</string>
     <string name="plugins_loaded">已加载</string>
-    <string name="plugins_failed">失败</string>
+    <string name="plugins_failed">加载失败</string>
     <string name="missing_plugin_descriptor">缺少插件描述文件</string>
     <string name="invalid_plugin_descriptor">无效的插件描述文件</string>
     <string name="missing_data_descriptor">缺少数据描述文件</string>
@@ -229,4 +229,25 @@
     <string name="no_plugins">无可用插件</string>
     <string name="removed_n_items">已移除 %1$d 个项目</string>
     <string name="whether_reset_switch_preference">是否要将此设置重置为默认值？</string>
+    <string name="enabled">启用</string>
+    <string name="following_system_settings">跟随系统设置</string>
+    <string name="button_sound">按键音</string>
+    <string name="button_sound_volume">按键音音量</string>
+    <string name="clipboard_return_after_paste">粘贴后返回</string>
+    <string name="theme_message_follow_system_day_night_mode_enabled">“跟随系统夜间模式”已启用，不能手动更换主题。</string>
+    <string name="disable_it">禁用它</string>
+    <string name="reset_keyboard_on_focus_change">焦点改变时切换回键盘</string>
+    <string name="export_user_data">导出用户数据</string>
+    <string name="import_user_data">导入用户数据</string>
+    <string name="exception_user_data_filename">文件 %1$s 的拓展名不是 fcitx5-android 用户数据</string>
+    <string name="exception_user_data_metadata">找不到用户数据的元数据</string>
+    <string name="exception_user_data_package_name_mismatch">用户数据与当前应用不匹配</string>
+    <string name="user_data_imported">已导入来自 %1$s 的用户数据，正在重启…</string>
+    <string name="confirm_import_user_data">导入用户数据会覆盖本地设置与输入历史，并且在重启应用后才能生效。继续吗？</string>
+    <string name="restart_channel">应用重启</string>
+    <string name="restart_notify_msg">应用已被重启，点击此处打开</string>
+    <string name="i_do_not_need_it">我不需要</string>
+    <string name="grant_permission">授予权限</string>
+    <string name="clear_clp_db_confirm">剪贴板数据库将会被完全清空，包括已置顶的条目。继续吗？</string>
+    <string name="reset_cursor_after_commit">提交文本后重置光标位置</string>
 </resources>

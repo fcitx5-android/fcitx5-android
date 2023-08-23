@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name_debug">小企鹅输入法5 (剪贴板过滤插件 | 调试)</string>
+    <string name="app_name_release">小企鹅输入法5 (剪贴板过滤插件)</string>
+    <string name="description">对剪贴板内容应用 ClearURLs</string>
+</resources>

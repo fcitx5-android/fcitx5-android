@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name_debug">Fcitx5 для Android (плагин фильтра буфера обмена | Отладка)</string>
+    <string name="app_name_release">Fcitx5 для Android (плагин фильтра буфера обмена)</string>
+    <string name="description">Применить ClearURLs в буфере обмена</string>
+</resources>
