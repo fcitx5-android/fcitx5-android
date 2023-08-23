@@ -1,0 +1,39 @@
+# 0.0.7 - Plugin Service and User Data Export/Import
+ 
+## Highlights
+
+- Plugin Service: plugins can have their own service and communicate with the input method. Currently "Clipboard Filter Plugin" is available for applying ClearURLs rules.
+- User Data Export/Import: export Android preference and Fcitx configuration as .zip archive, then import it later or on other devices.
+
+### libime 1.1.1
+
+- Updated language model, which may "improve the experience on Pinyin in a significant way"
+
+### fcitx5-chinese-addons 5.1.0
+
+- New custom phrase in Pinyin, Learn more at https://github.com/fcitx/fcitx5-chinese-addons/pull/138
+
+## New features
+
+- Show a smile face icon on comma key to indicate it's long press action
+- Scale candidate text if it's too long
+- Keypress sound effect settings
+- Plugins can have their own service
+- Option for switch back to keyboard after paste in clipboard UI
+- Don't follow system font scale settings in keyboard buttons
+- Save fcitx state before device shutdown
+- Option for switch back to keyboard on focus change
+- User data export and import
+- Exclude Activity launched by keyboard from recents
+- Prompt before clear clipboard database in developer settings
+- Option to reset cursor position after commit text
+
+## Bug fixes
+
+- Missing character in some emoticon
+- Missing EditorInfo inspector preference UI
+- Potential crash in InlineSuggestionsUi
+- Import table configuration file with empty value
+- Edit another clipboard entry while in clipboard editing dialog
+- Potential crash when showing the keyboard for the first time
+- Changes to fcitx configuration via settings UI cannot be saved sometimes

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(fcitx5-android VERSION 0.0.6)
+project(fcitx5-android VERSION 0.0.7)
 
 set(CMAKE_CXX_STANDARD 17)
 
