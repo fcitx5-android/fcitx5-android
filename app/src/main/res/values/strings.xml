@@ -246,4 +246,6 @@
     <string name="confirm_import_user_data">Import user data would override local settings and input history, and requires restart the App for changes to take effect. Processed?</string>
     <string name="restart_channel">App restart</string>
     <string name="restart_notify_msg">App has been restarted, click here to open</string>
+    <string name="i_do_not_need_it">I don\'t need it</string>
+    <string name="grant_permission">Grant permission</string>
 </resources>
