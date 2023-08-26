@@ -10,12 +10,7 @@ add_custom_target(cmake)
 # dummy target to export "notifications_public.h"
 add_custom_target(notifications)
 
-set(CMAKE_INSTALL_PREFIX /usr)
-# fcitx-utils/standardpath.cpp uses FCITX_INSTALL_LIBDATADIR,
-# which is CMAKE_INSTALL_LIBDATADIR's absolute path
-set(CMAKE_INSTALL_LIBDATADIR /usr/lib)
-set(FCITX_INSTALL_PKGDATADIR /usr/share/fcitx5)
-set(FCITX_INSTALL_LOCALEDIR /usr/share/locale)
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Fcitx5AndroidInstallDirs.cmake")
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
