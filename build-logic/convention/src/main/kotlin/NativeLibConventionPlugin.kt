@@ -17,6 +17,7 @@ class NativeLibConventionPlugin : NativeBaseConventionPlugin() {
                 }
             }
             buildFeatures {
+                prefab = true
                 prefabPublishing = true
             }
             libraryVariants.all {

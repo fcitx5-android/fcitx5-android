@@ -27,19 +27,7 @@ android {
                     "copy-fcitx5-modules",
                     // android specific modules
                     "androidfrontend",
-                    "androidkeyboard",
-                    // fcitx5-chinese-addons
-                    "pinyin",
-                    "scel2org5",
-                    "table",
-                    "chttrans",
-                    "fullwidth",
-                    "pinyinhelper",
-                    "punctuation",
-                    // fcitx5-lua
-                    "luaaddonloader",
-                    // fcitx5-unikey
-                    "unikey"
+                    "androidkeyboard"
                 )
             }
         }
@@ -84,7 +72,12 @@ aboutLibraries {
 }
 
 fcitxComponent {
-    installFcitx5Data = true
+    installLibraries = listOf(
+        "fcitx5",
+        "fcitx5-lua",
+        "libime",
+        "fcitx5-chinese-addons"
+    )
 }
 
 ksp {
@@ -94,6 +87,9 @@ ksp {
 dependencies {
     ksp(project(":codegen"))
     implementation(project(":lib:fcitx5"))
+    implementation(project(":lib:fcitx5-lua"))
+    implementation(project(":lib:libime"))
+    implementation(project(":lib:fcitx5-chinese-addons"))
     implementation(project(":lib:common"))
     implementation(libs.kotlinx.coroutines)
     implementation(libs.kotlinx.serialization.json)

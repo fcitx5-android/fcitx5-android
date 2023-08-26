@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.18)
 
 project(fcitx5-android-lib-fcitx5 VERSION 0.0.7)
 
-set(CMAKE_CXX_STANDARD 17)
-
 # For reproducible build
 add_link_options("LINKER:--hash-style=gnu,--build-id=none")
 
@@ -18,7 +16,6 @@ set(CMAKE_INSTALL_PREFIX /usr)
 set(CMAKE_INSTALL_LIBDATADIR /usr/lib)
 set(FCITX_INSTALL_PKGDATADIR /usr/share/fcitx5)
 set(FCITX_INSTALL_LOCALEDIR /usr/share/locale)
-set(LIBIME_INSTALL_PKGDATADIR table)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
