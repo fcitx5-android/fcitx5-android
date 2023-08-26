@@ -209,6 +209,7 @@ void AndroidKeyboardEngine::setConfig(const RawConfig &config) {
 }
 
 void AndroidKeyboardEngine::activate(const InputMethodEntry &entry, InputContextEvent &event) {
+    FCITX_UNUSED(entry);
     auto *inputContext = event.inputContext();
     wordHintAction_.setChecked(*config_.enableWordHint);
     wordHintAction_.update(inputContext);
@@ -226,6 +227,7 @@ void AndroidKeyboardEngine::deactivate(const InputMethodEntry &entry, InputConte
 }
 
 void AndroidKeyboardEngine::reset(const InputMethodEntry &entry, InputContextEvent &event) {
+    FCITX_UNUSED(entry);
     auto *inputContext = event.inputContext();
     resetState(inputContext);
     inputContext->inputPanel().reset();
@@ -340,7 +342,7 @@ void AndroidKeyboardEngine::invokeActionImpl(const InputMethodEntry &entry, Invo
     auto *state = inputContext->propertyFor(&factory_);
     if (event.action() != InvokeActionEvent::Action::LeftClick
         || cursor < 0
-        || cursor > state->buffer_.size()) {
+        || static_cast<size_t>(cursor) > state->buffer_.size()) {
         return InputMethodEngineV3::invokeActionImpl(entry, event);
     }
     event.filter();

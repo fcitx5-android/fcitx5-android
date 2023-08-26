@@ -136,7 +136,7 @@ public:
             const auto *entry = imMgr.entry(ime.name());
             entries.emplace_back(entry);
         }
-        return std::move(entries);
+        return entries;
     }
 
     InputMethodStatus inputMethodStatus() {
@@ -163,7 +163,7 @@ public:
             entries.emplace_back(&entry);
             return true;
         });
-        return std::move(entries);
+        return entries;
     }
 
     void setEnabledInputMethods(std::vector<std::string> &entries) {
@@ -460,6 +460,9 @@ JNI_OnLoad(JavaVM *jvm, void * /* reserved */) {
     // return supported JNI version; or it will crash
     return JNI_VERSION_1_6;
 }
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -1040,3 +1043,5 @@ Java_org_fcitx_fcitx5_android_data_table_TableManager_checkTableDictFormat(JNIEn
     }
     return JNI_TRUE;
 }
+
+#pragma GCC diagnostic pop
