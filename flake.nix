@@ -36,11 +36,9 @@
               platformVersion = "33";
               ndkVersion = "25.2.9519653";
 
-              abiVersions = [ "arm64-v8a" "armeabi-v7a" ];
               includeNDK = true;
               androidComposition = final.androidenv.composeAndroidPackages {
-                inherit (self)
-                  platformToolsVersion ndkVersion abiVersions includeNDK;
+                inherit (self) platformToolsVersion ndkVersion includeNDK;
                 buildToolsVersions = [ self.buildToolsVersion ];
                 platformVersions = [ self.platformVersion ];
                 cmakeVersions = [ self.cmakeVersion ];
@@ -48,31 +46,36 @@
                 includeSources = true;
               };
 
-              shell = final.lib.makeOverridable ({ androidStudio }:
-                with final;
-                with self;
-                mkShell {
-                  buildInputs = [
-                    androidComposition.androidsdk
-                    extra-cmake-modules
-                    gettext
-                    python39
-                    icu
-                    androidStudio
-                  ];
-                  ANDROID_SDK_ROOT =
-                    "${androidComposition.androidsdk}/libexec/android-sdk";
-                  NDK_VERSION = ndkVersion;
-                  BUILD_TOOLS_VERSION = buildToolsVersion;
-                  GRADLE_OPTS =
-                    "-Dorg.gradle.project.android.aapt2FromMavenOverride=${androidComposition.androidsdk}/libexec/android-sdk/build-tools/${buildToolsVersion}/aapt2";
-                  ECM_DIR = "${extra-cmake-modules}/share/ECM/cmake/";
-                  JAVA_HOME = "${jdk17}";
-                  shellHook = ''
-                    export PATH="$ANDROID_SDK_ROOT/cmake/${cmakeVersion}/bin:$PATH"
-                    echo sdk.dir=$ANDROID_SDK_ROOT > local.properties
-                  '';
-                }) { androidStudio = final.androidStudioPackages.stable; };
+              shell = final.lib.makeOverridable
+                ({ androidStudio, generateLocalProperties }:
+                  with final;
+                  with self;
+                  mkShell {
+                    buildInputs = [
+                      androidComposition.androidsdk
+                      extra-cmake-modules
+                      gettext
+                      python39
+                      icu
+                      androidStudio
+                    ];
+                    ANDROID_SDK_ROOT =
+                      "${androidComposition.androidsdk}/libexec/android-sdk";
+                    NDK_VERSION = ndkVersion;
+                    BUILD_TOOLS_VERSION = buildToolsVersion;
+                    GRADLE_OPTS =
+                      "-Dorg.gradle.project.android.aapt2FromMavenOverride=${androidComposition.androidsdk}/libexec/android-sdk/build-tools/${buildToolsVersion}/aapt2";
+                    ECM_DIR = "${extra-cmake-modules}/share/ECM/cmake/";
+                    JAVA_HOME = "${jdk17}";
+                    shellHook = ''
+                      export PATH="$ANDROID_SDK_ROOT/cmake/${cmakeVersion}/bin:$PATH"
+                    '' + lib.optionalString generateLocalProperties ''
+                      echo sdk.dir=$ANDROID_SDK_ROOT > local.properties
+                    '';
+                  }) {
+                    androidStudio = final.androidStudioPackages.stable;
+                    generateLocalProperties = true;
+                  };
             });
           };
         };
