@@ -20,3 +20,5 @@ unset(BUILD_SHARED_LIBS)
 
 set(ANTHY_TARGET anthy-unicode)
 add_subdirectory(fcitx5-anthy)
+# anthy have some GCC pragma that LLVM doesn't recognize
+target_compile_options(anthy PRIVATE "-Wno-unknown-warning-option")
