@@ -10,13 +10,11 @@ find_package(fcitx5 REQUIRED CONFIG)
 get_target_property(FCITX5_CMAKE_MODULES fcitx5::cmake INTERFACE_INCLUDE_DIRECTORIES)
 set(CMAKE_MODULE_PATH ${FCITX5_CMAKE_MODULES} ${CMAKE_MODULE_PATH})
 
+find_package(ECM MODULE)
 find_package(Fcitx5Utils MODULE)
 
 # dummy target to export src/main/cpp/cmake
 add_custom_target(cmake)
-
-# cmake/FindECM.cmake
-find_package(ECM)
 
 # prebuilt dir. at least it works.
 set(PREBUILT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../fcitx5/src/main/cpp/prebuilt")

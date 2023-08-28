@@ -10,13 +10,9 @@ find_package(fcitx5 REQUIRED CONFIG)
 get_target_property(FCITX5_CMAKE_MODULES fcitx5::cmake INTERFACE_INCLUDE_DIRECTORIES)
 set(CMAKE_MODULE_PATH ${FCITX5_CMAKE_MODULES} ${CMAKE_MODULE_PATH})
 
+find_package(ECM MODULE)
 find_package(Fcitx5Core MODULE)
 find_package(Fcitx5Module MODULE)
-
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
-
-# cmake/FindECM.cmake
-find_package(ECM)
 
 option(ENABLE_TEST "" OFF)
 option(ENABLE_QT "" OFF)
