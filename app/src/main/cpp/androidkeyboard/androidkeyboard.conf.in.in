@@ -9,4 +9,3 @@ Configurable=True
 [Addon/OptionalDependencies]
 0=spell
 1=quickphrase
-;2=emoji

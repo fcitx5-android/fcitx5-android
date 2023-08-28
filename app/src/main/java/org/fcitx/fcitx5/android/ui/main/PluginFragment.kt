@@ -87,14 +87,11 @@ class PluginFragment : PaddingPreferenceFragment() {
                                 getString(R.string.missing_plugin_descriptor)
                             }
                             is PluginLoadFailed.PathConflict -> {
-                                getString(
-                                    R.string.path_conflict,
-                                    reason.path,
-                                    when (val src = reason.existingSrc) {
-                                        FileSource.Main -> R.string.main_program
-                                        is FileSource.Plugin -> src.descriptor.name
-                                    }
-                                )
+                                val owner = when (reason.existingSrc) {
+                                    FileSource.Main -> getString(R.string.main_program)
+                                    is FileSource.Plugin -> reason.existingSrc.descriptor.name
+                                }
+                                getString(R.string.path_conflict, reason.path, owner)
                             }
                             is PluginLoadFailed.PluginAPIIncompatible -> {
                                 getString(R.string.incompatible_api, reason.api)

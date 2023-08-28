@@ -10,15 +10,15 @@ plugins {
 }
 
 android {
-    namespace = "org.fcitx.fcitx5.android.plugin.anthy"
+    namespace = "org.fcitx.fcitx5.android.plugin.unikey"
 
     defaultConfig {
-        applicationId = "org.fcitx.fcitx5.android.plugin.anthy"
+        applicationId = "org.fcitx.fcitx5.android.plugin.unikey"
 
         externalNativeBuild {
             cmake {
                 targets(
-                    "anthy"
+                    "unikey"
                 )
             }
         }
@@ -44,7 +44,7 @@ android {
 }
 
 aboutLibraries {
-    configPath = "plugin/anthy/licenses"
+    configPath = "plugin/unikey/licenses"
 }
 
 dependencies {

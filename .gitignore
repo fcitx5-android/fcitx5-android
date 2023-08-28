@@ -12,19 +12,12 @@
 # Generated asset descriptor
 /app/src/main/assets/descriptor.json
 
-# Module :plugin:anthy
+# Plugins
 # Installed data
-/plugin/anthy/src/main/assets/usr/share/fcitx5/addon
-/plugin/anthy/src/main/assets/usr/share/fcitx5/anthy
-/plugin/anthy/src/main/assets/usr/share/fcitx5/inputmethod
-/plugin/anthy/src/main/assets/usr/share/locale
+/plugin/*/src/main/assets/usr/share/fcitx5
+/plugin/*/src/main/assets/usr/share/locale
 # Generated asset descriptor
-/plugin/anthy/src/main/assets/descriptor.json
-
-# Module :plugin:clipboard-filter
-# Generated asset descriptor
-/plugin/clipboard-filter/src/main/assets/descriptor.json
-
+/plugin/*/src/main/assets/descriptor.json
 
 # Intellij
 .idea/*

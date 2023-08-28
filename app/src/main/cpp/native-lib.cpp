@@ -136,7 +136,7 @@ public:
             const auto *entry = imMgr.entry(ime.name());
             entries.emplace_back(entry);
         }
-        return std::move(entries);
+        return entries;
     }
 
     InputMethodStatus inputMethodStatus() {
@@ -163,7 +163,7 @@ public:
             entries.emplace_back(&entry);
             return true;
         });
-        return std::move(entries);
+        return entries;
     }
 
     void setEnabledInputMethods(std::vector<std::string> &entries) {
@@ -461,6 +461,9 @@ JNI_OnLoad(JavaVM *jvm, void * /* reserved */) {
     return JNI_VERSION_1_6;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_setupLogStream(JNIEnv *env, jclass clazz, jboolean verbose) {
@@ -535,9 +538,8 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
 
     const char *locale_dir_char = locale_dir.c_str();
     fcitx::registerDomain("fcitx5", locale_dir_char);
-    fcitx::registerDomain("fcitx5-chinese-addons", locale_dir_char);
     fcitx::registerDomain("fcitx5-lua", locale_dir_char);
-    fcitx::registerDomain("fcitx5-unikey", locale_dir_char);
+    fcitx::registerDomain("fcitx5-chinese-addons", locale_dir_char);
     fcitx::registerDomain("fcitx5-android", locale_dir_char);
 
     int extDomainsSize = env->GetArrayLength(extDomains);
@@ -1041,3 +1043,5 @@ Java_org_fcitx_fcitx5_android_data_table_TableManager_checkTableDictFormat(JNIEn
     }
     return JNI_TRUE;
 }
+
+#pragma GCC diagnostic pop

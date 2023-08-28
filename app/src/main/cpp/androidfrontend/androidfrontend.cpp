@@ -161,7 +161,10 @@ AndroidFrontend::AndroidFrontend(Instance *instance)
     eventHandlers_.emplace_back(instance_->watchEvent(
             EventType::InputContextInputMethodActivated,
             EventWatcherPhase::Default,
-            [this](Event &event) { imChangeCallback(); }
+            [this](Event &event) {
+                FCITX_UNUSED(event);
+                imChangeCallback();
+            }
     ));
     eventHandlers_.emplace_back(instance_->watchEvent(
             EventType::InputContextUpdateUI,
