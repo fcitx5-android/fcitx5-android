@@ -209,7 +209,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
             val fileName = cr.queryFileName(uri) ?: return@launch
             val extName = fileName.substringAfterLast('.')
             if (extName != QuickPhrase.EXT) {
-                importErrorDialog(getString(R.string.invalid_quickphrase))
+                importErrorDialog(getString(R.string.exception_quickphrase_filename, fileName))
                 return@launch
             }
             val entryName = fileName.substringBeforeLast('.')
@@ -227,7 +227,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                 .build().let { nm.notify(id, it) }
             try {
                 val inputStream = cr.openInputStream(uri)!!
-                val imported = QuickPhraseManager.importFromInputStream(inputStream, entryName)
+                val imported = QuickPhraseManager.importFromInputStream(inputStream, fileName)
                     .getOrThrow()
                 withContext(Dispatchers.Main) {
                     ui.addItem(item = imported)

@@ -11,15 +11,13 @@ class QuickPhraseData(private val data: List<QuickPhraseEntry>) :
     companion object {
         fun fromLines(lines: List<String>): Result<QuickPhraseData> =
             runCatching {
-                lines
-                    .mapNotNull {
-                        it.trim().takeIf(String::isNotEmpty)?.let { l ->
-                            val key = l.substringBefore(' ')
-                            val value = l.substringAfter(' ')
-                            if (key.isEmpty() || value.isEmpty())
-                                errorRuntime(R.string.exception_quickphrase_parse, it)
-                            QuickPhraseEntry(key, value)
-                        }
+                lines.filter { it.isNotBlank() }
+                    .map {
+                        val s = it.trim()
+                        val spaceIndex = s.indexOf(' ')
+                        if (spaceIndex < 0)
+                            errorRuntime(R.string.exception_quickphrase_parse, it)
+                        QuickPhraseEntry(s.substring(0, spaceIndex), s.substring(spaceIndex + 1))
                     }
             }.map { QuickPhraseData(it) }
     }

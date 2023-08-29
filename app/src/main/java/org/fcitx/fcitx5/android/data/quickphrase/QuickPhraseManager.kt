@@ -1,9 +1,8 @@
 package org.fcitx.fcitx5.android.data.quickphrase
 
-import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.data.DataManager
 import org.fcitx.fcitx5.android.utils.appContext
-import org.fcitx.fcitx5.android.utils.errorArg
+import org.fcitx.fcitx5.android.utils.withTempDir
 import java.io.File
 import java.io.InputStream
 
@@ -33,9 +32,7 @@ object QuickPhraseManager {
         return CustomQuickPhrase(file)
     }
 
-    fun importFromFile(file: File): Result<CustomQuickPhrase> {
-        if (file.extension != QuickPhrase.EXT)
-            errorArg(R.string.exception_quickphrase_filename, file.path)
+    private fun importFromFile(file: File): Result<CustomQuickPhrase> {
         // throw away data, only ensuring the format is correct
         return QuickPhraseData.fromLines(file.readLines()).map {
             val dest = File(customQuickPhraseDir, file.name)
@@ -44,15 +41,13 @@ object QuickPhraseManager {
         }
     }
 
-    fun importFromInputStream(stream: InputStream, name: String): Result<CustomQuickPhrase> {
-        return stream.use { inputStream ->
-            val tempFile = File(appContext.cacheDir, name)
-            tempFile.outputStream().use { outputStream ->
-                inputStream.copyTo(outputStream)
+    fun importFromInputStream(stream: InputStream, fileName: String): Result<CustomQuickPhrase> {
+        return stream.use { i ->
+            withTempDir { dir ->
+                val tempFile = dir.resolve(fileName)
+                tempFile.outputStream().use { o -> i.copyTo(o) }
+                importFromFile(tempFile)
             }
-            val new = importFromFile(tempFile)
-            tempFile.delete()
-            return@use new
         }
     }
 
