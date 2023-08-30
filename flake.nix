@@ -61,6 +61,7 @@
                     ];
                     ANDROID_SDK_ROOT =
                       "${androidComposition.androidsdk}/libexec/android-sdk";
+                    ANDROID_HOME = ANDROID_SDK_ROOT;
                     NDK_VERSION = ndkVersion;
                     BUILD_TOOLS_VERSION = buildToolsVersion;
                     GRADLE_OPTS =
