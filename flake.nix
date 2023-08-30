@@ -50,7 +50,7 @@
                 ({ androidStudio, generateLocalProperties }:
                   with final;
                   with self;
-                  mkShell {
+                  mkShell rec {
                     buildInputs = [
                       androidComposition.androidsdk
                       extra-cmake-modules
