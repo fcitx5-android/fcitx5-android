@@ -16,6 +16,7 @@ jobs:
         os:
           - ubuntu-22.04
           - macos-13
+          - windows-2022
         abi:
           - armeabi-v7a
           - arm64-v8a
@@ -29,6 +30,12 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
+
+      - name: Regenerate symlinks pointing to submodule (Windows)
+        if: ${{ matrix.os == 'windows-2022' }}
+        run: |
+          Remove-Item -Recurse app/src/main/assets/usr/share
+          git checkout -- *
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -54,6 +61,22 @@ jobs:
         run: |
           brew install extra-cmake-modules
 
+      - name: Install ECM (Windows)
+        if: ${{ matrix.os == 'windows-2022' }}
+        run: |
+          git clone --depth 1 https://github.com/KDE/extra-cmake-modules
+          cd extra-cmake-modules && cmake -B build -G Ninja `
+            -DCMAKE_INSTALL_PREFIX="$($(Get-Item .).FullName)/dist"
+          cmake --install build
+          Add-Content $env:GITHUB_ENV "ECM_DIR=$($(Get-Item .).FullName)/dist/share/ECM/cmake"
+
+      - name: Install gettext (Windows)
+        if: ${{ matrix.os == 'windows-2022' }}
+        run: |
+          aria2c -d gettext https://github.com/mlocati/gettext-iconv-windows/releases/download/v0.21-v1.16/gettext0.21-iconv1.16-shared-64.zip
+          cd gettext && 7z x gettext0.21-iconv1.16-shared-64.zip
+          Add-Content $env:GITHUB_PATH "$($(Get-Item .).FullName)/bin"
+
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
 
@@ -69,6 +92,7 @@ jobs:
           path: app/build/outputs/apk/debug/
 
       - name: Pack plugins
+        shell: bash
         run: |
           mkdir plugins-to-upload
           for i in $(ls plugin)
