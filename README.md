@@ -69,6 +69,19 @@ Discuss on Telegram: https://t.me/+hci-DrFVWUM3NTUx ([@fcitx5_android](https://t
 
 ### How to set up development environment
 
+<details>
+<summary>Prerequisites for Windows</summary>
+
+- Enable [Developer Mode](https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development) so that symlinks can be created without administrator privilege.
+
+- Enable symlink support for `git`:
+
+    ```powershell
+    git config --global core.symlinks true
+    ```
+
+</details>
+
 First, clone this repository and fetch all submodules:
 
 ```sh
@@ -76,13 +89,31 @@ git clone git@github.com:fcitx5-android/fcitx5-android.git
 git submodule update --init --recursive
 ```
 
-Install extra-cmake-modules from your distribution software repository:
+<details>
+<summary>On Windows, you may need to regenerate symlinks to submodules.</summary>
+
+```powershell
+Remove-Item -Recurse app/src/main/assets/usr/share
+git checkout -- .
+```
+
+</details>
+
+Install `extra-cmake-modules` and `gettext` with your system package manager:
 
 ```sh
 # For Arch Linux (Arch has gettext in it's base meta package)
 sudo pacman -S extra-cmake-modules
+
 # For Debian/Ubuntu
 sudo apt install extra-cmake-modules gettext
+
+# For macOS
+brew install extra-cmake-modules gettext
+
+# For Windows, install MSYS2 and execute in its shell (UCRT64)
+pacman -S mingw-w64-ucrt-x86_64-extra-cmake-modules mingw-w64-ucrt-x86_64-gettext
+# then add C:/msys64/ucrt64/bin to PATH
 ```
 
 Install Android SDK Platform, Android SDK Build-Tools, Android NDK and cmake via SDK Manager in Android Studio:
