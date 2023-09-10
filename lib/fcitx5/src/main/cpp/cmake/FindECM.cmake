@@ -1,7 +1,7 @@
 if(DEFINED ENV{ECM_DIR})
     set(ECM_DIR $ENV{ECM_DIR})
 elseif(CMAKE_HOST_WIN32)
-    set(ECM_DIR "C:/msys64/mingw64/share/ECM/cmake")
+    set(ECM_DIR "C:/msys64/ucrt64/share/ECM/cmake")
 elseif(CMAKE_HOST_APPLE)
     if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
         set(ECM_DIR /opt/homebrew/share/ECM/cmake)
