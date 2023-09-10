@@ -61,21 +61,11 @@ jobs:
         run: |
           brew install extra-cmake-modules
 
-      - name: Install ECM (Windows)
+      - name: Install system dependencies (Windows)
         if: ${{ matrix.os == 'windows-2022' }}
         run: |
-          git clone --depth 1 https://github.com/KDE/extra-cmake-modules
-          cd extra-cmake-modules && cmake -B build -G Ninja `
-            -DCMAKE_INSTALL_PREFIX="$($(Get-Item .).FullName)/dist"
-          cmake --install build
-          Add-Content $env:GITHUB_ENV "ECM_DIR=$($(Get-Item .).FullName)/dist/share/ECM/cmake"
-
-      - name: Install gettext (Windows)
-        if: ${{ matrix.os == 'windows-2022' }}
-        run: |
-          aria2c -d gettext https://github.com/mlocati/gettext-iconv-windows/releases/download/v0.21-v1.16/gettext0.21-iconv1.16-shared-64.zip
-          cd gettext && 7z x gettext0.21-iconv1.16-shared-64.zip
-          Add-Content $env:GITHUB_PATH "$($(Get-Item .).FullName)/bin"
+          C:/msys64/usr/bin/pacman -S --noconfirm mingw-w64-x86_64-extra-cmake-modules mingw-w64-x86_64-gettext
+          Add-Content $env:GITHUB_PATH "C:/msys64/mingw64/bin"
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2

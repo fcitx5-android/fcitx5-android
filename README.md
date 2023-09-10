@@ -68,6 +68,7 @@ Discuss on Telegram: https://t.me/+hci-DrFVWUM3NTUx ([@fcitx5_android](https://t
 - GNU Gettext >= 0.20 (for `msgfmt` binary; or install `appstream` if you really have to use gettext <= 0.19.)
 
 ### How to set up development environment
+
 <details>
 <summary>Prerequisites for Windows</summary>
 <ul>
@@ -90,26 +91,17 @@ Install extra-cmake-modules from your distribution software repository:
 ```sh
 # For Arch Linux (Arch has gettext in it's base meta package)
 sudo pacman -S extra-cmake-modules
+
 # For Debian/Ubuntu
 sudo apt install extra-cmake-modules gettext
+
 # For macOS
 brew install extra-cmake-modules gettext
+
+# For Windows, install MSYS2 and execute in its shell
+pacman -S mingw-w64-x86_64-extra-cmake-modules mingw-w64-x86_64-gettext
+# then add C:/msys64/mingw64/bin to PATH
 ```
-<details>
-<summary>For Windows you have to manually install ECM and gettext.</summary>
-Do the following steps outside fcitx5-android directory:
-<pre>
-<code>winget install cmake Ninja-build.Ninja
-git clone https://github.com/KDE/extra-cmake-modules
-cd extra-cmake-modules
-cmake -B build -G Ninja -DCMAKE_INSTALL_PREFIX="$($(Get-Item .).FullName)/dist"
-cmake --install build</code>
-</pre>
-<ul>
-  <li>Add environment variable <code>ECM_DIR</code> valued absolute path to <code>extra-cmake-modules/dist/share/ECM/cmake</code></li>
-  <li>Create a directory named <code>gettext</code>, download and extract <a href="https://github.com/mlocati/gettext-iconv-windows/releases/download/v0.21-v1.16/gettext0.21-iconv1.16-shared-64.zip">prebuilt gettext</a> into it, then add absolute path to <code>gettext/bin</code> to <code>PATH</code>.</li>
-</ul>
-</details>
 
 Install Android SDK Platform, Android SDK Build-Tools, Android NDK and cmake via SDK Manager in Android Studio:
 
