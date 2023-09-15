@@ -217,13 +217,22 @@ fun SeekBar.setOnChangeListener(listener: SeekBar.(progress: Int) -> Unit) {
 
 @SuppressLint("PrivateApi")
 fun getSystemProperty(key: String): String {
-    return Class.forName("android.os.SystemProperties")
-        .getMethod("get", String::class.java)
-        .invoke(null, key) as String
+    return try {
+        Class.forName("android.os.SystemProperties")
+            .getMethod("get", String::class.java)
+            .invoke(null, key) as String
+    } catch (e: Exception) {
+        ""
+    }
 }
 
-fun getSystemSetting(key: String): Boolean =
-    Settings.System.getInt(appContext.contentResolver, key) == 1
+fun isSystemSettingEnabled(key: String): Boolean {
+    return try {
+        Settings.System.getInt(appContext.contentResolver, key) == 1
+    } catch (e: Exception) {
+        false
+    }
+}
 
 /**
  * @return top-level files in zip file

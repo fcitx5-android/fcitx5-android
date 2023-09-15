@@ -10,7 +10,7 @@ import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.audioManager
-import org.fcitx.fcitx5.android.utils.getSystemSetting
+import org.fcitx.fcitx5.android.utils.isSystemSettingEnabled
 import org.fcitx.fcitx5.android.utils.vibrator
 
 object InputFeedbacks {
@@ -23,15 +23,15 @@ object InputFeedbacks {
         }
     }
 
-    private var systemSoundEffectsEnabled = false
-    private var systemHapticFeedbackEnabled = false
+    private var systemSoundEffects = false
+    private var systemHapticFeedback = false
 
     fun syncSystemPrefs() {
-        systemSoundEffectsEnabled = getSystemSetting(Settings.System.SOUND_EFFECTS_ENABLED)
+        systemSoundEffects = isSystemSettingEnabled(Settings.System.SOUND_EFFECTS_ENABLED)
         // it says "Replaced by using android.os.VibrationAttributes.USAGE_TOUCH"
         // but gives no clue about how to use it, and this one still works
         @Suppress("DEPRECATION")
-        systemHapticFeedbackEnabled = getSystemSetting(Settings.System.HAPTIC_FEEDBACK_ENABLED)
+        systemHapticFeedback = isSystemSettingEnabled(Settings.System.HAPTIC_FEEDBACK_ENABLED)
     }
 
     private val soundOnKeyPress by AppPrefs.getInstance().keyboard.soundOnKeyPress
@@ -53,7 +53,7 @@ object InputFeedbacks {
         when (hapticOnKeyPress) {
             InputFeedbackMode.Enabled -> {}
             InputFeedbackMode.Disabled -> return
-            InputFeedbackMode.FollowingSystem -> if (!systemHapticFeedbackEnabled) return
+            InputFeedbackMode.FollowingSystem -> if (!systemHapticFeedback) return
         }
 
         val duration: Long
@@ -97,7 +97,7 @@ object InputFeedbacks {
         when (soundOnKeyPress) {
             InputFeedbackMode.Enabled -> {}
             InputFeedbackMode.Disabled -> return
-            InputFeedbackMode.FollowingSystem -> if (!systemSoundEffectsEnabled) return
+            InputFeedbackMode.FollowingSystem -> if (!systemSoundEffects) return
         }
         val fx = when (effect) {
             SoundEffect.Standard -> AudioManager.FX_KEYPRESS_STANDARD
