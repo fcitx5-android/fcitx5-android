@@ -106,7 +106,10 @@ class CustomThemeActivity : AppCompatActivity() {
         createTextView(R.string.dark_keys, ripple = true)
     }
     private val variantSwitch by lazy {
-        switch { }
+        switch {
+            // Use dark keys by default
+            isChecked = false
+        }
     }
 
     private val brightnessLabel by lazy {
@@ -253,31 +256,10 @@ class CustomThemeActivity : AppCompatActivity() {
                 croppedImageFile = c
                 srcImageFile = s
             }
-            theme =
-                (if (variantSwitch.isChecked) ThemePreset.TransparentLight else ThemePreset.TransparentDark)
-                    .deriveCustomBackground(n, c.path, s.path)
+            // Use dark keys by default
+            theme = ThemePreset.TransparentDark.deriveCustomBackground(n, c.path, s.path)
         }
         previewUi = KeyboardPreviewUi(this, theme)
-        whenHasBackground {
-            cropLabel.setOnClickListener {
-                launchCrop(previewUi.intrinsicWidth, previewUi.intrinsicHeight)
-            }
-            variantLabel.setOnClickListener {
-                variantSwitch.isChecked = !variantSwitch.isChecked
-            }
-            variantSwitch.setOnCheckedChangeListener { _, isChecked ->
-                setKeyVariant(it, darkKeys = isChecked)
-            }
-            brightnessSeekBar.setOnSeekBarChangeListener(object :
-                SeekBar.OnSeekBarChangeListener {
-                override fun onStartTrackingTouch(bar: SeekBar) {}
-                override fun onStopTrackingTouch(bar: SeekBar) {}
-
-                override fun onProgressChanged(bar: SeekBar, progress: Int, fromUser: Boolean) {
-                    if (fromUser) updateState()
-                }
-            })
-        }
         if (theme.backgroundImage == null) {
             brightnessLabel.visibility = View.GONE
             cropLabel.visibility = View.GONE
@@ -330,6 +312,25 @@ class CustomThemeActivity : AppCompatActivity() {
                     updateState()
                 }
             }
+            cropLabel.setOnClickListener {
+                launchCrop(previewUi.intrinsicWidth, previewUi.intrinsicHeight)
+            }
+            variantLabel.setOnClickListener {
+                variantSwitch.isChecked = !variantSwitch.isChecked
+            }
+            // attach OnCheckedChangeListener after calling setChecked (isChecked in kotlin)
+            variantSwitch.setOnCheckedChangeListener { _, isChecked ->
+                setKeyVariant(background, darkKeys = isChecked)
+            }
+            brightnessSeekBar.setOnSeekBarChangeListener(object :
+                SeekBar.OnSeekBarChangeListener {
+                override fun onStartTrackingTouch(bar: SeekBar) {}
+                override fun onStopTrackingTouch(bar: SeekBar) {}
+
+                override fun onProgressChanged(bar: SeekBar, progress: Int, fromUser: Boolean) {
+                    if (fromUser) updateState()
+                }
+            })
         }
 
         if (newCreated) {
