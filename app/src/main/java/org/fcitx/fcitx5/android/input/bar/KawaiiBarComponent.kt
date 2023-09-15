@@ -362,14 +362,15 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     @RequiresApi(Build.VERSION_CODES.R)
     fun handleInlineSuggestions(response: InlineSuggestionsResponse): Boolean {
-        if (response.inlineSuggestions.isEmpty()) {
+        val suggestions = response.inlineSuggestions
+        if (suggestions.isEmpty()) {
             isInlineSuggestionEmpty = true
             return true
         }
         var pinned: InlineSuggestion? = null
         val scrollable = mutableListOf<InlineSuggestion>()
         var extraPinnedCount = 0
-        response.inlineSuggestions.forEach {
+        suggestions.forEach {
             if (it.info.isPinned) {
                 if (pinned == null) {
                     pinned = it
