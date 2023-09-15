@@ -81,7 +81,9 @@ class ThemeListFragment : Fragment() {
                         val theme = result.theme
                         adapter.prependTheme(theme)
                         ThemeManager.saveTheme(theme)
-                        ThemeManager.switchTheme(theme)
+                        if (!followSystemDayNightTheme) {
+                            ThemeManager.switchTheme(theme)
+                        }
                     }
                     is CustomThemeActivity.BackgroundResult.Deleted -> {
                         val name = result.name
