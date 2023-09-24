@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Process
 import android.util.Log
 import androidx.preference.PreferenceManager
@@ -17,8 +18,10 @@ import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.ui.main.LogActivity
+import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.Locales
 import org.fcitx.fcitx5.android.utils.isDarkMode
+import org.fcitx.fcitx5.android.utils.userManager
 import timber.log.Timber
 import kotlin.system.exitProcess
 
@@ -36,11 +39,35 @@ class FcitxApplication : Application() {
         }
     }
 
+    private val unlockReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action != Intent.ACTION_USER_UNLOCKED) return
+            if (!isDirectBootMode) return
+            Timber.d("Device unlocked, app will exit now and restart to normal mode")
+            AppUtil.exit()
+        }
+    }
+
+    private var isDirectBootMode = false
+
     override fun onCreate() {
         super.onCreate()
+        val directBootAwareContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            isDirectBootMode = !userManager.isUserUnlocked
+            if (isDirectBootMode) {
+                registerReceiver(unlockReceiver, IntentFilter(Intent.ACTION_USER_UNLOCKED))
+                // Use protected context if device is locked
+                createDeviceProtectedStorageContext()
+            } else
+            // Already unlocked
+                this
+        }
+        // Android version doesn't support direct boot
+        else this
+
         if (!BuildConfig.DEBUG) {
             Thread.setDefaultUncaughtExceptionHandler { _, e ->
-                startActivity(Intent(applicationContext, LogActivity::class.java).apply {
+                startActivity(Intent(directBootAwareContext, LogActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     putExtra(LogActivity.FROM_CRASH, true)
                     // avoid transaction overflow
@@ -58,7 +85,7 @@ class FcitxApplication : Application() {
 
         instance = this
         // we don't have AppPrefs available yet
-        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(directBootAwareContext)
         if (BuildConfig.DEBUG || sharedPrefs.getBoolean("verbose_log", false)) {
             Timber.plant(object : Timber.DebugTree() {
                 override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
@@ -74,6 +101,11 @@ class FcitxApplication : Application() {
             })
         }
 
+        if (isDirectBootMode)
+            Timber.d("App is in direct boot mode")
+        else
+            Timber.d("App is in normal mode")
+
         AppPrefs.init(sharedPrefs)
         // record last pid for crash logs
         AppPrefs.getInstance().internal.pid.apply {
@@ -82,7 +114,7 @@ class FcitxApplication : Application() {
             Timber.d("Last pid is $lastPid. Set it to current pid: $currentPid")
             setValue(currentPid)
         }
-        ClipboardManager.init(applicationContext)
+        ClipboardManager.init(directBootAwareContext)
         ThemeManager.init(resources.configuration)
         Locales.onLocaleChange(resources.configuration)
         registerReceiver(shutdownReceiver, IntentFilter(Intent.ACTION_SHUTDOWN))

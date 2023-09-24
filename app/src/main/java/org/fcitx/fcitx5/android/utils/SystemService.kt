@@ -4,6 +4,7 @@ import android.app.NotificationManager
 import android.content.ClipboardManager
 import android.content.Context
 import android.media.AudioManager
+import android.os.UserManager
 import android.os.Vibrator
 import android.view.inputmethod.InputMethodManager
 import androidx.core.content.getSystemService
@@ -26,3 +27,6 @@ val Fragment.notificationManager
 
 val Context.vibrator
     get() = getSystemService<Vibrator>()!!
+
+val Context.userManager
+    get() = getSystemService<UserManager>()!!

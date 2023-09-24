@@ -43,7 +43,15 @@ object DataManager {
         json.encodeToString(descriptor)
     }
 
-    val dataDir = File(appContext.applicationInfo.dataDir)
+    // If Android version supports direct boot, we put the hierarchy in device encrypted storage
+    // instead of credential encrypted storage so that data can be accessed before user unlock
+    val dataDir: File = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        Timber.d("Using protected storage")
+        appContext.createDeviceProtectedStorageContext().dataDir
+    } else {
+        File(appContext.applicationInfo.dataDir)
+    }
+
     private val destDescriptorFile = File(dataDir, Const.dataDescriptorName)
 
     private fun AssetManager.getDataDescriptor() =

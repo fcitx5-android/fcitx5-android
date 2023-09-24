@@ -386,7 +386,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
             with(context) {
                 startupFcitx(
                     locale,
-                    applicationInfo.dataDir,
+                    DataManager.dataDir.path,
                     nativeLibDir,
                     (getExternalFilesDir(null) ?: filesDir).absolutePath,
                     (externalCacheDir ?: cacheDir).absolutePath,
