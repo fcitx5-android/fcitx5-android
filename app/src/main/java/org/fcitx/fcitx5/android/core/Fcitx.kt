@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import org.fcitx.fcitx5.android.FcitxApplication
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.data.DataManager
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
@@ -366,6 +367,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         override fun nativeStartup() {
             DataManager.sync()
             val locale = Locales.fcitxLocale
+            val dataDir = DataManager.dataDir.absolutePath
             val plugins = DataManager.getLoadedPlugins()
             val nativeLibDir = buildString {
                 append(context.applicationInfo.nativeLibraryDir)
@@ -379,14 +381,15 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
                 """
                Starting fcitx with:
                locale=$locale
+               dataDir=$dataDir
                nativeLibDir=$nativeLibDir
                extDomains=${extDomains.joinToString()}
             """.trimIndent()
             )
-            with(context) {
+            with(FcitxApplication.getInstance().directBootAwareContext) {
                 startupFcitx(
                     locale,
-                    DataManager.dataDir.path,
+                    dataDir,
                     nativeLibDir,
                     (getExternalFilesDir(null) ?: filesDir).absolutePath,
                     (externalCacheDir ?: cacheDir).absolutePath,

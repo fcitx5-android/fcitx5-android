@@ -30,7 +30,6 @@ import org.fcitx.fcitx5.android.utils.applyTranslucentSystemBars
 import org.fcitx.fcitx5.android.utils.navigateFromMain
 import splitties.dimensions.dp
 import splitties.views.topPadding
-import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
 
