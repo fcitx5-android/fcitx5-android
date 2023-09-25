@@ -12,8 +12,10 @@
     <application>
         <activity
             android:name=".AboutActivity"
+            android:directBootAware="true"
             android:exported="true"
-            android:theme="@style/DeviceSettingsTheme">
+            android:theme="@style/DeviceSettingsTheme"
+            tools:targetApi="n">
             <intent-filter>
                 <action
                     android:name="org.fcitx.fcitx5.android.plugin.MANIFEST"
