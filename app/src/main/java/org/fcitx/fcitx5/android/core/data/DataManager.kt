@@ -46,7 +46,7 @@ object DataManager {
     // If Android version supports direct boot, we put the hierarchy in device encrypted storage
     // instead of credential encrypted storage so that data can be accessed before user unlock
     val dataDir: File = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        Timber.d("Using protected storage")
+        Timber.d("Using device protected storage")
         appContext.createDeviceProtectedStorageContext().dataDir
     } else {
         File(appContext.applicationInfo.dataDir)
@@ -258,6 +258,16 @@ object DataManager {
         destDescriptorFile.writeText(serializeDataDescriptor(newHierarchy.downToDataDescriptor()).getOrThrow())
         callbacks.forEach { it() }
         callbacks.clear()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            // remove old assets from credential encrypted storage
+            val oldDataDir = appContext.dataDir
+            val oldDataDescriptor = oldDataDir.resolve(Const.dataDescriptorName)
+            if (oldDataDescriptor.exists()) {
+                oldDataDescriptor.delete()
+                oldDataDir.resolve("README.md").delete()
+                oldDataDir.resolve("usr").deleteRecursively()
+            }
+        }
         synced = true
         Timber.d("Synced")
     }
@@ -286,6 +296,7 @@ object DataManager {
     fun deleteAndSync() {
         lock.withLock {
             dataDir.resolve(Const.dataDescriptorName).delete()
+            dataDir.resolve("README.md").delete()
             dataDir.resolve("usr").deleteRecursively()
         }
         sync()
