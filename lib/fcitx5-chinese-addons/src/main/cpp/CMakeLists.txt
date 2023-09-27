@@ -47,6 +47,10 @@ foreach (mod IN LISTS BOOST_MODULES)
     set("boost_${mod}_DIR" "${BOOST_ROOT}/lib/cmake/boost_${mod}-${BOOST_VERSION}")
 endforeach ()
 
+# prebuilt marisa
+set(marisa_DIR "${PREBUILT_DIR}/marisa/${ANDROID_ABI}/lib/cmake/marisa")
+find_package(marisa)
+
 # prebuilt opencc
 set(OpenCC_DIR "${PREBUILT_DIR}/opencc/${ANDROID_ABI}/lib/cmake/opencc")
 find_package(OpenCC)
