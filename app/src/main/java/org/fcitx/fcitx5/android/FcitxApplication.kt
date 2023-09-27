@@ -62,7 +62,10 @@ class FcitxApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        isDirectBootMode = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !userManager.isUserUnlocked
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !userManager.isUserUnlocked) {
+            isDirectBootMode = true
+            registerReceiver(unlockReceiver, IntentFilter(Intent.ACTION_USER_UNLOCKED))
+        }
         val ctx = directBootAwareContext
 
         if (!BuildConfig.DEBUG) {
