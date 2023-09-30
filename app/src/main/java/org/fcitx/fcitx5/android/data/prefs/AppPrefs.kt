@@ -2,6 +2,9 @@ package org.fcitx.fcitx5.android.data.prefs
 
 import android.content.SharedPreferences
 import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.core.content.edit
+import androidx.preference.PreferenceManager
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.InputFeedbacks.InputFeedbackMode
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateMode
@@ -350,6 +353,30 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
                 it.managedPreferences[key]?.fireChange()
             }
         }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun syncToDeviceEncryptedStorage() {
+        val ctx = appContext.createDeviceProtectedStorageContext()
+        val sp = PreferenceManager.getDefaultSharedPreferences(ctx)
+        sp.edit {
+            listOf(
+                internal.verboseLog,
+                internal.editorInfoInspector,
+                advanced.ignoreSystemCursor,
+                advanced.resetCursorAfterCommit,
+                advanced.disableAnimation,
+                advanced.vivoKeypressWorkaround
+            ).forEach {
+                it.putValueTo(this@edit)
+            }
+            keyboard.managedPreferences.forEach {
+                it.value.putValueTo(this@edit)
+            }
+            clipboard.managedPreferences.forEach {
+                it.value.putValueTo(this@edit)
+            }
+        }
+    }
 
     companion object {
         private var instance: AppPrefs? = null

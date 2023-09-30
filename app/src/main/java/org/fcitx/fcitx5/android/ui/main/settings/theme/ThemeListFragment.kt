@@ -1,5 +1,6 @@
 package org.fcitx.fcitx5.android.ui.main.settings.theme
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -314,6 +315,13 @@ class ThemeListFragment : Fragment() {
     private fun exportTheme(theme: Theme.Custom) {
         beingExported = theme
         exportLauncher.launch(theme.name + ".zip")
+    }
+
+    override fun onStop() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            ThemeManager.syncToDeviceEncryptedStorage()
+        }
+        super.onStop()
     }
 
     override fun onDestroy() {

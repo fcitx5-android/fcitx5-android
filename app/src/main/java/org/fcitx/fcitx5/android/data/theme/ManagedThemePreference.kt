@@ -21,4 +21,8 @@ class ManagedThemePreference(
             ThemeManager.getAllThemes().find { it.name == name }
         } ?: defaultValue
 
+    override fun putValueTo(editor: SharedPreferences.Editor) {
+        editor.putString(key, getValue().name)
+    }
+
 }

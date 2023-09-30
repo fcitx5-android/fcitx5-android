@@ -118,6 +118,10 @@ class FcitxApplication : Application() {
         ThemeManager.init(resources.configuration)
         Locales.onLocaleChange(resources.configuration)
         registerReceiver(shutdownReceiver, IntentFilter(Intent.ACTION_SHUTDOWN))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !isDirectBootMode) {
+            AppPrefs.getInstance().syncToDeviceEncryptedStorage()
+            ThemeManager.syncToDeviceEncryptedStorage()
+        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

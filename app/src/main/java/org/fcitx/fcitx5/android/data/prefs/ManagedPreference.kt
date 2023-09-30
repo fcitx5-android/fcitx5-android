@@ -3,7 +3,6 @@ package org.fcitx.fcitx5.android.data.prefs
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import org.fcitx.fcitx5.android.utils.WeakHashSet
-import timber.log.Timber
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -25,6 +24,8 @@ abstract class ManagedPreference<T : Any>(
     abstract fun setValue(value: T)
 
     abstract fun getValue(): T
+
+    abstract fun putValueTo(editor: SharedPreferences.Editor)
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): T = getValue()
 
@@ -62,13 +63,18 @@ abstract class ManagedPreference<T : Any>(
             sharedPreferences.edit { putBoolean(key, value) }
         }
 
-        override fun getValue(): Boolean = sharedPreferences.all[key]?.let {
-            it.let { x -> x as? Boolean }
-                ?: run {
-                    setValue(defaultValue)
-                    defaultValue
-                }
-        } ?: defaultValue
+        override fun getValue(): Boolean {
+            return try {
+                sharedPreferences.getBoolean(key, defaultValue)
+            } catch (e: Exception) {
+                setValue(defaultValue)
+                defaultValue
+            }
+        }
+
+        override fun putValueTo(editor: SharedPreferences.Editor) {
+            editor.putBoolean(key, getValue())
+        }
     }
 
     class PString(sharedPreferences: SharedPreferences, key: String, defaultValue: String) :
@@ -78,13 +84,18 @@ abstract class ManagedPreference<T : Any>(
             sharedPreferences.edit { putString(key, value) }
         }
 
-        override fun getValue(): String = sharedPreferences.all[key]?.let {
-            it.let { x -> x as? String }
-                ?: run {
-                    setValue(defaultValue)
-                    defaultValue
-                }
-        } ?: defaultValue
+        override fun getValue(): String {
+            return try {
+                sharedPreferences.getString(key, defaultValue)!!
+            } catch (e: Exception) {
+                setValue(defaultValue)
+                defaultValue
+            }
+        }
+
+        override fun putValueTo(editor: SharedPreferences.Editor) {
+            editor.putString(key, getValue())
+        }
     }
 
     class PStringLike<T : Any>(
@@ -98,15 +109,20 @@ abstract class ManagedPreference<T : Any>(
             sharedPreferences.edit { putString(key, codec.encode(value)) }
         }
 
-        override fun getValue(): T =
-            sharedPreferences.all[key]?.let { raw ->
-                if (raw !is String)
-                    setValue(defaultValue)
-                raw.let { it as? String }
-                    ?.runCatching { codec.decode(this) }
-                    ?.onFailure { Timber.w("Failed to decode value '$raw' of preference $key") }
-                    ?.getOrNull()
-            } ?: defaultValue
+        override fun getValue(): T {
+            return try {
+                sharedPreferences.getString(key, null)?.let {
+                    codec.decode(it)
+                } ?: defaultValue
+            } catch (e: Exception) {
+                setValue(defaultValue)
+                defaultValue
+            }
+        }
+
+        override fun putValueTo(editor: SharedPreferences.Editor) {
+            editor.putString(key, codec.encode(getValue()))
+        }
     }
 
 
@@ -117,13 +133,18 @@ abstract class ManagedPreference<T : Any>(
             sharedPreferences.edit { putInt(key, value) }
         }
 
-        override fun getValue(): Int = sharedPreferences.all[key]?.let {
-            it.let { x -> x as? Int }
-                ?: run {
-                    setValue(defaultValue)
-                    defaultValue
-                }
-        } ?: defaultValue
+        override fun getValue(): Int {
+            return try {
+                sharedPreferences.getInt(key, defaultValue)
+            } catch (e: Exception) {
+                setValue(defaultValue)
+                defaultValue
+            }
+        }
+
+        override fun putValueTo(editor: SharedPreferences.Editor) {
+            editor.putInt(key, getValue())
+        }
     }
 
     class PFloat(sharedPreferences: SharedPreferences, key: String, defaultValue: Float) :
@@ -132,13 +153,18 @@ abstract class ManagedPreference<T : Any>(
             sharedPreferences.edit { putFloat(key, value) }
         }
 
-        override fun getValue(): Float = sharedPreferences.all[key]?.let {
-            it.let { x -> x as? Float }
-                ?: run {
-                    setValue(defaultValue)
-                    defaultValue
-                }
-        } ?: defaultValue
+        override fun getValue(): Float {
+            return try {
+                sharedPreferences.getFloat(key, defaultValue)
+            } catch (e: Exception) {
+                setValue(defaultValue)
+                defaultValue
+            }
+        }
+
+        override fun putValueTo(editor: SharedPreferences.Editor) {
+            editor.putFloat(key, getValue())
+        }
     }
 
 }
