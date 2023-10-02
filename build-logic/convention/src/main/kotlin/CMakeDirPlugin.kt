@@ -7,8 +7,13 @@ import org.gradle.api.Task
 import java.io.File
 
 val Project.cmakeDir: File
-    get() = extensions.extraProperties.get(CMakeDirPlugin.CMAKE_DIR) as? File
-        ?: error("Cannot find cmake dir. Did you apply org.fcitx.fcitx5.android.cmake-dir plugin and make your task `runAfterNativeConfigure`?")
+    get() {
+        try {
+            return extensions.extraProperties.get(CMakeDirPlugin.CMAKE_DIR) as File
+        } catch (e: Exception) {
+            error("Cannot find cmake dir. Did you apply org.fcitx.fcitx5.android.cmake-dir plugin and make your task `runAfterNativeConfigure`?")
+        }
+    }
 
 /**
  * Important: make sure that the task runs after than the native task
