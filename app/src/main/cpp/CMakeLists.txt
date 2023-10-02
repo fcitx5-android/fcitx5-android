@@ -42,13 +42,8 @@ find_package(Libevent)
 
 # prebuilt boost
 set(BOOST_VERSION "1.80.0")
-set(BOOST_MODULES headers filesystem atomic iostreams)
-set(BOOST_ROOT "${PREBUILT_DIR}/boost/${ANDROID_ABI}")
-set(Boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
-foreach (mod IN LISTS BOOST_MODULES)
-    set("boost_${mod}_DIR" "${BOOST_ROOT}/lib/cmake/boost_${mod}-${BOOST_VERSION}")
-endforeach ()
-find_package(Boost 1.80 REQUIRED COMPONENTS filesystem iostreams)
+list(APPEND CMAKE_FIND_ROOT_PATH "${PREBUILT_DIR}/boost/${ANDROID_ABI}/lib/cmake")
+find_package(Boost 1.80 REQUIRED COMPONENTS headers filesystem iostreams)
 
 add_library(native-lib SHARED native-lib.cpp)
 target_link_libraries(native-lib
@@ -60,7 +55,7 @@ target_link_libraries(native-lib
         Fcitx5::Module::QuickPhrase
         Fcitx5::Module::Unicode
         Fcitx5::Module::Clipboard
-        Boost::boost
+        Boost::headers
         LibIME::Pinyin
         LibIME::Table
         )

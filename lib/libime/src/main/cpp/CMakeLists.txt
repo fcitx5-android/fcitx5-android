@@ -25,12 +25,13 @@ find_package(fmt)
 
 # prebuilt boost
 set(BOOST_VERSION "1.80.0")
-set(BOOST_MODULES headers filesystem atomic iostreams)
-set(BOOST_ROOT "${PREBUILT_DIR}/boost/${ANDROID_ABI}")
-set(Boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
-foreach (mod IN LISTS BOOST_MODULES)
-    set("boost_${mod}_DIR" "${BOOST_ROOT}/lib/cmake/boost_${mod}-${BOOST_VERSION}")
-endforeach ()
+list(APPEND CMAKE_FIND_ROOT_PATH "${PREBUILT_DIR}/boost/${ANDROID_ABI}/lib/cmake")
+find_package(Boost ${BOOST_VERSION} REQUIRED COMPONENTS filesystem iostreams CONFIG)
+
+# prebuilt zstd
+set(zstd_DIR "${PREBUILT_DIR}/zstd/${ANDROID_ABI}/lib/cmake/zstd")
+find_package(zstd)
+add_library(PkgConfig::ZSTD ALIAS zstd::libzstd_static)
 
 set(LIBIME_INSTALL_PKGDATADIR table)
 option(ENABLE_TEST "" OFF)
