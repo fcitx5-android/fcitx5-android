@@ -37,11 +37,13 @@ import org.fcitx.fcitx5.android.utils.materialTextInput
 import org.fcitx.fcitx5.android.utils.notificationManager
 import org.fcitx.fcitx5.android.utils.queryFileName
 import org.fcitx.fcitx5.android.utils.str
+import splitties.resources.drawable
+import splitties.resources.styledColor
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.verticalLayout
-import splitties.views.imageResource
+import splitties.views.imageDrawable
 import splitties.views.setPaddingDp
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -87,10 +89,11 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                         dustman.forceDirty()
                     }
                 }
+                var icon = R.drawable.ic_baseline_settings_24
                 when (entry) {
                     is BuiltinQuickPhrase -> {
                         if (entry.override != null) {
-                            imageResource = R.drawable.ic_baseline_expand_more_24
+                            icon = R.drawable.ic_baseline_expand_more_24
                             setOnClickListener {
                                 PopupMenu(requireContext(), this).apply {
                                     menu.add(getString(R.string.edit)).setOnMenuItemClickListener {
@@ -108,7 +111,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                                 }
                             }
                         } else {
-                            imageResource = R.drawable.ic_baseline_edit_24
+                            icon = R.drawable.ic_baseline_edit_24
                             setOnClickListener {
                                 edit()
                             }
@@ -116,13 +119,15 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
 
                     }
                     is CustomQuickPhrase -> {
-                        imageResource = R.drawable.ic_baseline_edit_24
+                        icon = R.drawable.ic_baseline_edit_24
                         setOnClickListener {
                             edit()
                         }
                     }
                 }
-
+                imageDrawable = drawable(icon)!!.apply {
+                    setTint(styledColor(android.R.attr.colorControlNormal))
+                }
             }
         ) {
             init {

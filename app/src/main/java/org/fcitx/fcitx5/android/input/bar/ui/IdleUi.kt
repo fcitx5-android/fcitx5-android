@@ -18,7 +18,14 @@ import org.fcitx.fcitx5.android.input.bar.ui.idle.NumberRow
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import splitties.dimensions.dp
-import splitties.views.dsl.constraintlayout.*
+import splitties.views.dsl.constraintlayout.after
+import splitties.views.dsl.constraintlayout.before
+import splitties.views.dsl.constraintlayout.centerVertically
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.endOfParent
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.matchConstraints
+import splitties.views.dsl.constraintlayout.startOfParent
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
@@ -144,8 +151,7 @@ class IdleUi(
     fun setHideKeyboardIsVoiceInput(isVoiceInput: Boolean, callback: View.OnClickListener) {
         hideKeyboardButton.setIcon(
             if (isVoiceInput) R.drawable.ic_baseline_keyboard_voice_24
-            else R.drawable.ic_baseline_arrow_drop_down_24,
-            theme.altKeyTextColor
+            else R.drawable.ic_baseline_arrow_drop_down_24
         )
         hideKeyboardButton.setOnClickListener(callback)
     }

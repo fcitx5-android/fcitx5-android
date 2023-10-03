@@ -59,7 +59,6 @@ import splitties.views.backgroundColor
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
-import splitties.views.imageResource
 import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -255,7 +254,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                 }
             )
         }
-        candidateUi.expandButton.image.imageResource = R.drawable.ic_baseline_expand_more_24
+        candidateUi.expandButton.setIcon(R.drawable.ic_baseline_expand_more_24)
     }
 
     // set expand candidate button to close expand candidate
@@ -263,7 +262,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         candidateUi.expandButton.setOnClickListener {
             windowManager.attachWindow(KeyboardWindow)
         }
-        candidateUi.expandButton.image.imageResource = R.drawable.ic_baseline_expand_less_24
+        candidateUi.expandButton.setIcon(R.drawable.ic_baseline_expand_less_24)
     }
 
     // should be used with setExpandButtonToAttach or setExpandButtonToDetach

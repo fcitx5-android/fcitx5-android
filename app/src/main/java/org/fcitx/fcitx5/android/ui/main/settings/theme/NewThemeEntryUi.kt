@@ -2,16 +2,24 @@ package org.fcitx.fcitx5.android.ui.main.settings.theme
 
 import android.content.Context
 import android.graphics.Color
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.view.ViewOutlineProvider
 import androidx.constraintlayout.widget.ConstraintLayout
 import org.fcitx.fcitx5.android.R
 import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.resources.styledDrawable
-import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.*
+import splitties.views.dsl.constraintlayout.above
+import splitties.views.dsl.constraintlayout.below
+import splitties.views.dsl.constraintlayout.bottomOfParent
+import splitties.views.dsl.constraintlayout.centerHorizontally
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.topOfParent
+import splitties.views.dsl.core.Ui
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.imageView
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.wrapContent
 import splitties.views.imageDrawable
 
 class NewThemeEntryUi(override val ctx: Context) : Ui {
@@ -21,8 +29,9 @@ class NewThemeEntryUi(override val ctx: Context) : Ui {
     }
 
     val icon = imageView {
-        imageDrawable = ctx.drawable(R.drawable.ic_baseline_plus_24)
-        colorFilter = PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN)
+        imageDrawable = ctx.drawable(R.drawable.ic_baseline_plus_24)!!.apply {
+            setTint(Color.WHITE)
+        }
     }
 
     override val root = constraintLayout {

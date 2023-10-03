@@ -1,8 +1,6 @@
 package org.fcitx.fcitx5.android.input.status
 
 import android.content.Context
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.OvalShape
@@ -95,8 +93,9 @@ class StatusAreaEntryUi(override val ctx: Context, private val theme: Theme) : U
         if (entry.icon != 0) {
             icon.visibility = View.VISIBLE
             textIcon.visibility = View.GONE
-            icon.imageDrawable = ctx.drawable(entry.icon)
-            icon.colorFilter = PorterDuffColorFilter(contentColor, PorterDuff.Mode.SRC_IN)
+            icon.imageDrawable = ctx.drawable(entry.icon)!!.apply {
+                setTint(contentColor)
+            }
         } else {
             icon.visibility = View.GONE
             textIcon.visibility = View.VISIBLE

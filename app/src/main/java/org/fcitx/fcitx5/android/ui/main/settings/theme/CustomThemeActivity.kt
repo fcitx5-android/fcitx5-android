@@ -8,8 +8,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
@@ -475,8 +473,7 @@ class CustomThemeActivity : AppCompatActivity() {
         if (!newCreated) {
             menu.add(R.string.delete).apply {
                 icon = drawable(R.drawable.ic_baseline_delete_24)!!.apply {
-                    colorFilter =
-                        PorterDuffColorFilter(color(R.color.red_400), PorterDuff.Mode.SRC_IN)
+                    setTint(color(R.color.red_400))
                 }
                 setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
                 setOnMenuItemClickListener {
@@ -486,7 +483,9 @@ class CustomThemeActivity : AppCompatActivity() {
             }
         }
         menu.add(R.string.save).apply {
-            setIcon(R.drawable.ic_baseline_done_24)
+            icon = drawable(R.drawable.ic_baseline_done_24)!!.apply {
+                setTint(styledColor(android.R.attr.colorControlNormal))
+            }
             setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
             setOnMenuItemClickListener {
                 done()

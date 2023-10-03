@@ -179,7 +179,9 @@ class ThemeListFragment : Fragment() {
             gravity = gravityVerticalCenter
         }
         val settingsButton = imageButton {
-            imageDrawable = drawable(R.drawable.ic_baseline_settings_24)
+            imageDrawable = drawable(R.drawable.ic_baseline_settings_24)?.apply {
+                setTint(styledColor(android.R.attr.colorControlNormal))
+            }
             background = styledDrawable(android.R.attr.actionBarItemBackground)
             setOnClickListener {
                 findNavController().navigate(R.id.action_themeListFragment_to_themeSettingsFragment)

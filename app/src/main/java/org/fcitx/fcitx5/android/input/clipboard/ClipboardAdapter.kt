@@ -1,7 +1,5 @@
 package org.fcitx.fcitx5.android.input.clipboard
 
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.os.Build
 import android.view.ViewGroup
 import android.widget.PopupMenu
@@ -79,11 +77,10 @@ abstract class ClipboardAdapter :
             root.setOnLongClickListener {
                 popupMenu?.dismiss()
                 val iconColor = ctx.styledColor(android.R.attr.colorControlNormal)
-                val iconColorFilter = PorterDuffColorFilter(iconColor, PorterDuff.Mode.SRC_IN)
                 val popup = PopupMenu(ctx, root)
                 fun menuItem(@StringRes title: Int, @DrawableRes ic: Int, callback: () -> Unit) {
                     popup.menu.add(title).apply {
-                        icon = ctx.drawable(ic)?.apply { colorFilter = iconColorFilter }
+                        icon = ctx.drawable(ic)?.apply { setTint(iconColor) }
                         setOnMenuItemClickListener {
                             callback()
                             true

@@ -1,8 +1,7 @@
 package org.fcitx.fcitx5.android.ui.main.settings.theme
 
 import android.content.Context
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
+import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.OvalShape
@@ -14,7 +13,6 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.utils.rippleDrawable
 import splitties.dimensions.dp
-import splitties.resources.drawable
 import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.bottomOfParent
 import splitties.views.dsl.constraintlayout.centerHorizontally
@@ -30,6 +28,7 @@ import splitties.views.dsl.core.imageView
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.view
 import splitties.views.imageDrawable
+import splitties.views.imageResource
 import splitties.views.setPaddingDp
 
 class ThemeThumbnailUi(override val ctx: Context) : Ui {
@@ -48,13 +47,11 @@ class ThemeThumbnailUi(override val ctx: Context) : Ui {
 
     val checkMark = imageView {
         scaleType = ImageView.ScaleType.FIT_CENTER
-        imageDrawable = ctx.drawable(R.drawable.ic_baseline_check_24)
     }
 
     val editButton = imageView {
         setPaddingDp(16, 4, 4, 16)
         scaleType = ImageView.ScaleType.FIT_CENTER
-        imageDrawable = ctx.drawable(R.drawable.ic_baseline_edit_24)
     }
 
     override val root = constraintLayout {
@@ -94,29 +91,27 @@ class ThemeThumbnailUi(override val ctx: Context) : Ui {
         returnKey.background = ShapeDrawable(OvalShape()).apply {
             paint.color = theme.accentKeyBackgroundColor
         }
-        val foreground = PorterDuffColorFilter(theme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
+        val foregroundTint = ColorStateList.valueOf(theme.altKeyTextColor)
         editButton.apply {
             visibility = if (theme is Theme.Custom) View.VISIBLE else View.GONE
-            colorFilter = foreground
             background = rippleDrawable(theme.keyPressHighlightColor)
+            imageTintList = foregroundTint
         }
-        checkMark.colorFilter = foreground
+        checkMark.imageTintList = foregroundTint
     }
 
     fun setChecked(checked: Boolean) {
         checkMark.isVisible = checked
-        checkMark.imageDrawable = ctx.drawable(R.drawable.ic_baseline_check_24)
+        checkMark.imageResource = R.drawable.ic_baseline_check_24
     }
 
     fun setChecked(state: State) {
         checkMark.isVisible = state != State.Normal
-        checkMark.imageDrawable = ctx.drawable(
-            when (state) {
-                State.Normal -> R.drawable.ic_baseline_check_24
-                State.Selected -> R.drawable.ic_baseline_check_24
-                State.LightMode -> R.drawable.ic_baseline_light_mode_24
-                State.DarkMode -> R.drawable.ic_baseline_dark_mode_24
-            }
-        )
+        checkMark.imageResource = when (state) {
+            State.Normal -> 0
+            State.Selected -> R.drawable.ic_baseline_check_24
+            State.LightMode -> R.drawable.ic_baseline_light_mode_24
+            State.DarkMode -> R.drawable.ic_baseline_dark_mode_24
+        }
     }
 }

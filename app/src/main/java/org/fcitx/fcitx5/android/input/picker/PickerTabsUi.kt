@@ -1,8 +1,6 @@
 package org.fcitx.fcitx5.android.input.picker
 
 import android.content.Context
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
 import androidx.annotation.DrawableRes
 import androidx.core.view.isVisible
@@ -13,8 +11,19 @@ import org.fcitx.fcitx5.android.utils.alpha
 import org.fcitx.fcitx5.android.utils.pressHighlightDrawable
 import org.fcitx.fcitx5.android.utils.rippleDrawable
 import splitties.resources.drawable
-import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.*
+import splitties.views.dsl.constraintlayout.after
+import splitties.views.dsl.constraintlayout.before
+import splitties.views.dsl.constraintlayout.centerVertically
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.endOfParent
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.startOfParent
+import splitties.views.dsl.core.Ui
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.imageView
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.view
 import splitties.views.gravityCenter
 import splitties.views.imageDrawable
 
@@ -25,8 +34,7 @@ class PickerTabsUi(override val ctx: Context, val theme: Theme) : Ui {
     }
 
     inner class TabUi : Ui {
-        override val ctx: Context
-            get() = this@PickerTabsUi.ctx
+        override val ctx = this@PickerTabsUi.ctx
 
         var position: Int = -1
 
@@ -36,9 +44,7 @@ class PickerTabsUi(override val ctx: Context, val theme: Theme) : Ui {
             setTextColor(theme.keyTextColor)
         }
 
-        val icon = imageView {
-            colorFilter = PorterDuffColorFilter(theme.keyTextColor, PorterDuff.Mode.SRC_IN)
-        }
+        val icon = imageView()
 
         override val root = view(::CustomGestureView) {
             add(label, lParams {
@@ -64,7 +70,9 @@ class PickerTabsUi(override val ctx: Context, val theme: Theme) : Ui {
         }
 
         fun setIcon(@DrawableRes src: Int) {
-            icon.imageDrawable = ctx.drawable(src)
+            icon.imageDrawable = ctx.drawable(src)!!.apply {
+                setTint(theme.keyTextColor.alpha(0.5f))
+            }
             label.isVisible = false
             icon.isVisible = true
         }
@@ -72,7 +80,7 @@ class PickerTabsUi(override val ctx: Context, val theme: Theme) : Ui {
         fun setActive(active: Boolean) {
             val color = theme.keyTextColor.alpha(if (active) 1f else 0.5f)
             label.setTextColor(color)
-            icon.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
+            icon.imageDrawable?.setTint(color)
         }
     }
 

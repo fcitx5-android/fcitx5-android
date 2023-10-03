@@ -1,8 +1,6 @@
 package org.fcitx.fcitx5.android.ui.common
 
 import android.content.Context
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
@@ -20,6 +18,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import org.fcitx.fcitx5.android.R
 import splitties.dimensions.dp
+import splitties.resources.drawable
 import splitties.resources.styledColor
 import splitties.views.backgroundColor
 import splitties.views.bottomPadding
@@ -29,7 +28,7 @@ import splitties.views.dsl.coordinatorlayout.defaultLParams
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.gravityEndBottom
-import splitties.views.imageResource
+import splitties.views.imageDrawable
 import splitties.views.recyclerview.verticalLayoutManager
 import kotlin.math.min
 
@@ -53,10 +52,9 @@ abstract class BaseDynamicListUi<T>(
     protected var shouldShowFab = false
 
     protected val fab = view(::FloatingActionButton) {
-        imageResource = R.drawable.ic_baseline_plus_24
-        colorFilter = PorterDuffColorFilter(
-            styledColor(android.R.attr.colorForegroundInverse), PorterDuff.Mode.SRC_IN
-        )
+        imageDrawable = drawable(R.drawable.ic_baseline_plus_24)!!.apply {
+            setTint(styledColor(android.R.attr.colorForegroundInverse))
+        }
     }
 
     sealed class Mode<T> {

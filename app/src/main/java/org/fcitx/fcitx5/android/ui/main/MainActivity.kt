@@ -29,6 +29,8 @@ import org.fcitx.fcitx5.android.utils.Const
 import org.fcitx.fcitx5.android.utils.applyTranslucentSystemBars
 import org.fcitx.fcitx5.android.utils.navigateFromMain
 import splitties.dimensions.dp
+import splitties.resources.drawable
+import splitties.resources.styledColor
 import splitties.views.topPadding
 
 class MainActivity : AppCompatActivity() {
@@ -111,7 +113,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean = menu.run {
         add(R.string.save).apply {
-            setIcon(R.drawable.ic_baseline_save_24)
+            icon = drawable(R.drawable.ic_baseline_save_24)!!.apply {
+                setTint(styledColor(android.R.attr.colorControlNormal))
+            }
             setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
             viewModel.toolbarSaveButtonOnClickListener.apply {
                 observe(this@MainActivity) { listener -> isVisible = listener != null }
@@ -152,7 +156,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         add(R.string.edit).apply {
-            setIcon(R.drawable.ic_baseline_edit_24)
+            icon = drawable(R.drawable.ic_baseline_edit_24)!!.apply {
+                setTint(styledColor(android.R.attr.colorControlNormal))
+            }
             setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
             viewModel.toolbarEditButtonVisible.apply {
                 observe(this@MainActivity) { isVisible = it }
@@ -165,7 +171,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         add(R.string.delete).apply {
-            setIcon(R.drawable.ic_baseline_delete_24)
+            icon = drawable(R.drawable.ic_baseline_delete_24)!!.apply {
+                setTint(styledColor(android.R.attr.colorControlNormal))
+            }
             setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
             viewModel.toolbarDeleteButtonOnClickListener.apply {
                 observe(this@MainActivity) { listener -> isVisible = listener != null }

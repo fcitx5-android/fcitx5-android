@@ -1,29 +1,42 @@
 package org.fcitx.fcitx5.android.ui.common
 
 import android.content.Context
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.view.View
 import android.view.ViewGroup
 import org.fcitx.fcitx5.android.R
 import splitties.dimensions.dp
+import splitties.resources.drawable
 import splitties.resources.resolveThemeAttribute
 import splitties.resources.styledColor
 import splitties.resources.styledDimenPxSize
 import splitties.resources.styledDrawable
 import splitties.views.backgroundColor
-import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.*
-import splitties.views.imageResource
+import splitties.views.dsl.constraintlayout.after
+import splitties.views.dsl.constraintlayout.before
+import splitties.views.dsl.constraintlayout.centerVertically
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.endOfParent
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.matchConstraints
+import splitties.views.dsl.constraintlayout.startOfParent
+import splitties.views.dsl.core.Ui
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.checkBox
+import splitties.views.dsl.core.imageButton
+import splitties.views.dsl.core.imageView
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.wrapContent
+import splitties.views.imageDrawable
 import splitties.views.setPaddingDp
 import splitties.views.textAppearance
 
 class DynamicListEntryUi(override val ctx: Context) : Ui {
 
     val handleImage = imageView {
-        imageResource = R.drawable.ic_baseline_drag_handle_24
-        colorFilter =
-            PorterDuffColorFilter(styledColor(android.R.attr.colorAccent), PorterDuff.Mode.SRC_IN)
+        imageDrawable = drawable(R.drawable.ic_baseline_drag_handle_24)!!.apply {
+            setTint(styledColor(android.R.attr.colorAccent))
+        }
         setPaddingDp(3, 0, 3, 0)
     }
 
@@ -38,12 +51,16 @@ class DynamicListEntryUi(override val ctx: Context) : Ui {
 
     val editButton = imageButton {
         background = styledDrawable(android.R.attr.selectableItemBackground)
-        imageResource = R.drawable.ic_baseline_edit_24
+        imageDrawable = drawable(R.drawable.ic_baseline_edit_24)!!.apply {
+            setTint(styledColor(android.R.attr.colorControlNormal))
+        }
     }
 
     val settingsButton = imageButton {
         background = styledDrawable(android.R.attr.selectableItemBackground)
-        imageResource = R.drawable.ic_baseline_settings_24
+        imageDrawable = drawable(R.drawable.ic_baseline_settings_24)!!.apply {
+            setTint(styledColor(android.R.attr.colorControlNormal))
+        }
     }
 
     override val root: View = constraintLayout {

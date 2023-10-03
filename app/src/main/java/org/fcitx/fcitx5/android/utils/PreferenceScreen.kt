@@ -6,6 +6,8 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceScreen
+import splitties.resources.drawable
+import splitties.resources.styledColor
 
 fun PreferenceScreen.addCategory(title: String, block: PreferenceCategory.() -> Unit) {
     val category = PreferenceCategory(context).apply {
@@ -33,7 +35,9 @@ fun PreferenceGroup.addPreference(
         if (icon == null) {
             isIconSpaceReserved = false
         } else {
-            setIcon(icon)
+            setIcon(context.drawable(icon)?.apply {
+                setTint(context.styledColor(android.R.attr.colorControlNormal))
+            })
         }
         onClick?.also {
             setOnPreferenceClickListener { _ ->

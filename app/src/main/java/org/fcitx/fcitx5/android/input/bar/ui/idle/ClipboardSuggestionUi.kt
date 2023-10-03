@@ -1,23 +1,38 @@
 package org.fcitx.fcitx5.android.input.bar.ui.idle
 
 import android.content.Context
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.text.TextUtils
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
 import org.fcitx.fcitx5.android.utils.rippleDrawable
 import splitties.dimensions.dp
-import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.*
-import splitties.views.imageResource
+import splitties.resources.drawable
+import splitties.views.dsl.constraintlayout.after
+import splitties.views.dsl.constraintlayout.before
+import splitties.views.dsl.constraintlayout.centerInParent
+import splitties.views.dsl.constraintlayout.centerVertically
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.endOfParent
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.matchConstraints
+import splitties.views.dsl.constraintlayout.startOfParent
+import splitties.views.dsl.core.Ui
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.imageView
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.verticalMargin
+import splitties.views.dsl.core.wrapContent
+import splitties.views.imageDrawable
 
 class ClipboardSuggestionUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     private val icon = imageView {
-        imageResource = R.drawable.ic_clipboard
-        colorFilter = PorterDuffColorFilter(theme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
+        imageDrawable = drawable(R.drawable.ic_clipboard)!!.apply {
+            setTint(theme.altKeyTextColor)
+        }
     }
 
     val text = textView {

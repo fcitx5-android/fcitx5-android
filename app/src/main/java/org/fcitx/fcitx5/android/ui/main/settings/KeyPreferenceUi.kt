@@ -11,13 +11,30 @@ import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import splitties.dimensions.dp
+import splitties.resources.drawable
 import splitties.resources.styledColor
 import splitties.resources.styledColorSL
 import splitties.resources.styledDrawable
-import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.*
+import splitties.views.dsl.constraintlayout.above
+import splitties.views.dsl.constraintlayout.after
+import splitties.views.dsl.constraintlayout.before
+import splitties.views.dsl.constraintlayout.below
+import splitties.views.dsl.constraintlayout.bottomOfParent
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.endOfParent
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.matchConstraints
+import splitties.views.dsl.constraintlayout.startOfParent
+import splitties.views.dsl.constraintlayout.topOfParent
+import splitties.views.dsl.core.Ui
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.button
+import splitties.views.dsl.core.editText
+import splitties.views.dsl.core.imageButton
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.wrapContent
 import splitties.views.gravityCenter
-import splitties.views.imageResource
+import splitties.views.imageDrawable
 
 class KeyPreferenceUi(override val ctx: Context) : Ui {
 
@@ -26,8 +43,7 @@ class KeyPreferenceUi(override val ctx: Context) : Ui {
     }
 
     private inner class ModifierButton(label: String, val modifier: KeyState) : Ui {
-        override val ctx: Context
-            get() = this@KeyPreferenceUi.ctx
+        override val ctx = this@KeyPreferenceUi.ctx
 
         override val root = button {
             text = label
@@ -96,7 +112,9 @@ class KeyPreferenceUi(override val ctx: Context) : Ui {
 
     private val clearButton = imageButton {
         background = styledDrawable(android.R.attr.actionBarItemBackground)
-        imageResource = R.drawable.ic_baseline_delete_24
+        imageDrawable = drawable(R.drawable.ic_baseline_delete_24)!!.apply {
+            setTint(styledColor(android.R.attr.colorControlNormal))
+        }
         setOnClickListener {
             setKey(Key.None)
         }

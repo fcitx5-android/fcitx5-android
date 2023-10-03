@@ -24,6 +24,8 @@ import org.fcitx.fcitx5.android.utils.Logcat
 import org.fcitx.fcitx5.android.utils.applyTranslucentSystemBars
 import org.fcitx.fcitx5.android.utils.iso8601UTCDateTime
 import org.fcitx.fcitx5.android.utils.toast
+import splitties.resources.drawable
+import splitties.resources.styledColor
 import splitties.views.topPadding
 
 class LogActivity : AppCompatActivity() {
@@ -94,7 +96,9 @@ class LogActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         if (!fromCrash) {
             menu.add(R.string.clear).apply {
-                setIcon(R.drawable.ic_baseline_delete_24)
+                icon = drawable(R.drawable.ic_baseline_delete_24)!!.apply {
+                    setTint(styledColor(android.R.attr.colorControlNormal))
+                }
                 setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
                 setOnMenuItemClickListener {
                     logView.clear()
@@ -103,7 +107,9 @@ class LogActivity : AppCompatActivity() {
             }
         }
         menu.add(R.string.export).apply {
-            setIcon(R.drawable.ic_baseline_save_24)
+            icon = drawable(R.drawable.ic_baseline_save_24)!!.apply {
+                setTint(styledColor(android.R.attr.colorControlNormal))
+            }
             setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
             setOnMenuItemClickListener {
                 launcher.launch("$packageName-${iso8601UTCDateTime()}.txt")

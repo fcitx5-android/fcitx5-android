@@ -2,8 +2,6 @@ package org.fcitx.fcitx5.android.input.editing
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.StateListDrawable
 import android.view.View
 import androidx.annotation.DrawableRes
@@ -18,6 +16,7 @@ import org.fcitx.fcitx5.android.utils.borderDrawable
 import org.fcitx.fcitx5.android.utils.pressHighlightDrawable
 import org.fcitx.fcitx5.android.utils.rippleDrawable
 import splitties.dimensions.dp
+import splitties.resources.drawable
 import splitties.views.dsl.constraintlayout.above
 import splitties.views.dsl.constraintlayout.below
 import splitties.views.dsl.constraintlayout.bottomOfParent
@@ -36,7 +35,7 @@ import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.textView
 import splitties.views.dsl.core.wrapContent
 import splitties.views.gravityCenter
-import splitties.views.imageResource
+import splitties.views.imageDrawable
 import splitties.views.padding
 
 class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
@@ -83,8 +82,9 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
     }
 
     private fun iconButton(@DrawableRes icon: Int) = GImageButton(ctx).apply {
-        image.imageResource = icon
-        image.colorFilter = PorterDuffColorFilter(theme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
+        image.imageDrawable = drawable(icon)!!.apply {
+            setTint(theme.altKeyTextColor)
+        }
         padding = dp(10)
         applyBorderedBackground()
     }

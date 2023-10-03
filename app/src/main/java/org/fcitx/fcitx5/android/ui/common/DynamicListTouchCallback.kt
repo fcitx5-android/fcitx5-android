@@ -1,10 +1,8 @@
 package org.fcitx.fcitx5.android.ui.common
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import androidx.core.graphics.drawable.toBitmap
@@ -28,23 +26,16 @@ open class DynamicListTouchCallback<T>(
     private var selected = true
     private var reset = false
 
-    private val deleteBackground by lazy {
+    private val deleteBackground: ColorDrawable by lazy {
         ColorDrawable().apply {
             color = ctx.color(R.color.red_400)
         }
     }
 
-    private val deleteIcon by lazy {
-        ctx.drawable(R.drawable.ic_baseline_delete_24)!!.toBitmap()
-    }
-
-    private val deleteIconPaint by lazy {
-        Paint().apply {
-            colorFilter = PorterDuffColorFilter(
-                ctx.styledColor(android.R.attr.colorBackground),
-                PorterDuff.Mode.SRC_IN
-            )
-        }
+    private val deleteIcon: Bitmap by lazy {
+        ctx.drawable(R.drawable.ic_baseline_delete_24)!!.apply {
+            setTint(ctx.styledColor(android.R.attr.colorBackground))
+        }.toBitmap()
     }
 
     // manually call start drag at the on long click listener
@@ -94,26 +85,24 @@ open class DynamicListTouchCallback<T>(
                 deleteBackground.apply {
                     bounds = itemView.run { Rect(canvasLeft, top, right, bottom) }
                 }.draw(c)
-                deleteIcon.also {
-                    val iconMargin = (itemView.height - it.height) / 2
-                    val revealed = (dX.absoluteValue - iconMargin).toInt()
-                    c.drawBitmap(
-                        it,
-                        /* src = */ Rect(
-                            /* left = */ if (revealed > it.width) 0 else it.width - revealed,
-                            /* top = */ 0,
-                            /* right = */ it.width,
-                            /* bottom = */ it.height
-                        ),
-                        /* dst = */ Rect(
-                            /* left = */ if (revealed > it.width) itemView.right - iconMargin - it.width else canvasLeft,
-                            /* top = */ itemView.top + iconMargin,
-                            /* right = */ itemView.right - iconMargin,
-                            /* bottom = */ itemView.top + iconMargin + it.height
-                        ),
-                        deleteIconPaint
-                    )
-                }
+                val iconMargin = (itemView.height - deleteIcon.height) / 2
+                val revealed = (dX.absoluteValue - iconMargin).toInt()
+                c.drawBitmap(
+                    deleteIcon,
+                    /* src = */ Rect(
+                        /* left = */ if (revealed > deleteIcon.width) 0 else deleteIcon.width - revealed,
+                        /* top = */ 0,
+                        /* right = */ deleteIcon.width,
+                        /* bottom = */ deleteIcon.height
+                    ),
+                    /* dst = */ Rect(
+                        /* left = */ if (revealed > deleteIcon.width) itemView.right - iconMargin - deleteIcon.width else canvasLeft,
+                        /* top = */ itemView.top + iconMargin,
+                        /* right = */ itemView.right - iconMargin,
+                        /* bottom = */ itemView.top + iconMargin + deleteIcon.height
+                    ),
+                    null
+                )
             }
             ItemTouchHelper.ACTION_STATE_DRAG -> {
             }

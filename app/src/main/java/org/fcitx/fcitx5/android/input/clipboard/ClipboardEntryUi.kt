@@ -3,8 +3,6 @@ package org.fcitx.fcitx5.android.input.clipboard
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
 import android.text.TextUtils
@@ -12,6 +10,7 @@ import android.view.View
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import splitties.dimensions.dp
+import splitties.resources.drawable
 import splitties.views.dsl.constraintlayout.bottomOfParent
 import splitties.views.dsl.constraintlayout.centerVertically
 import splitties.views.dsl.constraintlayout.constraintLayout
@@ -23,7 +22,7 @@ import splitties.views.dsl.core.imageView
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.textView
 import splitties.views.dsl.core.wrapContent
-import splitties.views.imageResource
+import splitties.views.imageDrawable
 import splitties.views.setPaddingDp
 
 class ClipboardEntryUi(override val ctx: Context, private val theme: Theme) : Ui {
@@ -38,9 +37,10 @@ class ClipboardEntryUi(override val ctx: Context, private val theme: Theme) : Ui
     }
 
     val pin = imageView {
-        imageResource = R.drawable.ic_baseline_push_pin_24
-        colorFilter = PorterDuffColorFilter(theme.altKeyTextColor, PorterDuff.Mode.SRC_IN)
-        alpha = 0.3f
+        imageDrawable = drawable(R.drawable.ic_baseline_push_pin_24)!!.apply {
+            setTint(theme.altKeyTextColor)
+            setAlpha(0.3f)
+        }
     }
 
     override val root = constraintLayout {

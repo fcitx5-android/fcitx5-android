@@ -1,8 +1,6 @@
 package org.fcitx.fcitx5.android.input.popup
 
 import android.content.Context
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
 import android.graphics.drawable.InsetDrawable
 import android.graphics.drawable.ShapeDrawable
@@ -12,11 +10,12 @@ import androidx.core.graphics.ColorUtils
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef
 import splitties.dimensions.dp
+import splitties.resources.drawable
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.horizontalLayout
 import splitties.views.dsl.core.imageView
 import splitties.views.dsl.core.lParams
-import splitties.views.imageResource
+import splitties.views.imageDrawable
 import kotlin.math.floor
 
 class PopupMenuUi(
@@ -60,8 +59,9 @@ class PopupMenuUi(
         imageView {
             background = inactiveBackground
             scaleType = ImageView.ScaleType.CENTER_INSIDE
-            colorFilter = PorterDuffColorFilter(theme.accentKeyTextColor, PorterDuff.Mode.SRC_IN)
-            imageResource = it.icon
+            imageDrawable = drawable(it.icon)!!.apply {
+                setTint(theme.accentKeyTextColor)
+            }
         }
     }
 

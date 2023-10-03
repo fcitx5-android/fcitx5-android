@@ -23,7 +23,6 @@ import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Variant
 import org.fcitx.fcitx5.android.utils.styledFloat
 import org.fcitx.fcitx5.android.utils.unset
 import splitties.dimensions.dp
-import splitties.resources.drawable
 import splitties.views.dsl.constraintlayout.centerHorizontally
 import splitties.views.dsl.constraintlayout.centerInParent
 import splitties.views.dsl.constraintlayout.constraintLayout
@@ -31,7 +30,7 @@ import splitties.views.dsl.constraintlayout.lParams
 import splitties.views.dsl.constraintlayout.parentId
 import splitties.views.dsl.core.*
 import splitties.views.existingOrNewId
-import splitties.views.imageDrawable
+import splitties.views.imageResource
 import splitties.views.padding
 import kotlin.math.min
 
@@ -330,15 +329,14 @@ class ImageKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Image) :
 private fun ImageView.configure(theme: Theme, @DrawableRes src: Int, variant: Variant) = apply {
     isClickable = false
     isFocusable = false
-    imageDrawable = drawable(src)
-    colorFilter = PorterDuffColorFilter(
+    imageTintList = ColorStateList.valueOf(
         when (variant) {
             Variant.Normal -> theme.keyTextColor
             Variant.AltForeground, Variant.Alternative -> theme.altKeyTextColor
             Variant.Accent -> theme.accentKeyTextColor
-        },
-        PorterDuff.Mode.SRC_IN
+        }
     )
+    imageResource = src
 }
 
 @SuppressLint("ViewConstructor")

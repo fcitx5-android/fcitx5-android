@@ -11,8 +11,6 @@ import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.popup.PopupAction
-import splitties.resources.drawable
-import splitties.views.imageDrawable
 import splitties.views.imageResource
 
 @SuppressLint("ViewConstructor")
@@ -185,13 +183,11 @@ class TextKeyboard(
 
     private fun updateCapsButtonIcon() {
         caps.img.apply {
-            imageDrawable = drawable(
-                when (capsState) {
-                    CapsState.None -> R.drawable.ic_capslock_none
-                    CapsState.Once -> R.drawable.ic_capslock_once
-                    CapsState.Lock -> R.drawable.ic_capslock_lock
-                }
-            )
+            imageResource = when (capsState) {
+                CapsState.None -> R.drawable.ic_capslock_none
+                CapsState.Once -> R.drawable.ic_capslock_once
+                CapsState.Lock -> R.drawable.ic_capslock_lock
+            }
         }
     }
 
