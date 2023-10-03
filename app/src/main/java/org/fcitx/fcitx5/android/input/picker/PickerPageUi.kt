@@ -28,11 +28,11 @@ import splitties.views.dsl.constraintlayout.below
 import splitties.views.dsl.constraintlayout.bottomOfParent
 import splitties.views.dsl.constraintlayout.bottomToTopOf
 import splitties.views.dsl.constraintlayout.constraintLayout
-import splitties.views.dsl.constraintlayout.endOfParent
-import splitties.views.dsl.constraintlayout.endToStartOf
 import splitties.views.dsl.constraintlayout.lParams
-import splitties.views.dsl.constraintlayout.startOfParent
-import splitties.views.dsl.constraintlayout.startToEndOf
+import splitties.views.dsl.constraintlayout.leftOfParent
+import splitties.views.dsl.constraintlayout.leftToRightOf
+import splitties.views.dsl.constraintlayout.rightOfParent
+import splitties.views.dsl.constraintlayout.rightToLeftOf
 import splitties.views.dsl.constraintlayout.topOfParent
 import splitties.views.dsl.constraintlayout.topToBottomOf
 import splitties.views.dsl.core.Ui
@@ -128,16 +128,16 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, private val dens
                             // not last row, align bottom to top of first view in next row
                             bottomToTopOf(keyViews[(row + 1) * columnCount])
                         }
-                        // layout_constraintEnd_to
+                        // layout_constraintRight_to
                         if (i == keyViews.size - 1) {
                             // last key (likely not last column), align end to start of backspace button
-                            endToStartOf(backspaceKey)
+                            rightToLeftOf(backspaceKey)
                         } else if (column == columnCount - 1) {
                             // last column, align end to end of parent
-                            endOfParent()
+                            rightOfParent()
                         } else {
                             // neither, align end to start of next view
-                            endToStartOf(keyViews[i + 1])
+                            rightToLeftOf(keyViews[i + 1])
                         }
                         matchConstraintPercentWidth = keyWidth
                     })
@@ -165,13 +165,13 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, private val dens
                             // not last row, align bottom to top of first view in next row
                             bottomToTopOf(keyViews[(row + 1) * columnCount])
                         }
-                        // layout_constraintStart_to
+                        // layout_constraintLeft_to
                         if (column == 0) {
                             // first column, align start to start of parent
-                            startOfParent()
+                            leftOfParent()
                         } else {
                             // not first column, align start to end of last column
-                            startToEndOf(keyViews[i - 1])
+                            leftToRightOf(keyViews[i - 1])
                         }
                         matchConstraintPercentWidth = keyWidth
                     })
@@ -184,7 +184,7 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, private val dens
                 below(keyViews[(rowCount - 2) * columnCount])
                 // bottom/right corner
                 bottomOfParent()
-                endOfParent()
+                rightOfParent()
                 matchConstraintPercentWidth = 0.15f
             })
         }
