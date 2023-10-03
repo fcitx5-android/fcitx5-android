@@ -3,6 +3,7 @@ package org.fcitx.fcitx5.android.input.status
 import android.view.View
 import android.widget.PopupMenu
 import android.widget.Toast
+import androidx.core.view.MenuCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
@@ -10,7 +11,6 @@ import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
-import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.bar.ui.ToolButton
@@ -71,8 +71,8 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
     }
 
     private fun activateAction(action: Action) {
-        fcitx.launchOnReady { f ->
-            f.activateAction(action.id)
+        fcitx.launchOnReady {
+            it.activateAction(action.id)
         }
     }
 
@@ -82,20 +82,26 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
                 when (entry) {
                     is StatusAreaEntry.Fcitx -> {
                         val menu = entry.action.menu
-                        if (menu != null && menu.isNotEmpty()) {
-                            val popup = PopupMenu(context, view)
-                            menu.forEach { action ->
-                                popup.menu.add(action.shortText).apply {
-                                    setOnMenuItemClickListener {
-                                        activateAction(action)
+                        if (menu.isNullOrEmpty()) {
+                            activateAction(entry.action)
+                            return
+                        }
+                        val popup = PopupMenu(context, view)
+                        var groupId = 0 // Menu.NONE; ungrouped
+                        menu.forEach {
+                            if (it.isSeparator) {
+                                groupId++
+                            } else {
+                                popup.menu.add(groupId, 0, 0, it.shortText).apply {
+                                    setOnMenuItemClickListener { _ ->
+                                        activateAction(it)
                                         true
                                     }
                                 }
                             }
-                            popup.show()
-                        } else {
-                            activateAction(entry.action)
                         }
+                        MenuCompat.setGroupDividerEnabled(popup.menu, true)
+                        popup.show()
                     }
                     is StatusAreaEntry.Android -> when (entry.type) {
                         InputMethod -> fcitx.runImmediately { inputMethodEntryCached }.let {
@@ -115,8 +121,7 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
                 }
             }
 
-            override val theme: Theme
-                get() = this@StatusAreaWindow.theme
+            override val theme = this@StatusAreaWindow.theme
         }
     }
 
@@ -135,7 +140,7 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
     override fun onStatusAreaUpdate(actions: Array<Action>) {
         adapter.entries = arrayOf(
             *staticEntries,
-            *actions.map { StatusAreaEntry.fromAction(it) }.toTypedArray()
+            *Array(actions.size) { StatusAreaEntry.fromAction(actions[it]) }
         )
     }
 
