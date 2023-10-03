@@ -287,8 +287,7 @@ bool AndroidKeyboardEngine::updateBuffer(InputContext *inputContext, const std::
 
     auto *state = inputContext->propertyFor(&factory_);
     const CapabilityFlags noPredictFlag{CapabilityFlag::Password,
-                                        CapabilityFlag::NoSpellCheck,
-                                        CapabilityFlag::Sensitive};
+                                        CapabilityFlag::NoSpellCheck};
     // no spell hint enabled or no supported dictionary
     if (!*config_.enableWordHint ||
         inputContext->capabilityFlags().testAny(noPredictFlag) ||
