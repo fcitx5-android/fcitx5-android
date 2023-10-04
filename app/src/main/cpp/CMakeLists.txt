@@ -41,9 +41,8 @@ set(Libevent_DIR "${PREBUILT_DIR}/libevent/${ANDROID_ABI}/lib/cmake/libevent")
 find_package(Libevent)
 
 # prebuilt boost
-set(BOOST_VERSION "1.80.0")
 list(APPEND CMAKE_FIND_ROOT_PATH "${PREBUILT_DIR}/boost/${ANDROID_ABI}/lib/cmake")
-find_package(Boost 1.80 REQUIRED COMPONENTS headers filesystem iostreams)
+find_package(Boost 1.83.0 REQUIRED COMPONENTS headers filesystem iostreams CONFIG)
 
 add_library(native-lib SHARED native-lib.cpp)
 target_link_libraries(native-lib

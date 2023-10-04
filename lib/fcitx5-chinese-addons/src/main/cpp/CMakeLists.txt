@@ -39,9 +39,8 @@ set(fmt_DIR "${PREBUILT_DIR}/fmt/${ANDROID_ABI}/lib/cmake/fmt")
 find_package(fmt)
 
 # prebuilt boost
-set(BOOST_VERSION "1.80.0")
 list(APPEND CMAKE_FIND_ROOT_PATH "${PREBUILT_DIR}/boost/${ANDROID_ABI}/lib/cmake")
-find_package(Boost ${BOOST_VERSION} REQUIRED COMPONENTS iostreams CONFIG)
+find_package(Boost 1.83.0 REQUIRED COMPONENTS iostreams CONFIG)
 
 # prebuilt marisa-tire, OpenCC needs it
 set(marisa_DIR "${PREBUILT_DIR}/marisa/${ANDROID_ABI}/lib/cmake/marisa")

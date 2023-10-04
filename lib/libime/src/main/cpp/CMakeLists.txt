@@ -24,9 +24,8 @@ set(fmt_DIR "${PREBUILT_DIR}/fmt/${ANDROID_ABI}/lib/cmake/fmt")
 find_package(fmt)
 
 # prebuilt boost
-set(BOOST_VERSION "1.80.0")
 list(APPEND CMAKE_FIND_ROOT_PATH "${PREBUILT_DIR}/boost/${ANDROID_ABI}/lib/cmake")
-find_package(Boost ${BOOST_VERSION} REQUIRED COMPONENTS filesystem iostreams CONFIG)
+find_package(Boost 1.83.0 REQUIRED COMPONENTS filesystem iostreams CONFIG)
 
 # prebuilt zstd
 set(zstd_DIR "${PREBUILT_DIR}/zstd/${ANDROID_ABI}/lib/cmake/zstd")
