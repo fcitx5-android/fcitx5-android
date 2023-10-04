@@ -16,6 +16,7 @@ import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.*
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.CapabilityFlags
@@ -83,11 +84,7 @@ class InputView(
         setOnClickListener(placeholderOnClickListener)
     }
 
-    private val eventHandlerJob = service.lifecycleScope.launch {
-        fcitx.runImmediately { eventFlow }.collect {
-            handleFcitxEvent(it)
-        }
-    }
+    private val eventHandlerJob: Job
 
     private val scope = DynamicScope()
     private val themedContext = context.withTheme(R.style.Theme_InputViewTheme)
@@ -182,6 +179,12 @@ class InputView(
     init {
         // MUST call before any operation
         setupScope()
+
+        eventHandlerJob = service.lifecycleScope.launch {
+            fcitx.runImmediately { eventFlow }.collect {
+                handleFcitxEvent(it)
+            }
+        }
 
         // restore punctuation mapping in case of InputView recreation
         fcitx.launchOnReady {
