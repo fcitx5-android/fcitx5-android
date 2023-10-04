@@ -7,7 +7,16 @@ import androidx.core.view.isVisible
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import splitties.dimensions.dp
-import splitties.views.dsl.constraintlayout.*
+import splitties.views.dsl.constraintlayout.after
+import splitties.views.dsl.constraintlayout.bottomOfParent
+import splitties.views.dsl.constraintlayout.centerHorizontally
+import splitties.views.dsl.constraintlayout.centerVertically
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.endOfParent
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.matchConstraints
+import splitties.views.dsl.constraintlayout.startOfParent
+import splitties.views.dsl.constraintlayout.topOfParent
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.textView
@@ -16,9 +25,7 @@ import splitties.views.gravityVerticalCenter
 
 class TitleUi(override val ctx: Context, theme: Theme) : Ui {
 
-    private val backButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_back_24, theme).apply {
-        id = R.id.expand_candidate_btn
-    }
+    private val backButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_back_24, theme)
 
     private val titleText = textView {
         typeface = Typeface.defaultFromStyle(Typeface.BOLD)

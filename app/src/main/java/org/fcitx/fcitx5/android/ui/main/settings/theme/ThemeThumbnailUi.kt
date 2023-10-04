@@ -52,6 +52,7 @@ class ThemeThumbnailUi(override val ctx: Context) : Ui {
     val editButton = imageView {
         setPaddingDp(16, 4, 4, 16)
         scaleType = ImageView.ScaleType.FIT_CENTER
+        imageResource = R.drawable.ic_baseline_edit_24
     }
 
     override val root = constraintLayout {

@@ -13,13 +13,11 @@ import splitties.views.dsl.constraintlayout.lParams
 import splitties.views.dsl.constraintlayout.startOfParent
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
-import splitties.views.dsl.core.view
 
 class CandidateUi(override val ctx: Context, theme: Theme, private val horizontalView: View) : Ui {
 
-    val expandButton = view(::ToolButton, R.id.expand_candidate_btn) {
-        setIcon(R.drawable.ic_baseline_expand_more_24)
-        setPressHighlightColor(theme.keyPressHighlightColor)
+    val expandButton = ToolButton(ctx, R.drawable.ic_baseline_expand_more_24, theme).apply {
+        id = R.id.expand_candidate_btn
         visibility = View.INVISIBLE
     }
 
