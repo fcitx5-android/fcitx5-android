@@ -1,0 +1,12 @@
+{
+    "uniqueId": "rime/marisa-trie",
+    "artifactVersion": "0.2.6",
+    "description": "Matching Algorithm with Recursively Implemented StorAge",
+    "name": "rime/marisa-trie",
+    "website": "https://github.com/rime/marisa-trie",
+    "tag": "native",
+    "licenses": [
+        "BSD-2-Clause",
+        "LGPL-2.1-or-later"
+    ]
+}

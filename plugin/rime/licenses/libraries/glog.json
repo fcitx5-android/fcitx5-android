@@ -1,0 +1,11 @@
+{
+    "uniqueId": "google/glog",
+    "artifactVersion": "0.6.0",
+    "description": "C++ implementation of the Google logging module",
+    "name": "google/glog",
+    "website": "https://github.com/google/glog",
+    "tag": "native",
+    "licenses": [
+        "BSD-3-Clause"
+    ]
+}
