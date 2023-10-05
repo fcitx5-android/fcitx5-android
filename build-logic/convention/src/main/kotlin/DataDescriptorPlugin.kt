@@ -7,6 +7,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByName
@@ -25,6 +26,12 @@ interface DataDescriptorPluginExtension {
      * paths relative to asset dir to be excluded
      */
     val excludes: ListProperty<String>
+
+    /**
+     * symlinks to create after copying files
+     * target -> source
+     */
+    val symlinks: MapProperty<String, String>
 }
 
 /**
@@ -41,6 +48,7 @@ class DataDescriptorPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         val extension = target.extensions.create<DataDescriptorPluginExtension>(TASK)
         extension.excludes.convention(listOf())
+        extension.symlinks.convention(mapOf())
         target.task<DataDescriptorTask>(TASK) {
             inputDir.set(target.assetsDir)
             outputFile.set(target.assetsDir.resolve(FILE_NAME))
@@ -56,7 +64,8 @@ class DataDescriptorPlugin : Plugin<Project> {
         @Serializable
         data class DataDescriptor(
             val sha256: String,
-            val files: Map<String, String>
+            val files: Map<String, String>,
+            val symlinks: Map<String, String>
         )
 
         @get:Incremental
@@ -73,15 +82,21 @@ class DataDescriptorPlugin : Plugin<Project> {
             project.extensions.getByName<DataDescriptorPluginExtension>(TASK).excludes.get()
         }
 
-        private fun serialize(map: Map<String, String>) {
-            file.deleteOnExit()
+        private val symlinks by lazy {
+            project.extensions.getByName<DataDescriptorPluginExtension>(TASK).symlinks.get()
+        }
+
+        private fun serialize(map: Map<String, String>, symlinks: Map<String, String>) {
+            if (symlinks.keys.intersect(map.keys).isNotEmpty())
+                throw IllegalArgumentException("Symlink target cannot be path in files")
             val descriptor = DataDescriptor(
                 Hashing.sha256()
                     .hashString(
                         map.entries.joinToString { it.key + it.value },
                         Charset.defaultCharset()
                     ).toString(),
-                map
+                map,
+                symlinks
             )
             file.writeText(json.encodeToString(descriptor))
         }
@@ -131,7 +146,7 @@ class DataDescriptorPlugin : Plugin<Project> {
                     map[p.path] = ""
                 }
             }
-            serialize(map.toSortedMap())
+            serialize(map.toSortedMap(), symlinks)
         }
     }
 }

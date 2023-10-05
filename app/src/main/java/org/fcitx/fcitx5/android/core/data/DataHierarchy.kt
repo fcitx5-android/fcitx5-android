@@ -11,7 +11,7 @@ import java.security.MessageDigest
 class DataHierarchy {
     private val files = mutableMapOf<String, Pair<SHA256, FileSource>>()
     private val descriptorSHA256 = mutableSetOf<SHA256>()
-    private val plugins = mutableSetOf<PluginDescriptor>()
+    private val symlinks = mutableMapOf<String, Pair<String, FileSource>>()
 
     class Conflict(val path: String, val src: FileSource) : Exception()
 
@@ -32,9 +32,18 @@ class DataHierarchy {
         }
         // merge new files only when there is no conflict with existing files
         files.putAll(newFiles)
-        if (src is FileSource.Plugin) {
-            plugins += src.descriptor
+        val newSymlinks = descriptor.symlinks.mapValues { (target, source) ->
+            // target we try to create is already a file in our hierarchy
+            files[target]?.let { (_, src) ->
+                throw Conflict(target, src)
+            }
+            // target we try to create is already a symlink in our hierarchy
+            symlinks[target]?.let { (_, src) ->
+                throw Conflict(target, src)
+            }
+            Pair(source, src)
         }
+        symlinks.putAll(newSymlinks)
         descriptorSHA256.add(descriptor.sha256)
     }
 
@@ -42,7 +51,10 @@ class DataHierarchy {
      * Create a [DataDescriptor] from the file list, discarding other information
      */
     fun downToDataDescriptor() =
-        DataDescriptor(sha256(this), files.mapValues { it.value.first })
+        DataDescriptor(
+            sha256(this),
+            files.mapValues { it.value.first },
+            symlinks.mapValues { it.value.first })
 
     companion object {
         private val digest by lazy { MessageDigest.getInstance("SHA-256") }
@@ -66,7 +78,7 @@ class DataHierarchy {
         fun diff(old: DataDescriptor, new: DataHierarchy): List<FileAction> {
             if (old.sha256 == sha256(new))
                 return emptyList()
-            return new.files.mapNotNull { (path, v) ->
+            val diffFiles = new.files.mapNotNull { (path, v) ->
                 val (sha256, src) = v
                 when {
                     path !in old.files && sha256.isNotBlank() ->
@@ -86,6 +98,19 @@ class DataHierarchy {
                             FileAction.DeleteDir(path)
                     })
             }
+            val diffLinks = new.symlinks.mapNotNull { (target, v) ->
+                val (source, _) = v
+                if (old.symlinks[target] == source)
+                    // old link will be overwritten
+                    null
+                else
+                    FileAction.CreateSymlink(target, source)
+            }.toMutableList<FileAction>().apply {
+                addAll(old.symlinks.filterKeys { it !in new.symlinks }.map { (target, _) ->
+                    FileAction.DeleteFile(target)
+                })
+            }
+            return diffFiles + diffLinks
         }
     }
 }
