@@ -43,6 +43,10 @@ android {
     }
 }
 
+generateDataDescriptor {
+    symlinks.put("usr/share/rime-data/opencc", "usr/share/opencc")
+}
+
 aboutLibraries {
     configPath = "plugin/rime/licenses"
 }
