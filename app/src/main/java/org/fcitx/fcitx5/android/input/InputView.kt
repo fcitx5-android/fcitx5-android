@@ -14,7 +14,10 @@ import android.widget.ImageView
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.*
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -48,8 +51,24 @@ import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.wrapToUniqueComponent
 import org.mechdancer.dependency.plusAssign
 import splitties.dimensions.dp
-import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.*
+import splitties.views.dsl.constraintlayout.above
+import splitties.views.dsl.constraintlayout.below
+import splitties.views.dsl.constraintlayout.bottomOfParent
+import splitties.views.dsl.constraintlayout.centerHorizontally
+import splitties.views.dsl.constraintlayout.centerVertically
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.endOfParent
+import splitties.views.dsl.constraintlayout.endToStartOf
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.startOfParent
+import splitties.views.dsl.constraintlayout.startToEndOf
+import splitties.views.dsl.constraintlayout.topOfParent
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.imageView
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.view
+import splitties.views.dsl.core.withTheme
+import splitties.views.dsl.core.wrapContent
 import splitties.views.imageDrawable
 
 @SuppressLint("ViewConstructor")
@@ -377,6 +396,15 @@ class InputView(
                 broadcaster.onImeUpdate(it.data)
             }
             is FcitxEvent.StatusAreaEvent -> {
+                // Engine subMode update won't trigger IMChangeEvent, but usually updates StatusArea
+                fcitx.launchOnReady {
+                    val ime = it.currentIme()
+                    if (ime != it.inputMethodEntryCached) {
+                        service.lifecycleScope.launch {
+                            broadcaster.onImeUpdate(ime)
+                        }
+                    }
+                }
                 punctuation.updatePunctuationMapping(it.data)
                 broadcaster.onStatusAreaUpdate(it.data)
             }
