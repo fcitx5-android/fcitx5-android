@@ -615,6 +615,10 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
         }
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 7, *vararg);
     };
+    auto toastCallback = [](const std::string &s) {
+        auto env = GlobalRef->AttachEnv();
+        env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->ShowToast, *JString(env, s));
+    };
 
     Fcitx::Instance().startup([&](auto *androidfrontend) {
         FCITX_INFO() << "Setting up callback";
@@ -626,6 +630,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
         androidfrontend->template call<fcitx::IAndroidFrontend::setKeyEventCallback>(keyEventCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setInputMethodChangeCallback>(imChangeCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setStatusAreaUpdateCallback>(statusAreaUpdateCallback);
+        androidfrontend->template call<fcitx::IAndroidFrontend::setToastCallback>(toastCallback);
     });
     FCITX_INFO() << "Finishing startup";
 }

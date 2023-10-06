@@ -1,0 +1,11 @@
+[Addon]
+Name=Android Toast & Notification
+Type=SharedLibrary
+Library=libandroidnotification
+Category=Module
+Version=@PROJECT_VERSION@
+OnDemand=True
+Configurable=True
+
+[Addon/Dependencies]
+0=androidfrontend:@PROJECT_VERSION@

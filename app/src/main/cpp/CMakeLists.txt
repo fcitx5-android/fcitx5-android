@@ -28,6 +28,7 @@ include("${FCITX_INSTALL_CMAKECONFIG_DIR}/Fcitx5Utils/Fcitx5CompilerSettings.cma
 add_subdirectory(po)
 add_subdirectory(androidfrontend)
 add_subdirectory(androidkeyboard)
+add_subdirectory(androidnotification)
 
 # prebuilt dir. at least it works.
 set(PREBUILT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../lib/fcitx5/src/main/cpp/prebuilt")

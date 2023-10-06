@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.core
 
 import android.content.Context
 import androidx.annotation.Keep
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -15,6 +16,8 @@ import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.utils.ImmutableGraph
 import org.fcitx.fcitx5.android.utils.Locales
+import org.fcitx.fcitx5.android.utils.appContext
+import org.fcitx.fcitx5.android.utils.toast
 import timber.log.Timber
 
 /**
@@ -165,6 +168,17 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         get() = lifecycleRegistry
 
     private companion object JNI {
+
+        /**
+         * called from native-lib
+         */
+        @Suppress("unused")
+        @JvmStatic
+        fun showToast(s: String) {
+            ContextCompat.getMainExecutor(appContext).execute {
+                appContext.toast(s)
+            }
+        }
 
         private val eventFlow_ =
             MutableSharedFlow<FcitxEvent<*>>(

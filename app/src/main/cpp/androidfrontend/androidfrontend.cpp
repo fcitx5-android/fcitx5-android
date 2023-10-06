@@ -296,6 +296,10 @@ std::vector<std::string> AndroidFrontend::getCandidates(const int offset, const 
     return ic->getCandidates(offset, limit);
 }
 
+void AndroidFrontend::showToast(const std::string &s) {
+    toastCallback(s);
+}
+
 void AndroidFrontend::setCommitStringCallback(const CommitStringCallback &callback) {
     commitStringCallback = callback;
 }
@@ -329,6 +333,10 @@ void AndroidFrontend::handleStatusAreaUpdate() {
         statusAreaDefer_ = nullptr;
         return true;
     });
+}
+
+void AndroidFrontend::setToastCallback(const ToastCallback &callback) {
+    toastCallback = callback;
 }
 
 class AndroidFrontendFactory : public AddonFactory {

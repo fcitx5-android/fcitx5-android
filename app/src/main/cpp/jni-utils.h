@@ -102,6 +102,7 @@ public:
     jmethodID BooleanInit;
 
     jclass Fcitx;
+    jmethodID ShowToast;
     jmethodID HandleFcitxEvent;
 
     jclass InputMethodEntry;
@@ -142,6 +143,7 @@ public:
         BooleanInit = env->GetMethodID(Boolean, "<init>", "(Z)V");
 
         Fcitx = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("org/fcitx/fcitx5/android/core/Fcitx")));
+        ShowToast = env->GetStaticMethodID(Fcitx, "showToast", "(Ljava/lang/String;)V");
         HandleFcitxEvent = env->GetStaticMethodID(Fcitx, "handleFcitxEvent", "(I[Ljava/lang/Object;)V");
 
         InputMethodEntry = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("org/fcitx/fcitx5/android/core/InputMethodEntry")));

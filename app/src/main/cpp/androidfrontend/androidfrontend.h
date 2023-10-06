@@ -3,7 +3,6 @@
 
 #include <fcitx/instance.h>
 #include <fcitx/addoninstance.h>
-#include <fcitx/inputcontext.h>
 #include <fcitx-utils/i18n.h>
 
 #include "androidfrontend_public.h"
@@ -35,6 +34,7 @@ public:
     InputContext *activeInputContext() const;
     void setCapabilityFlags(uint64_t flag);
     std::vector<std::string> getCandidates(const int offset, const int limit);
+    void showToast(const std::string &s);
     void setCandidateListCallback(const CandidateListCallback &callback);
     void setCommitStringCallback(const CommitStringCallback &callback);
     void setPreeditCallback(const ClientPreeditCallback &callback);
@@ -42,6 +42,7 @@ public:
     void setKeyEventCallback(const KeyEventCallback &callback);
     void setInputMethodChangeCallback(const InputMethodChangeCallback &callback);
     void setStatusAreaUpdateCallback(const StatusAreaUpdateCallback &callback);
+    void setToastCallback(const ToastCallback &callback);
 
 private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, keyEvent);
@@ -55,6 +56,7 @@ private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, deactivateInputContext);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCapabilityFlags);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, getCandidates);
+    FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, showToast);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCandidateListCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCommitStringCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setPreeditCallback);
@@ -62,6 +64,7 @@ private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setKeyEventCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setInputMethodChangeCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setStatusAreaUpdateCallback);
+    FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setToastCallback);
 
     Instance *instance_;
     FocusGroup focusGroup_;
@@ -80,6 +83,7 @@ private:
     KeyEventCallback keyEventCallback = [](const int, const uint32_t, const uint32_t, const bool, const int) {};
     InputMethodChangeCallback imChangeCallback = [] {};
     StatusAreaUpdateCallback statusAreaUpdateCallback = [] {};
+    ToastCallback toastCallback = [](const std::string &) {};
 };
 } // namespace fcitx
 
