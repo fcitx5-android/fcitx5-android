@@ -169,8 +169,9 @@ class IdleUi(
     fun updateState(state: State, fromUser: Boolean = false) {
         Timber.d("Switch idle ui to $state")
         if (
+            !fromUser ||
             disableAnimation ||
-            (state == State.InlineSuggestion || currentState == State.InlineSuggestion) && !fromUser
+            (state == State.InlineSuggestion || currentState == State.InlineSuggestion)
         ) {
             clearAnimation()
         } else {
