@@ -25,8 +25,8 @@ android {
     }
 }
 
-configure<DataDescriptorPluginExtension> {
-    excludes.set(listOf("data.minify.json"))
+generateDataDescriptor{
+    excludes.add("data.minify.json")
 }
 
 dependencies {

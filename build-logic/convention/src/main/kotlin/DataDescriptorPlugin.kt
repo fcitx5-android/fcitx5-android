@@ -7,9 +7,9 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.task
 import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
@@ -25,6 +25,12 @@ interface DataDescriptorPluginExtension {
      * paths relative to asset dir to be excluded
      */
     val excludes: ListProperty<String>
+
+    /**
+     * symlinks to create after copying files
+     * target -> source
+     */
+    val symlinks: MapProperty<String, String>
 }
 
 /**
@@ -41,9 +47,12 @@ class DataDescriptorPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         val extension = target.extensions.create<DataDescriptorPluginExtension>(TASK)
         extension.excludes.convention(listOf())
+        extension.symlinks.convention(mapOf())
         target.task<DataDescriptorTask>(TASK) {
             inputDir.set(target.assetsDir)
             outputFile.set(target.assetsDir.resolve(FILE_NAME))
+            excludes.set(extension.excludes)
+            symlinks.set(extension.symlinks)
         }
         target.task<Delete>(CLEAN_TASK) {
             delete(target.assetsDir.resolve(FILE_NAME))
@@ -56,7 +65,8 @@ class DataDescriptorPlugin : Plugin<Project> {
         @Serializable
         data class DataDescriptor(
             val sha256: String,
-            val files: Map<String, String>
+            val files: Map<String, String>,
+            val symlinks: Map<String, String> = mapOf()
         )
 
         @get:Incremental
@@ -64,24 +74,29 @@ class DataDescriptorPlugin : Plugin<Project> {
         @get:InputDirectory
         abstract val inputDir: DirectoryProperty
 
+        @get:Input
+        abstract val excludes: ListProperty<String>
+
+        @get:Input
+        abstract val symlinks: MapProperty<String, String>
+
         @get:OutputFile
         abstract val outputFile: RegularFileProperty
 
         private val file by lazy { outputFile.get().asFile }
 
-        private val excludes by lazy {
-            project.extensions.getByName<DataDescriptorPluginExtension>(TASK).excludes.get()
-        }
 
-        private fun serialize(map: Map<String, String>) {
-            file.deleteOnExit()
+        private fun serialize(files: Map<String, String>, symlinks: Map<String, String>) {
+            if (symlinks.keys.intersect(files.keys).isNotEmpty())
+                throw IllegalArgumentException("Symlink target cannot be path in files")
             val descriptor = DataDescriptor(
                 Hashing.sha256()
                     .hashString(
-                        map.entries.joinToString { it.key + it.value },
+                        (files + symlinks).entries.joinToString { it.key + it.value },
                         Charset.defaultCharset()
                     ).toString(),
-                map
+                files,
+                symlinks
             )
             file.writeText(json.encodeToString(descriptor))
         }
@@ -119,7 +134,7 @@ class DataDescriptorPlugin : Plugin<Project> {
                 logger.log(LogLevel.DEBUG, "${change.changeType}: ${change.normalizedPath}")
                 val relativeFile = change.file.relativeTo(file.parentFile)
                 val key = relativeFile.path
-                if (change.changeType == ChangeType.REMOVED || key in excludes) {
+                if (change.changeType == ChangeType.REMOVED || key in excludes.get()) {
                     map.remove(key)
                 } else {
                     map[key] = sha256(change.file)
@@ -131,7 +146,7 @@ class DataDescriptorPlugin : Plugin<Project> {
                     map[p.path] = ""
                 }
             }
-            serialize(map.toSortedMap())
+            serialize(map.toSortedMap(), symlinks.get())
         }
     }
 }

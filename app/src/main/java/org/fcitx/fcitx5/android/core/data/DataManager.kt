@@ -10,6 +10,7 @@ import kotlinx.serialization.json.Json
 import org.fcitx.fcitx5.android.BuildConfig
 import org.fcitx.fcitx5.android.core.data.DataManager.dataDir
 import org.fcitx.fcitx5.android.utils.Const
+import org.fcitx.fcitx5.android.utils.FileUtil
 import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.javaIdRegex
 import org.xmlpull.v1.XmlPullParser
@@ -183,7 +184,7 @@ object DataManager {
                 ?.getOrNull()
                 ?.let { deserializeDataDescriptor(it) }
                 ?.getOrNull()
-                ?: DataDescriptor("", mapOf())
+                ?: DataDescriptor("", mapOf(), mapOf())
 
         // load app's data descriptor
         val mainDescriptor =
@@ -211,13 +212,18 @@ object DataManager {
             val pluginContext = appContext.createPackageContext(plugin.packageName, 0)
             val assets = pluginContext.assets
             val descriptor = runCatching { assets.getDataDescriptor() }.onFailure {
-                Timber.w("Failed to get or decode data descriptor of ${plugin.name}")
+                Timber.w("Failed to get or decode data descriptor of '${plugin.name}'")
                 Timber.w(it)
             }.getOrNull() ?: continue
             try {
                 newHierarchy.install(descriptor, FileSource.Plugin(plugin))
-            } catch (e: DataHierarchy.Conflict) {
-                Timber.w("Path ${e.path} is already created by ${e.src}")
+            } catch (e: DataHierarchy.PathConflict) {
+                Timber.w("Path '${e.path}' has already been created by '${e.src}', cannot create file")
+                failedPlugins[plugin.packageName] =
+                    PluginLoadFailed.PathConflict(plugin, e.path, e.src)
+                continue
+            } catch (e: DataHierarchy.SymlinkConflict) {
+                Timber.w("Path '${e.path}' has already been created by '${e.src}', cannot create symlink")
                 failedPlugins[plugin.packageName] =
                     PluginLoadFailed.PathConflict(plugin, e.path, e.src)
                 continue
@@ -241,16 +247,20 @@ object DataManager {
                     assets.copyFile(it.path)
                 }
                 is FileAction.DeleteDir -> {
-                    deleteDir(it.path)
+                    removePath(it.path).getOrThrow()
                 }
                 is FileAction.DeleteFile -> {
-                    deleteFile(it.path)
+                    removePath(it.path).getOrThrow()
                 }
                 is FileAction.UpdateFile -> {
                     val assets = if (it.src is FileSource.Plugin)
                         pluginAssets.getValue(it.src.descriptor.name)
                     else appContext.assets
                     assets.copyFile(it.path)
+                }
+                is FileAction.CreateSymlink -> {
+                    removePath(it.path).getOrThrow()
+                    symlink(it.src, it.path).getOrThrow()
                 }
             }
         }
@@ -272,17 +282,11 @@ object DataManager {
         Timber.d("Synced")
     }
 
-    private fun deleteFile(path: String) {
-        val file = File(dataDir, path)
-        if (file.exists() && file.isFile)
-            file.delete()
-    }
+    private fun removePath(path: String) =
+        FileUtil.removeFile(dataDir.resolve(path))
 
-    private fun deleteDir(path: String) {
-        val dir = File(dataDir, path)
-        if (dir.exists() && dir.isDirectory)
-            dir.deleteRecursively()
-    }
+    private fun symlink(source: String, target: String) =
+        FileUtil.symlink(dataDir.resolve(source), dataDir.resolve(target))
 
     private fun AssetManager.copyFile(filename: String) {
         open(filename).use { i ->

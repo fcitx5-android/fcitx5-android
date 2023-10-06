@@ -4,7 +4,7 @@ sealed interface FileAction {
     val path: String
 
     /**
-     * We want to create files first, then update files, and finally delete directories and files.
+     * We want to create files first, then update files, delete directories and files, and finally create symlinks
      */
     val ordinal: Int
 
@@ -13,6 +13,11 @@ sealed interface FileAction {
      */
     interface Sourced {
         val src: FileSource
+    }
+
+    data class CreateSymlink(override val path: String, val src: String) : FileAction {
+        override val ordinal: Int
+            get() = -1
     }
 
     data class CreateFile(override val path: String, override val src: FileSource) :

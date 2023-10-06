@@ -17,5 +17,9 @@ data class DataDescriptor(
      * path -> sha256
      * sha256 will be empty if the path is a directory
      */
-    val files: Map<String, SHA256>
+    val files: Map<String, SHA256>,
+    /**
+     * Symbolic links from target -> source
+     */
+    val symlinks: Map<String, String> = mapOf()
 )
