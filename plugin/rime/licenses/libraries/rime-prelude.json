@@ -1,6 +1,6 @@
 {
     "uniqueId": "rime/rime-prelude",
-    "artifactVersion": "0.0",
+    "artifactVersion": "0.40",
     "description": "Essential files for building up your Rime configuration",
     "name": "rime/rime-prelude",
     "website": "https://github.com/rime/rime-prelude",
