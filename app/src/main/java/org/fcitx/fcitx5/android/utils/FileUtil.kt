@@ -27,6 +27,7 @@ object FileUtil {
     }
 
     fun symlink(source: String, target: String) = runCatching {
+        File(target).parentFile?.mkdirs()
         Os.symlink(source, target)
     }
 }

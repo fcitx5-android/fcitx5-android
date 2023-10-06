@@ -1,6 +1,7 @@
 package org.fcitx.fcitx5.android.core.data
 
 import android.util.Base64
+import timber.log.Timber
 import java.security.MessageDigest
 
 /**

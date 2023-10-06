@@ -21,5 +21,5 @@ data class DataDescriptor(
     /**
      * Symbolic links from target -> source
      */
-    val symlinks: Map<String, String>
+    val symlinks: Map<String, String> = mapOf()
 )
