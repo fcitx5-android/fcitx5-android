@@ -1,0 +1,11 @@
+{
+    "uniqueId": "hchunhui/librime-lua",
+    "artifactVersion": "5671021",
+    "description": "Extending RIME with Lua scripts",
+    "name": "hchunhui/librime-lua",
+    "website": "https://github.com/hchunhui/librime-lua",
+    "tag": "native",
+    "licenses": [
+        "BSD-3-Clause"
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "uniqueId": "lotem/librime-octagram",
+    "artifactVersion": "a6ced5a",
+    "description": "RIME octagram plugin",
+    "name": "lotem/librime-octagram",
+    "website": "https://github.com/lotem/librime-octagram",
+    "tag": "native",
+    "licenses": [
+        "GPL-3.0-only"
+    ]
+}

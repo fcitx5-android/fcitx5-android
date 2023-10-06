@@ -22,3 +22,18 @@
 [submodule "plugin/unikey/src/main/cpp/fcitx5-unikey"]
 	path = plugin/unikey/src/main/cpp/fcitx5-unikey
 	url = git@github.com:fcitx/fcitx5-unikey.git
+[submodule "plugin/rime/src/main/cpp/fcitx5-rime"]
+	path = plugin/rime/src/main/cpp/fcitx5-rime
+	url = git@github.com:fcitx/fcitx5-rime.git
+[submodule "plugin/rime/src/main/cpp/rime-prelude"]
+	path = plugin/rime/src/main/cpp/rime-prelude
+	url = git@github.com:rime/rime-prelude.git
+[submodule "plugin/rime/src/main/cpp/rime-essay"]
+	path = plugin/rime/src/main/cpp/rime-essay
+	url = git@github.com:rime/rime-essay.git
+[submodule "plugin/rime/src/main/cpp/rime-luna-pinyin"]
+	path = plugin/rime/src/main/cpp/rime-luna-pinyin
+	url = git@github.com:rime/rime-luna-pinyin.git
+[submodule "plugin/rime/src/main/cpp/rime-stroke"]
+	path = plugin/rime/src/main/cpp/rime-stroke
+	url = git@github.com:rime/rime-stroke.git

@@ -1,0 +1,11 @@
+{
+    "uniqueId": "rime/rime-prelude",
+    "artifactVersion": "dd84abe",
+    "description": "Essential files for building up your Rime configuration",
+    "name": "rime/rime-prelude",
+    "website": "https://github.com/rime/rime-prelude",
+    "tag": "native",
+    "licenses": [
+        "LGPL-3.0-only"
+    ]
+}

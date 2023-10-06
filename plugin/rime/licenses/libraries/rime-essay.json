@@ -1,0 +1,11 @@
+{
+    "uniqueId": "rime/rime-essay",
+    "artifactVersion": "e0519d0",
+    "description": "The shared vocabulary and language model",
+    "name": "rime/rime-essay",
+    "website": "https://github.com/rime/rime-essay",
+    "tag": "native",
+    "licenses": [
+        "LGPL-3.0-only"
+    ]
+}
