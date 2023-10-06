@@ -1,7 +1,6 @@
 package org.fcitx.fcitx5.android.core.data
 
 import android.util.Base64
-import timber.log.Timber
 import java.security.MessageDigest
 
 /**
@@ -14,33 +13,36 @@ class DataHierarchy {
     private val descriptorSHA256 = mutableSetOf<SHA256>()
     private val symlinks = mutableMapOf<String, Pair<String, FileSource>>()
 
-    class Conflict(val path: String, val src: FileSource) : Exception()
+    data class PathConflict(val path: String, val src: FileSource) : Exception()
+    data class SymlinkConflict(val path: String, val src: FileSource) : Exception()
 
     /**
      * Merge a [DataDescriptor]
      *
-     * @throws Conflict if a non-directory path is existing in the file list
+     * @throws PathConflict if a non-directory path is existing in the hierarchy
      */
     fun install(descriptor: DataDescriptor, src: FileSource) {
         val newFiles = descriptor.files.mapValues { (path, sha256) ->
             files[path]?.also { old ->
                 // path conflict when at least one of them is not a directory (empty sha256)
                 if (old.first.isNotEmpty() || sha256.isNotEmpty()) {
-                    throw Conflict(path, old.second)
+                    throw PathConflict(path, old.second)
                 }
             }
             Pair(sha256, src)
         }
         // merge new files only when there is no conflict with existing files
         files.putAll(newFiles)
-        val newSymlinks = descriptor.symlinks.mapValues { (target, source) ->
-            // target we try to create is already a file in our hierarchy
-            files[target]?.let { (_, src) ->
-                throw Conflict(target, src)
+        val newSymlinks = descriptor.symlinks.mapValues { (path, source) ->
+            // path we try to create is already a file or directory in our hierarchy
+            files[path]?.let { (_, src) ->
+                throw SymlinkConflict(path, src)
             }
-            // target we try to create is already a symlink in our hierarchy
-            symlinks[target]?.let { (_, src) ->
-                throw Conflict(target, src)
+            // path we try to create is already a symlink in our hierarchy
+            // but it refers to a different path
+            symlinks[path]?.let { (existedSource, src) ->
+                if (source != existedSource)
+                    throw PathConflict(path, src)
             }
             Pair(source, src)
         }
@@ -102,7 +104,7 @@ class DataHierarchy {
             val diffLinks = new.symlinks.mapNotNull { (target, v) ->
                 val (source, _) = v
                 if (old.symlinks[target] == source)
-                    // old link will be overwritten
+                // old link will be overwritten
                     null
                 else
                     FileAction.CreateSymlink(target, source)

@@ -217,7 +217,7 @@ object DataManager {
             }.getOrNull() ?: continue
             try {
                 newHierarchy.install(descriptor, FileSource.Plugin(plugin))
-            } catch (e: DataHierarchy.Conflict) {
+            } catch (e: DataHierarchy.PathConflict) {
                 Timber.w("Path ${e.path} is already created by ${e.src}")
                 failedPlugins[plugin.packageName] =
                     PluginLoadFailed.PathConflict(plugin, e.path, e.src)
