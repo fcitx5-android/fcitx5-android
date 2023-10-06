@@ -5,6 +5,10 @@ config_version: '0.40'
 
 schema_list:
   - schema: luna_pinyin
+  - schema: luna_pinyin_tw
+  - schema: luna_pinyin_simp
+  - schema: luna_pinyin_fluency
+  - schema: stroke
 
 switcher:
   caption: 〔方案選單〕

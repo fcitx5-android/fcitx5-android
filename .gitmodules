@@ -34,3 +34,6 @@
 [submodule "plugin/rime/src/main/cpp/rime-luna-pinyin"]
 	path = plugin/rime/src/main/cpp/rime-luna-pinyin
 	url = git@github.com:rime/rime-luna-pinyin.git
+[submodule "plugin/rime/src/main/cpp/rime-stroke"]
+	path = plugin/rime/src/main/cpp/rime-stroke
+	url = git@github.com:rime/rime-stroke.git
