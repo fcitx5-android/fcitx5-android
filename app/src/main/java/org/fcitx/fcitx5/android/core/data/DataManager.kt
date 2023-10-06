@@ -212,13 +212,18 @@ object DataManager {
             val pluginContext = appContext.createPackageContext(plugin.packageName, 0)
             val assets = pluginContext.assets
             val descriptor = runCatching { assets.getDataDescriptor() }.onFailure {
-                Timber.w("Failed to get or decode data descriptor of ${plugin.name}")
+                Timber.w("Failed to get or decode data descriptor of '${plugin.name}'")
                 Timber.w(it)
             }.getOrNull() ?: continue
             try {
                 newHierarchy.install(descriptor, FileSource.Plugin(plugin))
             } catch (e: DataHierarchy.PathConflict) {
-                Timber.w("Path ${e.path} is already created by ${e.src}")
+                Timber.w("Path '${e.path}' has already been created by '${e.src}', cannot create file")
+                failedPlugins[plugin.packageName] =
+                    PluginLoadFailed.PathConflict(plugin, e.path, e.src)
+                continue
+            } catch (e: DataHierarchy.SymlinkConflict) {
+                Timber.w("Path '${e.path}' has already been created by '${e.src}', cannot create symlink")
                 failedPlugins[plugin.packageName] =
                     PluginLoadFailed.PathConflict(plugin, e.path, e.src)
                 continue
@@ -278,10 +283,10 @@ object DataManager {
     }
 
     private fun removePath(path: String) =
-        FileUtil.removePath(dataDir.resolve(path).path)
+        FileUtil.removeFile(dataDir.resolve(path))
 
     private fun symlink(source: String, target: String) =
-        FileUtil.symlink(dataDir.resolve(source).path, dataDir.resolve(target).path)
+        FileUtil.symlink(dataDir.resolve(source), dataDir.resolve(target))
 
     private fun AssetManager.copyFile(filename: String) {
         open(filename).use { i ->

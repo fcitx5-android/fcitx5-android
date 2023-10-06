@@ -19,7 +19,8 @@ class DataHierarchy {
     /**
      * Merge a [DataDescriptor]
      *
-     * @throws PathConflict if a non-directory path is existing in the hierarchy
+     * @throws PathConflict if a non-directory path already exists in the hierarchy
+     * @throws SymlinkConflict if a file or directory already exists when creating symlink
      */
     fun install(descriptor: DataDescriptor, src: FileSource) {
         val newFiles = descriptor.files.mapValues { (path, sha256) ->

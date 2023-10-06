@@ -8,26 +8,25 @@ import java.io.IOException
 object FileUtil {
 
     /**
-     * Delete a path
-     * If it's a directory, delete its contents first
-     * If it's a symlink, don't follow
+     * Delete a [File].
+     * If it's a directory, delete its contents first.
+     * If it's a symlink, don't follow.
      */
-    fun removePath(path: String) = runCatching {
-        val file = File(path)
+    fun removeFile(file: File) = runCatching {
         if (!file.exists())
             return Result.success(Unit)
-        val isSymlink = OsConstants.S_ISLNK(Os.lstat(path).st_mode)
+        val isSymlink = OsConstants.S_ISLNK(Os.lstat(file.path).st_mode)
         // deleteRecursively follows symlink, so we want to make sure it's not a symlink
         val result = if (!isSymlink)
             file.deleteRecursively()
         else
             file.delete()
         if (!result)
-            throw IOException("$path can not be deleted")
+            throw IOException("Cannot delete '${file.path}'")
     }
 
-    fun symlink(source: String, target: String) = runCatching {
-        File(target).parentFile?.mkdirs()
-        Os.symlink(source, target)
+    fun symlink(source: File, target: File) = runCatching {
+        target.parentFile?.mkdirs()
+        Os.symlink(source.path, target.path)
     }
 }
