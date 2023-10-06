@@ -139,7 +139,7 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
     override fun onDetached() {
         bar.expandButtonStateMachine.push(
             ExpandedCandidatesDetached,
-            ExpandedCandidatesEmpty to (horizontalCandidate.adapter.total <= adapter.offset)
+            ExpandedCandidatesEmpty to (horizontalCandidate.adapter.total == adapter.offset)
         )
         candidatesSubmitJob?.cancel()
         offsetJob?.cancel()

@@ -55,7 +55,7 @@ public:
         if (!isPreeditEnabled()) {
             checkClientPreeditUpdate();
         }
-        InputPanel &ip = inputPanel();
+        const InputPanel &ip = inputPanel();
         frontend_->updateInputPanel(
                 filterText(ip.preedit()),
                 filterText(ip.auxUp()),
@@ -69,12 +69,17 @@ public:
             if (bulk) {
                 size = bulk->totalSize();
                 // limit candidate count to 16 (for paging)
-                const int limit = std::min(size, 16);
+                const int limit = size < 0 ? 16 : std::min(size, 16);
                 for (int i = 0; i < limit; i++) {
-                    auto &candidate = bulk->candidateFromAll(i);
-                    // maybe unnecessary; I don't see anywhere using `CandidateWord::setPlaceHolder`
-                    // if (candidate.isPlaceHolder()) continue;
-                    candidates.emplace_back(filterString(candidate.text()));
+                    try {
+                        auto &candidate = bulk->candidateFromAll(i);
+                        // maybe unnecessary; I don't see anywhere using `CandidateWord::setPlaceHolder`
+                        // if (candidate.isPlaceHolder()) continue;
+                        candidates.emplace_back(filterString(candidate.text()));
+                    } catch (const std::invalid_argument &e) {
+                        size = static_cast<int>(candidates.size());
+                        break;
+                    }
                 }
             } else {
                 size = list->size();
@@ -109,16 +114,22 @@ public:
         std::vector<std::string> candidates;
         const auto &list = inputPanel().candidateList();
         if (list) {
+            const int last = offset + limit;
             const auto &bulk = list->toBulk();
             if (bulk) {
-                const int _limit = std::min(bulk->totalSize(), offset + limit);
-                for (int i = offset; i < _limit; i++) {
-                    auto &candidate = bulk->candidateFromAll(i);
-                    candidates.emplace_back(filterString(candidate.text()));
+                const int totalSize = bulk->totalSize();
+                const int end = totalSize < 0 ? last : std::min(totalSize, last);
+                for (int i = offset; i < end; i++) {
+                    try {
+                        auto &candidate = bulk->candidateFromAll(i);
+                        candidates.emplace_back(filterString(candidate.text()));
+                    } catch (const std::invalid_argument &e) {
+                        break;
+                    }
                 }
             } else {
-                const int _limit = std::min(list->size(), offset + limit);
-                for (int i = offset; i < _limit; i++) {
+                const int end = std::min(list->size(), last);
+                for (int i = offset; i < end; i++) {
                     candidates.emplace_back(filterString(list->candidate(i).text()));
                 }
             }
@@ -134,7 +145,7 @@ private:
 
     void checkClientPreeditUpdate() {
         const auto &clientPreedit = filterText(inputPanel().clientPreedit());
-        bool empty = clientPreedit.empty();
+        const bool empty = clientPreedit.empty();
         // skip update if new and old clientPreedit are both empty
         if (empty && clientPreeditEmpty_) return;
         clientPreeditEmpty_ = empty;
