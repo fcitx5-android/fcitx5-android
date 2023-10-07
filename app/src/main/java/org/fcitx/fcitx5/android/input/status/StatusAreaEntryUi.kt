@@ -4,12 +4,14 @@ import android.content.Context
 import android.graphics.Typeface
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.OvalShape
+import android.icu.text.BreakIterator
 import android.os.Build
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.input.AutoScaleTextView
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
 import splitties.dimensions.dp
 import splitties.resources.drawable
@@ -27,6 +29,7 @@ import splitties.views.dsl.core.imageView
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.view
 import splitties.views.dsl.core.wrapContent
 import splitties.views.gravityCenter
 import splitties.views.imageDrawable
@@ -43,8 +46,7 @@ class StatusAreaEntryUi(override val ctx: Context, private val theme: Theme) : U
         scaleType = ImageView.ScaleType.CENTER_INSIDE
     }
 
-    val textIcon = textView {
-        gravity = gravityCenter
+    val textIcon = view(::AutoScaleTextView) {
         setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20f)
         // keep original typeface, apply textStyle only
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -53,7 +55,6 @@ class StatusAreaEntryUi(override val ctx: Context, private val theme: Theme) : U
         } else {
             setTypeface(typeface, Typeface.BOLD)
         }
-        text
     }
 
     val label = textView {
@@ -72,7 +73,7 @@ class StatusAreaEntryUi(override val ctx: Context, private val theme: Theme) : U
             add(icon, lParams {
                 centerOn(bkg)
             })
-            add(textIcon, lParams {
+            add(textIcon, lParams(wrapContent, wrapContent) {
                 centerOn(bkg)
             })
             add(label, lParams(wrapContent, wrapContent) {
@@ -99,11 +100,21 @@ class StatusAreaEntryUi(override val ctx: Context, private val theme: Theme) : U
         } else {
             icon.visibility = View.GONE
             textIcon.visibility = View.VISIBLE
-            textIcon.text = entry.label.substring(0, 1)
+            textIcon.text = getFirstCharacter(entry.label)
             textIcon.setTextColor(contentColor)
         }
         bkgDrawable.paint.color =
             if (entry.active) theme.genericActiveBackgroundColor else theme.keyBackgroundColor
         label.text = entry.label
+    }
+
+    private fun getFirstCharacter(s: String): String {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val iterator = BreakIterator.getCharacterInstance()
+            iterator.setText(s)
+            s.substring(iterator.first(), iterator.next())
+        } else {
+            s.substring(0, s.offsetByCodePoints(0, 1))
+        }
     }
 }
