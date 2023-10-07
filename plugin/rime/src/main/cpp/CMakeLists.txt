@@ -34,6 +34,10 @@ set_target_properties(Rime_static PROPERTIES
         INTERFACE_LINK_LIBRARIES "${Rime_dependencies}"
         )
 
-set(RIME_TARGET Rime_static)
+# https://github.com/rime/librime/blob/1.9.0/src/rime_api.h#L663
+# https://stackoverflow.com/questions/805555/ld-linker-question-the-whole-archive-option
+# use $<LINK_LIBRARY:WHOLE_ARCHIVE,Rime_static> when cmake updated to 3.24+
+# https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html#link-features
+set(RIME_TARGET "-Wl,--whole-archive" Rime_static "-Wl,--no-whole-archive")
 set(RIME_DATA_DIR "${CMAKE_INSTALL_DATADIR}/rime-data")
 add_subdirectory(fcitx5-rime)
