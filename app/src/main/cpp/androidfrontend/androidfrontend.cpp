@@ -42,7 +42,7 @@ public:
     }
 
     void updatePreeditImpl() override {
-        checkClientPreeditUpdate();
+        frontend_->updateClientPreedit(filterText(inputPanel().clientPreedit()));
     }
 
     void updateInputPanel() {
@@ -52,10 +52,10 @@ public:
         // However on Android, androidkeyboard uses clientPreedit unconditionally in order to provide
         // a more integrated experience, so we need to check clientPreedit update manually even if
         // clientPreedit is not enabled.
-        if (!isPreeditEnabled()) {
-            checkClientPreeditUpdate();
-        }
         const InputPanel &ip = inputPanel();
+        if (!isPreeditEnabled() && frontend_->instance()->inputMethod(this) == "keyboard-us") {
+            frontend_->updateClientPreedit(filterText(ip.clientPreedit()));
+        }
         frontend_->updateInputPanel(
                 filterText(ip.preedit()),
                 filterText(ip.auxUp()),
@@ -140,17 +140,6 @@ public:
 private:
     AndroidFrontend *frontend_;
     int uid_;
-
-    bool clientPreeditEmpty_ = true;
-
-    void checkClientPreeditUpdate() {
-        const auto &clientPreedit = filterText(inputPanel().clientPreedit());
-        const bool empty = clientPreedit.empty();
-        // skip update if new and old clientPreedit are both empty
-        if (empty && clientPreeditEmpty_) return;
-        clientPreeditEmpty_ = empty;
-        frontend_->updateClientPreedit(clientPreedit);
-    }
 
     inline Text filterText(const Text &orig) {
         return frontend_->instance()->outputFilter(this, orig);
