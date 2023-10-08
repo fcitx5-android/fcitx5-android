@@ -109,6 +109,7 @@ class StatusAreaEntryUi(override val ctx: Context, private val theme: Theme) : U
     }
 
     private fun getFirstCharacter(s: String): String {
+        if (s.isEmpty()) return ""
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             val iterator = BreakIterator.getCharacterInstance()
             iterator.setText(s)
