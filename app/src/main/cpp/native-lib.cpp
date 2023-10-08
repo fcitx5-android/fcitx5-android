@@ -1,5 +1,7 @@
 #include <jni.h>
 
+#include <sys/stat.h>
+
 #include <memory>
 #include <future>
 #include <fstream>
@@ -19,6 +21,7 @@
 #include <fcitx-utils/i18n.h>
 #include <fcitx-utils/event.h>
 #include <fcitx-utils/eventdispatcher.h>
+#include <fcitx-utils/standardpath.h>
 #include <fcitx-utils/stringutils.h>
 
 #include <quickphrase_public.h>
@@ -619,6 +622,9 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
         auto env = GlobalRef->AttachEnv();
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->ShowToast, *JString(env, s));
     };
+
+    umask(007);
+    fcitx::StandardPath::global().syncUmask();
 
     Fcitx::Instance().startup([&](auto *androidfrontend) {
         FCITX_INFO() << "Setting up callback";
