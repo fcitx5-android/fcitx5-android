@@ -350,11 +350,14 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         // will be called in fcitx main thread
         private fun onFirstRun() {
             Timber.i("onFirstRun")
-            getFcitxGlobalConfig()?.get("cfg")?.run {
-                get("Behavior")["PreeditEnabledByDefault"].value = "False"
+            getFcitxGlobalConfig()?.get("cfg")?.apply {
+                get("Behavior").apply {
+                    get("ShareInputState").value = "All"
+                    get("PreeditEnabledByDefault").value = "False"
+                }
                 setFcitxGlobalConfig(this)
             }
-            getFcitxAddonConfig("pinyin")?.get("cfg")?.run {
+            getFcitxAddonConfig("pinyin")?.get("cfg")?.apply {
                 get("PreeditInApplication").value = "False"
                 get("PreeditCursorPositionAtBeginning").value = "False"
                 get("QuickPhraseKey").value = ""
