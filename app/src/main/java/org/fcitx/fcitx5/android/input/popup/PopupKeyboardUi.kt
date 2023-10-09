@@ -4,8 +4,6 @@ import android.content.Context
 import android.graphics.Rect
 import android.graphics.drawable.GradientDrawable
 import android.view.ViewOutlineProvider
-import org.fcitx.fcitx5.android.core.FcitxKeyMapping
-import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.AutoScaleTextView
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction
@@ -215,14 +213,7 @@ class PopupKeyboardUi(
 
     override fun onTrigger(): KeyAction? {
         val key = keys.getOrNull(focusedIndex) ?: return null
-        /**
-         * send `KP_*` KeySym for numeric characters in popup
-         * see also [org.fcitx.fcitx5.android.input.keyboard.AlphabetDigitKey]
-         */
-        return if (key.length == 1 && key[0].isDigit())
-            KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_KP_0 + key[0].digitToInt()))
-        else
-            KeyAction.FcitxKeyAction(key)
+        return KeyAction.FcitxKeyAction(key)
     }
 
 }

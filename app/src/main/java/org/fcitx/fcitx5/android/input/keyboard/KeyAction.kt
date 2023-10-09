@@ -19,13 +19,13 @@ sealed class KeyAction {
 
     data class CapsAction(val lock: Boolean) : KeyAction()
 
-    object QuickPhraseAction : KeyAction()
+    data object QuickPhraseAction : KeyAction()
 
-    object UnicodeAction : KeyAction()
+    data object UnicodeAction : KeyAction()
 
-    object LangSwitchAction : KeyAction()
+    data object LangSwitchAction : KeyAction()
 
-    object ShowInputMethodPickerAction : KeyAction()
+    data object ShowInputMethodPickerAction : KeyAction()
 
     data class LayoutSwitchAction(val act: String = "") : KeyAction()
 
@@ -35,5 +35,5 @@ sealed class KeyAction {
 
     data class PickerSwitchAction(val key: PickerWindow.Key? = null) : KeyAction()
 
-    object SpaceLongPressAction: KeyAction()
+    data object SpaceLongPressAction: KeyAction()
 }
