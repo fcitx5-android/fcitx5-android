@@ -31,16 +31,14 @@ jobjectArray fcitxInputMethodEntriesToJObjectArray(JNIEnv *env, const std::vecto
 }
 
 jobject fcitxInputMethodStatusToJObject(JNIEnv *env, const InputMethodStatus &status) {
-    const auto entry = status.entry;
-    if (status.subMode.empty()) return fcitxInputMethodEntryToJObject(env, entry);
     return env->NewObject(GlobalRef->InputMethodEntry, GlobalRef->InputMethodEntryInitWithSubMode,
-                          *JString(env, entry->uniqueName()),
-                          *JString(env, entry->name()),
-                          *JString(env, entry->icon()),
-                          *JString(env, entry->nativeName()),
-                          *JString(env, entry->label()),
-                          *JString(env, entry->languageCode()),
-                          entry->isConfigurable(),
+                          *JString(env, status.uniqueName),
+                          *JString(env, status.name),
+                          *JString(env, status.icon),
+                          *JString(env, status.nativeName),
+                          *JString(env, status.label),
+                          *JString(env, status.languageCode),
+                          status.configurable,
                           *JString(env, status.subMode),
                           *JString(env, status.subModeLabel),
                           *JString(env, status.subModeIcon)

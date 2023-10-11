@@ -142,14 +142,12 @@ public:
         return entries;
     }
 
-    InputMethodStatus inputMethodStatus() {
+    std::unique_ptr<InputMethodStatus> inputMethodStatus() {
         auto *ic = p_frontend->call<fcitx::IAndroidFrontend::activeInputContext>();
-        auto *engine = p_instance->inputMethodEngine(ic);
-        const auto *entry = p_instance->inputMethodEntry(ic);
-        if (engine) {
-            return {entry, engine, ic};
-        }
-        return {entry};
+        if (!ic) return nullptr;
+        auto *entry = p_instance->inputMethodEntry(ic);
+        auto *engine = static_cast<fcitx::InputMethodEngine *>(p_instance->addonManager().addon(entry->addon(), true));
+        return std::make_unique<InputMethodStatus>(entry, engine, ic);
     }
 
     void setInputMethod(const std::string &ime) {
@@ -282,9 +280,9 @@ public:
         auto &globalConfig = p_instance->globalConfig();
         auto &addonManager = p_instance->addonManager();
         const auto &enabledAddons = globalConfig.enabledAddons();
-        std::unordered_set<std::string> enabledSet(enabledAddons.begin(), enabledAddons.end());
+        const std::unordered_set<std::string> enabledSet(enabledAddons.begin(), enabledAddons.end());
         const auto &disabledAddons = globalConfig.disabledAddons();
-        std::unordered_set<std::string>
+        const std::unordered_set<std::string>
                 disabledSet(disabledAddons.begin(), disabledAddons.end());
         std::vector<AddonStatus> addons;
         for (const auto category: {fcitx::AddonCategory::InputMethod,
@@ -304,7 +302,7 @@ public:
                 } else if (enabledSet.count(info->uniqueName())) {
                     enabled = true;
                 }
-                addons.emplace_back(AddonStatus(info, enabled));
+                addons.emplace_back(info, enabled);
             }
         }
         return addons;
@@ -390,7 +388,7 @@ public:
                           fcitx::StatusGroup::InputMethod,
                           fcitx::StatusGroup::AfterInputMethod}) {
             for (auto act: ic->statusArea().actions(group)) {
-                actions.emplace_back(ActionEntity(act, ic));
+                actions.emplace_back(act, ic);
             }
         }
         return actions;
@@ -484,33 +482,33 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
     }
     FCITX_INFO() << "Starting...";
 
-    setenv("SKIP_FCITX_PATH", "true", 1);
-
     auto locale_ = CString(env, locale);
     auto appData_ = CString(env, appData);
     auto appLib_ = CString(env, appLib);
     auto extData_ = CString(env, extData);
     auto extCache_ = CString(env, extCache);
 
-    std::string lang_ = fcitx::stringutils::split(*locale_, ":")[0];
-    std::string config_home = fcitx::stringutils::joinPath(*extData_, "config");
-    std::string data_home = fcitx::stringutils::joinPath(*extData_, "data");
-    std::string usr_share = fcitx::stringutils::joinPath(*appData_, "usr", "share");
-    std::string locale_dir = fcitx::stringutils::joinPath(usr_share, "locale");
-    std::string libime_data = fcitx::stringutils::joinPath(usr_share, "libime");
-    std::string lua_path = fcitx::stringutils::concat(
+    const std::string lang_ = fcitx::stringutils::split(*locale_, ":")[0];
+    const std::string config_home = fcitx::stringutils::joinPath(*extData_, "config");
+    const std::string data_home = fcitx::stringutils::joinPath(*extData_, "data");
+    const std::string usr_share = fcitx::stringutils::joinPath(*appData_, "usr", "share");
+    const std::string locale_dir = fcitx::stringutils::joinPath(usr_share, "locale");
+    const std::string libime_data = fcitx::stringutils::joinPath(usr_share, "libime");
+    const std::string lua_path = fcitx::stringutils::concat(
             fcitx::stringutils::joinPath(data_home, "lua", "?.lua"), ";",
             fcitx::stringutils::joinPath(data_home, "lua", "?", "init.lua"), ";",
             fcitx::stringutils::joinPath(usr_share, "lua", "5.4", "?.lua"), ";",
             fcitx::stringutils::joinPath(usr_share, "lua", "5.4", "?", "init.lua"), ";",
             ";" // double semicolon, for default path defined in luaconf.h
     );
-    std::string lua_cpath = fcitx::stringutils::concat(
+    const std::string lua_cpath = fcitx::stringutils::concat(
             fcitx::stringutils::joinPath(data_home, "lua", "?.so"), ";",
             fcitx::stringutils::joinPath(usr_share, "lua", "5.4", "?.so"), ";",
             ";"
     );
 
+    // prevent StandardPath from resolving it's hardcoded installation path
+    setenv("SKIP_FCITX_PATH", "1", 1);
     // for fcitx default profile [DefaultInputMethod]
     setenv("LANG", lang_.c_str(), 1);
     // for libintl-lite loading gettext .mo translations
@@ -545,7 +543,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
     fcitx::registerDomain("fcitx5-chinese-addons", locale_dir_char);
     fcitx::registerDomain("fcitx5-android", locale_dir_char);
 
-    int extDomainsSize = env->GetArrayLength(extDomains);
+    const int extDomainsSize = env->GetArrayLength(extDomains);
     for (int i = 0; i < extDomainsSize; i++) {
         auto domain = JRef<jstring>(env, env->GetObjectArrayElement(extDomains, i));
         fcitx::registerDomain(CString(env, domain), locale_dir_char);
@@ -604,8 +602,9 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
     auto imChangeCallback = []() {
         auto env = GlobalRef->AttachEnv();
         auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(1, GlobalRef->Object, nullptr));
-        const auto status = Fcitx::Instance().inputMethodStatus();
-        auto obj = JRef(env, fcitxInputMethodStatusToJObject(env, status));
+        std::unique_ptr<InputMethodStatus> status = Fcitx::Instance().inputMethodStatus();
+        if (!status) return;
+        auto obj = JRef(env, fcitxInputMethodStatusToJObject(env, *status));
         env->SetObjectArrayElement(vararg, 0, obj);
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 6, *vararg);
     };
@@ -684,8 +683,8 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxChar(JNIEnv *env, jclass clazz, jchar c, jint state, jboolean up, jint timestamp) {
     RETURN_IF_NOT_RUNNING
-    fcitx::Key parsedKey{fcitx::Key::keySymFromString((const char *) &c),
-                         fcitx::KeyStates(static_cast<uint32_t>(state))};
+    const fcitx::Key parsedKey{fcitx::Key::keySymFromString(reinterpret_cast<const char *>(&c)),
+                               fcitx::KeyStates(static_cast<uint32_t>(state))};
     Fcitx::Instance().sendKey(parsedKey, up, timestamp);
 }
 
@@ -753,8 +752,9 @@ extern "C"
 JNIEXPORT jobject JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_inputMethodStatus(JNIEnv *env, jclass clazz) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
-    const auto &status = Fcitx::Instance().inputMethodStatus();
-    return fcitxInputMethodStatusToJObject(env, status);
+    auto status = Fcitx::Instance().inputMethodStatus();
+    if (!status) return nullptr;
+    return fcitxInputMethodStatusToJObject(env, *status);
 }
 
 extern "C"

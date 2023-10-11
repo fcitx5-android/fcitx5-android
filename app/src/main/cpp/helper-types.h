@@ -7,24 +7,35 @@
 
 class InputMethodStatus {
 public:
-    const fcitx::InputMethodEntry *entry;
+    // fcitx::InputMethodEntry
+    std::string uniqueName;
+    std::string name;
+    std::string nativeName;
+    std::string icon;
+    std::string label;
+    std::string languageCode;
+    std::string addon;
+    bool configurable = false;
+    // fcitx::InputMethodEngine
     std::string subMode;
     std::string subModeLabel;
     std::string subModeIcon;
 
     InputMethodStatus(const fcitx::InputMethodEntry *entry,
                       fcitx::InputMethodEngine *engine,
-                      fcitx::InputContext *ic)
-            : entry(entry) {
-        if (engine) {
-            subMode = engine->subMode(*entry, *ic);
-            subModeLabel = engine->subModeLabel(*entry, *ic);
-            subModeIcon = engine->subModeIcon(*entry, *ic);
-        }
+                      fcitx::InputContext *ic) {
+        uniqueName = entry->uniqueName();
+        name = entry->name();
+        nativeName = entry->nativeName();
+        icon = entry->icon();
+        label = entry->label();
+        languageCode = entry->languageCode();
+        addon = entry->addon();
+        configurable = entry->isConfigurable();
+        subMode = engine->subMode(*entry, *ic);
+        subModeLabel = engine->subModeLabel(*entry, *ic);
+        subModeIcon = engine->subModeIcon(*entry, *ic);
     }
-
-    InputMethodStatus(const fcitx::InputMethodEntry *entry)
-            : entry(entry) {}
 };
 
 class AddonStatus {
