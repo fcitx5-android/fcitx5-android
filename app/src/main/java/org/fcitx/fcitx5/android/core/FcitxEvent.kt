@@ -35,10 +35,12 @@ sealed class FcitxEvent<T>(open val data: T) {
         }
     }
 
-    data class CommitStringEvent(override val data: String) :
-        FcitxEvent<String>(data) {
+    data class CommitStringEvent(override val data: Data) :
+        FcitxEvent<CommitStringEvent.Data>(data) {
         override val eventType: EventType
             get() = EventType.Commit
+
+        data class Data(val text: String, val cursor: Int)
     }
 
     data class ClientPreeditEvent(override val data: FormattedText) :
@@ -157,7 +159,12 @@ sealed class FcitxEvent<T>(open val data: T) {
                         params[1] as Array<String>
                     )
                 )
-                EventType.Commit -> CommitStringEvent(params[0] as String)
+                EventType.Commit -> CommitStringEvent(
+                    CommitStringEvent.Data(
+                        params[0] as String,
+                        params[1] as Int
+                    )
+                )
                 EventType.ClientPreedit -> ClientPreeditEvent(params[0] as FormattedText)
                 EventType.InputPanel -> InputPanelEvent(
                     InputPanelEvent.Data(

@@ -249,5 +249,4 @@
     <string name="i_do_not_need_it">I don\'t need it</string>
     <string name="grant_permission">Grant permission</string>
     <string name="clear_clp_db_confirm">Clipboard database would be completely cleared, including pinned items. Processed?</string>
-    <string name="reset_cursor_after_commit">Reset cursor position after commit text</string>
 </resources>

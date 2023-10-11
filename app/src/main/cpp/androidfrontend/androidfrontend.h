@@ -17,7 +17,7 @@ public:
     Instance *instance() { return instance_; }
 
     void updateCandidateList(const std::vector<std::string> &candidates, const int size);
-    void commitString(const std::string &str);
+    void commitString(const std::string &str, const int cursor);
     void updateClientPreedit(const Text &clientPreedit);
     void updateInputPanel(const Text &preedit, const Text &auxUp, const Text &auxDown);
     void releaseInputContext(const int uid);
@@ -77,7 +77,7 @@ private:
     void handleStatusAreaUpdate();
 
     CandidateListCallback candidateListCallback = [](const std::vector<std::string> &, const int) {};
-    CommitStringCallback commitStringCallback = [](const std::string &) {};
+    CommitStringCallback commitStringCallback = [](const std::string &, const int) {};
     ClientPreeditCallback preeditCallback = [](const Text &) {};
     InputPanelCallback inputPanelAuxCallback = [](const fcitx::Text &, const fcitx::Text &, const Text &) {};
     KeyEventCallback keyEventCallback = [](const int, const uint32_t, const uint32_t, const bool, const int) {};

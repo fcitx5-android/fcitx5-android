@@ -59,7 +59,7 @@ class CommonKeyActionListener :
             reset()
         } else if (inputMethodEntryCached.uniqueName.let { it == "keyboard-us" || it == "unikey" }) {
             // androidkeyboard clears composing on reset, but we want to commit it as-is
-            service.currentInputConnection?.finishComposingText()
+            service.finishComposing()
             reset()
         } else {
             if (!select(0)) reset()

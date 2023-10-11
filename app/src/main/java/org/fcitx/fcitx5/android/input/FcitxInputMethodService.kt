@@ -85,7 +85,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private var highlightColor: Int = 0x66008577 // material_deep_teal_500 with alpha 0.4
 
     private val ignoreSystemCursor by AppPrefs.getInstance().advanced.ignoreSystemCursor
-    private val resetCursor by AppPrefs.getInstance().advanced.resetCursorAfterCommit
 
     private val inlineSuggestions by AppPrefs.getInstance().keyboard.inlineSuggestions
 
@@ -126,7 +125,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private fun handleFcitxEvent(event: FcitxEvent<*>) {
         when (event) {
             is FcitxEvent.CommitStringEvent -> {
-                commitText(event.data)
+                commitText(event.data.text, event.data.cursor)
             }
             is FcitxEvent.KeyEvent -> event.data.let event@{
                 if (it.states.virtual) {
@@ -223,24 +222,31 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    fun commitText(text: String) {
+    fun commitText(text: String, cursor: Int = -1) {
+        val ic = currentInputConnection ?: return
+        val targetCursor = if (cursor == -1) text.length else cursor
+        val currentCursor = selection.current.start - composing.start
+        // when composing text equals commit content, finish composing text as-is
         if (composing.isNotEmpty() && composingText.toString() == text) {
-            // when composing text equals commit content, finish composing text as-is
-            val cursor = composing.end
-            resetComposingState()
-            currentInputConnection?.finishComposingText()
-            if (resetCursor) {
-                selection.predict(cursor)
-                currentInputConnection?.setSelection(cursor, cursor)
+            if (targetCursor != currentCursor) {
+                val c = composing.start + targetCursor
+                selection.predict(c)
+                ic.setSelection(c, c)
             }
+            resetComposingState()
+            ic.finishComposingText()
             return
         }
         // committed text should replace composing (if any), replace selected range (if any),
         // or simply prepend before cursor
         val start = if (composing.isEmpty()) selection.latest.start else composing.start
-        selection.predict(start + text.length)
         resetComposingState()
-        currentInputConnection?.commitText(text, 1)
+        ic.commitText(text, 1)
+        if (targetCursor != currentCursor) {
+            val c = start + targetCursor
+            selection.predict(c)
+            ic.setSelection(c, c)
+        }
     }
 
     private fun sendDownKeyEvent(eventTime: Long, keyEventCode: Int, metaState: Int = 0) {
@@ -594,6 +600,18 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
         composingText = text
         ic.endBatchEdit()
+    }
+
+    /**
+     * Finish composing text and leave cursor position as-is.
+     * Also updates internal composing state of [FcitxInputMethodService].
+     */
+    fun finishComposing() {
+        val ic = currentInputConnection ?: return
+        if (composing.isEmpty()) return
+        composing.clear()
+        composingText = FormattedText.Empty
+        ic.finishComposingText()
     }
 
     @SuppressLint("RestrictedApi")

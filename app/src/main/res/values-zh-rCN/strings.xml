@@ -249,5 +249,4 @@
     <string name="i_do_not_need_it">我不需要</string>
     <string name="grant_permission">授予权限</string>
     <string name="clear_clp_db_confirm">剪贴板数据库将会被完全清空，包括已置顶的条目。继续吗？</string>
-    <string name="reset_cursor_after_commit">提交文本后重置光标位置</string>
 </resources>
