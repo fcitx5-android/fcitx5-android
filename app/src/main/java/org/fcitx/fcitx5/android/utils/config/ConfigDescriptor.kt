@@ -146,6 +146,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
             QuickPhrase,
             Chttrans,
             TableGlobal,
+            PinyinCustomPhrase,
 
             // manually added on Android side for TableManager
             AndroidTable
@@ -267,6 +268,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                                 "QuickPhrase", "Editor" -> ConfigExternal.ETy.QuickPhrase
                                 "Chttrans" -> ConfigExternal.ETy.Chttrans
                                 "TableGlobal" -> ConfigExternal.ETy.TableGlobal
+                                "CustomPhrase" -> ConfigExternal.ETy.PinyinCustomPhrase
                                 "AndroidTable" -> ConfigExternal.ETy.AndroidTable
                                 else -> null
                             }

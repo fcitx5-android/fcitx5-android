@@ -31,6 +31,10 @@
 #include <libime/pinyin/pinyindictionary.h>
 #include <libime/table/tablebaseddictionary.h>
 
+#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/stream_buffer.hpp>
+#include "../../../../lib/fcitx5-chinese-addons/src/main/cpp/fcitx5-chinese-addons/im/pinyin/customphrase.h"
+
 #include "androidfrontend/androidfrontend_public.h"
 #include "jni-utils.h"
 #include "nativestreambuf.h"
@@ -1055,6 +1059,66 @@ Java_org_fcitx_fcitx5_android_data_table_TableManager_checkTableDictFormat(JNIEn
         throwJavaException(env, e.what());
     }
     return JNI_TRUE;
+}
+
+extern "C"
+JNIEXPORT jobjectArray JNICALL
+Java_org_fcitx_fcitx5_android_data_pinyin_CustomPhraseManager_load(JNIEnv *env, jclass clazz) {
+    auto fp = fcitx::StandardPath::global().open(fcitx::StandardPath::Type::PkgData, "pinyin/customphrase", O_RDONLY);
+    if (fp.fd() < 0) {
+        FCITX_INFO() << "cannot open pinyin/customphrase";
+        return nullptr;
+    }
+    boost::iostreams::stream_buffer<boost::iostreams::file_descriptor_source>
+            buffer(fp.fd(), boost::iostreams::file_descriptor_flags::never_close_handle);
+    std::istream in(&buffer);
+    fcitx::CustomPhraseDict dict;
+    dict.load(in, true);
+    int size = 0;
+    dict.foreach([&](const std::string &key, std::vector<fcitx::CustomPhrase> &items) {
+        FCITX_UNUSED(key);
+        size += static_cast<int>(items.size());
+    });
+    int i = 0;
+    jobjectArray array = env->NewObjectArray(size, GlobalRef->PinyinCustomPhrase, nullptr);
+    dict.foreach([&](const std::string &key, std::vector<fcitx::CustomPhrase> &items) {
+        for (const auto &item: items) {
+            env->SetObjectArrayElement(array, i++,
+                                       JRef(env, env->NewObject(GlobalRef->PinyinCustomPhrase, GlobalRef->PinyinCustomPhraseInit,
+                                                                *JString(env, key),
+                                                                item.order(),
+                                                                *JString(env, item.value())
+                                            )
+                                       )
+            );
+        }
+    });
+    return array;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_fcitx_fcitx5_android_data_pinyin_CustomPhraseManager_save(JNIEnv *env, jclass clazz, jobjectArray items) {
+    fcitx::CustomPhraseDict dict;
+    const int size = env->GetArrayLength(items);
+    for (int i = 0; i < size; i++) {
+        auto phrase = JRef(env, env->GetObjectArrayElement(items, i));
+        auto phraseKey = JRef<jstring>(env, env->GetObjectField(phrase, GlobalRef->PinyinCustomPhraseKey));
+        auto phraseOrder = env->GetIntField(phrase, GlobalRef->PinyinCustomPhraseOrder);
+        auto phraseValue = JRef<jstring>(env, env->GetObjectField(phrase, GlobalRef->PinyinCustomPhraseValue));
+        dict.addPhrase(*CString(env, phraseKey),
+                       *CString(env, phraseValue),
+                       static_cast<int>(phraseOrder));
+    }
+    fcitx::StandardPath::global().safeSave(
+            fcitx::StandardPath::Type::PkgData, "pinyin/customphrase",
+            [&](int fd) {
+                boost::iostreams::stream_buffer<boost::iostreams::file_descriptor_sink>
+                        buffer(fd, boost::iostreams::file_descriptor_flags::never_close_handle);
+                std::ostream out(&buffer);
+                dict.save(out);
+                return true;
+            });
 }
 
 #pragma GCC diagnostic pop

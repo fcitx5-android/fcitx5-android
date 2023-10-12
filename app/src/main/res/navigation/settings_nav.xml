@@ -156,6 +156,13 @@
             app:exitAnim="@animator/nav_default_exit_anim"
             app:popEnterAnim="@animator/nav_default_pop_enter_anim"
             app:popExitAnim="@animator/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_imConfigFragment_to_pinyinCustomPhraseFragment"
+            app:destination="@id/pinyinCustomPhraseFragment"
+            app:enterAnim="@animator/nav_default_enter_anim"
+            app:exitAnim="@animator/nav_default_exit_anim"
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim" />
     </fragment>
 
     <fragment
@@ -211,6 +218,13 @@
         <action
             android:id="@+id/action_addonConfigFragment_to_tableInputMethodFragment"
             app:destination="@id/tableInputMethodFragment"
+            app:enterAnim="@animator/nav_default_enter_anim"
+            app:exitAnim="@animator/nav_default_exit_anim"
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_addonConfigFragment_to_pinyinCustomPhraseFragment"
+            app:destination="@id/pinyinCustomPhraseFragment"
             app:enterAnim="@animator/nav_default_enter_anim"
             app:exitAnim="@animator/nav_default_exit_anim"
             app:popEnterAnim="@animator/nav_default_pop_enter_anim"
@@ -299,4 +313,7 @@
         android:id="@+id/pluginFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.PluginFragment"
         android:label="@string/plugins" />
+    <fragment
+        android:id="@+id/pinyinCustomPhraseFragment"
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.PinyinCustomPhraseFragment" />
 </navigation>

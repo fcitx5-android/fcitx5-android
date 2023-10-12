@@ -143,6 +143,19 @@ object PreferenceScreenFactory {
             }
         }
 
+        fun pinyinCustomPhrase() = Preference(context).apply {
+            setOnPreferenceClickListener {
+                val currentFragment = fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
+                val action = when (currentFragment) {
+                    is AddonConfigFragment -> R.id.action_addonConfigFragment_to_pinyinCustomPhraseFragment
+                    is InputMethodConfigFragment -> R.id.action_imConfigFragment_to_pinyinCustomPhraseFragment
+                    else -> throw IllegalStateException("Can not navigate to custom phrase editor from current fragment")
+                }
+                currentFragment.findNavController().navigate(action)
+                true
+            }
+        }
+
         fun listPreference(subtype: ConfigType<*>): Preference = object : Preference(context) {
             override fun onClick() {
                 val currentFragment = fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
@@ -222,6 +235,7 @@ object PreferenceScreenFactory {
                 ConfigExternal.ETy.Chttrans -> addonConfigPreference("chttrans")
                 ConfigExternal.ETy.TableGlobal -> addonConfigPreference("table")
                 ConfigExternal.ETy.AndroidTable -> tableInputMethod()
+                ConfigExternal.ETy.PinyinCustomPhrase -> pinyinCustomPhrase()
                 else -> stubPreference()
             }
             is ConfigInt -> {

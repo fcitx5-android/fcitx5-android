@@ -429,7 +429,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
 
     })
 
-    private suspend fun <T> withFcitxContext(block: suspend () -> T): T =
+    private suspend inline fun <T> withFcitxContext(crossinline block: suspend () -> T): T =
         withContext(dispatcher) {
             block()
         }

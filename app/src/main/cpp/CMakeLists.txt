@@ -45,10 +45,14 @@ find_package(Libevent)
 list(APPEND CMAKE_FIND_ROOT_PATH "${PREBUILT_DIR}/boost/${ANDROID_ABI}/lib/cmake")
 find_package(Boost 1.83.0 REQUIRED COMPONENTS headers filesystem iostreams CONFIG)
 
-add_library(native-lib SHARED native-lib.cpp)
+add_library(native-lib SHARED
+        native-lib.cpp
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../../../lib/fcitx5-chinese-addons/src/main/cpp/fcitx5-chinese-addons/im/pinyin/customphrase.cpp"
+        )
 target_link_libraries(native-lib
         log
         libevent::core
+        fmt::fmt-header-only
         Fcitx5::Utils
         Fcitx5::Config
         Fcitx5::Core
@@ -56,6 +60,7 @@ target_link_libraries(native-lib
         Fcitx5::Module::Unicode
         Fcitx5::Module::Clipboard
         Boost::headers
+        Boost::iostreams
         LibIME::Pinyin
         LibIME::Table
         )
