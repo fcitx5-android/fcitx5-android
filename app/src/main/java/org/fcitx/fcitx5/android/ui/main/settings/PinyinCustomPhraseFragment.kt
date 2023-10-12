@@ -39,7 +39,7 @@ class PinyinCustomPhraseFragment : Fragment(), OnItemChangedListener<PinyinCusto
 
     private val dustman = NaiveDustman<PinyinCustomPhrase>()
 
-    private val initialItems = CustomPhraseManager.load()
+    private val initialItems = CustomPhraseManager.load() ?: emptyArray()
 
     private var keyLabel = KEY
     private var orderLabel = ORDER
@@ -57,7 +57,7 @@ class PinyinCustomPhraseFragment : Fragment(), OnItemChangedListener<PinyinCusto
                 phraseLabel = translate(PHRASE, CHINESE_ADDONS_DOMAIN)
             }
         }
-        val initialEntries = CustomPhraseManager.load().toList()
+        val initialEntries = initialItems.toList()
         ui = object : BaseDynamicListUi<PinyinCustomPhrase>(
             requireContext(),
             Mode.FreeAdd("", converter = { PinyinCustomPhrase("", 1, "") }),
@@ -67,7 +67,7 @@ class PinyinCustomPhraseFragment : Fragment(), OnItemChangedListener<PinyinCusto
                 setOnCheckedChangeListener(null)
                 isChecked = entry.enabled
                 setOnCheckedChangeListener { _, checked ->
-                    ui.updateItem(ui.indexItem(entry), entry.copy().apply { enabled = checked })
+                    ui.updateItem(ui.indexItem(entry), entry.copyEnabled(checked))
                 }
             }
         ) {
