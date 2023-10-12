@@ -2,6 +2,7 @@ package org.fcitx.fcitx5.android.ui.main.settings
 
 import android.app.AlertDialog
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +43,10 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
             Mode.FreeAdd("", converter = { QuickPhraseEntry("", "") }),
             initialEntries,
         ) {
+            override fun showEntry(x: QuickPhraseEntry): String = x.run {
+                "$keyword → ${phrase.replace("\n", "\\n")}"
+            }
+
             override fun showEditDialog(
                 title: String,
                 entry: QuickPhraseEntry?,
@@ -49,6 +54,10 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
             ) {
                 val (keywordLayout, keywordField) = materialTextInput {
                     setHint(R.string.quickphrase_keyword)
+                }
+                keywordField.apply {
+                    isSingleLine = true
+                    imeOptions = EditorInfo.IME_ACTION_NEXT
                 }
                 val (phraseLayout, phraseField) = materialTextInput {
                     setHint(R.string.quickphrase_phrase)
@@ -70,10 +79,6 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
                     }
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
-            }
-
-            override fun showEntry(x: QuickPhraseEntry): String = x.run {
-                "$keyword\u2003→\u2003$phrase"
             }
         }
         ui.addOnItemChangedListener(this)

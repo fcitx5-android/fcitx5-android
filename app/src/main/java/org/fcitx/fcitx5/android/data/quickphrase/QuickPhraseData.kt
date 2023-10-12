@@ -3,22 +3,24 @@ package org.fcitx.fcitx5.android.data.quickphrase
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.utils.errorRuntime
 
-class QuickPhraseData(private val data: List<QuickPhraseEntry>) :
-    List<QuickPhraseEntry> by data {
+class QuickPhraseData(private val data: List<QuickPhraseEntry>) : List<QuickPhraseEntry> by data {
 
     fun serialize(): String = joinToString("\n") { it.serialize() }
 
     companion object {
-        fun fromLines(lines: List<String>): Result<QuickPhraseData> =
-            runCatching {
-                lines.filter { it.isNotBlank() }
-                    .map {
-                        val s = it.trim()
-                        val spaceIndex = s.indexOf(' ')
-                        if (spaceIndex < 0)
-                            errorRuntime(R.string.exception_quickphrase_parse, it)
-                        QuickPhraseEntry(s.substring(0, spaceIndex), s.substring(spaceIndex + 1))
-                    }
-            }.map { QuickPhraseData(it) }
+        fun fromLines(lines: List<String>): Result<QuickPhraseData> {
+            return runCatching {
+                val list = mutableListOf<QuickPhraseEntry>()
+                lines.forEach {
+                    if (it.isBlank()) return@forEach
+                    val s = it.trim()
+                    val sep = s.indexOf(' ')
+                    if (sep < 0)
+                        errorRuntime(R.string.exception_quickphrase_parse, it)
+                    list.add(QuickPhraseEntry(s.substring(0, sep), s.substring(sep + 1)))
+                }
+                QuickPhraseData(list)
+            }
+        }
     }
 }
