@@ -6,7 +6,7 @@ import splitties.bitflags.hasFlag
 
 /**
  * translated from
- * [fcitx-utils/capabilityflags.h](https://github.com/fcitx/fcitx5/blob/5.0.13/src/lib/fcitx-utils/capabilityflags.h)
+ * [fcitx-utils/capabilityflags.h](https://github.com/fcitx/fcitx5/blob/5.1.1/src/lib/fcitx-utils/capabilityflags.h)
  */
 @Suppress("unused")
 enum class CapabilityFlag(val flag: ULong) {
@@ -60,6 +60,17 @@ enum class CapabilityFlag(val flag: ULong) {
      */
     ClientSideInputPanel(1UL shl 39),
 
+    /**
+     * Whether client request input method to be disabled.
+     * Usually this means only allow to type with raw keyboard.
+     */
+    Disable(1UL shl 40),
+
+    /**
+     * Whether client support commit string with cursor location.
+     */
+    CommitStringWithCursor(1UL shl 41),
+
     PasswordOrSensitive(Password.flag or Sensitive.flag);
 
 }
@@ -75,7 +86,8 @@ value class CapabilityFlags constructor(val flags: ULong) {
 
         val DefaultFlags = CapabilityFlags(
             CapabilityFlag.Preedit,
-            CapabilityFlag.ClientUnfocusCommit
+            CapabilityFlag.ClientUnfocusCommit,
+            CapabilityFlag.CommitStringWithCursor
         )
 
         fun fromEditorInfo(info: EditorInfo): CapabilityFlags {

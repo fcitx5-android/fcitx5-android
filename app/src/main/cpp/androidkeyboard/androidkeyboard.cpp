@@ -316,8 +316,8 @@ void AndroidKeyboardEngine::commitBuffer(InputContext *inputContext) {
     if (preedit.empty()) {
         return;
     }
-    if (auto icv2 = dynamic_cast<InputContextV2 *>(inputContext)) {
-        icv2->commitStringWithCursor(preedit, cursor);
+    if (inputContext->capabilityFlags().test(CapabilityFlag::CommitStringWithCursor)) {
+        inputContext->commitStringWithCursor(preedit, cursor);
     } else {
         inputContext->commitString(preedit);
     }
