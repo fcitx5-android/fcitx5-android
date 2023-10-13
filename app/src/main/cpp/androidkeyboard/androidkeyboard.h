@@ -26,6 +26,8 @@ FCITX_CONFIGURATION(
         AndroidKeyboardEngineConfig,
         Option<bool>
             enableWordHint{this, "EnableWordHint", _("Enable word hint"), true};
+        Option<bool>
+            enableEmoji{this, "EnableEmoji", _("Enable emoji in hint"), true};
         Option<int, IntConstrain>
             pageSize{this, "PageSize", _("Word hint page size"), 5, IntConstrain(3, 10)};
         OptionWithAnnotation<ChooseModifier, ChooseModifierI18NAnnotation>
@@ -81,7 +83,7 @@ public:
     void resetState(InputContext *inputContext, bool fromCandidate = false);
 
     FCITX_ADDON_DEPENDENCY_LOADER(spell, instance_->addonManager());
-//    FCITX_ADDON_DEPENDENCY_LOADER(emoji, instance_->addonManager());
+    FCITX_ADDON_DEPENDENCY_LOADER(emoji, instance_->addonManager());
 //    FCITX_ADDON_DEPENDENCY_LOADER(quickphrase, instance_->addonManager());
 
     void updateCandidate(const InputMethodEntry &entry, InputContext *inputContext);
