@@ -77,31 +77,31 @@ class CommonKeyActionListener :
     val listener by lazy {
         KeyActionListener { action, _ ->
             when (action) {
-                is FcitxKeyAction -> fcitx.launchOnReady {
-                    it.sendKey(action.act, KeyState.Virtual.state)
+                is FcitxKeyAction -> service.postFcitxJob {
+                    sendKey(action.act, KeyState.Virtual.state)
                 }
-                is SymAction -> fcitx.launchOnReady {
-                    it.sendKey(action.sym, action.states)
+                is SymAction -> service.postFcitxJob {
+                    sendKey(action.sym, action.states)
                 }
-                is CommitAction -> fcitx.launchOnReady {
-                    it.commitAndReset()
+                is CommitAction -> service.postFcitxJob {
+                    commitAndReset()
                     service.lifecycleScope.launch { service.commitText(action.text) }
                 }
-                is QuickPhraseAction -> fcitx.launchOnReady {
-                    it.commitAndReset()
-                    it.triggerQuickPhrase()
+                is QuickPhraseAction -> service.postFcitxJob {
+                    commitAndReset()
+                    triggerQuickPhrase()
                 }
-                is UnicodeAction -> fcitx.launchOnReady {
-                    it.commitAndReset()
-                    it.triggerUnicode()
+                is UnicodeAction -> service.postFcitxJob {
+                    commitAndReset()
+                    triggerUnicode()
                 }
-                is LangSwitchAction -> fcitx.launchOnReady {
-                    if (it.enabledIme().size < 2) {
+                is LangSwitchAction -> service.postFcitxJob {
+                    if (enabledIme().size < 2) {
                         service.lifecycleScope.launch {
                             inputView.showDialog(AddMoreInputMethodsPrompt.build(context))
                         }
                     } else {
-                        it.enumerateIme()
+                        enumerateIme()
                     }
                 }
                 is ShowInputMethodPickerAction -> showInputMethodPicker()
@@ -129,7 +129,7 @@ class CommonKeyActionListener :
                         Stopped -> {}
                         Selection -> service.deleteSelection()
                         Reset -> if (action.totalCnt < 0) { // swipe left
-                            fcitx.launchOnReady { it.reset() }
+                            service.postFcitxJob { reset() }
                         }
                     }
                     backspaceSwipeState = Stopped
@@ -146,11 +146,11 @@ class CommonKeyActionListener :
                 is SpaceLongPressAction -> {
                     when (spaceKeyLongPressBehavior) {
                         SpaceLongPressBehavior.None -> {}
-                        SpaceLongPressBehavior.Enumerate -> fcitx.launchOnReady {
-                            it.enumerateIme()
+                        SpaceLongPressBehavior.Enumerate -> service.postFcitxJob {
+                            enumerateIme()
                         }
-                        SpaceLongPressBehavior.ToggleActivate -> fcitx.launchOnReady {
-                            it.toggleIme()
+                        SpaceLongPressBehavior.ToggleActivate -> service.postFcitxJob {
+                            toggleIme()
                         }
                         SpaceLongPressBehavior.ShowPicker -> showInputMethodPicker()
                     }
