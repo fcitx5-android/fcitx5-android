@@ -2,5 +2,5 @@
 <resources>
     <string name="app_name_debug">Fcitx5 for Android (Unikey Plugin | Debug)</string>
     <string name="app_name_release">Fcitx5 for Android (Unikey Plugin)</string>
-    <string name="description">Unikey (Vietnamese Input Method) engine support for Fcitx5</string>
+    <string name="description">Unikey (Vietnamese input method) engine support for Fcitx5</string>
 </resources>
