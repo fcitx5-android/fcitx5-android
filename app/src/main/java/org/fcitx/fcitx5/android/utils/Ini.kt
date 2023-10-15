@@ -3,52 +3,50 @@ package org.fcitx.fcitx5.android.utils
 import org.fcitx.fcitx5.android.core.RawConfig
 import java.io.File
 
-
 @JvmInline
 value class Ini(val core: RawConfig) {
 
-    val value
+    val value: String
         get() = core.value
 
     fun get(vararg keys: String): Ini? {
-        if (keys.isEmpty())
-            return null
-        else {
-            var current = core
-            keys.forEach {
-                current = current.findByName(it) ?: return null
-            }
-            return Ini(current)
+        if (keys.isEmpty()) return null
+        var current = core
+        keys.forEach {
+            current = current.findByName(it) ?: return null
+        }
+        return Ini(current)
+    }
+
+    fun set(vararg keys: String, raw: RawConfig) {
+        var current = core
+        keys.forEach {
+            current = current.getOrCreate(it)
+        }
+        current.getOrCreate(raw.name).apply {
+            // RawConfig's comment is immutable; is fine.
+            value = raw.value
+            subItems = raw.subItems
         }
     }
 
-    fun set(vararg keys: String, value: RawConfig) {
-        if (keys.isEmpty())
-            return
+    fun set(vararg keys: String, str: String) {
+        if (keys.isEmpty()) return
         var current = core
         keys.forEach {
-            val sub = current.findByName(it)
-            if (sub == null) {
-                val new = RawConfig(it, arrayOf())
-                current.subItems = (current.subItems?.plus(new)) ?: arrayOf(new)
-                current = new
-            } else {
-                current = sub
-            }
+            current = current.getOrCreate(it)
         }
-        current.subItems = current.subItems?.map {
-            if (it.name == value.name)
-                value
-            else
-                it
-        }?.toTypedArray() ?: arrayOf(value)
+        current.value = str
     }
 
     companion object {
+        @JvmStatic
         private external fun readFromIni(src: String): RawConfig?
+
+        @JvmStatic
         private external fun writeAsIni(dest: String, value: RawConfig)
-        fun parseIniFromFile(file: File) =
-            readFromIni(file.path)?.let { Ini(it) }
+
+        fun parseIniFromFile(file: File) = readFromIni(file.path)?.let { Ini(it) }
 
         fun writeIniToFile(ini: Ini, file: File) = writeAsIni(file.path, ini.core)
     }
