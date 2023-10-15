@@ -55,7 +55,6 @@ import kotlin.math.max
 class FcitxInputMethodService : LifecycleInputMethodService() {
 
     private lateinit var fcitx: FcitxConnection
-    private var eventHandlerJob: Job? = null
 
     private var jobs = Channel<Job>(capacity = Channel.UNLIMITED)
 
@@ -129,7 +128,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         lifecycleScope.launch {
             jobs.consumeEach { it.join() }
         }
-        eventHandlerJob = lifecycleScope.launch {
+        lifecycleScope.launch {
             fcitx.runImmediately { eventFlow }.collect {
                 handleFcitxEvent(it)
             }
@@ -716,8 +715,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             advanced.disableAnimation.unregisterOnChangeListener(recreateInputViewListener)
         }
         ThemeManager.removeOnChangedListener(onThemeChangeListener)
-        eventHandlerJob?.cancel()
-        eventHandlerJob = null
         super.onDestroy()
         // Fcitx might be used in super.onDestroy()
         FcitxDaemon.disconnect(javaClass.name)
