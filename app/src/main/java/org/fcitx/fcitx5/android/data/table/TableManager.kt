@@ -27,11 +27,10 @@ object TableManager {
             ?.mapNotNull { confFile ->
                 runCatching {
                     TableBasedInputMethod.new(confFile).apply {
-                        table = runCatching {
+                        table =
                             File(tableDicDir, tableFileName)
                                 .takeIf { it.extension == "dict" }
                                 ?.let { LibIMEDictionary(it) }
-                        }.getOrNull()
                     }
                 }.getOrNull()
             } ?: listOf()
