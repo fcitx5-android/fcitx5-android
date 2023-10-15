@@ -1,47 +1,44 @@
 package org.fcitx.fcitx5.android.data.table
 
-import cc.ekblad.konbini.ParserResult
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.data.table.dict.LibIMEDictionary
-import org.fcitx.fcitx5.android.utils.IniParser
-import org.fcitx.fcitx5.android.utils.IniPrettyPrinter
+import org.fcitx.fcitx5.android.utils.Ini
 import org.fcitx.fcitx5.android.utils.Locales
 import org.fcitx.fcitx5.android.utils.errorRuntime
-import org.fcitx.fcitx5.android.utils.getValue
 import timber.log.Timber
 import java.io.File
 
 class TableBasedInputMethod(val file: File) {
 
-    private var ini = when (val x = IniParser.parse(file.readText())) {
-        is ParserResult.Error -> errorRuntime(R.string.invalid_im, file.name)
-        is ParserResult.Ok -> x.result
-    }
+    private var ini = Ini.parseIniFromFile(file) ?: errorRuntime(R.string.invalid_im, file.name)
 
     var table: LibIMEDictionary? = null
 
     val name: String by lazy {
-        ini.sections[InputMethod]?.let { im ->
-            val properties = im.data
-            properties.getValue(NameI18n.format(Locales.languageWithCountry))
-                ?: properties.getValue(NameI18n.format(Locales.language))
-                ?: properties.getValue(Name)
-        } ?: errorRuntime(R.string.invalid_im, ERROR_MISSING_INPUT_METHOD_OR_NAME)
+        ini.get(InputMethod)?.let {
+            (it.get(NameI18n.format(Locales.languageWithCountry))
+                ?: it.get(NameI18n.format(Locales.language))
+                ?: it.get(Name))?.value
+        } ?: errorRuntime(
+            R.string.invalid_im,
+            ERROR_MISSING_INPUT_METHOD_OR_NAME
+        )
     }
 
     var tableFileName: String
-        get() = ini.getValue(Table, File)
+        get() = ini.get(Table, File)?.value
             ?.substringAfterLast('/')
             ?: errorRuntime(R.string.invalid_im, ERROR_MISSING_TABLE_OR_FILE)
         set(value) {
-            ini.setValue(Table, File, "table/$value")
+            ini.set(Table, File, value = "table/$value")
         }
 
     val tableFileExists
         get() = table != null
 
     fun save() {
-        file.writeText(IniPrettyPrinter.pretty(ini))
+        Ini.writeIniToFile(ini, file)
     }
 
     fun delete() {

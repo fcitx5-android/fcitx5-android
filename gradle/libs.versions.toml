@@ -37,7 +37,6 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version = "1.1.0-beta02" }
 material = { module = "com.google.android.material:material", version = "1.9.0" }
-konbini = { group = "cc.ekblad.konbini", name = "konbini", version = "0.1.3" }
 arrow = { module = "io.arrow-kt:arrow-core", version = "1.2.0" }
 imagecropper = { module = "com.vanniktech:android-image-cropper", version = "4.5.0" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version = "3.0.0" }

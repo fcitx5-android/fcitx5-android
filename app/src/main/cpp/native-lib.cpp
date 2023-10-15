@@ -23,6 +23,7 @@
 #include <fcitx-utils/eventdispatcher.h>
 #include <fcitx-utils/standardpath.h>
 #include <fcitx-utils/stringutils.h>
+#include <fcitx-config/iniparser.h>
 
 #include <quickphrase_public.h>
 #include <unicode_public.h>
@@ -1119,6 +1120,32 @@ Java_org_fcitx_fcitx5_android_data_pinyin_CustomPhraseManager_save(JNIEnv *env, 
                 dict.save(out);
                 return true;
             });
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_org_fcitx_fcitx5_android_utils_Ini_readFromIni(JNIEnv *env, jclass clazz, jstring src) {
+    fcitx::RawConfig config;
+    FILE *fp = std::fopen(*CString(env, src), "rb");
+    if (!fp) {
+        return nullptr;
+    }
+    fcitx::readFromIni(config, fp);
+    std::fclose(fp);
+    return fcitxRawConfigToJObject(env, config);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_fcitx_fcitx5_android_utils_Ini_writeAsIni(JNIEnv *env, jclass clazz, jstring dest, jobject value) {
+    FILE *fp = std::fopen(*CString(env, dest), "wb");
+    if (!fp) {
+        throwJavaException(env, "Unable to open file");
+        return;
+    }
+    auto config = jobjectToRawConfig(env, value);
+    fcitx::writeAsIni(config, fp);
+    std::fclose(fp);
 }
 
 #pragma GCC diagnostic pop
