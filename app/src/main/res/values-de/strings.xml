@@ -96,7 +96,7 @@
     <string name="key_radius">Tastenradius</string>
     <string name="key_horizontal_margin">Horizontaler Tastenrand</string>
     <string name="key_vertical_margin">Vertikaler Tastenrand</string>
-    <string name="configure_theme">Thema konfigurieren</string>
+    <string name="configure">Konfigurieren</string>
     <string name="choose_image">Bild wählen ...</string>
     <string name="dark_keys">Dunkle Tasten</string>
     <string name="recrop_image">Bild neu zuschneiden</string>

@@ -58,8 +58,8 @@
             app:popEnterAnim="@animator/nav_default_pop_enter_anim"
             app:popExitAnim="@animator/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_mainFragment_to_themeListFragment"
-            app:destination="@id/themeListFragment"
+            android:id="@+id/action_mainFragment_to_themeFragment"
+            app:destination="@id/themeFragment"
             app:enterAnim="@animator/nav_default_enter_anim"
             app:exitAnim="@animator/nav_default_exit_anim"
             app:popEnterAnim="@animator/nav_default_pop_enter_anim"
@@ -244,21 +244,10 @@
         android:name="org.fcitx.fcitx5.android.ui.main.settings.behavior.AdvancedSettingsFragment"
         android:label="@string/advanced" />
     <fragment
-        android:id="@+id/themeListFragment"
-        android:name="org.fcitx.fcitx5.android.ui.main.settings.theme.ThemeListFragment"
+        android:id="@+id/themeFragment"
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.theme.ThemeFragment"
         android:label="@string/theme">
-        <action
-            android:id="@+id/action_themeListFragment_to_themeSettingsFragment"
-            app:destination="@id/themeSettingsFragment"
-            app:enterAnim="@animator/nav_default_enter_anim"
-            app:exitAnim="@animator/nav_default_exit_anim"
-            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
-            app:popExitAnim="@animator/nav_default_pop_exit_anim" />
     </fragment>
-    <fragment
-        android:id="@+id/themeSettingsFragment"
-        android:name="org.fcitx.fcitx5.android.ui.main.settings.theme.ThemeSettingsFragment"
-        android:label="@string/theme" />
 
     <fragment
         android:id="@+id/listFragment"

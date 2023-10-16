@@ -110,7 +110,7 @@
     <string name="key_radius">按鍵圓角半徑</string>
     <string name="key_horizontal_margin">按鍵橫向邊距</string>
     <string name="key_vertical_margin">按鍵垂直邊距</string>
-    <string name="configure_theme">配置主題</string>
+    <string name="configure">配置</string>
     <string name="choose_image">選擇圖片…</string>
     <string name="dark_keys">深色按鍵</string>
     <string name="recrop_image">重新裁剪圖片</string>

@@ -64,7 +64,7 @@ class MainFragment : PaddingPreferenceFragment() {
                 addDestinationPreference(
                     R.string.theme,
                     R.drawable.ic_baseline_palette_24,
-                    R.id.action_mainFragment_to_themeListFragment
+                    R.id.action_mainFragment_to_themeFragment
                 )
                 addDestinationPreference(
                     R.string.clipboard,

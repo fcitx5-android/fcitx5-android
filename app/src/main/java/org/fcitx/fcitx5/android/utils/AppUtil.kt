@@ -42,7 +42,7 @@ object AppUtil {
         launchMainToDest(context, R.id.imListFragment)
 
     fun launchMainToThemeList(context: Context) =
-        launchMainToDest(context, R.id.themeListFragment)
+        launchMainToDest(context, R.id.themeFragment)
 
     fun launchMainToInputMethodConfig(context: Context, uniqueName: String, displayName: String) =
         launchMainToDest(

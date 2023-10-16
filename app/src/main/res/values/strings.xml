@@ -110,7 +110,7 @@
     <string name="key_radius">Key radius</string>
     <string name="key_horizontal_margin">Key horizontal margin</string>
     <string name="key_vertical_margin">Key vertical margin</string>
-    <string name="configure_theme">Configure Theme</string>
+    <string name="configure">Configure</string>
     <string name="choose_image">Choose Image…</string>
     <string name="dark_keys">Dark Keys</string>
     <string name="recrop_image">Re-Crop Image</string>

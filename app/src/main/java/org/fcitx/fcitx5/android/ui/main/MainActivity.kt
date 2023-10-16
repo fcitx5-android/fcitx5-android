@@ -78,7 +78,7 @@ class MainActivity : AppCompatActivity() {
         }
         navController.addOnDestinationChangedListener { _, dest, _ ->
             when (dest.id) {
-                R.id.themeListFragment -> viewModel.disableToolbarShadow()
+                R.id.themeFragment -> viewModel.disableToolbarShadow()
                 else -> viewModel.enableToolbarShadow()
             }
         }
