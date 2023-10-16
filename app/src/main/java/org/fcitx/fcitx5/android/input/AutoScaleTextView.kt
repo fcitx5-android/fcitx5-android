@@ -97,9 +97,9 @@ class AutoScaleTextView @JvmOverloads constructor(
             } else {
                 textBounds.set(
                     /* left = */ 0,
-                    /* top = */ floor(fontMetrics.top.toDouble()).toInt(),
-                    /* right = */ ceil(paint.measureText(text).toDouble()).toInt(),
-                    /* bottom = */ ceil(fontMetrics.bottom.toDouble()).toInt()
+                    /* top = */ floor(fontMetrics.top).toInt(),
+                    /* right = */ ceil(paint.measureText(text)).toInt(),
+                    /* bottom = */ ceil(fontMetrics.bottom).toInt()
                 )
             }
             needsMeasureText = false

@@ -249,4 +249,5 @@
     <string name="i_do_not_need_it">I don\'t need it</string>
     <string name="grant_permission">Grant permission</string>
     <string name="clear_clp_db_confirm">Clipboard database would be completely cleared, including pinned items. Processed?</string>
+    <string name="expand_keypress_area">Expand keypress area to the edge</string>
 </resources>

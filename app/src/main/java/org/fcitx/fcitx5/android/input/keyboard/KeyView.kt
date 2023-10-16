@@ -4,13 +4,22 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Configuration
-import android.graphics.*
-import android.graphics.drawable.*
+import android.graphics.Color
+import android.graphics.Rect
+import android.graphics.Typeface
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.InsetDrawable
+import android.graphics.drawable.LayerDrawable
+import android.graphics.drawable.RippleDrawable
+import android.graphics.drawable.StateListDrawable
 import android.util.TypedValue
 import android.view.View
 import android.widget.ImageView
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
+import androidx.annotation.FloatRange
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.updateLayoutParams
 import org.fcitx.fcitx5.android.R
@@ -28,11 +37,17 @@ import splitties.views.dsl.constraintlayout.centerInParent
 import splitties.views.dsl.constraintlayout.constraintLayout
 import splitties.views.dsl.constraintlayout.lParams
 import splitties.views.dsl.constraintlayout.parentId
-import splitties.views.dsl.core.*
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.imageView
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.view
+import splitties.views.dsl.core.wrapContent
 import splitties.views.existingOrNewId
 import splitties.views.imageResource
 import splitties.views.padding
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearance) :
     CustomGestureView(ctx) {
@@ -60,7 +75,27 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
             if (!boundsValid) updateBounds()
         }
 
-    val layout = constraintLayout {
+    /**
+     * KeyView content left margin, in percentage of parent width
+     */
+    @FloatRange(0.0, 1.0)
+    var layoutMarginLeft = 0f
+
+    /**
+     * KeyView content right margin, in percentage of parent width
+     */
+    @FloatRange(0.0, 1.0)
+    var layoutMarginRight = 0f
+
+    /**
+     * [KeyView] contains 2 parts: `TouchEventView` and `AppearanceView`.
+     *
+     * `TouchEventView` is the outer [CustomGestureView] that handles touch events.
+     *
+     * `AppearanceView` in the inner [ConstraintLayout], it can be smaller than its parent,
+     * and holds the [bounds] for popup.
+     */
+    protected val appearanceView = constraintLayout {
         // sync any state from parent
         isDuplicateParentStateEnabled = true
     }
@@ -76,7 +111,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
         // key border
         if ((bordered && def.border != Border.Off) || def.border == Border.On) {
             // background: key border
-            background = LayerDrawable(
+            appearanceView.background = LayerDrawable(
                 arrayOf(
                     GradientDrawable().apply {
                         cornerRadius = radius
@@ -107,11 +142,11 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                 setupPressHighlight()
             }
         }
-        add(layout, lParams(matchParent, matchParent))
+        add(appearanceView, lParams(matchParent, matchParent))
     }
 
     private fun setupPressHighlight(mask: Drawable? = null) {
-        foreground = if (rippled)
+        appearanceView.foreground = if (rippled)
             RippleDrawable(
                 ColorStateList.valueOf(theme.keyPressHighlightColor), null,
                 // ripple should be masked with an opaque color
@@ -138,17 +173,32 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
 
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
-        layout.alpha = if (enabled) 1f else styledFloat(android.R.attr.disabledAlpha)
+        appearanceView.alpha = if (enabled) 1f else styledFloat(android.R.attr.disabledAlpha)
     }
 
     fun updateBounds() {
-        val (x, y) = cachedLocation.also { getLocationInWindow(it) }
-        cachedBounds.set(x, y, x + width, y + height)
+        val (x, y) = cachedLocation.also { appearanceView.getLocationInWindow(it) }
+        cachedBounds.set(x, y, x + appearanceView.width, y + appearanceView.height)
         boundsValid = true
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         boundsValid = false
+        if (layoutMarginLeft != 0f || layoutMarginRight != 0f) {
+            val w = right - left
+            val h = bottom - top
+            val layoutWidth = (w * (1f - layoutMarginLeft - layoutMarginRight)).roundToInt()
+            appearanceView.updateLayoutParams<LayoutParams> {
+                leftMargin = (w * layoutMarginLeft).roundToInt()
+                rightMargin = (w * layoutMarginRight).roundToInt()
+            }
+            // sets `measuredWidth` and `measuredHeight` of `AppearanceView`
+            // https://developer.android.com/guide/topics/ui/how-android-draws#measure
+            appearanceView.measure(
+                MeasureSpec.makeMeasureSpec(layoutWidth, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(h, MeasureSpec.EXACTLY)
+            )
+        }
         super.onLayout(changed, left, top, right, bottom)
     }
 
@@ -160,7 +210,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                 val minHeight = dp(26)
                 val hInset = dp(10)
                 val vInset = if (h < minHeight) 0 else min((h - minHeight) / 2, dp(16))
-                background = InsetDrawable(
+                appearanceView.background = InsetDrawable(
                     GradientDrawable().apply {
                         cornerRadius = bkgRadius
                         setColor(theme.spaceBarColor)
@@ -168,7 +218,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                     hInset, vInset, hInset, vInset
                 )
                 // InsetDrawable sets padding to container view; remove padding to prevent text from bing clipped
-                padding = 0
+                appearanceView.padding = 0
                 // apply press highlight for background area
                 setupPressHighlight(
                     InsetDrawable(
@@ -184,14 +234,14 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                 val drawableSize = min(min(w, h), dp(35))
                 val hInset = (w - drawableSize) / 2
                 val vInset = (h - drawableSize) / 2
-                background = InsetDrawable(
+                appearanceView.background = InsetDrawable(
                     GradientDrawable().apply {
                         shape = GradientDrawable.OVAL
                         setColor(theme.accentKeyBackgroundColor)
                     },
                     hInset, vInset, hInset, vInset
                 )
-                padding = 0
+                appearanceView.padding = 0
                 setupPressHighlight(
                     InsetDrawable(
                         GradientDrawable().apply {
@@ -228,7 +278,7 @@ open class TextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Text) 
     }
 
     init {
-        layout.apply {
+        appearanceView.apply {
             add(mainText, lParams(wrapContent, wrapContent) {
                 centerInParent()
             })
@@ -256,7 +306,9 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
     }
 
     init {
-        layout.apply { add(altText, lParams(wrapContent, wrapContent)) }
+        appearanceView.apply {
+            add(altText, lParams(wrapContent, wrapContent))
+        }
         applyLayout(resources.configuration.orientation)
     }
 
@@ -322,7 +374,11 @@ class ImageKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Image) :
     val img = imageView { configure(theme, def.src, def.variant) }
 
     init {
-        layout.apply { add(img, lParams(wrapContent, wrapContent) { centerInParent() }) }
+        appearanceView.apply {
+            add(img, lParams(wrapContent, wrapContent) {
+                centerInParent()
+            })
+        }
     }
 }
 
@@ -347,18 +403,18 @@ class ImageTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.ImageT
     }
 
     init {
-        layout.apply {
+        appearanceView.apply {
             add(img, lParams(dp(13), dp(13)))
-            mainText.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                centerHorizontally()
-                bottomToBottom = parentId
-                bottomMargin = vMargin + dp(4)
-                topToTop = unset
-            }
-            img.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                centerHorizontally()
-                topToTop = parentId
-            }
+        }
+        mainText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            centerHorizontally()
+            bottomToBottom = parentId
+            bottomMargin = vMargin + dp(4)
+            topToTop = unset
+        }
+        img.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            centerHorizontally()
+            topToTop = parentId
         }
         updateMargins(resources.configuration.orientation)
     }
