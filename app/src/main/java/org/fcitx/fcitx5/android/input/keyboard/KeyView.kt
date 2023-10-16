@@ -63,8 +63,13 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
         bordered = prefs.keyBorder.getValue()
         rippled = prefs.keyRippleEffect.getValue()
         radius = dp(prefs.keyRadius.getValue().toFloat())
-        hMargin = if (def.margin) dp(prefs.keyHorizontalMargin.getValue()) else 0
-        vMargin = if (def.margin) dp(prefs.keyVerticalMargin.getValue()) else 0
+        val landscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        val hMarginPref =
+            if (landscape) prefs.keyHorizontalMarginLandscape else prefs.keyHorizontalMargin
+        val vMarginPref =
+            if (landscape) prefs.keyVerticalMarginLandscape else prefs.keyVerticalMargin
+        hMargin = if (def.margin) dp(hMarginPref.getValue()) else 0
+        vMargin = if (def.margin) dp(vMarginPref.getValue()) else 0
     }
 
     private val cachedLocation = intArrayOf(0, 0)

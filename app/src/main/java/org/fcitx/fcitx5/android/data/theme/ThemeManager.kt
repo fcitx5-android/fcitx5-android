@@ -221,11 +221,45 @@ object ThemeManager {
 
         val keyRippleEffect = switch(R.string.key_ripple_effect, "key_ripple_effect", false)
 
-        val keyHorizontalMargin =
-            int(R.string.key_horizontal_margin, "key_horizontal_margin", 3, 0, 8, "dp")
+        val keyHorizontalMargin: ManagedPreference.PInt
+        val keyHorizontalMarginLandscape: ManagedPreference.PInt
 
-        val keyVerticalMargin =
-            int(R.string.key_vertical_margin, "key_vertical_margin", 7, 0, 16, "dp")
+        init {
+            val (primary, secondary) = twinInt(
+                R.string.key_horizontal_margin,
+                R.string.portrait,
+                "key_horizontal_margin",
+                3,
+                R.string.landscape,
+                "key_horizontal_margin_landscape",
+                3,
+                0,
+                24,
+                "dp"
+            )
+            keyHorizontalMargin = primary
+            keyHorizontalMarginLandscape = secondary
+        }
+
+        val keyVerticalMargin: ManagedPreference.PInt
+        val keyVerticalMarginLandscape: ManagedPreference.PInt
+
+        init {
+            val (primary, secondary) = twinInt(
+                R.string.key_vertical_margin,
+                R.string.portrait,
+                "key_vertical_margin",
+                7,
+                R.string.landscape,
+                "key_vertical_margin_landscape",
+                4,
+                0,
+                24,
+                "dp"
+            )
+            keyVerticalMargin = primary
+            keyVerticalMarginLandscape = secondary
+        }
 
         val keyRadius = int(R.string.key_radius, "key_radius", 4, 0, 48, "dp")
 
