@@ -21,8 +21,10 @@ GitHub: [![release version](https://img.shields.io/github/v/release/fcitx5-andro
 
 - English (with spell check)
 - Chinese (Pinyin, Shuangpin, Wubi, Cangjie and custom tables)
-- Vietnamese (Based on UniKey, supports Telex, VNI and VIQR)
+- Vietnamese (via [UniKey Plugin](./plugin/unikey), supports Telex, VNI and VIQR)
 - Japanese (via [Anthy Plugin](./plugin/anthy))
+- Korean (via [Hangul Plugin](./plugin/hangul))
+- Generic (via [RIME Plugin](./plugin/rime))
 
 ### Implemented Features
 
@@ -93,7 +95,7 @@ git submodule update --init --recursive
 <summary>On Windows, you may need to regenerate symlinks to submodules.</summary>
 
 ```powershell
-Remove-Item -Recurse app/src/main/assets/usr/share
+Remove-Item -Recurse app/src/main/assets/usr/share, plugin/hangul/src/main/assets/usr/share/libhangul
 git checkout -- .
 ```
 

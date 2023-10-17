@@ -1,0 +1,11 @@
+{
+    "uniqueId": "libhangul/libhangul",
+    "artifactVersion": "0.1.0",
+    "description": "A library to support hangul input method logic",
+    "name": "libhangul/libhangul",
+    "website": "https://github.com/libhangul/libhangul",
+    "tag": "native",
+    "licenses": [
+        "LGPL-2.1-or-later"
+    ]
+}

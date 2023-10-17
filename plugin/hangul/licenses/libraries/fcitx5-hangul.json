@@ -1,0 +1,11 @@
+{
+    "uniqueId": "fcitx/fcitx5-hangul",
+    "artifactVersion": "5.1.0",
+    "description": "Hangul Wrapper for Fcitx",
+    "name": "fcitx/fcitx5-hangul",
+    "website": "https://github.com/fcitx/fcitx5-hangul",
+    "tag": "native",
+    "licenses": [
+        "LGPL-2.1-or-later"
+    ]
+}

@@ -37,3 +37,6 @@
 [submodule "plugin/rime/src/main/cpp/rime-stroke"]
 	path = plugin/rime/src/main/cpp/rime-stroke
 	url = git@github.com:rime/rime-stroke.git
+[submodule "plugin/hangul/src/main/cpp/fcitx5-hangul"]
+	path = plugin/hangul/src/main/cpp/fcitx5-hangul
+	url = git@github.com:fcitx/fcitx5-hangul.git
