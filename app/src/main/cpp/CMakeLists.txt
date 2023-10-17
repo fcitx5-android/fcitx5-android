@@ -17,6 +17,7 @@ find_package(libime REQUIRED CONFIG)
 get_target_property(LIBIME_CMAKE_MODULES libime::cmake INTERFACE_INCLUDE_DIRECTORIES)
 set(CMAKE_MODULE_PATH ${LIBIME_CMAKE_MODULES} ${CMAKE_MODULE_PATH})
 
+find_package(LibIMECore MODULE)
 find_package(LibIMEPinyin MODULE)
 find_package(LibIMETable MODULE)
 
@@ -45,14 +46,15 @@ find_package(Libevent)
 list(APPEND CMAKE_FIND_ROOT_PATH "${PREBUILT_DIR}/boost/${ANDROID_ABI}/lib/cmake")
 find_package(Boost 1.83.0 REQUIRED COMPONENTS headers filesystem iostreams CONFIG)
 
-add_library(native-lib SHARED
-        native-lib.cpp
-        "${CMAKE_CURRENT_SOURCE_DIR}/../../../../lib/fcitx5-chinese-addons/src/main/cpp/fcitx5-chinese-addons/im/pinyin/customphrase.cpp"
-        )
+set(CHINESE_ADDONS_PINYIN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../lib/fcitx5-chinese-addons/src/main/cpp/fcitx5-chinese-addons/im/pinyin")
+add_library(pinyin-customphrase STATIC "${CHINESE_ADDONS_PINYIN_DIR}/customphrase.cpp")
+target_include_directories(pinyin-customphrase INTERFACE "${CHINESE_ADDONS_PINYIN_DIR}")
+target_link_libraries(pinyin-customphrase PRIVATE fmt::fmt-header-only Fcitx5::Utils LibIME::Core)
+
+add_library(native-lib SHARED native-lib.cpp)
 target_link_libraries(native-lib
         log
         libevent::core
-        fmt::fmt-header-only
         Fcitx5::Utils
         Fcitx5::Config
         Fcitx5::Core
@@ -63,6 +65,7 @@ target_link_libraries(native-lib
         Boost::iostreams
         LibIME::Pinyin
         LibIME::Table
+        pinyin-customphrase
         )
 
 add_custom_target(copy-fcitx5-modules

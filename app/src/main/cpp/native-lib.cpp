@@ -34,7 +34,7 @@
 
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream_buffer.hpp>
-#include "../../../../lib/fcitx5-chinese-addons/src/main/cpp/fcitx5-chinese-addons/im/pinyin/customphrase.h"
+#include "customphrase.h"
 
 #include "androidfrontend/androidfrontend_public.h"
 #include "jni-utils.h"
