@@ -135,6 +135,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
         pkgNameCache = PackageNameCache(this)
         AppPrefs.getInstance().apply {
+            keyboard.expandKeypressArea.registerOnChangeListener(recreateInputViewListener)
             advanced.disableAnimation.registerOnChangeListener(recreateInputViewListener)
         }
         ThemeManager.addOnChangedListener(onThemeChangeListener)
@@ -712,6 +713,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onDestroy() {
         AppPrefs.getInstance().apply {
+            keyboard.expandKeypressArea.unregisterOnChangeListener(recreateInputViewListener)
             advanced.disableAnimation.unregisterOnChangeListener(recreateInputViewListener)
         }
         ThemeManager.removeOnChangedListener(onThemeChangeListener)
