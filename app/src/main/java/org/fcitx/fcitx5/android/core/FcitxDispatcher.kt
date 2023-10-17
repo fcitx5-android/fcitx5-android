@@ -96,7 +96,7 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
         Timber.i("FcitxDispatcher stop()")
         return if (isRunning.compareAndSet(true, false)) {
             runBlocking {
-                bypass()
+                controller.nativeScheduleEmpty()
                 runningLock.withLock {
                     val rest = queue.toList()
                     queue.clear()
@@ -106,18 +106,14 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
         } else emptyList()
     }
 
-    // bypass nativeLoopOnce if no code is executing in native dispatcher
-    private fun bypass() {
-        if (nativeLoopLock.isLocked)
-            controller.nativeScheduleEmpty()
-    }
-
     override fun dispatch(context: CoroutineContext, block: Runnable) {
         if (!isRunning.get()) {
             throw IllegalStateException("Dispatcher is not in running state!")
         }
         queue.offer(WrappedRunnable(block))
-        bypass()
+        // always call `nativeScheduleEmpty()` to prevent `nativeLoopOnce()` from blocking
+        // the thread when we have something to run
+        controller.nativeScheduleEmpty()
     }
 
     companion object {

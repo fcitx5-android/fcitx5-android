@@ -94,28 +94,25 @@ fun interface FcitxLifecycleObserver {
 class FcitxLifecycleCoroutineScope(
     val lifecycle: FcitxLifecycle,
     override val coroutineContext: CoroutineContext = SupervisorJob()
-) :
-    CoroutineScope, FcitxLifecycleObserver {
+) : CoroutineScope, FcitxLifecycleObserver {
     override fun onStateChanged(event: FcitxLifecycle.Event) {
         if (lifecycle.currentState >= FcitxLifecycle.State.STOPPING) {
             coroutineContext.cancelChildren()
         }
     }
-
 }
 
 suspend fun <T> FcitxLifecycle.whenAtState(
     state: FcitxLifecycle.State,
     block: suspend CoroutineScope.() -> T
 ): T =
-    if (state == currentState)
-        block(lifecycleScope)
+    if (state == currentState) block(lifecycleScope)
     else AtStateHelper(this, state).run(block)
 
-suspend fun <T> FcitxLifecycle.whenReady(block: suspend CoroutineScope.() -> T) =
+suspend inline fun <T> FcitxLifecycle.whenReady(noinline block: suspend CoroutineScope.() -> T) =
     whenAtState(FcitxLifecycle.State.READY, block)
 
-suspend fun <T> FcitxLifecycle.whenStopped(block: suspend CoroutineScope.() -> T) =
+suspend inline fun <T> FcitxLifecycle.whenStopped(noinline block: suspend CoroutineScope.() -> T) =
     whenAtState(FcitxLifecycle.State.STOPPED, block)
 
 fun <T> FcitxLifecycle.launchWhenReady(block: suspend CoroutineScope.() -> T) =
