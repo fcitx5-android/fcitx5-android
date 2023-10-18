@@ -182,7 +182,7 @@
     <string name="exception_table_im_filename">\"%1$s\" 的副檔名不是碼表輸入法包（ .zip ）</string>
     <string name="table_already_exists">碼表輸入法配置檔 \"%1$s\" 已存在</string>
     <string name="table_file_does_not_exist_title">碼表不可用</string>
-    <string name="table_file_does_not_exist_message">碼表字典 \"%1$s\" 不存在。請檢查字典文件，或刪除並重新匯入。</string>
+    <string name="table_file_does_not_exist_message">碼表字典 \"%1$s\" 不存在。請檢查字典文件，並重新匯入。</string>
     <string name="import_table">匯入碼表</string>
     <string name="table_from_zip">從 zip 匯入…</string>
     <string name="table_select_files">從單獨的檔案匯入…</string>

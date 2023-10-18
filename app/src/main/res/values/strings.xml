@@ -182,7 +182,7 @@
     <string name="exception_table_im_filename">The extension of \"%1$s\" does not indicate a table input method package (.zip)</string>
     <string name="table_already_exists">Table input method configuration file \"%1$s\" already exists</string>
     <string name="table_file_does_not_exist_title">Table unavailable</string>
-    <string name="table_file_does_not_exist_message">Table dictionary \"%1$s\" does not exist. Please check the table dict file or delete and re-import.</string>
+    <string name="table_file_does_not_exist_message">Table dictionary \"%1$s\" does not exist. Please check the dict file or re-import.</string>
     <string name="import_table">Import Table</string>
     <string name="table_from_zip">From zip…</string>
     <string name="table_select_files">From separate files…</string>
@@ -250,4 +250,6 @@
     <string name="grant_permission">Grant permission</string>
     <string name="clear_clp_db_confirm">Clipboard database would be completely cleared, including pinned items. Processed?</string>
     <string name="expand_keypress_area">Expand keypress area to the edge</string>
+    <string name="update_table">Update table</string>
+    <string name="table_dict_replace_message">Table dictionary \"%1$s\" exists. You may import a new dict and replace it.</string>
 </resources>

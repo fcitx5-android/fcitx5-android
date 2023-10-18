@@ -140,7 +140,7 @@
     <string name="exception_table_im_filename">Die Erweiterung von \"%1$s\" ist keine Tabelleneingabemethode (.zip)</string>
     <string name="table_already_exists">Konfigurationsdatei der Tabelleneingabemethode \"%1$s\" existiert schon</string>
     <string name="table_file_does_not_exist_title">Tabelle nicht auffindbar</string>
-    <string name="table_file_does_not_exist_message">Das Wörterbuch der Tabelleneingabe \"%1$s\" ist nicht vorhanden. Bitte checken Sie die dict-Datei oder löschen und reimportieren Sie sie.</string>
+    <string name="table_file_does_not_exist_message">Das Wörterbuch der Tabelleneingabe \"%1$s\" ist nicht vorhanden. Bitte checken Sie die dict-Datei reimportieren Sie sie.</string>
     <string name="import_table">Tabelle importieren</string>
     <string name="table_from_zip">Aus ZIP-Datei...</string>
     <string name="table_select_files">Aus getrennten Dateien ...</string>

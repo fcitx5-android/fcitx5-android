@@ -182,7 +182,7 @@
     <string name="exception_table_im_filename">\"%1$s\" 的拓展名不是码表输入法包（ .zip ）</string>
     <string name="table_already_exists">码表输入法配置文件 \"%1$s\" 已存在</string>
     <string name="table_file_does_not_exist_title">码表不可用</string>
-    <string name="table_file_does_not_exist_message">码表词典 \"%1$s\" 不存在。请检查词典文件，或删除并重新导入。</string>
+    <string name="table_file_does_not_exist_message">码表词典 \"%1$s\" 不存在。请检查词典文件，或重新导入。</string>
     <string name="import_table">导入码表</string>
     <string name="table_from_zip">从 zip 导入…</string>
     <string name="table_select_files">从单独的文件导入…</string>

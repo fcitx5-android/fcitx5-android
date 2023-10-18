@@ -31,6 +31,7 @@ import org.fcitx.fcitx5.android.utils.NaiveDustman
 import org.fcitx.fcitx5.android.utils.errorDialog
 import org.fcitx.fcitx5.android.utils.notificationManager
 import org.fcitx.fcitx5.android.utils.queryFileName
+import splitties.resources.drawable
 import splitties.resources.styledDrawable
 import splitties.views.imageDrawable
 
@@ -41,10 +42,12 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
     private lateinit var zipLauncher: ActivityResultLauncher<String>
     private lateinit var confLauncher: ActivityResultLauncher<String>
     private lateinit var dictLauncher: ActivityResultLauncher<String>
+    private lateinit var replaceLauncher: ActivityResultLauncher<String>
 
     private var confUri: Uri? = null
     private var dictUri: Uri? = null
     private var filesSelectionDialog: AlertDialog? = null
+    private var tableToReplace: TableBasedInputMethod? = null
 
     private val dustman = NaiveDustman<TableBasedInputMethod>()
 
@@ -56,16 +59,18 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
             Mode.Custom(),
             TableManager.inputMethods(),
             initSettingsButton = {
-                visibility = if (it.tableFileExists) View.GONE else View.VISIBLE
-                imageDrawable = styledDrawable(android.R.attr.alertDialogIcon)
-                setOnClickListener { _: View ->
-                    if (it.tableFileExists) return@setOnClickListener
+                visibility = View.VISIBLE
+                imageDrawable =
+                    if (it.tableFileExists) drawable(R.drawable.ic_baseline_edit_24)
+                    else styledDrawable(android.R.attr.alertDialogIcon)
+                setOnClickListener { _ ->
+                    tableToReplace = it
                     lifecycleScope.launch {
-                        errorDialog(
-                            requireContext(),
-                            getString(R.string.table_file_does_not_exist_title),
-                            getString(R.string.table_file_does_not_exist_message, it.tableFileName)
-                        )
+                        if (it.tableFileExists) {
+                            showReplaceTableDialog(it)
+                        } else {
+                            showMissingTableDictDialog(it)
+                        }
                     }
                 }
             }
@@ -137,6 +142,9 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
         }
         dictLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             if (uri != null) prepareDictFromUri(uri)
+        }
+        replaceLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            if (uri != null) replaceDictFromUri(uri)
         }
     }
 
@@ -303,6 +311,64 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
 
     private suspend fun importErrorDialog(message: String) {
         errorDialog(requireContext(), getString(R.string.import_error), message)
+    }
+
+    private fun replaceDictFromUri(uri: Uri) {
+        val ctx = requireContext()
+        val cr = ctx.contentResolver
+        val nm = ctx.notificationManager
+        val im = tableToReplace ?: return
+        tableToReplace = null
+        lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
+            val importId = IMPORT_ID++
+            val dictName = cr.queryFileName(uri) ?: return@launch
+            if (Dictionary.Type.fromFileName(dictName) == null) {
+                importErrorDialog(getString(R.string.exception_table_dict_filename, dictName))
+                return@launch
+            }
+            NotificationCompat.Builder(ctx, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_baseline_library_books_24)
+                .setContentTitle(getString(R.string.table_im))
+                .setContentText("${getString(R.string.importing)} $dictName")
+                .setOngoing(true)
+                .setProgress(100, 0, true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .build().let { nm.notify(importId, it) }
+            try {
+                val dictStream = cr.openInputStream(uri)!!
+                im.table = TableManager.replaceTableDict(im, dictName, dictStream).getOrThrow()
+                withContext(Dispatchers.Main) {
+                    ui.updateItem(ui.indexItem(im), im)
+                }
+                dustman.forceDirty()
+            } catch (e: Exception) {
+                importErrorDialog(e.localizedMessage ?: e.stackTraceToString())
+            }
+            nm.cancel(importId)
+        }
+    }
+
+    private fun showReplaceTableDialog(im: TableBasedInputMethod) {
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.update_table)
+            .setMessage(getString(R.string.table_dict_replace_message, im.tableFileName))
+            .setNeutralButton(R.string.table_file_placeholder) { _, _ ->
+                replaceLauncher.launch("*/*")
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showMissingTableDictDialog(im: TableBasedInputMethod) {
+        AlertDialog.Builder(requireContext())
+            .setIconAttribute(android.R.attr.alertDialogIcon)
+            .setTitle(R.string.table_file_does_not_exist_title)
+            .setMessage(getString(R.string.table_file_does_not_exist_message, im.tableFileName))
+            .setPositiveButton(android.R.string.ok, null)
+            .setNeutralButton(R.string.table_file_placeholder) { _, _ ->
+                replaceLauncher.launch("*/*")
+            }
+            .show()
     }
 
     private fun reloadConfig() {
