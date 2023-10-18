@@ -23,6 +23,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -49,11 +50,33 @@ import splitties.resources.drawable
 import splitties.resources.resolveThemeAttribute
 import splitties.resources.styledColor
 import splitties.resources.styledDrawable
-import splitties.views.*
+import splitties.views.backgroundColor
+import splitties.views.bottomPadding
 import splitties.views.dsl.appcompat.switch
-import splitties.views.dsl.appcompat.toolbar
-import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.*
+import splitties.views.dsl.constraintlayout.above
+import splitties.views.dsl.constraintlayout.before
+import splitties.views.dsl.constraintlayout.below
+import splitties.views.dsl.constraintlayout.bottomOfParent
+import splitties.views.dsl.constraintlayout.centerHorizontally
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.endOfParent
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.matchConstraints
+import splitties.views.dsl.constraintlayout.packed
+import splitties.views.dsl.constraintlayout.startOfParent
+import splitties.views.dsl.constraintlayout.topOfParent
+import splitties.views.dsl.constraintlayout.topToTopOf
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.seekBar
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.view
+import splitties.views.dsl.core.wrapContent
+import splitties.views.dsl.core.wrapInScrollView
+import splitties.views.gravityVerticalCenter
+import splitties.views.horizontalPadding
+import splitties.views.textAppearance
+import splitties.views.topPadding
 import java.io.File
 
 class CustomThemeActivity : AppCompatActivity() {
@@ -80,7 +103,7 @@ class CustomThemeActivity : AppCompatActivity() {
     }
 
     private val toolbar by lazy {
-        toolbar {
+        view(::Toolbar) {
             backgroundColor = styledColor(android.R.attr.colorPrimary)
             elevation = dp(4f)
         }
