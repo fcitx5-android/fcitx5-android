@@ -160,6 +160,11 @@
                 android:name="splitties.init.AppCtxInitializer"
                 android:value="androidx.startup"
                 tools:node="remove" />
+            <!-- do not inject splitties AppCompat -->
+            <meta-data
+                android:name="splitties.views.dsl.appcompat.experimental.AppCompatViewInstantiatorInjecter"
+                android:value="androidx.startup"
+                tools:node="remove" />
         </provider>
     </application>
 

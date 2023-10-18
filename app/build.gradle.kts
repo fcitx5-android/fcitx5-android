@@ -137,3 +137,10 @@ dependencies {
     androidTestImplementation(libs.androidx.lifecycle.testing)
     androidTestImplementation(libs.junit)
 }
+
+// remove Baseline Profile Installer or whatever it is...
+configurations {
+    all {
+        exclude(group = "androidx.profileinstaller", module = "profileinstaller")
+    }
+}

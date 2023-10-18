@@ -5,34 +5,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.setup.SetupActivity">
+
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewpager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:orientation="horizontal" />
+        app:layout_constraintTop_toTopOf="parent" />
+
     <Button
         android:id="@+id/skip_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:background="?android:attr/selectableItemBackground" />
+        app:layout_constraintTop_toTopOf="parent" />
+
     <Button
         android:id="@+id/next_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:background="?android:attr/selectableItemBackground"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:background="?android:attr/selectableItemBackground" />
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <Button
         android:id="@+id/prev_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
+        android:background="?android:attr/selectableItemBackground"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:background="?android:attr/selectableItemBackground" />
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

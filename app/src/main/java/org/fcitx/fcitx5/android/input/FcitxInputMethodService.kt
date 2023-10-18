@@ -671,7 +671,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             .addStyle(style)
             .build()
         val spec = InlinePresentationSpec
-            .Builder(InlinePresentationSpecMinSize, InlinePresentationSpecMaxSize)
+            .Builder(Size(0, 0), Size(Int.MAX_VALUE, Int.MAX_VALUE))
             .setStyle(styleBundle)
             .build()
         return InlineSuggestionsRequest.Builder(listOf(spec))
@@ -724,8 +724,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     companion object {
         const val DeleteSurroundingFlag = "org.fcitx.fcitx5.android.DELETE_SURROUNDING"
-        private val InlinePresentationSpecMinSize = Size(0, 0)
-        private val InlinePresentationSpecMaxSize = Size(Int.MAX_VALUE, Int.MAX_VALUE)
     }
 
 }

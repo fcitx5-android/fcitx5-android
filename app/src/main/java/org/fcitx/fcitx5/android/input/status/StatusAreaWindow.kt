@@ -1,9 +1,9 @@
 package org.fcitx.fcitx5.android.input.status
 
+import android.os.Build
 import android.view.View
 import android.widget.PopupMenu
 import android.widget.Toast
-import androidx.core.view.MenuCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
@@ -81,18 +81,19 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
             override fun onItemClick(view: View, entry: StatusAreaEntry) {
                 when (entry) {
                     is StatusAreaEntry.Fcitx -> {
-                        val menu = entry.action.menu
-                        if (menu.isNullOrEmpty()) {
+                        val actions = entry.action.menu
+                        if (actions.isNullOrEmpty()) {
                             activateAction(entry.action)
                             return
                         }
                         val popup = PopupMenu(context, view)
+                        val menu = popup.menu
                         var groupId = 0 // Menu.NONE; ungrouped
-                        menu.forEach {
+                        actions.forEach {
                             if (it.isSeparator) {
                                 groupId++
                             } else {
-                                popup.menu.add(groupId, 0, 0, it.shortText).apply {
+                                menu.add(groupId, 0, 0, it.shortText).apply {
                                     setOnMenuItemClickListener { _ ->
                                         activateAction(it)
                                         true
@@ -100,7 +101,9 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
                                 }
                             }
                         }
-                        MenuCompat.setGroupDividerEnabled(popup.menu, true)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            menu.setGroupDividerEnabled(true)
+                        }
                         popup.show()
                     }
                     is StatusAreaEntry.Android -> when (entry.type) {
