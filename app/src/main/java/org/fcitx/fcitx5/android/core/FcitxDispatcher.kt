@@ -52,7 +52,6 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
         fun nativeExit()
     }
 
-    private val nativeLoopLock = Mutex()
     private val runningLock = Mutex()
 
     private val queue = ConcurrentLinkedQueue<WrappedRunnable>()
@@ -64,17 +63,15 @@ class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispat
      * This function returns immediately
      */
     fun start() {
+        Timber.d("FcitxDispatcher start()")
         internalScope.launch {
             runningLock.withLock {
-                Timber.d("FcitxDispatcher start()")
                 if (isRunning.compareAndSet(false, true)) {
                     Timber.d("nativeStartup()")
                     controller.nativeStartup()
                     while (isActive && isRunning.get()) {
                         // blocking...
-                        nativeLoopLock.withLock {
-                            controller.nativeLoopOnce()
-                        }
+                        controller.nativeLoopOnce()
                         // do scheduled jobs
                         while (true) {
                             val block = queue.poll() ?: break
