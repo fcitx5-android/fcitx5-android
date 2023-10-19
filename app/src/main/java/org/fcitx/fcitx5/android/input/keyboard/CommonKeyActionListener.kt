@@ -7,6 +7,7 @@ import org.fcitx.fcitx5.android.core.FcitxAPI
 import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.input.broadcast.PreeditEmptyStateComponent
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
@@ -46,6 +47,7 @@ class CommonKeyActionListener :
     private val fcitx by manager.fcitx()
     private val service by manager.inputMethodService()
     private val inputView by manager.inputView()
+    private val preeditState: PreeditEmptyStateComponent by manager.must()
     private val windowManager: InputWindowManager by manager.must()
 
     private var lastPickerType by AppPrefs.getInstance().internal.lastPickerType
@@ -108,10 +110,7 @@ class CommonKeyActionListener :
                 is MoveSelectionAction -> {
                     when (backspaceSwipeState) {
                         Stopped -> {
-                            val preeditEmpty = fcitx.runImmediately {
-                                clientPreeditCached.isEmpty() && inputPanelCached.preedit.isEmpty()
-                            }
-                            backspaceSwipeState = if (preeditEmpty) {
+                            backspaceSwipeState = if (preeditState.isEmpty) {
                                 service.applySelectionOffset(action.start, action.end)
                                 Selection
                             } else {
