@@ -33,7 +33,6 @@ class CursorTracker {
     }
 
     fun consume(start: Int, end: Int = start): Boolean {
-        Timber.d("consume [$start,$end]")
         if (current.rangeEquals(start, end)) {
             return true
         }
@@ -46,7 +45,7 @@ class CursorTracker {
         }
         current.update(start, end)
         if (!matched) {
-            Timber.d("unable to consume")
+            Timber.d("unable to consume [$start,$end]")
         }
         return matched
     }

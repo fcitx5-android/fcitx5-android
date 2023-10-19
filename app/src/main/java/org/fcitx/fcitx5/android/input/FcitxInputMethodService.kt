@@ -11,7 +11,11 @@ import android.os.SystemClock
 import android.text.InputType
 import android.util.LruCache
 import android.util.Size
-import android.view.*
+import android.view.KeyCharacterMap
+import android.view.KeyEvent
+import android.view.View
+import android.view.ViewGroup
+import android.view.Window
 import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InlineSuggestionsRequest
@@ -34,7 +38,12 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.core.*
+import org.fcitx.fcitx5.android.core.CapabilityFlags
+import org.fcitx.fcitx5.android.core.FcitxAPI
+import org.fcitx.fcitx5.android.core.FcitxEvent
+import org.fcitx.fcitx5.android.core.FormattedText
+import org.fcitx.fcitx5.android.core.KeyStates
+import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.data.InputFeedbacks
@@ -45,6 +54,7 @@ import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.cursor.CursorRange
 import org.fcitx.fcitx5.android.input.cursor.CursorTracker
 import org.fcitx.fcitx5.android.utils.alpha
+import org.fcitx.fcitx5.android.utils.withBatchEdit
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
 import splitties.resources.styledColor
@@ -244,28 +254,34 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     fun commitText(text: String, cursor: Int = -1) {
         val ic = currentInputConnection ?: return
-        val targetCursor = if (cursor == -1) text.length else cursor
-        val currentCursor = selection.current.start - composing.start
         // when composing text equals commit content, finish composing text as-is
         if (composing.isNotEmpty() && composingText.toString() == text) {
-            if (targetCursor != currentCursor) {
-                val c = composing.start + targetCursor
-                selection.predict(c)
-                ic.setSelection(c, c)
-            }
+            val c = if (cursor == -1) text.length else cursor
+            val target = composing.start + c
             resetComposingState()
-            ic.finishComposingText()
+            ic.withBatchEdit {
+                if (selection.current.start != target) {
+                    selection.predict(target)
+                    ic.setSelection(target, target)
+                }
+                ic.finishComposingText()
+            }
             return
         }
         // committed text should replace composing (if any), replace selected range (if any),
         // or simply prepend before cursor
         val start = if (composing.isEmpty()) selection.latest.start else composing.start
         resetComposingState()
-        ic.commitText(text, 1)
-        if (targetCursor != currentCursor) {
-            val c = start + targetCursor
-            selection.predict(c)
-            ic.setSelection(c, c)
+        if (cursor == -1) {
+            selection.predict(start + text.length)
+            ic.commitText(text, 1)
+        } else {
+            val target = start + cursor
+            selection.predict(target)
+            ic.withBatchEdit {
+                commitText(text, 1)
+                setSelection(target, target)
+            }
         }
     }
 
@@ -496,7 +512,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     ) {
         // onUpdateSelection can left behind when user types quickly enough, eg. long press backspace
         cursorUpdateIndex += 1
-        Timber.d("onUpdateSelection: old=[$oldSelStart,$oldSelEnd] new=[$newSelStart,$newSelEnd] cand=[$candidatesStart,$candidatesEnd]")
+        Timber.d("onUpdateSelection: old=[$oldSelStart,$oldSelEnd] new=[$newSelStart,$newSelEnd]")
         handleCursorUpdate(newSelStart, newSelEnd, cursorUpdateIndex)
         inputView?.updateSelection(newSelStart, newSelEnd)
     }

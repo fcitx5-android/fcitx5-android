@@ -18,6 +18,7 @@ import android.provider.OpenableColumns
 import android.provider.Settings
 import android.util.TypedValue
 import android.view.View
+import android.view.inputmethod.InputConnection
 import android.widget.EditText
 import android.widget.SeekBar
 import android.widget.Toast
@@ -270,3 +271,9 @@ inline fun <T> withTempDir(block: (File) -> T): T {
 fun <T> WeakHashSet(): MutableSet<T> = Collections.newSetFromMap(WeakHashMap<T, Boolean>())
 
 val javaIdRegex = Regex("(?:\\b[_a-zA-Z]|\\B\\$)\\w*+")
+
+fun InputConnection.withBatchEdit(block: InputConnection.() -> Unit) {
+    beginBatchEdit()
+    block.invoke(this)
+    endBatchEdit()
+}
