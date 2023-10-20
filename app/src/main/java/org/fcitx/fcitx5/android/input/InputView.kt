@@ -396,17 +396,8 @@ class InputView(
                 broadcaster.onImeUpdate(it.data)
             }
             is FcitxEvent.StatusAreaEvent -> {
-                // Engine subMode update won't trigger IMChangeEvent, but usually updates StatusArea
-                fcitx.launchOnReady {
-                    val ime = it.currentIme()
-                    if (ime != it.inputMethodEntryCached) {
-                        service.lifecycleScope.launch {
-                            broadcaster.onImeUpdate(ime)
-                        }
-                    }
-                }
-                punctuation.updatePunctuationMapping(it.data)
-                broadcaster.onStatusAreaUpdate(it.data)
+                punctuation.updatePunctuationMapping(it.data.actions)
+                broadcaster.onStatusAreaUpdate(it.data.actions)
             }
             else -> {}
         }

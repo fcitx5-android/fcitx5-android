@@ -615,13 +615,18 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
     };
     auto statusAreaUpdateCallback = []() {
         auto env = GlobalRef->AttachEnv();
+        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(static_cast<int>(2), GlobalRef->Object, nullptr));
         const auto actions = Fcitx::Instance().statusAreaActions();
-        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(static_cast<int>(actions.size()), GlobalRef->Action, nullptr));
+        auto actionArray = JRef<jobjectArray>(env, env->NewObjectArray(static_cast<int>(actions.size()), GlobalRef->Action, nullptr));
         int i = 0;
         for (const auto &a: actions) {
             auto obj = JRef(env, fcitxActionToJObject(env, a));
-            env->SetObjectArrayElement(vararg, i++, obj);
+            env->SetObjectArrayElement(actionArray, i++, obj);
         }
+        env->SetObjectArrayElement(vararg, 0, actionArray);
+        std::unique_ptr<InputMethodStatus> status = Fcitx::Instance().inputMethodStatus();
+        auto statusObj = JRef(env, fcitxInputMethodStatusToJObject(env, *status));
+        env->SetObjectArrayElement(vararg, 1, statusObj);
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 7, *vararg);
     };
     auto toastCallback = [](const std::string &s) {

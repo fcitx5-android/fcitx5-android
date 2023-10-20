@@ -51,8 +51,7 @@ sealed class FcitxEvent<T>(open val data: T) {
         override fun toString(): String = "ClientPreeditEvent('$data', ${data.cursor})"
     }
 
-    data class InputPanelEvent(override val data: Data) :
-        FcitxEvent<InputPanelEvent.Data>(data) {
+    data class InputPanelEvent(override val data: Data) : FcitxEvent<InputPanelEvent.Data>(data) {
         override val eventType: EventType
             get() = EventType.InputPanel
 
@@ -72,8 +71,7 @@ sealed class FcitxEvent<T>(open val data: T) {
         override fun toString(): String = "ReadyEvent"
     }
 
-    data class KeyEvent(override val data: Data) :
-        FcitxEvent<KeyEvent.Data>(data) {
+    data class KeyEvent(override val data: Data) : FcitxEvent<KeyEvent.Data>(data) {
         override val eventType: EventType
             get() = EventType.Key
 
@@ -92,25 +90,28 @@ sealed class FcitxEvent<T>(open val data: T) {
             get() = EventType.Change
     }
 
-    data class StatusAreaEvent(override val data: Array<Action>) :
-        FcitxEvent<Array<Action>>(data) {
-
+    data class StatusAreaEvent(override val data: Data) : FcitxEvent<StatusAreaEvent.Data>(data) {
         override val eventType: EventType
             get() = EventType.StatusArea
 
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
+        data class Data(val actions: Array<Action>, val im: InputMethodEntry) {
+            override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (javaClass != other?.javaClass) return false
 
-            other as StatusAreaEvent
+                other as Data
 
-            if (!data.contentEquals(other.data)) return false
+                if (!actions.contentEquals(other.actions)) return false
+                if (im != other.im) return false
 
-            return true
-        }
+                return true
+            }
 
-        override fun hashCode(): Int {
-            return data.contentHashCode()
+            override fun hashCode(): Int {
+                var result = actions.contentHashCode()
+                result = 31 * result + im.hashCode()
+                return result
+            }
         }
     }
 
@@ -184,7 +185,12 @@ sealed class FcitxEvent<T>(open val data: T) {
                     )
                 )
                 EventType.Change -> IMChangeEvent(params[0] as InputMethodEntry)
-                EventType.StatusArea -> StatusAreaEvent(params as Array<Action>)
+                EventType.StatusArea -> StatusAreaEvent(
+                    StatusAreaEvent.Data(
+                        params[0] as Array<Action>,
+                        params[1] as InputMethodEntry
+                    )
+                )
                 else -> UnknownEvent(params)
             }
     }

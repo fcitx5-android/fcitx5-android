@@ -453,7 +453,16 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         when (event) {
             is FcitxEvent.ReadyEvent -> lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_READY)
             is FcitxEvent.IMChangeEvent -> inputMethodEntryCached = event.data
-            is FcitxEvent.StatusAreaEvent -> statusAreaActionsCached = event.data
+            is FcitxEvent.StatusAreaEvent -> {
+                val (actions, im) = event.data
+                statusAreaActionsCached = actions
+                // Engine subMode update won't trigger IMChangeEvent, but usually updates StatusArea
+                if (im != inputMethodEntryCached) {
+                    inputMethodEntryCached = im
+                    // notify downstream consumers that engine subMode has changed
+                    eventFlow_.tryEmit(FcitxEvent.IMChangeEvent(im))
+                }
+            }
             is FcitxEvent.ClientPreeditEvent -> clientPreeditCached = event.data
             is FcitxEvent.InputPanelEvent -> inputPanelCached = event.data
             else -> {}
