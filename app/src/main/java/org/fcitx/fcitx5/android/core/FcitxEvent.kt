@@ -7,8 +7,7 @@ sealed class FcitxEvent<T>(open val data: T) {
     data class CandidateListEvent(override val data: Data) :
         FcitxEvent<CandidateListEvent.Data>(data) {
 
-        override val eventType: EventType
-            get() = EventType.Candidate
+        override val eventType = EventType.Candidate
 
         data class Data(val total: Int, val candidates: Array<String>) {
 
@@ -37,23 +36,23 @@ sealed class FcitxEvent<T>(open val data: T) {
 
     data class CommitStringEvent(override val data: Data) :
         FcitxEvent<CommitStringEvent.Data>(data) {
-        override val eventType: EventType
-            get() = EventType.Commit
+
+        override val eventType = EventType.Commit
 
         data class Data(val text: String, val cursor: Int)
     }
 
     data class ClientPreeditEvent(override val data: FormattedText) :
         FcitxEvent<FormattedText>(data) {
-        override val eventType: EventType
-            get() = EventType.ClientPreedit
+
+        override val eventType = EventType.ClientPreedit
 
         override fun toString(): String = "ClientPreeditEvent('$data', ${data.cursor})"
     }
 
     data class InputPanelEvent(override val data: Data) : FcitxEvent<InputPanelEvent.Data>(data) {
-        override val eventType: EventType
-            get() = EventType.InputPanel
+
+        override val eventType = EventType.InputPanel
 
         data class Data(
             val preedit: FormattedText,
@@ -65,15 +64,15 @@ sealed class FcitxEvent<T>(open val data: T) {
     }
 
     data class ReadyEvent(override val data: Unit = Unit) : FcitxEvent<Unit>(data) {
-        override val eventType: EventType
-            get() = EventType.Ready
+
+        override val eventType = EventType.Ready
 
         override fun toString(): String = "ReadyEvent"
     }
 
     data class KeyEvent(override val data: Data) : FcitxEvent<KeyEvent.Data>(data) {
-        override val eventType: EventType
-            get() = EventType.Key
+
+        override val eventType = EventType.Key
 
         data class Data(
             val sym: KeySym,
@@ -91,8 +90,8 @@ sealed class FcitxEvent<T>(open val data: T) {
     }
 
     data class StatusAreaEvent(override val data: Data) : FcitxEvent<StatusAreaEvent.Data>(data) {
-        override val eventType: EventType
-            get() = EventType.StatusArea
+
+        override val eventType = EventType.StatusArea
 
         data class Data(val actions: Array<Action>, val im: InputMethodEntry) {
             override fun equals(other: Any?): Boolean {
@@ -115,9 +114,17 @@ sealed class FcitxEvent<T>(open val data: T) {
         }
     }
 
+    data class DeleteSurroundingEvent(override val data: Data) :
+        FcitxEvent<DeleteSurroundingEvent.Data>(data) {
+
+            override val eventType = EventType.DeleteSurrounding
+
+        data class Data(val before: Int, val after: Int)
+    }
+
     data class UnknownEvent(override val data: Array<Any>) : FcitxEvent<Array<Any>>(data) {
-        override val eventType: EventType
-            get() = EventType.Unknown
+
+        override val eventType = EventType.Unknown
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
@@ -144,6 +151,7 @@ sealed class FcitxEvent<T>(open val data: T) {
         Key,
         Change,
         StatusArea,
+        DeleteSurrounding,
         Unknown
     }
 
@@ -191,6 +199,9 @@ sealed class FcitxEvent<T>(open val data: T) {
                         params[1] as InputMethodEntry
                     )
                 )
+                EventType.DeleteSurrounding -> (params[0] as IntArray).let {
+                    DeleteSurroundingEvent(DeleteSurroundingEvent.Data(it[0], it[1]))
+                }
                 else -> UnknownEvent(params)
             }
     }

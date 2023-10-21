@@ -195,7 +195,23 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             is FcitxEvent.ClientPreeditEvent -> {
                 updateComposingText(event.data)
             }
+            is FcitxEvent.DeleteSurroundingEvent -> {
+                val (before, after) = event.data
+                handleDeleteSurrounding(before, after)
+            }
             else -> {}
+        }
+    }
+
+    private fun handleDeleteSurrounding(before: Int, after: Int) {
+        val ic = currentInputConnection ?: return
+        if (before > 0) {
+            selection.predictOffset(-before)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            ic.deleteSurroundingTextInCodePoints(before, after)
+        } else {
+            ic.deleteSurroundingText(before, after)
         }
     }
 
@@ -206,7 +222,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         } else if (lastSelection.start > 0) {
             selection.predictOffset(-1)
         }
-        // In practice nobody (apart form us) would set `privateImeOptions` to our
+        // In practice nobody (apart form ourselves) would set `privateImeOptions` to our
         // `DeleteSurroundingFlag`, leading to a behavior of simulating backspace key pressing
         // in almost every EditText.
         if (currentInputEditorInfo.privateImeOptions != DeleteSurroundingFlag ||

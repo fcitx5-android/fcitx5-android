@@ -34,6 +34,7 @@ public:
     InputContext *activeInputContext() const;
     void setCapabilityFlags(uint64_t flag);
     std::vector<std::string> getCandidates(const int offset, const int limit);
+    void deleteSurrounding(const int before, const int after);
     void showToast(const std::string &s);
     void setCandidateListCallback(const CandidateListCallback &callback);
     void setCommitStringCallback(const CommitStringCallback &callback);
@@ -42,6 +43,7 @@ public:
     void setKeyEventCallback(const KeyEventCallback &callback);
     void setInputMethodChangeCallback(const InputMethodChangeCallback &callback);
     void setStatusAreaUpdateCallback(const StatusAreaUpdateCallback &callback);
+    void setDeleteSurroundingCallback(const DeleteSurroundingCallback &callback);
     void setToastCallback(const ToastCallback &callback);
 
 private:
@@ -64,6 +66,7 @@ private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setKeyEventCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setInputMethodChangeCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setStatusAreaUpdateCallback);
+    FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setDeleteSurroundingCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setToastCallback);
 
     Instance *instance_;
@@ -83,6 +86,7 @@ private:
     KeyEventCallback keyEventCallback = [](const int, const uint32_t, const uint32_t, const bool, const int) {};
     InputMethodChangeCallback imChangeCallback = [] {};
     StatusAreaUpdateCallback statusAreaUpdateCallback = [] {};
+    DeleteSurroundingCallback deleteSurroundingCallback = [](const int, const int) {};
     ToastCallback toastCallback = [](const std::string &) {};
 };
 } // namespace fcitx

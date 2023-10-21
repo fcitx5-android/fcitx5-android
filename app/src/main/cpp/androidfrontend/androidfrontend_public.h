@@ -11,6 +11,7 @@ typedef std::function<void(const fcitx::Text &, const fcitx::Text &, const fcitx
 typedef std::function<void(const int, const uint32_t, const uint32_t, const bool, const int)> KeyEventCallback;
 typedef std::function<void()> InputMethodChangeCallback;
 typedef std::function<void()> StatusAreaUpdateCallback;
+typedef std::function<void(const int, const int)> DeleteSurroundingCallback;
 typedef std::function<void(const std::string &)> ToastCallback;
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, keyEvent,
@@ -69,6 +70,9 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setInputMethodChangeCallback,
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setStatusAreaUpdateCallback,
                              void(const StatusAreaUpdateCallback &))
+
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setDeleteSurroundingCallback,
+                             void(const DeleteSurroundingCallback &))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setToastCallback,
                              void(const ToastCallback &))

@@ -629,6 +629,15 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
         env->SetObjectArrayElement(vararg, 1, statusObj);
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 7, *vararg);
     };
+    auto deleteSurroundingCallback = [](const int before, const int after) {
+        std::array<int, 2> arr{before, after};
+        auto env = GlobalRef->AttachEnv();
+        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(1, GlobalRef->Object, nullptr));
+        auto intArray = JRef<jintArray>(env, env->NewIntArray(2));
+        env->SetIntArrayRegion(intArray, 0, 2, arr.data());
+        env->SetObjectArrayElement(vararg, 0, intArray);
+        env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 8, *vararg);
+    };
     auto toastCallback = [](const std::string &s) {
         auto env = GlobalRef->AttachEnv();
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->ShowToast, *JString(env, s));

@@ -117,7 +117,7 @@ void AndroidKeyboardEngine::keyEvent(const InputMethodEntry &entry, KeyEvent &ev
             }
             return updateCandidate(entry, inputContext);
         }
-    } else if (key.check(FcitxKey_Delete)) {
+    } else if (key.check(FcitxKey_Delete) || key.check(FcitxKey_KP_Delete)) {
         if (buffer.del()) {
             event.filterAndAccept();
             if (buffer.empty()) {

@@ -42,7 +42,13 @@ public:
     }
 
     void deleteSurroundingTextImpl(int offset, unsigned int size) override {
-        FCITX_INFO() << "DeleteSurrounding: " << offset << " " << size;
+        const int before = -offset;
+        const int after = offset + static_cast<int>(size);
+        if (before < 0 || after < 0) {
+            FCITX_WARN() << "Invalid deleteSurrounding request: offset=" << offset << ", size=" << size;
+            return;
+        }
+        frontend_->deleteSurrounding(before, after);
     }
 
     void updatePreeditImpl() override {
@@ -300,6 +306,10 @@ std::vector<std::string> AndroidFrontend::getCandidates(const int offset, const 
     return ic->getCandidates(offset, limit);
 }
 
+void AndroidFrontend::deleteSurrounding(const int before, const int after) {
+    deleteSurroundingCallback(before, after);
+}
+
 void AndroidFrontend::showToast(const std::string &s) {
     toastCallback(s);
 }
@@ -337,6 +347,10 @@ void AndroidFrontend::handleStatusAreaUpdate() {
         statusAreaDefer_ = nullptr;
         return true;
     });
+}
+
+void AndroidFrontend::setDeleteSurroundingCallback(const DeleteSurroundingCallback &callback) {
+    deleteSurroundingCallback = callback;
 }
 
 void AndroidFrontend::setToastCallback(const ToastCallback &callback) {
