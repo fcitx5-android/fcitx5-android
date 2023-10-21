@@ -102,7 +102,7 @@ object TableManager {
             runCatching {
                 dict.toLibIMEDictionary(File(tempDir, im.tableFileName))
             }.onSuccess {
-                it.file.copyTo(File(tableDicDir, im.tableFileName))
+                it.file.copyTo(File(tableDicDir, im.tableFileName), overwrite = true)
             }.onFailure {
                 dictFile.delete()
                 errorRuntime(R.string.invalid_table_dict, it.message)
