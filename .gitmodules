@@ -40,3 +40,6 @@
 [submodule "plugin/hangul/src/main/cpp/fcitx5-hangul"]
 	path = plugin/hangul/src/main/cpp/fcitx5-hangul
 	url = git@github.com:fcitx/fcitx5-hangul.git
+[submodule "plugin/chewing/src/main/cpp/fcitx5-chewing"]
+	path = plugin/chewing/src/main/cpp/fcitx5-chewing
+	url = git@github.com:fcitx/fcitx5-chewing.git
