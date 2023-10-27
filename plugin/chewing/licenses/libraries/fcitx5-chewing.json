@@ -1,0 +1,11 @@
+{
+    "uniqueId": "fcitx/fcitx5-chewing",
+    "artifactVersion": "5.1.0",
+    "description": "Chewing Wrapper for Fcitx",
+    "name": "fcitx/fcitx5-chewing",
+    "website": "https://github.com/fcitx/fcitx5-chewing",
+    "tag": "native",
+    "licenses": [
+        "GPL-2.0-or-later"
+    ]
+}
