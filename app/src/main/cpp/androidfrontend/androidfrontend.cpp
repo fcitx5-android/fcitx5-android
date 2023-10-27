@@ -194,10 +194,9 @@ AndroidFrontend::AndroidFrontend(Instance *instance)
 }
 
 void AndroidFrontend::keyEvent(const Key &key, bool isRelease, const int timestamp) {
-    auto *ic = activeIC_;
-    if (!ic) return;
-    KeyEvent keyEvent(ic, key, isRelease);
-    ic->keyEvent(keyEvent);
+    if (!activeIC_) return;
+    KeyEvent keyEvent(activeIC_, key, isRelease);
+    activeIC_->keyEvent(keyEvent);
     if (!keyEvent.accepted()) {
         auto sym = key.sym();
         keyEventCallback(sym, key.states(), Key::keySymToUnicode(sym), isRelease, timestamp);
@@ -222,7 +221,7 @@ void AndroidFrontend::updateClientPreedit(const Text &clientPreedit) {
 }
 
 void AndroidFrontend::updateInputPanel(const Text &preedit, const Text &auxUp, const Text &auxDown) {
-    inputPanelAuxCallback(preedit, auxUp, auxDown);
+    inputPanelCallback(preedit, auxUp, auxDown);
 }
 
 void AndroidFrontend::releaseInputContext(const int uid) {
@@ -230,45 +229,39 @@ void AndroidFrontend::releaseInputContext(const int uid) {
 }
 
 bool AndroidFrontend::selectCandidate(int idx) {
-    auto *ic = dynamic_cast<AndroidInputContext *>(focusGroup_.focusedInputContext());
-    if (!ic) return false;
-    return ic->selectCandidate(idx);
+    if (!activeIC_) return false;
+    return activeIC_->selectCandidate(idx);
 }
 
 bool AndroidFrontend::isInputPanelEmpty() {
-    auto *ic = focusGroup_.focusedInputContext();
-    if (!ic) return true;
-    return ic->inputPanel().empty();
+    if (!activeIC_) return true;
+    return activeIC_->inputPanel().empty();
 }
 
 void AndroidFrontend::resetInputContext() {
-    auto *ic = focusGroup_.focusedInputContext();
-    if (!ic) return;
-    ic->reset();
+    if (!activeIC_) return;
+    activeIC_->reset();
 }
 
 void AndroidFrontend::repositionCursor(int position) {
-    auto *ic = focusGroup_.focusedInputContext();
-    if (!ic) return;
-    InvokeActionEvent event(InvokeActionEvent::Action::LeftClick, position, ic);
-    ic->invokeAction(event);
+    if (!activeIC_) return;
+    InvokeActionEvent event(InvokeActionEvent::Action::LeftClick, position, activeIC_);
+    activeIC_->invokeAction(event);
 }
 
 void AndroidFrontend::focusInputContext(bool focus) {
+    if (!activeIC_) return;
     if (focus) {
-        if (!activeIC_) return;
         activeIC_->focusIn();
     } else {
-        auto *ic = focusGroup_.focusedInputContext();
-        if (!ic) return;
-        ic->focusOut();
+        activeIC_->focusOut();
     }
 }
 
 void AndroidFrontend::activateInputContext(const int uid, const std::string &pkgName) {
     auto *ptr = icCache_.find(uid);
     if (ptr) {
-        activeIC_ = ptr->get();
+        activeIC_ = dynamic_cast<AndroidInputContext *>(ptr->get());
     } else {
         auto *ic = new AndroidInputContext(this, instance_->inputContextManager(), uid, pkgName);
         activeIC_ = ic;
@@ -298,9 +291,8 @@ void AndroidFrontend::setCandidateListCallback(const CandidateListCallback &call
 }
 
 std::vector<std::string> AndroidFrontend::getCandidates(const int offset, const int limit) {
-    auto *ic = dynamic_cast<AndroidInputContext *>(focusGroup_.focusedInputContext());
-    if (!ic) return {};
-    return ic->getCandidates(offset, limit);
+    if (!activeIC_) return {};
+    return activeIC_->getCandidates(offset, limit);
 }
 
 void AndroidFrontend::deleteSurrounding(const int before, const int after) {
@@ -320,7 +312,7 @@ void AndroidFrontend::setPreeditCallback(const ClientPreeditCallback &callback) 
 }
 
 void AndroidFrontend::setInputPanelAuxCallback(const InputPanelCallback &callback) {
-    inputPanelAuxCallback = callback;
+    inputPanelCallback = callback;
 }
 
 void AndroidFrontend::setKeyEventCallback(const KeyEventCallback &callback) {
