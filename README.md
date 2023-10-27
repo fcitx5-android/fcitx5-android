@@ -20,7 +20,9 @@ GitHub: [![release version](https://img.shields.io/github/v/release/fcitx5-andro
 ### Supported Languages
 
 - English (with spell check)
-- Chinese (Pinyin, Shuangpin, Wubi, Cangjie and custom tables; Chewing (via [Chewing Plugin](./plugin/chewing)))
+- Chinese
+  - Pinyin, Shuangpin, Wubi, Cangjie and custom tables (built-in, powered by [fcitx5-chinese-addons](https://github.com/fcitx/fcitx5-chinese-addons))
+  - Zhuyin/Bopomofo (via [Chewing Plugin](./plugin/chewing)))
 - Vietnamese (via [UniKey Plugin](./plugin/unikey), supports Telex, VNI and VIQR)
 - Japanese (via [Anthy Plugin](./plugin/anthy))
 - Korean (via [Hangul Plugin](./plugin/hangul))
