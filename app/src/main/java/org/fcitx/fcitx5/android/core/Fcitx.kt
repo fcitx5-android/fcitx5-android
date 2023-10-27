@@ -79,11 +79,11 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
     override suspend fun sendKey(c: Char, states: UInt, up: Boolean, timestamp: Int) =
         withFcitxContext { sendKeyToFcitxChar(c, states.toInt(), up, timestamp) }
 
-    override suspend fun sendKey(sym: Int, states: UInt, up: Boolean, timestamp: Int) =
-        withFcitxContext { sendKeySymToFcitx(sym, states.toInt(), up, timestamp) }
+    override suspend fun sendKey(sym: Int, states: UInt, code: Int, up: Boolean, timestamp: Int) =
+        withFcitxContext { sendKeySymToFcitx(sym, states.toInt(), code, up, timestamp) }
 
     override suspend fun sendKey(sym: KeySym, states: KeyStates, up: Boolean, timestamp: Int) =
-        withFcitxContext { sendKeySymToFcitx(sym.sym, states.toInt(), up, timestamp) }
+        withFcitxContext { sendKeySymToFcitx(sym.sym, states.toInt(), 0, up, timestamp) }
 
     override suspend fun select(idx: Int): Boolean = withFcitxContext { selectCandidate(idx) }
     override suspend fun forget(idx: Int): Boolean = withFcitxContext { forgetCandidate(idx) }
@@ -233,7 +233,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         external fun sendKeyToFcitxChar(c: Char, state: Int, up: Boolean, timestamp: Int)
 
         @JvmStatic
-        external fun sendKeySymToFcitx(sym: Int, state: Int, up: Boolean, timestamp: Int)
+        external fun sendKeySymToFcitx(sym: Int, state: Int, code: Int, up: Boolean, timestamp: Int)
 
         @JvmStatic
         external fun selectCandidate(idx: Int): Boolean

@@ -47,6 +47,7 @@ import org.fcitx.fcitx5.android.core.CapabilityFlags
 import org.fcitx.fcitx5.android.core.FcitxAPI
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.FormattedText
+import org.fcitx.fcitx5.android.core.KeyCode
 import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.core.SubtypeManager
@@ -468,12 +469,14 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         val up = event.action == KeyEvent.ACTION_UP
         val states = KeyStates.fromKeyEvent(event)
         val charCode = event.unicodeChar
+        val androidKeyCode = event.keyCode
+        val linuxKeyCode = KeyCode.androidToLinux[androidKeyCode] ?: 0
         // try send charCode first, allow upper case and lower case character generating different KeySym
         // skip \t, because it's charCode is different from KeySym
         // skip \n, because fcitx wants \r for return
         if (charCode > 0 && charCode != '\t'.code && charCode != '\n'.code) {
             postFcitxJob {
-                sendKey(charCode, states.states, up, timestamp)
+                sendKey(charCode, states.states, linuxKeyCode + 8 /* evdev offset */, up, timestamp)
             }
             return true
         }
