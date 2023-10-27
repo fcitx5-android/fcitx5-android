@@ -165,9 +165,7 @@ AndroidFrontend::AndroidFrontend(Instance *instance)
           focusGroup_("android", instance->inputContextManager()),
           activeIC_(nullptr),
           icCache_(),
-          eventHandlers_(),
-          statusAreaDefer_(),
-          statusAreaUpdated_(false) {
+          eventHandlers_() {
     eventHandlers_.emplace_back(instance_->watchEvent(
             EventType::InputContextInputMethodActivated,
             EventWatcherPhase::Default,
@@ -177,18 +175,17 @@ AndroidFrontend::AndroidFrontend(Instance *instance)
             }
     ));
     eventHandlers_.emplace_back(instance_->watchEvent(
-            EventType::InputContextUpdateUI,
+            EventType::InputContextFlushUI,
             EventWatcherPhase::Default,
             [this](Event &event) {
-                auto &e = static_cast<InputContextUpdateUIEvent &>(event);
+                auto &e = static_cast<InputContextFlushUIEvent &>(event);
                 switch (e.component()) {
                     case UserInterfaceComponent::InputPanel: {
-                        auto *ic = dynamic_cast<AndroidInputContext *>(activeIC_);
-                        if (ic) ic->updateInputPanel();
+                        if (activeIC_) activeIC_->updateInputPanel();
                         break;
                     }
                     case UserInterfaceComponent::StatusArea: {
-                        handleStatusAreaUpdate();
+                        statusAreaUpdateCallback();
                         break;
                     }
                 }
@@ -336,17 +333,6 @@ void AndroidFrontend::setInputMethodChangeCallback(const InputMethodChangeCallba
 
 void AndroidFrontend::setStatusAreaUpdateCallback(const StatusAreaUpdateCallback &callback) {
     statusAreaUpdateCallback = callback;
-}
-
-void AndroidFrontend::handleStatusAreaUpdate() {
-    if (statusAreaUpdated_) return;
-    statusAreaUpdated_ = true;
-    statusAreaDefer_ = instance_->eventLoop().addDeferEvent([this](EventSource *) {
-        statusAreaUpdateCallback();
-        statusAreaUpdated_ = false;
-        statusAreaDefer_ = nullptr;
-        return true;
-    });
 }
 
 void AndroidFrontend::setDeleteSurroundingCallback(const DeleteSurroundingCallback &callback) {

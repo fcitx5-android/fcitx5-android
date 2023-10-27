@@ -10,6 +10,8 @@
 
 namespace fcitx {
 
+class AndroidInputContext;
+
 class AndroidFrontend : public AddonInstance {
 public:
     AndroidFrontend(Instance *instance);
@@ -71,13 +73,9 @@ private:
 
     Instance *instance_;
     FocusGroup focusGroup_;
-    InputContext *activeIC_;
+    AndroidInputContext *activeIC_;
     InputContextCache icCache_;
     std::vector<std::unique_ptr<HandlerTableEntry<EventHandler>>> eventHandlers_;
-    std::unique_ptr<EventSource> statusAreaDefer_;
-    bool statusAreaUpdated_;
-
-    void handleStatusAreaUpdate();
 
     CandidateListCallback candidateListCallback = [](const std::vector<std::string> &, const int) {};
     CommitStringCallback commitStringCallback = [](const std::string &, const int) {};
