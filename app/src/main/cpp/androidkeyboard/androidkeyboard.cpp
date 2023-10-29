@@ -1,3 +1,7 @@
+/*
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ */
 #include <fcitx-utils/utf8.h>
 #include <fcitx-utils/charutils.h>
 #include <fcitx/instance.h>

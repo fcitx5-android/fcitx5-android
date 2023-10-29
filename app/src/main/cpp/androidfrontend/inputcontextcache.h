@@ -1,5 +1,9 @@
-// modified from https://github.com/fcitx/libime/blob/1.0.14/src/libime/core/lrucache.h
-
+/*
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * SPDX-FileCopyrightText: Copyright 2017-2017 CSSlayer <wengxt@gmail.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileComment: Modified from https://github.com/fcitx/libime/blob/1.0.14/src/libime/core/lrucache.h
+ */
 #ifndef FCITX5_ANDROID_INPUTCONTEXTCACHE_H
 #define FCITX5_ANDROID_INPUTCONTEXTCACHE_H
 

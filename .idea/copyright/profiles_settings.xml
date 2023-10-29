@@ -1,0 +1,7 @@
+<component name="CopyrightManager">
+  <settings default="fcitx5-android">
+    <module2copyright>
+      <element module="Project Source Files" copyright="fcitx5-android" />
+    </module2copyright>
+  </settings>
+</component>

@@ -1,9 +1,11 @@
+/*
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * SPDX-FileCopyrightText: Copyright 2016-2016 CSSlayer <wengxt@gmail.com>
+ * SPDX-FileCopyrightText: Copyright 2023 Fcitx5 for Android Contributors
+ * SPDX-FileComment: Modified from https://github.com/fcitx/fcitx5/blob/5.1.1/src/lib/fcitx/addonloader_p.h
+ */
 #ifndef FCITX5_ANDROID_ANDROIDADDONLOADER_H
 #define FCITX5_ANDROID_ANDROIDADDONLOADER_H
-
-/**
- * @see https://github.com/fcitx/fcitx5/blob/5.1.1/src/lib/fcitx/addonloader_p.cpp
- */
 
 #include <stdexcept>
 #include <fcitx-utils/library.h>

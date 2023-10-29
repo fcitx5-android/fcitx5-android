@@ -1,3 +1,7 @@
+/*
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ */
 import Versions.cmakeVersion
 import com.android.build.api.variant.AndroidComponentsExtension
 import org.gradle.api.Plugin

@@ -1,0 +1,7 @@
+<component name="CopyrightManager">
+  <copyright>
+    <option name="keyword" value="SPDX-FileCopyrightText" />
+    <option name="notice" value="SPDX-License-Identifier: LGPL-2.1-or-later&#10;SPDX-FileCopyrightText: Copyright &amp;#36;originalComment.match(&quot;Copyright (\d+)&quot;, 1, &quot;-&quot;)&amp;#36;today.year Fcitx5 for Android Contributors" />
+    <option name="myName" value="fcitx5-android" />
+  </copyright>
+</component>

@@ -1,3 +1,7 @@
+/*
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ */
 #ifndef _FCITX5_ANDROID_ANDROIDFRONTEND_H_
 #define _FCITX5_ANDROID_ANDROIDFRONTEND_H_
 

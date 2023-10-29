@@ -1,5 +1,9 @@
 @file:Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
 
+/**
+ * Copyright (C) 2021-2023 Fcitx 5 for Android Contributors
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ */
 package org.fcitx.fcitx5.android.lib.plugin_base
 
 import android.annotation.SuppressLint
