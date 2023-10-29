@@ -1,6 +1,8 @@
 package org.fcitx.fcitx5.android.ui.main.settings
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
@@ -15,6 +17,7 @@ import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceScreen
 import arrow.core.getOrElse
+import org.fcitx.fcitx5.android.BuildConfig
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Key
 import org.fcitx.fcitx5.android.core.RawConfig
@@ -35,6 +38,7 @@ import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.ConfigList
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.ConfigString
 import org.fcitx.fcitx5.android.utils.config.ConfigType
 import org.fcitx.fcitx5.android.utils.parcelableArray
+import org.fcitx.fcitx5.android.utils.toast
 
 object PreferenceScreenFactory {
 
@@ -156,6 +160,24 @@ object PreferenceScreenFactory {
             }
         }
 
+        fun rimeUserDataDir() = Preference(context).apply {
+            setOnPreferenceClickListener {
+                val documentId =
+                    Uri.encode("primary:Android/data/${BuildConfig.APPLICATION_ID}/files/data/rime")
+                try {
+                    context.startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse("content://com.android.externalstorage.documents/document/$documentId")
+                        )
+                    )
+                } catch (e: Exception) {
+                    context.toast(e.localizedMessage ?: e.stackTraceToString())
+                }
+                true
+            }
+        }
+
         fun listPreference(subtype: ConfigType<*>): Preference = object : Preference(context) {
             override fun onClick() {
                 val currentFragment = fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
@@ -236,6 +258,7 @@ object PreferenceScreenFactory {
                 ConfigExternal.ETy.TableGlobal -> addonConfigPreference("table")
                 ConfigExternal.ETy.AndroidTable -> tableInputMethod()
                 ConfigExternal.ETy.PinyinCustomPhrase -> pinyinCustomPhrase()
+                ConfigExternal.ETy.RimeUserDataDir -> rimeUserDataDir()
                 else -> stubPreference()
             }
             is ConfigInt -> {
