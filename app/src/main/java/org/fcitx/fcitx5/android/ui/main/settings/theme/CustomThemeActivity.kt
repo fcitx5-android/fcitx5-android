@@ -99,7 +99,7 @@ class CustomThemeActivity : AppCompatActivity() {
             }
 
         override fun parseResult(resultCode: Int, intent: Intent?): BackgroundResult? =
-            intent?.extras?.parcelable(RESULT)
+            intent?.parcelable(RESULT)
     }
 
     private val toolbar by lazy {
@@ -259,7 +259,7 @@ class CustomThemeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // recover from bundle
-        val originTheme = intent?.extras?.parcelable<Theme.Custom>(ORIGIN_THEME)?.also { t ->
+        val originTheme = intent?.parcelable<Theme.Custom>(ORIGIN_THEME)?.also { t ->
             theme = t
             whenHasBackground {
                 croppedImageFile = File(it.croppedFilePath)

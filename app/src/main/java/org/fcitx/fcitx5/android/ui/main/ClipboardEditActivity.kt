@@ -64,11 +64,11 @@ class ClipboardEditActivity : Activity() {
 
     private fun processIntent(intent: Intent) {
         scope.launch {
-            intent.extras?.run {
-                if (getBoolean(LAST_ENTRY)) {
+            intent.run {
+                if (getBooleanExtra(LAST_ENTRY, false)) {
                     ClipboardManager.lastEntry
                 } else {
-                    ClipboardManager.get(getInt(ENTRY_ID))
+                    ClipboardManager.get(getIntExtra(ENTRY_ID, -1))
                 }
             }?.let { setEntry(it) }
         }

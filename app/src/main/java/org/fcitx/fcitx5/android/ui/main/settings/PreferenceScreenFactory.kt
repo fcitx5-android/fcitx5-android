@@ -1,8 +1,7 @@
 package org.fcitx.fcitx5.android.ui.main.settings
 
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
+import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
@@ -17,7 +16,6 @@ import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceScreen
 import arrow.core.getOrElse
-import org.fcitx.fcitx5.android.BuildConfig
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Key
 import org.fcitx.fcitx5.android.core.RawConfig
@@ -26,6 +24,8 @@ import org.fcitx.fcitx5.android.ui.main.modified.MySwitchPreference
 import org.fcitx.fcitx5.android.ui.main.settings.addon.AddonConfigFragment
 import org.fcitx.fcitx5.android.ui.main.settings.global.GlobalConfigFragment
 import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
+import org.fcitx.fcitx5.android.utils.buildDocumentsProviderIntent
+import org.fcitx.fcitx5.android.utils.buildPrimaryStorageIntent
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.ConfigBool
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.ConfigCustom
@@ -162,15 +162,16 @@ object PreferenceScreenFactory {
 
         fun rimeUserDataDir() = Preference(context).apply {
             setOnPreferenceClickListener {
-                val documentId =
-                    Uri.encode("primary:Android/data/${BuildConfig.APPLICATION_ID}/files/data/rime")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    try {
+                        context.startActivity(buildPrimaryStorageIntent("data/rime"))
+                        return@setOnPreferenceClickListener true
+                    } catch (e: Exception) {
+                        context.toast(e.localizedMessage ?: e.stackTraceToString())
+                    }
+                }
                 try {
-                    context.startActivity(
-                        Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse("content://com.android.externalstorage.documents/document/$documentId")
-                        )
-                    )
+                    context.startActivity(buildDocumentsProviderIntent())
                 } catch (e: Exception) {
                     context.toast(e.localizedMessage ?: e.stackTraceToString())
                 }
