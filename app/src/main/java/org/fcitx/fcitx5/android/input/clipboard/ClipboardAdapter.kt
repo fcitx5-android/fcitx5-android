@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardEntry
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.utils.DeviceUtil
 import splitties.resources.drawable
 import splitties.resources.styledColor
 import kotlin.math.min
@@ -98,7 +99,7 @@ abstract class ClipboardAdapter :
                 menuItem(R.string.delete, R.drawable.ic_baseline_delete_24) {
                     onDelete(entry.id)
                 }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !DeviceUtil.isSamsungOneUI) {
                     popup.setForceShowIcon(true)
                 }
                 popupMenu = popup

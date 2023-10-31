@@ -12,6 +12,7 @@ import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
 import org.fcitx.fcitx5.android.input.keyboard.SpaceLongPressBehavior
 import org.fcitx.fcitx5.android.input.keyboard.SwipeSymbolDirection
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
+import org.fcitx.fcitx5.android.utils.DeviceUtil
 import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.getSystemProperty
 import org.fcitx.fcitx5.android.utils.vibrator
@@ -35,7 +36,7 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
         val vivoKeypressWorkaround = switch(
             R.string.vivo_keypress_workaround,
             "vivo_keypress_workaround",
-            getSystemProperty("ro.vivo.os.version").isNotEmpty()
+            DeviceUtil.isVivoOriginOS
         )
     }
 
