@@ -31,12 +31,12 @@ jobs:
       fail-fast: false
     steps:
       - name: Fetch fdroiddata
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: f-droid/fdroiddata
 
       - name: Fetch fdroidserver
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: f-droid/fdroidserver
           path: fdroidserver

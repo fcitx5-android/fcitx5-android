@@ -16,7 +16,7 @@ jobs:
       GITHUB_ACTOR: android-fcitx5
     steps:
       - name: Fetch source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: recursive
@@ -28,7 +28,7 @@ jobs:
           java-version: "17"
 
       - name: Setup Android environment
-        uses: android-actions/setup-android@v2
+        uses: android-actions/setup-android@v3
 
       - name: Install Android NDK
         run: |

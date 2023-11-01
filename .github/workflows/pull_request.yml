@@ -44,7 +44,7 @@ jobs:
           java-version: "17"
 
       - name: Setup Android environment
-        uses: android-actions/setup-android@v2
+        uses: android-actions/setup-android@v3
 
       - name: Install Android NDK
         run: |
