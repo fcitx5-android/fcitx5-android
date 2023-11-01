@@ -76,7 +76,6 @@ abstract class ClipboardAdapter :
                 onPaste(entry)
             }
             root.setOnLongClickListener {
-                popupMenu?.dismiss()
                 val iconColor = ctx.styledColor(android.R.attr.colorControlNormal)
                 val popup = PopupMenu(ctx, root)
                 fun menuItem(@StringRes title: Int, @DrawableRes ic: Int, callback: () -> Unit) {
@@ -102,10 +101,11 @@ abstract class ClipboardAdapter :
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !DeviceUtil.isSamsungOneUI) {
                     popup.setForceShowIcon(true)
                 }
-                popupMenu = popup
                 popup.setOnDismissListener {
                     if (it === popupMenu) popupMenu = null
                 }
+                popupMenu?.dismiss()
+                popupMenu = popup
                 popup.show()
                 true
             }
@@ -116,6 +116,7 @@ abstract class ClipboardAdapter :
 
     fun onDetached() {
         popupMenu?.dismiss()
+        popupMenu = null
     }
 
     abstract val theme: Theme

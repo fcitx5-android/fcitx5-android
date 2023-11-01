@@ -82,6 +82,8 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
         }
     }
 
+    var popupMenu: PopupMenu? = null
+
     private val adapter: StatusAreaAdapter by lazy {
         object : StatusAreaAdapter() {
             override fun onItemClick(view: View, entry: StatusAreaEntry) {
@@ -125,6 +127,8 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
                                 }
                             }
                         }
+                        popupMenu?.dismiss()
+                        popupMenu = popup
                         popup.show()
                     }
                     is StatusAreaEntry.Android -> when (entry.type) {
@@ -203,5 +207,7 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
     }
 
     override fun onDetached() {
+        popupMenu?.dismiss()
+        popupMenu = null
     }
 }
