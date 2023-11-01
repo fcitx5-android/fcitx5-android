@@ -26,6 +26,7 @@ GitHub: [![release version](https://img.shields.io/github/v/release/fcitx5-andro
 - Vietnamese (via [UniKey Plugin](./plugin/unikey), supports Telex, VNI and VIQR)
 - Japanese (via [Anthy Plugin](./plugin/anthy))
 - Korean (via [Hangul Plugin](./plugin/hangul))
+- Sinhala (via [Sayura Plugin](./plugin/sayura))
 - Generic (via [RIME Plugin](./plugin/rime))
 
 ### Implemented Features

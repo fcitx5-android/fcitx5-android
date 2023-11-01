@@ -43,3 +43,6 @@
 [submodule "plugin/chewing/src/main/cpp/fcitx5-chewing"]
 	path = plugin/chewing/src/main/cpp/fcitx5-chewing
 	url = git@github.com:fcitx/fcitx5-chewing.git
+[submodule "plugin/sayura/src/main/cpp/fcitx5-sayura"]
+	path = plugin/sayura/src/main/cpp/fcitx5-sayura
+	url = git@github.com:fcitx/fcitx5-sayura.git
