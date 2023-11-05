@@ -1,0 +1,34 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+  <path
+      android:pathData="M69,25 L134.34,90.35 115.73,131.73 39,55C49.93,44.18 58.13,35.88 69,25Z"
+      android:strokeLineJoin="miter"
+      android:strokeWidth="1"
+      android:strokeColor="#00000000"
+      android:strokeLineCap="butt">
+    <aapt:attr name="android:fillColor">
+      <gradient 
+          android:startX="55"
+          android:startY="40"
+          android:endX="108"
+          android:endY="92"
+          android:type="linear">
+        <item android:offset="0" android:color="#44000000"/>
+        <item android:offset="1" android:color="#00000000"/>
+      </gradient>
+    </aapt:attr>
+  </path>
+  <path
+      android:pathData="M40,26h28v28h-28z"
+      android:strokeWidth="2"
+      android:fillColor="#ffffff"
+      android:strokeColor="#000000"
+      android:strokeLineCap="round"/>
+  <path
+      android:fillColor="#FF000000"
+      android:pathData="m47.1,31.73h13.63v7.12L47.1,38.85ZM55.25,36.7c1.17,0.53 2.71,1.29 3.52,1.75l0.94,-1.04c-0.84,-0.46 -2.41,-1.17 -3.52,-1.65zM52.04,28.06c-0.3,0.61 -0.84,1.42 -1.34,2.08L44.97,30.14L44.97,40.45L62.96,40.45L62.96,30.14h-9.7c0.43,-0.48 0.91,-1.06 1.34,-1.67zM42.71,41.82v1.8h4.59c-0.41,1.27 -0.89,2.56 -1.32,3.55l2.05,0.03L48.41,47.19 59.76,47.19c-0.25,1.29 -0.56,2 -0.91,2.28 -0.28,0.18 -0.53,0.2 -1.06,0.2 -0.58,0 -2.18,-0.03 -3.67,-0.18 0.38,0.58 0.66,1.42 0.71,2.03 1.55,0.08 3.04,0.08 3.8,0.05 0.91,-0.05 1.52,-0.18 2.1,-0.66 0.68,-0.61 1.17,-1.93 1.6,-4.59 0.08,-0.33 0.13,-0.96 0.13,-0.96L49.1,45.36l0.58,-1.75h15.5v-1.8zM48.77,32.47c0.61,0.51 1.37,1.22 1.8,1.72h-2.69v1.37h4.21c-1.17,0.79 -2.84,1.47 -4.41,1.8 0.35,0.3 0.84,0.89 1.09,1.27 1.47,-0.43 3.07,-1.22 4.26,-2.13v2h1.8v-2.94h5.04v-1.37h-2.58c0.56,-0.48 1.19,-1.06 1.77,-1.65l-1.34,-0.79c-0.48,0.63 -1.37,1.62 -2.03,2.2l0.38,0.23h-1.24v-2.18h-1.8v2.18h-2.03l1.11,-0.53c-0.46,-0.48 -1.32,-1.24 -2,-1.77z"/>
+</vector>

@@ -7,15 +7,18 @@
       <w>berberman</w>
       <w>constraintlayout</w>
       <w>cout</w>
+      <w>customphrase</w>
       <w>endl</w>
       <w>fcitx</w>
       <w>fmtlib</w>
       <w>icuuid</w>
+      <w>iostreams</w>
       <w>iter</w>
       <w>jbytes</w>
       <w>jnicall</w>
       <w>jobject</w>
       <w>jstring</w>
+      <w>jyutping</w>
       <w>lgpl</w>
       <w>libevent</w>
       <w>libime</w>

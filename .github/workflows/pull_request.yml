@@ -34,8 +34,8 @@ jobs:
       - name: Regenerate symlinks pointing to submodule (Windows)
         if: ${{ matrix.os == 'windows-2022' }}
         run: |
-          Remove-Item -Recurse app/src/main/assets/usr/share, plugin/hangul/src/main/assets/usr/share/libhangul, plugin/chewing/src/main/assets/usr/share/libchewing
-          git checkout -- *
+          Remove-Item -Recurse app/src/main/assets/usr/share, plugin/hangul/src/main/assets/usr/share/libhangul, plugin/chewing/src/main/assets/usr/share/libchewing, plugin/jyutping/src/main/assets/usr/share/libime
+          git checkout -- .
 
       - name: Setup Java
         uses: actions/setup-java@v3
