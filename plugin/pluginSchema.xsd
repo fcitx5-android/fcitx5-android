@@ -1,16 +1,24 @@
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
-    <xs:element name="apiVersion" type="xs:string" />
-    <xs:element name="domain" type="xs:string" />
-    <xs:element name="description" type="xs:string" />
-    <xs:element name="hasService" type="xs:boolean" />
-    <xs:element name="plugin">
-        <xs:complexType>
-            <xs:sequence>
-                <xs:element ref="apiVersion" />
-                <xs:element ref="domain" />
-                <xs:element ref="description" />
-                <xs:element ref="hasService" />
-            </xs:sequence>
-        </xs:complexType>
-    </xs:element>
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:complexType name="libraryType">
+        <xs:sequence>
+            <xs:element name="dependency" maxOccurs="unbounded" type="xs:string" />
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:string" use="required" />
+    </xs:complexType>
+    <xs:complexType name="librariesType">
+        <xs:sequence>
+            <xs:element name="library" maxOccurs="unbounded" type="libraryType" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="pluginType">
+        <xs:sequence>
+            <xs:element name="apiVersion" type="xs:string" />
+            <xs:element name="domain" type="xs:string" />
+            <xs:element name="description" type="xs:string" />
+            <xs:element name="hasService" type="xs:boolean" />
+            <xs:element name="libraries" type="librariesType" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="plugin" type="pluginType" />
 </xs:schema>

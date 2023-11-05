@@ -28,7 +28,8 @@ data class PluginDescriptor(
      */
     val hasService: Boolean,
     val versionName: String,
-    val nativeLibraryDir: String
+    val nativeLibraryDir: String,
+    val libraryDependency: Map<String, List<String>>
 ) {
     val name by lazy {
         packageName.removePrefix("$pluginPackagePrefix.").removeSuffix(".${Const.buildType}")

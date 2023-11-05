@@ -37,6 +37,7 @@
 #include "customphrase.h"
 
 #include "androidfrontend/androidfrontend_public.h"
+#include "androidaddonloader/androidaddonloader.h"
 #include "jni-utils.h"
 #include "nativestreambuf.h"
 #include "helper-types.h"
@@ -76,11 +77,10 @@ public:
         return event_base_loop(get_event_base(), EVLOOP_ONCE);
     }
 
-    void startup(const std::function<void(fcitx::AddonInstance *)> &setupCallback) {
-        char arg0[] = "";
-        char *argv[] = {arg0};
-        p_instance = std::make_unique<fcitx::Instance>(FCITX_ARRAY_SIZE(argv), argv);
-        p_instance->addonManager().registerDefaultLoader(nullptr);
+    void startup(fcitx::AndroidLibraryDependency dependency,
+                 const std::function<void(fcitx::AddonInstance *)> &setupCallback) {
+        p_instance = std::make_unique<fcitx::Instance>(0, nullptr);
+        p_instance->addonManager().registerLoader(std::make_unique<fcitx::AndroidSharedLibraryLoader>(dependency));
         p_dispatcher = std::make_unique<fcitx::EventDispatcher>();
         p_dispatcher->attach(&p_instance->eventLoop());
         p_instance->initialize();
@@ -480,7 +480,16 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_setupLogStream(JNIEnv *env, jclass claz
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz, jstring locale, jstring appData, jstring appLib, jstring extData, jstring extCache, jobjectArray extDomains) {
+Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
+        JNIEnv *env, jclass clazz,
+        jstring locale,
+        jstring appData,
+        jstring appLib,
+        jstring extData,
+        jstring extCache,
+        jobjectArray extDomains,
+        jobjectArray libraryNames,
+        jobjectArray libraryDependencies) {
     if (Fcitx::Instance().isRunning()) {
         FCITX_ERROR() << "Fcitx is already running!";
         return;
@@ -552,6 +561,21 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
     for (int i = 0; i < extDomainsSize; i++) {
         auto domain = JRef<jstring>(env, env->GetObjectArrayElement(extDomains, i));
         fcitx::registerDomain(CString(env, domain), locale_dir_char);
+    }
+
+    std::unordered_map<std::string, std::unordered_set<std::string>> depsMap;
+    const int librarySize = env->GetArrayLength(libraryNames);
+    for (int i = 0; i < librarySize; i++) {
+        auto jstringName = JRef<jstring>(env, env->GetObjectArrayElement(libraryNames, i));
+        auto lib = CString(env, jstringName);
+        auto jobjectArrayDeps = JRef<jobjectArray>(env, env->GetObjectArrayElement(libraryDependencies, i));
+        const int depSize = env->GetArrayLength(jobjectArrayDeps);
+        std::unordered_set<std::string> depSet(depSize);
+        for (int j = 0; j < depSize; j++) {
+            auto jstringDepName = JRef<jstring>(env, env->GetObjectArrayElement(jobjectArrayDeps, j));
+            depSet.emplace(CString(env, jstringDepName));
+        }
+        depsMap.emplace(lib, depSet);
     }
 
     auto candidateListCallback = [](const std::vector<std::string> &candidates, const int size) {
@@ -646,7 +670,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(JNIEnv *env, jclass clazz,
     umask(007);
     fcitx::StandardPath::global().syncUmask();
 
-    Fcitx::Instance().startup([&](auto *androidfrontend) {
+    Fcitx::Instance().startup(depsMap, [&](auto *androidfrontend) {
         FCITX_INFO() << "Setting up callback";
         readyCallback();
         androidfrontend->template call<fcitx::IAndroidFrontend::setCandidateListCallback>(candidateListCallback);

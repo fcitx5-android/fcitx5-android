@@ -112,19 +112,41 @@ object DataManager {
             var apiVersion: String? = null
             var description: String? = null
             var hasService = false
+            val libraryDependency = mutableMapOf<String, List<String>>()
+            var library: String? = null
+            var dependency: ArrayList<String>? = null
             var text: String? = null
             while ((eventType != XmlPullParser.END_DOCUMENT)) {
                 when (eventType) {
                     XmlPullParser.TEXT -> text = parser.text
+                    XmlPullParser.START_TAG -> when (parser.name) {
+                        "library" -> {
+                            dependency = arrayListOf()
+                            for (i in 0..<parser.attributeCount) {
+                                if (parser.getAttributeName(i) == "name") {
+                                    library = parser.getAttributeValue(i)
+                                }
+                            }
+                        }
+                    }
                     XmlPullParser.END_TAG -> when (parser.name) {
                         "apiVersion" -> apiVersion = text
                         "domain" -> domain = text
                         "description" -> description = text
                         "hasService" -> hasService = text?.lowercase() == "true"
+                        "dependency" -> dependency?.add(text!!)
+                        "library" -> {
+                            if (library != null && dependency != null) {
+                                libraryDependency[library] = dependency
+                                library = null
+                                dependency = null
+                            }
+                        }
                     }
                 }
                 eventType = parser.next()
             }
+            parser.close()
 
             // Replace @string/ with string resource
             description = description?.let { d ->
@@ -156,7 +178,8 @@ object DataManager {
                             description,
                             hasService,
                             info.versionName,
-                            info.applicationInfo.nativeLibraryDir
+                            info.applicationInfo.nativeLibraryDir,
+                            libraryDependency
                         )
                     )
                 } else {

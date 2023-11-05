@@ -203,7 +203,9 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
             appLib: String,
             extData: String,
             extCache: String,
-            extDomains: Array<String>
+            extDomains: Array<String>,
+            libraryNames: Array<String>,
+            libraryDependencies: Array<Array<String>>
         )
 
         @JvmStatic
@@ -386,14 +388,21 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
             val locale = Locales.fcitxLocale
             val dataDir = DataManager.dataDir.absolutePath
             val plugins = DataManager.getLoadedPlugins()
-            val nativeLibDir = buildString {
-                append(context.applicationInfo.nativeLibraryDir)
-                plugins.forEach {
-                    append(':')
-                    append(it.nativeLibraryDir)
+            val nativeLibDir = StringBuilder(context.applicationInfo.nativeLibraryDir)
+            val extDomains = arrayListOf<String>()
+            val libraryNames = arrayListOf<String>()
+            val libraryDependency = arrayListOf<Array<String>>()
+            plugins.forEach {
+                nativeLibDir.append(':')
+                nativeLibDir.append(it.nativeLibraryDir)
+                it.domain?.let { d ->
+                    extDomains.add(d)
+                }
+                it.libraryDependency.forEach { (lib, dep) ->
+                    libraryNames.add(lib)
+                    libraryDependency.add(dep.toTypedArray())
                 }
             }
-            val extDomains = plugins.mapNotNull { it.domain }.toTypedArray()
             Timber.d(
                 """
                Starting fcitx with:
@@ -407,10 +416,12 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
                 startupFcitx(
                     locale,
                     dataDir,
-                    nativeLibDir,
+                    nativeLibDir.toString(),
                     (getExternalFilesDir(null) ?: filesDir).absolutePath,
                     (externalCacheDir ?: cacheDir).absolutePath,
-                    extDomains
+                    extDomains.toTypedArray(),
+                    libraryNames.toTypedArray(),
+                    libraryDependency.toTypedArray()
                 )
             }
         }
