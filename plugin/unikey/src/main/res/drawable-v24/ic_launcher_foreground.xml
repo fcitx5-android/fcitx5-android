@@ -7,15 +7,13 @@
   <path
       android:pathData="M68.01,25.13 L133.35,90.47 122.73,131.73 46,55 50.13,50.72 40.01,41Z"
       android:strokeLineJoin="miter"
-      android:strokeWidth="0.999992"
-      android:strokeColor="#00000000"
       android:strokeLineCap="butt">
     <aapt:attr name="android:fillColor">
-      <gradient 
-          android:startX="54.71"
-          android:startY="39.37"
-          android:endX="108.12"
-          android:endY="92.78"
+      <gradient
+          android:startX="54"
+          android:startY="54"
+          android:endX="85"
+          android:endY="85"
           android:type="linear">
         <item android:offset="0" android:color="#44000000"/>
         <item android:offset="1" android:color="#00000000"/>
@@ -24,12 +22,8 @@
   </path>
   <path
       android:pathData="m41,26v0.93,14h5.57V54H61.43V40.93h5.57V26H55.86,54Z"
-      android:strokeWidth="1"
-      android:fillColor="#ffffff"
-      android:strokeColor="#00000000"/>
+      android:fillColor="#ffffff"/>
   <path
       android:pathData="m40,25v1,15h6L46,55L62,55L62,41h6L68,25L56,25 54,25ZM42,27L54,27L54,39L42,39ZM56,27h10v12h-4,-6zM44,29v3c0,1.61 0.25,2.85 0.97,3.75C45.69,36.65 46.83,37 48,37 49.17,37 50.31,36.65 51.03,35.75 51.75,34.85 52,33.61 52,32v-3h-2v3c0,1.39 -0.25,2.15 -0.53,2.5C49.19,34.85 48.83,35 48,35 47.17,35 46.81,34.85 46.53,34.5 46.25,34.15 46,33.39 46,32v-3zM60,29v8h2L62,29ZM48,41h6,2 4L60,53L48,53ZM52,43h-2v8h2L52,46L56,51h2v-8h-2v5z"
-      android:strokeWidth="1"
-      android:fillColor="#000000"
-      android:strokeColor="#00000000"/>
+      android:fillColor="#000000"/>
 </vector>

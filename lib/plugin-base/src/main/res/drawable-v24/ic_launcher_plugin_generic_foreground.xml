@@ -7,15 +7,13 @@
   <path
       android:pathData="M66.63,29.21 L117.77,80.35 101.13,114.78 41.08,54.72 48.45,47.4 40,38.96Z"
       android:strokeLineJoin="miter"
-      android:strokeWidth="1"
-      android:strokeColor="#00000000"
       android:strokeLineCap="butt">
     <aapt:attr name="android:fillColor">
       <gradient
-          android:startX="50"
-          android:startY="36"
-          android:endX="102"
-          android:endY="88"
+          android:startX="54"
+          android:startY="54"
+          android:endX="85"
+          android:endY="85"
           android:type="linear">
         <item android:offset="0" android:color="#44000000"/>
         <item android:offset="1" android:color="#00000000"/>
