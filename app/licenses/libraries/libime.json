@@ -1,6 +1,6 @@
 {
     "uniqueId": "fcitx/libime",
-    "artifactVersion": "1.1.2",
+    "artifactVersion": "1.1.3",
     "description": "library to support generic input method implementation",
     "name": "fcitx/libime",
     "website": "https://github.com/fcitx/libime",

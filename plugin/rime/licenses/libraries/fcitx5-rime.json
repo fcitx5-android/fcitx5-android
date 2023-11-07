@@ -1,6 +1,6 @@
 {
     "uniqueId": "fcitx/fcitx5-rime",
-    "artifactVersion": "5.1.2",
+    "artifactVersion": "5.1.3",
     "description": "Rime Wrapper for Fcitx",
     "name": "fcitx/fcitx5-rime",
     "website": "https://github.com/fcitx/fcitx5-rime",

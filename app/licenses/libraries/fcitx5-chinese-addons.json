@@ -1,6 +1,6 @@
 {
     "uniqueId": "fcitx/fcitx5-chinese-addons",
-    "artifactVersion": "5.1.1",
+    "artifactVersion": "5.1.2",
     "description": "Chinese related addon for fcitx5",
     "name": "fcitx/fcitx5-chinese-addons",
     "website": "https://github.com/fcitx/fcitx5-chinese-addons",

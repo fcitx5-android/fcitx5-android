@@ -1,6 +1,6 @@
 {
     "uniqueId": "fcitx/fcitx5-anthy",
-    "artifactVersion": "5.1.1",
+    "artifactVersion": "5.1.2",
     "description": "Anthy Wrapper for Fcitx",
     "name": "fcitx/fcitx5-anthy",
     "website": "https://github.com/fcitx/fcitx5-anthy",

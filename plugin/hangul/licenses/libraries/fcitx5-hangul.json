@@ -1,6 +1,6 @@
 {
     "uniqueId": "fcitx/fcitx5-hangul",
-    "artifactVersion": "5.1.0",
+    "artifactVersion": "5.1.1",
     "description": "Hangul Wrapper for Fcitx",
     "name": "fcitx/fcitx5-hangul",
     "website": "https://github.com/fcitx/fcitx5-hangul",
