@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - '.github/workflows/fdroid.yml'
+      - 'app/org.fcitx.fcitx5.android.yml'
   workflow_dispatch:
     inputs:
       build_number:

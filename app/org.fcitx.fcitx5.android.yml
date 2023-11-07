@@ -20,11 +20,11 @@ Builds:
     submodules: true
     sudo:
       - apt-get update
-      - apt-get install -y g++ libtool make automake gettext bzip2 xz-utils
-        extra-cmake-modules openjdk-17-jdk-headless opencc
-        ghc libghc-shake-dev libghc-aeson-pretty-dev libghc-js-flot-data haskell-js-dgtable-utils
+      - apt-get install -y g++ libtool make automake gettext bzip2 xz-utils pkg-config
+        cmake extra-cmake-modules ninja-build libfmt-dev libboost-all-dev libfcitx5utils-dev opencc openjdk-17-jdk-headless
+        ghc cabal-install libghc-shake-dev libghc-aeson-pretty-dev libghc-js-flot-data haskell-js-dgtable-utils
       - update-java-alternatives -a
-      - apt-get install -y -t bullseye-backports libime-bin fcitx5-modules
+      - apt-get install -y -t bullseye-backports fcitx5-modules
     gradle:
       - yes
     binary: https://jenkins.fcitx-im.org/job/android/job/fcitx5-android/lastSuccessfulBuild/artifact/out/org.fcitx.fcitx5.android-%v-%abi-release.apk
@@ -34,21 +34,20 @@ Builds:
       - lib/fcitx5/src/main/cpp/prebuilt
     prebuild:
       - sdkmanager 'cmake;3.22.1'
-      - sed -i -e '/ImportQualifiedPost/d' -e 's/import \(.*\) qualified as/import qualified \1 as/g' $$fcitx5-android-prebuilder$$/Main.hs
+      - sed -i -e '/ImportQualifiedPost/d' $$fcitx5-android-prebuilder$$/src/Main.hs
+      - sed -i -e 's/import \(.*\) qualified as/import qualified \1 as/g' $$fcitx5-android-prebuilder$$/src/*.hs
       - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' ../build-logic/convention/build.gradle.kts
-      - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' ../lib/common/build.gradle.kts
-      - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' ../lib/plugin-base/build.gradle.kts
+      - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' ../lib/*/build.gradle.kts
     scanignore:
       - lib/fcitx5/src/main/cpp/fcitx5/src/modules/unicode/charselectdata
     scandelete:
       - build-logic/convention/build
     build:
       - pushd $$fcitx5-android-prebuilder$$
-      - mkdir build
-      - cd build
+      - cabal configure --disable-library-vanilla --enable-shared --enable-executable-dynamic --ghc-options=-dynamic
       - ABI=%abi ANDROID_NDK_ROOT=$$NDK$$ CMAKE_VERSION=3.22.1 ANDROID_PLATFORM=23
         COMP_SPELL_DICT=/usr/lib/x86_64-linux-gnu/fcitx5/libexec/comp-spell-dict
-        runghc ../Main.hs -j everything
+        ./build-cabal -j spell-dict fmt libevent libintl-lite boost marisa opencc libime lua chinese-addons-data zstd
       - popd
       - mv $$fcitx5-android-prebuilder$$/build ../lib/fcitx5/src/main/cpp/prebuilt
     ndk: 25.2.9519653
