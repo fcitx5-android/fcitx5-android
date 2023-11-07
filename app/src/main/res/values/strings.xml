@@ -252,4 +252,6 @@
     <string name="expand_keypress_area">Expand keypress area to the edge</string>
     <string name="update_table">Update table</string>
     <string name="table_dict_replace_message">Table dictionary \"%1$s\" exists. You may import a new dict and replace it.</string>
+    <string name="lang_switch_key_behavior">Language switch key behavior</string>
+    <string name="lang_switch_behavior_next_ime_app">Switch to next input method App</string>
 </resources>

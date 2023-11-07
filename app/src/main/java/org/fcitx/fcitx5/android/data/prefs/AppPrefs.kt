@@ -9,12 +9,12 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.InputFeedbacks.InputFeedbackMode
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateMode
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
+import org.fcitx.fcitx5.android.input.keyboard.LangSwitchBehavior
 import org.fcitx.fcitx5.android.input.keyboard.SpaceLongPressBehavior
 import org.fcitx.fcitx5.android.input.keyboard.SwipeSymbolDirection
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
 import org.fcitx.fcitx5.android.utils.DeviceUtil
 import org.fcitx.fcitx5.android.utils.appContext
-import org.fcitx.fcitx5.android.utils.getSystemProperty
 import org.fcitx.fcitx5.android.utils.vibrator
 
 class AppPrefs(private val sharedPreferences: SharedPreferences) {
@@ -193,6 +193,22 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
         )
         val showLangSwitchKey =
             switch(R.string.show_lang_switch_key, "show_lang_switch_key", true)
+        val langSwitchKeyBehavior = list(
+            R.string.lang_switch_key_behavior,
+            "lang_switch_key_behavior",
+            LangSwitchBehavior.Enumerate,
+            LangSwitchBehavior,
+            listOf(
+                LangSwitchBehavior.Enumerate,
+                LangSwitchBehavior.ToggleActivate,
+                LangSwitchBehavior.NextInputMethodApp
+            ),
+            listOf(
+                R.string.space_behavior_enumerate,
+                R.string.space_behavior_activate,
+                R.string.lang_switch_behavior_next_ime_app
+            )
+        ) { showLangSwitchKey.getValue() }
 
         val keyboardHeightPercent: ManagedPreference.PInt
         val keyboardHeightPercentLandscape: ManagedPreference.PInt

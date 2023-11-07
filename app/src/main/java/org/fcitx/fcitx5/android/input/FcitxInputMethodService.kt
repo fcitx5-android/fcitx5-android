@@ -54,6 +54,7 @@ import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.cursor.CursorRange
 import org.fcitx.fcitx5.android.input.cursor.CursorTracker
 import org.fcitx.fcitx5.android.utils.alpha
+import org.fcitx.fcitx5.android.utils.inputMethodManager
 import org.fcitx.fcitx5.android.utils.withBatchEdit
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
@@ -715,6 +716,15 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     override fun onInlineSuggestionsResponse(response: InlineSuggestionsResponse): Boolean {
         if (!inlineSuggestions) return false
         return inputView?.handleInlineSuggestions(response) ?: false
+    }
+
+    fun nextInputMethodApp() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            switchToNextInputMethod(false)
+        } else {
+            @Suppress("DEPRECATION")
+            inputMethodManager.switchToNextInputMethod(window.window!!.attributes.token, false)
+        }
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {

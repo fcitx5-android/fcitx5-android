@@ -51,7 +51,11 @@ class CommonKeyActionListener :
     private val windowManager: InputWindowManager by manager.must()
 
     private var lastPickerType by AppPrefs.getInstance().internal.lastPickerType
-    private val spaceKeyLongPressBehavior by AppPrefs.getInstance().keyboard.spaceKeyLongPressBehavior
+
+    private val kbdPrefs = AppPrefs.getInstance().keyboard
+
+    private val spaceKeyLongPressBehavior by kbdPrefs.spaceKeyLongPressBehavior
+    private val langSwitchKeyBehavior by kbdPrefs.langSwitchKeyBehavior
 
     private var backspaceSwipeState = Stopped
 
@@ -97,13 +101,27 @@ class CommonKeyActionListener :
                     commitAndReset()
                     triggerUnicode()
                 }
-                is LangSwitchAction -> service.postFcitxJob {
-                    if (enabledIme().size < 2) {
-                        service.lifecycleScope.launch {
-                            inputView.showDialog(AddMoreInputMethodsPrompt.build(context))
+                is LangSwitchAction -> {
+                    when (langSwitchKeyBehavior) {
+                        LangSwitchBehavior.Enumerate -> {
+                            service.postFcitxJob {
+                                if (enabledIme().size < 2) {
+                                    service.lifecycleScope.launch {
+                                        inputView.showDialog(AddMoreInputMethodsPrompt.build(context))
+                                    }
+                                } else {
+                                    enumerateIme()
+                                }
+                            }
                         }
-                    } else {
-                        enumerateIme()
+                        LangSwitchBehavior.ToggleActivate -> {
+                            service.postFcitxJob {
+                                toggleIme()
+                            }
+                        }
+                        LangSwitchBehavior.NextInputMethodApp -> {
+                            service.nextInputMethodApp()
+                        }
                     }
                 }
                 is ShowInputMethodPickerAction -> showInputMethodPicker()
