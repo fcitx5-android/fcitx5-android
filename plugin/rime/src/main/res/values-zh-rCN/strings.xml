@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name_debug">小企鹅输入法5 (中州韵插件 | 调试)</string>
+    <string name="app_name_release">小企鹅输入法5 (中州韵插件)</string>
+    <string name="description">RIME (中州韵输入法引擎) 支持</string>
+</resources>

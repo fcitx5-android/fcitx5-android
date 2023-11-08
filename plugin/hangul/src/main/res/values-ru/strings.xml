@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name_debug">Fcitx5 для Android (плагин Hangul | Отладка)</string>
+    <string name="app_name_release">Fcitx5 для Android (плагин Hangul)</string>
+    <string name="description">Поддержка движка Hangul (корейский метод ввода) для Fcitx5</string>
+</resources>

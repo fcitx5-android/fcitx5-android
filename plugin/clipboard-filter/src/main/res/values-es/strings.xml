@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name_debug">Fcitx5 para Android (complemento de filtro de portapapeles | depuración)</string>
+    <string name="app_name_release">Fcitx5 para Android (complemento de filtro de portapapeles)</string>
+    <string name="description">Aplicar ClearURLs en portapapeles</string>
+</resources>

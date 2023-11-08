@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pkg_name">Nombre de paquete</string>
+    <string name="api_version">Versión de API de complemento</string>
+    <string name="gettext_domain">Dominio Gettext</string>
+    <string name="plugin_description">Descripción de complemento</string>
+    <string name="copied">Copiado en portapapeles</string>
+    <string name="plugin_info">Información de complemento</string>
+    <string name="licenses">Licencias de código abierto</string>
+    <string name="has_service">Contiene el servicio IPC</string>
+</resources>

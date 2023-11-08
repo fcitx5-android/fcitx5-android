@@ -249,4 +249,9 @@
     <string name="i_do_not_need_it">我不需要</string>
     <string name="grant_permission">授予权限</string>
     <string name="clear_clp_db_confirm">剪贴板数据库将会被完全清空，包括已置顶的条目。继续吗？</string>
+    <string name="expand_keypress_area">将按键范围扩展至边缘</string>
+    <string name="update_table">更新码表</string>
+    <string name="table_dict_replace_message">码表词典 \"%1$s\" 存在。您可以导入新词典并替换它。</string>
+    <string name="lang_switch_key_behavior">语言切换键行为</string>
+    <string name="lang_switch_behavior_next_ime_app">切换至下一个输入法</string>
 </resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name_debug">Fcitx5 для Android (плагин Jyutping | Отладка)</string>
+    <string name="app_name_release">Fcitx5 для Android (плагин Jyutping)</string>
+    <string name="description">Поддержка движка Jyutping (кантонский метод ввода) для Fcitx5</string>
+</resources>

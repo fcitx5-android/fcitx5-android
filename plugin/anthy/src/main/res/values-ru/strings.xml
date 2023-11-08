@@ -2,5 +2,5 @@
 <resources>
     <string name="app_name_debug">Fcitx5 для Android (плагин Anthy | Отладка)</string>
     <string name="app_name_release">Fcitx5 для Android (плагин Anthy)</string>
-    <string name="description">Обёртка Anthy для Fcitx5</string>
+    <string name="description">Поддержка движка Anthy (японский метод ввода) для Fcitx5</string>
 </resources>

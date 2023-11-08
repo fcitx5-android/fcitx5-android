@@ -2,5 +2,5 @@
 <resources>
     <string name="app_name_debug">小企鹅输入法5 (Anthy 插件|调试)</string>
     <string name="app_name_release">小企鹅输入法5 (Anthy 插件)</string>
-    <string name="description">Fcitx5 的 Anthy 封装</string>
+    <string name="description">Anthy（日语输入法）引擎支持</string>
 </resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name_debug">小企鵝輸入法5（Sayura 外掛程式 | 除錯模式）</string>
+    <string name="app_name_release">小企鵝輸入法5（Sayura 外掛程式）</string>
+    <string name="description">Sayura（僧伽羅語輸入法）引擎支持</string>
+</resources>

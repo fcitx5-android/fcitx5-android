@@ -1,0 +1,38 @@
+# 
+# Translators:
+# Adolfo Jayme-Barrientos, 2023
+# 
+msgid ""
+msgstr ""
+"Project-Id-Version: fcitx5-android\n"
+"Report-Msgid-Bugs-To: https://github.com/fcitx5-android/fcitx5-android/issues\n"
+"POT-Creation-Date: 2022-02-14 18:51+0800\n"
+"PO-Revision-Date: 2022-03-18 22:18+0000\n"
+"Last-Translator: Adolfo Jayme-Barrientos, 2023\n"
+"Language-Team: Spanish (https://app.transifex.com/fcitx/teams/12005/es/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: es\n"
+"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+
+msgid "Android Frontend"
+msgstr "Interfaz para Android"
+
+msgid "Android Keyboard"
+msgstr "Teclado para Android"
+
+msgid "Word hint"
+msgstr ""
+
+msgid "Enable word hint"
+msgstr ""
+
+msgid "Word hint page size"
+msgstr ""
+
+msgid "Choose key modifier"
+msgstr ""
+
+msgid "Insert space between words"
+msgstr "Insertar espacio entre palabras"

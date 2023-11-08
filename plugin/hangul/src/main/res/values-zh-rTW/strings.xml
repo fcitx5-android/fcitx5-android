@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name_debug">小企鵝輸入法5（Hangul 外掛程式 | 除錯模式）</string>
+    <string name="app_name_release">小企鵝輸入法5（Hangul 外掛程式）</string>
+    <string name="description">Hangul（韓語輸入法）引擎支援</string>
+</resources>

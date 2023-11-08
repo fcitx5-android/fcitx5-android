@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name_debug">小企鵝輸入法5（中州韻外掛程式 | 除錯模式）</string>
+    <string name="app_name_release">小企鵝輸入法5（中州韻外掛程式）</string>
+    <string name="description">RIME（中州韻輸入法引擎）支援</string>
+</resources>

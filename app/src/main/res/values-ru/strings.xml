@@ -11,7 +11,7 @@
     <string name="conf">Конфигурация</string>
     <string name="global_options">Глобальные параметры</string>
     <string name="behavior">Поведение</string>
-    <string name="advanced">Усовершенствованное</string>
+    <string name="advanced">Расширенное</string>
     <string name="ignore_sys_cursor">Игнорировать позицию системного курсора</string>
     <string name="hide_key_config">Скрыть конфигурации горячих клавиш</string>
     <string name="_not_available_">(Недоступно)</string>
@@ -182,7 +182,7 @@
     <string name="exception_table_im_filename">Расширение \"%1$s\" не указывает на пакет метода ввода кодовой таблицы (.zip)</string>
     <string name="table_already_exists">Файл конфигурации метода ввода кодовой таблицы \"%1$s\" уже существует</string>
     <string name="table_file_does_not_exist_title">Таблица недоступна</string>
-    <string name="table_file_does_not_exist_message">Словарь кодовых таблиц \"%1$s\" не существует. Пожалуйста, проверьте файл таблицы dict или удалите и повторно импортируйте.</string>
+    <string name="table_file_does_not_exist_message">Словарь кодовой таблицы \"%1$s\" не существует. Пожалуйста, проверьте файл dict или повторите импорт.</string>
     <string name="import_table">Импорт кодовой таблицы</string>
     <string name="table_from_zip">Из zip…</string>
     <string name="table_select_files">Из отдельных файлов…</string>
@@ -213,7 +213,7 @@
     <string name="capture_heap_dump">Захватить дамп кучи</string>
     <string name="plugins">Плагины</string>
     <string name="plugins_loaded">Загружено</string>
-    <string name="plugins_failed">Не удалось</string>
+    <string name="plugins_failed">Загрузка не удалась</string>
     <string name="missing_plugin_descriptor">Отсутствует дескриптор плагина</string>
     <string name="invalid_plugin_descriptor">Неверный дескриптор плагина</string>
     <string name="missing_data_descriptor">Отсутствует дескриптор данных</string>
@@ -237,4 +237,21 @@
     <string name="theme_message_follow_system_day_night_mode_enabled">Невозможно переключить тему вручную, пока включен режим «Следовать системному темному режиму».</string>
     <string name="disable_it">Отключить это</string>
     <string name="reset_keyboard_on_focus_change">Переключаться обратно на клавиатуру при смене фокуса</string>
-    </resources>
+    <string name="export_user_data">Экспорт пользовательских данных</string>
+    <string name="import_user_data">Импорт пользовательских данных</string>
+    <string name="exception_user_data_filename">Расширение имени файла %1$s не указывает на пользовательские данные fcitx5-android</string>
+    <string name="exception_user_data_metadata">Невозможно найти метаданные пользовательских данных</string>
+    <string name="exception_user_data_package_name_mismatch">Пользовательские данные не соответствуют текущему приложению</string>
+    <string name="user_data_imported">Пользовательские данные %1$s  были импортированы, перезапуск…</string>
+    <string name="confirm_import_user_data">Импорт пользовательских данных переопределит локальные настройки и историю ввода, и потребуется перезапустить приложение, чтобы изменения вступили в силу. Выполнить?</string>
+    <string name="restart_channel">Перезапуск приложения</string>
+    <string name="restart_notify_msg">Приложение перезапущено. Нажмите здесь, чтобы открыть</string>
+    <string name="i_do_not_need_it">Мне это не нужно</string>
+    <string name="grant_permission">Предоставить разрешение</string>
+    <string name="clear_clp_db_confirm">База данных буфера обмена будет полностью очищена, включая закрепленные элементы. Выполнить?</string>
+    <string name="expand_keypress_area">Расширить область нажатия клавиш до края</string>
+    <string name="update_table">Обновить таблицу</string>
+    <string name="table_dict_replace_message">Словарь кодовой таблицы \"%1$s\" существует. Вы можете импортировать новый словарь и заменить его.</string>
+    <string name="lang_switch_key_behavior">Поведение клавиши переключения языка </string>
+    <string name="lang_switch_behavior_next_ime_app">Переключиться на следующий метод ввода</string>
+</resources>

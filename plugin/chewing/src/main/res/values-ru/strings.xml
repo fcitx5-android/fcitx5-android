@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name_debug">Fcitx5 для Android (плагин Chewing | Отладка)</string>
+    <string name="app_name_release">Fcitx5 для Android (плагин Chewing)</string>
+    <string name="description">Поддержка движка Chewing (метод ввода Zhuyin/Bopomofo) для Fcitx5</string>
+</resources>

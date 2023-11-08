@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name_debug">Android 版的 Fcitx5（剪貼簿過濾外掛程式 | 除錯模式）</string>
-    <string name="app_name_release">Android 版的 Fcitx5（剪貼簿過濾外掛程式）</string>
-    <string name="description">在剪貼簿上引用 ClearURLs</string>
+    <string name="app_name_debug">小企鵝輸入法5（剪貼簿過濾外掛程式 | 除錯模式）</string>
+    <string name="app_name_release">小企鵝輸入法5（剪貼簿過濾外掛程式）</string>
+    <string name="description">對剪貼簿內容應用 ClearURLs</string>
 </resources>

@@ -31,3 +31,9 @@ msgstr ""
 
 msgid "Insert space between words"
 msgstr ""
+
+msgid "Android Toast & Notification"
+msgstr ""
+
+msgid "Hidden Notifications"
+msgstr ""

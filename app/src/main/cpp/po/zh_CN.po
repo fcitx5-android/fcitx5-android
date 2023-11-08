@@ -37,3 +37,9 @@ msgstr "选词修饰键"
 
 msgid "Insert space between words"
 msgstr "在单词间插入空格"
+
+msgid "Android 消息框与通知"
+msgstr ""
+
+msgid "隐藏的通知"
+msgstr ""
