@@ -1,8 +1,18 @@
 <b>支持的语言</b>
 <ul>
 <li>英文（支持拼写检查）</li>
-<li>中文（拼音、双拼、五笔、仓颉 及 自定义码表）</li>
-<li>越南语（基于 UniKey，支持 Telex VNI VIQR 等方案）</li>
+<li>中文
+  <ul>
+  <li>拼音、双拼、五笔、仓颉 及 自定义码表（内置）</li>
+  <li>注音（新酷音插件）</li>
+  <li>粤语拼音（粤拼插件）</li>
+  </ul>
+</li>
+<li>越南语（UniKey 插件，支持 Telex VNI VIQR 等方案）</li>
+<li>日语（Anthy 插件）</li>
+<li>韩语（Hangul 插件）</li>
+<li>僧伽罗语（Sayura 插件）</li>
+<li>通用（中州韵插件，支持导入自定义方案）</li>
 </ul>
 <b>已实现的功能</b>
 <ul>

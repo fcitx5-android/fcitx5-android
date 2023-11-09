@@ -1,0 +1,44 @@
+# 0.0.8 - More Languages Supported via Plugins
+
+## Highlights
+
+- More Languages Supported, and Many Many New Plugins
+- Pinyin `customphrase` Editor UI: Manage pinyin customphrase within settings
+- Direct Boot Mode Support: Fcitx5 for Android can be used to input password for unlocking device the first time after rebooting
+
+### New plugins
+
+- RIME, Hangul (Korean), Chewing (Zhuyin/Bopomofo), Sayura (Sinhala), Jyutping (Cantonese)
+- Unikey (Vietnamese) has been split into plugin as well
+- All plugins now have their own icon
+
+### Build process improvements
+
+- Now you can build fcitx5-android on Windows (requires MSYS2) and macOS (requires Homebrew).
+
+## New features
+
+- Direct boot mode support
+- Support more icons and text labels in StatusArea
+- Implement `fcitx::INotifications::showTip` as Android Toast
+- Set GlobalConfig/ShareInputState to "All" on first run
+- Swipe/LongPress now inputs normal number keys rather than KP_* ones
+- Pinyin customphrase editor UI
+- Option to "Expand keypress area" (i.e. Expanding tapping area of A and L keys)
+- Key margin can be configured separately for portrait and landscape mode
+- Change theme settings and preview theme in one page
+- Replace table dictionary without deleting and importing again
+- Option to change language switch key behavior
+
+## Bug fixes
+
+- QuickPhrase .mb files cannot be imported
+- Keyboard theme out of sync when importing theme with "Follow system dark mode" enabled
+- PickerWindow layout mirrors in RTL layout direction
+- Potential crash when showing keyboard for the first time
+- Toolbar cannot be collapsed when "expand by default" enabled
+- Label on space key won't change when input method subMode changes
+- Save/Read QuickPhrase with newline character
+- Occasionally event disorder / dead lock when handling fcitx events
+- Workaround some manufacturer os specific issues
+- ExpandedCandidateWindow cannot be detached when dismissing predict candidates

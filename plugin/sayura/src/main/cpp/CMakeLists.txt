@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(fcitx5-android-plugin-sayura VERSION 0.0.7)
+project(fcitx5-android-plugin-sayura VERSION 0.0.8)
 
 # For reproducible build
 add_link_options("LINKER:--hash-style=gnu,--build-id=none")

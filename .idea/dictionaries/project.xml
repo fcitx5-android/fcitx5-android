@@ -5,6 +5,7 @@
       <w>androidkeyboard</w>
       <w>androidnotification</w>
       <w>berberman</w>
+      <w>bopomofo</w>
       <w>constraintlayout</w>
       <w>cout</w>
       <w>customphrase</w>
@@ -30,13 +31,17 @@
       <w>pkgdatadir</w>
       <w>preedit</w>
       <w>quickphrase</w>
+      <w>sayura</w>
       <w>sdkmanager</w>
       <w>setenv</w>
       <w>shijienihao</w>
       <w>shuangpin</w>
+      <w>sinhala</w>
       <w>spdx</w>
       <w>stringutils</w>
       <w>unfocus</w>
+      <w>unikey</w>
+      <w>zhuyin</w>
     </words>
   </dictionary>
 </component>

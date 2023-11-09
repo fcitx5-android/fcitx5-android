@@ -17,7 +17,7 @@ object Versions {
     private const val defaultBuildTools = "33.0.2"
 
     // NOTE: increase this value to bump version code
-    private const val baseVersionCode = 5
+    private const val baseVersionCode = 6
 
     fun calculateVersionCode(abi: String): Int {
         val abiId = when (abi) {

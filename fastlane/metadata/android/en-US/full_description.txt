@@ -1,8 +1,18 @@
 <b>Supported languages</b>
 <ul>
 <li>English (with spellcheck)</li>
-<li>Chinese (Pinyin, Shuangpin, Wubi, Cangjie and custom tables)</li>
-<li>Vietnamese (Based on UniKey, supports Telex, VNI and VIQR)</li>
+<li>Chinese
+  <ul>
+  <li>Pinyin, Shuangpin, Wubi, Cangjie and custom tables (built-in)</li>
+  <li>Zhuyin/Bopomofo (via Chewing Plugin)</li>
+  <li>Jyutping (via Jyutping Plugin)</li>
+  </ul>
+</li>
+<li>Vietnamese (via on UniKey Plugin, supports Telex, VNI and VIQR)</li>
+<li>Japanese (via Anthy Plugin)</li>
+<li>Korean (via Hangul Plugin)</li>
+<li>Sinhala (via Sayura Plugin)</li>
+<li>Generic (via RIME Plugin, supports importing custom schemas)</li>
 </ul>
 <b>Features</b>
 <ul>
