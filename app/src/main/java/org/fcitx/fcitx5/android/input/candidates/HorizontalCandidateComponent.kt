@@ -78,6 +78,10 @@ class HorizontalCandidateComponent :
         runBlocking {
             _expandedCandidateOffset.emit(view.childCount)
         }
+        bar.expandButtonStateMachine.push(
+            ExpandedCandidatesUpdated,
+            ExpandedCandidatesEmpty to (adapter.total == layoutManager.childCount)
+        )
     }
 
     val adapter: HorizontalCandidateViewAdapter by lazy {
@@ -118,10 +122,6 @@ class HorizontalCandidateComponent :
                     }
                 }
                 refreshExpanded()
-                bar.expandButtonStateMachine.push(
-                    ExpandedCandidatesUpdated,
-                    ExpandedCandidatesEmpty to (adapter.total == childCount)
-                )
             }
             // no need to override `generate{,Default}LayoutParams`, because HorizontalCandidateViewAdapter
             // guarantees ViewHolder's layoutParams to be `FlexboxLayoutManager.LayoutParams`
@@ -178,5 +178,9 @@ class HorizontalCandidateComponent :
             }
         }
         adapter.updateCandidates(candidates, total)
+        // not sure why empty candidates won't trigger `FlexboxLayoutManager#onLayoutCompleted()`
+        if (candidates.isEmpty()) {
+            refreshExpanded()
+        }
     }
 }
