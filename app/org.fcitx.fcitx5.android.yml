@@ -44,7 +44,6 @@ Builds:
       - build-logic/convention/build
     build:
       - pushd $$fcitx5-android-prebuilder$$
-      - cabal configure --disable-library-vanilla --enable-shared --enable-executable-dynamic --ghc-options=-dynamic
       - ABI=%abi ANDROID_NDK_ROOT=$$NDK$$ CMAKE_VERSION=3.22.1 ANDROID_PLATFORM=23
         COMP_SPELL_DICT=/usr/lib/x86_64-linux-gnu/fcitx5/libexec/comp-spell-dict
         ./build-cabal -j spell-dict fmt libevent libintl-lite boost marisa opencc libime lua chinese-addons-data zstd
