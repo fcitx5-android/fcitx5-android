@@ -60,16 +60,7 @@ public:
     }
 
     void updateInputPanel() {
-        // Normally input method engine should check CapabilityFlag::Preedit before update clientPreedit,
-        // and fcitx5 won't trigger UpdatePreeditEvent when that flag is not present, in which case
-        // InputContext::updatePreeditImpl() won't be called.
-        // However on Android, androidkeyboard uses clientPreedit unconditionally in order to provide
-        // a more integrated experience, so we need to check clientPreedit update manually even if
-        // clientPreedit is not enabled.
         const InputPanel &ip = inputPanel();
-        if (!isPreeditEnabled() && frontend_->instance()->inputMethod(this) == "keyboard-us") {
-            frontend_->updateClientPreedit(filterText(ip.clientPreedit()));
-        }
         frontend_->updateInputPanel(
                 filterText(ip.preedit()),
                 filterText(ip.auxUp()),

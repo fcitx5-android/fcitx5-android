@@ -269,15 +269,17 @@ void AndroidKeyboardEngine::updateCandidate(const InputMethodEntry &entry, Input
 }
 
 void AndroidKeyboardEngine::updateUI(InputContext *inputContext) {
-    auto [preedit, cursor] = preeditWithCursor(inputContext);
-    Text clientPreedit(preedit, TextFormatFlag::Underline);
-    clientPreedit.setCursor(static_cast<int>(cursor));
-    inputContext->inputPanel().setClientPreedit(clientPreedit);
-    // we don't want preedit here ...
-//    if (!inputContext->capabilityFlags().test(CapabilityFlag::Preedit)) {
-//        inputContext->inputPanel().setPreedit(preedit);
-//    }
-    inputContext->updatePreedit();
+    auto [text, cursor] = preeditWithCursor(inputContext);
+    if (inputContext->capabilityFlags().test(CapabilityFlag::Preedit)) {
+        Text clientPreedit(text, TextFormatFlag::Underline);
+        clientPreedit.setCursor(static_cast<int>(cursor));
+        inputContext->inputPanel().setClientPreedit(clientPreedit);
+        inputContext->updatePreedit();
+    } else {
+        Text preedit(text);
+        preedit.setCursor(static_cast<int>(cursor));
+        inputContext->inputPanel().setPreedit(preedit);
+    }
     inputContext->updateUserInterface(UserInterfaceComponent::InputPanel);
 }
 

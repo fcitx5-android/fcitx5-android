@@ -359,13 +359,10 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
             getFcitxGlobalConfig()?.get("cfg")?.apply {
                 get("Behavior").apply {
                     get("ShareInputState").value = "All"
-                    get("PreeditEnabledByDefault").value = "False"
                 }
                 setFcitxGlobalConfig(this)
             }
             getFcitxAddonConfig("pinyin")?.get("cfg")?.apply {
-                get("PreeditInApplication").value = "False"
-                get("PreeditCursorPositionAtBeginning").value = "False"
                 get("QuickPhraseKey").value = ""
                 setFcitxAddonConfig("pinyin", this)
             }
