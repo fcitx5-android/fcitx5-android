@@ -134,7 +134,8 @@
         <service
             android:name=".FcitxRemoteService"
             android:exported="true"
-            android:permission="${applicationId}.permission.IPC">
+            android:permission="${applicationId}.permission.IPC"
+            tools:ignore="SystemPermissionTypo">
             <intent-filter>
                 <action android:name="${applicationId}.IPC" />
             </intent-filter>
@@ -158,11 +159,6 @@
             android:exported="false"
             tools:ignore="MissingClass"
             tools:node="merge">
-            <!-- do not inject splitties appCtx -->
-            <meta-data
-                android:name="splitties.init.AppCtxInitializer"
-                android:value="androidx.startup"
-                tools:node="remove" />
             <!-- do not inject splitties AppCompat -->
             <meta-data
                 android:name="splitties.views.dsl.appcompat.experimental.AppCompatViewInstantiatorInjecter"

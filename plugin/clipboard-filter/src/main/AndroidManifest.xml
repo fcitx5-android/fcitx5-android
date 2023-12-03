@@ -12,7 +12,7 @@
             android:directBootAware="true"
             android:exported="true"
             android:permission="${mainApplicationId}.permission.PLUGIN"
-            tools:targetApi="n">
+            tools:targetApi="24">
             <intent-filter>
                 <action android:name="${mainApplicationId}.plugin.SERVICE" />
             </intent-filter>

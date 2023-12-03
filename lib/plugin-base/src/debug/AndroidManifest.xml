@@ -15,7 +15,7 @@
             android:directBootAware="true"
             android:exported="true"
             android:theme="@style/DeviceSettingsTheme"
-            tools:targetApi="n">
+            tools:targetApi="24">
             <intent-filter>
                 <action
                     android:name="org.fcitx.fcitx5.android.plugin.MANIFEST"
