@@ -31,8 +31,8 @@
               # Update versions here
               # This should match to build-logic/convention/src/main/kotlin/Versions.kt
               cmakeVersion = "3.22.1";
-              buildToolsVersion = "33.0.2";
-              platformToolsVersion = "33.0.3";
+              buildToolsVersion = "34.0.0";
+              platformToolsVersion = "34.0.5";
               platformVersion = "33";
               ndkVersion = "25.2.9519653";
 
