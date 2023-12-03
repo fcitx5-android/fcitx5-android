@@ -24,6 +24,7 @@ import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InlineSuggestionsRequest
 import android.view.inputmethod.InlineSuggestionsResponse
+import android.view.inputmethod.InputMethodSubtype
 import android.widget.FrameLayout
 import android.widget.inline.InlinePresentationSpec
 import androidx.annotation.Keep
@@ -48,6 +49,7 @@ import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.FormattedText
 import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
+import org.fcitx.fcitx5.android.core.SubtypeManager
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.data.InputFeedbacks
@@ -57,6 +59,7 @@ import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.cursor.CursorRange
 import org.fcitx.fcitx5.android.input.cursor.CursorTracker
+import org.fcitx.fcitx5.android.utils.InputMethodUtil
 import org.fcitx.fcitx5.android.utils.alpha
 import org.fcitx.fcitx5.android.utils.inputMethodManager
 import org.fcitx.fcitx5.android.utils.withBatchEdit
@@ -154,6 +157,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             advanced.disableAnimation.registerOnChangeListener(recreateInputViewListener)
         }
         ThemeManager.addOnChangedListener(onThemeChangeListener)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            postFcitxJob {
+                SubtypeManager.syncWith(enabledIme())
+            }
+        }
         super.onCreate()
     }
 
@@ -203,6 +211,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             is FcitxEvent.DeleteSurroundingEvent -> {
                 val (before, after) = event.data
                 handleDeleteSurrounding(before, after)
+            }
+            is FcitxEvent.IMChangeEvent -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    val subtype = SubtypeManager.subtypeOf(event.data.uniqueName) ?: return
+                    switchInputMethod(InputMethodUtil.componentName, subtype)
+                }
             }
             else -> {}
         }
@@ -486,6 +500,22 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         postFcitxJob {
             // ensure InputContext has been created before focusing it
             activate(uid, pkgName)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            val subtype = inputMethodManager.currentInputMethodSubtype ?: return
+            val im = SubtypeManager.inputMethodOf(subtype)
+            postFcitxJob {
+                activateIme(im)
+            }
+        }
+    }
+
+    override fun onCurrentInputMethodSubtypeChanged(newSubtype: InputMethodSubtype) {
+        super.onCurrentInputMethodSubtypeChanged(newSubtype)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            postFcitxJob {
+                activateIme(SubtypeManager.inputMethodOf(newSubtype))
+            }
         }
     }
 
