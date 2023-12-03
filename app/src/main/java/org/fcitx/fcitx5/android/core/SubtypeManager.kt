@@ -30,7 +30,7 @@ object SubtypeManager {
         }
         val hashCodes = IntArray(subtypes.size) { subtypes[it].hashCode() }
         val imm = appContext.inputMethodManager
-        val imiId = InputMethodUtil.serviceName
+        val imiId = InputMethodUtil.componentName
         // although this method has been marked as deprecated,
         // dynamic subtypes have to be "registered" before they can be "enabled"
         @Suppress("DEPRECATION")

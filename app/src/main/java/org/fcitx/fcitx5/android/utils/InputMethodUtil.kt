@@ -10,19 +10,33 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import android.view.inputmethod.InputMethodSubtype
+import org.fcitx.fcitx5.android.BuildConfig
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 
 object InputMethodUtil {
-    val serviceName =
+
+    @JvmField
+    val serviceName: String = FcitxInputMethodService::class.java.name
+
+    @JvmField
+    val componentName: String =
         ComponentName(appContext, FcitxInputMethodService::class.java).flattenToShortString()
 
     fun isEnabled(): Boolean {
-        val s = getSecureSettings(Settings.Secure.ENABLED_INPUT_METHODS) ?: return false
-        return s.split(':').map { it.substringBefore(';') }.contains(serviceName)
+        return appContext.inputMethodManager.enabledInputMethodList.any {
+            it.packageName == BuildConfig.APPLICATION_ID && it.serviceName == serviceName
+        }
     }
 
-    fun isSelected(): Boolean =
-        getSecureSettings(Settings.Secure.DEFAULT_INPUT_METHOD) == serviceName
+    fun isSelected(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            appContext.inputMethodManager.currentInputMethodInfo?.let {
+                it.packageName == BuildConfig.APPLICATION_ID && it.serviceName == serviceName
+            } ?: false
+        } else {
+            getSecureSettings(Settings.Secure.DEFAULT_INPUT_METHOD) == componentName
+        }
+    }
 
     fun startSettingsActivity(context: Context) =
         context.startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS).apply {

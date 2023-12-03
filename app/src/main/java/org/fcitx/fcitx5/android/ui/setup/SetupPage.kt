@@ -37,11 +37,10 @@ enum class SetupPage {
     }
 
     companion object {
-        private val values = values()
-        fun valueOf(value: Int) = values[value]
-        fun SetupPage.isLastPage() = this == values.last()
-        fun Int.isLastPage() = this == values.size - 1
-        fun hasUndonePage() = values.any { !it.isDone() }
-        fun firstUndonePage() = values.firstOrNull { !it.isDone() }
+        fun valueOf(value: Int) = entries[value]
+        fun SetupPage.isLastPage() = this == entries.last()
+        fun Int.isLastPage() = this == entries.size - 1
+        fun hasUndonePage() = entries.any { !it.isDone() }
+        fun firstUndonePage() = entries.firstOrNull { !it.isDone() }
     }
 }
