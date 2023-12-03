@@ -11,20 +11,15 @@ import android.os.Build
 import android.provider.Settings
 import android.view.inputmethod.InputMethodSubtype
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
-import timber.log.Timber
-import java.util.TimeZone
 
 object InputMethodUtil {
-    private val serviceName =
+    val serviceName =
         ComponentName(appContext, FcitxInputMethodService::class.java).flattenToShortString()
 
-    private fun getSecureSettings(name: String) =
-        Settings.Secure.getString(appContext.contentResolver, name)
-
-    fun isEnabled(): Boolean =
-        getSecureSettings(Settings.Secure.ENABLED_INPUT_METHODS)
-            ?.split(":")?.contains(serviceName)
-            ?: false
+    fun isEnabled(): Boolean {
+        val s = getSecureSettings(Settings.Secure.ENABLED_INPUT_METHODS) ?: return false
+        return s.split(':').map { it.substringBefore(';') }.contains(serviceName)
+    }
 
     fun isSelected(): Boolean =
         getSecureSettings(Settings.Secure.DEFAULT_INPUT_METHOD) == serviceName

@@ -5,6 +5,7 @@
 package org.fcitx.fcitx5.android.core
 
 import android.content.Context
+import android.os.Build
 import androidx.annotation.Keep
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.channels.BufferOverflow
@@ -424,6 +425,11 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
                     libraryNames.toTypedArray(),
                     libraryDependency.toTypedArray()
                 )
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                lifecycle.launchWhenReady {
+                    SubtypeManager.syncWith(enabledIme())
+                }
             }
         }
 

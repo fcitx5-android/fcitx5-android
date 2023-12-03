@@ -4,12 +4,14 @@
  */
 package org.fcitx.fcitx5.android.ui.main.settings.im
 
+import android.os.Build
 import android.view.View
 import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.daemon.launchOnReady
+import org.fcitx.fcitx5.android.core.SubtypeManager
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.DynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
@@ -21,6 +23,9 @@ class InputMethodListFragment : ProgressFragment(), OnItemChangedListener<InputM
         if (isInitialized) {
             fcitx.launchOnReady { f ->
                 f.setEnabledIme(ui.entries.map { it.uniqueName }.toTypedArray())
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    SubtypeManager.syncWith(f.enabledIme())
+                }
             }
         }
     }

@@ -16,6 +16,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.daemon.launchOnReady
+import org.fcitx.fcitx5.android.core.SubtypeManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
@@ -34,7 +35,6 @@ import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.DeviceUtil
 import org.fcitx.fcitx5.android.utils.alpha
-import org.fcitx.fcitx5.android.utils.styledFloat
 import org.mechdancer.dependency.manager.must
 import splitties.dimensions.dp
 import splitties.resources.styledColor
@@ -143,6 +143,9 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
                         }
                         ReloadConfig -> fcitx.launchOnReady { f ->
                             f.reloadConfig()
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                                SubtypeManager.syncWith(f.enabledIme())
+                            }
                             service.lifecycleScope.launch {
                                 Toast.makeText(service, R.string.done, Toast.LENGTH_SHORT).show()
                             }

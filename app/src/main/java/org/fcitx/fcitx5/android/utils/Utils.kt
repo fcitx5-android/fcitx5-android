@@ -203,6 +203,10 @@ fun isSystemSettingEnabled(key: String): Boolean {
     }
 }
 
+fun getSecureSettings(name: String): String? {
+    return Settings.Secure.getString(appContext.contentResolver, name)
+}
+
 /**
  * @return top-level files in zip file
  */
