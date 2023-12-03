@@ -33,7 +33,7 @@
               cmakeVersion = "3.22.1";
               buildToolsVersion = "34.0.0";
               platformToolsVersion = "34.0.4";
-              platformVersion = "33";
+              platformVersion = "34";
               ndkVersion = "25.2.9519653";
 
               includeNDK = true;
