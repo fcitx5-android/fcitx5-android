@@ -31,9 +31,9 @@
               # Update versions here
               # This should match to build-logic/convention/src/main/kotlin/Versions.kt
               cmakeVersion = "3.22.1";
-              buildToolsVersion = "33.0.2";
-              platformToolsVersion = "33.0.3";
-              platformVersion = "33";
+              buildToolsVersion = "34.0.0";
+              platformToolsVersion = "34.0.5";
+              platformVersion = "34";
               ndkVersion = "25.2.9519653";
 
               includeNDK = true;
@@ -47,7 +47,7 @@
               };
 
               shell = final.lib.makeOverridable
-                ({ androidStudio, generateLocalProperties }:
+                ({ androidStudio, generateLocalProperties, exportCMakeBin }:
                   with final;
                   with self;
                   mkShell rec {
@@ -68,14 +68,15 @@
                       "-Dorg.gradle.project.android.aapt2FromMavenOverride=${androidComposition.androidsdk}/libexec/android-sdk/build-tools/${buildToolsVersion}/aapt2";
                     ECM_DIR = "${extra-cmake-modules}/share/ECM/cmake/";
                     JAVA_HOME = "${jdk17}";
-                    shellHook = ''
+                    shellHook = lib.optionalString exportCMakeBin ''
                       export PATH="$ANDROID_SDK_ROOT/cmake/${cmakeVersion}/bin:$PATH"
                     '' + lib.optionalString generateLocalProperties ''
                       echo sdk.dir=$ANDROID_SDK_ROOT > local.properties
                     '';
                   }) {
-                    androidStudio = final.androidStudioPackages.stable;
+                    androidStudio = final.androidStudioPackages.beta;
                     generateLocalProperties = true;
+                    exportCMakeBin = true;
                   };
             });
           };
