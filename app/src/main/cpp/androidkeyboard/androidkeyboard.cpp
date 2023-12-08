@@ -322,8 +322,9 @@ void AndroidKeyboardEngine::commitBuffer(InputContext *inputContext) {
     if (preedit.empty()) {
         return;
     }
+    auto characterCount = utf8::length(preedit, 0, cursor);
     if (inputContext->capabilityFlags().test(CapabilityFlag::CommitStringWithCursor)) {
-        inputContext->commitStringWithCursor(preedit, cursor);
+        inputContext->commitStringWithCursor(preedit, characterCount);
     } else {
         inputContext->commitString(preedit);
     }

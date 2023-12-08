@@ -107,6 +107,9 @@ public:
 
 private:
     bool supportHint(const std::string &language);
+    /**
+     * preedit string and byte cursor
+     */
     std::pair<std::string, size_t> preeditWithCursor(InputContext *inputContext);
 
     Instance *instance_;
