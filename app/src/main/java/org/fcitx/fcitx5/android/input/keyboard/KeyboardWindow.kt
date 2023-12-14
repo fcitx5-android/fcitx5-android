@@ -117,17 +117,18 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
     }
 
     fun switchLayout(to: String, remember: Boolean = true) {
-        if (to == currentKeyboardName) return
         val target = to.ifEmpty { lastSymbolType }
         ContextCompat.getMainExecutor(service).execute {
             if (keyboards.containsKey(target)) {
                 if (remember && target != TextKeyboard.Name) {
                     lastSymbolType = target
                 }
+                if (target == currentKeyboardName) return@execute
                 detachCurrentLayout()
                 attachLayout(target)
-                if (windowManager.isAttached(this))
+                if (windowManager.isAttached(this)) {
                     notifyBarLayoutChanged()
+                }
             } else {
                 if (remember) {
                     lastSymbolType = PickerWindow.Key.Symbol.name
