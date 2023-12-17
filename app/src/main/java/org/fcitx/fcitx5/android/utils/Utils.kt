@@ -114,7 +114,7 @@ fun NavController.navigateFromMain(@IdRes dest: Int, bundle: Bundle? = null) {
 
 fun darkenColorFilter(percent: Int): ColorFilter {
     val value = percent * 255 / 100
-    return PorterDuffColorFilter(Color.argb(value, 0, 0, 0), PorterDuff.Mode.SRC_ATOP)
+    return PorterDuffColorFilter(Color.argb(value, 0, 0, 0), PorterDuff.Mode.SRC_OVER)
 }
 
 @Suppress("unused")
