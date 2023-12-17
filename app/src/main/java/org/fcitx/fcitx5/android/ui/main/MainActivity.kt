@@ -115,80 +115,82 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean = menu.run {
-        add(R.string.save).apply {
-            icon = drawable(R.drawable.ic_baseline_save_24)!!.apply {
-                setTint(styledColor(android.R.attr.colorControlNormal))
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menu.apply {
+            add(R.string.save).apply {
+                icon = drawable(R.drawable.ic_baseline_save_24)!!.apply {
+                    setTint(styledColor(android.R.attr.colorControlNormal))
+                }
+                setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
+                viewModel.toolbarSaveButtonOnClickListener.apply {
+                    observe(this@MainActivity) { listener -> isVisible = listener != null }
+                    setValue(value)
+                }
+                setOnMenuItemClickListener {
+                    viewModel.toolbarSaveButtonOnClickListener.value?.invoke()
+                    true
+                }
             }
-            setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
-            viewModel.toolbarSaveButtonOnClickListener.apply {
-                observe(this@MainActivity) { listener -> isVisible = listener != null }
+            val aboutMenus = mutableListOf<MenuItem>()
+            add(R.string.faq).apply {
+                aboutMenus.add(this)
+                setOnMenuItemClickListener {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Const.faqUrl)))
+                    true
+                }
+            }
+            add(R.string.developer).apply {
+                aboutMenus.add(this)
+                setOnMenuItemClickListener {
+                    navController.navigate(R.id.action_mainFragment_to_developerFragment)
+                    true
+                }
+            }
+            add(R.string.about).apply {
+                aboutMenus.add(this)
+                setOnMenuItemClickListener {
+                    navController.navigate(R.id.action_mainFragment_to_aboutFragment)
+                    true
+                }
+            }
+            viewModel.aboutButton.apply {
+                observe(this@MainActivity) { enabled ->
+                    aboutMenus.forEach { menu -> menu.isVisible = enabled }
+                }
                 setValue(value)
             }
-            setOnMenuItemClickListener {
-                viewModel.toolbarSaveButtonOnClickListener.value?.invoke()
-                true
-            }
-        }
-        val aboutMenus = mutableListOf<MenuItem>()
-        add(R.string.faq).apply {
-            aboutMenus.add(this)
-            setOnMenuItemClickListener {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Const.faqUrl)))
-                true
-            }
-        }
-        add(R.string.developer).apply {
-            aboutMenus.add(this)
-            setOnMenuItemClickListener {
-                navController.navigate(R.id.action_mainFragment_to_developerFragment)
-                true
-            }
-        }
-        add(R.string.about).apply {
-            aboutMenus.add(this)
-            setOnMenuItemClickListener {
-                navController.navigate(R.id.action_mainFragment_to_aboutFragment)
-                true
-            }
-        }
-        viewModel.aboutButton.apply {
-            observe(this@MainActivity) { enabled ->
-                aboutMenus.forEach { menu -> menu.isVisible = enabled }
-            }
-            setValue(value)
-        }
 
-        add(R.string.edit).apply {
-            icon = drawable(R.drawable.ic_baseline_edit_24)!!.apply {
-                setTint(styledColor(android.R.attr.colorControlNormal))
+            add(R.string.edit).apply {
+                icon = drawable(R.drawable.ic_baseline_edit_24)!!.apply {
+                    setTint(styledColor(android.R.attr.colorControlNormal))
+                }
+                setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
+                viewModel.toolbarEditButtonVisible.apply {
+                    observe(this@MainActivity) { isVisible = it }
+                    setValue(value)
+                }
+                setOnMenuItemClickListener {
+                    viewModel.toolbarEditButtonOnClickListener.value?.invoke()
+                    true
+                }
             }
-            setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
-            viewModel.toolbarEditButtonVisible.apply {
-                observe(this@MainActivity) { isVisible = it }
-                setValue(value)
-            }
-            setOnMenuItemClickListener {
-                viewModel.toolbarEditButtonOnClickListener.value?.invoke()
-                true
-            }
-        }
 
-        add(R.string.delete).apply {
-            icon = drawable(R.drawable.ic_baseline_delete_24)!!.apply {
-                setTint(styledColor(android.R.attr.colorControlNormal))
-            }
-            setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
-            viewModel.toolbarDeleteButtonOnClickListener.apply {
-                observe(this@MainActivity) { listener -> isVisible = listener != null }
-                setValue(value)
-            }
-            setOnMenuItemClickListener {
-                viewModel.toolbarDeleteButtonOnClickListener.value?.invoke()
-                true
+            add(R.string.delete).apply {
+                icon = drawable(R.drawable.ic_baseline_delete_24)!!.apply {
+                    setTint(styledColor(android.R.attr.colorControlNormal))
+                }
+                setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
+                viewModel.toolbarDeleteButtonOnClickListener.apply {
+                    observe(this@MainActivity) { listener -> isVisible = listener != null }
+                    setValue(value)
+                }
+                setOnMenuItemClickListener {
+                    viewModel.toolbarDeleteButtonOnClickListener.value?.invoke()
+                    true
+                }
             }
         }
-        true
+        return true
     }
 
     private var needNotifications by AppPrefs.getInstance().internal.needNotifications
