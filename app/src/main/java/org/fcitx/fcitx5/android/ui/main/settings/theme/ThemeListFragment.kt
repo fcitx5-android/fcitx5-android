@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.data.theme.ThemeFilesManager
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
 import org.fcitx.fcitx5.android.utils.applyNavBarInsetsBottomPadding
@@ -58,28 +59,25 @@ class ThemeListFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         imageLauncher = registerForActivityResult(CustomThemeActivity.Contract()) { result ->
-            if (result != null) {
-                when (result) {
-                    is CustomThemeActivity.BackgroundResult.Created -> {
-                        val theme = result.theme
-                        themeListAdapter.prependTheme(theme)
-                        ThemeManager.saveTheme(theme)
-                        if (!followSystemDayNightTheme) {
-                            ThemeManager.switchTheme(theme)
-                        }
+            if (result == null) return@registerForActivityResult
+            when (result) {
+                is CustomThemeActivity.BackgroundResult.Created -> {
+                    val theme = result.theme
+                    themeListAdapter.prependTheme(theme)
+                    ThemeManager.saveTheme(theme)
+                    if (!followSystemDayNightTheme) {
+                        ThemeManager.setNormalModeTheme(theme)
                     }
-                    is CustomThemeActivity.BackgroundResult.Deleted -> {
-                        val name = result.name
-                        // Update the list first, as we rely on theme changed listener
-                        // in the case that the deleted theme was active
-                        themeListAdapter.removeTheme(name)
-                        ThemeManager.deleteTheme(name)
-                    }
-                    is CustomThemeActivity.BackgroundResult.Updated -> {
-                        val theme = result.theme
-                        themeListAdapter.replaceTheme(theme)
-                        ThemeManager.saveTheme(theme)
-                    }
+                }
+                is CustomThemeActivity.BackgroundResult.Deleted -> {
+                    val name = result.name
+                    themeListAdapter.removeTheme(name)
+                    ThemeManager.deleteTheme(name)
+                }
+                is CustomThemeActivity.BackgroundResult.Updated -> {
+                    val theme = result.theme
+                    themeListAdapter.replaceTheme(theme)
+                    ThemeManager.saveTheme(theme)
                 }
             }
         }
@@ -91,14 +89,16 @@ class ThemeListFragment : Fragment() {
                 lifecycleScope.withLoadingDialog(ctx) {
                     withContext(NonCancellable + Dispatchers.IO) {
                         val name = cr.queryFileName(uri) ?: return@withContext
-                        if (!name.endsWith(".zip")) {
-                            importErrorDialog(getString(R.string.exception_theme_filename))
+                        val ext = name.substringAfterLast('.')
+                        if (ext != "zip") {
+                            importErrorDialog(getString(R.string.exception_theme_filename, ext))
                             return@withContext
                         }
                         try {
                             val inputStream = cr.openInputStream(uri)!!
-                            val (newCreated, theme, migrated) = ThemeManager.importTheme(inputStream)
-                                .getOrThrow()
+                            val (newCreated, theme, migrated) =
+                                ThemeFilesManager.importTheme(inputStream).getOrThrow()
+                            ThemeManager.refreshThemes()
                             withContext(Dispatchers.Main) {
                                 if (newCreated) {
                                     themeListAdapter.prependTheme(theme)
@@ -125,7 +125,7 @@ class ThemeListFragment : Fragment() {
                     withContext(NonCancellable + Dispatchers.IO) {
                         try {
                             val outputStream = ctx.contentResolver.openOutputStream(uri)!!
-                            ThemeManager.exportTheme(exported, outputStream).getOrThrow()
+                            ThemeFilesManager.exportTheme(exported, outputStream).getOrThrow()
                         } catch (e: Exception) {
                             withContext(Dispatchers.Main) {
                                 ctx.toast(e.localizedMessage ?: e.stackTraceToString())
@@ -147,6 +147,7 @@ class ThemeListFragment : Fragment() {
             override fun onEditTheme(theme: Theme.Custom) = editTheme(theme)
             override fun onExportTheme(theme: Theme.Custom) = exportTheme(theme)
         }
+        ThemeManager.refreshThemes()
         themeListAdapter.setThemes(ThemeManager.getAllThemes())
         updateSelectedThemes()
         ThemeManager.addOnChangedListener(onThemeChangeListener)
@@ -157,7 +158,7 @@ class ThemeListFragment : Fragment() {
     }
 
     private fun updateSelectedThemes(activeTheme: Theme? = null) {
-        val active = activeTheme ?: ThemeManager.getActiveTheme()
+        val active = activeTheme ?: ThemeManager.activeTheme
         var light: Theme? = null
         var dark: Theme? = null
         if (followSystemDayNightTheme) {
@@ -192,7 +193,7 @@ class ThemeListFragment : Fragment() {
                             .setView(view)
                             .create()
                         view.adapter = object :
-                            SimpleThemeListAdapter<Theme.Builtin>(ThemeManager.builtinThemes) {
+                            SimpleThemeListAdapter<Theme.Builtin>(ThemeManager.BuiltinThemes) {
                             override fun onClick(theme: Theme.Builtin) {
                                 val newTheme =
                                     theme.deriveCustomNoBackground(UUID.randomUUID().toString())
@@ -219,13 +220,14 @@ class ThemeListFragment : Fragment() {
                 .setNegativeButton(R.string.disable_it) { _, _ ->
                     followSystemDayNightTheme = false
                     lifecycleScope.launch {
+                        ThemeManager.setNormalModeTheme(theme)
                         updateSelectedThemes()
                     }
                 }
                 .show()
             return
         }
-        ThemeManager.switchTheme(theme)
+        ThemeManager.setNormalModeTheme(theme)
     }
 
     private fun editTheme(theme: Theme.Custom) {

@@ -13,16 +13,28 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.*
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
-import org.fcitx.fcitx5.android.data.theme.ThemeManager.Prefs.NavbarBackground
+import org.fcitx.fcitx5.android.data.theme.ThemePrefs.NavbarBackground
 import org.fcitx.fcitx5.android.input.keyboard.TextKeyboard
 import splitties.dimensions.dp
 import splitties.views.backgroundColor
-import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.*
+import splitties.views.dsl.constraintlayout.below
+import splitties.views.dsl.constraintlayout.centerHorizontally
+import splitties.views.dsl.constraintlayout.centerInParent
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.matchConstraints
+import splitties.views.dsl.core.Ui
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.horizontalMargin
+import splitties.views.dsl.core.imageView
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.view
 import splitties.views.imageDrawable
 
 class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {

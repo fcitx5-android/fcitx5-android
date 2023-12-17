@@ -108,7 +108,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     @Keep
     private val recreateInputViewListener = ManagedPreference.OnChangeListener<Any> { _, _ ->
-        recreateInputView(ThemeManager.getActiveTheme())
+        recreateInputView(ThemeManager.activeTheme)
     }
 
     @Keep
@@ -414,7 +414,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // during each onConfigurationChanged period.
         // That is, onCreateInputView would be called again, after system dark mode changes,
         // or screen orientation changes.
-        return InputView(this, fcitx, ThemeManager.getActiveTheme()).also {
+        return InputView(this, fcitx, ThemeManager.activeTheme).also {
             inputView = it
         }
     }
@@ -693,7 +693,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreateInlineSuggestionsRequest(uiExtras: Bundle): InlineSuggestionsRequest? {
         if (!inlineSuggestions) return null
-        val theme = ThemeManager.getActiveTheme()
+        val theme = ThemeManager.activeTheme
         val chipDrawable =
             if (theme.isDark) R.drawable.bkg_inline_suggestion_dark else R.drawable.bkg_inline_suggestion_light
         val chipBg = Icon.createWithResource(this, chipDrawable).setTint(theme.keyTextColor)

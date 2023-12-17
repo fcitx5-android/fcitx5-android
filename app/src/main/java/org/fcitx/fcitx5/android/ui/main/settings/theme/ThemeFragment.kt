@@ -55,9 +55,7 @@ class ThemeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View = with(requireContext()) {
-        val activeTheme = ThemeManager.getActiveTheme()
-
-        previewUi = KeyboardPreviewUi(this, activeTheme)
+        previewUi = KeyboardPreviewUi(this, ThemeManager.activeTheme)
         ThemeManager.addOnChangedListener(onThemeChangeListener)
         val preview = previewUi.root.apply {
             scaleX = 0.5f
@@ -69,7 +67,7 @@ class ThemeFragment : Fragment() {
         tabLayout = TabLayout(this)
 
         viewPager = ViewPager2(this).apply {
-            adapter = object : FragmentStateAdapter(parentFragmentManager, lifecycle) {
+            adapter = object : FragmentStateAdapter(this@ThemeFragment) {
                 override fun getItemCount() = 2
                 override fun createFragment(position: Int): Fragment = when (position) {
                     0 -> ThemeListFragment()

@@ -42,7 +42,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.ThemeFilesManager
 import org.fcitx.fcitx5.android.data.theme.ThemePreset
 import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
 import org.fcitx.fcitx5.android.utils.applyTranslucentSystemBars
@@ -276,7 +276,7 @@ class CustomThemeActivity : AppCompatActivity() {
         }
         // create new
         if (originTheme == null) {
-            val (n, c, s) = ThemeManager.newCustomBackgroundImages()
+            val (n, c, s) = ThemeFilesManager.newCustomBackgroundImages()
             backgroundStates.apply {
                 croppedImageFile = c
                 srcImageFile = s
