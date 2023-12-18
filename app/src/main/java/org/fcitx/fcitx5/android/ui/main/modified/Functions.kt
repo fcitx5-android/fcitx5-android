@@ -25,15 +25,29 @@ private fun <T : Preference> T.def() =
     mDefault.get(this)
 
 fun <T : EditTextPreference> T.restore() {
-    def()?.let { text = it.toString() }
+    // must `callChangeListener` before `setText`
+    // https://android.googlesource.com/platform/frameworks/support/+/872b66efac82f0b0a3fac4bb14a789464ab19f96/preference/preference/src/main/java/androidx/preference/EditTextPreferenceDialogFragmentCompat.java#146
+    (def() as? String)?.let {
+        if (callChangeListener(it)) {
+            text = it
+        }
+    }
 }
 
 fun <T : ListPreference> T.restore() {
-    def()?.let { it as? String }?.let { value = it }
+    (def() as? String)?.let {
+        if (callChangeListener(it)) {
+            value = it
+        }
+    }
 }
 
 fun <T : SwitchPreference> T.restore() {
-    def()?.let { it as? Boolean }?.let { isChecked = it }
+    (def() as? Boolean)?.let {
+        if (callChangeListener(it)) {
+            isChecked = it
+        }
+    }
 }
 
 fun PreferenceDialogFragmentCompat.fixDialogMargin(contentView: View) {
