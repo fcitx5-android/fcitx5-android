@@ -154,10 +154,10 @@ fun RecyclerView.applyNavBarInsetsBottomPadding() {
 
 suspend fun <T> Result<T>.toast(context: Context) = withContext(Dispatchers.Main.immediate) {
     onSuccess {
-        Toast.makeText(context, R.string.done, Toast.LENGTH_SHORT).show()
+        context.toast(R.string.done)
     }
     onFailure {
-        Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+        context.toast(it.localizedMessage ?: it.stackTraceToString())
     }
 }
 
