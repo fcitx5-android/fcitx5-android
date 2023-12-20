@@ -9,7 +9,6 @@ import androidx.annotation.StringRes
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
-import androidx.preference.SwitchPreference
 import org.fcitx.fcitx5.android.ui.main.modified.MySwitchPreference
 import org.fcitx.fcitx5.android.ui.main.settings.DialogSeekBarPreference
 import org.fcitx.fcitx5.android.ui.main.settings.EditTextIntPreference
@@ -83,7 +82,7 @@ abstract class ManagedPreferenceUi<T : Preference>(
             isIconSpaceReserved = false
             isSingleLineTitle = false
             summaryProvider = EditTextIntPreference.SimpleSummaryProvider
-            setDefaultValue(this@EditTextInt.defaultValue)
+            setDefaultValue(this@EditTextInt.defaultValue.toString())
             setTitle(this@EditTextInt.title)
             setDialogTitle(this@EditTextInt.title)
             min = this@EditTextInt.min
