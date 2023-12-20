@@ -214,7 +214,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             }
             is FcitxEvent.IMChangeEvent -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                    val subtype = SubtypeManager.subtypeOf(event.data.uniqueName) ?: return
+                    val im = event.data.uniqueName
+                    val subtype = SubtypeManager.subtypeOf(im) ?: return
+                    skipNextSubtypeChange = im
+                    // [^1]: notify system that input method subtype has changed
                     switchInputMethod(InputMethodUtil.componentName, subtype)
                 }
             }
@@ -493,6 +496,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         return forwardKeyEvent(event) || super.onKeyUp(keyCode, event)
     }
 
+    private var firstBindInput = true
+
     override fun onBindInput() {
         val uid = currentInputBinding.uid
         val pkgName = pkgNameCache.forUid(uid)
@@ -501,20 +506,45 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             // ensure InputContext has been created before focusing it
             activate(uid, pkgName)
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            val subtype = inputMethodManager.currentInputMethodSubtype ?: return
-            val im = SubtypeManager.inputMethodOf(subtype)
-            postFcitxJob {
-                activateIme(im)
+        if (firstBindInput) {
+            firstBindInput = false
+            // only use input method from subtype for the first `onBindInput`, because
+            // 1. fcitx has `ShareInputState` option, thus reading input method from subtype
+            //    everytime would ruin `ShareInputState=Program`
+            // 2. im from subtype should be read once, when user changes input method from other
+            //    app to a subtype of ours via system input method picker (on 34+)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                val subtype = inputMethodManager.currentInputMethodSubtype ?: return
+                val im = SubtypeManager.inputMethodOf(subtype)
+                postFcitxJob {
+                    activateIme(im)
+                }
             }
         }
     }
 
+    /**
+     * When input method changes internally (eg. via language switch key or keyboard shortcut),
+     * we want to notify system that subtype has changed (see [^1]), then ignore the incoming
+     * [onCurrentInputMethodSubtypeChanged] callback.
+     * Input method should only be changed when user changes subtype in system input method picker
+     * manually.
+     */
+    private var skipNextSubtypeChange: String? = null
+
     override fun onCurrentInputMethodSubtypeChanged(newSubtype: InputMethodSubtype) {
         super.onCurrentInputMethodSubtypeChanged(newSubtype)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            val im = SubtypeManager.inputMethodOf(newSubtype)
+            Timber.d("onCurrentInputMethodSubtypeChanged: im=$im")
+            // don't change input method if this "subtype change" was our notify to system
+            // see [^1]
+            if (skipNextSubtypeChange == im) {
+                skipNextSubtypeChange = null
+                return
+            }
             postFcitxJob {
-                activateIme(SubtypeManager.inputMethodOf(newSubtype))
+                activateIme(im)
             }
         }
     }
