@@ -247,7 +247,7 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
                 "keyboard_side_padding_landscape",
                 0,
                 0,
-                200,
+                300,
                 "dp"
             )
             keyboardSidePadding = primary
