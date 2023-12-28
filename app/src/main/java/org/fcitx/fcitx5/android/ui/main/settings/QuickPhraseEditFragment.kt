@@ -40,7 +40,7 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
     override suspend fun initialize(): View {
         quickPhrase = requireArguments().serializable(ARG)!!
         val initialEntries = withContext(Dispatchers.IO) {
-            quickPhrase.loadData().getOrThrow()
+            quickPhrase.loadData()
         }
         ui = object : BaseDynamicListUi<QuickPhraseEntry>(
             requireContext(),

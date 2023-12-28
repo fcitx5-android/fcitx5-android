@@ -21,7 +21,7 @@ abstract class QuickPhrase : Serializable {
             throw IllegalStateException("File ${file.absolutePath} does not exist")
     }
 
-    abstract fun loadData(): Result<QuickPhraseData>
+    abstract fun loadData(): QuickPhraseData
 
     abstract fun saveData(data: QuickPhraseData)
 

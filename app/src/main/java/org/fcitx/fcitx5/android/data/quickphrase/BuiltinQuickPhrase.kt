@@ -40,12 +40,7 @@ class BuiltinQuickPhrase(
 
     private fun loadBuiltinData() = QuickPhraseData.fromLines(file.readLines())
 
-    override fun loadData(): Result<QuickPhraseData> =
-        if (override == null)
-            loadBuiltinData()
-        else
-            override!!.loadData()
-
+    override fun loadData() = override?.loadData() ?: loadBuiltinData()
 
     override fun saveData(data: QuickPhraseData) {
         createOverrideIfNotExist()

@@ -20,7 +20,7 @@ class CustomQuickPhrase(file: File) : QuickPhrase() {
         get() = if (isEnabled) super.name
         else file.name.substringBefore(".$EXT.$DISABLE")
 
-    override fun loadData(): Result<QuickPhraseData> = QuickPhraseData.fromLines(file.readLines())
+    override fun loadData() = QuickPhraseData.fromLines(file.readLines())
 
     init {
         ensureFileExists()

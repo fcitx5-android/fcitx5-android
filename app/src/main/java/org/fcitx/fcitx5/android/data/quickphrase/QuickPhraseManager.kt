@@ -4,8 +4,10 @@
  */
 package org.fcitx.fcitx5.android.data.quickphrase
 
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.data.DataManager
 import org.fcitx.fcitx5.android.utils.appContext
+import org.fcitx.fcitx5.android.utils.errorRuntime
 import org.fcitx.fcitx5.android.utils.withTempDir
 import java.io.File
 import java.io.InputStream
@@ -37,8 +39,13 @@ object QuickPhraseManager {
     }
 
     private fun importFromFile(file: File): Result<CustomQuickPhrase> {
-        // throw away data, only ensuring the format is correct
-        return QuickPhraseData.fromLines(file.readLines()).map {
+        return runCatching {
+            // check quickphrase format of each line
+            file.readLines().forEachIndexed { idx, line ->
+                if (line.isNotBlank() && QuickPhraseData.parseLine(line) == null) {
+                    errorRuntime(R.string.exception_quickphrase_parse, "\n(${idx + 1}) $line")
+                }
+            }
             val dest = File(customQuickPhraseDir, file.name)
             file.copyTo(dest)
             CustomQuickPhrase(dest)
