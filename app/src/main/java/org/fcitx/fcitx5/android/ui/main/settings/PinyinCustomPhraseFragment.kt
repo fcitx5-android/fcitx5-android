@@ -18,6 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.reloadPinyinCustomPhrase
 import org.fcitx.fcitx5.android.data.pinyin.CustomPhraseManager
 import org.fcitx.fcitx5.android.data.pinyin.customphrase.PinyinCustomPhrase
@@ -127,20 +128,33 @@ class PinyinCustomPhraseFragment : Fragment(), OnItemChangedListener<PinyinCusto
                     add(orderLayout, lParams(matchParent))
                     add(phraseLayout, lParams(matchParent))
                 }
-                AlertDialog.Builder(context)
+                val dialog = AlertDialog.Builder(context)
                     .setTitle(title)
                     .setView(layout)
-                    .setPositiveButton(android.R.string.ok) { _, _ ->
-                        block(
-                            PinyinCustomPhrase(
-                                keyField.str,
-                                orderField.str.toIntOrNull() ?: 1,
-                                phraseField.str
-                            )
-                        )
-                    }
+                    .setPositiveButton(android.R.string.ok, null)
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener onClick@{
+                    val key = keyField.str
+                    if (key.isBlank()) {
+                        keyField.error = getString(R.string._cannot_be_empty, keyLabel)
+                        keyField.requestFocus()
+                        return@onClick
+                    } else {
+                        keyField.error = null
+                    }
+                    val order = orderField.str.toIntOrNull() ?: 1
+                    val phrase = phraseField.str
+                    if (phrase.isEmpty()) {
+                        phraseField.error = getString(R.string._cannot_be_empty, phraseLabel)
+                        phraseField.requestFocus()
+                        return@onClick
+                    } else {
+                        phraseField.error = null
+                    }
+                    block(PinyinCustomPhrase(key, order, phrase))
+                    dialog.dismiss()
+                }
             }
         }
         ui.addOnItemChangedListener(this)

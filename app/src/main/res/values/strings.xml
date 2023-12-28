@@ -254,4 +254,6 @@
     <string name="table_dict_replace_message">Table dictionary \"%1$s\" exists. You may import a new dict and replace it.</string>
     <string name="lang_switch_key_behavior">Language switch key behavior</string>
     <string name="lang_switch_behavior_next_ime_app">Switch to next input method App</string>
+    <string name="cannot_be_empty">Cannot be empty</string>
+    <string name="_cannot_be_empty">%1$s cannot be empty</string>
 </resources>

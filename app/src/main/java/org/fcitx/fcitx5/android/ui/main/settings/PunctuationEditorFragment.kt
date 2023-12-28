@@ -6,6 +6,7 @@ package org.fcitx.fcitx5.android.ui.main.settings
 
 import android.app.AlertDialog
 import android.view.View
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.core.getPunctuationConfig
 import org.fcitx.fcitx5.android.daemon.launchOnReady
@@ -103,16 +104,32 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
                     add(mappingLayout, lParams(matchParent))
                     add(altMappingLayout, lParams(matchParent))
                 }
-                AlertDialog.Builder(context)
+                val dialog = AlertDialog.Builder(context)
                     .setTitle(title)
                     .setView(layout)
-                    .setPositiveButton(android.R.string.ok) { _, _ ->
-                        block(
-                            PunctuationMapEntry(keyField.str, mappingField.str, altMappingField.str)
-                        )
-                    }
+                    .setPositiveButton(android.R.string.ok, null)
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener onClick@{
+                    val key = keyField.str.trim()
+                    if (key.isBlank()) {
+                        keyField.error = getString(R.string._cannot_be_empty, keyDesc)
+                        keyField.requestFocus()
+                        return@onClick
+                    } else {
+                        keyField.error = null
+                    }
+                    val mapping = mappingField.str
+                    if (mapping.isBlank()) {
+                        mappingField.error = getString(R.string._cannot_be_empty, mappingDesc)
+                        mappingField.requestFocus()
+                        return@onClick
+                    } else {
+                        mappingField.error = null
+                    }
+                    block(PunctuationMapEntry(key, mapping, altMappingField.str))
+                    dialog.dismiss()
+                }
             }
         }
         resetDustman()

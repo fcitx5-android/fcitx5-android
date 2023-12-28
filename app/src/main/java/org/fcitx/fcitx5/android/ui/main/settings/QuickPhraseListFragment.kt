@@ -93,6 +93,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                         dustman.forceDirty()
                     }
                 }
+
                 var icon = R.drawable.ic_baseline_settings_24
                 when (entry) {
                     is BuiltinQuickPhrase -> {
@@ -139,45 +140,59 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                 shouldShowFab = true
                 fab.setOnClickListener {
                     // TODO use expandable fab instead
-                    val actions = arrayOf(
-                        getString(R.string.import_from_file),
-                        getString(R.string.create_new)
-                    )
-                    AlertDialog.Builder(requireContext())
-                        .setTitle(R.string.quickphrase_editor)
-                        .setItems(actions) { _, i ->
-                            when (i) {
-                                0 -> {
-                                    launcher.launch("*/*")
-                                }
-                                1 -> {
-                                    val (inputLayout, editText) = materialTextInput {
-                                        setHint(R.string.name)
-                                    }
-                                    val layout = verticalLayout {
-                                        setPaddingDp(20, 10, 20, 0)
-                                        add(inputLayout, lParams(matchParent))
-                                    }
-                                    AlertDialog.Builder(requireContext())
-                                        .setTitle(R.string.create_new)
-                                        .setView(layout)
-                                        .setPositiveButton(android.R.string.ok) { _, _ ->
-                                            ui.addItem(item = QuickPhraseManager.newEmpty(editText.str))
-                                        }
-                                        .setNegativeButton(android.R.string.cancel) { _, _ -> }
-                                        .show()
-                                }
-                                else -> {}
-                            }
-                        }
-                        .setNegativeButton(android.R.string.cancel, null)
-                        .show()
+                    showImportOrCreateDialog()
                 }
                 setViewModel(viewModel)
                 // Builtin quick phrase shouldn't be removed
                 // But it can be disabled
                 removable = { e -> e !is BuiltinQuickPhrase }
                 addTouchCallback()
+            }
+
+            private fun showImportOrCreateDialog() {
+                val actions = arrayOf(
+                    getString(R.string.import_from_file),
+                    getString(R.string.create_new)
+                )
+                AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.quickphrase_editor)
+                    .setItems(actions) { _, i ->
+                        when (i) {
+                            0 -> launcher.launch("*/*")
+                            1 -> showCreateQuickPhraseDialog()
+                        }
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
+            }
+
+            private fun showCreateQuickPhraseDialog() {
+                val (inputLayout, editText) = materialTextInput {
+                    setHint(R.string.name)
+                }
+                val layout = verticalLayout {
+                    setPaddingDp(20, 10, 20, 0)
+                    add(inputLayout, lParams(matchParent))
+                }
+                val dialog = AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.create_new)
+                    .setView(layout)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener onClick@{
+                    val name = editText.str.trim()
+                    if (name.isBlank()) {
+                        editText.error =
+                            getString(R.string._cannot_be_empty, getString(R.string.name))
+                        editText.requestFocus()
+                        return@onClick
+                    } else {
+                        editText.error = null
+                    }
+                    ui.addItem(item = QuickPhraseManager.newEmpty(name))
+                    dialog.dismiss()
+                }
             }
 
             override fun updateFAB() {
