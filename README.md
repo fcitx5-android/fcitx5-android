@@ -68,8 +68,8 @@ Discuss on Telegram: https://t.me/+hci-DrFVWUM3NTUx ([@fcitx5_android](https://t
 
 ### Dependencies
 
-- Android SDK Platform & Build-Tools 33.
-- Android NDK (Side by side) 25 & CMake 3.22.1, they can be installed using SDK Manager in Android Studio or `sdkmanager` command line. **Note:** NDK 21 & 22 are confirmed not working with this project.
+- Android SDK Platform & Build-Tools 34.
+- Android NDK (Side by side) 25 & CMake 3.22.1, they can be installed using SDK Manager in Android Studio or `sdkmanager` command line.
 - [KDE/extra-cmake-modules](https://github.com/KDE/extra-cmake-modules)
 - GNU Gettext >= 0.20 (for `msgfmt` binary; or install `appstream` if you really have to use gettext <= 0.19.)
 
@@ -82,7 +82,7 @@ Discuss on Telegram: https://t.me/+hci-DrFVWUM3NTUx ([@fcitx5_android](https://t
 
 - Enable symlink support for `git`:
 
-    ```powershell
+    ```shell
     git config --global core.symlinks true
     ```
 
@@ -90,7 +90,7 @@ Discuss on Telegram: https://t.me/+hci-DrFVWUM3NTUx ([@fcitx5_android](https://t
 
 First, clone this repository and fetch all submodules:
 
-```sh
+```shell
 git clone git@github.com:fcitx5-android/fcitx5-android.git
 git submodule update --init --recursive
 ```
@@ -98,8 +98,21 @@ git submodule update --init --recursive
 <details>
 <summary>On Windows, you may need to regenerate symlinks to submodules.</summary>
 
+Run in PowerShell:
+
 ```powershell
 Remove-Item -Recurse app/src/main/assets/usr/share, plugin/hangul/src/main/assets/usr/share/libhangul, plugin/chewing/src/main/assets/usr/share/libchewing, plugin/jyutping/src/main/assets/usr/share/libime
+```
+
+Or Command Prompt:
+
+```bat
+RD /S /Q app\src\main\assets\usr\share plugin\hangul\src\main\assets\usr\share\libhangul plugin\chewing\src\main\assets\usr\share\libchewing plugin\jyutping\src\main\assets\usr\share\libime
+```
+
+Then let `git` regenerate symlinks:
+
+```shell
 git checkout -- .
 ```
 
@@ -107,7 +120,7 @@ git checkout -- .
 
 Install `extra-cmake-modules` and `gettext` with your system package manager:
 
-```sh
+```shell
 # For Arch Linux (Arch has gettext in it's base meta package)
 sudo pacman -S extra-cmake-modules
 
@@ -119,7 +132,7 @@ brew install extra-cmake-modules gettext
 
 # For Windows, install MSYS2 and execute in its shell (UCRT64)
 pacman -S mingw-w64-ucrt-x86_64-extra-cmake-modules mingw-w64-ucrt-x86_64-gettext
-# then add C:/msys64/ucrt64/bin to PATH
+# then add C:\msys64\ucrt64\bin to PATH
 ```
 
 Install Android SDK Platform, Android SDK Build-Tools, Android NDK and cmake via SDK Manager in Android Studio:
