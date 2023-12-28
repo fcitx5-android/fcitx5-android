@@ -38,7 +38,7 @@ jobs:
           git checkout -- .
 
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "temurin"
           java-version: "17"
@@ -76,7 +76,7 @@ jobs:
           ./gradlew :assembleDebugPlugins
 
       - name: Upload app
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-${{ matrix.os }}-${{ matrix.abi }}
           path: app/build/outputs/apk/debug/
@@ -94,7 +94,7 @@ jobs:
           done
 
       - name: Upload plugins
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: plugins-${{ matrix.os }}-${{ matrix.abi }}
           path: plugins-to-upload

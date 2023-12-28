@@ -115,7 +115,7 @@ jobs:
           $fdroid build --verbose --test --scan-binary --on-server --no-tarball $build
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{ success() || failure() }}
         with:
           name: fdroid-${{ matrix.abi }}
