@@ -38,9 +38,9 @@ set(PREBUILT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../lib/fcitx5/src/main/cp
 set(fmt_DIR "${PREBUILT_DIR}/fmt/${ANDROID_ABI}/lib/cmake/fmt")
 find_package(fmt)
 
-# prebuilt libevent
-set(Libevent_DIR "${PREBUILT_DIR}/libevent/${ANDROID_ABI}/lib/cmake/libevent")
-find_package(Libevent)
+# prebuilt libuv
+set(libuv_DIR "${PREBUILT_DIR}/libuv/${ANDROID_ABI}/lib/cmake/libuv")
+find_package(libuv)
 
 # prebuilt boost
 list(APPEND CMAKE_FIND_ROOT_PATH "${PREBUILT_DIR}/boost/${ANDROID_ABI}/lib/cmake")
@@ -54,7 +54,7 @@ target_link_libraries(pinyin-customphrase PRIVATE fmt::fmt-header-only Fcitx5::U
 add_library(native-lib SHARED native-lib.cpp androidaddonloader/androidaddonloader.cpp)
 target_link_libraries(native-lib
         log
-        libevent::core
+        libuv::uv_a
         Fcitx5::Utils
         Fcitx5::Config
         Fcitx5::Core

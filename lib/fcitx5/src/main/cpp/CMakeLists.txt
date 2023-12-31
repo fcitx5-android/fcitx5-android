@@ -26,9 +26,10 @@ find_package(fmt)
 set(LibIntl_DIR "${PREBUILT_DIR}/libintl-lite/${ANDROID_ABI}/lib/cmake")
 find_package(LibIntl)
 
-# prebuilt libevent
-set(Libevent_DIR "${PREBUILT_DIR}/libevent/${ANDROID_ABI}/lib/cmake/libevent")
-find_package(Libevent)
+# prebuilt libuv
+set(libuv_DIR "${PREBUILT_DIR}/libuv/${ANDROID_ABI}/lib/cmake/libuv")
+find_package(libuv)
+set(LIBUV_TARGET libuv::uv_a)
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Fcitx5AndroidInstallDirs.cmake")
 # LIBDATADIR is not a standard CMake install dir, defined in fcitx5/CMakeLists.txt#L169

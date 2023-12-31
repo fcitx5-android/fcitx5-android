@@ -12,7 +12,7 @@
 
 #include <android/log.h>
 
-#include <event2/event.h>
+#include <uv.h>
 
 #include <fcitx/instance.h>
 #include <fcitx/addonmanager.h>
@@ -72,13 +72,13 @@ public:
         return p_instance != nullptr && p_dispatcher != nullptr && p_frontend != nullptr;
     }
 
-    event_base *get_event_base() {
+    uv_loop_t *get_event_base() {
         fcitx::EventLoop &event_loop = p_instance->eventLoop();
-        return static_cast<event_base *>(event_loop.nativeHandle());
+        return static_cast<uv_loop_t *>(event_loop.nativeHandle());
     }
 
     int loopOnce() {
-        return event_base_loop(get_event_base(), EVLOOP_ONCE);
+        return uv_run(get_event_base(), UV_RUN_ONCE);
     }
 
     void startup(fcitx::AndroidLibraryDependency dependency,
@@ -421,7 +421,7 @@ public:
 
     void exit() {
         // Make sure that the exec doesn't get blocked
-        event_base_loopexit(get_event_base(), nullptr);
+        uv_stop(get_event_base());
         // Normally, we would use exec to drive the event loop.
         // Since we are calling loopOnce in JVM repeatedly, we shouldn't have used this function.
         // However, exit events would lose chance to be called in this case.
