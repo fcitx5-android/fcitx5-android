@@ -21,8 +21,7 @@ object AppUtil {
     fun launchMain(context: Context) {
         context.startActivity(
             Intent(context, MainActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
             }
         )
     }
@@ -32,11 +31,16 @@ object AppUtil {
             .setComponentName(MainActivity::class.java)
             .setGraph(R.navigation.settings_nav)
             .addDestination(dest, arguments)
-            .createPendingIntent()
-            .send(context, 0, Intent().apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-            })
+            .createTaskStackBuilder()
+            /**
+             * [androidx.core.app.TaskStackBuilder.getIntents] would add unwanted flags
+             * [Intent.FLAG_ACTIVITY_CLEAR_TASK] and [Intent.FLAG_ACTIVITY_TASK_ON_HOME]
+             * so we must launch the Intent by ourselves
+             */
+            .editIntentAt(0)?.apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                context.startActivity(this)
+            }
     }
 
     fun launchMainToKeyboard(context: Context) =
