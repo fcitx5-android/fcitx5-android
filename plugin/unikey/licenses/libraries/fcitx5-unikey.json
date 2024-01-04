@@ -1,6 +1,6 @@
 {
     "uniqueId": "fcitx/fcitx5-unikey",
-    "artifactVersion": "5.1.1",
+    "artifactVersion": "5.1.2",
     "description": "Unikey (Vietnamese Input Method) engine support for Fcitx",
     "name": "fcitx/fcitx5-unikey",
     "website": "https://github.com/fcitx/fcitx5-unikey",

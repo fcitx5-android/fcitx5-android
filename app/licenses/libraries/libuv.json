@@ -1,0 +1,11 @@
+{
+    "uniqueId": "libuv/libuv",
+    "artifactVersion": "1.47.0",
+    "description": "Cross-platform asynchronous I/O",
+    "name": "libuv/libuv",
+    "website": "https://libuv.org/",
+    "tag": "native",
+    "licenses": [
+        "MIT"
+    ]
+}

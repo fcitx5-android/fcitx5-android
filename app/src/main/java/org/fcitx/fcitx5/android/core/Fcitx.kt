@@ -357,16 +357,6 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         // will be called in fcitx main thread
         private fun onFirstRun() {
             Timber.i("onFirstRun")
-            getFcitxGlobalConfig()?.get("cfg")?.apply {
-                get("Behavior").apply {
-                    get("ShareInputState").value = "All"
-                }
-                setFcitxGlobalConfig(this)
-            }
-            getFcitxAddonConfig("pinyin")?.get("cfg")?.apply {
-                get("QuickPhraseKey").value = ""
-                setFcitxAddonConfig("pinyin", this)
-            }
             firstRun = false
         }
 
