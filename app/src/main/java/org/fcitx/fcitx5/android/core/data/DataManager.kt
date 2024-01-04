@@ -80,7 +80,6 @@ object DataManager {
     fun addOnNextSyncedCallback(block: () -> Unit) =
         callbacks.add(block)
 
-    @SuppressLint("DiscouragedApi")
     fun detectPlugins(): Pair<Set<PluginDescriptor>, Map<String, PluginLoadFailed>> {
         val toLoad = mutableSetOf<PluginDescriptor>()
         val preloadFailed = mutableMapOf<String, PluginLoadFailed>()
@@ -93,7 +92,6 @@ object DataManager {
                 PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_ALL.toLong())
             )
         } else {
-            @Suppress("DEPRECATION")
             pm.queryIntentActivities(Intent(PLUGIN_INTENT), PackageManager.MATCH_ALL)
         }.map {
             it.activityInfo.packageName
@@ -104,6 +102,7 @@ object DataManager {
         // Parse plugin.xml
         for (packageName in pluginPackages) {
             val res = pm.getResourcesForApplication(packageName)
+            @SuppressLint("DiscouragedApi")
             val resId = res.getIdentifier("plugin", "xml", packageName)
             if (resId == 0) {
                 Timber.w("Failed to get the plugin descriptor of $packageName")
@@ -156,9 +155,9 @@ object DataManager {
             description = description?.let { d ->
                 d.removePrefix("@string/").let { s ->
                     if (s.matches(javaIdRegex)) {
-                        res.getIdentifier(s, "string", packageName).let { id ->
-                            if (id != 0) res.getString(id) else d
-                        }
+                        @SuppressLint("DiscouragedApi")
+                        val id = res.getIdentifier(s, "string", packageName)
+                        if (id != 0) res.getString(id) else d
                     } else d
                 }
             }
@@ -171,7 +170,6 @@ object DataManager {
                             PackageManager.PackageInfoFlags.of(PackageManager.GET_META_DATA.toLong())
                         )
                     } else {
-                        @Suppress("DEPRECATION")
                         pm.getPackageInfo(packageName, PackageManager.GET_META_DATA)
                     }
                     toLoad.add(
