@@ -17,8 +17,20 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.utils.setOnChangeListener
 import splitties.dimensions.dp
 import splitties.resources.resolveThemeAttribute
-import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.*
+import splitties.views.dsl.constraintlayout.below
+import splitties.views.dsl.constraintlayout.centerHorizontally
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.endOfParent
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.matchConstraints
+import splitties.views.dsl.constraintlayout.startOfParent
+import splitties.views.dsl.constraintlayout.topOfParent
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.horizontalMargin
+import splitties.views.dsl.core.seekBar
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.verticalMargin
+import splitties.views.dsl.core.wrapContent
 import splitties.views.textAppearance
 
 class TwinSeekBarPreference @JvmOverloads constructor(

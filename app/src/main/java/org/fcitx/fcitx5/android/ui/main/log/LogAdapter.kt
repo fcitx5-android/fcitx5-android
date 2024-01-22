@@ -12,8 +12,6 @@ import android.view.textclassifier.TextClassifier
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import splitties.dimensions.dp
-import splitties.views.dsl.core.endMargin
-import splitties.views.dsl.core.startMargin
 import splitties.views.dsl.core.textView
 import splitties.views.dsl.core.wrapContent
 
@@ -45,8 +43,8 @@ class LogAdapter(private val entries: ArrayList<CharSequence> = ArrayList()) :
                 setTextClassifier(TextClassifier.NO_OP)
             }
             layoutParams = MarginLayoutParams(wrapContent, wrapContent).apply {
-                startMargin = dp(4)
-                endMargin = dp(4)
+                marginStart = dp(4)
+                marginEnd = dp(4)
             }
         }
     )

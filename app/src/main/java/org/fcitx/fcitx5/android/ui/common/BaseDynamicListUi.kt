@@ -4,15 +4,20 @@
  */
 package org.fcitx.fcitx5.android.ui.common
 
+import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageButton
 import androidx.activity.OnBackPressedDispatcher
-import androidx.appcompat.app.AlertDialog
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.view.*
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.doOnAttach
+import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.ItemTouchHelper
 import arrow.core.identity
@@ -26,10 +31,21 @@ import splitties.resources.drawable
 import splitties.resources.styledColor
 import splitties.views.backgroundColor
 import splitties.views.bottomPadding
-import splitties.views.dsl.constraintlayout.*
+import splitties.views.dsl.constraintlayout.bottomOfParent
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.leftOfParent
+import splitties.views.dsl.constraintlayout.rightOfParent
+import splitties.views.dsl.constraintlayout.topOfParent
 import splitties.views.dsl.coordinatorlayout.coordinatorLayout
 import splitties.views.dsl.coordinatorlayout.defaultLParams
-import splitties.views.dsl.core.*
+import splitties.views.dsl.core.Ui
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.editText
+import splitties.views.dsl.core.margin
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.view
+import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.gravityEndBottom
 import splitties.views.imageDrawable
@@ -294,6 +310,7 @@ abstract class BaseDynamicListUi<T>(
             gravity = gravityEndBottom
             margin = dp(16)
             behavior = object : HideBottomViewOnScrollBehavior<FloatingActionButton>() {
+                @SuppressLint("RestrictedApi")
                 override fun layoutDependsOn(
                     parent: CoordinatorLayout,
                     child: FloatingActionButton,

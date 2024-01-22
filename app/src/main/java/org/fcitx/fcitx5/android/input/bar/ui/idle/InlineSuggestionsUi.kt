@@ -17,8 +17,22 @@ import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayout
 import com.google.android.flexbox.JustifyContent
 import splitties.dimensions.dp
-import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.*
+import splitties.views.dsl.constraintlayout.before
+import splitties.views.dsl.constraintlayout.centerOn
+import splitties.views.dsl.constraintlayout.centerVertically
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.endOfParent
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.matchConstraints
+import splitties.views.dsl.constraintlayout.startOfParent
+import splitties.views.dsl.core.Ui
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.frameLayout
+import splitties.views.dsl.core.horizontalMargin
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.view
+import splitties.views.dsl.core.wrapContent
 
 class InlineSuggestionsUi(override val ctx: Context) : Ui {
 

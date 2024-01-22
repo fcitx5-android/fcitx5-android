@@ -15,7 +15,7 @@ import androidx.annotation.CallSuper
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
-import java.util.*
+import java.util.Collections
 
 abstract class DynamicListAdapter<T>(
     initialEntries: List<T>,

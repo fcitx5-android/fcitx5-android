@@ -12,7 +12,13 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.*
 import splitties.dimensions.dp
-import splitties.views.dsl.constraintlayout.*
+import splitties.views.dsl.constraintlayout.above
+import splitties.views.dsl.constraintlayout.below
+import splitties.views.dsl.constraintlayout.bottomOfParent
+import splitties.views.dsl.constraintlayout.centerHorizontally
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.matchConstraints
+import splitties.views.dsl.constraintlayout.topOfParent
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.view
 import splitties.views.imageResource

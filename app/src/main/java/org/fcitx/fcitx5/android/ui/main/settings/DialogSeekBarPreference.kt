@@ -13,7 +13,14 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.utils.setOnChangeListener
 import splitties.dimensions.dp
 import splitties.resources.resolveThemeAttribute
-import splitties.views.dsl.core.*
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.horizontalMargin
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.seekBar
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.verticalLayout
+import splitties.views.dsl.core.verticalMargin
 import splitties.views.gravityHorizontalCenter
 import splitties.views.textAppearance
 

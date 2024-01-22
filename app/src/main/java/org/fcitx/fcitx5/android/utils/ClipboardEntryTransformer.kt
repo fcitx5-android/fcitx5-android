@@ -8,7 +8,7 @@ import org.fcitx.fcitx5.android.common.ipc.IClipboardEntryTransformer
 
 private const val FALLBACK_DESC = "<no description>"
 
-val IClipboardEntryTransformer.desc
+val IClipboardEntryTransformer.desc: String
     get() = runCatching { description }.getOrElse { FALLBACK_DESC }
 
 fun IClipboardEntryTransformer.descEquals(other: IClipboardEntryTransformer): Boolean {

@@ -12,7 +12,6 @@ import android.text.Spanned
 import android.text.SpannedString
 import android.text.style.DynamicDrawableSpan
 import android.view.View
-import android.view.View.*
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.core.text.buildSpannedString
@@ -21,7 +20,11 @@ import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import splitties.dimensions.dp
 import splitties.views.backgroundColor
-import splitties.views.dsl.core.*
+import splitties.views.dsl.core.Ui
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.verticalLayout
 import splitties.views.horizontalPadding
 
 class PreeditUi(override val ctx: Context, private val theme: Theme) : Ui {
@@ -63,7 +66,7 @@ class PreeditUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     override val root: View = verticalLayout {
         alpha = 0.8f
-        visibility = INVISIBLE
+        visibility = View.INVISIBLE
         add(upView, lParams())
         add(downView, lParams())
     }
@@ -71,9 +74,9 @@ class PreeditUi(override val ctx: Context, private val theme: Theme) : Ui {
     private fun updateTextView(view: TextView, str: CharSequence, visible: Boolean) = view.run {
         if (visible) {
             text = str
-            if (visibility == GONE) visibility = VISIBLE
-        } else if (visibility != GONE) {
-            visibility = GONE
+            if (visibility == View.GONE) visibility = View.VISIBLE
+        } else if (visibility != View.GONE) {
+            visibility = View.GONE
         }
     }
 

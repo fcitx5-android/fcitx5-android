@@ -6,7 +6,11 @@ package org.fcitx.fcitx5.android.utils
 
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.drawable.*
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.RippleDrawable
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.StateListDrawable
 import android.graphics.drawable.shapes.OvalShape
 import androidx.annotation.ColorInt
 

@@ -13,8 +13,19 @@ import splitties.resources.resolveThemeAttribute
 import splitties.resources.styledColor
 import splitties.resources.styledDimenPxSize
 import splitties.resources.styledDrawable
-import splitties.views.dsl.constraintlayout.*
-import splitties.views.dsl.core.*
+import splitties.views.dsl.constraintlayout.above
+import splitties.views.dsl.constraintlayout.below
+import splitties.views.dsl.constraintlayout.bottomOfParent
+import splitties.views.dsl.constraintlayout.centerHorizontally
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.startOfParent
+import splitties.views.dsl.constraintlayout.topOfParent
+import splitties.views.dsl.core.Ui
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.wrapContent
 import splitties.views.textAppearance
 import splitties.views.topPadding
 
