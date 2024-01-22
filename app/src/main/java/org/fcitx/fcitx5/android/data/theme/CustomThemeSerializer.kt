@@ -74,7 +74,8 @@ object CustomThemeSerializer : JsonTransformingSerializer<Theme.Custom>(Theme.Cu
                         put("genericActiveForegroundColor", getValue("accentKeyTextColor"))
                     }
                 })
-            }
+            },
+            MigrationStrategy("1.0", EmptyTransform)
         )
 
     private const val VERSION = "version"
