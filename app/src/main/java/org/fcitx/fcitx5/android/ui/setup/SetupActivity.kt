@@ -26,7 +26,6 @@ import org.fcitx.fcitx5.android.databinding.ActivitySetupBinding
 import org.fcitx.fcitx5.android.ui.setup.SetupPage.Companion.firstUndonePage
 import org.fcitx.fcitx5.android.ui.setup.SetupPage.Companion.isLastPage
 import org.fcitx.fcitx5.android.utils.applyTranslucentSystemBars
-import org.fcitx.fcitx5.android.utils.getCurrentFragment
 import org.fcitx.fcitx5.android.utils.notificationManager
 
 class SetupActivity : FragmentActivity() {
@@ -97,7 +96,9 @@ class SetupActivity : FragmentActivity() {
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        (viewPager.getCurrentFragment(supportFragmentManager) as SetupFragment).sync()
+        supportFragmentManager.fragments.forEach {
+            if (it.isVisible) (it as SetupFragment).sync()
+        }
     }
 
     private fun createNotificationChannel() {

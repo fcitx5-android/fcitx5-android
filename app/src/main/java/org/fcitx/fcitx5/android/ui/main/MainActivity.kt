@@ -31,7 +31,6 @@ import org.fcitx.fcitx5.android.ui.main.settings.PinyinDictionaryFragment
 import org.fcitx.fcitx5.android.ui.setup.SetupActivity
 import org.fcitx.fcitx5.android.utils.Const
 import org.fcitx.fcitx5.android.utils.applyTranslucentSystemBars
-import org.fcitx.fcitx5.android.utils.navigateFromMain
 import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.resources.styledColor
@@ -105,7 +104,8 @@ class MainActivity : AppCompatActivity() {
                     .setMessage(R.string.whether_import_dict)
                     .setNegativeButton(android.R.string.cancel) { _, _ -> }
                     .setPositiveButton(android.R.string.ok) { _, _ ->
-                        navController.navigateFromMain(
+                        navController.popBackStack(R.id.mainFragment, false)
+                        navController.navigate(
                             R.id.action_mainFragment_to_pinyinDictionaryFragment,
                             bundleOf(PinyinDictionaryFragment.INTENT_DATA_URI to it)
                         )

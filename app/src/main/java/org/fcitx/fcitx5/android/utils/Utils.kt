@@ -15,7 +15,6 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.os.Looper
 import android.provider.OpenableColumns
 import android.provider.Settings
@@ -26,7 +25,6 @@ import android.widget.EditText
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.annotation.AttrRes
-import androidx.annotation.IdRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -35,10 +33,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.navigation.NavController
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.widget.ViewPager2
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.FcitxApplication
@@ -55,9 +50,6 @@ import java.util.TimeZone
 import java.util.WeakHashMap
 import java.util.zip.ZipInputStream
 import kotlin.math.roundToInt
-
-fun ViewPager2.getCurrentFragment(fragmentManager: FragmentManager): Fragment? =
-    fragmentManager.findFragmentByTag("f$currentItem")
 
 val appContext: Context
     get() = FcitxApplication.getInstance().applicationContext
@@ -106,11 +98,6 @@ private val iso8601DateFormat by lazy {
 
 fun iso8601UTCDateTime(timeMillis: Long? = null): String =
     iso8601DateFormat.format(timeMillis?.let { Date(it) } ?: Date())
-
-fun NavController.navigateFromMain(@IdRes dest: Int, bundle: Bundle? = null) {
-    popBackStack(R.id.mainFragment, false)
-    navigate(dest, bundle)
-}
 
 fun darkenColorFilter(percent: Int): ColorFilter {
     val value = percent * 255 / 100
