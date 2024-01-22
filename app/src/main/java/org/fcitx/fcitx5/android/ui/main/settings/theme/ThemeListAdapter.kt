@@ -57,23 +57,20 @@ abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHold
         }
     }
 
+    private fun prependOffset(index: Int): Int {
+        return if (index == -1) 0 else 1
+    }
+
     fun prependTheme(it: Theme) {
         entries.add(0, it)
-        activeIndex += 1
-        lightIndex += 1
-        darkIndex += 1
+        activeIndex += prependOffset(activeIndex)
+        lightIndex += prependOffset(lightIndex)
+        darkIndex += prependOffset(darkIndex)
         notifyItemInserted(OFFSET)
     }
 
-    fun replaceTheme(theme: Theme) {
-        val index = entries.indexOfFirst { it.name == theme.name }
-        entries[index] = theme
-        notifyItemChanged(index + OFFSET)
-    }
-
-    private fun removedOffset(removedIndex: Int, offsetIndex: Int): Int {
-        val i = removedIndex - OFFSET - offsetIndex
-        return i.sign
+    private fun removedOffset(removedIndex: Int, index: Int): Int {
+        return if (index == -1) 0 else (removedIndex - OFFSET - index).sign
     }
 
     fun removeTheme(name: String) {
@@ -83,6 +80,21 @@ abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHold
         activeIndex += removedOffset(index, activeIndex)
         lightIndex += removedOffset(index, lightIndex)
         darkIndex += removedOffset(index, darkIndex)
+    }
+
+    private fun replaceIndex(replacedIndex: Int, index: Int): Int {
+        return if (replacedIndex + OFFSET == index) OFFSET else index
+    }
+
+    fun replaceTheme(theme: Theme) {
+        val index = entries.indexOfFirst { it.name == theme.name }
+        entries.removeAt(index)
+        entries.add(0, theme)
+        activeIndex = replaceIndex(index, activeIndex)
+        lightIndex = replaceIndex(index, lightIndex)
+        darkIndex = replaceIndex(index, darkIndex)
+        notifyItemMoved(index + OFFSET, OFFSET)
+        notifyItemChanged(OFFSET)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =

@@ -123,14 +123,29 @@ object ThemeFilesManager {
                     )
                     if (ThemeManager.BuiltinThemes.find { it.name == decoded.name } != null)
                         errorRuntime(R.string.exception_theme_name_clash)
-                    val exists = ThemeManager.getTheme(decoded.name) != null
+                    val oldTheme = ThemeManager.getTheme(decoded.name) as? Theme.Custom
+                    val newCreated = oldTheme == null
                     val newTheme = if (decoded.backgroundImage != null) {
                         val srcFile = File(dir, decoded.backgroundImage.srcFilePath)
-                        val croppedFile = File(dir, decoded.backgroundImage.croppedFilePath)
-                        extracted.find { it.name == srcFile.name }?.copyTo(srcFile)
+                        val oldSrcFile = oldTheme?.backgroundImage?.srcFilePath?.let { File(it) }
+                        val srcFileNameMatches = oldSrcFile?.name == srcFile.name
+                        extracted.find { it.name == srcFile.name }
+                            // allow overwriting background image files when theme and file names all are same
+                            ?.copyTo(srcFile, overwrite = srcFileNameMatches)
                             ?: errorRuntime(R.string.exception_theme_src_image)
-                        extracted.find { it.name == croppedFile.name }?.copyTo(croppedFile)
+                        val croppedFile = File(dir, decoded.backgroundImage.croppedFilePath)
+                        val oldCroppedFile =
+                            oldTheme?.backgroundImage?.croppedFilePath?.let { File(it) }
+                        val croppedFileNameMatches = oldCroppedFile?.name == croppedFile.name
+                        extracted.find { it.name == croppedFile.name }
+                            ?.copyTo(croppedFile, overwrite = croppedFileNameMatches)
                             ?: errorRuntime(R.string.exception_theme_cropped_image)
+                        if (!srcFileNameMatches) {
+                            oldSrcFile?.delete()
+                        }
+                        if (!croppedFileNameMatches) {
+                            oldCroppedFile?.delete()
+                        }
                         decoded.copy(
                             backgroundImage = decoded.backgroundImage.copy(
                                 croppedFilePath = croppedFile.path,
@@ -140,7 +155,8 @@ object ThemeFilesManager {
                     } else {
                         decoded
                     }
-                    Triple(!exists, newTheme, migrated)
+                    saveThemeFiles(newTheme)
+                    Triple(newCreated, newTheme, migrated)
                 }
             }
         }
