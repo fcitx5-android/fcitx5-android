@@ -137,7 +137,7 @@ class DataDescriptorPlugin : Plugin<Project> {
                     return@forEach
                 logger.log(LogLevel.DEBUG, "${change.changeType}: ${change.normalizedPath}")
                 val relativeFile = change.file.relativeTo(file.parentFile)
-                val key = relativeFile.path
+                val key = relativeFile.path.replace(File.separatorChar, '/')
                 if (change.changeType == ChangeType.REMOVED || key in excludes.get()) {
                     map.remove(key)
                 } else {
