@@ -39,7 +39,6 @@ class FcitxRemoteService : Service() {
         PriorityQueue<IClipboardEntryTransformer>(3, compareByDescending { it.priority })
 
     private fun transformClipboard(source: String): String {
-        MainScope()
         var result = source
         clipboardTransformers.forEach {
             try {
@@ -74,11 +73,8 @@ class FcitxRemoteService : Service() {
 
         override fun registerClipboardEntryTransformer(transformer: IClipboardEntryTransformer) {
             Timber.d("registerClipboardEntryTransformer: ${transformer.desc}")
-            try {
-                transformer.description!!.isNotEmpty() || throw Exception()
-            } catch (e: Exception) {
+            if (transformer.description.isNullOrBlank()) {
                 Timber.w("Cannot register ClipboardEntryTransformer of null or empty description")
-                return
             }
             if (clipboardTransformers.any { it.descEquals(transformer) }) {
                 Timber.w("ClipboardEntryTransformer ${transformer.desc} has already been registered")
@@ -97,7 +93,7 @@ class FcitxRemoteService : Service() {
             Timber.d("unregisterClipboardEntryTransformer: ${transformer.desc}")
             scope.launch {
                 clipboardTransformers.remove(transformer)
-                        || clipboardTransformers.removeIf { it.descEquals(transformer) }
+                        || clipboardTransformers.removeAll { it.descEquals(transformer) }
                         || return@launch
                 updateClipboardManager()
             }
