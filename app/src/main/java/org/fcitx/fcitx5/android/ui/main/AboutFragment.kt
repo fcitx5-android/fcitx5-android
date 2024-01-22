@@ -8,6 +8,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.navigation.fragment.findNavController
+import org.fcitx.fcitx5.android.BuildConfig
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.ui.common.PaddingPreferenceFragment
 import org.fcitx.fcitx5.android.utils.Const
@@ -37,12 +38,12 @@ class AboutFragment : PaddingPreferenceFragment() {
             addCategory(R.string.version) {
                 isIconSpaceReserved = false
                 addPreference(R.string.current_version, Const.versionName)
-                addPreference(R.string.build_git_hash, Const.buildGitHash) {
-                    val commit = Const.buildGitHash.substringBefore('-')
+                addPreference(R.string.build_git_hash, BuildConfig.BUILD_GIT_HASH) {
+                    val commit = BuildConfig.BUILD_GIT_HASH.substringBefore('-')
                     val uri = Uri.parse("${Const.githubRepo}/commit/${commit}")
                     startActivity(Intent(Intent.ACTION_VIEW, uri))
                 }
-                addPreference(R.string.build_time, formatDateTime(Const.buildTime))
+                addPreference(R.string.build_time, formatDateTime(BuildConfig.BUILD_TIME))
             }
         }
     }

@@ -13,7 +13,6 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.fcitx.fcitx5.android.BuildConfig
 import org.fcitx.fcitx5.android.core.data.DataManager.dataDir
-import org.fcitx.fcitx5.android.utils.Const
 import org.fcitx.fcitx5.android.utils.FileUtil
 import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.javaIdRegex
@@ -39,13 +38,13 @@ object DataManager {
     var synced = false
         private set
 
-    // should be consistent with the deserialization in build.gradle.kts (:app)
-    private fun deserializeDataDescriptor(raw: String) = runCatching {
-        json.decodeFromString<DataDescriptor>(raw)
+    // should be consistent with the deserialization in DataDescriptorPlugin (:build-logic)
+    private fun deserializeDataDescriptor(raw: String): DataDescriptor {
+        return json.decodeFromString<DataDescriptor>(raw)
     }
 
-    private fun serializeDataDescriptor(descriptor: DataDescriptor) = runCatching {
-        json.encodeToString(descriptor)
+    private fun serializeDataDescriptor(descriptor: DataDescriptor): String {
+        return json.encodeToString(descriptor)
     }
 
     // If Android version supports direct boot, we put the hierarchy in device encrypted storage
@@ -57,14 +56,12 @@ object DataManager {
         File(appContext.applicationInfo.dataDir)
     }
 
-    private val destDescriptorFile = File(dataDir, Const.dataDescriptorName)
-
-    private fun AssetManager.getDataDescriptor() =
-        open(Const.dataDescriptorName)
+    private fun AssetManager.getDataDescriptor(): DataDescriptor {
+        return open(BuildConfig.DATA_DESCRIPTOR_NAME)
             .bufferedReader()
             .use { it.readText() }
             .let { deserializeDataDescriptor(it) }
-            .getOrThrow()
+    }
 
     private val loadedPlugins = mutableSetOf<PluginDescriptor>()
     private val failedPlugins = mutableMapOf<String, PluginLoadFailed>()
@@ -102,6 +99,7 @@ object DataManager {
         // Parse plugin.xml
         for (packageName in pluginPackages) {
             val res = pm.getResourcesForApplication(packageName)
+
             @SuppressLint("DiscouragedApi")
             val resId = res.getIdentifier("plugin", "xml", packageName)
             if (resId == 0) {
@@ -201,24 +199,15 @@ object DataManager {
         loadedPlugins.clear()
         failedPlugins.clear()
 
+        val destDescriptorFile = File(dataDir, BuildConfig.DATA_DESCRIPTOR_NAME)
+
         // load last run's data descriptor
-        val oldDescriptor =
-            destDescriptorFile
-                .takeIf { it.exists() && it.isFile }
-                ?.runCatching { readText() }
-                ?.getOrNull()
-                ?.let { deserializeDataDescriptor(it) }
-                ?.getOrNull()
-                ?: DataDescriptor("", mapOf(), mapOf())
+        val oldDescriptor = destDescriptorFile
+            .runCatching { deserializeDataDescriptor(bufferedReader().use { it.readText() }) }
+            .getOrElse { DataDescriptor("", emptyMap(), emptyMap()) }
 
         // load app's data descriptor
-        val mainDescriptor =
-            appContext.assets
-                .open(Const.dataDescriptorName)
-                .bufferedReader()
-                .use { it.readText() }
-                .let { deserializeDataDescriptor(it) }
-                .getOrThrow()
+        val mainDescriptor = appContext.assets.getDataDescriptor()
 
         val (parsedDescriptors, failed) = detectPlugins()
         failedPlugins.putAll(failed)
@@ -290,13 +279,15 @@ object DataManager {
             }
         }
         // save the new hierarchy as the data descriptor to be used in the next run
-        destDescriptorFile.writeText(serializeDataDescriptor(newHierarchy.downToDataDescriptor()).getOrThrow())
+        destDescriptorFile.bufferedWriter().use {
+            it.write(serializeDataDescriptor(newHierarchy.downToDataDescriptor()))
+        }
         callbacks.forEach { it() }
         callbacks.clear()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             // remove old assets from credential encrypted storage
             val oldDataDir = appContext.dataDir
-            val oldDataDescriptor = oldDataDir.resolve(Const.dataDescriptorName)
+            val oldDataDescriptor = oldDataDir.resolve(BuildConfig.DATA_DESCRIPTOR_NAME)
             if (oldDataDescriptor.exists()) {
                 oldDataDescriptor.delete()
                 oldDataDir.resolve("README.md").delete()
@@ -324,7 +315,7 @@ object DataManager {
 
     fun deleteAndSync() {
         lock.withLock {
-            dataDir.resolve(Const.dataDescriptorName).delete()
+            dataDir.resolve(BuildConfig.DATA_DESCRIPTOR_NAME).delete()
             dataDir.resolve("README.md").delete()
             dataDir.resolve("usr").deleteRecursively()
         }
