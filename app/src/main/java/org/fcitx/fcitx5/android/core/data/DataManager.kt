@@ -15,7 +15,7 @@ import org.fcitx.fcitx5.android.BuildConfig
 import org.fcitx.fcitx5.android.core.data.DataManager.dataDir
 import org.fcitx.fcitx5.android.utils.FileUtil
 import org.fcitx.fcitx5.android.utils.appContext
-import org.fcitx.fcitx5.android.utils.javaIdRegex
+import org.fcitx.fcitx5.android.utils.isJavaIdentifier
 import org.xmlpull.v1.XmlPullParser
 import timber.log.Timber
 import java.io.File
@@ -149,14 +149,13 @@ object DataManager {
             }
             parser.close()
 
-            // Replace @string/ with string resource
-            description = description?.let { d ->
-                d.removePrefix("@string/").let { s ->
-                    if (s.matches(javaIdRegex)) {
-                        @SuppressLint("DiscouragedApi")
-                        val id = res.getIdentifier(s, "string", packageName)
-                        if (id != 0) res.getString(id) else d
-                    } else d
+            if (description?.startsWith("@string/") == true) {
+                // Replace "@string/" with string resource
+                val s = description.substring(8)
+                if (s.isJavaIdentifier()) {
+                    @SuppressLint("DiscouragedApi")
+                    val id = res.getIdentifier(s, "string", packageName)
+                    if (id != 0) description = res.getString(id)
                 }
             }
 
