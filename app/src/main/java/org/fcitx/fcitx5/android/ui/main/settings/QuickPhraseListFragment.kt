@@ -39,6 +39,7 @@ import org.fcitx.fcitx5.android.utils.NaiveDustman
 import org.fcitx.fcitx5.android.utils.errorDialog
 import org.fcitx.fcitx5.android.utils.materialTextInput
 import org.fcitx.fcitx5.android.utils.notificationManager
+import org.fcitx.fcitx5.android.utils.onPositiveButtonClick
 import org.fcitx.fcitx5.android.utils.queryFileName
 import org.fcitx.fcitx5.android.utils.str
 import splitties.resources.drawable
@@ -174,25 +175,25 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                     setPaddingDp(20, 10, 20, 0)
                     add(inputLayout, lParams(matchParent))
                 }
-                val dialog = AlertDialog.Builder(requireContext())
+                AlertDialog.Builder(requireContext())
                     .setTitle(R.string.create_new)
                     .setView(layout)
                     .setPositiveButton(android.R.string.ok, null)
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener onClick@{
-                    val name = editText.str.trim()
-                    if (name.isBlank()) {
-                        editText.error =
-                            getString(R.string._cannot_be_empty, getString(R.string.name))
-                        editText.requestFocus()
-                        return@onClick
-                    } else {
-                        editText.error = null
+                    .onPositiveButtonClick onClick@{
+                        val name = editText.str.trim()
+                        if (name.isBlank()) {
+                            editText.error =
+                                getString(R.string._cannot_be_empty, getString(R.string.name))
+                            editText.requestFocus()
+                            return@onClick false
+                        } else {
+                            editText.error = null
+                        }
+                        ui.addItem(item = QuickPhraseManager.newEmpty(name))
+                        return@onClick true
                     }
-                    ui.addItem(item = QuickPhraseManager.newEmpty(name))
-                    dialog.dismiss()
-                }
             }
 
             override fun updateFAB() {

@@ -21,6 +21,7 @@ import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.utils.NaiveDustman
 import org.fcitx.fcitx5.android.utils.materialTextInput
+import org.fcitx.fcitx5.android.utils.onPositiveButtonClick
 import org.fcitx.fcitx5.android.utils.serializable
 import org.fcitx.fcitx5.android.utils.str
 import splitties.views.dsl.core.add
@@ -75,42 +76,40 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
                     add(keywordLayout, lParams(matchParent))
                     add(phraseLayout, lParams(matchParent))
                 }
-                val dialog = AlertDialog.Builder(context)
+                AlertDialog.Builder(context)
                     .setTitle(title)
                     .setView(layout)
                     .setPositiveButton(android.R.string.ok, null)
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
-                // change OnClickListener after dialog is shown,
-                // so we can control when to dismiss the dialog
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener onClick@{
-                    val keyword = keywordField.str.trim()
-                    // "keyword" cannot contain any black characters
-                    if (keyword.isBlank()) {
-                        keywordField.error = getString(
-                            R.string._cannot_be_empty,
-                            getString(R.string.quickphrase_keyword)
-                        )
-                        keywordField.requestFocus()
-                        return@onClick
-                    } else {
-                        keywordField.error = null
+                    .onPositiveButtonClick onClick@{
+                        val keyword = keywordField.str.trim()
+                        // "keyword" cannot contain any black characters
+                        if (keyword.isBlank()) {
+                            keywordField.error = getString(
+                                R.string._cannot_be_empty,
+                                getString(R.string.quickphrase_keyword)
+                            )
+                            keywordField.requestFocus()
+                            return@onClick false
+                        } else {
+                            keywordField.error = null
+                        }
+                        // "phrase" may contain blank characters
+                        val phrase = phraseField.str
+                        if (phrase.isEmpty()) {
+                            phraseField.error = getString(
+                                R.string._cannot_be_empty,
+                                getString(R.string.quickphrase_phrase)
+                            )
+                            phraseField.requestFocus()
+                            return@onClick false
+                        } else {
+                            phraseField.error = null
+                        }
+                        block(QuickPhraseEntry(keyword, phraseField.str))
+                        return@onClick true
                     }
-                    // "phrase" may contain blank characters
-                    val phrase = phraseField.str
-                    if (phrase.isEmpty()) {
-                        phraseField.error = getString(
-                            R.string._cannot_be_empty,
-                            getString(R.string.quickphrase_phrase)
-                        )
-                        phraseField.requestFocus()
-                        return@onClick
-                    } else {
-                        phraseField.error = null
-                    }
-                    block(QuickPhraseEntry(keyword, phraseField.str))
-                    dialog.dismiss()
-                }
             }
         }
         ui.addOnItemChangedListener(this)

@@ -16,6 +16,7 @@ import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.utils.NaiveDustman
 import org.fcitx.fcitx5.android.utils.materialTextInput
+import org.fcitx.fcitx5.android.utils.onPositiveButtonClick
 import org.fcitx.fcitx5.android.utils.str
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
@@ -104,32 +105,32 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
                     add(mappingLayout, lParams(matchParent))
                     add(altMappingLayout, lParams(matchParent))
                 }
-                val dialog = AlertDialog.Builder(context)
+                AlertDialog.Builder(context)
                     .setTitle(title)
                     .setView(layout)
                     .setPositiveButton(android.R.string.ok, null)
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener onClick@{
-                    val key = keyField.str.trim()
-                    if (key.isBlank()) {
-                        keyField.error = getString(R.string._cannot_be_empty, keyDesc)
-                        keyField.requestFocus()
-                        return@onClick
-                    } else {
-                        keyField.error = null
+                    .onPositiveButtonClick onClick@{
+                        val key = keyField.str.trim()
+                        if (key.isBlank()) {
+                            keyField.error = getString(R.string._cannot_be_empty, keyDesc)
+                            keyField.requestFocus()
+                            return@onClick false
+                        } else {
+                            keyField.error = null
+                        }
+                        val mapping = mappingField.str
+                        if (mapping.isBlank()) {
+                            mappingField.error = getString(R.string._cannot_be_empty, mappingDesc)
+                            mappingField.requestFocus()
+                            return@onClick false
+                        } else {
+                            mappingField.error = null
+                        }
+                        block(PunctuationMapEntry(key, mapping, altMappingField.str))
+                        return@onClick true
                     }
-                    val mapping = mappingField.str
-                    if (mapping.isBlank()) {
-                        mappingField.error = getString(R.string._cannot_be_empty, mappingDesc)
-                        mappingField.requestFocus()
-                        return@onClick
-                    } else {
-                        mappingField.error = null
-                    }
-                    block(PunctuationMapEntry(key, mapping, altMappingField.str))
-                    dialog.dismiss()
-                }
             }
         }
         resetDustman()

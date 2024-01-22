@@ -34,6 +34,8 @@ import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import org.fcitx.fcitx5.android.utils.NaiveDustman
 import org.fcitx.fcitx5.android.utils.errorDialog
 import org.fcitx.fcitx5.android.utils.notificationManager
+import org.fcitx.fcitx5.android.utils.onPositiveButtonClick
+import org.fcitx.fcitx5.android.utils.positiveButton
 import org.fcitx.fcitx5.android.utils.queryFileName
 import splitties.resources.drawable
 import splitties.resources.styledDrawable
@@ -183,20 +185,17 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
             .setOnDismissListener {
                 (filesSelectionUi.root.parent as? ViewGroup)?.removeView(filesSelectionUi.root)
             }
-            .show().apply {
-                getButton(AlertDialog.BUTTON_POSITIVE).apply {
-                    // override default button handler to prevent dialog close on click
-                    setOnClickListener {
-                        importConfAndDictUri()
-                    }
-                    isEnabled = false
-                }
+            .show()
+            .onPositiveButtonClick {
+                positiveButton.isEnabled = false
+                importConfAndDictUri()
+                false
             }
     }
 
     private fun updateFilesSelectionDialogButton(importing: Boolean = false) {
         filesSelectionDialog?.apply {
-            getButton(AlertDialog.BUTTON_POSITIVE).isEnabled =
+            positiveButton.isEnabled =
                 if (importing) false else (confUri != null && dictUri != null)
         }
     }

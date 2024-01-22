@@ -26,6 +26,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.utils.onPositiveButtonClick
+import org.fcitx.fcitx5.android.utils.str
 import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.resources.styledColor
@@ -256,25 +258,24 @@ abstract class BaseDynamicListUi<T>(
                 rightOfParent(dp(20))
             })
         }
-        val dialog = AlertDialog.Builder(ctx)
+        AlertDialog.Builder(ctx)
             .setTitle(title)
             .setView(layout)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-            }
-            .setNegativeButton(android.R.string.cancel) { dialog, _ ->
-                dialog.cancel()
-            }
+            .setPositiveButton(android.R.string.ok, null)
+            .setNegativeButton(android.R.string.cancel, null)
             .show()
-        editText.requestFocus()
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-            val t = editText.editableText.toString()
-            if (mode.validator(t)) {
-                block(mode.converter(t))
-                dialog.dismiss()
-            } else {
-                editText.error = ctx.getString(R.string.invalid_value)
+            .onPositiveButtonClick {
+                val str = editText.str
+                if (mode.validator(str)) {
+                    editText.error = null
+                    block(mode.converter(str))
+                    true
+                } else {
+                    editText.error = ctx.getString(R.string.invalid_value)
+                    false
+                }
             }
-        }
+        editText.requestFocus()
     }
 
     protected val recyclerView = recyclerView {
