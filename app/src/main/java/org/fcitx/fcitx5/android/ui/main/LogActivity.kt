@@ -43,14 +43,14 @@ class LogActivity : AppCompatActivity() {
         launcher = registerForActivityResult(CreateDocument("text/plain")) { uri ->
             if (uri == null) return@registerForActivityResult
             lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
-                runCatching {
+                toast(runCatching {
                     contentResolver.openOutputStream(uri)!!.use { stream ->
                         stream.bufferedWriter().use { writer ->
                             writer.write(DeviceInfo.get(this@LogActivity))
                             writer.write(logView.currentLog)
                         }
                     }
-                }.toast(this@LogActivity)
+                })
             }
         }
     }

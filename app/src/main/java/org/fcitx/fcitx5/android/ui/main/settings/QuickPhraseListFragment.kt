@@ -36,7 +36,7 @@ import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import org.fcitx.fcitx5.android.utils.NaiveDustman
-import org.fcitx.fcitx5.android.utils.errorDialog
+import org.fcitx.fcitx5.android.utils.importErrorDialog
 import org.fcitx.fcitx5.android.utils.materialTextInput
 import org.fcitx.fcitx5.android.utils.notificationManager
 import org.fcitx.fcitx5.android.utils.onPositiveButtonClick
@@ -234,12 +234,12 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
             val fileName = cr.queryFileName(uri) ?: return@launch
             val extName = fileName.substringAfterLast('.')
             if (extName != QuickPhrase.EXT) {
-                importErrorDialog(getString(R.string.exception_quickphrase_filename, fileName))
+                ctx.importErrorDialog(R.string.exception_quickphrase_filename, fileName)
                 return@launch
             }
             val entryName = fileName.substringBeforeLast('.')
             if (ui.entries.any { it.name == entryName }) {
-                importErrorDialog(getString(R.string.quickphrase_already_exists))
+                ctx.importErrorDialog(R.string.quickphrase_already_exists)
                 return@launch
             }
             NotificationCompat.Builder(ctx, CHANNEL_ID)
@@ -258,14 +258,10 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                     ui.addItem(item = imported)
                 }
             } catch (e: Exception) {
-                importErrorDialog(e.localizedMessage ?: e.stackTraceToString())
+                ctx.importErrorDialog(e)
             }
             nm.cancel(id)
         }
-    }
-
-    private suspend fun importErrorDialog(message: String) {
-        errorDialog(requireContext(), getString(R.string.import_error), message)
     }
 
     private fun reloadQuickPhrase() {

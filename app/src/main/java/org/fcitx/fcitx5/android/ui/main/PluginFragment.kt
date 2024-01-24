@@ -130,7 +130,6 @@ class PluginFragment : PaddingPreferenceFragment() {
                 PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_ALL.toLong())
             )
         } else {
-            @Suppress("DEPRECATION")
             pm.queryIntentActivities(Intent(DataManager.PLUGIN_INTENT), PackageManager.MATCH_ALL)
         }.firstOrNull {
             it.activityInfo.packageName == pkg

@@ -14,7 +14,7 @@ import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import org.fcitx.fcitx5.android.utils.RectSerializer
 import org.fcitx.fcitx5.android.utils.appContext
-import org.fcitx.fcitx5.android.utils.darkenColorFilter
+import org.fcitx.fcitx5.android.utils.DarkenColorFilter
 import java.io.File
 
 @Serializable
@@ -94,7 +94,7 @@ sealed class Theme : Parcelable {
                 if (!cropped.exists()) return null
                 val bitmap = BitmapFactory.decodeStream(cropped.inputStream()) ?: return null
                 return BitmapDrawable(appContext.resources, bitmap).apply {
-                    colorFilter = darkenColorFilter(100 - brightness)
+                    colorFilter = DarkenColorFilter(100 - brightness)
                 }
             }
         }

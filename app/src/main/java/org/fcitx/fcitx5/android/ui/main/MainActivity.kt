@@ -31,6 +31,7 @@ import org.fcitx.fcitx5.android.ui.main.settings.PinyinDictionaryFragment
 import org.fcitx.fcitx5.android.ui.setup.SetupActivity
 import org.fcitx.fcitx5.android.utils.Const
 import org.fcitx.fcitx5.android.utils.applyTranslucentSystemBars
+import org.fcitx.fcitx5.android.utils.startActivity
 import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.resources.styledColor
@@ -86,7 +87,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         if (intent?.action == Intent.ACTION_MAIN && SetupActivity.shouldShowUp()) {
-            startActivity(Intent(this, SetupActivity::class.java))
+            startActivity<SetupActivity>()
         } else {
             processIntent(intent)
         }

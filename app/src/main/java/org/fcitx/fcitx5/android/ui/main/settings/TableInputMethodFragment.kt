@@ -32,7 +32,7 @@ import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import org.fcitx.fcitx5.android.utils.NaiveDustman
-import org.fcitx.fcitx5.android.utils.errorDialog
+import org.fcitx.fcitx5.android.utils.importErrorDialog
 import org.fcitx.fcitx5.android.utils.notificationManager
 import org.fcitx.fcitx5.android.utils.onPositiveButtonClick
 import org.fcitx.fcitx5.android.utils.positiveButton
@@ -213,7 +213,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
             val importId = IMPORT_ID++
             val fileName = cr.queryFileName(uri) ?: return@launch
             if (!fileName.endsWith(".zip")) {
-                importErrorDialog(getString(R.string.exception_table_im_filename, fileName))
+                ctx.importErrorDialog(R.string.exception_table_im_filename, fileName)
                 return@launch
             }
             NotificationCompat.Builder(ctx, CHANNEL_ID)
@@ -231,7 +231,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
                     ui.addItem(item = imported)
                 }
             } catch (e: Exception) {
-                importErrorDialog(e.localizedMessage ?: e.stackTraceToString())
+                ctx.importErrorDialog(e)
             }
             nm.cancel(importId)
         }
@@ -242,7 +242,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
         lifecycleScope.launch {
             val fileName = ctx.contentResolver.queryFileName(uri) ?: ""
             if (!fileName.removeSuffix(".in").endsWith(".conf")) {
-                importErrorDialog(getString(R.string.exception_table_conf_filename, fileName))
+                ctx.importErrorDialog(R.string.exception_table_conf_filename, fileName)
                 return@launch
             }
             confUri = uri
@@ -256,7 +256,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
         lifecycleScope.launch {
             val fileName = ctx.contentResolver.queryFileName(uri) ?: ""
             if (Dictionary.Type.fromFileName(fileName) == null) {
-                importErrorDialog(getString(R.string.exception_table_dict_filename, fileName))
+                ctx.importErrorDialog(R.string.exception_table_dict_filename, fileName)
                 return@launch
             }
             dictUri = uri
@@ -273,7 +273,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
         val dictUri = this@TableInputMethodFragment.dictUri
         if (confUri == null || dictUri == null) {
             lifecycleScope.launch {
-                importErrorDialog(getString(R.string.exception_table_import_both_files))
+                ctx.importErrorDialog(R.string.exception_table_import_both_files)
             }
             return
         }
@@ -303,17 +303,13 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
                     ui.addItem(item = imported)
                 }
             } catch (e: Exception) {
-                importErrorDialog(e.localizedMessage ?: e.stackTraceToString())
+                ctx.importErrorDialog(e)
             }
             nm.cancel(importId)
             withContext(Dispatchers.Main) {
                 updateFilesSelectionDialogButton(importing = false)
             }
         }
-    }
-
-    private suspend fun importErrorDialog(message: String) {
-        errorDialog(requireContext(), getString(R.string.import_error), message)
     }
 
     private fun replaceDictFromUri(uri: Uri) {
@@ -326,7 +322,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
             val importId = IMPORT_ID++
             val dictName = cr.queryFileName(uri) ?: return@launch
             if (Dictionary.Type.fromFileName(dictName) == null) {
-                importErrorDialog(getString(R.string.exception_table_dict_filename, dictName))
+                ctx.importErrorDialog(R.string.exception_table_dict_filename, dictName)
                 return@launch
             }
             NotificationCompat.Builder(ctx, CHANNEL_ID)
@@ -345,7 +341,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
                 }
                 dustman.forceDirty()
             } catch (e: Exception) {
-                importErrorDialog(e.localizedMessage ?: e.stackTraceToString())
+                ctx.importErrorDialog(e)
             }
             nm.cancel(importId)
         }

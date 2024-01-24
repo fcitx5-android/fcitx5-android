@@ -4,7 +4,6 @@
  */
 package org.fcitx.fcitx5.android.ui.main
 
-import android.content.Intent
 import android.os.Bundle
 import android.os.Debug
 import androidx.activity.result.ActivityResultLauncher
@@ -23,6 +22,7 @@ import org.fcitx.fcitx5.android.ui.common.PaddingPreferenceFragment
 import org.fcitx.fcitx5.android.ui.main.modified.MySwitchPreference
 import org.fcitx.fcitx5.android.utils.addPreference
 import org.fcitx.fcitx5.android.utils.iso8601UTCDateTime
+import org.fcitx.fcitx5.android.utils.startActivity
 import org.fcitx.fcitx5.android.utils.toast
 import java.io.File
 
@@ -37,11 +37,11 @@ class DeveloperFragment : PaddingPreferenceFragment() {
             if (uri == null) return@registerForActivityResult
             val ctx = requireContext()
             lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
-                runCatching {
+                ctx.toast(runCatching {
                     ctx.contentResolver.openOutputStream(uri)!!.use { o ->
                         hprofFile.inputStream().use { i -> i.copyTo(o) }
                     }
-                }.toast(ctx)
+                })
                 hprofFile.delete()
             }
         }
@@ -50,7 +50,7 @@ class DeveloperFragment : PaddingPreferenceFragment() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceScreen = preferenceManager.createPreferenceScreen(requireContext()).apply {
             addPreference(R.string.real_time_logs) {
-                context.startActivity(Intent(context, LogActivity::class.java))
+                startActivity<LogActivity>()
             }
             addPreference(MySwitchPreference(context).apply {
                 key = AppPrefs.getInstance().internal.verboseLog.key

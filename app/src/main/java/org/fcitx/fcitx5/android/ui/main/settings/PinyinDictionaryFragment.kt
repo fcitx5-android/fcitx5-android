@@ -32,7 +32,7 @@ import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import org.fcitx.fcitx5.android.utils.NaiveDustman
-import org.fcitx.fcitx5.android.utils.errorDialog
+import org.fcitx.fcitx5.android.utils.importErrorDialog
 import org.fcitx.fcitx5.android.utils.notificationManager
 import org.fcitx.fcitx5.android.utils.parcelable
 import org.fcitx.fcitx5.android.utils.queryFileName
@@ -136,12 +136,12 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDiction
             val id = IMPORT_ID++
             val fileName = cr.queryFileName(uri) ?: return@launch
             if (PinyinDictionary.Type.fromFileName(fileName) == null) {
-                importErrorDialog(getString(R.string.invalid_dict))
+                ctx.importErrorDialog(R.string.invalid_dict)
                 return@launch
             }
             val entryName = fileName.substringBeforeLast('.')
             if (ui.entries.any { it.name == entryName }) {
-                importErrorDialog(getString(R.string.dict_already_exists))
+                ctx.importErrorDialog(R.string.dict_already_exists)
                 return@launch
             }
             NotificationCompat.Builder(ctx, CHANNEL_ID)
@@ -160,14 +160,10 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDiction
                     ui.addItem(item = imported)
                 }
             } catch (e: Exception) {
-                importErrorDialog(e.localizedMessage ?: e.stackTraceToString())
+                ctx.importErrorDialog(e)
             }
             nm.cancel(id)
         }
-    }
-
-    private suspend fun importErrorDialog(message: String) {
-        errorDialog(requireContext(), getString(R.string.import_error), message)
     }
 
     private fun reloadDict() {

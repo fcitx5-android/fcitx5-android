@@ -46,7 +46,7 @@ import org.fcitx.fcitx5.android.data.theme.ThemeFilesManager
 import org.fcitx.fcitx5.android.data.theme.ThemePreset
 import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
 import org.fcitx.fcitx5.android.utils.applyTranslucentSystemBars
-import org.fcitx.fcitx5.android.utils.darkenColorFilter
+import org.fcitx.fcitx5.android.utils.DarkenColorFilter
 import org.fcitx.fcitx5.android.utils.parcelable
 import splitties.dimensions.dp
 import splitties.resources.color
@@ -414,7 +414,7 @@ class CustomThemeActivity : AppCompatActivity() {
     private fun BackgroundStates.updateState() {
         val progress = brightnessSeekBar.progress
         brightnessValue.text = "$progress%"
-        filteredDrawable.colorFilter = darkenColorFilter(100 - progress)
+        filteredDrawable.colorFilter = DarkenColorFilter(100 - progress)
         previewUi.setBackground(filteredDrawable)
     }
 

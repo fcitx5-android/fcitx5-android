@@ -26,6 +26,7 @@ import org.fcitx.fcitx5.android.ui.main.LogActivity
 import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.Locales
 import org.fcitx.fcitx5.android.utils.isDarkMode
+import org.fcitx.fcitx5.android.utils.startActivity
 import org.fcitx.fcitx5.android.utils.userManager
 import timber.log.Timber
 import kotlin.system.exitProcess
@@ -74,7 +75,7 @@ class FcitxApplication : Application() {
 
         if (!BuildConfig.DEBUG) {
             Thread.setDefaultUncaughtExceptionHandler { _, e ->
-                startActivity(Intent(ctx, LogActivity::class.java).apply {
+                startActivity<LogActivity> {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     putExtra(LogActivity.FROM_CRASH, true)
                     // avoid transaction overflow
@@ -85,7 +86,7 @@ class FcitxApplication : Application() {
                             it
                     }
                     putExtra(LogActivity.CRASH_STACK_TRACE, truncated)
-                })
+                }
                 exitProcess(10)
             }
         }

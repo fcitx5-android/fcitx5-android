@@ -24,7 +24,7 @@ import org.fcitx.fcitx5.android.data.theme.ThemeFilesManager
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
 import org.fcitx.fcitx5.android.utils.applyNavBarInsetsBottomPadding
-import org.fcitx.fcitx5.android.utils.errorDialog
+import org.fcitx.fcitx5.android.utils.importErrorDialog
 import org.fcitx.fcitx5.android.utils.queryFileName
 import org.fcitx.fcitx5.android.utils.toast
 import splitties.resources.styledDrawable
@@ -49,10 +49,6 @@ class ThemeListFragment : Fragment() {
         lifecycleScope.launch {
             updateSelectedThemes(it)
         }
-    }
-
-    private suspend fun importErrorDialog(message: String) {
-        errorDialog(requireContext(), getString(R.string.import_error), message)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,7 +87,7 @@ class ThemeListFragment : Fragment() {
                         val name = cr.queryFileName(uri) ?: return@withContext
                         val ext = name.substringAfterLast('.')
                         if (ext != "zip") {
-                            importErrorDialog(getString(R.string.exception_theme_filename, ext))
+                            ctx.importErrorDialog(R.string.exception_theme_filename, ext)
                             return@withContext
                         }
                         try {
@@ -110,7 +106,7 @@ class ThemeListFragment : Fragment() {
                                 }
                             }
                         } catch (e: Exception) {
-                            importErrorDialog(e.localizedMessage ?: e.stackTraceToString())
+                            ctx.importErrorDialog(e)
                         }
                     }
                 }
@@ -128,7 +124,7 @@ class ThemeListFragment : Fragment() {
                             ThemeFilesManager.exportTheme(exported, outputStream).getOrThrow()
                         } catch (e: Exception) {
                             withContext(Dispatchers.Main) {
-                                ctx.toast(e.localizedMessage ?: e.stackTraceToString())
+                                ctx.toast(e)
                             }
                         }
                     }

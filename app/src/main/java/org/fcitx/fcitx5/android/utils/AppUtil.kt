@@ -19,11 +19,9 @@ import kotlin.system.exitProcess
 object AppUtil {
 
     fun launchMain(context: Context) {
-        context.startActivity(
-            Intent(context, MainActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-            }
-        )
+        context.startActivity<MainActivity> {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+        }
     }
 
     private fun launchMainToDest(context: Context, @IdRes dest: Int, arguments: Bundle? = null) {
@@ -61,13 +59,11 @@ object AppUtil {
         )
 
     fun launchClipboardEdit(context: Context, id: Int, lastEntry: Boolean = false) {
-        context.startActivity(
-            Intent(context, ClipboardEditActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                putExtra(ClipboardEditActivity.ENTRY_ID, id)
-                putExtra(ClipboardEditActivity.LAST_ENTRY, lastEntry)
-            }
-        )
+        context.startActivity<ClipboardEditActivity> {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            putExtra(ClipboardEditActivity.ENTRY_ID, id)
+            putExtra(ClipboardEditActivity.LAST_ENTRY, lastEntry)
+        }
     }
 
     fun exit() {

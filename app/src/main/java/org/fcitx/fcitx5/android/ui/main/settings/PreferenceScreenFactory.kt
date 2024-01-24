@@ -171,13 +171,13 @@ object PreferenceScreenFactory {
                         context.startActivity(buildPrimaryStorageIntent("data/rime"))
                         return@setOnPreferenceClickListener true
                     } catch (e: Exception) {
-                        context.toast(e.localizedMessage ?: e.stackTraceToString())
+                        context.toast(e)
                     }
                 }
                 try {
                     context.startActivity(buildDocumentsProviderIntent())
                 } catch (e: Exception) {
-                    context.toast(e.localizedMessage ?: e.stackTraceToString())
+                    context.toast(e)
                 }
                 true
             }
