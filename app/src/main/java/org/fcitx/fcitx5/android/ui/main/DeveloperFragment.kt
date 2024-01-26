@@ -37,11 +37,11 @@ class DeveloperFragment : PaddingPreferenceFragment() {
             if (uri == null) return@registerForActivityResult
             val ctx = requireContext()
             lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
-                ctx.toast(runCatching {
+                runCatching {
                     ctx.contentResolver.openOutputStream(uri)!!.use { o ->
                         hprofFile.inputStream().use { i -> i.copyTo(o) }
                     }
-                })
+                }.let { ctx.toast(it) }
                 hprofFile.delete()
             }
         }
