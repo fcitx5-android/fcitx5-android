@@ -12,6 +12,7 @@ import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.broadcast.PreeditEmptyStateComponent
+import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
@@ -52,6 +53,7 @@ class CommonKeyActionListener :
     private val service by manager.inputMethodService()
     private val inputView by manager.inputView()
     private val preeditState: PreeditEmptyStateComponent by manager.must()
+    private val horizontalCandidate: HorizontalCandidateComponent by manager.must()
     private val windowManager: InputWindowManager by manager.must()
 
     private var lastPickerType by AppPrefs.getInstance().internal.lastPickerType
@@ -63,11 +65,13 @@ class CommonKeyActionListener :
 
     private var backspaceSwipeState = Stopped
 
+    private val keepComposingIMs = arrayOf("keyboard-us", "unikey")
+
     private suspend fun FcitxAPI.commitAndReset() {
         if (clientPreeditCached.isEmpty() && inputPanelCached.preedit.isEmpty()) {
             // preedit is empty, there can be prediction candidates
             reset()
-        } else if (inputMethodEntryCached.uniqueName.let { it == "keyboard-us" || it == "unikey" }) {
+        } else if (inputMethodEntryCached.uniqueName in keepComposingIMs) {
             // androidkeyboard clears composing on reset, but we want to commit it as-is
             service.finishComposing()
             reset()
@@ -132,7 +136,10 @@ class CommonKeyActionListener :
                 is MoveSelectionAction -> {
                     when (backspaceSwipeState) {
                         Stopped -> {
-                            backspaceSwipeState = if (preeditState.isEmpty) {
+                            backspaceSwipeState = if (
+                                preeditState.isEmpty &&
+                                horizontalCandidate.adapter.total == 0
+                            ) {
                                 service.applySelectionOffset(action.start, action.end)
                                 Selection
                             } else {
