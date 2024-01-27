@@ -5,6 +5,7 @@
 #ifndef _FCITX5_ANDROID_ANDROIDFRONTEND_PUBLIC_H_
 #define _FCITX5_ANDROID_ANDROIDFRONTEND_PUBLIC_H_
 
+#include <fcitx/text.h>
 #include <fcitx/inputcontext.h>
 #include <fcitx-utils/key.h>
 
