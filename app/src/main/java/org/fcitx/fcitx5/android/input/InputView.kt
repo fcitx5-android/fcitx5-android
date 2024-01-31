@@ -353,6 +353,7 @@ class InputView(
                 endToStartOf(rightPaddingSpace)
             }
         }
+        preedit.ui.root.setPadding(sidePadding, 0, sidePadding, 0)
         kawaiiBar.view.setPadding(sidePadding, 0, sidePadding, 0)
     }
 
