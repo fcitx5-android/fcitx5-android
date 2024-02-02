@@ -16,6 +16,7 @@ jobs:
         os:
           - ubuntu-22.04
           - macos-13
+          - macos-14
           - windows-2022
         abi:
           - armeabi-v7a
@@ -57,7 +58,7 @@ jobs:
           sudo apt install extra-cmake-modules gettext
 
       - name: Install system dependencies (macOS)
-        if: ${{ matrix.os == 'macos-13' }}
+        if: ${{ startsWith(matrix.os, 'macos') }}
         run: |
           brew install extra-cmake-modules
 
