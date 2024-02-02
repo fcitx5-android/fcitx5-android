@@ -12,6 +12,7 @@ jobs:
   build_pull_request:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os:
           - ubuntu-22.04
