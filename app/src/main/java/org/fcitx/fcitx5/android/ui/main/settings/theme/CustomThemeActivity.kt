@@ -23,6 +23,7 @@ import android.view.ViewGroup
 import android.webkit.MimeTypeMap
 import android.widget.SeekBar
 import androidx.activity.addCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.StringRes
@@ -45,7 +46,6 @@ import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeFilesManager
 import org.fcitx.fcitx5.android.data.theme.ThemePreset
 import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
-import org.fcitx.fcitx5.android.utils.applyTranslucentSystemBars
 import org.fcitx.fcitx5.android.utils.DarkenColorFilter
 import org.fcitx.fcitx5.android.utils.parcelable
 import splitties.dimensions.dp
@@ -292,7 +292,7 @@ class CustomThemeActivity : AppCompatActivity() {
             variantSwitch.visibility = View.GONE
             brightnessSeekBar.visibility = View.GONE
         }
-        applyTranslucentSystemBars()
+        enableEdgeToEdge()
         ViewCompat.setOnApplyWindowInsetsListener(ui) { _, windowInsets ->
             val statusBars = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
             val navBars = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
