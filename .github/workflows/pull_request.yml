@@ -12,10 +12,12 @@ jobs:
   build_pull_request:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os:
           - ubuntu-22.04
           - macos-13
+          - macos-14
           - windows-2022
         abi:
           - armeabi-v7a
@@ -57,13 +59,14 @@ jobs:
           sudo apt install extra-cmake-modules gettext
 
       - name: Install system dependencies (macOS)
-        if: ${{ matrix.os == 'macos-13' }}
+        if: ${{ startsWith(matrix.os, 'macos') }}
         run: |
           brew install extra-cmake-modules
 
       - name: Install system dependencies (Windows)
         if: ${{ matrix.os == 'windows-2022' }}
         run: |
+          C:/msys64/usr/bin/pacman -Syu --noconfirm
           C:/msys64/usr/bin/pacman -S --noconfirm mingw-w64-ucrt-x86_64-gettext mingw-w64-ucrt-x86_64-extra-cmake-modules
           Add-Content $env:GITHUB_PATH "C:/msys64/ucrt64/bin"
 
