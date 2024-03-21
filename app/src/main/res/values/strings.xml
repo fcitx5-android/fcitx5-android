@@ -243,12 +243,12 @@
     <string name="exception_user_data_metadata">Unable to find metadata of user data</string>
     <string name="exception_user_data_package_name_mismatch">User data does not match current application</string>
     <string name="user_data_imported">User data on %1$s has been imported, restarting…</string>
-    <string name="confirm_import_user_data">Import user data would override local settings and input history, and requires restart the App for changes to take effect. Processed?</string>
+    <string name="confirm_import_user_data">Import user data would override local settings and input history, and requires restart the App for changes to take effect. Proceed?</string>
     <string name="restart_channel">App restart</string>
     <string name="restart_notify_msg">App has been restarted, click here to open</string>
     <string name="i_do_not_need_it">I don\'t need it</string>
     <string name="grant_permission">Grant permission</string>
-    <string name="clear_clp_db_confirm">Clipboard database would be completely cleared, including pinned items. Processed?</string>
+    <string name="clear_clp_db_confirm">Clipboard database would be completely cleared, including pinned items. Proceed?</string>
     <string name="expand_keypress_area">Expand keypress area to the edge</string>
     <string name="update_table">Update table</string>
     <string name="table_dict_replace_message">Table dictionary \"%1$s\" exists. You may import a new dict and replace it.</string>
