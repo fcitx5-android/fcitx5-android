@@ -233,7 +233,7 @@
     <string name="following_system_settings">Follow system settings</string>
     <string name="button_sound">Sound on keypress</string>
     <string name="button_sound_volume">Keypress sound volume</string>
-    <string name="clipboard_return_after_paste">Return after paste</string>
+    <string name="clipboard_return_after_paste">Return after pasting</string>
     <string name="theme_message_follow_system_day_night_mode_enabled">Cannot switch theme manually while \"Follow system dark mode\" is enabled.</string>
     <string name="disable_it">Disable it</string>
     <string name="reset_keyboard_on_focus_change">Switch back to keyboard when the focus changes</string>
