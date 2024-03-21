@@ -236,7 +236,7 @@
     <string name="clipboard_return_after_paste">Return after paste</string>
     <string name="theme_message_follow_system_day_night_mode_enabled">Cannot switch theme manually while \"Follow system dark mode\" is enabled.</string>
     <string name="disable_it">Disable it</string>
-    <string name="reset_keyboard_on_focus_change">Switch back to keyboard on change focus</string>
+    <string name="reset_keyboard_on_focus_change">Switch back to keyboard when the focus changes</string>
     <string name="export_user_data">Export user data</string>
     <string name="import_user_data">Import user data</string>
     <string name="exception_user_data_filename">The filename extension of %1$s does not indicate fcitx5-android user data</string>
