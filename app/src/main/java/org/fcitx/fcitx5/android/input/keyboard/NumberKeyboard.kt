@@ -18,18 +18,6 @@ class NumberKeyboard(
     theme: Theme,
 ) : BaseKeyboard(context, theme, Layout) {
 
-    class PunctuationKey(p: String, percentWidth: Float, variant: Appearance.Variant) : KeyDef(
-        Appearance.Text(
-            displayText = p,
-            textSize = 23f,
-            percentWidth = percentWidth,
-            variant = variant
-        ),
-        setOf(
-            Behavior.Press(KeyAction.CommitAction(p))
-        )
-    )
-
     companion object {
         const val Name = "Number"
 
@@ -57,10 +45,10 @@ class NumberKeyboard(
             ),
             listOf(
                 LayoutSwitchKey("ABC", TextKeyboard.Name),
-                PunctuationKey(",", 0.1f, KeyDef.Appearance.Variant.Alternative),
+                NumPadKey(",", 0xffac, 23f, 0.1f, KeyDef.Appearance.Variant.Alternative),
                 LayoutSwitchKey("!?#", PickerWindow.Key.Symbol.name, 0.13333f, KeyDef.Appearance.Variant.AltForeground),
                 NumPadKey("0", 0xffb0, 30f, 0.23334f),
-                PunctuationKey("=", 0.13333f, KeyDef.Appearance.Variant.AltForeground),
+                NumPadKey("=", 0xffbd, 23f, 0.13333f, KeyDef.Appearance.Variant.AltForeground),
                 NumPadKey(".", 0xffae, 23f, 0.1f, KeyDef.Appearance.Variant.Alternative),
                 ReturnKey()
             )
