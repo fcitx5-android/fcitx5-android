@@ -10,6 +10,7 @@
 #include <fcitx/userinterfacemanager.h>
 
 #include "spell_public.h"
+#include "emoji_public.h"
 #include "../../../../../lib/fcitx5/src/main/cpp/fcitx5/src/im/keyboard/chardata.h" // dirty but works
 
 #include "androidkeyboard.h"
@@ -256,6 +257,16 @@ void AndroidKeyboardEngine::updateCandidate(const InputMethodEntry &entry, Input
                                                         state->buffer_.userInput(),
                                                         SpellCandidateSize);
     }
+    if (config_.enableEmoji.value() && emoji()) {
+        auto emojiResults = emoji()->call<IEmoji::query>(entry.languageCode(), state->buffer_.userInput(), true);
+        if (!emojiResults.empty()) {
+            // don't show emoji as 1st candidate if there are other candidates
+            int offset = results.empty() ? 0 : 1;
+            std::for_each(emojiResults.rbegin(), emojiResults.rend(), [&](std::string &e) {
+                results.insert(results.begin() + offset, {e, e});
+            });
+        }
+    }
     auto candidateList = std::make_unique<CommonCandidateList>();
     for (const auto &result: results) {
         candidateList->append<AndroidKeyboardCandidateWord>(this, Text(result.first), result.second);
@@ -336,7 +347,9 @@ void AndroidKeyboardEngine::commitBuffer(InputContext *inputContext) {
 
 bool AndroidKeyboardEngine::supportHint(const std::string &language) {
     const bool hasSpell = spell() && spell()->call<ISpell::checkDict>(language);
-    return hasSpell;
+    const bool hasEmoji = *config_.enableEmoji && emoji() &&
+                          emoji()->call<IEmoji::check>(language, true);
+    return hasSpell || hasEmoji;
 }
 
 std::pair<std::string, size_t> AndroidKeyboardEngine::preeditWithCursor(InputContext *inputContext) {

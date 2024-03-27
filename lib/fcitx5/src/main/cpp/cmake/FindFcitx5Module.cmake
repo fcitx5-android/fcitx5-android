@@ -3,7 +3,7 @@ set(Fcitx5Module_FOUND TRUE)
 # prefab dependency
 find_package(fcitx5 REQUIRED CONFIG)
 
-set(FCITX5_MODULE_NAMES Clipboard IMSelector Notifications QuickPhrase Spell Unicode)
+set(FCITX5_MODULE_NAMES Emoji Clipboard IMSelector Notifications QuickPhrase Spell Unicode)
 foreach(Mod IN LISTS FCITX5_MODULE_NAMES)
     string(TOLOWER "${Mod}" mod)
     set(MOD_INTERFACE "fcitx5-module-${mod}-interface")
@@ -17,6 +17,9 @@ foreach(Mod IN LISTS FCITX5_MODULE_NAMES)
         add_library("Fcitx5::Module::${Mod}" ALIAS "${MOD_INTERFACE}")
     endif()
 endforeach()
+
+# fix target dependency
+set_target_properties(fcitx5::emoji PROPERTIES INTERFACE_LINK_LIBRARIES ZLIB::ZLIB)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Fcitx5Module

@@ -20,6 +20,7 @@ android {
                     "Fcitx5Config",
                     "Fcitx5Utils",
                     // fcitx5 modules
+                    "emoji",
                     "clipboard",
                     "imselector",
                     "notifications",
@@ -50,6 +51,10 @@ android {
             headers = "$headersPrefix/Utils"
         }
         val moduleHeadersPrefix = "$headersPrefix/Module/fcitx-module"
+        create("emoji") {
+            libraryName = "libemoji"
+            headers = "$moduleHeadersPrefix/emoji"
+        }
         create("clipboard") {
             libraryName = "libclipboard"
             headers = "$moduleHeadersPrefix/clipboard"
