@@ -42,7 +42,7 @@ object QuickPhraseManager {
         return runCatching {
             // check quickphrase format of each line
             file.readLines().forEachIndexed { idx, line ->
-                if (line.isNotBlank() && QuickPhraseData.parseLine(line) == null) {
+                if (line.isNotBlank() && QuickPhraseEntry.fromLine(line) == null) {
                     errorRuntime(R.string.exception_quickphrase_parse, "\n(${idx + 1}) $line")
                 }
             }

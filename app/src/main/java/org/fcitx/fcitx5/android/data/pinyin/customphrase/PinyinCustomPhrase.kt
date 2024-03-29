@@ -4,6 +4,7 @@
  */
 package org.fcitx.fcitx5.android.data.pinyin.customphrase
 
+import org.fcitx.fcitx5.android.core.FcitxUtils
 import kotlin.math.absoluteValue
 
 data class PinyinCustomPhrase(
@@ -17,5 +18,5 @@ data class PinyinCustomPhrase(
         return copy(order = (if (e) 1 else -1) * order.absoluteValue)
     }
 
-    fun serialize() = "$key,${order.absoluteValue}=$value"
+    fun serialize() = "$key,${order.absoluteValue}=${FcitxUtils.escapeForValue(value)}"
 }
