@@ -254,4 +254,6 @@
     <string name="table_dict_replace_message">码表词典 \"%1$s\" 存在。您可以导入新词典并替换它。</string>
     <string name="lang_switch_key_behavior">语言切换键行为</string>
     <string name="lang_switch_behavior_next_ime_app">切换至下一个输入法</string>
+    <string name="no_action_available">无可用操作</string>
+    <string name="action_forget_candidate_word">恢复默认词频</string>
 </resources>

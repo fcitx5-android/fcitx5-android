@@ -228,6 +228,28 @@ bool AndroidFrontend::selectCandidate(int idx) {
     return activeIC_->selectCandidate(idx);
 }
 
+bool AndroidFrontend::forgetCandidate(int idx) {
+    if (!activeIC_) return false;
+    // check current IME engine, currently only support pinyin
+    auto currentIm = instance_->currentInputMethod();
+    if (currentIm != "pinyin" && currentIm != "shuangpin") return false;
+    // do we have candidate list?
+    auto list = activeIC_->inputPanel().candidateList();
+    if (!list) return false;
+    // Ctrl+7 to activate forget candidate mode
+    auto key = Key(FcitxKey_7, Flags<KeyState>(KeyState::Ctrl));
+    KeyEvent keyEvent(activeIC_, key, false);
+    auto handled = activeIC_->keyEvent(keyEvent);
+    if (handled) {
+        keyEvent = KeyEvent(activeIC_, key, true);
+        activeIC_->keyEvent(keyEvent);
+    } else {
+        // something went wrong
+        return false;
+    }
+    return activeIC_->selectCandidate(idx);
+}
+
 bool AndroidFrontend::isInputPanelEmpty() {
     if (!activeIC_) return true;
     return activeIC_->inputPanel().empty();
