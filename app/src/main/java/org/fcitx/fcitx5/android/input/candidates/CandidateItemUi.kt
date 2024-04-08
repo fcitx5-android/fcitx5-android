@@ -46,18 +46,17 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
 
     fun showExtraActionMenu(currentIm: InputMethodEntry, onForget: () -> Unit) {
         promptMenu?.dismiss()
-        val context = root.context
-        promptMenu = PopupMenu(context, root).apply {
+        promptMenu = PopupMenu(ctx, root).apply {
             val actions = arrayListOf<Pair<String, () -> Unit>>().apply {
                 // only pinyin and table could forget words
                 if (currentIm.addon == "pinyin" || currentIm.addon == "table") {
-                    add(context.getString(R.string.action_forget_candidate_word) to onForget)
+                    add(ctx.getString(R.string.action_forget_candidate_word) to onForget)
                 }
             }
             menu.apply {
                 add(buildSpannedString {
                     bold {
-                        color(context.styledColor(android.R.attr.colorAccent)) {
+                        color(ctx.styledColor(android.R.attr.colorAccent)) {
                             append(text.text.toString())
                         }
                     }

@@ -38,9 +38,7 @@ class GridExpandedCandidateWindow :
                 holder.itemView.setOnLongClickListener { _ ->
                     val currentIm = fcitx.runImmediately { inputMethodEntryCached }
                     holder.ui.showExtraActionMenu(currentIm, onForget = {
-                        fcitx.launchOnReady {
-                            it.forget(holder.idx)
-                        }
+                        fcitx.launchOnReady { it.forget(holder.idx) }
                     })
                     true
                 }
