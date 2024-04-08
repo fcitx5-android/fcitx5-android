@@ -49,8 +49,8 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
         val context = root.context
         promptMenu = PopupMenu(context, root).apply {
             val actions = arrayListOf<Pair<String, () -> Unit>>().apply {
-                // only Pinyin Engine has forget word feature
-                if (currentIm.uniqueName == "pinyin" || currentIm.uniqueName == "shuangpin") {
+                // only pinyin and table could forget words
+                if (currentIm.addon == "pinyin" || currentIm.addon == "table") {
                     add(context.getString(R.string.action_forget_candidate_word) to onForget)
                 }
             }
@@ -64,7 +64,7 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
                 }).apply {
                     isEnabled = false
                 }
-                actions.forEachIndexed { index, (title, action) ->
+                actions.forEach { (title, action) ->
                     add(title).setOnMenuItemClickListener {
                         action()
                         true
