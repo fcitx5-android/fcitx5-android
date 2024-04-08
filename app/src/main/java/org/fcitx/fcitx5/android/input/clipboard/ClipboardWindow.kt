@@ -32,7 +32,9 @@ import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.BooleanKey.ClipboardDbEmpty
 import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.BooleanKey.ClipboardListeningEnabled
-import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.State.*
+import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.State.AddMore
+import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.State.EnableListening
+import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.State.Normal
 import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.TransitionEvent.ClipboardDbUpdated
 import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.TransitionEvent.ClipboardListeningUpdated
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
@@ -73,8 +75,11 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         )
     }
 
-    private val clipboardEnabledPref = AppPrefs.getInstance().clipboard.clipboardListening
-    private val clipboardReturnAfterPaste by AppPrefs.getInstance().clipboard.clipboardReturnAfterPaste
+    private val prefs = AppPrefs.getInstance().clipboard
+
+    private val clipboardEnabledPref = prefs.clipboardListening
+    private val clipboardReturnAfterPaste by prefs.clipboardReturnAfterPaste
+    private val clipboardMaskSensitive by prefs.clipboardMaskSensitive
 
     private val clipboardEntriesPager by lazy {
         Pager(PagingConfig(pageSize = 16)) { ClipboardManager.allEntries() }
@@ -82,8 +87,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     private var adapterSubmitJob: Job? = null
 
     private val adapter: ClipboardAdapter by lazy {
-        object : ClipboardAdapter() {
-            override val theme = this@ClipboardWindow.theme
+        object : ClipboardAdapter(this@ClipboardWindow.theme, clipboardMaskSensitive) {
             override fun onPin(id: Int) {
                 service.lifecycleScope.launch { ClipboardManager.pin(id) }
             }

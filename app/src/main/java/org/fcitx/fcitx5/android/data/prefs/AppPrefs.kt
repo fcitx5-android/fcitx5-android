@@ -347,6 +347,9 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
         val clipboardReturnAfterPaste = switch(
             R.string.clipboard_return_after_paste, "clipboard_return_after_paste", false
         ) { clipboardListening.getValue() }
+        val clipboardMaskSensitive = switch(
+            R.string.clipboard_mask_sensitive, "clipboard_mask_sensitive", true
+        ) { clipboardListening.getValue() }
     }
 
     private val providers = mutableListOf<ManagedPreferenceProvider>()

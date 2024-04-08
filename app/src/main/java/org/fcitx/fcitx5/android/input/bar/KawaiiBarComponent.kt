@@ -30,13 +30,19 @@ import org.fcitx.fcitx5.android.core.CapabilityFlag
 import org.fcitx.fcitx5.android.core.CapabilityFlags
 import org.fcitx.fcitx5.android.core.FcitxEvent.CandidateListEvent
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
+import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
-import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.*
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.ClickToAttachWindow
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.ClickToDetachWindow
+import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.Hidden
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.BooleanKey.CandidateEmpty
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.BooleanKey.PreeditEmpty
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.*
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.CandidatesUpdated
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.ExtendedWindowAttached
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.PreeditUpdated
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.TransitionEvent.WindowDetached
 import org.fcitx.fcitx5.android.input.bar.ui.CandidateUi
 import org.fcitx.fcitx5.android.input.bar.ui.IdleUi
 import org.fcitx.fcitx5.android.input.bar.ui.TitleUi
@@ -70,6 +76,7 @@ import splitties.views.dsl.core.matchParent
 import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.math.min
 
 class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(),
     InputBroadcastReceiver {
@@ -82,12 +89,15 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
     private val popup: PopupComponent by manager.must()
 
-    private val clipboardSuggestion = AppPrefs.getInstance().clipboard.clipboardSuggestion
-    private val clipboardItemTimeout = AppPrefs.getInstance().clipboard.clipboardItemTimeout
-    private val expandedCandidateStyle by AppPrefs.getInstance().keyboard.expandedCandidateStyle
-    private val expandToolbarByDefault by AppPrefs.getInstance().keyboard.expandToolbarByDefault
-    private val toolbarNumRowOnPassword by AppPrefs.getInstance().keyboard.toolbarNumRowOnPassword
-    private val showVoiceInputButton by AppPrefs.getInstance().keyboard.showVoiceInputButton
+    private val prefs = AppPrefs.getInstance()
+
+    private val clipboardSuggestion = prefs.clipboard.clipboardSuggestion
+    private val clipboardItemTimeout = prefs.clipboard.clipboardItemTimeout
+    private val clipboardMaskSensitive by prefs.clipboard.clipboardMaskSensitive
+    private val expandedCandidateStyle by prefs.keyboard.expandedCandidateStyle
+    private val expandToolbarByDefault by prefs.keyboard.expandToolbarByDefault
+    private val toolbarNumRowOnPassword by prefs.keyboard.toolbarNumRowOnPassword
+    private val showVoiceInputButton by prefs.keyboard.showVoiceInputButton
 
     private var clipboardTimeoutJob: Job? = null
 
@@ -105,7 +115,11 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                 if (it.text.isEmpty()) {
                     isClipboardFresh = false
                 } else {
-                    idleUi.clipboardUi.text.text = it.text.take(42)
+                    idleUi.clipboardUi.text.text = if (it.sensitive && clipboardMaskSensitive) {
+                        ClipboardEntry.BULLET.repeat(min(42, it.text.length))
+                    } else {
+                        it.text.take(42)
+                    }
                     isClipboardFresh = true
                     launchClipboardTimeoutJob()
                 }

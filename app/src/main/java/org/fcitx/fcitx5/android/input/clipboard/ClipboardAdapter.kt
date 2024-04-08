@@ -20,8 +20,10 @@ import splitties.resources.drawable
 import splitties.resources.styledColor
 import kotlin.math.min
 
-abstract class ClipboardAdapter :
-    PagingDataAdapter<ClipboardEntry, ClipboardAdapter.ViewHolder>(diffCallback) {
+abstract class ClipboardAdapter(
+    private val theme: Theme,
+    private val maskSensitive: Boolean
+) : PagingDataAdapter<ClipboardEntry, ClipboardAdapter.ViewHolder>(diffCallback) {
 
     companion object {
         private val diffCallback = object : DiffUtil.ItemCallback<ClipboardEntry>() {
@@ -43,10 +45,16 @@ abstract class ClipboardAdapter :
         /**
          * excerpt text to show on ClipboardEntryUi, to reduce render time of very long text
          * @param str text to excerpt
+         * @param mask mask text content with "•"
          * @param lines max output lines
          * @param chars max chars per output line
          */
-        fun excerptText(str: String, lines: Int = 4, chars: Int = 128) = buildString {
+        fun excerptText(
+            str: String,
+            mask: Boolean = false,
+            lines: Int = 4,
+            chars: Int = 128
+        ): String = buildString {
             val length = str.length
             var lineBreak = -1
             for (i in 1..lines) {
@@ -55,11 +63,20 @@ abstract class ClipboardAdapter :
                 lineBreak = str.indexOf('\n', start)
                 if (lineBreak < 0) {
                     // no line breaks remaining, substring to end of text
-                    append(str.substring(start, excerptEnd))
+                    if (mask) {
+                        append(ClipboardEntry.BULLET.repeat(excerptEnd - start))
+                    } else {
+                        append(str.substring(start, excerptEnd))
+                    }
                     break
                 } else {
+                    val end = min(excerptEnd, lineBreak)
                     // append one line exactly
-                    appendLine(str.substring(start, min(excerptEnd, lineBreak)))
+                    if (mask) {
+                        append(ClipboardEntry.BULLET.repeat(end - start))
+                    } else {
+                        appendLine(str.substring(start, end))
+                    }
                 }
             }
         }
@@ -75,7 +92,7 @@ abstract class ClipboardAdapter :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val entry = getItem(position) ?: return
         with(holder.entryUi) {
-            setEntry(excerptText(entry.text), entry.pinned)
+            setEntry(excerptText(entry.text, entry.sensitive && maskSensitive), entry.pinned)
             root.setOnClickListener {
                 onPaste(entry)
             }
@@ -122,8 +139,6 @@ abstract class ClipboardAdapter :
         popupMenu?.dismiss()
         popupMenu = null
     }
-
-    abstract val theme: Theme
 
     abstract fun onPaste(entry: ClipboardEntry)
 
