@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.BooleanKey.ExpandedCandidatesEmpty
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesAttached
@@ -125,6 +126,22 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
             candidatesPager.flow.collect {
                 adapter.submitData(it)
             }
+        }
+    }
+
+    fun bindCandidateUiViewHolder(holder: PagingCandidateViewAdapter.ViewHolder) {
+        holder.itemView.setOnClickListener {
+            fcitx.launchOnReady { it.select(holder.idx) }
+        }
+        if (horizontalCandidate.canForgetWord) {
+            holder.itemView.setOnLongClickListener { _ ->
+                holder.ui.showExtraActionMenu(onForget = {
+                    fcitx.launchOnReady { it.forget(holder.idx) }
+                })
+                true
+            }
+        } else {
+            holder.itemView.setOnLongClickListener(null)
         }
     }
 

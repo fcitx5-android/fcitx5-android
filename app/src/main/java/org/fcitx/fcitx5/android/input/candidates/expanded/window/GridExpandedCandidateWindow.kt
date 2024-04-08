@@ -9,7 +9,6 @@ import android.util.DisplayMetrics
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
-import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.candidates.adapter.GridPagingCandidateViewAdapter
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateLayout
@@ -32,16 +31,7 @@ class GridExpandedCandidateWindow :
         object : GridPagingCandidateViewAdapter(theme) {
             override fun onBindViewHolder(holder: ViewHolder, position: Int) {
                 super.onBindViewHolder(holder, position)
-                holder.itemView.setOnClickListener {
-                    fcitx.launchOnReady { it.select(holder.idx) }
-                }
-                holder.itemView.setOnLongClickListener { _ ->
-                    val currentIm = fcitx.runImmediately { inputMethodEntryCached }
-                    holder.ui.showExtraActionMenu(currentIm, onForget = {
-                        fcitx.launchOnReady { it.forget(holder.idx) }
-                    })
-                    true
-                }
+                bindCandidateUiViewHolder(holder)
             }
         }
     }

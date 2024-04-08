@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
-import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.input.candidates.adapter.PagingCandidateViewAdapter
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateLayout
 import org.fcitx.fcitx5.android.input.candidates.expanded.decoration.FlexboxHorizontalDecoration
@@ -37,16 +36,7 @@ class FlexboxExpandedCandidateWindow :
 
             override fun onBindViewHolder(holder: ViewHolder, position: Int) {
                 super.onBindViewHolder(holder, position)
-                holder.itemView.setOnClickListener {
-                    fcitx.launchOnReady { it.select(holder.idx) }
-                }
-                holder.itemView.setOnLongClickListener { _ ->
-                    val currentIm = fcitx.runImmediately { inputMethodEntryCached }
-                    holder.ui.showExtraActionMenu(currentIm, onForget = {
-                        fcitx.launchOnReady { it.forget(holder.idx) }
-                    })
-                    true
-                }
+                bindCandidateUiViewHolder(holder)
             }
         }
     }

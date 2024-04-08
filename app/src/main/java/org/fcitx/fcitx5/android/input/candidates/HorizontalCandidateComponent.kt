@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.runBlocking
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxEvent
+import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.BooleanKey.ExpandedCandidatesEmpty
@@ -95,12 +96,15 @@ class HorizontalCandidateComponent :
                 holder.itemView.setOnClickListener {
                     fcitx.launchOnReady { it.select(holder.idx) }
                 }
-                holder.itemView.setOnLongClickListener { _ ->
-                    val currentIm = fcitx.runImmediately { inputMethodEntryCached }
-                    holder.ui.showExtraActionMenu(currentIm, onForget = {
-                        fcitx.launchOnReady { it.forget(holder.idx) }
-                    })
-                    true
+                if (canForgetWord) {
+                    holder.itemView.setOnLongClickListener { _ ->
+                        holder.ui.showExtraActionMenu(onForget = {
+                            fcitx.launchOnReady { it.forget(holder.idx) }
+                        })
+                        true
+                    }
+                } else {
+                    holder.itemView.setOnLongClickListener(null)
                 }
             }
         }
@@ -189,5 +193,12 @@ class HorizontalCandidateComponent :
         if (candidates.isEmpty()) {
             refreshExpanded()
         }
+    }
+
+    var canForgetWord: Boolean = false
+        private set
+
+    override fun onImeUpdate(ime: InputMethodEntry) {
+        canForgetWord = (ime.addon == "pinyin" || ime.addon == "table")
     }
 }

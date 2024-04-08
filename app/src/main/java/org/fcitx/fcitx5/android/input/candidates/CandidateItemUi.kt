@@ -10,7 +10,6 @@ import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import androidx.core.text.color
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.AutoScaleTextView
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
@@ -44,15 +43,9 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
 
     private var promptMenu: PopupMenu? = null
 
-    fun showExtraActionMenu(currentIm: InputMethodEntry, onForget: () -> Unit) {
+    fun showExtraActionMenu(onForget: () -> Unit) {
         promptMenu?.dismiss()
         promptMenu = PopupMenu(ctx, root).apply {
-            val actions = arrayListOf<Pair<String, () -> Unit>>().apply {
-                // only pinyin and table could forget words
-                if (currentIm.addon == "pinyin" || currentIm.addon == "table") {
-                    add(ctx.getString(R.string.action_forget_candidate_word) to onForget)
-                }
-            }
             menu.apply {
                 add(buildSpannedString {
                     bold {
@@ -63,15 +56,10 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
                 }).apply {
                     isEnabled = false
                 }
-                actions.forEach { (title, action) ->
-                    add(title).setOnMenuItemClickListener {
-                        action()
+                add(R.string.action_forget_candidate_word).apply {
+                    setOnMenuItemClickListener {
+                        onForget()
                         true
-                    }
-                }
-                if (actions.isEmpty()) {
-                    add(R.string.no_action_available).apply {
-                        isEnabled = false
                     }
                 }
                 add(android.R.string.cancel).apply {
