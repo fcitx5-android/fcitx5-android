@@ -38,7 +38,7 @@ object ClearURLs {
             return
         catalog = Json.decodeFromString(
             catalogSerializer,
-            assetManager.open("data.minify.json").bufferedReader().readText()
+            assetManager.open("data.min.json").bufferedReader().readText()
         )["providers"]
     }
 

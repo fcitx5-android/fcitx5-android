@@ -49,3 +49,6 @@
 [submodule "plugin/jyutping/src/main/cpp/libime-jyutping"]
 	path = plugin/jyutping/src/main/cpp/libime-jyutping
 	url = git@github.com:fcitx/libime-jyutping.git
+[submodule "plugin/clipboard-filter/ClearURLsRules"]
+	path = plugin/clipboard-filter/ClearURLsRules
+	url = git@github.com:ClearURLs/Rules.git
