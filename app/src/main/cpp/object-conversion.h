@@ -20,6 +20,7 @@ jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntr
                           *JString(env, entry->nativeName()),
                           *JString(env, entry->label()),
                           *JString(env, entry->languageCode()),
+                          *JString(env, entry->addon()),
                           entry->isConfigurable()
     );
 }
@@ -42,6 +43,7 @@ jobject fcitxInputMethodStatusToJObject(JNIEnv *env, const InputMethodStatus &st
                           *JString(env, status.nativeName),
                           *JString(env, status.label),
                           *JString(env, status.languageCode),
+                          *JString(env, status.addon),
                           status.configurable,
                           *JString(env, status.subMode),
                           *JString(env, status.subModeLabel),

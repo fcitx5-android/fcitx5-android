@@ -120,6 +120,10 @@ public:
         return p_frontend->call<fcitx::IAndroidFrontend::selectCandidate>(idx);
     }
 
+    bool forgetCandidate(int idx) {
+        return p_frontend->call<fcitx::IAndroidFrontend::forgetCandidate>(idx);
+    }
+
     bool isInputPanelEmpty() {
         return p_frontend->call<fcitx::IAndroidFrontend::isInputPanelEmpty>();
     }
@@ -751,6 +755,14 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_selectCandidate(JNIEnv *env, jclass cla
     RETURN_VALUE_IF_NOT_RUNNING(false)
     FCITX_DEBUG() << "selectCandidate: #" << idx;
     return Fcitx::Instance().select(idx);
+}
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_forgetCandidate(JNIEnv *env, jclass clazz, jint idx) {
+    RETURN_VALUE_IF_NOT_RUNNING(false)
+    FCITX_DEBUG() << "forgetCandidate: #" << idx;
+    return Fcitx::Instance().forgetCandidate(idx);
 }
 
 extern "C"

@@ -95,6 +95,13 @@ class HorizontalCandidateComponent :
                 holder.itemView.setOnClickListener {
                     fcitx.launchOnReady { it.select(holder.idx) }
                 }
+                holder.itemView.setOnLongClickListener { _ ->
+                    val currentIm = fcitx.runImmediately { inputMethodEntryCached }
+                    holder.ui.showExtraActionMenu(currentIm, onForget = {
+                        fcitx.launchOnReady { it.forget(holder.idx) }
+                    })
+                    true
+                }
             }
         }
     }

@@ -228,6 +228,28 @@ bool AndroidFrontend::selectCandidate(int idx) {
     return activeIC_->selectCandidate(idx);
 }
 
+bool AndroidFrontend::forgetCandidate(int idx) {
+    if (!activeIC_) return false;
+    // check current engine, only pinyin and table engine support deleting words
+    auto *entry = instance_->inputMethodEntry(activeIC_);
+    if (entry->addon() != "pinyin" && entry->addon() != "table") return false;
+    // do we have candidate list?
+    auto list = activeIC_->inputPanel().candidateList();
+    if (!list) return false;
+    // Ctrl+7 to activate forget candidate mode
+    Key key(FcitxKey_7, Flags<KeyState>(KeyState::Ctrl));
+    KeyEvent pressEvent(activeIC_, key, false);
+    auto handled = activeIC_->keyEvent(pressEvent);
+    if (handled) {
+        KeyEvent releaseEvent(activeIC_, key, true);
+        activeIC_->keyEvent(releaseEvent);
+    } else {
+        // something went wrong
+        return false;
+    }
+    return activeIC_->selectCandidate(idx);
+}
+
 bool AndroidFrontend::isInputPanelEmpty() {
     if (!activeIC_) return true;
     return activeIC_->inputPanel().empty();
