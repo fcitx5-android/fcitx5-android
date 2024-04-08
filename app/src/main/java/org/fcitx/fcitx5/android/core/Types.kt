@@ -18,6 +18,7 @@ data class InputMethodEntry(
     val nativeName: String,
     val label: String,
     val languageCode: String,
+    val addon: String,
     val isConfigurable: Boolean,
     val subMode: InputMethodSubMode
 ) {
@@ -28,6 +29,7 @@ data class InputMethodEntry(
         nativeName: String,
         label: String,
         languageCode: String,
+        addon: String,
         isConfigurable: Boolean
     ) : this(
         uniqueName,
@@ -36,6 +38,7 @@ data class InputMethodEntry(
         nativeName,
         label,
         languageCode,
+        addon,
         isConfigurable,
         InputMethodSubMode()
     )
@@ -47,6 +50,7 @@ data class InputMethodEntry(
         nativeName: String,
         label: String,
         languageCode: String,
+        addon: String,
         isConfigurable: Boolean,
         subMode: String,
         subModeLabel: String,
@@ -58,11 +62,12 @@ data class InputMethodEntry(
         nativeName,
         label,
         languageCode,
+        addon,
         isConfigurable,
         InputMethodSubMode(subMode, subModeLabel, subModeIcon)
     )
 
-    constructor(name: String) : this("", name, "", "", "×", "", false)
+    constructor(name: String) : this("", name, "", "", "×", "", "", false)
 
     val displayName: String
         get() = name.ifEmpty { uniqueName }
