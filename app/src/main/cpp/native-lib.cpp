@@ -368,9 +368,9 @@ public:
         p_unicode->call<fcitx::IUnicode::trigger>(ic);
     }
 
-    void setClipboard(const std::string &string) {
+    void setClipboard(const std::string &string, bool password) {
         if (!p_clipboard) return;
-        p_clipboard->call<fcitx::IClipboard::setClipboard>("", string);
+        p_clipboard->call<fcitx::IClipboard::setClipboardV2>("", string, password);
     }
 
     void focusInputContext(bool focus) {
@@ -959,9 +959,9 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_triggerUnicodeInput(JNIEnv *env, jclass
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_setFcitxClipboard(JNIEnv *env, jclass clazz, jstring string) {
+Java_org_fcitx_fcitx5_android_core_Fcitx_setFcitxClipboard(JNIEnv *env, jclass clazz, jstring string, jboolean password) {
     RETURN_IF_NOT_RUNNING
-    Fcitx::Instance().setClipboard(CString(env, string));
+    Fcitx::Instance().setClipboard(CString(env, string), password == JNI_TRUE);
 }
 
 extern "C"

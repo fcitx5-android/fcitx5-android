@@ -80,7 +80,7 @@ public:
                         auto &candidate = bulk->candidateFromAll(i);
                         // maybe unnecessary; I don't see anywhere using `CandidateWord::setPlaceHolder`
                         // if (candidate.isPlaceHolder()) continue;
-                        candidates.emplace_back(filterString(candidate.text()));
+                        candidates.emplace_back(filterString(candidate.textWithComment()));
                     } catch (const std::invalid_argument &e) {
                         size = static_cast<int>(candidates.size());
                         break;
@@ -89,7 +89,7 @@ public:
             } else {
                 size = list->size();
                 for (int i = 0; i < size; i++) {
-                    candidates.emplace_back(filterString(list->candidate(i).text()));
+                    candidates.emplace_back(filterString(list->candidate(i).textWithComment()));
                 }
             }
         }

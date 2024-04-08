@@ -144,8 +144,8 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
 
     override suspend fun triggerQuickPhrase() = withFcitxContext { triggerQuickPhraseInput() }
     override suspend fun triggerUnicode() = withFcitxContext { triggerUnicodeInput() }
-    private suspend fun setClipboard(string: String) =
-        withFcitxContext { setFcitxClipboard(string) }
+    private suspend fun setClipboard(string: String, password: Boolean = false) =
+        withFcitxContext { setFcitxClipboard(string, password) }
 
     override suspend fun focus(focus: Boolean) = withFcitxContext { focusInputContext(focus) }
     override suspend fun activate(uid: Int, pkgName: String) =
@@ -308,7 +308,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         external fun triggerUnicodeInput()
 
         @JvmStatic
-        external fun setFcitxClipboard(string: String)
+        external fun setFcitxClipboard(string: String, password: Boolean)
 
         @JvmStatic
         external fun focusInputContext(focus: Boolean)
@@ -448,7 +448,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
 
     @Keep
     private val onClipboardUpdate = ClipboardManager.OnClipboardUpdateListener {
-        lifecycle.lifecycleScope.launch { setClipboard(it.text) }
+        lifecycle.lifecycleScope.launch { setClipboard(it.text, it.sensitive) }
     }
 
     private fun computeAddonGraph() = runBlocking {

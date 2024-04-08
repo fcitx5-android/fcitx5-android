@@ -149,7 +149,7 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
             ?.let { e ->
                 launch {
                     mutex.withLock {
-                        clbDao.find(e.text)?.let {
+                        clbDao.find(e.text, e.sensitive)?.let {
                             updateLastEntry(it.copy(timestamp = e.timestamp))
                             clbDao.updateTime(it.id, e.timestamp)
                             return@launch
