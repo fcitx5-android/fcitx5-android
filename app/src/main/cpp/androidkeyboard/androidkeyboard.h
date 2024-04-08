@@ -30,6 +30,8 @@ FCITX_CONFIGURATION(
         AndroidKeyboardEngineConfig,
         Option<bool>
             enableWordHint{this, "EnableWordHint", _("Enable word hint"), true};
+        Option<bool>
+            editorControlledWordHint{this, "EditorControlledWordHint", _("Disable word hint based on editor attributes"), true};
         Option<int, IntConstrain>
             pageSize{this, "PageSize", _("Word hint page size"), 5, IntConstrain(3, 10)};
         OptionWithAnnotation<ChooseModifier, ChooseModifierI18NAnnotation>
