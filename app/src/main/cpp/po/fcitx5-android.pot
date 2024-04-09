@@ -23,6 +23,9 @@ msgstr ""
 msgid "Enable word hint"
 msgstr ""
 
+msgid "Disable word hint based on editor attributes"
+msgstr ""
+
 msgid "Word hint page size"
 msgstr ""
 

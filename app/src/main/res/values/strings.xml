@@ -257,5 +257,5 @@
     <string name="cannot_be_empty">Cannot be empty</string>
     <string name="_cannot_be_empty">%1$s cannot be empty</string>
     <string name="action_forget_candidate_word">Forget word</string>
-    <string name="clipboard_mask_sensitive">Mask sensitive data (such as passwords) in clipboard history and suggestion</string>
+    <string name="clipboard_mask_sensitive">Mask sensitive data (such as passwords)</string>
 </resources>
