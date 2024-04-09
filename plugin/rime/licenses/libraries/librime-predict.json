@@ -1,0 +1,11 @@
+{
+    "uniqueId": "rime/librime-predict",
+    "artifactVersion": "72e4d71",
+    "description": "librime plugin. predict next word.",
+    "name": "rime/librime-predict",
+    "website": "https://github.com/rime/librime-predict",
+    "tag": "native",
+    "licenses": [
+        "BSD-3-Clause"
+    ]
+}
