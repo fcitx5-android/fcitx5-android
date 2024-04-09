@@ -4,16 +4,10 @@
  */
 package org.fcitx.fcitx5.android.ui.main.settings.behavior
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.core.app.NotificationCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceScreen
@@ -28,14 +22,12 @@ import org.fcitx.fcitx5.android.data.UserDataManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceFragment
 import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
-import org.fcitx.fcitx5.android.ui.main.MainActivity
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.addPreference
 import org.fcitx.fcitx5.android.utils.formatDateTime
 import org.fcitx.fcitx5.android.utils.importErrorDialog
 import org.fcitx.fcitx5.android.utils.iso8601UTCDateTime
-import org.fcitx.fcitx5.android.utils.notificationManager
 import org.fcitx.fcitx5.android.utils.queryFileName
 import org.fcitx.fcitx5.android.utils.toast
 
@@ -73,22 +65,7 @@ class AdvancedSettingsFragment : ManagedPreferenceFragment(AppPrefs.getInstance(
                                 AppUtil.exit()
                             }
                             withContext(Dispatchers.Main) {
-                                NotificationCompat.Builder(ctx, CHANNEL_ID)
-                                    .setSmallIcon(R.drawable.ic_baseline_sync_24)
-                                    .setContentTitle(getText(R.string.app_name))
-                                    .setContentText(getText(R.string.restart_notify_msg))
-                                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                                    .setContentIntent(
-                                        PendingIntent.getActivity(
-                                            ctx,
-                                            0,
-                                            Intent(ctx, MainActivity::class.java),
-                                            PendingIntent.FLAG_IMMUTABLE
-                                        )
-                                    )
-                                    .setAutoCancel(true)
-                                    .build()
-                                    .let { ctx.notificationManager.notify(NOTIFY_ID, it) }
+                                AppUtil.showRestartNotification(ctx)
                                 ctx.toast(
                                     getString(
                                         R.string.user_data_imported,
@@ -122,7 +99,6 @@ class AdvancedSettingsFragment : ManagedPreferenceFragment(AppPrefs.getInstance(
                     }
                 }
             }
-        createNotificationChannel()
     }
 
     override fun onPreferenceUiCreated(screen: PreferenceScreen) {
@@ -149,21 +125,6 @@ class AdvancedSettingsFragment : ManagedPreferenceFragment(AppPrefs.getInstance(
                 }
                 .setNegativeButton(android.R.string.cancel, null)
                 .show()
-        }
-    }
-
-    private val CHANNEL_ID = "app-restart"
-
-    private val NOTIFY_ID = 0xdead
-
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                getText(R.string.restart_channel),
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply { description = CHANNEL_ID }
-            notificationManager.createNotificationChannel(channel)
         }
     }
 }

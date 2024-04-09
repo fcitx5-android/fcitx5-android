@@ -4,10 +4,15 @@
  */
 package org.fcitx.fcitx5.android.utils
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.annotation.IdRes
+import androidx.core.app.NotificationCompat
 import androidx.core.os.bundleOf
 import androidx.navigation.NavDeepLinkBuilder
 import org.fcitx.fcitx5.android.R
@@ -68,5 +73,40 @@ object AppUtil {
 
     fun exit() {
         exitProcess(0)
+    }
+
+    private const val RESTART_CHANNEL_ID = "app-restart"
+
+    private const val RESTART_NOTIFY_ID = 0xdead
+
+    private fun createRestartNotificationChannel(ctx: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                RESTART_CHANNEL_ID,
+                ctx.getText(R.string.restart_channel),
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply { description = RESTART_CHANNEL_ID }
+            ctx.notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    fun showRestartNotification(ctx: Context) {
+        createRestartNotificationChannel(ctx)
+        NotificationCompat.Builder(ctx, RESTART_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_baseline_sync_24)
+            .setContentTitle(ctx.getText(R.string.app_name))
+            .setContentText(ctx.getText(R.string.restart_notify_msg))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(
+                PendingIntent.getActivity(
+                    ctx,
+                    0,
+                    Intent(ctx, MainActivity::class.java),
+                    PendingIntent.FLAG_IMMUTABLE
+                )
+            )
+            .setAutoCancel(true)
+            .build()
+            .let { ctx.notificationManager.notify(RESTART_NOTIFY_ID, it) }
     }
 }

@@ -12,14 +12,17 @@ import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.data.DataManager
+import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.ui.common.PaddingPreferenceFragment
 import org.fcitx.fcitx5.android.ui.main.modified.MySwitchPreference
+import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.addPreference
 import org.fcitx.fcitx5.android.utils.iso8601UTCDateTime
 import org.fcitx.fcitx5.android.utils.startActivity
@@ -59,6 +62,26 @@ class DeveloperFragment : PaddingPreferenceFragment() {
                 setDefaultValue(false)
                 isIconSpaceReserved = false
                 isSingleLineTitle = false
+                setOnPreferenceChangeListener { _, _ ->
+                    AlertDialog.Builder(context)
+                        .setTitle(R.string.verbose_log)
+                        .setMessage(R.string.restart_to_apply_settings)
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .setPositiveButton(android.R.string.ok) { _, _ ->
+                            lifecycleScope.launch {
+                                withContext(NonCancellable + Dispatchers.IO) {
+                                    FcitxDaemon.stopFcitx()
+                                }
+                                lifecycleScope.launch(NonCancellable + Dispatchers.Main) {
+                                    delay(400L)
+                                    AppUtil.exit()
+                                }
+                                AppUtil.showRestartNotification(context)
+                            }
+                        }
+                        .show()
+                    true
+                }
             })
             addPreference(MySwitchPreference(context).apply {
                 key = AppPrefs.getInstance().internal.editorInfoInspector.key
