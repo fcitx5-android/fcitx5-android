@@ -82,7 +82,7 @@ abstract class ManagedPreferenceUi<T : Preference>(
             isIconSpaceReserved = false
             isSingleLineTitle = false
             summaryProvider = EditTextIntPreference.SimpleSummaryProvider
-            setDefaultValue(this@EditTextInt.defaultValue.toString())
+            setDefaultValue(this@EditTextInt.defaultValue)
             setTitle(this@EditTextInt.title)
             setDialogTitle(this@EditTextInt.title)
             min = this@EditTextInt.min

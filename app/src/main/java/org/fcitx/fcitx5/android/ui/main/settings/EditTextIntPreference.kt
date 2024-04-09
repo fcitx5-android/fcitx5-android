@@ -19,20 +19,37 @@ class EditTextIntPreference(context: Context) : EditTextPreference(context) {
     var max: Int = Int.MAX_VALUE
     var unit: String = ""
 
-    private val currentValue: Int
-        get() = getPersistedInt(value)
+    private var default: Int = 0
+
+    override fun persistInt(value: Int): Boolean {
+        return super.persistInt(value).also {
+            if (it) this@EditTextIntPreference.value = value
+        }
+    }
+
+    // it appears as an "Int" Preference to the user, we want to accept Int for defaultValue
+    override fun setDefaultValue(defaultValue: Any?) {
+        val value = defaultValue as? Int ?: return
+        default = value
+        // the underlying Preference is an "EditText", we must use String for it's defaultValue
+        super.setDefaultValue(value.toString())
+    }
 
     override fun onGetDefaultValue(a: TypedArray, index: Int): Any {
-        return a.getInteger(index, 0)
+        return a.getInteger(index, default)
     }
 
     override fun onSetInitialValue(defaultValue: Any?) {
-        value = defaultValue as? Int ?: getPersistedInt(0)
+        value = getPersistedInt(default)
+    }
+
+    private fun textForValue(): String {
+        return getPersistedInt(value).toString()
     }
 
     init {
         setOnBindEditTextListener {
-            it.setText(currentValue.toString())
+            it.setText(textForValue())
             it.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
             it.keyListener = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 DigitsKeyListener.getInstance(Locale.ROOT, min < 0, false)
@@ -59,7 +76,7 @@ class EditTextIntPreference(context: Context) : EditTextPreference(context) {
 
     object SimpleSummaryProvider : SummaryProvider<EditTextIntPreference> {
         override fun provideSummary(preference: EditTextIntPreference): CharSequence {
-            return preference.run { "$currentValue $unit" }
+            return preference.run { "${textForValue()} $unit" }
         }
     }
 }
