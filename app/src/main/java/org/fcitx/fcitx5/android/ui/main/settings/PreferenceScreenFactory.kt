@@ -289,7 +289,7 @@ object PreferenceScreenFactory {
             is ConfigInt -> {
                 val min = descriptor.intMin
                 val max = descriptor.intMax
-                if (min != null && max != null) {
+                if (min != null && max != null && max - min <= 100) {
                     DialogSeekBarPreference(context).apply {
                         summaryProvider = DialogSeekBarPreference.SimpleSummaryProvider
                         descriptor.defaultValue?.let { setDefaultValue(it) }
