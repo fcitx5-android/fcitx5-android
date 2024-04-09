@@ -4,6 +4,7 @@
  */
 package org.fcitx.fcitx5.android.ui.main.settings
 
+import android.app.AlertDialog
 import android.content.Context
 import android.os.Build
 import androidx.core.content.ContextCompat
@@ -19,6 +20,7 @@ import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceScreen
+import androidx.preference.PreferenceViewHolder
 import arrow.core.getOrElse
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Key
@@ -164,22 +166,38 @@ object PreferenceScreenFactory {
             }
         }
 
-        fun rimeUserDataDir() = Preference(context).apply {
-            setOnPreferenceClickListener {
+        fun rimeUserDataDir(title: String): Preference = object : Preference(context) {
+            init {
+                setOnPreferenceClickListener {
+                    AlertDialog.Builder(context)
+                        .setTitle(title)
+                        .setMessage(R.string.open_rime_user_data_dir)
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .setPositiveButton(android.R.string.ok) { _, _ ->
+                            try {
+                                context.startActivity(buildDocumentsProviderIntent())
+                            } catch (e: Exception) {
+                                context.toast(e)
+                            }
+                        }
+                        .show()
+                    true
+                }
+            }
+
+            // make it a hidden option, because of compatibility issues
+            override fun onBindViewHolder(holder: PreferenceViewHolder) {
+                super.onBindViewHolder(holder)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    try {
-                        context.startActivity(buildPrimaryStorageIntent("data/rime"))
-                        return@setOnPreferenceClickListener true
-                    } catch (e: Exception) {
-                        context.toast(e)
+                    holder.itemView.setOnLongClickListener {
+                        try {
+                            context.startActivity(buildPrimaryStorageIntent("data/rime"))
+                        } catch (e: Exception) {
+                            context.toast(e)
+                        }
+                        true
                     }
                 }
-                try {
-                    context.startActivity(buildDocumentsProviderIntent())
-                } catch (e: Exception) {
-                    context.toast(e)
-                }
-                true
             }
         }
 
@@ -263,7 +281,9 @@ object PreferenceScreenFactory {
                 ConfigExternal.ETy.TableGlobal -> addonConfigPreference("table")
                 ConfigExternal.ETy.AndroidTable -> tableInputMethod()
                 ConfigExternal.ETy.PinyinCustomPhrase -> pinyinCustomPhrase()
-                ConfigExternal.ETy.RimeUserDataDir -> rimeUserDataDir()
+                ConfigExternal.ETy.RimeUserDataDir -> rimeUserDataDir(
+                    descriptor.description ?: descriptor.name
+                )
                 else -> stubPreference()
             }
             is ConfigInt -> {
