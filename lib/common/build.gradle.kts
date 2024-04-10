@@ -13,7 +13,6 @@ android {
         }
     }
 
-    @Suppress("UnstableApiUsage")
     buildFeatures {
         aidl = true
     }

@@ -62,14 +62,15 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
                 // Evaluation should be delayed as we need be able to see other tasks
                 target.afterEvaluate {
                     tasks.findByName(DataDescriptorPlugin.TASK)?.also {
-                        tasks.getByName("merge${variantName}Assets").dependsOn(it)
-                        tasks.getByName("lintVitalAnalyzeRelease").dependsOn(it)
-                        tasks.getByName("generateReleaseLintVitalReportModel").dependsOn(it)
+                        tasks.findByName("merge${variantName}Assets")?.dependsOn(it)
+                        tasks.findByName("lintVitalAnalyzeRelease")?.dependsOn(it)
+                        tasks.findByName("generateReleaseLintVitalReportModel")?.dependsOn(it)
                     }
                 }
             }
             // Make data descriptor depend on fcitx component if have
             // Since we are using finalizeDsl, there is no need to do afterEvaluate
+            @Suppress("UnstableApiUsage")
             finalizeDsl {
                 target.tasks.findByName(FcitxComponentPlugin.INSTALL_TASK)?.also { componentTask ->
                     target.tasks.findByName(DataDescriptorPlugin.TASK)?.dependsOn(componentTask)

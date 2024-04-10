@@ -1,5 +1,3 @@
-@file:Suppress("UnstableApiUsage")
-
 plugins {
     id("org.fcitx.fcitx5.android.app-convention")
     id("org.fcitx.fcitx5.android.native-app-convention")
@@ -18,6 +16,7 @@ android {
         applicationId = "org.fcitx.fcitx5.android"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        @Suppress("UnstableApiUsage")
         externalNativeBuild {
             cmake {
                 targets(
@@ -64,7 +63,7 @@ android {
 
 kotlin {
     sourceSets.configureEach {
-        kotlin.srcDir("$buildDir/generated/ksp/$name/kotlin/")
+        kotlin.srcDir("${layout.buildDirectory}/generated/ksp/$name/kotlin/")
     }
 }
 
@@ -139,6 +138,7 @@ dependencies {
     androidTestImplementation(libs.junit)
 }
 
+@Suppress("UnstableApiUsage")
 configurations {
     all {
         // remove Baseline Profile Installer or whatever it is...

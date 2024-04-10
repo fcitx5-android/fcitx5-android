@@ -1,5 +1,3 @@
-@file:Suppress("UnstableApiUsage")
-
 plugins {
     id("org.fcitx.fcitx5.android.app-convention")
     id("org.fcitx.fcitx5.android.plugin-app-convention")
@@ -15,6 +13,7 @@ android {
     defaultConfig {
         applicationId = "org.fcitx.fcitx5.android.plugin.jyutping"
 
+        @Suppress("UnstableApiUsage")
         externalNativeBuild {
             cmake {
                 targets(

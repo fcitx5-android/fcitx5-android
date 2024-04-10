@@ -1,5 +1,3 @@
-@file:Suppress("UnstableApiUsage")
-
 plugins {
     id("org.fcitx.fcitx5.android.lib-convention")
     id("org.fcitx.fcitx5.android.native-lib-convention")
@@ -10,6 +8,7 @@ android {
     namespace = "org.fcitx.fcitx5.android.lib.libime"
 
     defaultConfig {
+        @Suppress("UnstableApiUsage")
         externalNativeBuild {
             cmake {
                 targets(

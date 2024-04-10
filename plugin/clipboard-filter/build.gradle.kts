@@ -1,9 +1,3 @@
-/*
- * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
- */
-@file:Suppress("UnstableApiUsage")
-
 plugins {
     id("org.fcitx.fcitx5.android.app-convention")
     id("org.fcitx.fcitx5.android.plugin-app-convention")
@@ -30,7 +24,7 @@ android {
 }
 
 generateDataDescriptor{
-    excludes.add("data.minify.json")
+    excludes.add("data.min.json")
 }
 
 dependencies {

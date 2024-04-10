@@ -142,8 +142,7 @@ enum class AddonCategory {
     InputMethod, Frontend, Loader, Module, UI;
 
     companion object {
-        private val Values = values()
-        fun fromInt(i: Int) = Values[i]
+        fun fromInt(i: Int) = entries[i]
     }
 }
 

@@ -16,7 +16,7 @@ open class AndroidBaseConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         target.pluginManager.apply("org.jetbrains.kotlin.android")
 
-        target.extensions.configure<CommonExtension<*, *, *, *, *>>("android") {
+        target.extensions.configure(CommonExtension::class.java) {
             compileSdk = Versions.compileSdk
             buildToolsVersion = target.buildTools
             defaultConfig {

@@ -48,8 +48,8 @@ class FcitxHeadersPlugin : Plugin<Project> {
                         ?.dependsOn(installHeadersTask)
                 }
             }
+            @Suppress("UnstableApiUsage")
             finalizeDsl {
-                @Suppress("UnstableApiUsage")
                 it.prefab.forEach { library ->
                     library.headers?.let { path -> project.file(path).mkdirs() }
                 }

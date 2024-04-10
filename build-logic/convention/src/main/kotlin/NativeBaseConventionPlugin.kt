@@ -14,7 +14,7 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
         @Suppress("UnstableApiUsage")
-        target.extensions.configure<CommonExtension<*, *, *, *, *>>("android") {
+        target.extensions.configure(CommonExtension::class.java) {
             ndkVersion = target.ndkVersion
             defaultConfig {
                 minSdk = Versions.minSdk
