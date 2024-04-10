@@ -47,8 +47,8 @@ class TwinSeekBarPreference @JvmOverloads constructor(
     var secondaryKey: String = ""
     var secondaryLabel: String = ""
 
-    var default: Int? = null
-    var secondaryDefault: Int? = null
+    var default: Int = 0
+    var secondaryDefault: Int = 0
     var defaultLabel: String? = null
 
     var value = 0
@@ -58,19 +58,22 @@ class TwinSeekBarPreference @JvmOverloads constructor(
 
     override fun onSetInitialValue(defaultValue: Any?) {
         preferenceDataStore?.apply {
-            value = getInt(key, 0)
-            secondaryValue = getInt(secondaryKey, 0)
+            value = getInt(key, default)
+            secondaryValue = getInt(secondaryKey, secondaryDefault)
         } ?: sharedPreferences?.apply {
-            value = getInt(key, 0)
-            secondaryValue = getInt(secondaryKey, 0)
+            value = getInt(key, default)
+            secondaryValue = getInt(secondaryKey, secondaryDefault)
         }
     }
 
+    /**
+     * @param defaultValue should be `Pair<Int, Int>`
+     */
     override fun setDefaultValue(defaultValue: Any?) {
-        (defaultValue as? Pair<*, *>)?.apply {
-            (first as? Int)?.let { value = it; default = it }
-            (second as? Int)?.let { secondaryValue = it; secondaryDefault = it }
-        }
+        super.setDefaultValue(defaultValue)
+        val (first, second) = defaultValue as? Pair<*, *> ?: return
+        default = first as? Int ?: 0
+        secondaryDefault = second as? Int ?: 0
     }
 
     private fun persistValues(primary: Int, secondary: Int) {
@@ -154,11 +157,7 @@ class TwinSeekBarPreference @JvmOverloads constructor(
                 setValue(primary, secondary)
             }
             .setNeutralButton(R.string.default_) { _, _ ->
-                default?.let { p ->
-                    secondaryDefault?.let { s ->
-                        setValue(p, s)
-                    }
-                }
+                setValue(default, secondaryDefault)
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()

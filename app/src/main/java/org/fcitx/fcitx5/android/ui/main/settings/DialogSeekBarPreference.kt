@@ -47,7 +47,7 @@ class DialogSeekBarPreference @JvmOverloads constructor(
     var step: Int
     var unit: String
 
-    var default: Int? = null
+    var default: Int = 0
     var defaultLabel: String? = null
 
     init {
@@ -74,15 +74,15 @@ class DialogSeekBarPreference @JvmOverloads constructor(
 
     override fun setDefaultValue(defaultValue: Any?) {
         super.setDefaultValue(defaultValue)
-        (defaultValue as? Int)?.let { default = it }
+        default = defaultValue as? Int ?: 0
     }
 
     override fun onGetDefaultValue(a: TypedArray, index: Int): Any {
-        return a.getInteger(index, 0)
+        return a.getInteger(index, default)
     }
 
     override fun onSetInitialValue(defaultValue: Any?) {
-        value = getPersistedInt(defaultValue as? Int ?: 0)
+        value = getPersistedInt(defaultValue as? Int ?: default)
     }
 
     override fun onClick() {
@@ -130,9 +130,7 @@ class DialogSeekBarPreference @JvmOverloads constructor(
                 setValue(value)
             }
             .setNeutralButton(R.string.default_) { _, _ ->
-                default?.let {
-                    setValue(it)
-                }
+                setValue(default)
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
