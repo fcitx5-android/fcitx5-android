@@ -5,9 +5,7 @@
     <string name="save">Сохранить</string>
     <string name="input_methods">Методы ввода</string>
     <string name="add_input_method">Добавить метод ввода</string>
-    <string name="input_methods_conf">Настроить методы ввода</string>
     <string name="addons">Дополнения</string>
-    <string name="addons_conf">Настроить дополнения</string>
     <string name="conf">Конфигурация</string>
     <string name="global_options">Глобальные параметры</string>
     <string name="behavior">Поведение</string>

@@ -109,7 +109,7 @@
     <fragment
         android:id="@+id/imListFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodListFragment"
-        android:label="@string/input_methods_conf">
+        android:label="@string/input_methods">
         <action
             android:id="@+id/action_imListFragment_to_imConfigFragment"
             app:destination="@id/imConfigFragment"
@@ -168,7 +168,7 @@
     <fragment
         android:id="@+id/addonListFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.settings.addon.AddonListFragment"
-        android:label="@string/addons_conf">
+        android:label="@string/addons">
         <action
             android:id="@+id/action_addonListFragment_to_addonConfigFragment"
             app:destination="@id/addonConfigFragment"

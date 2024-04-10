@@ -5,9 +5,7 @@
     <string name="save">保存</string>
     <string name="input_methods">インプットメソッド</string>
     <string name="add_input_method">インプットメソッドの追加</string>
-    <string name="input_methods_conf">インプットメソッドの設定</string>
     <string name="addons">アドオン</string>
-    <string name="addons_conf">アドオンの設定</string>
     <string name="conf">設定</string>
     <string name="global_options">全般オプション</string>
     <string name="behavior">ふるまい</string>

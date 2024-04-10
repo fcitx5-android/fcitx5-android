@@ -5,9 +5,7 @@
     <string name="save">Guardar</string>
     <string name="input_methods">Métodos de entrada</string>
     <string name="add_input_method">Añadir método de entrada</string>
-    <string name="input_methods_conf">Configurar métodos de entrada</string>
     <string name="addons">Complementos</string>
-    <string name="addons_conf">Configurar complementos</string>
     <string name="conf">Configuración</string>
     <string name="global_options">Opciones globales</string>
     <string name="behavior">Comportamiento</string>

@@ -5,9 +5,7 @@
     <string name="save">저장</string>
     <string name="input_methods">입력기</string>
     <string name="add_input_method">입력기 추가</string>
-    <string name="input_methods_conf">입력기 구성하기</string>
     <string name="addons">애드온</string>
-    <string name="addons_conf">애드온 구성하기</string>
     <string name="conf">구성</string>
     <string name="global_options">전역 옵션</string>
     <string name="behavior">동작</string>

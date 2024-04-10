@@ -5,9 +5,7 @@
     <string name="save">Speichern</string>
     <string name="input_methods">Eingabemethoden</string>
     <string name="add_input_method">Eingabemethode hinzufügen</string>
-    <string name="input_methods_conf">Eingabemethoden konfigurieren</string>
     <string name="addons">Addons</string>
-    <string name="addons_conf">Addons konfigurieren</string>
     <string name="conf">Konfiguration</string>
     <string name="global_options">Globale Optionen</string>
     <string name="behavior">Verhalten</string>

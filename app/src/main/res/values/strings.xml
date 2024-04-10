@@ -5,9 +5,7 @@
     <string name="save">Save</string>
     <string name="input_methods">Input Methods</string>
     <string name="add_input_method">Add Input Method</string>
-    <string name="input_methods_conf">Configure Input Methods</string>
     <string name="addons">Addons</string>
-    <string name="addons_conf">Configure Addons</string>
     <string name="conf">Configuration</string>
     <string name="global_options">Global Options</string>
     <string name="behavior">Behavior</string>

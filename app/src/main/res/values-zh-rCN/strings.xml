@@ -5,9 +5,7 @@
     <string name="save">保存</string>
     <string name="input_methods">输入法</string>
     <string name="add_input_method">添加输入法</string>
-    <string name="input_methods_conf">配置输入法</string>
     <string name="addons">附加组件</string>
-    <string name="addons_conf">配置附加组件</string>
     <string name="conf">配置</string>
     <string name="global_options">全局选项</string>
     <string name="behavior">行为</string>

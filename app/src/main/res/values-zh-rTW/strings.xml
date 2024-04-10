@@ -5,9 +5,7 @@
     <string name="save">儲存</string>
     <string name="input_methods">輸入法</string>
     <string name="add_input_method">新增輸入法</string>
-    <string name="input_methods_conf">設定輸入法</string>
     <string name="addons">附加元件</string>
-    <string name="addons_conf">設定附加元件</string>
     <string name="conf">設定</string>
     <string name="global_options">全域選項</string>
     <string name="behavior">行為</string>
