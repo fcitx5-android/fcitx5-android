@@ -113,7 +113,7 @@ class ThemePrefs(sharedPreferences: SharedPreferences) :
     val navbarBackground = list(
         R.string.navbar_background,
         "navbar_background",
-        NavbarBackground.Full,
+        NavbarBackground.ColorOnly,
         NavbarBackground,
         listOf(
             NavbarBackground.None,
