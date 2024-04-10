@@ -19,6 +19,7 @@ import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.data.InputFeedbacks
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.GestureType
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListener
@@ -55,6 +56,14 @@ abstract class BaseKeyboard(
     private val popupOnKeyPress by prefs.keyboard.popupOnKeyPress
     private val expandKeypressArea by prefs.keyboard.expandKeypressArea
     private val swipeSymbolDirection by prefs.keyboard.swipeSymbolDirection
+
+    private val spaceSwipeMoveCursor = prefs.keyboard.spaceSwipeMoveCursor
+    private val spaceKeys = mutableListOf<KeyView>()
+    private val spaceSwipeChangeListener = ManagedPreference.OnChangeListener<Boolean> { _, v ->
+        spaceKeys.forEach {
+            it.swipeEnabled = v
+        }
+    }
 
     private val vivoKeypressWorkaround by prefs.advanced.vivoKeypressWorkaround
 
@@ -130,6 +139,7 @@ abstract class BaseKeyboard(
                 centerHorizontally()
             })
         }
+        spaceSwipeMoveCursor.registerOnChangeListener(spaceSwipeChangeListener)
     }
 
     private fun createKeyView(def: KeyDef): KeyView {
@@ -147,7 +157,8 @@ abstract class BaseKeyboard(
                 else -> InputFeedbacks.SoundEffect.Standard
             }
             if (def is SpaceKey) {
-                swipeEnabled = true
+                spaceKeys.add(this)
+                swipeEnabled = spaceSwipeMoveCursor.getValue()
                 swipeRepeatEnabled = true
                 swipeThresholdX = selectionSwipeThreshold
                 swipeThresholdY = disabledSwipeThreshold
