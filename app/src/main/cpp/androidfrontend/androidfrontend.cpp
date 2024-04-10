@@ -127,7 +127,7 @@ public:
                 for (int i = offset; i < end; i++) {
                     try {
                         auto &candidate = bulk->candidateFromAll(i);
-                        candidates.emplace_back(filterString(candidate.text()));
+                        candidates.emplace_back(filterString(candidate.textWithComment()));
                     } catch (const std::invalid_argument &e) {
                         break;
                     }
@@ -135,7 +135,7 @@ public:
             } else {
                 const int end = std::min(list->size(), last);
                 for (int i = offset; i < end; i++) {
-                    candidates.emplace_back(filterString(list->candidate(i).text()));
+                    candidates.emplace_back(filterString(list->candidate(i).textWithComment()));
                 }
             }
         }
