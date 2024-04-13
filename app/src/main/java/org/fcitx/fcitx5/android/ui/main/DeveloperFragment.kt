@@ -37,7 +37,10 @@ class DeveloperFragment : PaddingPreferenceFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         launcher = registerForActivityResult(CreateDocument("application/octet-stream")) { uri ->
-            if (uri == null) return@registerForActivityResult
+            if (uri == null) {
+                hprofFile.delete()
+                return@registerForActivityResult
+            }
             val ctx = requireContext()
             lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
                 runCatching {
