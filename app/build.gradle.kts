@@ -63,7 +63,7 @@ android {
 
 kotlin {
     sourceSets.configureEach {
-        kotlin.srcDir("${layout.buildDirectory}/generated/ksp/$name/kotlin/")
+        kotlin.srcDir(layout.buildDirectory.dir("generated/ksp/$name/kotlin"))
     }
 }
 
