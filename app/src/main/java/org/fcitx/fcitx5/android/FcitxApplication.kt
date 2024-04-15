@@ -14,6 +14,7 @@ import android.content.res.Configuration
 import android.os.Build
 import android.os.Process
 import android.util.Log
+import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.MainScope
@@ -75,6 +76,18 @@ class FcitxApplication : Application() {
 
         if (!BuildConfig.DEBUG) {
             Thread.setDefaultUncaughtExceptionHandler { _, e ->
+                val crashTime = System.currentTimeMillis()
+                val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(ctx)
+                val lastCrashTimePrefKey = "last_crash_time"
+                val lastCrashTime = sharedPreferences.getLong(lastCrashTimePrefKey, -1L)
+                // make sure it was written to persistent storage
+                sharedPreferences.edit(commit = true) {
+                    putLong(lastCrashTimePrefKey, crashTime)
+                }
+                if (crashTime - lastCrashTime <= 10_000L) {
+                    // continuous crashes within 10 seconds, maybe in a crash loop. just bail
+                    exitProcess(10)
+                }
                 startActivity<LogActivity> {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     putExtra(LogActivity.FROM_CRASH, true)
