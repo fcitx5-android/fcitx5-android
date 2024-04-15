@@ -26,22 +26,18 @@ FCITX_CONFIGURATION(NotificationsConfig,
 
 class Notifications final : public AddonInstance {
 public:
-    Notifications(Instance *instance) : instance_(instance) {};
-    ~Notifications() = default;
+    explicit Notifications(Instance *instance);
+    ~Notifications() override = default;
 
     Instance *instance() { return instance_; }
 
-    void updateConfig();
     void reloadConfig() override;
+
     void save() override;
 
     const Configuration *getConfig() const override { return &config_; }
 
-    void setConfig(const RawConfig &config) override {
-        config_.load(config, true);
-        safeSaveAsIni(config_, ConfPath);
-        updateConfig();
-    }
+    void setConfig(const RawConfig &config) override;
 
     FCITX_ADDON_DEPENDENCY_LOADER(androidfrontend, instance_->addonManager());
 
@@ -65,12 +61,14 @@ private:
     FCITX_ADDON_EXPORT_FUNCTION(Notifications, showTip);
     FCITX_ADDON_EXPORT_FUNCTION(Notifications, closeNotification);
 
-    static const inline std::string ConfPath = "conf/androidnotification.conf";
+    static const inline char* ConfPath = "conf/androidnotification.conf";
 
     NotificationsConfig config_;
     Instance *instance_;
 
     std::unordered_set<std::string> hiddenNotifications_;
+
+    void updateHiddenNotifications();
 
 }; // class Notifications
 

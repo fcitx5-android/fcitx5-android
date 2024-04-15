@@ -13,25 +13,36 @@
 
 namespace fcitx {
 
-void Notifications::updateConfig() {
-    hiddenNotifications_.clear();
-    for (const auto &id: config_.hiddenNotifications.value()) {
-        hiddenNotifications_.insert(id);
-    }
+Notifications::Notifications(Instance *instance) : instance_(instance) {
+    reloadConfig();
 }
 
 void Notifications::reloadConfig() {
     readAsIni(config_, ConfPath);
-    updateConfig();
+    updateHiddenNotifications();
 }
 
 void Notifications::save() {
     std::vector<std::string> values_;
+    values_.reserve(hiddenNotifications_.size());
     for (const auto &id: hiddenNotifications_) {
         values_.push_back(id);
     }
     config_.hiddenNotifications.setValue(std::move(values_));
     safeSaveAsIni(config_, ConfPath);
+}
+
+void Notifications::setConfig(const fcitx::RawConfig &config) {
+    config_.load(config, true);
+    safeSaveAsIni(config_, ConfPath);
+    updateHiddenNotifications();
+}
+
+void Notifications::updateHiddenNotifications() {
+    hiddenNotifications_.clear();
+    for (const auto &id: config_.hiddenNotifications.value()) {
+        hiddenNotifications_.insert(id);
+    }
 }
 
 uint32_t Notifications::sendNotification(
