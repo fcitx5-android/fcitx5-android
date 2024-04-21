@@ -166,8 +166,14 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
     companion object :
         ConfigParser<RawConfig, ConfigDescriptor<*, *>, Companion.ParseException> {
 
-        private val RawConfig.type
-            get() = findByName("Type")?.value?.let { ConfigType.parse(it) }
+        private val RawConfig.type: Either<ConfigType.Companion.UnknownConfigTypeException, ConfigType<*>>?
+            get() {
+                val type = findByName("Type")?.value
+                if (type == "String" && findByName("IsEnum")?.value == "True") {
+                    return Either.Right(ConfigType.TyEnum)
+                }
+                return type?.let { ConfigType.parse(it) }
+            }
         private val RawConfig.description
             get() = findByName("Description")?.value
         private val RawConfig.defaultValue
