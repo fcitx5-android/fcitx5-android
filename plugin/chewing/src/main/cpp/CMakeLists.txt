@@ -23,4 +23,5 @@ set_target_properties(Chewing_static PROPERTIES
         )
 
 set(CHEWING_TARGET Chewing_static)
+option(ENABLE_TEST "" OFF)
 add_subdirectory(fcitx5-chewing)
