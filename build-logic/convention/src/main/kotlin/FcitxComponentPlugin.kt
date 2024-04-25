@@ -4,6 +4,7 @@
  */
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.Delete
 import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.kotlin.dsl.create
@@ -79,10 +80,29 @@ class FcitxComponentPlugin : Plugin<Project> {
     private fun registerCleanTask(project: Project) {
         project.task<Delete>(CLEAN_TASK) {
             delete(project.assetsDir.resolve("usr/share/locale"))
-            // delete all non symlink dirs
-            delete(project.assetsDir.resolve("usr/share/fcitx5").listFiles()?.filter {
-                !it.toPath().isSymbolicLink()
-            })
+            // delete all non symlink files
+            // true -> delete
+            val files = mutableMapOf<String, Boolean>()
+            project.assetsDir.resolve("usr/share/fcitx5").walkBottomUp()
+                .onEnter {
+                    // Don't enter symlink dir and don't delete
+                    (!it.toPath().isSymbolicLink()).also { x -> files[it.path] = x }
+                }
+                .onLeave {
+                    // Delete dir if all of its children can be deleted
+                    files[it.path] =
+                        it.listFiles()?.mapNotNull { f -> files[f.path] }?.all { x -> x } ?: false
+                }
+                .forEach {
+                    // Don't delete symlink
+                    files[it.path] = !it.toPath().isSymbolicLink()
+                }
+            files.forEach {
+                if (it.value) {
+                    logger.log(LogLevel.DEBUG, "Delete ${it.key}")
+                    delete(it.key)
+                }
+            }
         }.also {
             project.cleanTask.dependsOn(it)
         }
