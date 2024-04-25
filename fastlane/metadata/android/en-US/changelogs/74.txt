@@ -1,0 +1,53 @@
+# 0.0.9 - Basic Pinyin Correction and Forget Words
+
+## Highlights
+
+- The application now targets Android API 34, and exposes input methods as subtypes to system input method picker
+- Pinyin input method from fcitx5-chinese-addons gains basic error correction support for adjacent keys in the same row
+- Pinyin/Shuangpin and Table input methods from fcitx5-chinese-addons are able to "forget word" by long pressing the candidates
+- RIME Plugin includes rime-predict for next-word prediction
+
+### Notable changes
+
+- "Global Options - Show preedit in application" has been enabled by default, you may need to enable it manually after upgrading from old versions. 
+For those who don't like composing text (aka client preedit) in applications, pinyin and rime engine now include a "Preedit Mode" option to disable it.
+- As many users requested, English input method now provides an option "Disable word hint based on editor attributes".
+Turning it off would make the input method ignore InputType flags from editor and provide word hint regardless.
+
+### Build process improvements
+
+- descriptor.json generated on Windows actually works, by replacing backslash ("\\") in path with forward slash ("/")
+
+## New features
+
+- Allow client preedit in global options and pinyin engine by default
+- Expose input method as subtypes to system input method picker on Android 14+
+- Handle subtype switching via system input method picker
+- Raise keyboard side padding limit to 300dp
+- Add shrug emoticon ¯\_(ツ)_/¯
+- Swipe left backspace key to clear predict candidates
+- Apply keyboard side padding to preedit
+- Use KP_Separator/KP_Equal for comma/dot in NumberKeyboard
+- Trigger "forget word" by long pressing on candidates from pinyin and table engine
+- Option to mask sensitive data (such as password) in clipboard UI
+- Option to show word hint regardless of InputType flags
+- Prompt to restart after changing verbose logging preference
+- Option to disable swipe gesture on space key
+- OpenCC config shows a list of available profiles
+
+## Bug fixes
+
+- Toolbar above keyboard sometimes become blank when switching input methods
+- Unable to detect other input method apps on Android 14
+- Fix crash in androidkeyboard when commit characters with byte length > 1
+- Last symbol state cannot be remembered when switching between SymbolPicker/NumberKeyboard for multiple times
+- Keyboard theme won't follow system dark mode when dark mode changes while app is not running
+- Transparent area in keyboard background images won't get darkened
+- "Restore default" in FcitxPreferenceFragment does not work
+- Disallow empty user input in various editor fragments
+- Fix importing/creating quickphrase with backslash
+- Fix crash when saving logs on some devices
+- Fix default value display in various custom Preferences
+- Change default navigation bar background to follow keyboard background color to avoid problems on some Android 14 devices
+- "Hidden Notifications" config in "Android Toast & Notifications" cannot be persisted
+- Prevent crash loop when uncaught exception occurs during Application instantiation
