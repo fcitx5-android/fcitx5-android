@@ -21,7 +21,7 @@ defaults:
 jobs:
   fdroid-build:
     runs-on: ubuntu-latest
-    container: registry.gitlab.com/fdroid/fdroidserver:buildserver-bullseye
+    container: registry.gitlab.com/fdroid/fdroidserver:buildserver-bookworm
     strategy:
       matrix:
         abi:
