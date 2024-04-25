@@ -20,7 +20,7 @@ Builds:
     submodules: true
     sudo:
       - apt-get update
-      - apt-get install -y g++ libtool make automake gettext bzip2 xz-utils pkg-config
+      - apt-get install -y g++ libtool make automake gettext bzip2 xz-utils zstd pkg-config
         cmake extra-cmake-modules ninja-build libfmt-dev libboost-all-dev libfcitx5utils-dev opencc openjdk-17-jdk-headless
         ghc cabal-install libghc-shake-dev libghc-aeson-pretty-dev libghc-js-flot-data haskell-js-dgtable-utils
       - update-java-alternatives -a
