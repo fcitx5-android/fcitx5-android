@@ -94,7 +94,6 @@
     <string name="key_radius">Tastenradius</string>
     <string name="key_horizontal_margin">Horizontaler Tastenrand</string>
     <string name="key_vertical_margin">Vertikaler Tastenrand</string>
-    <string name="configure">Konfigurieren</string>
     <string name="choose_image">Bild wählen ...</string>
     <string name="dark_keys">Dunkle Tasten</string>
     <string name="recrop_image">Bild neu zuschneiden</string>
@@ -138,7 +137,6 @@
     <string name="exception_table_im_filename">Die Erweiterung von \"%1$s\" ist keine Tabelleneingabemethode (.zip)</string>
     <string name="table_already_exists">Konfigurationsdatei der Tabelleneingabemethode \"%1$s\" existiert schon</string>
     <string name="table_file_does_not_exist_title">Tabelle nicht auffindbar</string>
-    <string name="table_file_does_not_exist_message">Das Wörterbuch der Tabelleneingabe \"%1$s\" ist nicht vorhanden. Bitte checken Sie die dict-Datei reimportieren Sie sie.</string>
     <string name="import_table">Tabelle importieren</string>
     <string name="table_from_zip">Aus ZIP-Datei...</string>
     <string name="table_select_files">Aus getrennten Dateien ...</string>
@@ -163,5 +161,4 @@
     <string name="following_system_settings">Wie Systemeinstellungen</string>
     <string name="button_sound">Ton bei Tastendruck</string>
     <string name="button_sound_volume">Ton Tastendruck Lautstärke</string>
-    <string name="clipboard_return_after_paste">Nach dem Einfügen zurück</string>
     </resources>

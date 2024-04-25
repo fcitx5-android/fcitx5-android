@@ -32,13 +32,13 @@
     <string name="done">完成</string>
     <string name="setup_keyboard">请完成键盘设置</string>
     <string name="setup_channel">设置向导</string>
-    <string name="pinyin_dict">拼音词典</string>
+    <string name="pinyin_dict">拼音词库</string>
     <string name="reloading">重新加载中</string>
     <string name="importing">正在导入</string>
     <string name="import_error">导入错误</string>
-    <string name="dict_already_exists">词典已存在</string>
-    <string name="invalid_dict">词典无效</string>
-    <string name="whether_import_dict">您想导入这本词典吗？</string>
+    <string name="dict_already_exists">词库已存在</string>
+    <string name="invalid_dict">词库类型无效</string>
+    <string name="whether_import_dict">您想导入这个词库吗？</string>
     <string name="import_">导入</string>
     <string name="synced">已同步！</string>
     <string name="loading">加载中</string>
@@ -251,5 +251,12 @@
     <string name="update_table">更新码表</string>
     <string name="table_dict_replace_message">码表词典 \"%1$s\" 存在。您可以导入新词典并替换它。</string>
     <string name="lang_switch_key_behavior">语言切换键行为</string>
-    <string name="lang_switch_behavior_next_ime_app">切换至下一个输入法</string>
+    <string name="lang_switch_behavior_next_ime_app">切换至下一个输入法应用</string>
+    <string name="cannot_be_empty">不能为空</string>
+    <string name="_cannot_be_empty">%1$s不能为空</string>
+    <string name="action_forget_candidate_word">忘记词汇</string>
+    <string name="clipboard_mask_sensitive">隐藏敏感信息（如密码）</string>
+    <string name="open_rime_user_data_dir">即将打开应用数据目录。 RIME 用户数据目录位于“data/rime”。</string>
+    <string name="restart_to_apply_settings">应用将重启以应用新设置。继续吗？</string>
+    <string name="space_swipe_move_cursor">划动空格键以移动光标</string>
 </resources>

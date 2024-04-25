@@ -1,8 +1,9 @@
 # 
 # Translators:
 # 黃柏諺 <s8321414@gmail.com>, 2022
-# Zhang Jia-Bin <cracky.ice@gmail.com>, 2022
+# Jia-Bin, 2022
 # rocka, 2022
+# Lau YeeYu, 2024
 # 
 msgid ""
 msgstr ""
@@ -10,8 +11,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: https://github.com/fcitx5-android/fcitx5-android/issues\n"
 "POT-Creation-Date: 2022-02-14 18:51+0800\n"
 "PO-Revision-Date: 2022-03-18 22:18+0000\n"
-"Last-Translator: rocka, 2022\n"
-"Language-Team: Chinese (Taiwan) (https://www.transifex.com/fcitx/teams/12005/zh_TW/)\n"
+"Last-Translator: Lau YeeYu, 2024\n"
+"Language-Team: Chinese (Taiwan) (https://app.transifex.com/fcitx/teams/12005/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -30,6 +31,9 @@ msgstr "單字提示"
 msgid "Enable word hint"
 msgstr "啟用單字提示"
 
+msgid "Disable word hint based on editor attributes"
+msgstr "依據編輯器屬性禁用字詞提示"
+
 msgid "Word hint page size"
 msgstr "單字提示頁大小"
 
@@ -39,8 +43,8 @@ msgstr "選詞修飾鍵"
 msgid "Insert space between words"
 msgstr "在單字間插入空格"
 
-msgid "Android 浮動式訊息与通知"
-msgstr ""
+msgid "Android Toast & Notification"
+msgstr "Android 浮動式訊息與通知"
 
-msgid "隐藏的通知"
-msgstr ""
+msgid "Hidden Notifications"
+msgstr "隱藏的通知"

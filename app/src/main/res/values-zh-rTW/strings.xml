@@ -32,13 +32,13 @@
     <string name="done">完成</string>
     <string name="setup_keyboard">完成鍵盤設定</string>
     <string name="setup_channel">設定精靈</string>
-    <string name="pinyin_dict">拼音字典</string>
+    <string name="pinyin_dict">拼音词库</string>
     <string name="reloading">正在重新載入</string>
     <string name="importing">正在匯入</string>
     <string name="import_error">匯入錯誤</string>
-    <string name="dict_already_exists">字典已存在</string>
-    <string name="invalid_dict">無效的字典類型</string>
-    <string name="whether_import_dict">您想要匯入此字典嗎？</string>
+    <string name="dict_already_exists">词库已存在</string>
+    <string name="invalid_dict">無效的词库類型</string>
+    <string name="whether_import_dict">您想要匯入此词库嗎？</string>
     <string name="import_">匯入</string>
     <string name="synced">已同步！</string>
     <string name="loading">正在載入</string>
@@ -162,8 +162,8 @@
     <string name="disable_addon_warn_optdep">停用%1$s中的某些功能</string>
     <string name="disable_addon_warn_confirm">確實要停用它嗎？</string>
     <string name="swipe_symbol_behavior">划動輸入標點及數字</string>
-    <string name="swipe_down">下滑</string>
-    <string name="swipe_up">上滑</string>
+    <string name="swipe_down">下划</string>
+    <string name="swipe_up">上划</string>
     <string name="disabled">已停用</string>
     <string name="system_default">系統預設</string>
     <string name="editor_info_inspector">EditorInfo 檢查器</string>
@@ -252,4 +252,11 @@
     <string name="table_dict_replace_message">碼表字典 \"%1$s\" 已存在。您可以匯入新字典並覆蓋原字典。</string>
     <string name="lang_switch_key_behavior">語言切換鍵行為</string>
     <string name="lang_switch_behavior_next_ime_app">切換至下一個輸入法</string>
+    <string name="cannot_be_empty">不能為空</string>
+    <string name="_cannot_be_empty">%1$s不能為空</string>
+    <string name="action_forget_candidate_word">忘記詞彙</string>
+    <string name="clipboard_mask_sensitive">隱藏敏感訊息（如密碼）</string>
+    <string name="open_rime_user_data_dir">即將開啓應用數據目錄。RIME 用户數據目錄位於 “data/rime”。</string>
+    <string name="restart_to_apply_settings">應用程式將重新啓動以應用新設定。是否繼續？</string>
+    <string name="space_swipe_move_cursor">划動空格以移動游標</string>
 </resources>

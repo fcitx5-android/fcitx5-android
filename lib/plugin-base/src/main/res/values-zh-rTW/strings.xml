@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="pkg_name">包名</string>
+    <string name="pkg_name">套件名稱</string>
     <string name="api_version">外掛程式 API 版本</string>
     <string name="gettext_domain">Gettext 域</string>
     <string name="plugin_description">外掛程式描述</string>
     <string name="copied">已複製到剪貼簿</string>
     <string name="plugin_info">外掛程式資訊</string>
     <string name="licenses">開放原始碼授權條款</string>
+    <string name="has_service">包含行程間通訊服務</string>
 </resources>
