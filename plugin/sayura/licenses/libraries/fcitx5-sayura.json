@@ -1,6 +1,6 @@
 {
     "uniqueId": "fcitx/fcitx5-sayura",
-    "artifactVersion": "5.1.1",
+    "artifactVersion": "5.1.2",
     "description": "Sinhala input method for Fcitx",
     "name": "fcitx/fcitx5-sayura",
     "website": "https://github.com/fcitx/fcitx5-sayura",
