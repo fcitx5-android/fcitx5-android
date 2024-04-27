@@ -106,6 +106,7 @@
     <string name="key_border">啟用按鍵邊框</string>
     <string name="brightness">亮度</string>
     <string name="key_radius">按鍵圓角半徑</string>
+    <string name="key_radius_text_editing">文字編輯按鍵圓角半徑</string>
     <string name="key_horizontal_margin">按鍵橫向邊距</string>
     <string name="key_vertical_margin">按鍵垂直邊距</string>
     <string name="configure">配置</string>

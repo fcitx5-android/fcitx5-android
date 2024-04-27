@@ -6,6 +6,7 @@ package org.fcitx.fcitx5.android.input.editing
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Typeface
 import android.graphics.drawable.StateListDrawable
 import android.view.View
 import androidx.annotation.DrawableRes
@@ -16,6 +17,9 @@ import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.bar.ui.ToolButton
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
+import org.fcitx.fcitx5.android.input.keyboard.TextKeyView
+import org.fcitx.fcitx5.android.input.keyboard.ImageKeyView
+import org.fcitx.fcitx5.android.input.keyboard.KeyDef
 import org.fcitx.fcitx5.android.utils.borderDrawable
 import org.fcitx.fcitx5.android.utils.pressHighlightDrawable
 import org.fcitx.fcitx5.android.utils.rippleDrawable
@@ -45,6 +49,7 @@ import splitties.views.padding
 class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     private val keyRippleEffect by ThemeManager.prefs.keyRippleEffect
+    private val keyBorder by ThemeManager.prefs.keyBorder
 
     private val borderWidth = ctx.dp(1) / 2
 
@@ -78,19 +83,33 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
         }
     }
 
-    private fun textButton(@StringRes id: Int) = GTextButton(ctx).apply {
-        text.setText(id)
-        text.setTextColor(theme.keyTextColor)
-        stateListAnimator = null
-        applyBorderedBackground()
+    private fun textButton(
+        @StringRes id: Int,
+        variant: KeyDef.Appearance.Variant = KeyDef.Appearance.Variant.Normal,
+        border: KeyDef.Appearance.Border = KeyDef.Appearance.Border.Default
+
+    ): TextKeyView {
+        val def = KeyDef.Appearance.Text(
+            ctx.getString(id),
+            textSize = 16f,
+            variant = variant,
+            border = border,
+            textStyle = Typeface.BOLD,
+            radius = ThemeManager.prefs.keyRadiusTextEditing.getValue()
+        )
+        return TextKeyView(ctx, theme, def)
     }
 
-    private fun iconButton(@DrawableRes icon: Int) = GImageButton(ctx).apply {
-        image.imageDrawable = drawable(icon)!!.apply {
-            setTint(theme.altKeyTextColor)
-        }
-        padding = dp(10)
-        applyBorderedBackground()
+    private fun iconButton(
+        @DrawableRes icon: Int,
+        variant: KeyDef.Appearance.Variant = KeyDef.Appearance.Variant.Normal
+    ): ImageKeyView {
+        val def = KeyDef.Appearance.Image(
+            icon,
+            variant = variant,
+            radius = ThemeManager.prefs.keyRadiusTextEditing.getValue()
+        )
+        return ImageKeyView(ctx, theme, def)
     }
 
     val upButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_up_24)
@@ -101,45 +120,33 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     val leftButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_left_24)
 
-    val selectButton = textButton(R.string.select).apply {
-        text.setTextColor(
-            ColorStateList(
-                arrayOf(
-                    intArrayOf(android.R.attr.state_activated),
-                    intArrayOf(android.R.attr.state_enabled)
-                ),
-                intArrayOf(theme.genericActiveForegroundColor, theme.keyTextColor)
-            )
-        )
-        background = StateListDrawable().apply {
-            addState(
-                intArrayOf(android.R.attr.state_activated),
-                borderDrawable(
-                    borderWidth,
-                    theme.dividerColor,
-                    theme.genericActiveBackgroundColor
-                )
-            )
-            addState(
-                intArrayOf(android.R.attr.state_enabled),
-                borderDrawable(borderWidth, theme.dividerColor)
-            )
-        }
-    }
+    val selectButton = textButton(
+        R.string.select,
+        if (keyBorder) KeyDef.Appearance.Variant.Accent else KeyDef.Appearance.Variant.Alternative,
+        if (keyBorder) KeyDef.Appearance.Border.Special else KeyDef.Appearance.Border.Default
+    )
 
     val homeButton = iconButton(R.drawable.ic_baseline_first_page_24)
 
     val endButton = iconButton(R.drawable.ic_baseline_last_page_24)
 
-    val selectAllButton = textButton(android.R.string.selectAll)
+    val selectAllButton =
+        textButton(android.R.string.selectAll, KeyDef.Appearance.Variant.Alternative)
 
-    val cutButton = textButton(android.R.string.cut).apply { visibility = View.GONE }
+    val cutButton = textButton(
+        android.R.string.cut, KeyDef.Appearance.Variant.Alternative
+    ).apply { visibility = View.GONE }
 
-    val copyButton = textButton(android.R.string.copy)
+    val copyButton =
+        textButton(android.R.string.copy, KeyDef.Appearance.Variant.Alternative)
 
-    val pasteButton = textButton(android.R.string.paste)
+    val pasteButton =
+        textButton(android.R.string.paste, KeyDef.Appearance.Variant.Alternative)
 
-    val backspaceButton = iconButton(R.drawable.ic_baseline_backspace_24).apply {
+    val backspaceButton = iconButton(
+        R.drawable.ic_baseline_backspace_24,
+        KeyDef.Appearance.Variant.Alternative
+    ).apply {
         soundEffect = InputFeedbacks.SoundEffect.Delete
     }
 

@@ -66,7 +66,9 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
         val prefs = ThemeManager.prefs
         bordered = prefs.keyBorder.getValue()
         rippled = prefs.keyRippleEffect.getValue()
-        radius = dp(prefs.keyRadius.getValue().toFloat())
+        radius = if (def.radius == -1) dp(
+            prefs.keyRadius.getValue().toFloat()
+        ) else dp(def.radius.toFloat())
         val landscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         val hMarginPref =
             if (landscape) prefs.keyHorizontalMarginLandscape else prefs.keyHorizontalMargin

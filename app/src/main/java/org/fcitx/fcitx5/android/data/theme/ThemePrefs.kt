@@ -76,6 +76,9 @@ class ThemePrefs(sharedPreferences: SharedPreferences) :
 
     val keyRadius = int(R.string.key_radius, "key_radius", 4, 0, 48, "dp")
 
+    val keyRadiusTextEditing =
+        int(R.string.key_radius_text_editing, "key_radius_text_editing", 4, 0, 48, "dp")
+
     enum class PunctuationPosition {
         Bottom,
         TopRight;

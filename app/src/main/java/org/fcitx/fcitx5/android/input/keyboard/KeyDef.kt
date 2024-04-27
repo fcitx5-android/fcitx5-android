@@ -18,6 +18,7 @@ open class KeyDef(
         val variant: Variant,
         val border: Border,
         val margin: Boolean,
+        val radius: Int,
         val viewId: Int,
         val soundEffect: InputFeedbacks.SoundEffect
     ) {
@@ -41,9 +42,10 @@ open class KeyDef(
             variant: Variant = Variant.Normal,
             border: Border = Border.Default,
             margin: Boolean = true,
+            radius: Int = -1,
             viewId: Int = -1,
-            soundEffect: InputFeedbacks.SoundEffect = InputFeedbacks.SoundEffect.Standard
-        ) : Appearance(percentWidth, variant, border, margin, viewId, soundEffect)
+            soundEffect: InputFeedbacks.SoundEffect = InputFeedbacks.SoundEffect.Standard,
+        ) : Appearance(percentWidth, variant, border, margin, radius, viewId, soundEffect)
 
         class AltText(
             displayText: String,
@@ -68,9 +70,10 @@ open class KeyDef(
             variant: Variant = Variant.Normal,
             border: Border = Border.Default,
             margin: Boolean = true,
+            radius: Int = -1,
             viewId: Int = -1,
             soundEffect: InputFeedbacks.SoundEffect = InputFeedbacks.SoundEffect.Standard
-        ) : Appearance(percentWidth, variant, border, margin, viewId, soundEffect)
+        ) : Appearance(percentWidth, variant, border, margin, radius, viewId, soundEffect)
 
         class ImageText(
             displayText: String,
