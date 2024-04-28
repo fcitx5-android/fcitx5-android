@@ -1,0 +1,55 @@
+name: 功能请求 / Feature Request
+description: 为本项目提供新功能建议 / Suggest a new feature for this project
+labels:
+  - enhancement
+
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: 摘要 / Summary
+      description: 新功能应该做什么。 / What the new feature should do.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternative
+    attributes:
+      label: 替代方案 / Alternative Solution
+      description: 其它可能的解决方案（如果有）。 / Other possible solutions, if any.
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: 附加信息 / Additional Context
+      description: 与此功能请求有关的上下文信息或截图。 / Additional context or screenshots about the feature request.
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ### 设备信息 / Device Infomation
+
+  - type: input
+    id: os_version
+    attributes:
+      label: 系统版本 / OS Version
+    validations:
+      required: true
+
+  - type: input
+    id: app_version
+    attributes:
+      label: 应用版本 / App Version
+    validations:
+      required: true
+
+  - type: input
+    id: plugins_version
+    attributes:
+      label: 插件版本 / Plugins Version
+    validations:
+      required: false

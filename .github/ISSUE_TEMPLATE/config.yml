@@ -1,2 +1,14 @@
 blank_issues_enabled: false
 
+contact_links:
+  - name: GitHub 讨论区 / GitHub Discussions
+    url: https://github.com/fcitx5-android/fcitx5-android/discussions
+    about: 请在这里提出有关如何使用本输入法的疑问。 / Please ask questions about how to use the input method here.
+
+  - name: Telegram Group / Telegram 群组
+    url: https://t.me/fcitx5_android_group
+    about: 也可以群组中提问或讨论新功能。 / You may also ask questions or discuss new features in the group.
+
+  - name: Matrix Room / Matrix 房间
+    url: https://matrix.to/#/#fcitx5-android:mozilla.org
+    about: Matrix 房间与 Telegram 群组通过桥接机器人互通。 / Matrix Room and Telegram Group are connected through bridge bot.

@@ -1,0 +1,83 @@
+name: 问题报告 / Bug Report
+description: 创建问题报告以帮助我们改进 / Create a bug report to help us improve
+labels:
+  - bug
+
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: 摘要 / Summary
+      description: 简要描述遇到的问题。 / Briefly describe the bug.
+    validations:
+      required: true
+
+  - type: textarea
+    id: step_to_reproduce
+    attributes:
+      label: 重现步骤 / Steps to Reproduce
+      description: 如何重现该问题。 / How to reproduce the bug.
+      placeholder: |
+        1. 打开某界面 / Open page ...
+        2. 点击某菜单 / Click menu ...
+        3. 某处出问题 / Something went wrong ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: 预期行为 / Expected Behavior
+      description: 完成上述步骤后应该发生什么。 / What is expected to happen after the steps above.
+    validations:
+      required: true
+
+  - type: textarea
+    id: log
+    attributes:
+      label: 日志 / Log
+      description: 附上日志以帮助定位问题。 / Attach log to help locate the bug.
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: 截图 / Screenshot
+      description: 附上截图以帮助解释问题。 / Attach screenshots to help explain the bug.
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: 附加信息 / Additional Context
+      description: 与此问题相关的上下文信息，比如在问题出现前做了什么。 / Additional context about the bug, eg. what did you do before the bug appears.
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ### 设备信息 / Device Infomation
+
+  - type: input
+    id: os_version
+    attributes:
+      label: 系统版本 / OS Version
+    validations:
+      required: true
+
+  - type: input
+    id: app_version
+    attributes:
+      label: 应用版本 / App Version
+    validations:
+      required: true
+
+  - type: input
+    id: plugins_version
+    attributes:
+      label: 插件版本 / Plugins Version
+    validations:
+      required: false
