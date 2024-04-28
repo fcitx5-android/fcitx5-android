@@ -60,6 +60,9 @@ class PopupComponent :
     private val popupTextEditingRadius by lazy {
         context.dp(ThemeManager.prefs.keyRadiusTextEditing.getValue()).toFloat()
     }
+    private val popupClipBoardRadius by lazy {
+        context.dp(ThemeManager.prefs.keyRadiusClipboard.getValue()).toFloat()
+    }
     private val hideThreshold = 100L
 
     val root by lazy {

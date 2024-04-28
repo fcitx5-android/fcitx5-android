@@ -13,6 +13,7 @@ import android.text.TextUtils
 import android.view.View
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
 import splitties.dimensions.dp
 import splitties.resources.drawable
@@ -62,7 +63,7 @@ class ClipboardEntryUi(override val ctx: Context, private val theme: Theme) : Ui
     override val root = CustomGestureView(ctx).apply {
         isClickable = true
         minimumHeight = dp(30)
-        val radius = dp(2f)
+        val radius = dp(ThemeManager.prefs.keyRadiusClipboard.getValue().toFloat())
         foreground = RippleDrawable(
             ColorStateList.valueOf(theme.keyPressHighlightColor), null,
             GradientDrawable().apply {

@@ -107,6 +107,7 @@
     <string name="brightness">Brightness</string>
     <string name="key_radius">Key radius</string>
     <string name="key_radius_text_editing">Text editing key radius</string>
+    <string name="key_radius_clipboard">Clipboard content radius</string>
     <string name="key_horizontal_margin">Key horizontal margin</string>
     <string name="key_vertical_margin">Key vertical margin</string>
     <string name="configure">Configure</string>

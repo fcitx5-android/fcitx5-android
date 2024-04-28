@@ -107,6 +107,7 @@
     <string name="brightness">亮度</string>
     <string name="key_radius">按键圆角半径</string>
     <string name="key_radius_text_editing">文本编辑按键圆角半径</string>
+    <string name="key_radius_clipboard">剪贴板内容圆角半径</string>
     <string name="key_horizontal_margin">按键横向边距</string>
     <string name="key_vertical_margin">按键纵向边距</string>
     <string name="configure">配置</string>
