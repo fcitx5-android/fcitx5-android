@@ -42,8 +42,14 @@ object ClipboardStateMachine {
         })
     }
 
-    fun new(initialState: State, block: (State) -> Unit) =
-        EventStateMachine<State, TransitionEvent, BooleanKey>(initialState).apply {
+    fun new(initial: State, empty: Boolean, listening: Boolean, block: (State) -> Unit) =
+        EventStateMachine<State, TransitionEvent, BooleanKey>(
+            initialState = initial,
+            externalBooleanStates = mutableMapOf(
+                ClipboardDbEmpty to empty,
+                ClipboardListeningEnabled to listening
+            )
+        ).apply {
             onNewStateListener = block
         }
 

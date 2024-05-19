@@ -48,7 +48,6 @@ import org.mechdancer.dependency.manager.must
 import splitties.dimensions.dp
 import splitties.resources.styledColor
 import splitties.views.dsl.core.withTheme
-import kotlin.properties.Delegates
 
 class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
 
@@ -61,12 +60,6 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     }
 
     private lateinit var stateMachine: EventStateMachine<ClipboardStateMachine.State, ClipboardStateMachine.TransitionEvent, ClipboardStateMachine.BooleanKey>
-
-    private var isClipboardDbEmpty by Delegates.observable(ClipboardManager.itemCount == 0) { _, _, new ->
-        stateMachine.push(
-            ClipboardDbUpdated, ClipboardDbEmpty to new
-        )
-    }
 
     @Keep
     private val clipboardEnabledListener = ManagedPreference.OnChangeListener<Boolean> { _, it ->
@@ -227,18 +220,21 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     }
 
     override fun onAttached() {
+        val isEmpty = ClipboardManager.itemCount == 0
+        val isListening = clipboardEnabledPref.getValue()
         val initialState = when {
-            !clipboardEnabledPref.getValue() -> EnableListening
-            isClipboardDbEmpty -> AddMore
+            !isListening -> EnableListening
+            isEmpty -> AddMore
             else -> Normal
         }
-        stateMachine = ClipboardStateMachine.new(initialState) {
+        stateMachine = ClipboardStateMachine.new(initialState, isEmpty, isListening) {
             ui.switchUiByState(it)
         }
         // manually switch to initial ui
         ui.switchUiByState(initialState)
         adapter.addLoadStateListener {
-            isClipboardDbEmpty = it.append.endOfPaginationReached && adapter.itemCount < 1
+            val empty = it.append.endOfPaginationReached && adapter.itemCount < 1
+            stateMachine.push(ClipboardDbUpdated, ClipboardDbEmpty to empty)
         }
         adapterSubmitJob = service.lifecycleScope.launch {
             clipboardEntriesPager.flow.collect {

@@ -40,7 +40,12 @@ object ExpandButtonStateMachine {
     }
 
     fun new(block: (State) -> Unit) =
-        EventStateMachine<State, TransitionEvent, BooleanKey>(Hidden).apply {
+        EventStateMachine<State, TransitionEvent, BooleanKey>(
+            initialState =  Hidden,
+            externalBooleanStates = mutableMapOf(
+                ExpandedCandidatesEmpty to true
+            )
+        ).apply {
             onNewStateListener = block
         }
 }

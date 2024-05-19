@@ -9,7 +9,7 @@ import timber.log.Timber
 
 class EventStateMachine<State : Any, Event : EventStateMachine.TransitionEvent<State, B>, B : EventStateMachine.BooleanStateKey>(
     private val initialState: State,
-    private val externalBooleanStates: MutableMap<B, Boolean> = mutableMapOf()
+    private val externalBooleanStates: MutableMap<B, Boolean>
 ) {
 
     interface BooleanStateKey {

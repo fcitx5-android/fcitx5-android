@@ -6,7 +6,9 @@ package org.fcitx.fcitx5.android.input.bar
 
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.BooleanKey.CandidateEmpty
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.BooleanKey.PreeditEmpty
-import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.State.*
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.State.Candidate
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.State.Idle
+import org.fcitx.fcitx5.android.input.bar.KawaiiBarStateMachine.State.Title
 import org.fcitx.fcitx5.android.utils.BuildTransitionEvent
 import org.fcitx.fcitx5.android.utils.EventStateMachine
 import org.fcitx.fcitx5.android.utils.TransitionBuildBlock
@@ -47,7 +49,11 @@ object KawaiiBarStateMachine {
 
     fun new(block: (State) -> Unit) =
         EventStateMachine<State, TransitionEvent, BooleanKey>(
-            Idle
+            initialState = Idle,
+            externalBooleanStates = mutableMapOf(
+                PreeditEmpty to true,
+                CandidateEmpty to true
+            )
         ).apply {
             onNewStateListener = block
         }
