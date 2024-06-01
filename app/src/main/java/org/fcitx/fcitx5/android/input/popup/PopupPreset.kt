@@ -147,6 +147,7 @@ val PopupPreset: Map<String, Array<String>> = hashMapOf(
     "<" to arrayOf("≤", "«", "‹", "⟨"),
     "=" to arrayOf("∞", "≠", "≈"),
     ">" to arrayOf("≥", "»", "›", "⟩"),
+    "°" to arrayOf("′", "″", "‴"),
     //
     // Currency
     //
