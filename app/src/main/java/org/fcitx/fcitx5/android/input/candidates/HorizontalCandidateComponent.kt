@@ -7,16 +7,21 @@ package org.fcitx.fcitx5.android.input.candidates
 import android.content.res.Configuration
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RectShape
+import android.widget.PopupMenu
+import androidx.core.text.bold
+import androidx.core.text.buildSpannedString
+import androidx.core.text.color
 import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexboxLayoutManager
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxEvent
-import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.BooleanKey.ExpandedCandidatesEmpty
@@ -31,14 +36,17 @@ import org.fcitx.fcitx5.android.input.candidates.expanded.decoration.FlexboxVert
 import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.fcitx
+import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.mechdancer.dependency.manager.must
 import splitties.dimensions.dp
+import splitties.resources.styledColor
 import kotlin.math.max
 
 class HorizontalCandidateComponent :
     UniqueViewComponent<HorizontalCandidateComponent, RecyclerView>(), InputBroadcastReceiver {
 
+    private val service by manager.inputMethodService()
     private val context by manager.context()
     private val fcitx by manager.fcitx()
     private val theme by manager.theme()
@@ -87,7 +95,7 @@ class HorizontalCandidateComponent :
 
     val adapter: HorizontalCandidateViewAdapter by lazy {
         object : HorizontalCandidateViewAdapter(theme) {
-            override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            override fun onBindViewHolder(holder: CandidateViewHolder, position: Int) {
                 super.onBindViewHolder(holder, position)
                 holder.itemView.updateLayoutParams<FlexboxLayoutManager.LayoutParams> {
                     minWidth = layoutMinWidth
@@ -96,15 +104,9 @@ class HorizontalCandidateComponent :
                 holder.itemView.setOnClickListener {
                     fcitx.launchOnReady { it.select(holder.idx) }
                 }
-                if (canForgetWord) {
-                    holder.itemView.setOnLongClickListener { _ ->
-                        holder.ui.showExtraActionMenu(onForget = {
-                            fcitx.launchOnReady { it.forget(holder.idx) }
-                        })
-                        true
-                    }
-                } else {
-                    holder.itemView.setOnLongClickListener(null)
+                holder.itemView.setOnLongClickListener {
+                    showCandidateActionMenu(holder.idx, candidates[position], holder.ui)
+                    true
                 }
             }
         }
@@ -195,10 +197,39 @@ class HorizontalCandidateComponent :
         }
     }
 
-    var canForgetWord: Boolean = false
-        private set
+    private fun triggerCandidateAction(idx: Int, actionIdx: Int): Boolean {
+        fcitx.runIfReady { triggerCandidateAction(idx, actionIdx) }
+        return true
+    }
 
-    override fun onImeUpdate(ime: InputMethodEntry) {
-        canForgetWord = (ime.addon == "pinyin" || ime.addon == "table")
+    private var candidateActionMenu: PopupMenu? = null
+
+    fun showCandidateActionMenu(idx: Int, text: String, ui: CandidateItemUi) {
+        candidateActionMenu?.dismiss()
+        candidateActionMenu = null
+        service.lifecycleScope.launch {
+            val actions = fcitx.runOnReady { getCandidateActions(idx) }
+            if (actions.isEmpty()) return@launch
+            candidateActionMenu = PopupMenu(context, ui.root).apply {
+                menu.add(buildSpannedString {
+                    bold {
+                        color(context.styledColor(android.R.attr.colorAccent)) {
+                            append(text)
+                        }
+                    }
+                }).apply {
+                    isEnabled = false
+                }
+                actions.forEach { action ->
+                    menu.add(action.text).setOnMenuItemClickListener {
+                        triggerCandidateAction(idx, action.id)
+                    }
+                }
+                setOnDismissListener {
+                    candidateActionMenu = null
+                }
+                show()
+            }
+        }
     }
 }

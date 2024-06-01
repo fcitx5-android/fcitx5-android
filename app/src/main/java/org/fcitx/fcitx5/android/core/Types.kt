@@ -260,3 +260,12 @@ data class Action(
         return result
     }
 }
+
+data class CandidateAction(
+    val id: Int,
+    val text: String,
+    val isSeparator: Boolean,
+    val icon: String,
+    val isCheckable: Boolean,
+    val isChecked: Boolean
+)

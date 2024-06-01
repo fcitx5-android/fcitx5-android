@@ -24,6 +24,7 @@ import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEve
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.broadcast.ReturnKeyDrawableComponent
+import org.fcitx.fcitx5.android.input.candidates.CandidateViewHolder
 import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.candidates.adapter.PagingCandidateViewAdapter
 import org.fcitx.fcitx5.android.input.candidates.expanded.CandidatesPagingSource
@@ -129,19 +130,13 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
         }
     }
 
-    fun bindCandidateUiViewHolder(holder: PagingCandidateViewAdapter.ViewHolder) {
+    fun bindCandidateUiViewHolder(holder: CandidateViewHolder) {
         holder.itemView.setOnClickListener {
             fcitx.launchOnReady { it.select(holder.idx) }
         }
-        if (horizontalCandidate.canForgetWord) {
-            holder.itemView.setOnLongClickListener { _ ->
-                holder.ui.showExtraActionMenu(onForget = {
-                    fcitx.launchOnReady { it.forget(holder.idx) }
-                })
-                true
-            }
-        } else {
-            holder.itemView.setOnLongClickListener(null)
+        holder.itemView.setOnLongClickListener {
+            horizontalCandidate.showCandidateActionMenu(holder.idx, holder.text, holder.ui)
+            true
         }
     }
 
