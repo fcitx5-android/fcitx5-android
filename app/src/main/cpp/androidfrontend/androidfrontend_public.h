@@ -7,6 +7,7 @@
 
 #include <fcitx/text.h>
 #include <fcitx/inputcontext.h>
+#include <fcitx/candidateaction.h>
 #include <fcitx-utils/key.h>
 
 typedef std::function<void(const std::vector<std::string> &, const int)> CandidateListCallback;
@@ -52,6 +53,12 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setCapabilityFlags,
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, getCandidates,
                              std::vector<std::string>(const int, const int))
 
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, getCandidateActions,
+                             std::vector<CandidateAction>(const int))
+
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, triggerCandidateAction,
+                             void(const int, const int))
+
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, showToast,
                              void(const std::string &))
 
@@ -81,8 +88,5 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setDeleteSurroundingCallback,
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setToastCallback,
                              void(const ToastCallback &))
-
-FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, forgetCandidate,
-                             bool(int idx))
 
 #endif // _FCITX5_ANDROID_ANDROIDFRONTEND_PUBLIC_H_

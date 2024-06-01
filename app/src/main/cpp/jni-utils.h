@@ -138,6 +138,9 @@ public:
     jfieldID PinyinCustomPhraseOrder;
     jfieldID PinyinCustomPhraseValue;
 
+    jclass CandidateAction;
+    jmethodID CandidateActionInit;
+
     GlobalRefSingleton(JavaVM *jvm_) : jvm(jvm_) {
         JNIEnv *env;
         jvm->AttachCurrentThread(&env, nullptr);
@@ -184,6 +187,9 @@ public:
         PinyinCustomPhraseKey = env->GetFieldID(PinyinCustomPhrase, "key", "Ljava/lang/String;");
         PinyinCustomPhraseOrder = env->GetFieldID(PinyinCustomPhrase, "order", "I");
         PinyinCustomPhraseValue = env->GetFieldID(PinyinCustomPhrase, "value", "Ljava/lang/String;");
+
+        CandidateAction = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("org/fcitx/fcitx5/android/core/CandidateAction")));
+        CandidateActionInit = env->GetMethodID(CandidateAction, "<init>", "(ILjava/lang/String;ZLjava/lang/String;ZZ)V");
     }
 
     const JEnv AttachEnv() const { return JEnv(jvm); }

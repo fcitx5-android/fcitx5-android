@@ -8,6 +8,7 @@
 #include <fcitx/action.h>
 #include <fcitx/menu.h>
 #include <fcitx/inputcontext.h>
+#include <fcitx/candidateaction.h>
 
 class InputMethodStatus {
 public:
@@ -81,6 +82,24 @@ public:
             }
         }
     }
+};
+
+class CandidateActionEntity {
+public:
+    int id;
+    std::string text;
+    bool isSeparator;
+    std::string icon;
+    bool isCheckable;
+    bool isChecked;
+
+    CandidateActionEntity(const fcitx::CandidateAction &act) :
+            id(act.id()),
+            text(act.text()),
+            isSeparator(act.isSeparator()),
+            icon(act.icon()),
+            isCheckable(act.isCheckable()),
+            isChecked(act.isChecked()) {}
 };
 
 #endif //FCITX5_ANDROID_HELPER_TYPES_H

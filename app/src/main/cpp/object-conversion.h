@@ -161,4 +161,16 @@ jobject fcitxTextToJObject(JNIEnv *env, const fcitx::Text &text) {
     return obj;
 }
 
+jobject fcitxCandidateActionToObject(JNIEnv *env, const CandidateActionEntity &act) {
+    auto obj = env->NewObject(GlobalRef->CandidateAction, GlobalRef->CandidateActionInit,
+                              act.id,
+                              *JString(env, act.text),
+                              act.isSeparator,
+                              *JString(env, act.icon),
+                              act.isCheckable,
+                              act.isChecked
+    );
+    return obj;
+}
+
 #endif //FCITX5_ANDROID_OBJECT_CONVERSION_H

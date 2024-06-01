@@ -142,6 +142,66 @@ public:
         return candidates;
     }
 
+    bool doesCandidateHaveAction(const int idx) {
+        const auto &list = inputPanel().candidateList();
+        if (!list) return false;
+        const auto &actionable = list->toActionable();
+        if (!actionable) return false;
+        if (idx >= list->size()) {
+            const auto &bulk = list->toBulk();
+            if (bulk && idx < bulk->totalSize()) {
+                const auto &c = bulk->candidateFromAll(idx);
+                return actionable->hasAction(c);
+            }
+            return false;
+        } else {
+            const auto &c = list->candidate(idx);
+            return actionable->hasAction(c);
+        }
+    }
+
+    std::vector<CandidateAction> getCandidateAction(const int idx) {
+        std::vector<CandidateAction> actions;
+        const auto &list = inputPanel().candidateList();
+        if (list) {
+            const auto &actionable = list->toActionable();
+            if (actionable) {
+                if (idx >= list->size()) {
+                    const auto &bulk = list->toBulk();
+                    if (bulk && idx < bulk->totalSize()) {
+                        const auto &c = bulk->candidateFromAll(idx);
+                        for (const auto &a: actionable->candidateActions(c)) {
+                            actions.emplace_back(a);
+                        }
+                    }
+                } else {
+                    const auto &c = list->candidate(idx);
+                    for (const auto &a: actionable->candidateActions(c)) {
+                        actions.emplace_back(a);
+                    }
+                }
+            }
+        }
+        return actions;
+    }
+
+    void triggerCandidateAction(const int idx, const int actionIdx) {
+        const auto &list = inputPanel().candidateList();
+        if (!list) return;
+        const auto &actionable = list->toActionable();
+        if (!actionable) return;
+        if (idx >= list->size()) {
+            const auto &bulk = list->toBulk();
+            if (bulk && idx < bulk->totalSize()) {
+                const auto &c = bulk->candidateFromAll(idx);
+                actionable->triggerAction(c, actionIdx);
+            }
+        } else {
+            const auto &c = list->candidate(idx);
+            actionable->triggerAction(c, actionIdx);
+        }
+    }
+
 private:
     AndroidFrontend *frontend_;
     int uid_;
@@ -228,26 +288,14 @@ bool AndroidFrontend::selectCandidate(int idx) {
     return activeIC_->selectCandidate(idx);
 }
 
-bool AndroidFrontend::forgetCandidate(int idx) {
-    if (!activeIC_) return false;
-    // check current engine, only pinyin and table engine support deleting words
-    auto *entry = instance_->inputMethodEntry(activeIC_);
-    if (entry->addon() != "pinyin" && entry->addon() != "table") return false;
-    // do we have candidate list?
-    auto list = activeIC_->inputPanel().candidateList();
-    if (!list) return false;
-    // Ctrl+7 to activate forget candidate mode
-    Key key(FcitxKey_7, Flags<KeyState>(KeyState::Ctrl));
-    KeyEvent pressEvent(activeIC_, key, false);
-    auto handled = activeIC_->keyEvent(pressEvent);
-    if (handled) {
-        KeyEvent releaseEvent(activeIC_, key, true);
-        activeIC_->keyEvent(releaseEvent);
-    } else {
-        // something went wrong
-        return false;
-    }
-    return activeIC_->selectCandidate(idx);
+std::vector<CandidateAction> AndroidFrontend::getCandidateActions(const int idx) {
+    if (!activeIC_) return {};
+    return activeIC_->getCandidateAction(idx);
+}
+
+void AndroidFrontend::triggerCandidateAction(const int idx, const int actionIdx) {
+    if (!activeIC_) return;
+    activeIC_->triggerCandidateAction(idx, actionIdx);
 }
 
 bool AndroidFrontend::isInputPanelEmpty() {
