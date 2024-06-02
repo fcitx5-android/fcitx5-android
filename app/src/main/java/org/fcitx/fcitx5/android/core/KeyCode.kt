@@ -220,7 +220,7 @@ class KeyCode {
         )
         // XXX: assume QWERT
         var symToCode: HashMap<String, Int> = hashMapOf(
-            "0" to LinuxKeyCode.KEY_0,
+            "`" to LinuxKeyCode.KEY_GRAVE,
             "1" to LinuxKeyCode.KEY_1,
             "2" to LinuxKeyCode.KEY_2,
             "3" to LinuxKeyCode.KEY_3,
@@ -230,6 +230,7 @@ class KeyCode {
             "7" to LinuxKeyCode.KEY_7,
             "8" to LinuxKeyCode.KEY_8,
             "9" to LinuxKeyCode.KEY_9,
+            "0" to LinuxKeyCode.KEY_0,
             "-" to LinuxKeyCode.KEY_MINUS,
             "=" to LinuxKeyCode.KEY_EQUAL,
             "[" to LinuxKeyCode.KEY_LEFTBRACE,
