@@ -73,8 +73,8 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
     override suspend fun save() = withFcitxContext { saveFcitxState() }
     override suspend fun reloadConfig() = withFcitxContext { reloadFcitxConfig() }
 
-    override suspend fun sendKey(key: String, states: UInt, up: Boolean, timestamp: Int) =
-        withFcitxContext { sendKeyToFcitxString(key, states.toInt(), up, timestamp) }
+    override suspend fun sendKey(key: String, states: UInt, code: Int, up: Boolean, timestamp: Int) =
+        withFcitxContext { sendKeyToFcitxString(key, states.toInt(), code, up, timestamp) }
 
     override suspend fun sendKey(c: Char, states: UInt, up: Boolean, timestamp: Int) =
         withFcitxContext { sendKeyToFcitxChar(c, states.toInt(), up, timestamp) }
@@ -227,7 +227,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         external fun reloadFcitxConfig()
 
         @JvmStatic
-        external fun sendKeyToFcitxString(key: String, state: Int, up: Boolean, timestamp: Int)
+        external fun sendKeyToFcitxString(key: String, state: Int, code: Int, up: Boolean, timestamp: Int)
 
         @JvmStatic
         external fun sendKeyToFcitxChar(c: Char, state: Int, up: Boolean, timestamp: Int)
