@@ -23,4 +23,5 @@ set_target_properties(Hangul_static PROPERTIES
         )
 
 set(HANGUL_TARGET Hangul_static)
+option(ENABLE_TEST "" OFF)
 add_subdirectory(fcitx5-hangul)

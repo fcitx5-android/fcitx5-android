@@ -1,6 +1,6 @@
 {
     "uniqueId": "fcitx/fcitx5-jyutping",
-    "artifactVersion": "1.0.11",
+    "artifactVersion": "1.0.12",
     "description": "Jyutping (Cantonese Input Method) engine support for Fcitx5",
     "name": "fcitx/fcitx5-jyutping",
     "website": "https://github.com/fcitx/fcitx5-jyutping",
