@@ -23,6 +23,10 @@ android {
     }
 }
 
+aboutLibraries {
+    configPath = "plugin/clipboard-filter/licenses"
+}
+
 generateDataDescriptor{
     excludes.add("data.min.json")
 }

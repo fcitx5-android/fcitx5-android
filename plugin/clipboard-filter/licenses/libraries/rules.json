@@ -1,0 +1,11 @@
+{
+    "uniqueId": "ClearURLs/Rules",
+    "artifactVersion": "0d1c6e0",
+    "description": "Rules database of the ClearURLs WebExtension.",
+    "name": "ClearURLs/Rules",
+    "website": "https://github.com/ClearURLs/Rules",
+    "tag": "native",
+    "licenses": [
+        "LGPL-3.0-or-later"
+    ]
+}
