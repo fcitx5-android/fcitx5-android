@@ -21,10 +21,6 @@ object InputFeedbacks {
 
     enum class InputFeedbackMode {
         Enabled, Disabled, FollowingSystem;
-
-        companion object : ManagedPreference.StringLikeCodec<InputFeedbackMode> {
-            override fun decode(raw: String) = InputFeedbackMode.valueOf(raw)
-        }
     }
 
     private var systemSoundEffects = false
