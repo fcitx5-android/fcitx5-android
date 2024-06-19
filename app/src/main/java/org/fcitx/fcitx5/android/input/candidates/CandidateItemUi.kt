@@ -30,6 +30,11 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
     override val root = view(::CustomGestureView) {
         background = pressHighlightDrawable(theme.keyPressHighlightColor)
 
+        /**
+         * candidate long press feedback is handled by [HorizontalCandidateComponent.showCandidateActionMenu]
+         */
+        longPressFeedbackEnabled = false
+
         add(text, lParams(wrapContent, matchParent) {
             gravity = gravityCenter
         })

@@ -23,6 +23,7 @@ import kotlinx.coroutines.runBlocking
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.daemon.launchOnReady
+import org.fcitx.fcitx5.android.data.InputFeedbacks
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.BooleanKey.ExpandedCandidatesEmpty
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesUpdated
@@ -210,6 +211,7 @@ class HorizontalCandidateComponent :
         service.lifecycleScope.launch {
             val actions = fcitx.runOnReady { getCandidateActions(idx) }
             if (actions.isEmpty()) return@launch
+            InputFeedbacks.hapticFeedback(ui.root, longPress = true)
             candidateActionMenu = PopupMenu(context, ui.root).apply {
                 menu.add(buildSpannedString {
                     bold {
