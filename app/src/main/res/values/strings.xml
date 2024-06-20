@@ -259,4 +259,5 @@
     <string name="open_rime_user_data_dir">Application data directory will be opened. RIME user data directory is located in \"data/rime\".</string>
     <string name="restart_to_apply_settings">Application will restart to apply new settings. Proceed?</string>
     <string name="space_swipe_move_cursor">Swipe on space key to move cursor</string>
+    <string name="please_wait">Please wait…</string>
 </resources>
