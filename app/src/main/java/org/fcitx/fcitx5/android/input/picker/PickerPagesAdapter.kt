@@ -17,7 +17,7 @@ class PickerPagesAdapter(
     private val popupActionListener: PopupActionListener,
     data: List<Pair<PickerData.Category, Array<String>>>,
     val density: PickerPageUi.Density,
-    recentlyUsedFileName: String
+    private val recentlyUsedFileName: String
 ) : RecyclerView.Adapter<PickerPagesAdapter.ViewHolder>() {
 
     class ViewHolder(val ui: PickerPageUi) : RecyclerView.ViewHolder(ui.root)
@@ -110,7 +110,7 @@ class PickerPagesAdapter(
     override fun getItemCount() = pages.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(PickerPageUi(parent.context, theme, density))
+        return ViewHolder(PickerPageUi(parent.context, theme, density, recentlyUsedFileName))
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {

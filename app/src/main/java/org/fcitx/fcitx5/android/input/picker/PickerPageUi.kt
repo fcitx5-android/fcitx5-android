@@ -11,6 +11,7 @@ import org.fcitx.fcitx5.android.core.FcitxKeyMapping
 import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.AutoScaleTextView
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListener
@@ -28,6 +29,7 @@ import org.fcitx.fcitx5.android.input.keyboard.KeyView
 import org.fcitx.fcitx5.android.input.keyboard.TextKeyView
 import org.fcitx.fcitx5.android.input.popup.PopupAction
 import org.fcitx.fcitx5.android.input.popup.PopupActionListener
+import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.below
 import splitties.views.dsl.constraintlayout.bottomOfParent
 import splitties.views.dsl.constraintlayout.bottomToTopOf
@@ -43,7 +45,15 @@ import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.matchParent
 
-class PickerPageUi(override val ctx: Context, val theme: Theme, private val density: Density) : Ui {
+class PickerPageUi(
+    override val ctx: Context,
+    val theme: Theme,
+    private val density: Density,
+    recentlyUsedFileName: String = ""
+) : Ui {
+    private val keyBorder by ThemeManager.prefs.keyBorder
+    private val keySymbolBorder =
+        ThemeManager.prefs.keySymbolBorder.getValue() && recentlyUsedFileName == PickerWindow.Key.Symbol.name
 
     enum class Density(
         val pageSize: Int,
@@ -63,26 +73,25 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, private val dens
     }
 
     companion object {
-        val BackspaceAppearance = Appearance.Image(
-            src = R.drawable.ic_baseline_backspace_24,
-            variant = Variant.Alternative,
-            border = Border.Off,
-            viewId = R.id.button_backspace
-        )
-
         val BackspaceAction = SymAction(KeySym(FcitxKeyMapping.FcitxKey_BackSpace))
-
         private var popupOnKeyPress by AppPrefs.getInstance().keyboard.popupOnKeyPress
     }
 
     var keyActionListener: KeyActionListener? = null
     var popupActionListener: PopupActionListener? = null
 
+    private val backspaceAppearance = Appearance.Image(
+        src = R.drawable.ic_baseline_backspace_24,
+        variant = Variant.Alternative,
+        border = if (keySymbolBorder) Border.On else Border.Off,
+        viewId = R.id.button_backspace
+    )
+
     private val keyAppearance = Appearance.Text(
         displayText = "",
         textSize = density.textSize,
         variant = Variant.Normal,
-        border = Border.Off
+        border = if (keySymbolBorder) Border.On else Border.Off
     )
 
     private val keyViews = Array(density.pageSize) {
@@ -96,7 +105,7 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, private val dens
         }
     }
 
-    private val backspaceKey = ImageKeyView(ctx, theme, BackspaceAppearance).apply {
+    private val backspaceKey = ImageKeyView(ctx, theme, backspaceAppearance).apply {
         setOnClickListener { onBackspaceClick() }
         repeatEnabled = true
         onRepeatListener = { onBackspaceClick() }
@@ -107,6 +116,10 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, private val dens
     }
 
     override val root = constraintLayout {
+        if (!keyBorder && keySymbolBorder) {
+            backgroundColor = theme.barColor
+        }
+
         val columnCount = density.columnCount
         val rowCount = density.rowCount
         val keyWidth = 1f / columnCount

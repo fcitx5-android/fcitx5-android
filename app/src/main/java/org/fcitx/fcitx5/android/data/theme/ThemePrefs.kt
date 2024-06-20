@@ -32,6 +32,8 @@ class ThemePrefs(sharedPreferences: SharedPreferences) :
 
     val keyBorder = switch(R.string.key_border, "key_border", false)
 
+    val keySymbolBorder = switch(R.string.key_symbol_border, "key_symbol_border", false)
+
     val keyRippleEffect = switch(R.string.key_ripple_effect, "key_ripple_effect", false)
 
     val keyHorizontalMargin: ManagedPreference.PInt
@@ -75,6 +77,62 @@ class ThemePrefs(sharedPreferences: SharedPreferences) :
     }
 
     val keyRadius = int(R.string.key_radius, "key_radius", 4, 0, 48, "dp")
+
+    enum class KeyTextEditingStyle {
+        Linear,
+        Border,
+        Borderless;
+
+        companion object : ManagedPreference.StringLikeCodec<KeyTextEditingStyle> {
+            override fun decode(raw: String): KeyTextEditingStyle = valueOf(raw)
+        }
+    }
+
+    val keyTextEditingStyle = list(
+        R.string.key_text_editing_style,
+        "key_text_editing_style",
+        KeyTextEditingStyle.Linear,
+        KeyTextEditingStyle,
+        listOf(
+            KeyTextEditingStyle.Linear,
+            KeyTextEditingStyle.Border,
+            KeyTextEditingStyle.Borderless,
+        ),
+        listOf(
+            R.string.key_text_editing_style_linear,
+            R.string.key_text_editing_style_border,
+            R.string.key_text_editing_style_borderless
+        )
+    )
+
+    val keyTextEditingRippleEffect =
+        switch(R.string.key_text_editing_ripple_effect, "key_text_editing_ripple_effect", false)
+
+    val keyTextEditingMargin: ManagedPreference.PInt
+    val keyTextEditingMarginLandscape: ManagedPreference.PInt
+
+    init {
+        val (primary, secondary) = twinInt(
+            R.string.key_text_editing_margin,
+            R.string.portrait,
+            "key_text_editing_margin",
+            4,
+            R.string.landscape,
+            "key_text_editing_margin_landscape",
+            4,
+            0,
+            24,
+            "dp"
+        )
+        keyTextEditingMargin = primary
+        keyTextEditingMarginLandscape = secondary
+    }
+
+    val keyTextEditingRadius =
+        int(R.string.key_text_editing_radius, "key_text_editing_radius", 4, 0, 48, "dp")
+
+    val clipboardContentRadius =
+        int(R.string.clipboard_content_radius, "clipboard_content_radius", 2, 0, 48, "dp")
 
     enum class PunctuationPosition {
         Bottom,

@@ -55,23 +55,20 @@ import kotlin.math.roundToInt
 
 abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearance) :
     CustomGestureView(ctx) {
-
-    val bordered: Boolean
-    val rippled: Boolean
-    val radius: Float
+    //if def.border is off and bordered is true, there is no border, but the pressed highlight is a rounded rectangle
+    //if def.border is off and bordered is false, there is no border, and the pressed highlight is also not a rounded rectangle
+    private val bordered: Boolean = def.prefs.keyBorder.getValue()
+    private val rippled: Boolean = def.prefs.keyRippleEffect.getValue()
+    val radius: Float = dp(def.prefs.keyRadius.getValue().toFloat())
     val hMargin: Int
     val vMargin: Int
 
     init {
-        val prefs = ThemeManager.prefs
-        bordered = prefs.keyBorder.getValue()
-        rippled = prefs.keyRippleEffect.getValue()
-        radius = dp(prefs.keyRadius.getValue().toFloat())
         val landscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         val hMarginPref =
-            if (landscape) prefs.keyHorizontalMarginLandscape else prefs.keyHorizontalMargin
+            if (landscape) def.prefs.keyHorizontalMarginLandscape else def.prefs.keyHorizontalMargin
         val vMarginPref =
-            if (landscape) prefs.keyVerticalMarginLandscape else prefs.keyVerticalMargin
+            if (landscape) def.prefs.keyVerticalMarginLandscape else def.prefs.keyVerticalMargin
         hMargin = if (def.margin) dp(hMarginPref.getValue()) else 0
         vMargin = if (def.margin) dp(vMarginPref.getValue()) else 0
     }
@@ -191,6 +188,35 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
         boundsValid = true
     }
 
+    open fun onSetVariant(variant: Variant) {
+        if (def.border == Border.Off) {
+            if (variant == Variant.Accent) {
+                appearanceView.background = LayerDrawable(
+                    arrayOf(
+                        GradientDrawable().apply {
+                            cornerRadius = radius
+                            setColor(theme.accentKeyBackgroundColor)
+                        }
+                    )
+                ).apply {
+                    setLayerInset(0, hMargin, vMargin, hMargin, vMargin)
+                }
+            } else {
+                appearanceView.background = null
+            }
+        } else {
+            val background: LayerDrawable? = appearanceView.background as? LayerDrawable
+            val drawable: GradientDrawable? = background?.getDrawable(1) as? GradientDrawable
+            drawable?.setColor(
+                when (variant) {
+                    Variant.Normal, Variant.AltForeground -> theme.keyBackgroundColor
+                    Variant.Alternative -> theme.altKeyBackgroundColor
+                    Variant.Accent -> theme.accentKeyBackgroundColor
+                }
+            )
+        }
+    }
+
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         boundsValid = false
         if (layoutMarginLeft != 0f || layoutMarginRight != 0f) {
@@ -293,6 +319,17 @@ open class TextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Text) 
             })
         }
     }
+
+    override fun onSetVariant(variant: Variant) {
+        super.onSetVariant(variant)
+        mainText.setTextColor(
+            when (variant) {
+                Variant.Normal -> theme.keyTextColor
+                Variant.AltForeground, Variant.Alternative -> theme.altKeyTextColor
+                Variant.Accent -> theme.accentKeyTextColor
+            }
+        )
+    }
 }
 
 @SuppressLint("ViewConstructor")
@@ -375,6 +412,16 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
         }
         applyLayout(newConfig.orientation)
     }
+
+    override fun onSetVariant(variant: Variant) {
+        super.onSetVariant(variant)
+        altText.setTextColor(
+            when (variant) {
+                Variant.Normal, Variant.AltForeground, Variant.Alternative -> theme.altKeyTextColor
+                Variant.Accent -> theme.accentKeyTextColor
+            }
+        )
+    }
 }
 
 @SuppressLint("ViewConstructor")
@@ -388,6 +435,17 @@ class ImageKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Image) :
                 centerInParent()
             })
         }
+    }
+
+    override fun onSetVariant(variant: Variant) {
+        super.onSetVariant(variant)
+        img.imageTintList = ColorStateList.valueOf(
+            when (variant) {
+                Variant.Normal -> theme.keyTextColor
+                Variant.AltForeground, Variant.Alternative -> theme.altKeyTextColor
+                Variant.Accent -> theme.accentKeyTextColor
+            }
+        )
     }
 }
 

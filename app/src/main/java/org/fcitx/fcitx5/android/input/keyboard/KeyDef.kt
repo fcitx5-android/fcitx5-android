@@ -7,20 +7,34 @@ package org.fcitx.fcitx5.android.input.keyboard
 import android.graphics.Typeface
 import androidx.annotation.DrawableRes
 import org.fcitx.fcitx5.android.data.InputFeedbacks
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
 
 open class KeyDef(
     val appearance: Appearance,
     val behaviors: Set<Behavior>,
     val popup: Array<Popup>? = null
 ) {
+
     sealed class Appearance(
         val percentWidth: Float,
         val variant: Variant,
         val border: Border,
         val margin: Boolean,
+        val prefs: Prefs,
         val viewId: Int,
         val soundEffect: InputFeedbacks.SoundEffect
     ) {
+        class Prefs(
+            val keyBorder: ManagedPreference.PBool = ThemeManager.prefs.keyBorder,
+            val keyRippleEffect: ManagedPreference.PBool = ThemeManager.prefs.keyRippleEffect,
+            val keyRadius: ManagedPreference.PInt = ThemeManager.prefs.keyRadius,
+            val keyHorizontalMargin: ManagedPreference.PInt = ThemeManager.prefs.keyHorizontalMargin,
+            val keyVerticalMargin: ManagedPreference.PInt = ThemeManager.prefs.keyVerticalMargin,
+            val keyHorizontalMarginLandscape: ManagedPreference.PInt = ThemeManager.prefs.keyHorizontalMarginLandscape,
+            val keyVerticalMarginLandscape: ManagedPreference.PInt = ThemeManager.prefs.keyVerticalMarginLandscape,
+        )
+
         enum class Variant {
             Normal, AltForeground, Alternative, Accent
         }
@@ -41,9 +55,10 @@ open class KeyDef(
             variant: Variant = Variant.Normal,
             border: Border = Border.Default,
             margin: Boolean = true,
+            prefs: Prefs = Prefs(),
             viewId: Int = -1,
-            soundEffect: InputFeedbacks.SoundEffect = InputFeedbacks.SoundEffect.Standard
-        ) : Appearance(percentWidth, variant, border, margin, viewId, soundEffect)
+            soundEffect: InputFeedbacks.SoundEffect = InputFeedbacks.SoundEffect.Standard,
+        ) : Appearance(percentWidth, variant, border, margin, prefs, viewId, soundEffect)
 
         class AltText(
             displayText: String,
@@ -58,8 +73,20 @@ open class KeyDef(
             variant: Variant = Variant.Normal,
             border: Border = Border.Default,
             margin: Boolean = true,
-            viewId: Int = -1,
-        ) : Text(displayText, textSize, textStyle, percentWidth, variant, border, margin, viewId)
+            prefs: Prefs = Prefs(),
+            viewId: Int = -1
+        ) : Text(
+            displayText,
+            textSize,
+            textStyle,
+            percentWidth,
+            variant,
+            border,
+            margin,
+            prefs,
+            viewId,
+            InputFeedbacks.SoundEffect.Standard
+        )
 
         class Image(
             @DrawableRes
@@ -68,9 +95,10 @@ open class KeyDef(
             variant: Variant = Variant.Normal,
             border: Border = Border.Default,
             margin: Boolean = true,
+            prefs: Prefs = Prefs(),
             viewId: Int = -1,
             soundEffect: InputFeedbacks.SoundEffect = InputFeedbacks.SoundEffect.Standard
-        ) : Appearance(percentWidth, variant, border, margin, viewId, soundEffect)
+        ) : Appearance(percentWidth, variant, border, margin, prefs, viewId, soundEffect)
 
         class ImageText(
             displayText: String,
@@ -86,8 +114,19 @@ open class KeyDef(
             variant: Variant = Variant.Normal,
             border: Border = Border.Default,
             margin: Boolean = true,
+            prefs: Prefs = Prefs(),
             viewId: Int = -1
-        ) : Text(displayText, textSize, textStyle, percentWidth, variant, border, margin, viewId)
+        ) : Text(
+            displayText,
+            textSize,
+            textStyle,
+            percentWidth,
+            variant,
+            border,
+            margin,
+            prefs,
+            viewId
+        )
     }
 
     sealed class Behavior {

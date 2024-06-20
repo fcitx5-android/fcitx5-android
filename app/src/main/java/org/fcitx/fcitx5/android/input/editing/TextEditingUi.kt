@@ -6,21 +6,29 @@ package org.fcitx.fcitx5.android.input.editing
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Typeface
 import android.graphics.drawable.StateListDrawable
 import android.view.View
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.preference.PreferenceManager
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.InputFeedbacks
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.ThemePrefs
 import org.fcitx.fcitx5.android.input.bar.ui.ToolButton
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
+import org.fcitx.fcitx5.android.input.keyboard.ImageKeyView
+import org.fcitx.fcitx5.android.input.keyboard.KeyDef
+import org.fcitx.fcitx5.android.input.keyboard.TextKeyView
 import org.fcitx.fcitx5.android.utils.borderDrawable
 import org.fcitx.fcitx5.android.utils.pressHighlightDrawable
 import org.fcitx.fcitx5.android.utils.rippleDrawable
 import splitties.dimensions.dp
 import splitties.resources.drawable
+import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.above
 import splitties.views.dsl.constraintlayout.below
 import splitties.views.dsl.constraintlayout.bottomOfParent
@@ -44,10 +52,15 @@ import splitties.views.padding
 
 class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
 
-    private val keyRippleEffect by ThemeManager.prefs.keyRippleEffect
+    //if the main keyboard border is off and text editing is the border key, the background color should be applied as barColor
+    private val keyBorder by ThemeManager.prefs.keyBorder
 
+    //keyBordered should always be true, because the rounded rectangle pressed effect is needed even if borderless is selected
+    private val keyBordered =
+        ManagedPreference.PBool(PreferenceManager.getDefaultSharedPreferences(ctx), "", true)
+    private val keyStyle by ThemeManager.prefs.keyTextEditingStyle
+    private val keyRippleEffect by ThemeManager.prefs.keyTextEditingRippleEffect
     private val borderWidth = ctx.dp(1) / 2
-
     private fun View.applyBorderedBackground() {
         background = borderDrawable(borderWidth, theme.dividerColor)
         foreground =
@@ -78,19 +91,72 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
         }
     }
 
-    private fun textButton(@StringRes id: Int) = GTextButton(ctx).apply {
+    private fun textLinearButton(@StringRes id: Int) = GTextButton(ctx).apply {
         text.setText(id)
         text.setTextColor(theme.keyTextColor)
         stateListAnimator = null
         applyBorderedBackground()
     }
 
-    private fun iconButton(@DrawableRes icon: Int) = GImageButton(ctx).apply {
+    private fun iconLinearButton(@DrawableRes icon: Int) = GImageButton(ctx).apply {
         image.imageDrawable = drawable(icon)!!.apply {
             setTint(theme.altKeyTextColor)
         }
         padding = dp(10)
         applyBorderedBackground()
+    }
+
+    private fun textButton(
+        @StringRes id: Int,
+        variant: KeyDef.Appearance.Variant = KeyDef.Appearance.Variant.Normal,
+    ): CustomGestureView {
+        if (keyStyle == ThemePrefs.KeyTextEditingStyle.Linear) {
+            return textLinearButton(id)
+        } else {
+            val prefs = ThemeManager.prefs
+            val def = KeyDef.Appearance.Text(
+                ctx.getString(id),
+                textSize = 16f,
+                variant = variant,
+                border = if (keyStyle == ThemePrefs.KeyTextEditingStyle.Border) KeyDef.Appearance.Border.On else KeyDef.Appearance.Border.Off,
+                prefs = KeyDef.Appearance.Prefs(
+                    keyBorder = keyBordered,
+                    keyRippleEffect = prefs.keyTextEditingRippleEffect,
+                    keyRadius = prefs.keyTextEditingRadius,
+                    keyHorizontalMargin = prefs.keyTextEditingMargin,
+                    keyHorizontalMarginLandscape = prefs.keyTextEditingMarginLandscape,
+                    keyVerticalMargin = prefs.keyTextEditingMargin,
+                    keyVerticalMarginLandscape = prefs.keyTextEditingMarginLandscape
+                )
+            )
+            return TextKeyView(ctx, theme, def)
+        }
+    }
+
+    private fun iconButton(
+        @DrawableRes icon: Int,
+        variant: KeyDef.Appearance.Variant = KeyDef.Appearance.Variant.Normal
+    ): CustomGestureView {
+        if (keyStyle == ThemePrefs.KeyTextEditingStyle.Linear) {
+            return iconLinearButton(icon)
+        } else {
+            val prefs = ThemeManager.prefs
+            val def = KeyDef.Appearance.Image(
+                icon,
+                variant = variant,
+                border = if (keyStyle == ThemePrefs.KeyTextEditingStyle.Border) KeyDef.Appearance.Border.On else KeyDef.Appearance.Border.Off,
+                prefs = KeyDef.Appearance.Prefs(
+                    keyBorder = keyBordered,
+                    keyRippleEffect = prefs.keyTextEditingRippleEffect,
+                    keyRadius = prefs.keyTextEditingRadius,
+                    keyHorizontalMargin = prefs.keyTextEditingMargin,
+                    keyHorizontalMarginLandscape = prefs.keyTextEditingMarginLandscape,
+                    keyVerticalMargin = prefs.keyTextEditingMargin,
+                    keyVerticalMarginLandscape = prefs.keyTextEditingMarginLandscape
+                )
+            )
+            return ImageKeyView(ctx, theme, def)
+        }
     }
 
     val upButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_up_24)
@@ -101,49 +167,65 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     val leftButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_left_24)
 
-    val selectButton = textButton(R.string.select).apply {
-        text.setTextColor(
-            ColorStateList(
-                arrayOf(
-                    intArrayOf(android.R.attr.state_activated),
-                    intArrayOf(android.R.attr.state_enabled)
-                ),
-                intArrayOf(theme.genericActiveForegroundColor, theme.keyTextColor)
-            )
-        )
-        background = StateListDrawable().apply {
-            addState(
-                intArrayOf(android.R.attr.state_activated),
-                borderDrawable(
-                    borderWidth,
-                    theme.dividerColor,
-                    theme.genericActiveBackgroundColor
+    val selectButton =
+        if (keyStyle == ThemePrefs.KeyTextEditingStyle.Linear) textLinearButton(R.string.select).apply {
+            text.setTextColor(
+                ColorStateList(
+                    arrayOf(
+                        intArrayOf(android.R.attr.state_activated),
+                        intArrayOf(android.R.attr.state_enabled)
+                    ),
+                    intArrayOf(theme.genericActiveForegroundColor, theme.keyTextColor)
                 )
             )
-            addState(
-                intArrayOf(android.R.attr.state_enabled),
-                borderDrawable(borderWidth, theme.dividerColor)
-            )
-        }
-    }
+            background = StateListDrawable().apply {
+                addState(
+                    intArrayOf(android.R.attr.state_activated),
+                    borderDrawable(
+                        borderWidth,
+                        theme.dividerColor,
+                        theme.genericActiveBackgroundColor
+                    )
+                )
+                addState(
+                    intArrayOf(android.R.attr.state_enabled),
+                    borderDrawable(borderWidth, theme.dividerColor)
+                )
+            }
+        } else textButton(
+            R.string.select,
+            KeyDef.Appearance.Variant.Accent
+        )
 
     val homeButton = iconButton(R.drawable.ic_baseline_first_page_24)
 
     val endButton = iconButton(R.drawable.ic_baseline_last_page_24)
 
-    val selectAllButton = textButton(android.R.string.selectAll)
+    val selectAllButton =
+        textButton(android.R.string.selectAll, KeyDef.Appearance.Variant.Alternative)
 
-    val cutButton = textButton(android.R.string.cut).apply { visibility = View.GONE }
+    val cutButton = textButton(
+        android.R.string.cut, KeyDef.Appearance.Variant.Alternative
+    ).apply { visibility = View.GONE }
 
-    val copyButton = textButton(android.R.string.copy)
+    val copyButton =
+        textButton(android.R.string.copy, KeyDef.Appearance.Variant.Alternative)
 
-    val pasteButton = textButton(android.R.string.paste)
+    val pasteButton =
+        textButton(android.R.string.paste, KeyDef.Appearance.Variant.Alternative)
 
-    val backspaceButton = iconButton(R.drawable.ic_baseline_backspace_24).apply {
+    val backspaceButton = iconButton(
+        R.drawable.ic_baseline_backspace_24,
+        KeyDef.Appearance.Variant.Alternative
+    ).apply {
         soundEffect = InputFeedbacks.SoundEffect.Delete
     }
 
     override val root = constraintLayout {
+        if (!keyBorder && keyStyle == ThemePrefs.KeyTextEditingStyle.Border) {
+            backgroundColor = theme.barColor
+        }
+
         add(leftButton, lParams {
             topOfParent()
             leftOfParent()
@@ -227,6 +309,11 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     fun updateSelection(hasSelection: Boolean, userSelection: Boolean) {
         selectButton.isActivated = (hasSelection || userSelection)
+        if (selectButton.isActivated) {
+            (selectButton as? TextKeyView)?.onSetVariant(KeyDef.Appearance.Variant.Accent)
+        } else {
+            (selectButton as? TextKeyView)?.onSetVariant(KeyDef.Appearance.Variant.Normal)
+        }
         if (hasSelection) {
             selectAllButton.apply {
                 visibility = View.GONE
