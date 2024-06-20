@@ -58,6 +58,7 @@ import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.editing.TextEditingWindow
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
+import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
 import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.status.StatusAreaWindow
@@ -185,6 +186,13 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         service.requestHideSelf(0)
     }
 
+    private val swipeDownHideKeyboardCallback = CustomGestureView.OnGestureListener { _, e ->
+        if (e.type == CustomGestureView.GestureType.Up && e.totalY > 0) {
+            service.requestHideSelf(0)
+            true
+        } else false
+    }
+
     private var voiceInputSubtype: Pair<String, InputMethodSubtype>? = null
 
     private val switchToVoiceInputCallback = View.OnClickListener {
@@ -214,7 +222,12 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                     launchClipboardTimeoutJob()
                 }
             }
-            hideKeyboardButton.setOnClickListener(hideKeyboardCallback)
+            hideKeyboardButton.apply {
+                setOnClickListener(hideKeyboardCallback)
+                swipeEnabled = true
+                swipeThresholdY = dp(HEIGHT.toFloat())
+                onGestureListener = swipeDownHideKeyboardCallback
+            }
             buttonsUi.apply {
                 undoButton.setOnClickListener {
                     service.sendCombinationKeyEvents(KeyEvent.KEYCODE_Z, ctrl = true)
@@ -253,7 +266,13 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     }
 
     private val candidateUi by lazy {
-        CandidateUi(context, theme, horizontalCandidate.view)
+        CandidateUi(context, theme, horizontalCandidate.view).apply {
+            expandButton.apply {
+                swipeEnabled = true
+                swipeThresholdY = dp(HEIGHT.toFloat())
+                onGestureListener = swipeDownHideKeyboardCallback
+            }
+        }
     }
 
     private val titleUi by lazy {
