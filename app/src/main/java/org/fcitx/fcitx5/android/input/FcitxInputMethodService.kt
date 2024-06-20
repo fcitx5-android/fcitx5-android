@@ -794,6 +794,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     override fun onFinishInputView(finishingInput: Boolean) {
         Timber.d("onFinishInputView: finishingInput=$finishingInput")
         currentInputConnection?.finishComposingText()
+        resetComposingState()
         postFcitxJob {
             focus(false)
         }
