@@ -14,7 +14,7 @@ import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.audioManager
-import org.fcitx.fcitx5.android.utils.isSystemSettingEnabled
+import org.fcitx.fcitx5.android.utils.getSystemSettings
 import org.fcitx.fcitx5.android.utils.vibrator
 
 object InputFeedbacks {
@@ -31,11 +31,11 @@ object InputFeedbacks {
     private var systemHapticFeedback = false
 
     fun syncSystemPrefs() {
-        systemSoundEffects = isSystemSettingEnabled(Settings.System.SOUND_EFFECTS_ENABLED)
+        systemSoundEffects = getSystemSettings<Int>(Settings.System.SOUND_EFFECTS_ENABLED) == 1
         // it says "Replaced by using android.os.VibrationAttributes.USAGE_TOUCH"
         // but gives no clue about how to use it, and this one still works
         @Suppress("DEPRECATION")
-        systemHapticFeedback = isSystemSettingEnabled(Settings.System.HAPTIC_FEEDBACK_ENABLED)
+        systemHapticFeedback = getSystemSettings<Int>(Settings.System.HAPTIC_FEEDBACK_ENABLED) == 1
     }
 
     private val soundOnKeyPress by AppPrefs.getInstance().keyboard.soundOnKeyPress
