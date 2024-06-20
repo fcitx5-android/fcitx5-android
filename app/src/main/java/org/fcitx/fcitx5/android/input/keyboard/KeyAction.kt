@@ -11,7 +11,7 @@ import org.fcitx.fcitx5.android.input.picker.PickerWindow
 
 sealed class KeyAction {
 
-    data class FcitxKeyAction(var act: String) : KeyAction()
+    data class FcitxKeyAction(var act: String, var code: Int = 0) : KeyAction()
 
     data class SymAction(val sym: KeySym, val states: KeyStates = VirtualState) : KeyAction() {
         companion object {

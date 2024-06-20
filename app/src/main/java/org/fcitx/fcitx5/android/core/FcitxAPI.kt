@@ -43,11 +43,11 @@ interface FcitxAPI {
 
     suspend fun reloadConfig()
 
-    suspend fun sendKey(key: String, states: UInt = 0u, up: Boolean = false, timestamp: Int = -1)
+    suspend fun sendKey(key: String, states: UInt = 0u, code: Int = 0, up: Boolean = false, timestamp: Int = -1)
 
     suspend fun sendKey(c: Char, states: UInt = 0u, up: Boolean = false, timestamp: Int = -1)
 
-    suspend fun sendKey(sym: Int, states: UInt = 0u, up: Boolean = false, timestamp: Int = -1)
+    suspend fun sendKey(sym: Int, states: UInt = 0u, code: Int = 0, up: Boolean = false, timestamp: Int = -1)
 
     suspend fun sendKey(sym: KeySym, states: KeyStates, up: Boolean = false, timestamp: Int = -1)
 

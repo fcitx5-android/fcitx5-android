@@ -92,7 +92,7 @@ class CommonKeyActionListener :
         KeyActionListener { action, _ ->
             when (action) {
                 is FcitxKeyAction -> service.postFcitxJob {
-                    sendKey(action.act, KeyState.Virtual.state)
+                    sendKey(action.act, KeyState.Virtual.state, action.code + 8 /* evdev offset */)
                 }
                 is SymAction -> service.postFcitxJob {
                     sendKey(action.sym, action.states)

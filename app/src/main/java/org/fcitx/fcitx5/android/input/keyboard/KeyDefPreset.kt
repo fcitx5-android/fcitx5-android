@@ -11,6 +11,7 @@ import org.fcitx.fcitx5.android.core.FcitxKeyMapping
 import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
+import org.fcitx.fcitx5.android.core.KeyCode
 import org.fcitx.fcitx5.android.data.InputFeedbacks
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Border
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Variant
@@ -42,6 +43,7 @@ class SymbolKey(
 class AlphabetKey(
     val character: String,
     val punctuation: String,
+    val code: Int,
     variant: Variant = Variant.Normal,
     popup: Array<Popup>? = null
 ) : KeyDef(
@@ -52,8 +54,8 @@ class AlphabetKey(
         variant = variant
     ),
     setOf(
-        Behavior.Press(KeyAction.FcitxKeyAction(character)),
-        Behavior.Swipe(KeyAction.FcitxKeyAction(punctuation))
+        Behavior.Press(KeyAction.FcitxKeyAction(character, code)),
+        Behavior.Swipe(KeyAction.FcitxKeyAction(punctuation, KeyCode.symToCode[punctuation] ?: 0))
     ),
     popup ?: arrayOf(
         Popup.AltPreview(character, punctuation),

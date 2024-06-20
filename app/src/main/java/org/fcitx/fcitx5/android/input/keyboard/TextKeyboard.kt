@@ -11,6 +11,7 @@ import androidx.annotation.Keep
 import androidx.core.view.allViews
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
+import org.fcitx.fcitx5.android.core.LinuxKeyCode
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
@@ -30,37 +31,37 @@ class TextKeyboard(
 
         val Layout: List<List<KeyDef>> = listOf(
             listOf(
-                AlphabetKey("Q", "1"),
-                AlphabetKey("W", "2"),
-                AlphabetKey("E", "3"),
-                AlphabetKey("R", "4"),
-                AlphabetKey("T", "5"),
-                AlphabetKey("Y", "6"),
-                AlphabetKey("U", "7"),
-                AlphabetKey("I", "8"),
-                AlphabetKey("O", "9"),
-                AlphabetKey("P", "0")
+                AlphabetKey("Q", "1", LinuxKeyCode.KEY_Q),
+                AlphabetKey("W", "2", LinuxKeyCode.KEY_W),
+                AlphabetKey("E", "3", LinuxKeyCode.KEY_E),
+                AlphabetKey("R", "4", LinuxKeyCode.KEY_R),
+                AlphabetKey("T", "5", LinuxKeyCode.KEY_T),
+                AlphabetKey("Y", "6", LinuxKeyCode.KEY_Y),
+                AlphabetKey("U", "7", LinuxKeyCode.KEY_U),
+                AlphabetKey("I", "8", LinuxKeyCode.KEY_I),
+                AlphabetKey("O", "9", LinuxKeyCode.KEY_O),
+                AlphabetKey("P", "0", LinuxKeyCode.KEY_P)
             ),
             listOf(
-                AlphabetKey("A", "@"),
-                AlphabetKey("S", "*"),
-                AlphabetKey("D", "+"),
-                AlphabetKey("F", "-"),
-                AlphabetKey("G", "="),
-                AlphabetKey("H", "/"),
-                AlphabetKey("J", "#"),
-                AlphabetKey("K", "("),
-                AlphabetKey("L", ")")
+                AlphabetKey("A", "@", LinuxKeyCode.KEY_A),
+                AlphabetKey("S", "*", LinuxKeyCode.KEY_S),
+                AlphabetKey("D", "+", LinuxKeyCode.KEY_D),
+                AlphabetKey("F", "-", LinuxKeyCode.KEY_F),
+                AlphabetKey("G", "=", LinuxKeyCode.KEY_G),
+                AlphabetKey("H", "/", LinuxKeyCode.KEY_H),
+                AlphabetKey("J", "#", LinuxKeyCode.KEY_J),
+                AlphabetKey("K", "(", LinuxKeyCode.KEY_K),
+                AlphabetKey("L", ")", LinuxKeyCode.KEY_L)
             ),
             listOf(
                 CapsKey(),
-                AlphabetKey("Z", "'"),
-                AlphabetKey("X", ":"),
-                AlphabetKey("C", "\""),
-                AlphabetKey("V", "?"),
-                AlphabetKey("B", "!"),
-                AlphabetKey("N", "~"),
-                AlphabetKey("M", "\\"),
+                AlphabetKey("Z", "'", LinuxKeyCode.KEY_Z),
+                AlphabetKey("X", ":", LinuxKeyCode.KEY_X),
+                AlphabetKey("C", "\"", LinuxKeyCode.KEY_C),
+                AlphabetKey("V", "?", LinuxKeyCode.KEY_V),
+                AlphabetKey("B", "!", LinuxKeyCode.KEY_B),
+                AlphabetKey("N", "~", LinuxKeyCode.KEY_N),
+                AlphabetKey("M", "\\", LinuxKeyCode.KEY_M),
                 BackspaceKey()
             ),
             listOf(
