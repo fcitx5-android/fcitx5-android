@@ -79,21 +79,12 @@ class ThemePrefs(sharedPreferences: SharedPreferences) :
     enum class PunctuationPosition {
         Bottom,
         TopRight;
-
-        companion object : ManagedPreference.StringLikeCodec<PunctuationPosition> {
-            override fun decode(raw: String): PunctuationPosition = valueOf(raw)
-        }
     }
 
     val punctuationPosition = list(
         R.string.punctuation_position,
         "punctuation_position",
         PunctuationPosition.Bottom,
-        PunctuationPosition,
-        listOf(
-            PunctuationPosition.Bottom,
-            PunctuationPosition.TopRight
-        ),
         listOf(
             R.string.punctuation_pos_bottom,
             R.string.punctuation_pos_top_right
@@ -104,22 +95,12 @@ class ThemePrefs(sharedPreferences: SharedPreferences) :
         None,
         ColorOnly,
         Full;
-
-        companion object : ManagedPreference.StringLikeCodec<NavbarBackground> {
-            override fun decode(raw: String): NavbarBackground = valueOf(raw)
-        }
     }
 
     val navbarBackground = list(
         R.string.navbar_background,
         "navbar_background",
         NavbarBackground.ColorOnly,
-        NavbarBackground,
-        listOf(
-            NavbarBackground.None,
-            NavbarBackground.ColorOnly,
-            NavbarBackground.Full
-        ),
         listOf(
             R.string.navbar_bkg_none,
             R.string.navbar_bkg_color_only,
