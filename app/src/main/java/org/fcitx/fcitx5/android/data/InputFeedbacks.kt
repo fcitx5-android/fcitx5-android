@@ -41,6 +41,7 @@ object InputFeedbacks {
     private val soundOnKeyPress by AppPrefs.getInstance().keyboard.soundOnKeyPress
     private val soundOnKeyPressVolume by AppPrefs.getInstance().keyboard.soundOnKeyPressVolume
     private val hapticOnKeyPress by AppPrefs.getInstance().keyboard.hapticOnKeyPress
+    private val hapticOnKeyUp by AppPrefs.getInstance().keyboard.hapticOnKeyUp
     private val buttonPressVibrationMilliseconds by AppPrefs.getInstance().keyboard.buttonPressVibrationMilliseconds
     private val buttonLongPressVibrationMilliseconds by AppPrefs.getInstance().keyboard.buttonLongPressVibrationMilliseconds
     private val buttonPressVibrationAmplitude by AppPrefs.getInstance().keyboard.buttonPressVibrationAmplitude
@@ -53,13 +54,13 @@ object InputFeedbacks {
 
     private val audioManager = appContext.audioManager
 
-    fun hapticFeedback(view: View, longPress: Boolean = false) {
+    fun hapticFeedback(view: View, longPress: Boolean = false, keyUp: Boolean = false) {
         when (hapticOnKeyPress) {
             InputFeedbackMode.Enabled -> {}
             InputFeedbackMode.Disabled -> return
             InputFeedbackMode.FollowingSystem -> if (!systemHapticFeedback) return
         }
-
+        if (keyUp && !hapticOnKeyUp) return
         val duration: Long
         val amplitude: Int
         val hfc: Int

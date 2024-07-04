@@ -180,6 +180,7 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
             }
             MotionEvent.ACTION_UP -> {
                 isPressed = false
+                InputFeedbacks.hapticFeedback(this, longPress = true, keyUp = true)
                 dispatchGestureEvent(GestureType.Up, event.x, event.y)
                 val shouldPerformClick = !(touchMovedOutside ||
                         longPressTriggered ||

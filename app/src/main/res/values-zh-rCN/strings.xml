@@ -14,6 +14,7 @@
     <string name="hide_key_config">隐藏快捷键配置</string>
     <string name="_not_available_">（不可用）</string>
     <string name="button_haptic_feedback">按键时振动</string>
+    <string name="button_up_haptic_feedback">按键松开时振动</string>
     <string name="button_vibration_milliseconds">按键振动时长</string>
     <string name="button_press">短按</string>
     <string name="button_long_press">长按</string>

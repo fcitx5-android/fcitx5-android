@@ -14,6 +14,7 @@
     <string name="hide_key_config">Hide hotkey configurations</string>
     <string name="_not_available_">(Not Available)</string>
     <string name="button_haptic_feedback">Haptic feedback on keypress</string>
+    <string name="button_up_haptic_feedback">Haptic feedback on keyup</string>
     <string name="button_vibration_milliseconds">Keypress vibration duration</string>
     <string name="button_press">Press</string>
     <string name="button_long_press">Long press</string>
