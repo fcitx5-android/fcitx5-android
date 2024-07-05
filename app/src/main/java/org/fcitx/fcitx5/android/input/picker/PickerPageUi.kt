@@ -4,6 +4,7 @@
  */
 package org.fcitx.fcitx5.android.input.picker
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.ViewGroup
 import org.fcitx.fcitx5.android.R
@@ -43,7 +44,12 @@ import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.matchParent
 
-class PickerPageUi(override val ctx: Context, val theme: Theme, private val density: Density) : Ui {
+class PickerPageUi(
+    override val ctx: Context,
+    theme: Theme,
+    density: Density,
+    bordered: Boolean = false
+) : Ui {
 
     enum class Density(
         val pageSize: Int,
@@ -63,15 +69,7 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, private val dens
     }
 
     companion object {
-        val BackspaceAppearance = Appearance.Image(
-            src = R.drawable.ic_baseline_backspace_24,
-            variant = Variant.Alternative,
-            border = Border.Off,
-            viewId = R.id.button_backspace
-        )
-
         val BackspaceAction = SymAction(KeySym(FcitxKeyMapping.FcitxKey_BackSpace))
-
         private var popupOnKeyPress by AppPrefs.getInstance().keyboard.popupOnKeyPress
     }
 
@@ -82,7 +80,7 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, private val dens
         displayText = "",
         textSize = density.textSize,
         variant = Variant.Normal,
-        border = Border.Off
+        border = if (bordered) Border.On else Border.Off
     )
 
     private val keyViews = Array(density.pageSize) {
@@ -96,7 +94,14 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, private val dens
         }
     }
 
-    private val backspaceKey = ImageKeyView(ctx, theme, BackspaceAppearance).apply {
+    private val backspaceAppearance = Appearance.Image(
+        src = R.drawable.ic_baseline_backspace_24,
+        variant = Variant.Alternative,
+        border = if (bordered) Border.On else Border.Off,
+        viewId = R.id.button_backspace
+    )
+
+    private val backspaceKey = ImageKeyView(ctx, theme, backspaceAppearance).apply {
         setOnClickListener { onBackspaceClick() }
         repeatEnabled = true
         onRepeatListener = { onBackspaceClick() }
@@ -204,6 +209,7 @@ class PickerPageUi(override val ctx: Context, val theme: Theme, private val dens
             keyView.apply {
                 if (i >= items.size) {
                     isEnabled = false
+                    @SuppressLint("SetTextI18n")
                     mainText.text = ""
                     setOnClickListener(null)
                     setOnLongClickListener(null)

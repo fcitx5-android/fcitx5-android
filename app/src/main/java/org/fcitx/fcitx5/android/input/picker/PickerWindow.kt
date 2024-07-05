@@ -12,6 +12,7 @@ import androidx.transition.Transition
 import androidx.viewpager2.widget.ViewPager2
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.broadcast.ReturnKeyDrawableComponent
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
@@ -30,10 +31,11 @@ import org.mechdancer.dependency.manager.must
 
 class PickerWindow(
     override val key: Key,
-    val data: List<Pair<PickerData.Category, Array<String>>>,
-    val density: PickerPageUi.Density,
+    private val data: List<Pair<PickerData.Category, Array<String>>>,
+    private val density: PickerPageUi.Density,
     private val switchKey: KeyDef,
-    val popupPreview: Boolean = true
+    private val popupPreview: Boolean = true,
+    private val followKeyBorder: Boolean = true
 ) : InputWindow.ExtendedInputWindow<PickerWindow>(), EssentialWindow {
 
     enum class Key : EssentialWindow.Key {
@@ -48,6 +50,8 @@ class PickerWindow(
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
     private val popup: PopupComponent by manager.must()
     private val returnKeyDrawable: ReturnKeyDrawableComponent by manager.must()
+
+    private val keyBorder by ThemeManager.prefs.keyBorder
 
     private lateinit var pickerLayout: PickerLayout
     private lateinit var pickerPagesAdapter: PickerPagesAdapter
@@ -116,8 +120,9 @@ class PickerWindow(
 
     override fun onCreateView() = PickerLayout(context, theme, switchKey).apply {
         pickerLayout = this
+        val bordered = followKeyBorder && keyBorder
         pickerPagesAdapter = PickerPagesAdapter(
-            theme, keyActionListener, popupActionListener, data, density, key.name
+            theme, keyActionListener, popupActionListener, data, density, key.name, bordered
         )
         tabsUi.apply {
             setTabs(pickerPagesAdapter.categories)
