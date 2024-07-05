@@ -29,6 +29,7 @@ import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.BooleanKey.ClipboardDbEmpty
 import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.BooleanKey.ClipboardListeningEnabled
@@ -74,13 +75,19 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     private val clipboardReturnAfterPaste by prefs.clipboardReturnAfterPaste
     private val clipboardMaskSensitive by prefs.clipboardMaskSensitive
 
+    private val clipboardEntryRadius by ThemeManager.prefs.clipboardEntryRadius
+
     private val clipboardEntriesPager by lazy {
         Pager(PagingConfig(pageSize = 16)) { ClipboardManager.allEntries() }
     }
     private var adapterSubmitJob: Job? = null
 
     private val adapter: ClipboardAdapter by lazy {
-        object : ClipboardAdapter(this@ClipboardWindow.theme, clipboardMaskSensitive) {
+        object : ClipboardAdapter(
+            theme,
+            context.dp(clipboardEntryRadius.toFloat()),
+            clipboardMaskSensitive
+        ) {
             override fun onPin(id: Int) {
                 service.lifecycleScope.launch { ClipboardManager.pin(id) }
             }

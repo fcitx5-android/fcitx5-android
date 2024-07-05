@@ -31,7 +31,7 @@ import splitties.views.dsl.core.wrapContent
 import splitties.views.imageDrawable
 import splitties.views.setPaddingDp
 
-class ClipboardEntryUi(override val ctx: Context, private val theme: Theme) : Ui {
+class ClipboardEntryUi(override val ctx: Context, private val theme: Theme, radius: Float) : Ui {
 
     val textView = textView {
         minLines = 1
@@ -62,7 +62,6 @@ class ClipboardEntryUi(override val ctx: Context, private val theme: Theme) : Ui
     override val root = CustomGestureView(ctx).apply {
         isClickable = true
         minimumHeight = dp(30)
-        val radius = dp(2f)
         foreground = RippleDrawable(
             ColorStateList.valueOf(theme.keyPressHighlightColor), null,
             GradientDrawable().apply {
