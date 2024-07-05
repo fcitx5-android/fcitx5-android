@@ -59,8 +59,8 @@ public:
     static int constexpr MaxBufferSize = 20;
     static int constexpr SpellCandidateSize = 20;
 
-    AndroidKeyboardEngine(Instance *instance);
-    ~AndroidKeyboardEngine() = default;
+    explicit AndroidKeyboardEngine(Instance *instance);
+    ~AndroidKeyboardEngine() override = default;
 
     Instance *instance() { return instance_; }
 

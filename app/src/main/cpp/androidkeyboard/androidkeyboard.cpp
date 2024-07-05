@@ -142,16 +142,16 @@ void AndroidKeyboardEngine::keyEvent(const InputMethodEntry &entry, KeyEvent &ev
             auto cursor = buffer.cursor();
             if (cursor > 0) {
                 buffer.setCursor(cursor - 1);
+                event.filterAndAccept();
+                return updateCandidate(entry, inputContext);
             }
-            event.filterAndAccept();
-            return updateCandidate(entry, inputContext);
         } else if (key.check(FcitxKey_Right) || key.check(FcitxKey_KP_Right)) {
             auto cursor = buffer.cursor();
             if (cursor < buffer.size()) {
                 buffer.setCursor(buffer.cursor() + 1);
+                event.filterAndAccept();
+                return updateCandidate(entry, inputContext);
             }
-            event.filterAndAccept();
-            return updateCandidate(entry, inputContext);
         }
     }
 
