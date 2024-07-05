@@ -8,15 +8,13 @@ package org.fcitx.fcitx5.android.input.editing
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
-import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.InsetDrawable
-import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.StateListDrawable
 import androidx.annotation.DrawableRes
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
+import org.fcitx.fcitx5.android.input.keyboard.borderedKeyBackgroundDrawable
+import org.fcitx.fcitx5.android.input.keyboard.insetRadiusDrawable
 import org.fcitx.fcitx5.android.utils.borderDrawable
 import org.fcitx.fcitx5.android.utils.pressHighlightDrawable
 import org.fcitx.fcitx5.android.utils.rippleDrawable
@@ -42,53 +40,29 @@ class TextEditingButton(
 
     // bordered
     private val shadowWidth = dp(1)
-    private val hMargin = dp(4)
-    private val vMargin = dp(4)
+    private val hInset = dp(4)
+    private val vInset = dp(4)
 
     // !bordered
     private val lineWidth = max(1, dp(1) / 2)
 
     init {
         if (bordered) {
-            background = LayerDrawable(
-                arrayOf(
-                    GradientDrawable().apply {
-                        cornerRadius = radius
-                        setColor(theme.keyShadowColor)
-                    },
-                    GradientDrawable().apply {
-                        cornerRadius = radius
-                        setColor(if (altStyle) theme.altKeyBackgroundColor else theme.keyBackgroundColor)
-                    }
-                )
-            ).apply {
-                setLayerInset(0, hMargin, vMargin, hMargin, vMargin - shadowWidth)
-                setLayerInset(1, hMargin, vMargin, hMargin, vMargin)
-            }
-            if (rippled) {
-                foreground = RippleDrawable(
+            val bkgColor = if (altStyle) theme.altKeyBackgroundColor else theme.keyBackgroundColor
+            background = borderedKeyBackgroundDrawable(
+                bkgColor, theme.keyShadowColor,
+                radius, shadowWidth, hInset, vInset
+            )
+            foreground = if (rippled) {
+                RippleDrawable(
                     ColorStateList.valueOf(theme.keyPressHighlightColor), null,
-                    // ripple should be masked with an opaque color
-                    InsetDrawable(
-                        GradientDrawable().apply {
-                            cornerRadius = radius
-                            setColor(Color.WHITE)
-                        },
-                        hMargin, vMargin, hMargin, vMargin
-                    )
+                    insetRadiusDrawable(hInset, vInset, radius)
                 )
             } else {
-                foreground = StateListDrawable().apply {
+                StateListDrawable().apply {
                     addState(
                         intArrayOf(android.R.attr.state_pressed),
-                        // use mask drawable as highlight directly
-                        InsetDrawable(
-                            GradientDrawable().apply {
-                                cornerRadius = radius
-                                setColor(theme.keyPressHighlightColor)
-                            },
-                            hMargin, vMargin, hMargin, vMargin
-                        )
+                        insetRadiusDrawable(hInset, vInset, radius, theme.keyPressHighlightColor)
                     )
                 }
             }
@@ -148,47 +122,25 @@ class TextEditingButton(
                 theme.altKeyTextColor
             )
         )
-        if (bordered) {
-            background = StateListDrawable().apply {
+        background = if (bordered) {
+            StateListDrawable().apply {
                 addState(
                     intArrayOf(android.R.attr.state_activated),
-                    LayerDrawable(
-                        arrayOf(
-                            GradientDrawable().apply {
-                                cornerRadius = radius
-                                setColor(theme.keyShadowColor)
-                            },
-                            GradientDrawable().apply {
-                                cornerRadius = radius
-                                setColor(theme.genericActiveBackgroundColor)
-                            }
-                        )
-                    ).apply {
-                        setLayerInset(0, hMargin, vMargin, hMargin, vMargin - shadowWidth)
-                        setLayerInset(1, hMargin, vMargin, hMargin, vMargin)
-                    }
+                    borderedKeyBackgroundDrawable(
+                        theme.genericActiveBackgroundColor, theme.keyShadowColor,
+                        radius, shadowWidth, hInset, vInset
+                    )
                 )
                 addState(
                     intArrayOf(android.R.attr.state_enabled),
-                    LayerDrawable(
-                        arrayOf(
-                            GradientDrawable().apply {
-                                cornerRadius = radius
-                                setColor(theme.keyShadowColor)
-                            },
-                            GradientDrawable().apply {
-                                cornerRadius = radius
-                                setColor(theme.keyBackgroundColor)
-                            }
-                        )
-                    ).apply {
-                        setLayerInset(0, hMargin, vMargin, hMargin, vMargin - shadowWidth)
-                        setLayerInset(1, hMargin, vMargin, hMargin, vMargin)
-                    }
+                    borderedKeyBackgroundDrawable(
+                        theme.keyBackgroundColor, theme.keyShadowColor,
+                        radius, shadowWidth, hInset, vInset
+                    )
                 )
             }
         } else {
-            background = StateListDrawable().apply {
+            StateListDrawable().apply {
                 addState(
                     intArrayOf(android.R.attr.state_activated),
                     borderDrawable(
