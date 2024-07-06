@@ -2,7 +2,7 @@ plugins {
     `kotlin-dsl`
     kotlin("plugin.serialization") version embeddedKotlinVersion
     `maven-publish`
-    id("com.palantir.git-version") version "3.0.0"
+    alias(libs.plugins.gitVersion)
     `java-gradle-plugin`
 }
 
