@@ -11,6 +11,8 @@ import androidx.annotation.Keep
 import androidx.core.view.allViews
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
+import org.fcitx.fcitx5.android.core.KeyState
+import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
@@ -118,22 +120,34 @@ class TextKeyboard(
     }
 
     override fun onAction(action: KeyAction, source: KeyActionListener.Source) {
+        var transformed = action
         when (action) {
-            is KeyAction.FcitxKeyAction -> if (source == KeyActionListener.Source.Keyboard) {
-                transformKeyAction(action)
+            is KeyAction.FcitxKeyAction -> {
+                if (source == KeyActionListener.Source.Keyboard && action.act.length == 1) {
+                    when (capsState) {
+                        CapsState.None -> {
+                            transformed = action.copy(act = action.act.lowercase())
+                        }
+                        CapsState.Once -> {
+                            transformed = action.copy(
+                                act = action.act.uppercase(),
+                                states = KeyStates(KeyState.Virtual, KeyState.Shift)
+                            )
+                            switchCapsState()
+                        }
+                        CapsState.Lock -> {
+                            transformed = action.copy(
+                                act = action.act.uppercase(),
+                                states = KeyStates(KeyState.Virtual, KeyState.CapsLock)
+                            )
+                        }
+                    }
+                }
             }
             is KeyAction.CapsAction -> switchCapsState(action.lock)
             else -> {}
         }
-        super.onAction(action, source)
-    }
-
-    private fun transformKeyAction(action: KeyAction.FcitxKeyAction) {
-        if (action.act.length > 1) {
-            return
-        }
-        action.act = transformAlphabet(action.act)
-        if (capsState == CapsState.Once) switchCapsState()
+        super.onAction(transformed, source)
     }
 
     override fun onAttach() {

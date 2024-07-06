@@ -92,6 +92,8 @@ value class KeyStates(val states: UInt) {
     companion object {
         val Empty = KeyStates(0u)
 
+        val Virtual = KeyStates(KeyState.Virtual)
+
         fun of(v: Int) = KeyStates(v.toUInt())
 
         fun fromKeyEvent(event: KeyEvent): KeyStates {
