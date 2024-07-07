@@ -1,0 +1,11 @@
+{
+    "uniqueId": "fcitx/fcitx5-libthai",
+    "artifactVersion": "5.1.3",
+    "description": "Thai Wrapper for Fcitx",
+    "name": "fcitx/fcitx5-libthai",
+    "website": "https://github.com/fcitx/fcitx5-libthai",
+    "tag": "native",
+    "licenses": [
+        "GPL-2.0-or-later"
+    ]
+}
