@@ -77,10 +77,10 @@ public:
 
 class JEnv {
 private:
-    JNIEnv *env;
+    JNIEnv *env = nullptr;
 
 public:
-    JEnv(JavaVM *jvm) {
+    explicit JEnv(JavaVM *jvm) {
         if (jvm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) == JNI_EDETACHED) {
             jvm->AttachCurrentThread(&env, nullptr);
         }
@@ -141,7 +141,7 @@ public:
     jclass CandidateAction;
     jmethodID CandidateActionInit;
 
-    GlobalRefSingleton(JavaVM *jvm_) : jvm(jvm_) {
+    explicit GlobalRefSingleton(JavaVM *jvm_) : jvm(jvm_) {
         JNIEnv *env;
         jvm->AttachCurrentThread(&env, nullptr);
 
@@ -192,7 +192,7 @@ public:
         CandidateActionInit = env->GetMethodID(CandidateAction, "<init>", "(ILjava/lang/String;ZLjava/lang/String;ZZ)V");
     }
 
-    const JEnv AttachEnv() const { return JEnv(jvm); }
+    [[nodiscard]] JEnv AttachEnv() const { return JEnv(jvm); }
 };
 
 extern GlobalRefSingleton *GlobalRef;

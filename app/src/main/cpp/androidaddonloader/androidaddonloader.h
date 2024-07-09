@@ -20,7 +20,7 @@ namespace fcitx {
 
 class AndroidSharedLibraryFactory {
 public:
-    AndroidSharedLibraryFactory(Library lib) : library_(std::move(lib)) {
+    explicit AndroidSharedLibraryFactory(Library lib) : library_(std::move(lib)) {
         auto *funcPtr = library_.resolve("fcitx_addon_factory_instance");
         if (!funcPtr) {
             throw std::runtime_error(library_.error());
@@ -43,9 +43,9 @@ typedef std::unordered_map<std::string, std::unordered_set<std::string>> Android
 
 class AndroidSharedLibraryLoader : public AddonLoader {
 public:
-    AndroidSharedLibraryLoader(AndroidLibraryDependency dependency);
-    ~AndroidSharedLibraryLoader() = default;
-    std::string type() const override { return "SharedLibrary"; }
+    explicit AndroidSharedLibraryLoader(AndroidLibraryDependency dependency);
+
+    [[nodiscard]] std::string type() const override { return "SharedLibrary"; }
 
     AddonInstance *load(const AddonInfo &info, AddonManager *manager) override;
 

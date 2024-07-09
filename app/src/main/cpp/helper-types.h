@@ -93,7 +93,7 @@ public:
     bool isCheckable;
     bool isChecked;
 
-    CandidateActionEntity(const fcitx::CandidateAction &act) :
+    explicit CandidateActionEntity(const fcitx::CandidateAction &act) :
             id(act.id()),
             text(act.text()),
             isSeparator(act.isSeparator()),
