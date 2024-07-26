@@ -32,9 +32,6 @@ open class AndroidBaseConventionPlugin : Plugin<Project> {
             kotlinOptions {
                 // https://youtrack.jetbrains.com/issue/KT-55947
                 jvmTarget = Versions.java.toString()
-                // https://issuetracker.google.com/issues/250197571
-                // https://kotlinlang.org/docs/whatsnew1520.html#string-concatenation-via-invokedynamic
-                freeCompilerArgs += "-Xstring-concat=inline"
             }
         }
 
