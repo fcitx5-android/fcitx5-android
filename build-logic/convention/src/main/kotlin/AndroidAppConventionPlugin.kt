@@ -72,7 +72,6 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
                     excludes += setOf(
                         "/META-INF/*.version",
                         "/META-INF/*.kotlin_module",  // cannot be excluded actually
-                        "/kotlin/**",
                         "/kotlin-tooling-metadata.json"
                     )
                 }
@@ -117,7 +116,6 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
                 if (!metaInf.exists() || !metaInf.isDirectory) return@f
                 metaInf.listFiles()?.forEach {
                     if (it.name.endsWith(".kotlin_module")) {
-                        println("deleting ${it.path}")
                         it.delete()
                     }
                 }
