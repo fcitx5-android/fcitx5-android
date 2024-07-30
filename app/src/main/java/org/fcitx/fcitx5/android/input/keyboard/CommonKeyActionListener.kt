@@ -4,11 +4,14 @@
  */
 package org.fcitx.fcitx5.android.input.keyboard
 
+import android.view.inputmethod.ExtractedTextRequest
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.FcitxAPI
+import org.fcitx.fcitx5.android.core.FcitxKeyMapping
 import org.fcitx.fcitx5.android.core.KeyState
+import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.broadcast.PreeditEmptyStateComponent
@@ -64,6 +67,7 @@ class CommonKeyActionListener :
     private val langSwitchKeyBehavior by kbdPrefs.langSwitchKeyBehavior
 
     private var backspaceSwipeState = Stopped
+    private var cursorMovingOccupied = false
 
     private val keepComposingIMs = arrayOf("keyboard-us", "unikey")
 
@@ -133,6 +137,42 @@ class CommonKeyActionListener :
                     }
                 }
                 is ShowInputMethodPickerAction -> showInputMethodPicker()
+                is KeyAction.MoveCursorAction -> {
+                    if (cursorMovingOccupied) return@KeyActionListener
+                    cursorMovingOccupied = true
+                    val ic = service.currentInputConnection
+                    val extracted = ic?.getExtractedText(
+                        ExtractedTextRequest(), 0
+                    )
+                    val position = if (extracted != null) {
+                        with(extracted) {
+                            selectionStart + startOffset
+                        }
+                    } else {
+                        -1
+                    }
+                    val length = extracted?.text?.length
+                    val sym = when (action.direction) {
+                        KeyAction.CursorMoveDirection.LEFT -> {
+                            if (position != -1 && position == 0) {
+                                cursorMovingOccupied = false
+                                return@KeyActionListener
+                            }
+                            FcitxKeyMapping.FcitxKey_Left
+                        }
+                        KeyAction.CursorMoveDirection.RIGHT -> {
+                            if (position != -1 && position == length) {
+                                cursorMovingOccupied = false
+                                return@KeyActionListener
+                            }
+                            FcitxKeyMapping.FcitxKey_Right
+                        }
+                    }
+                    FcitxDaemon.getFirstConnectionOrNull()?.runImmediately {
+                        sendKey(sym) // blocking the thread needed here
+                    }
+                    cursorMovingOccupied = false
+                }
                 is MoveSelectionAction -> {
                     when (backspaceSwipeState) {
                         Stopped -> {
