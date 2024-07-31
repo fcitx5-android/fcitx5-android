@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.FcitxAPI
 import org.fcitx.fcitx5.android.core.FcitxKeyMapping
 import org.fcitx.fcitx5.android.core.KeyState
-import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.broadcast.PreeditEmptyStateComponent
@@ -67,7 +66,6 @@ class CommonKeyActionListener :
     private val langSwitchKeyBehavior by kbdPrefs.langSwitchKeyBehavior
 
     private var backspaceSwipeState = Stopped
-    private var cursorMovingOccupied = false
     private var cursorPosition = -1
     private var cursorMaximum = -1
 
@@ -140,40 +138,34 @@ class CommonKeyActionListener :
                 }
                 is ShowInputMethodPickerAction -> showInputMethodPicker()
                 is KeyAction.MoveCursorAction -> {
-                    if (cursorMovingOccupied) return@KeyActionListener
-                    cursorMovingOccupied = true
-                    val ic = service.currentInputConnection
-                    val extracted = ic?.getExtractedText(
-                        ExtractedTextRequest(), 0
-                    )
-                    val position = if (extracted != null) {
-                        with(extracted) {
-                            selectionStart + startOffset
-                        }
-                    } else {
-                        -1
-                    }
-                    val length = extracted?.text?.length
-                    val sym = when (action.direction) {
-                        KeyAction.CursorMoveDirection.LEFT -> {
-                            if (position != -1 && position == 0) {
-                                cursorMovingOccupied = false
-                                return@KeyActionListener
+                    if (!preeditState.isEmpty || cursorMaximum == -1) {
+                        val sym = when (action.direction) {
+                            KeyAction.CursorMoveDirection.LEFT -> {
+                                FcitxKeyMapping.FcitxKey_Left
                             }
-                            FcitxKeyMapping.FcitxKey_Left
+                            KeyAction.CursorMoveDirection.RIGHT -> {
+                                FcitxKeyMapping.FcitxKey_Right
+                            }
+                        }
+                        service.postFcitxJob { sendKey(sym) }
+                        return@KeyActionListener
+                    }
+
+                    val ic = service.currentInputConnection
+                    when (action.direction) {
+                        KeyAction.CursorMoveDirection.LEFT -> {
+                            if (cursorPosition != 0) {
+                                cursorPosition--
+                                ic.setSelection(cursorPosition, cursorPosition)
+                            }
                         }
                         KeyAction.CursorMoveDirection.RIGHT -> {
-                            if (position != -1 && position == length) {
-                                cursorMovingOccupied = false
-                                return@KeyActionListener
+                            if (cursorPosition != cursorMaximum) {
+                                cursorPosition++
+                                ic.setSelection(cursorPosition, cursorPosition)
                             }
-                            FcitxKeyMapping.FcitxKey_Right
                         }
                     }
-                    FcitxDaemon.getFirstConnectionOrNull()?.runImmediately {
-                        sendKey(sym) // blocking the thread needed here
-                    }
-                    cursorMovingOccupied = false
                 }
                 is KeyAction.TrackCursorAction -> {
                     if (cursorMaximum != -1) return@KeyActionListener
