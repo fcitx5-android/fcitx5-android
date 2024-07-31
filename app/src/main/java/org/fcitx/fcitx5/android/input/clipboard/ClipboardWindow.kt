@@ -20,6 +20,7 @@ import androidx.paging.PagingConfig
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.google.android.material.snackbar.BaseTransientBottomBar.BaseCallback
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.SnackbarContentLayout
 import kotlinx.coroutines.Job
@@ -59,6 +60,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     private val snackbarCtx by lazy {
         context.withTheme(R.style.InputViewSnackbarTheme)
     }
+    private var snackbarInstance: Snackbar? = null
 
     private lateinit var stateMachine: EventStateMachine<ClipboardStateMachine.State, ClipboardStateMachine.TransitionEvent, ClipboardStateMachine.BooleanKey>
 
@@ -192,22 +194,40 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         }
     }
 
+    private val pendingDeleteIds = arrayListOf<Int>()
+
     @SuppressLint("RestrictedApi")
     private fun showUndoSnackbar(vararg id: Int) {
-        val str = context.resources.getString(R.string.num_items_deleted, id.size)
-        Snackbar.make(snackbarCtx, ui.root, str, Snackbar.LENGTH_LONG)
-            .setBackgroundTint(theme.keyBackgroundColor)
-            .setTextColor(theme.keyTextColor)
+        id.forEach { pendingDeleteIds.add(it) }
+        val str = context.resources.getString(R.string.num_items_deleted, pendingDeleteIds.size)
+        snackbarInstance = Snackbar.make(snackbarCtx, ui.root, str, Snackbar.LENGTH_LONG)
+            .setBackgroundTint(theme.popupBackgroundColor)
+            .setTextColor(theme.popupTextColor)
             .setActionTextColor(theme.genericActiveBackgroundColor)
             .setAction(R.string.undo) {
                 service.lifecycleScope.launch {
-                    ClipboardManager.undoDelete(*id)
+                    ClipboardManager.undoDelete(*pendingDeleteIds.toIntArray())
+                    pendingDeleteIds.clear()
                 }
             }
             .addCallback(object : Snackbar.Callback() {
                 override fun onDismissed(transientBottomBar: Snackbar, event: Int) {
-                    service.lifecycleScope.launch {
-                        ClipboardManager.realDelete()
+                    if (snackbarInstance === transientBottomBar) {
+                        snackbarInstance = null
+                    }
+                    when (event) {
+                        BaseCallback.DISMISS_EVENT_SWIPE,
+                        BaseCallback.DISMISS_EVENT_MANUAL,
+                        BaseCallback.DISMISS_EVENT_TIMEOUT -> {
+                            service.lifecycleScope.launch {
+                                ClipboardManager.realDelete()
+                                pendingDeleteIds.clear()
+                            }
+                        }
+                        BaseCallback.DISMISS_EVENT_ACTION,
+                        BaseCallback.DISMISS_EVENT_CONSECUTIVE -> {
+                            // user clicked "undo" or deleted more items which makes a new snackbar
+                        }
                     }
                 }
             }).apply {
@@ -256,6 +276,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         adapter.onDetached()
         adapterSubmitJob?.cancel()
         promptMenu?.dismiss()
+        snackbarInstance?.dismiss()
     }
 
     override val title: String by lazy {
