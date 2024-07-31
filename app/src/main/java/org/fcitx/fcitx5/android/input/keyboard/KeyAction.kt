@@ -41,6 +41,10 @@ sealed class KeyAction {
 
     data class MoveCursorAction(val direction: CursorMoveDirection) : KeyAction()
 
+    data class TrackCursorAction(val direction: CursorMoveDirection) : KeyAction()
+
+    data object UntrackCursorAction : KeyAction()
+
     data class DeleteSelectionAction(val totalCnt: Int = 0) : KeyAction()
 
     data class PickerSwitchAction(val key: PickerWindow.Key? = null) : KeyAction()

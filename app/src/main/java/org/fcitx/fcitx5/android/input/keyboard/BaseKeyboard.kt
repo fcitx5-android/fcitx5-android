@@ -164,16 +164,18 @@ abstract class BaseKeyboard(
                         GestureType.Move -> when (val count = event.countX) {
                             0 -> false
                             else -> {
+                                val direction = if (count > 0) KeyAction.CursorMoveDirection.RIGHT
+                                else KeyAction.CursorMoveDirection.LEFT
                                 repeat(count.absoluteValue) {
-                                    onAction(
-                                        KeyAction.MoveCursorAction(
-                                            direction = if (count > 0) KeyAction.CursorMoveDirection.RIGHT
-                                            else KeyAction.CursorMoveDirection.LEFT
-                                        )
-                                    )
+                                    onAction(KeyAction.TrackCursorAction(direction))
+                                    onAction(KeyAction.MoveCursorAction(direction))
                                 }
                                 true
                             }
+                        }
+                        GestureType.Up -> {
+                            onAction(KeyAction.UntrackCursorAction)
+                            false
                         }
                         else -> false
                     }

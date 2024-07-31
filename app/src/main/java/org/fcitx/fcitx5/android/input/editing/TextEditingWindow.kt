@@ -48,12 +48,15 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
                 onRepeatListener = { block() }
             }
 
+            val source = KeyActionListener.Source.Keyboard
+
             leftButton.onClickWithRepeating {
-                commonKeyActionListener.listener.onKeyAction(
-                    KeyAction.MoveCursorAction(
-                        KeyAction.CursorMoveDirection.LEFT
-                    ), KeyActionListener.Source.Keyboard
-                )
+                val left = KeyAction.CursorMoveDirection.LEFT
+                commonKeyActionListener.listener.run {
+                    onKeyAction(KeyAction.TrackCursorAction(left), source)
+                    onKeyAction(KeyAction.MoveCursorAction(left), source)
+                    onKeyAction(KeyAction.UntrackCursorAction, source)
+                }
             }
 
             upButton.onClickWithRepeating { sendDirectionKey(KeyEvent.KEYCODE_DPAD_UP) }
@@ -61,11 +64,12 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
             downButton.onClickWithRepeating { sendDirectionKey(KeyEvent.KEYCODE_DPAD_DOWN) }
 
             rightButton.onClickWithRepeating {
-                commonKeyActionListener.listener.onKeyAction(
-                    KeyAction.MoveCursorAction(
-                        KeyAction.CursorMoveDirection.RIGHT
-                    ), KeyActionListener.Source.Keyboard
-                )
+                val right = KeyAction.CursorMoveDirection.RIGHT
+                commonKeyActionListener.listener.run {
+                    onKeyAction(KeyAction.TrackCursorAction(right), source)
+                    onKeyAction(KeyAction.MoveCursorAction(right), source)
+                    onKeyAction(KeyAction.UntrackCursorAction, source)
+                }
             }
 
             homeButton.setOnClickListener { sendDirectionKey(KeyEvent.KEYCODE_MOVE_HOME) }

@@ -68,6 +68,8 @@ class CommonKeyActionListener :
 
     private var backspaceSwipeState = Stopped
     private var cursorMovingOccupied = false
+    private var cursorPosition = -1
+    private var cursorMaximum = -1
 
     private val keepComposingIMs = arrayOf("keyboard-us", "unikey")
 
@@ -172,6 +174,25 @@ class CommonKeyActionListener :
                         sendKey(sym) // blocking the thread needed here
                     }
                     cursorMovingOccupied = false
+                }
+                is KeyAction.TrackCursorAction -> {
+                    if (cursorMaximum != -1) return@KeyActionListener
+                    val ic = service.currentInputConnection
+                    val extracted = ic?.getExtractedText(
+                        ExtractedTextRequest(), 0
+                    )
+                    if (extracted != null) {
+                        cursorMaximum = extracted.text.length
+                    }
+                    val selection = service.currentInputSelection
+                    cursorPosition = when (action.direction) {
+                        KeyAction.CursorMoveDirection.LEFT -> selection.start
+                        KeyAction.CursorMoveDirection.RIGHT -> selection.end
+                    }
+                }
+                is KeyAction.UntrackCursorAction -> {
+                    cursorMaximum = -1
+                    cursorPosition = -1
                 }
                 is MoveSelectionAction -> {
                     when (backspaceSwipeState) {
