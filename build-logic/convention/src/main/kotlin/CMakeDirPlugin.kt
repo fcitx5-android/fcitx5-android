@@ -2,12 +2,13 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later
  * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
  */
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import com.android.build.gradle.internal.cxx.model.CxxAbiModel
+import com.android.build.gradle.tasks.ExternalNativeBuildJsonTask
+import com.android.build.gradle.tasks.ExternalNativeBuildTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.kotlin.dsl.withType
 import java.io.File
 
 val Project.cmakeDir: File
@@ -24,20 +25,16 @@ val Project.cmakeDir: File
  * Since we can't declare the dependency relationship, a weaker running order constraint must be enforced
  */
 
-/**
- * Note: native build tasks would be called `:buildCMake$Variant[$ABI][$target1,$target2,etc]`
- * if `externalNativeBuild.cmake.targets` is provided with cmake target names, causing this method
- * to be inaccurate.
- * Consider using [Task.runAfterNativeConfigure] instead.
- */
 fun Task.runAfterNativeBuild(project: Project) {
-    mustRunAfter("${project.path}:buildCMakeDebug[${project.buildABI}]")
-    mustRunAfter("${project.path}:buildCMakeRelWithDebInfo[${project.buildABI}]")
+    project.tasks.withType<ExternalNativeBuildTask>().whenTaskAdded {
+        this@runAfterNativeBuild.mustRunAfter(this@whenTaskAdded)
+    }
 }
 
 fun Task.runAfterNativeConfigure(project: Project) {
-    mustRunAfter("${project.path}:configureCMakeDebug[${project.buildABI}]")
-    mustRunAfter("${project.path}:configureCMakeRelWithDebInfo[${project.buildABI}]")
+    project.tasks.withType<ExternalNativeBuildJsonTask>().whenTaskAdded {
+        this@runAfterNativeConfigure.mustRunAfter(this@whenTaskAdded)
+    }
 }
 
 /**
@@ -50,7 +47,7 @@ class CMakeDirPlugin : Plugin<Project> {
         const val CMAKE_DIR = "cmakeDir"
     }
 
-    private fun Project.setCmakeDir(file: File) {
+    private fun Project.setCMakeDir(file: File) {
         project.extensions.extraProperties.set(CMAKE_DIR, file)
     }
 
@@ -69,15 +66,15 @@ class CMakeDirPlugin : Plugin<Project> {
      */
     override fun apply(target: Project) {
         target.gradle.taskGraph.whenReady {
-            allTasks.find {
-                it.project.name == target.name &&
-                        (it.name.startsWith("configureCMakeDebug[") || it.name.startsWith("configureCMakeRelWithDebInfo["))
-            }?.doLast {
-                val buildModelFile = outputs.files.first().resolve("build_model.json")
-                val buildModel = Json.parseToJsonElement(buildModelFile.readText()).jsonObject
-                val cxxBuildFolder = buildModel["cxxBuildFolder"]!!.jsonPrimitive.content
-                target.setCmakeDir(File(cxxBuildFolder))
-            }
+            val cmakeConfigureTask =
+                target.tasks.filterIsInstance<ExternalNativeBuildJsonTask>().firstOrNull()
+                    ?: return@whenReady
+            val abiField =
+                ExternalNativeBuildJsonTask::class.java.declaredFields.find { it.name == "abi" }
+                    ?: return@whenReady
+            abiField.isAccessible = true
+            val abi = abiField.get(cmakeConfigureTask) as? CxxAbiModel ?: return@whenReady
+            target.setCMakeDir(abi.cxxBuildFolder)
         }
     }
 

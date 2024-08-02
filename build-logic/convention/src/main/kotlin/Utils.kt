@@ -45,15 +45,6 @@ val Project.assetsDir: File
 val Project.cleanTask: Task
     get() = tasks.getByName("clean")
 
-// Change default ABI here
-val Project.buildABI
-    get() = ep("BUILD_ABI", "buildABI") {
-//        "armeabi-v7a"
-        "arm64-v8a"
-//        "x86"
-//        "x86_64"
-    }
-
 val Project.buildVersionName
     get() = ep("BUILD_VERSION_NAME", "buildVersionName") {
         runCmd("git describe --tags --long --always")

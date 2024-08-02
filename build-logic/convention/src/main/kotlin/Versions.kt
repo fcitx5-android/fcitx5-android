@@ -12,6 +12,9 @@ object Versions {
     const val minSdk = 23
     const val targetSdk = 34
 
+    val defaultABI = "arm64-v8a"
+    val supportedABIs = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+
     private const val defaultCMake = "3.22.1"
     private const val defaultNDK = "25.2.9519653"
     private const val defaultBuildTools = "34.0.0"
@@ -19,8 +22,8 @@ object Versions {
     // NOTE: increase this value to bump version code
     private const val baseVersionCode = 7
 
-    fun calculateVersionCode(abi: String): Int {
-        val abiId = when (abi) {
+    fun calculateVersionCode(abi: String? = defaultABI): Int {
+        val abiId = when (abi ?: defaultABI) {
             "armeabi-v7a" -> 1
             "arm64-v8a" -> 2
             "x86" -> 3

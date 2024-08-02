@@ -36,22 +36,13 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
             if (PlayRelease.run { target.buildPlayRelease }) {
                 // in this case, the version code of arm64-v8a will be used for the single production,
                 // unless `buildABI` is specified
-                defaultConfig {
-                    ndk {
-                        abiFilters.add("armeabi-v7a")
-                        abiFilters.add("arm64-v8a")
-                        abiFilters.add("x86")
-                        abiFilters.add("x86_64")
-                    }
-                }
+                defaultConfig.ndk.abiFilters += Versions.supportedABIs
             } else {
-                splits {
-                    abi {
-                        isEnable = true
-                        reset()
-                        include(target.buildABI)
-                        isUniversalApk = false
-                    }
+                splits.abi {
+                    isEnable = true
+                    isUniversalApk = false
+                    reset()
+                    include(*Versions.supportedABIs.toTypedArray())
                 }
             }
         }
