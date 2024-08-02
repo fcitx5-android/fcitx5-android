@@ -5,17 +5,20 @@
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
+import com.android.build.gradle.internal.tasks.CompileArtProfileTask
+import com.android.build.gradle.internal.tasks.ExpandArtProfileWildcardsTask
+import com.android.build.gradle.internal.tasks.MergeArtProfileTask
 import com.android.build.gradle.tasks.PackageApplication
 import com.mikepenz.aboutlibraries.plugin.AboutLibrariesExtension
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFile
+import org.gradle.api.internal.provider.AbstractProperty
 import org.gradle.api.internal.provider.Providers
 import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
-import java.lang.reflect.Field
 
 /**
  * The prototype of an Android Application
@@ -56,6 +59,11 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
                 debug {
                     applicationIdSuffix = ".debug"
                 }
+                all {
+                    // remove META-INF/version-control-info.textproto
+                    @Suppress("UnstableApiUsage")
+                    vcsInfo.include = false
+                }
             }
             compileOptions {
                 isCoreLibraryDesugaringEnabled = true
@@ -72,6 +80,7 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
                     excludes += setOf(
                         "/META-INF/*.version",
                         "/META-INF/*.kotlin_module",  // cannot be excluded actually
+                        "/DebugProbesKt.bin",
                         "/kotlin-tooling-metadata.json"
                     )
                 }
@@ -80,29 +89,14 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
 
         // remove META-INF/com/android/build/gradle/app-metadata.properties
         target.tasks.withType<PackageApplication> {
-            var javaClass: Class<*>? = appMetadata.javaClass
-            var valueField: Field? = null
-            while (javaClass != null) {
-                valueField = javaClass.declaredFields.find { it.name == "value" }
-                if (valueField != null) break
-                else javaClass = javaClass.superclass
-            }
-            valueField?.isAccessible = true
-            var appMetadataPath: String? = null
-            target.afterEvaluate {
-                // writeReleaseAppMetadata was skipped... but why?
-                if (appMetadata.isPresent) {
-                    appMetadata.asFile.get().apply {
-                        appMetadataPath = path
-                        parentFile.mkdirs()
-                        // make sure appMetadata file exists before the task
-                        writeText("")
-                    }
+            val valueField =
+                AbstractProperty::class.java.declaredFields.find { it.name == "value" } ?: run {
+                    println("class AbstractProperty field value not found, something could have gone wrong")
+                    return@withType
                 }
-            }
+            valueField.isAccessible = true
             doFirst {
-                appMetadataPath?.let { File(it).delete() }
-                valueField?.set(appMetadata, Providers.notDefined<RegularFile>())
+                valueField.set(appMetadata, Providers.notDefined<RegularFile>())
                 allInputFilesWithNameOnlyPathSensitivity.removeAll { true }
             }
         }
@@ -121,6 +115,11 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
                 }
             }
         }
+
+        // remove assets/dexopt/baseline.prof{,m} (baseline profile)
+        target.tasks.withType<MergeArtProfileTask> { enabled = false }
+        target.tasks.withType<ExpandArtProfileWildcardsTask> { enabled = false }
+        target.tasks.withType<CompileArtProfileTask> { enabled = false }
 
         target.extensions.configure<ApplicationAndroidComponentsExtension> {
             // Add dependency relationships for data descriptor task

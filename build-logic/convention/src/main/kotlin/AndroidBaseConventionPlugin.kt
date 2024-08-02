@@ -26,13 +26,6 @@ open class AndroidBaseConventionPlugin : Plugin<Project> {
                 sourceCompatibility = Versions.java
                 targetCompatibility = Versions.java
             }
-            buildTypes {
-                onEach {
-                    // remove META-INF/version-control-info.textproto
-                    @Suppress("UnstableApiUsage")
-                    it.vcsInfo.include = false
-                }
-            }
         }
 
         target.tasks.withType<KotlinCompile> {
@@ -45,28 +38,6 @@ open class AndroidBaseConventionPlugin : Plugin<Project> {
         target.extensions.configure<KotlinProjectExtension> {
             sourceSets.all {
                 languageSettings.optIn("kotlin.RequiresOptIn")
-            }
-        }
-
-        target.afterEvaluate {
-            // remove assets/dexopt/baseline.prof{,m} (baseline profile)
-            target.tasks.findByName("prepareReleaseArtProfile")?.apply {
-                enabled = false
-            }
-            target.tasks.findByName("mergeReleaseArtProfile")?.apply {
-                enabled = false
-            }
-            target.tasks.findByName("expandReleaseL8ArtProfileWildcards")?.apply {
-                enabled = false
-            }
-            target.tasks.findByName("expandReleaseArtProfileWildcards")?.apply {
-                enabled = false
-            }
-            target.tasks.findByName("compileReleaseArtProfile")?.apply {
-                enabled = false
-            }
-            target.tasks.findByName("writeReleaseAppMetadata")?.apply {
-                enabled = false
             }
         }
     }
