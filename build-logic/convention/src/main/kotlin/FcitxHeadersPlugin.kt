@@ -28,8 +28,8 @@ class FcitxHeadersPlugin : Plugin<Project> {
 
     private fun registerInstallTask(project: Project) {
         val installHeadersTask = project.task(INSTALL_TASK) {
-            runAfterNativeConfigure(project) action@{ abiModel ->
-                val cmake = abiModel.cmake?.effectiveConfiguration?.cmakeExecutable ?: return@action
+            runAfterNativeConfigure(project) { abiModel ->
+                val cmake = abiModel.variant.module.cmake!!.cmakeExe!!
                 project.exec {
                     workingDir = abiModel.cxxBuildFolder
                     environment("DESTDIR", project.headersInstallDir.absolutePath)

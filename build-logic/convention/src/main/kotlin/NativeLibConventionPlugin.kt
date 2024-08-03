@@ -27,7 +27,7 @@ class NativeLibConventionPlugin : NativeBaseConventionPlugin() {
             }
         }
 
-        target.tasks.withType<PrefabPackageConfigurationTask> {
+        target.tasks.withType<PrefabPackageConfigurationTask>().all {
             // The output of PrefabConfigurePackageTask is up-to-date even after running clean.
             // This is probably a bug of AGP. To work around, we need always rerun this task.
             doNotTrackState("The up-to-date checking of PrefabConfigurePackageTask is incorrect")

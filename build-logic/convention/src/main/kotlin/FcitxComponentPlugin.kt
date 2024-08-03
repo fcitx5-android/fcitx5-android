@@ -56,13 +56,13 @@ class FcitxComponentPlugin : Plugin<Project> {
             "installLibrary${component.capitalized()}[${sourceProject.name}]"
         }
         val task = project.task(taskName) {
-            runAfterNativeConfigure(sourceProject) action@{ abiModel ->
-                val cmake = abiModel.cmake?.effectiveConfiguration?.cmakeExecutable ?: return@action
-                project.exec {
+            runAfterNativeConfigure(sourceProject) { abiModel ->
+                val cmake = abiModel.variant.module.cmake!!.cmakeExe!!
+                sourceProject.exec {
                     workingDir = abiModel.cxxBuildFolder
                     commandLine(cmake, "--build", ".", "--target", target)
                 }
-                project.exec {
+                sourceProject.exec {
                     workingDir = abiModel.cxxBuildFolder
                     environment("DESTDIR", project.assetsDir.absolutePath)
                     commandLine(cmake, "--install", ".", "--component", component)
