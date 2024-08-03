@@ -62,6 +62,8 @@ val Project.signKeyBase64: String?
 val Project.signKeyFile: String?
     get() = epn("SIGN_KEY_FILE", "signKeyFile")
 
+private var signKeyTempFile: File? = null
+
 val Project.signKey: File?
     get() {
         signKeyFile?.let {
@@ -70,11 +72,16 @@ val Project.signKey: File?
         }
         @OptIn(ExperimentalEncodingApi::class)
         signKeyBase64?.let {
+            if (signKeyTempFile?.exists() == true) {
+                return signKeyTempFile
+            }
             val buildDir = layout.buildDirectory.asFile.get()
             buildDir.mkdirs()
             val file = File.createTempFile("sign-", ".ks", buildDir)
             try {
                 file.writeBytes(Base64.decode(it))
+                file.deleteOnExit()
+                signKeyTempFile = file
                 return file
             } catch (e: Exception) {
                 println(e.localizedMessage ?: e.stackTraceToString())
