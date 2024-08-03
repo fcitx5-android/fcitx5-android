@@ -18,7 +18,7 @@ class AndroidInputContext;
 
 class AndroidFrontend : public AddonInstance {
 public:
-    AndroidFrontend(Instance *instance);
+    explicit AndroidFrontend(Instance *instance);
 
     Instance *instance() { return instance_; }
 
@@ -37,7 +37,7 @@ public:
     void focusInputContext(bool focus);
     void activateInputContext(const int uid, const std::string &pkgName);
     void deactivateInputContext(const int uid);
-    InputContext *activeInputContext() const;
+    [[nodiscard]] InputContext *activeInputContext() const;
     void setCapabilityFlags(uint64_t flag);
     std::vector<std::string> getCandidates(const int offset, const int limit);
     std::vector<CandidateAction> getCandidateActions(const int idx);

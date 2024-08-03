@@ -40,10 +40,6 @@ gradlePlugin {
             id = "org.fcitx.fcitx5.android.build-metadata"
             implementationClass = "BuildMetadataPlugin"
         }
-        register("cmakeDir") {
-            id = "org.fcitx.fcitx5.android.cmake-dir"
-            implementationClass = "CMakeDirPlugin"
-        }
         register("dataDescriptor") {
             id = "org.fcitx.fcitx5.android.data-descriptor"
             implementationClass = "DataDescriptorPlugin"
@@ -63,10 +59,6 @@ gradlePlugin {
         register("nativeLibConvention") {
             id = "org.fcitx.fcitx5.android.native-lib-convention"
             implementationClass = "NativeLibConventionPlugin"
-        }
-        register("androidSdkPath") {
-            id = "org.fcitx.fcitx5.android.android-sdk-path"
-            implementationClass = "AndroidSdkPathPlugin"
         }
     }
 }

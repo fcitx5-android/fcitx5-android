@@ -2,7 +2,6 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later
  * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
  */
-import Versions.buildTools
 import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -18,7 +17,7 @@ open class AndroidBaseConventionPlugin : Plugin<Project> {
 
         target.extensions.configure(CommonExtension::class.java) {
             compileSdk = Versions.compileSdk
-            buildToolsVersion = target.buildTools
+            buildToolsVersion = target.buildToolsVersion
             defaultConfig {
                 minSdk = Versions.minSdk
             }
@@ -32,9 +31,6 @@ open class AndroidBaseConventionPlugin : Plugin<Project> {
             kotlinOptions {
                 // https://youtrack.jetbrains.com/issue/KT-55947
                 jvmTarget = Versions.java.toString()
-                // https://issuetracker.google.com/issues/250197571
-                // https://kotlinlang.org/docs/whatsnew1520.html#string-concatenation-via-invokedynamic
-                freeCompilerArgs += "-Xstring-concat=inline"
             }
         }
 

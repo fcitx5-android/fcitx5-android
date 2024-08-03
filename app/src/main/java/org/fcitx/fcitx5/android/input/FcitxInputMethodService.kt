@@ -473,14 +473,14 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // skip \n, because fcitx wants \r for return
         if (charCode > 0 && charCode != '\t'.code && charCode != '\n'.code) {
             postFcitxJob {
-                sendKey(charCode, states.states, up, timestamp)
+                sendKey(charCode, states.states, event.scanCode, up, timestamp)
             }
             return true
         }
         val keySym = KeySym.fromKeyEvent(event)
         if (keySym != null) {
             postFcitxJob {
-                sendKey(keySym, states, up, timestamp)
+                sendKey(keySym, states, event.scanCode, up, timestamp)
             }
             return true
         }

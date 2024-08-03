@@ -28,6 +28,7 @@ GitHub: [![release version](https://img.shields.io/github/v/release/fcitx5-andro
 - Japanese (via [Anthy Plugin](./plugin/anthy))
 - Korean (via [Hangul Plugin](./plugin/hangul))
 - Sinhala (via [Sayura Plugin](./plugin/sayura))
+- Thai (via [Thai Plugin](./plugin/thai))
 - Generic (via [RIME Plugin](./plugin/rime), supports importing custom schemas)
 
 ### Implemented Features

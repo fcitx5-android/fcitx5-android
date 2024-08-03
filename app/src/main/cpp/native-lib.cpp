@@ -81,7 +81,7 @@ public:
         return uv_run(get_event_base(), UV_RUN_ONCE);
     }
 
-    void startup(fcitx::AndroidLibraryDependency dependency,
+    void startup(const fcitx::AndroidLibraryDependency& dependency,
                  const std::function<void(fcitx::AddonInstance *)> &setupCallback) {
         p_instance = std::make_unique<fcitx::Instance>(0, nullptr);
         p_instance->addonManager().registerLoader(std::make_unique<fcitx::AndroidSharedLibraryLoader>(dependency));
@@ -732,28 +732,31 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_reloadFcitxConfig(JNIEnv *env, jclass c
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxString(JNIEnv *env, jclass clazz, jstring key, jint state, jboolean up, jint timestamp) {
+Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxString(JNIEnv *env, jclass clazz, jstring key, jint state, jint code, jboolean up, jint timestamp) {
     RETURN_IF_NOT_RUNNING
     fcitx::Key parsedKey{fcitx::Key::keySymFromString(CString(env, key)),
-                         fcitx::KeyStates(static_cast<uint32_t>(state))};
+                         fcitx::KeyStates(static_cast<uint32_t>(state)),
+                         code + /* evdev offset */ 8};
     Fcitx::Instance().sendKey(parsedKey, up, timestamp);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxChar(JNIEnv *env, jclass clazz, jchar c, jint state, jboolean up, jint timestamp) {
+Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxChar(JNIEnv *env, jclass clazz, jchar c, jint state, jint code, jboolean up, jint timestamp) {
     RETURN_IF_NOT_RUNNING
     const fcitx::Key parsedKey{fcitx::Key::keySymFromString(reinterpret_cast<const char *>(&c)),
-                               fcitx::KeyStates(static_cast<uint32_t>(state))};
+                               fcitx::KeyStates(static_cast<uint32_t>(state)),
+                               code + /* evdev offset */ 8};
     Fcitx::Instance().sendKey(parsedKey, up, timestamp);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeySymToFcitx(JNIEnv *env, jclass clazz, jint sym, jint state, jboolean up, jint timestamp) {
+Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeySymToFcitx(JNIEnv *env, jclass clazz, jint sym, jint state, jint code, jboolean up, jint timestamp) {
     RETURN_IF_NOT_RUNNING
     fcitx::Key key{fcitx::KeySym(static_cast<uint32_t>(sym)),
-                   fcitx::KeyStates(static_cast<uint32_t>(state))};
+                   fcitx::KeyStates(static_cast<uint32_t>(state)),
+                   code + /* evdev offset */ 8};
     Fcitx::Instance().sendKey(key, up, timestamp);
 }
 

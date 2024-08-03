@@ -19,13 +19,6 @@ jobs:
           - macos-13
           - macos-14
           - windows-2022
-        abi:
-          - armeabi-v7a
-          - arm64-v8a
-          - x86
-          - x86_64
-    env:
-      BUILD_ABI: ${{ matrix.abi }}
     steps:
       - name: Fetch source code
         uses: actions/checkout@v4
@@ -81,7 +74,7 @@ jobs:
       - name: Upload app
         uses: actions/upload-artifact@v4
         with:
-          name: app-${{ matrix.os }}-${{ matrix.abi }}
+          name: app-${{ matrix.os }}
           path: app/build/outputs/apk/debug/
 
       - name: Pack plugins
@@ -99,5 +92,5 @@ jobs:
       - name: Upload plugins
         uses: actions/upload-artifact@v4
         with:
-          name: plugins-${{ matrix.os }}-${{ matrix.abi }}
+          name: plugins-${{ matrix.os }}
           path: plugins-to-upload

@@ -17,14 +17,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupWithNavController
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.databinding.ActivityMainBinding
@@ -58,13 +57,14 @@ class MainActivity : AppCompatActivity() {
             windowInsets
         }
         setContentView(binding.root)
-        setSupportActionBar(binding.toolbar)
-        val appBarConfiguration = AppBarConfiguration(
-            // always show back icon regardless of `navController.currentDestination`
-            topLevelDestinationIds = setOf()
-        )
+        // always show toolbar back arrow icon
+        // https://android.googlesource.com/platform/frameworks/support/+/32e643112d0217619237a0d7101b50919c6caf51/navigation/navigation-ui/src/main/java/androidx/navigation/ui/AbstractAppBarOnDestinationChangedListener.kt#80
+        binding.toolbar.navigationIcon = DrawerArrowDrawable(this).apply { progress = 1f }
+        // show menu icon and other action icons on toolbar
+        // don't use `setSupportActionBar(binding.toolbar)` here,
+        // because navController would change toolbar title, we need to control it by ourselves
+        setupToolbarMenu(binding.toolbar.menu)
         navController = binding.navHostFragment.getFragment<NavHostFragment>().navController
-        binding.toolbar.setupWithNavController(navController, appBarConfiguration)
         binding.toolbar.setNavigationOnClickListener {
             // prevent navigate up when child fragment has enabled `OnBackPressedCallback`
             if (onBackPressedDispatcher.hasEnabledCallbacks()) {
@@ -81,6 +81,7 @@ class MainActivity : AppCompatActivity() {
             binding.toolbar.elevation = dp(if (it) 4f else 0f)
         }
         navController.addOnDestinationChangedListener { _, dest, _ ->
+            dest.label?.let { viewModel.setToolbarTitle(it.toString()) }
             when (dest.id) {
                 R.id.themeFragment -> viewModel.disableToolbarShadow()
                 else -> viewModel.enableToolbarShadow()
@@ -116,7 +117,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+    private fun setupToolbarMenu(menu: Menu) {
         menu.apply {
             add(R.string.save).apply {
                 icon = drawable(R.drawable.ic_baseline_save_24)!!.apply {
@@ -191,7 +192,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        return true
     }
 
     private var needNotifications by AppPrefs.getInstance().internal.needNotifications

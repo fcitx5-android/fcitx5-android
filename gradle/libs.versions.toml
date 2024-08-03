@@ -1,5 +1,5 @@
 [versions]
-androidGradlePlugin = "8.5.0"
+androidGradlePlugin = "8.5.1"
 androidDesugarJDKLibs = "2.0.4"
 kotlin = "1.9.24"
 ksp = "1.9.24-1.0.20"

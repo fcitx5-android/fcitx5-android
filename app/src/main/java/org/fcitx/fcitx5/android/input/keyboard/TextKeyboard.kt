@@ -11,6 +11,8 @@ import androidx.annotation.Keep
 import androidx.core.view.allViews
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
+import org.fcitx.fcitx5.android.core.KeyState
+import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
@@ -111,29 +113,40 @@ class TextKeyboard(
     private var punctuationMapping: Map<String, String> = mapOf()
     private fun transformPunctuation(p: String) = punctuationMapping.getOrDefault(p, p)
 
-    private fun transformInputString(c: String): String {
-        if (c.length != 1) return c
-        if (c[0].isLetter()) return transformAlphabet(c)
-        return transformPunctuation(c)
-    }
-
     override fun onAction(action: KeyAction, source: KeyActionListener.Source) {
+        var transformed = action
         when (action) {
-            is KeyAction.FcitxKeyAction -> if (source == KeyActionListener.Source.Keyboard) {
-                transformKeyAction(action)
+            is KeyAction.FcitxKeyAction -> when (source) {
+                KeyActionListener.Source.Keyboard -> {
+                    when (capsState) {
+                        CapsState.None -> {
+                            transformed = action.copy(act = action.act.lowercase())
+                        }
+                        CapsState.Once -> {
+                            transformed = action.copy(
+                                act = action.act.uppercase(),
+                                states = KeyStates(KeyState.Virtual, KeyState.Shift)
+                            )
+                            switchCapsState()
+                        }
+                        CapsState.Lock -> {
+                            transformed = action.copy(
+                                act = action.act.uppercase(),
+                                states = KeyStates(KeyState.Virtual, KeyState.CapsLock)
+                            )
+                        }
+                    }
+                }
+                KeyActionListener.Source.Popup -> {
+                    if (capsState == CapsState.Once) {
+                        switchCapsState()
+                    }
+                }
             }
             is KeyAction.CapsAction -> switchCapsState(action.lock)
             else -> {}
         }
-        super.onAction(action, source)
-    }
-
-    private fun transformKeyAction(action: KeyAction.FcitxKeyAction) {
-        if (action.act.length > 1) {
-            return
-        }
-        action.act = transformAlphabet(action.act)
-        if (capsState == CapsState.Once) switchCapsState()
+        super.onAction(transformed, source)
     }
 
     override fun onAttach() {
@@ -156,12 +169,21 @@ class TextKeyboard(
             append(ime.displayName)
             ime.subMode.run { label.ifEmpty { name.ifEmpty { null } } }?.let { append(" ($it)") }
         }
+        if (capsState != CapsState.None) {
+            switchCapsState()
+        }
+    }
+
+    private fun transformPopupPreview(c: String): String {
+        if (c.length != 1) return c
+        if (c[0].isLetter()) return transformAlphabet(c)
+        return transformPunctuation(c)
     }
 
     override fun onPopupAction(action: PopupAction) {
         val newAction = when (action) {
-            is PopupAction.PreviewAction -> action.copy(content = transformInputString(action.content))
-            is PopupAction.PreviewUpdateAction -> action.copy(content = transformInputString(action.content))
+            is PopupAction.PreviewAction -> action.copy(content = transformPopupPreview(action.content))
+            is PopupAction.PreviewUpdateAction -> action.copy(content = transformPopupPreview(action.content))
             is PopupAction.ShowKeyboardAction -> {
                 val label = action.keyboard.label
                 if (label.length == 1 && label[0].isLetter())
@@ -174,13 +196,18 @@ class TextKeyboard(
     }
 
     private fun switchCapsState(lock: Boolean = false) {
-        capsState = if (lock) when (capsState) {
-            CapsState.Lock -> CapsState.None
-            else -> CapsState.Lock
-        } else when (capsState) {
-            CapsState.None -> CapsState.Once
-            else -> CapsState.None
-        }
+        capsState =
+            if (lock) {
+                when (capsState) {
+                    CapsState.Lock -> CapsState.None
+                    else -> CapsState.Lock
+                }
+            } else {
+                when (capsState) {
+                    CapsState.None -> CapsState.Once
+                    else -> CapsState.None
+                }
+            }
         updateCapsButtonIcon()
         updateAlphabetKeys()
     }

@@ -1,0 +1,11 @@
+{
+    "uniqueId": "GNU/libiconv",
+    "artifactVersion": "1.17",
+    "description": "Text encoding conversion library",
+    "name": "GNU/libiconv",
+    "website": "https://savannah.gnu.org/projects/libiconv",
+    "tag": "native",
+    "licenses": [
+        "LGPL-2.1-or-later"
+    ]
+}
