@@ -133,8 +133,10 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
             // Make data descriptor depend on fcitx component if have
             // Since we are using finalizeDsl, there is no need to do afterEvaluate
             finalizeDsl {
-                target.tasks.findByName(FcitxComponentPlugin.INSTALL_TASK)?.also { componentTask ->
-                    target.tasks.findByName(DataDescriptorPlugin.TASK)?.dependsOn(componentTask)
+                target.tasks.findByName(DataDescriptorPlugin.TASK)?.also { dataDescriptorTask ->
+                    FcitxComponentPlugin.DEPENDENT_TASKS.forEach { componentTask ->
+                        dataDescriptorTask.dependsOn(componentTask)
+                    }
                 }
                 // applicationId is not set upon apply
                 it.defaultConfig {

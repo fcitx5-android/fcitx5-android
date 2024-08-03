@@ -19,11 +19,15 @@ class FcitxComponentPlugin : Plugin<Project> {
 
     abstract class FcitxComponentExtension {
         var installLibraries: List<String> = emptyList()
+        var excludeFiles: List<String> = emptyList()
     }
 
     companion object {
         const val INSTALL_TASK = "installFcitxComponent"
+        const val DELETE_TASK = "deleteFcitxComponentExcludeFiles"
         const val CLEAN_TASK = "cleanFcitxComponents"
+
+        val DEPENDENT_TASKS = arrayOf(INSTALL_TASK, DELETE_TASK)
     }
 
     override fun apply(target: Project) {
@@ -37,6 +41,16 @@ class FcitxComponentPlugin : Plugin<Project> {
                 val project = rootProject.project(":lib:$it")
                 registerCMakeTask(target, "generate-desktop-file", "config", project)
                 registerCMakeTask(target, "translation-file", "translation", project)
+            }
+            if (ext.excludeFiles.isNotEmpty()) {
+                target.task(DELETE_TASK) {
+                    dependsOn(target.tasks.findByName(INSTALL_TASK))
+                    doLast {
+                        ext.excludeFiles.forEach {
+                            project.assetsDir.resolve(it).delete()
+                        }
+                    }
+                }
             }
         }
     }
