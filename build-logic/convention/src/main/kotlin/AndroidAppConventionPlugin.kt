@@ -18,7 +18,6 @@ import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.io.File
 
 /**
  * The prototype of an Android Application
@@ -37,23 +36,20 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
         target.extensions.configure<BaseAppModuleExtension> {
             defaultConfig {
                 targetSdk = Versions.targetSdk
-                versionCode = Versions.calculateVersionCode(target.buildABI)
+                versionCode = Versions.calculateVersionCode()
                 versionName = target.buildVersionName
             }
             buildTypes {
                 release {
                     isMinifyEnabled = true
                     isShrinkResources = true
-                    // config singing key for play release
-                    signingConfig = with(PlayRelease) {
-                        if (target.buildPlayRelease) {
-                            signingConfigs.create("playRelease") {
-                                storeFile = File(target.storeFile!!)
-                                storePassword = target.storePassword
-                                keyAlias = target.keyAlias
-                                keyPassword = target.keyPassword
-                            }
-                        } else null
+                    signingConfig = target.signKey?.let {
+                        signingConfigs.create("release") {
+                            storeFile = it
+                            storePassword = target.signKeyPwd
+                            keyAlias = target.signKeyAlias
+                            keyPassword = target.signKeyPwd
+                        }
                     }
                 }
                 debug {

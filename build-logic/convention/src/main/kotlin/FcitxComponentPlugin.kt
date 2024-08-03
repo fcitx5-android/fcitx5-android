@@ -27,8 +27,6 @@ class FcitxComponentPlugin : Plugin<Project> {
     }
 
     override fun apply(target: Project) {
-        target.pluginManager.apply("org.fcitx.fcitx5.android.android-sdk-path")
-        target.pluginManager.apply("org.fcitx.fcitx5.android.cmake-dir")
         registerCMakeTask(target, "generate-desktop-file", "config")
         registerCMakeTask(target, "translation-file", "translation")
         registerCleanTask(target)
@@ -52,29 +50,27 @@ class FcitxComponentPlugin : Plugin<Project> {
         component: String,
         sourceProject: Project = project
     ) {
-        val dependencyTask = project.tasks.findByName(INSTALL_TASK) ?: project.task(INSTALL_TASK)
         val taskName = if (project === sourceProject) {
             "installProject${component.capitalized()}"
         } else {
             "installLibrary${component.capitalized()}[${sourceProject.name}]"
         }
-        project.task(taskName) {
-            runAfterNativeConfigure(sourceProject)
-
-            doLast {
-                project.exec {
-                    workingDir = sourceProject.cmakeDir
-                    commandLine(project.cmakeBinary, "--build", ".", "--target", target)
+        val task = project.task(taskName) {
+            runAfterNativeConfigure(sourceProject) { abiModel ->
+                val cmake = abiModel.variant.module.cmake!!.cmakeExe!!
+                sourceProject.exec {
+                    workingDir = abiModel.cxxBuildFolder
+                    commandLine(cmake, "--build", ".", "--target", target)
                 }
-                project.exec {
-                    workingDir = sourceProject.cmakeDir
+                sourceProject.exec {
+                    workingDir = abiModel.cxxBuildFolder
                     environment("DESTDIR", project.assetsDir.absolutePath)
-                    commandLine(project.cmakeBinary, "--install", ".", "--component", component)
+                    commandLine(cmake, "--install", ".", "--component", component)
                 }
             }
-        }.also {
-            dependencyTask.dependsOn(it)
         }
+        val dependencyTask = project.tasks.findByName(INSTALL_TASK) ?: project.task(INSTALL_TASK)
+        dependencyTask.dependsOn(task)
     }
 
     private fun registerCleanTask(project: Project) {

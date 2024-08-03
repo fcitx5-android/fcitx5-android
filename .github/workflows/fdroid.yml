@@ -20,7 +20,7 @@ defaults:
 
 jobs:
   fdroid-build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     container: registry.gitlab.com/fdroid/fdroidserver:buildserver-bookworm
     strategy:
       matrix:

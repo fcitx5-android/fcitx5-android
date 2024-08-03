@@ -9,10 +9,9 @@ jobs:
   develop:
     strategy:
       matrix:
-        #  Nix doesn't support Android toolchain on aarch64-darwin yet
-        # https://github.com/NixOS/nixpkgs/issues/303968
-#        os: [ubuntu-latest, macOS-latest]
-        os: [ubuntu-latest]
+        os:
+          - ubuntu-22.04
+          - macos-14
     runs-on: ${{ matrix.os }}
     steps:
       - name: Fetch source code
