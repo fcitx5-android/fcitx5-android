@@ -26,7 +26,10 @@ fun Task.runAfterNativeConfigure(project: Project, action: (abiModel: CxxAbiMode
     lateinit var abiModel: CxxAbiModel
     project.tasks.withType<ExternalNativeBuildJsonTask>().all externalNativeBuild@{
         this@runAfterNativeConfigure.mustRunAfter(this@externalNativeBuild)
-        doLast {
+        doFirst {
+            // `CxxAbiModel.rewriteWithLocations` requires a "Non-default logger"
+            // https://cs.android.com/android-studio/platform/tools/base/+/mirror-goog-studio-main:build-system/gradle-core/src/main/java/com/android/build/gradle/internal/cxx/configure/NativeLocationsBuildService.kt;drc=b5516899015633c99dc64b510d9729c4e001e89c;l=67
+            // just supply a random LoggingEnvironment or whatever this is
             PassThroughRecordingLoggingEnvironment().use {
                 abiModel = this@externalNativeBuild.abiModel()
                     .rewriteWithLocations(nativeLocationsBuildService.get())
