@@ -30,7 +30,7 @@ class NativeAppConventionPlugin : NativeBaseConventionPlugin() {
             onVariants { variant ->
                 // different version code based on abi
                 variant.outputs.forEach { output ->
-                    val abi = output.filters.find { it.filterType == FilterType.ABI }?.identifier
+                    val abi = output.filters.first { it.filterType == FilterType.ABI }.identifier
                     output.versionCode.set(Versions.calculateVersionCode(abi))
                 }
             }
