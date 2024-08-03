@@ -134,9 +134,9 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
             // Since we are using finalizeDsl, there is no need to do afterEvaluate
             finalizeDsl {
                 target.tasks.findByName(DataDescriptorPlugin.TASK)?.also { dataDescriptorTask ->
-                    FcitxComponentPlugin.DEPENDENT_TASKS.forEach { componentTask ->
-                        dataDescriptorTask.dependsOn(componentTask)
-                    }
+                    FcitxComponentPlugin.DEPENDENT_TASKS
+                        .mapNotNull { taskName -> target.tasks.findByName(taskName) }
+                        .forEach { componentTask -> dataDescriptorTask.dependsOn(componentTask) }
                 }
                 // applicationId is not set upon apply
                 it.defaultConfig {
