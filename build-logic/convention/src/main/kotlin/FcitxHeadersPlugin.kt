@@ -22,21 +22,18 @@ class FcitxHeadersPlugin : Plugin<Project> {
         get() = file("build/headers")
 
     override fun apply(target: Project) {
-        target.pluginManager.apply("org.fcitx.fcitx5.android.android-sdk-path")
-        target.pluginManager.apply("org.fcitx.fcitx5.android.cmake-dir")
         registerInstallTask(target)
         registerCleanTask(target)
     }
 
     private fun registerInstallTask(project: Project) {
         val installHeadersTask = project.task(INSTALL_TASK) {
-            runAfterNativeConfigure(project)
-
-            doLast {
+            runAfterNativeConfigure(project) action@{ abiModel ->
+                val cmake = abiModel.cmake?.effectiveConfiguration?.cmakeExecutable ?: return@action
                 project.exec {
-                    workingDir = project.cmakeDir
+                    workingDir = abiModel.cxxBuildFolder
                     environment("DESTDIR", project.headersInstallDir.absolutePath)
-                    commandLine(project.cmakeBinary, "--install", ".", "--component", "header")
+                    commandLine(cmake, "--install", ".", "--component", "header")
                 }
             }
         }
