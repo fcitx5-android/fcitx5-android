@@ -50,16 +50,10 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
                 R.string.button_haptic_feedback,
                 "haptic_on_keypress",
                 InputFeedbackMode.FollowingSystem,
-                InputFeedbackMode,
                 listOf(
-                    InputFeedbackMode.FollowingSystem,
-                    InputFeedbackMode.Enabled,
-                    InputFeedbackMode.Disabled
-                ),
-                listOf(
-                    R.string.following_system_settings,
                     R.string.enabled,
-                    R.string.disabled
+                    R.string.disabled,
+                    R.string.following_system_settings
                 )
             )
         val hapticOnKeyUp = switch(
@@ -117,16 +111,10 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             R.string.button_sound,
             "sound_on_keypress",
             InputFeedbackMode.FollowingSystem,
-            InputFeedbackMode,
             listOf(
-                InputFeedbackMode.FollowingSystem,
-                InputFeedbackMode.Enabled,
-                InputFeedbackMode.Disabled
-            ),
-            listOf(
-                R.string.following_system_settings,
                 R.string.enabled,
-                R.string.disabled
+                R.string.disabled,
+                R.string.following_system_settings
             )
         )
         val soundOnKeyPressVolume = int(
@@ -161,12 +149,6 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             R.string.swipe_symbol_behavior,
             "swipe_symbol_behavior",
             SwipeSymbolDirection.Down,
-            SwipeSymbolDirection,
-            listOf(
-                SwipeSymbolDirection.Up,
-                SwipeSymbolDirection.Down,
-                SwipeSymbolDirection.Disabled
-            ),
             listOf(
                 R.string.swipe_up,
                 R.string.swipe_down,
@@ -186,13 +168,6 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             R.string.space_long_press_behavior,
             "space_long_press_behavior",
             SpaceLongPressBehavior.None,
-            SpaceLongPressBehavior,
-            listOf(
-                SpaceLongPressBehavior.None,
-                SpaceLongPressBehavior.Enumerate,
-                SpaceLongPressBehavior.ToggleActivate,
-                SpaceLongPressBehavior.ShowPicker
-            ),
             listOf(
                 R.string.space_behavior_none,
                 R.string.space_behavior_enumerate,
@@ -208,12 +183,6 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             R.string.lang_switch_key_behavior,
             "lang_switch_key_behavior",
             LangSwitchBehavior.Enumerate,
-            LangSwitchBehavior,
-            listOf(
-                LangSwitchBehavior.Enumerate,
-                LangSwitchBehavior.ToggleActivate,
-                LangSwitchBehavior.NextInputMethodApp
-            ),
             listOf(
                 R.string.space_behavior_enumerate,
                 R.string.space_behavior_activate,
@@ -285,12 +254,6 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             R.string.horizontal_candidate_style,
             "horizontal_candidate_style",
             HorizontalCandidateMode.AutoFillWidth,
-            HorizontalCandidateMode,
-            listOf(
-                HorizontalCandidateMode.NeverFillWidth,
-                HorizontalCandidateMode.AutoFillWidth,
-                HorizontalCandidateMode.AlwaysFillWidth,
-            ),
             listOf(
                 R.string.horizontal_candidate_never_fill,
                 R.string.horizontal_candidate_auto_fill,
@@ -301,11 +264,6 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             R.string.expanded_candidate_style,
             "expanded_candidate_style",
             ExpandedCandidateStyle.Grid,
-            ExpandedCandidateStyle,
-            listOf(
-                ExpandedCandidateStyle.Grid,
-                ExpandedCandidateStyle.Flexbox
-            ),
             listOf(
                 R.string.expanded_candidate_style_grid,
                 R.string.expanded_candidate_style_flexbox

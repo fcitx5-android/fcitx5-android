@@ -10,8 +10,4 @@ enum class HorizontalCandidateMode {
     NeverFillWidth,
     AutoFillWidth,
     AlwaysFillWidth;
-
-    companion object : ManagedPreference.StringLikeCodec<HorizontalCandidateMode> {
-        override fun decode(raw: String): HorizontalCandidateMode = valueOf(raw)
-    }
 }
