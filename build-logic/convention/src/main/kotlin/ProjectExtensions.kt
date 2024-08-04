@@ -2,11 +2,11 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later
  * SPDX-FileCopyrightText: Copyright 2024 Fcitx5 for Android Contributors
  */
+
+import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.artifacts.VersionCatalog
-import org.gradle.api.artifacts.VersionCatalogsExtension
-import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.the
 import java.io.ByteArrayOutputStream
 import java.io.File
 import kotlin.io.encoding.Base64
@@ -20,8 +20,7 @@ fun Project.runCmd(cmd: String): String = ByteArrayOutputStream().use {
     it.toString().trim()
 }
 
-val Project.versionCatalog: VersionCatalog
-    get() = extensions.getByType<VersionCatalogsExtension>().named("libs")
+val Project.libs get() = the<LibrariesForLibs>()
 
 val Project.assetsDir: File
     get() = file("src/main/assets").also { it.mkdirs() }

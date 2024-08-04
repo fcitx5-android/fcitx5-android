@@ -145,13 +145,7 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
             }
         }
 
-        runCatching {
-            target.pluginManager.apply(
-                target.versionCatalog.findPlugin("aboutlibraries").get().get().pluginId
-            )
-        }.onFailure {
-            it.printStackTrace()
-        }
+        target.pluginManager.apply(target.libs.plugins.aboutlibraries.get().pluginId)
 
         target.configure<AboutLibrariesExtension> {
             excludeFields = arrayOf(
@@ -162,14 +156,7 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
             includePlatform = false
         }
 
-        runCatching {
-            target.dependencies.add(
-                "coreLibraryDesugaring",
-                target.versionCatalog.findLibrary("android.desugarJDKLibs").get()
-            )
-        }.onFailure {
-            it.printStackTrace()
-        }
+        target.dependencies.add("coreLibraryDesugaring", target.libs.android.desugarJDKLibs)
     }
 
 }
