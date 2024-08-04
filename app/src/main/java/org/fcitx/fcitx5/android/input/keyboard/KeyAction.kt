@@ -11,6 +11,10 @@ import org.fcitx.fcitx5.android.input.picker.PickerWindow
 
 sealed class KeyAction {
 
+    enum class CursorMoveDirection {
+        LEFT, RIGHT
+    }
+
     data class FcitxKeyAction(
         val act: String,
         val code: Int = ScancodeMapping.charToScancode(act[0]),
@@ -34,6 +38,12 @@ sealed class KeyAction {
     data class LayoutSwitchAction(val act: String = "") : KeyAction()
 
     data class MoveSelectionAction(val start: Int = 0, val end: Int = 0) : KeyAction()
+
+    data class MoveCursorAction(val direction: CursorMoveDirection) : KeyAction()
+
+    data class TrackCursorAction(val direction: CursorMoveDirection) : KeyAction()
+
+    data object UntrackCursorAction : KeyAction()
 
     data class DeleteSelectionAction(val totalCnt: Int = 0) : KeyAction()
 

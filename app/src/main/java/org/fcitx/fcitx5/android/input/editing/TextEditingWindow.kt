@@ -13,7 +13,10 @@ import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.clipboard.ClipboardWindow
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
+import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
+import org.fcitx.fcitx5.android.input.keyboard.KeyAction
+import org.fcitx.fcitx5.android.input.keyboard.KeyActionListener
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.mechdancer.dependency.manager.must
@@ -24,6 +27,7 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
     private val service: FcitxInputMethodService by manager.inputMethodService()
     private val windowManager: InputWindowManager by manager.must()
     private val theme by manager.theme()
+    private val commonKeyActionListener: CommonKeyActionListener by manager.must()
 
     private val buttonRipple by ThemeManager.prefs.keyRippleEffect
     private val buttonBorder by ThemeManager.prefs.keyBorder
@@ -44,13 +48,29 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
                 onRepeatListener = { block() }
             }
 
-            leftButton.onClickWithRepeating { sendDirectionKey(KeyEvent.KEYCODE_DPAD_LEFT) }
+            val source = KeyActionListener.Source.Keyboard
+
+            leftButton.onClickWithRepeating {
+                val left = KeyAction.CursorMoveDirection.LEFT
+                commonKeyActionListener.listener.run {
+                    onKeyAction(KeyAction.TrackCursorAction(left), source)
+                    onKeyAction(KeyAction.MoveCursorAction(left), source)
+                    onKeyAction(KeyAction.UntrackCursorAction, source)
+                }
+            }
 
             upButton.onClickWithRepeating { sendDirectionKey(KeyEvent.KEYCODE_DPAD_UP) }
 
             downButton.onClickWithRepeating { sendDirectionKey(KeyEvent.KEYCODE_DPAD_DOWN) }
 
-            rightButton.onClickWithRepeating { sendDirectionKey(KeyEvent.KEYCODE_DPAD_RIGHT) }
+            rightButton.onClickWithRepeating {
+                val right = KeyAction.CursorMoveDirection.RIGHT
+                commonKeyActionListener.listener.run {
+                    onKeyAction(KeyAction.TrackCursorAction(right), source)
+                    onKeyAction(KeyAction.MoveCursorAction(right), source)
+                    onKeyAction(KeyAction.UntrackCursorAction, source)
+                }
+            }
 
             homeButton.setOnClickListener { sendDirectionKey(KeyEvent.KEYCODE_MOVE_HOME) }
             endButton.setOnClickListener { sendDirectionKey(KeyEvent.KEYCODE_MOVE_END) }

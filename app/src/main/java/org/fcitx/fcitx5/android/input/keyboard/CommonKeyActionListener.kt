@@ -4,10 +4,13 @@
  */
 package org.fcitx.fcitx5.android.input.keyboard
 
+import android.view.inputmethod.ExtractedTextRequest
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.FcitxAPI
+import org.fcitx.fcitx5.android.core.FcitxKeyMapping
+import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.broadcast.PreeditEmptyStateComponent
@@ -63,6 +66,8 @@ class CommonKeyActionListener :
     private val langSwitchKeyBehavior by kbdPrefs.langSwitchKeyBehavior
 
     private var backspaceSwipeState = Stopped
+    private var cursorPosition = -1
+    private var cursorMaximum = -1
 
     private val keepComposingIMs = arrayOf("keyboard-us", "unikey")
 
@@ -132,6 +137,55 @@ class CommonKeyActionListener :
                     }
                 }
                 is ShowInputMethodPickerAction -> showInputMethodPicker()
+                is KeyAction.MoveCursorAction -> {
+                    if (!preeditState.isEmpty || cursorMaximum == -1) {
+                        val sym = when (action.direction) {
+                            KeyAction.CursorMoveDirection.LEFT -> {
+                                FcitxKeyMapping.FcitxKey_Left
+                            }
+                            KeyAction.CursorMoveDirection.RIGHT -> {
+                                FcitxKeyMapping.FcitxKey_Right
+                            }
+                        }
+                        service.postFcitxJob { sendKey(sym) }
+                        return@KeyActionListener
+                    }
+
+                    val ic = service.currentInputConnection
+                    when (action.direction) {
+                        KeyAction.CursorMoveDirection.LEFT -> {
+                            if (cursorPosition != 0) {
+                                cursorPosition--
+                                ic.setSelection(cursorPosition, cursorPosition)
+                            }
+                        }
+                        KeyAction.CursorMoveDirection.RIGHT -> {
+                            if (cursorPosition != cursorMaximum) {
+                                cursorPosition++
+                                ic.setSelection(cursorPosition, cursorPosition)
+                            }
+                        }
+                    }
+                }
+                is KeyAction.TrackCursorAction -> {
+                    if (cursorMaximum != -1) return@KeyActionListener
+                    val ic = service.currentInputConnection
+                    val extracted = ic?.getExtractedText(
+                        ExtractedTextRequest(), 0
+                    )
+                    if (extracted != null) {
+                        cursorMaximum = extracted.text.length
+                    }
+                    val selection = service.currentInputSelection
+                    cursorPosition = when (action.direction) {
+                        KeyAction.CursorMoveDirection.LEFT -> selection.start
+                        KeyAction.CursorMoveDirection.RIGHT -> selection.end
+                    }
+                }
+                is KeyAction.UntrackCursorAction -> {
+                    cursorMaximum = -1
+                    cursorPosition = -1
+                }
                 is MoveSelectionAction -> {
                     when (backspaceSwipeState) {
                         Stopped -> {

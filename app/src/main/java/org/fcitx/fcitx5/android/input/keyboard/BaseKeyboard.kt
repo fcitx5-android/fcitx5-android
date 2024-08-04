@@ -13,10 +13,7 @@ import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
 import androidx.core.view.updateLayoutParams
-import org.fcitx.fcitx5.android.core.FcitxKeyMapping
 import org.fcitx.fcitx5.android.core.InputMethodEntry
-import org.fcitx.fcitx5.android.core.KeyStates
-import org.fcitx.fcitx5.android.core.KeySym
 import org.fcitx.fcitx5.android.data.InputFeedbacks
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
@@ -167,14 +164,18 @@ abstract class BaseKeyboard(
                         GestureType.Move -> when (val count = event.countX) {
                             0 -> false
                             else -> {
-                                val sym =
-                                    if (count > 0) FcitxKeyMapping.FcitxKey_Right else FcitxKeyMapping.FcitxKey_Left
-                                val action = KeyAction.SymAction(KeySym(sym), KeyStates.Empty)
+                                val direction = if (count > 0) KeyAction.CursorMoveDirection.RIGHT
+                                else KeyAction.CursorMoveDirection.LEFT
                                 repeat(count.absoluteValue) {
-                                    onAction(action)
+                                    onAction(KeyAction.TrackCursorAction(direction))
+                                    onAction(KeyAction.MoveCursorAction(direction))
                                 }
                                 true
                             }
+                        }
+                        GestureType.Up -> {
+                            onAction(KeyAction.UntrackCursorAction)
+                            false
                         }
                         else -> false
                     }
