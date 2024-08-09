@@ -7,12 +7,6 @@ plugins {
 android {
     namespace = "org.fcitx.fcitx5.android.lib.common"
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-    }
-
     buildFeatures {
         aidl = true
     }
