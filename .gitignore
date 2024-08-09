@@ -108,3 +108,6 @@ lint/tmp/
 
 # Android Profiling
 *.hprof
+
+### Kotlin ###
+.kotlin/

@@ -14,6 +14,7 @@ android {
         }
     }
     publishing {
+        // :lib:plugin_base contains different AndroidManifest.xml for debug and release variant
         multipleVariants { allVariants() }
     }
 }

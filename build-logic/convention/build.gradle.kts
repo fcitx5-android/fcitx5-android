@@ -1,3 +1,5 @@
+import org.gradle.accessors.dm.LibrariesForLibs
+
 plugins {
     `kotlin-dsl`
     kotlin("plugin.serialization") version embeddedKotlinVersion
@@ -20,6 +22,9 @@ dependencies {
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.aboutlibraries.plugin)
     implementation(libs.kotlinx.serialization.json)
+    // A workaround to enable version catalog usage in the convention plugin,
+    // see https://github.com/gradle/gradle/issues/15383#issuecomment-779893192
+    implementation(files(LibrariesForLibs::class.java.protectionDomain.codeSource.location))
 }
 
 gradlePlugin {

@@ -7,6 +7,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -28,9 +29,9 @@ open class AndroidBaseConventionPlugin : Plugin<Project> {
         }
 
         target.tasks.withType<KotlinCompile> {
-            kotlinOptions {
+            compilerOptions {
                 // https://youtrack.jetbrains.com/issue/KT-55947
-                jvmTarget = Versions.java.toString()
+                jvmTarget.set(JvmTarget.fromTarget(Versions.java.toString()))
             }
         }
 
