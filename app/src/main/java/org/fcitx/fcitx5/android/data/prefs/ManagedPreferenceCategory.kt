@@ -49,6 +49,21 @@ abstract class ManagedPreferenceCategory(
         return pref
     }
 
+    protected inline fun <reified T> enumList(
+        @StringRes
+        title: Int,
+        key: String,
+        defaultValue: T,
+        noinline enableUiOn: (() -> Boolean)? = null
+    ): ManagedPreference.PStringLike<T> where T : Enum<T>, T : ManagedPreferenceEnum {
+        val codec = object : ManagedPreference.StringLikeCodec<T> {
+            override fun decode(raw: String): T = enumValueOf(raw)
+        }
+        val entryValues = enumValues<T>().toList()
+        val entryLabels = entryValues.map { it.stringRes }
+        return list(title, key, defaultValue, codec, entryValues, entryLabels, enableUiOn)
+    }
+
     protected fun int(
         @StringRes
         title: Int,
