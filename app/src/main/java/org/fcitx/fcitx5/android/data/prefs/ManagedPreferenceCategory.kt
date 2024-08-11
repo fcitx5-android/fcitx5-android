@@ -59,9 +59,8 @@ abstract class ManagedPreferenceCategory(
         val codec = object : ManagedPreference.StringLikeCodec<T> {
             override fun decode(raw: String): T = enumValueOf(raw)
         }
-        val values = enumValues<T>()
-        val entryValues = values.toList()
-        val entryLabels = values.map { it.stringRes }.toList()
+        val entryValues = enumValues<T>().toList()
+        val entryLabels = entryValues.map { it.stringRes }
         return list(title, key, defaultValue, codec, entryValues, entryLabels, enableUiOn)
     }
 
