@@ -46,15 +46,10 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
 
     inner class Keyboard : ManagedPreferenceCategory(R.string.keyboard, sharedPreferences) {
         val hapticOnKeyPress =
-            list(
+            enumList(
                 R.string.button_haptic_feedback,
                 "haptic_on_keypress",
-                InputFeedbackMode.FollowingSystem,
-                listOf(
-                    R.string.enabled,
-                    R.string.disabled,
-                    R.string.following_system_settings
-                )
+                InputFeedbackMode.FollowingSystem
             )
         val hapticOnKeyUp = switch(
             R.string.button_up_haptic_feedback,
@@ -107,15 +102,10 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             buttonLongPressVibrationAmplitude = secondary
         }
 
-        val soundOnKeyPress = list(
+        val soundOnKeyPress = enumList(
             R.string.button_sound,
             "sound_on_keypress",
-            InputFeedbackMode.FollowingSystem,
-            listOf(
-                R.string.enabled,
-                R.string.disabled,
-                R.string.following_system_settings
-            )
+            InputFeedbackMode.FollowingSystem
         )
         val soundOnKeyPressVolume = int(
             R.string.button_sound_volume,
@@ -145,15 +135,10 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             switch(R.string.show_voice_input_button, "show_voice_input_button", false)
         val expandKeypressArea =
             switch(R.string.expand_keypress_area, "expand_keypress_area", false)
-        val swipeSymbolDirection = list(
+        val swipeSymbolDirection = enumList(
             R.string.swipe_symbol_behavior,
             "swipe_symbol_behavior",
-            SwipeSymbolDirection.Down,
-            listOf(
-                R.string.swipe_up,
-                R.string.swipe_down,
-                R.string.disabled
-            )
+            SwipeSymbolDirection.Down
         )
         val longPressDelay = int(
             R.string.keyboard_long_press_delay,
@@ -164,30 +149,19 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             "ms",
             10
         )
-        val spaceKeyLongPressBehavior = list(
+        val spaceKeyLongPressBehavior = enumList(
             R.string.space_long_press_behavior,
             "space_long_press_behavior",
-            SpaceLongPressBehavior.None,
-            listOf(
-                R.string.space_behavior_none,
-                R.string.space_behavior_enumerate,
-                R.string.space_behavior_activate,
-                R.string.space_behavior_picker
-            )
+            SpaceLongPressBehavior.None
         )
         val spaceSwipeMoveCursor =
             switch(R.string.space_swipe_move_cursor, "space_swipe_move_cursor", true)
         val showLangSwitchKey =
             switch(R.string.show_lang_switch_key, "show_lang_switch_key", true)
-        val langSwitchKeyBehavior = list(
+        val langSwitchKeyBehavior = enumList(
             R.string.lang_switch_key_behavior,
             "lang_switch_key_behavior",
-            LangSwitchBehavior.Enumerate,
-            listOf(
-                R.string.space_behavior_enumerate,
-                R.string.space_behavior_activate,
-                R.string.lang_switch_behavior_next_ime_app
-            )
+            LangSwitchBehavior.Enumerate
         ) { showLangSwitchKey.getValue() }
 
         val keyboardHeightPercent: ManagedPreference.PInt
@@ -250,24 +224,15 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             keyboardBottomPaddingLandscape = secondary
         }
 
-        val horizontalCandidateStyle = list(
+        val horizontalCandidateStyle = enumList(
             R.string.horizontal_candidate_style,
             "horizontal_candidate_style",
-            HorizontalCandidateMode.AutoFillWidth,
-            listOf(
-                R.string.horizontal_candidate_never_fill,
-                R.string.horizontal_candidate_auto_fill,
-                R.string.horizontal_candidate_always_fill
-            )
+            HorizontalCandidateMode.AutoFillWidth
         )
-        val expandedCandidateStyle = list(
+        val expandedCandidateStyle = enumList(
             R.string.expanded_candidate_style,
             "expanded_candidate_style",
-            ExpandedCandidateStyle.Grid,
-            listOf(
-                R.string.expanded_candidate_style_grid,
-                R.string.expanded_candidate_style_flexbox
-            )
+            ExpandedCandidateStyle.Grid
         )
 
         val expandedCandidateGridSpanCount: ManagedPreference.PInt

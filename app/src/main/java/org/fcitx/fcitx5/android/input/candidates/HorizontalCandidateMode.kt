@@ -4,10 +4,11 @@
  */
 package org.fcitx.fcitx5.android.input.candidates
 
-import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
+import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceEnum
 
-enum class HorizontalCandidateMode {
-    NeverFillWidth,
-    AutoFillWidth,
-    AlwaysFillWidth;
+enum class HorizontalCandidateMode(override val stringRes: Int) : ManagedPreferenceEnum {
+    NeverFillWidth(R.string.horizontal_candidate_never_fill),
+    AutoFillWidth(R.string.horizontal_candidate_auto_fill),
+    AlwaysFillWidth(R.string.horizontal_candidate_always_fill);
 }
