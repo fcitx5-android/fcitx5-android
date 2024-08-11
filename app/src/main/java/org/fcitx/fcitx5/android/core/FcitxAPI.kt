@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.SharedFlow
  */
 interface FcitxAPI {
 
-
     enum class AddonDep {
         Required,
         Optional
@@ -43,16 +42,15 @@ interface FcitxAPI {
 
     suspend fun reloadConfig()
 
-    suspend fun sendKey(key: String, states: UInt = 0u, up: Boolean = false, timestamp: Int = -1)
+    suspend fun sendKey(key: String, states: UInt = 0u, code: Int = 0, up: Boolean = false, timestamp: Int = -1)
 
-    suspend fun sendKey(c: Char, states: UInt = 0u, up: Boolean = false, timestamp: Int = -1)
+    suspend fun sendKey(c: Char, states: UInt = 0u, code: Int = 0, up: Boolean = false, timestamp: Int = -1)
 
-    suspend fun sendKey(sym: Int, states: UInt = 0u, up: Boolean = false, timestamp: Int = -1)
+    suspend fun sendKey(sym: Int, states: UInt = 0u, code: Int = 0, up: Boolean = false, timestamp: Int = -1)
 
-    suspend fun sendKey(sym: KeySym, states: KeyStates, up: Boolean = false, timestamp: Int = -1)
+    suspend fun sendKey(sym: KeySym, states: KeyStates, code: Int = 0, up: Boolean = false, timestamp: Int = -1)
 
     suspend fun select(idx: Int): Boolean
-    suspend fun forget(idx: Int): Boolean
     suspend fun isEmpty(): Boolean
     suspend fun reset()
     suspend fun moveCursor(position: Int)
@@ -100,5 +98,8 @@ interface FcitxAPI {
     suspend fun activateAction(id: Int)
 
     suspend fun getCandidates(offset: Int, limit: Int): Array<String>
+
+    suspend fun getCandidateActions(idx: Int): Array<CandidateAction>
+    suspend fun triggerCandidateAction(idx: Int, actionIdx: Int)
 
 }

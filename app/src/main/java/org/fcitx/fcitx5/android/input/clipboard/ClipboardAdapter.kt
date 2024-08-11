@@ -22,6 +22,7 @@ import kotlin.math.min
 
 abstract class ClipboardAdapter(
     private val theme: Theme,
+    private val entryRadius: Float,
     private val maskSensitive: Boolean
 ) : PagingDataAdapter<ClipboardEntry, ClipboardAdapter.ViewHolder>(diffCallback) {
 
@@ -87,7 +88,7 @@ abstract class ClipboardAdapter(
     class ViewHolder(val entryUi: ClipboardEntryUi) : RecyclerView.ViewHolder(entryUi.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(ClipboardEntryUi(parent.context, theme))
+        ViewHolder(ClipboardEntryUi(parent.context, theme, entryRadius))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val entry = getItem(position) ?: return

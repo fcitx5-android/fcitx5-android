@@ -33,10 +33,13 @@ object DeviceInfo {
                 }
             }"
         )
+        appendLine("--------- Package Info")
+        val pkgInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+        appendLine("Package Name: ${pkgInfo.packageName}")
+        appendLine("Version Code: ${pkgInfo.versionCodeCompat}")
+        appendLine("Version Name: ${pkgInfo.versionName}")
         appendLine("--------- Build Info")
-        appendLine("Package Name: ${BuildConfig.APPLICATION_ID}")
-        appendLine("Version Code: ${BuildConfig.VERSION_CODE}")
-        appendLine("Version Name: ${Const.versionName}")
+        appendLine("Build Type: ${BuildConfig.BUILD_TYPE}")
         appendLine("Build Time: ${iso8601UTCDateTime(BuildConfig.BUILD_TIME)}")
         appendLine("Build Git Hash: ${BuildConfig.BUILD_GIT_HASH}")
     }

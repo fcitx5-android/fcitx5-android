@@ -22,12 +22,11 @@ namespace fcitx {
 FCITX_CONFIGURATION(NotificationsConfig,
                     fcitx::Option<std::vector<std::string>> hiddenNotifications{
                             this, "HiddenNotifications",
-                            _("Hidden Notifications")};);
+                            _("Hidden Notifications")};)
 
 class Notifications final : public AddonInstance {
 public:
     explicit Notifications(Instance *instance);
-    ~Notifications() override = default;
 
     Instance *instance() { return instance_; }
 

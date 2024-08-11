@@ -5,22 +5,14 @@
 package org.fcitx.fcitx5.android.input.editing
 
 import android.content.Context
-import android.content.res.ColorStateList
-import android.graphics.drawable.StateListDrawable
 import android.view.View
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.InputFeedbacks
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.bar.ui.ToolButton
-import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
-import org.fcitx.fcitx5.android.utils.borderDrawable
-import org.fcitx.fcitx5.android.utils.pressHighlightDrawable
-import org.fcitx.fcitx5.android.utils.rippleDrawable
 import splitties.dimensions.dp
-import splitties.resources.drawable
 import splitties.views.dsl.constraintlayout.above
 import splitties.views.dsl.constraintlayout.below
 import splitties.views.dsl.constraintlayout.bottomOfParent
@@ -34,64 +26,25 @@ import splitties.views.dsl.constraintlayout.topOfParent
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.horizontalLayout
-import splitties.views.dsl.core.imageView
 import splitties.views.dsl.core.lParams
-import splitties.views.dsl.core.textView
-import splitties.views.dsl.core.wrapContent
-import splitties.views.gravityCenter
-import splitties.views.imageDrawable
-import splitties.views.padding
 
-class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
+class TextEditingUi(
+    override val ctx: Context,
+    private val theme: Theme,
+    private val ripple: Boolean,
+    private val border: Boolean,
+    private val radius: Float
+) : Ui {
 
-    private val keyRippleEffect by ThemeManager.prefs.keyRippleEffect
-
-    private val borderWidth = ctx.dp(1) / 2
-
-    private fun View.applyBorderedBackground() {
-        background = borderDrawable(borderWidth, theme.dividerColor)
-        foreground =
-            if (keyRippleEffect) rippleDrawable(theme.keyPressHighlightColor)
-            else pressHighlightDrawable(theme.keyPressHighlightColor)
-    }
-
-    class GTextButton(context: Context) : CustomGestureView(context) {
-        val text = textView {
-            isClickable = false
-            isFocusable = false
-            background = null
+    private fun textButton(@StringRes id: Int, altStyle: Boolean = false) =
+        TextEditingButton(ctx, theme, ripple, border, radius, altStyle).apply {
+            setText(id)
         }
 
-        init {
-            add(text, lParams(wrapContent, wrapContent, gravityCenter))
+    private fun iconButton(@DrawableRes icon: Int, altStyle: Boolean = false) =
+        TextEditingButton(ctx, theme, ripple, border, radius, altStyle).apply {
+            setIcon(icon)
         }
-    }
-
-    class GImageButton(context: Context) : CustomGestureView(context) {
-        val image = imageView {
-            isClickable = false
-            isFocusable = false
-        }
-
-        init {
-            add(image, lParams(wrapContent, wrapContent, gravityCenter))
-        }
-    }
-
-    private fun textButton(@StringRes id: Int) = GTextButton(ctx).apply {
-        text.setText(id)
-        text.setTextColor(theme.keyTextColor)
-        stateListAnimator = null
-        applyBorderedBackground()
-    }
-
-    private fun iconButton(@DrawableRes icon: Int) = GImageButton(ctx).apply {
-        image.imageDrawable = drawable(icon)!!.apply {
-            setTint(theme.altKeyTextColor)
-        }
-        padding = dp(10)
-        applyBorderedBackground()
-    }
 
     val upButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_up_24)
 
@@ -102,44 +55,24 @@ class TextEditingUi(override val ctx: Context, private val theme: Theme) : Ui {
     val leftButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_left_24)
 
     val selectButton = textButton(R.string.select).apply {
-        text.setTextColor(
-            ColorStateList(
-                arrayOf(
-                    intArrayOf(android.R.attr.state_activated),
-                    intArrayOf(android.R.attr.state_enabled)
-                ),
-                intArrayOf(theme.genericActiveForegroundColor, theme.keyTextColor)
-            )
-        )
-        background = StateListDrawable().apply {
-            addState(
-                intArrayOf(android.R.attr.state_activated),
-                borderDrawable(
-                    borderWidth,
-                    theme.dividerColor,
-                    theme.genericActiveBackgroundColor
-                )
-            )
-            addState(
-                intArrayOf(android.R.attr.state_enabled),
-                borderDrawable(borderWidth, theme.dividerColor)
-            )
-        }
+        enableActivatedState()
     }
 
     val homeButton = iconButton(R.drawable.ic_baseline_first_page_24)
 
     val endButton = iconButton(R.drawable.ic_baseline_last_page_24)
 
-    val selectAllButton = textButton(android.R.string.selectAll)
+    val selectAllButton = textButton(android.R.string.selectAll, altStyle = true)
 
-    val cutButton = textButton(android.R.string.cut).apply { visibility = View.GONE }
+    val cutButton = textButton(android.R.string.cut, altStyle = true).apply {
+        visibility = View.GONE
+    }
 
-    val copyButton = textButton(android.R.string.copy)
+    val copyButton = textButton(android.R.string.copy, altStyle = true)
 
-    val pasteButton = textButton(android.R.string.paste)
+    val pasteButton = textButton(android.R.string.paste, altStyle = true)
 
-    val backspaceButton = iconButton(R.drawable.ic_baseline_backspace_24).apply {
+    val backspaceButton = iconButton(R.drawable.ic_baseline_backspace_24, altStyle = true).apply {
         soundEffect = InputFeedbacks.SoundEffect.Delete
     }
 

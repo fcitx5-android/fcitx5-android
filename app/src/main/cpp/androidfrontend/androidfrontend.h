@@ -18,7 +18,7 @@ class AndroidInputContext;
 
 class AndroidFrontend : public AddonInstance {
 public:
-    AndroidFrontend(Instance *instance);
+    explicit AndroidFrontend(Instance *instance);
 
     Instance *instance() { return instance_; }
 
@@ -37,9 +37,11 @@ public:
     void focusInputContext(bool focus);
     void activateInputContext(const int uid, const std::string &pkgName);
     void deactivateInputContext(const int uid);
-    InputContext *activeInputContext() const;
+    [[nodiscard]] InputContext *activeInputContext() const;
     void setCapabilityFlags(uint64_t flag);
     std::vector<std::string> getCandidates(const int offset, const int limit);
+    std::vector<CandidateAction> getCandidateActions(const int idx);
+    void triggerCandidateAction(const int idx, const int actionIdx);
     void deleteSurrounding(const int before, const int after);
     void showToast(const std::string &s);
     void setCandidateListCallback(const CandidateListCallback &callback);
@@ -51,7 +53,6 @@ public:
     void setStatusAreaUpdateCallback(const StatusAreaUpdateCallback &callback);
     void setDeleteSurroundingCallback(const DeleteSurroundingCallback &callback);
     void setToastCallback(const ToastCallback &callback);
-    bool forgetCandidate(int idx);
 
 private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, keyEvent);
@@ -65,6 +66,8 @@ private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, deactivateInputContext);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCapabilityFlags);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, getCandidates);
+    FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, getCandidateActions);
+    FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, triggerCandidateAction);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, showToast);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCandidateListCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCommitStringCallback);
@@ -75,7 +78,6 @@ private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setStatusAreaUpdateCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setDeleteSurroundingCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setToastCallback);
-    FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, forgetCandidate);
 
     Instance *instance_;
     FocusGroup focusGroup_;

@@ -8,7 +8,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.FcitxAPI
-import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.broadcast.PreeditEmptyStateComponent
@@ -92,7 +91,7 @@ class CommonKeyActionListener :
         KeyActionListener { action, _ ->
             when (action) {
                 is FcitxKeyAction -> service.postFcitxJob {
-                    sendKey(action.act, KeyState.Virtual.state)
+                    sendKey(action.act, action.states.states, action.code)
                 }
                 is SymAction -> service.postFcitxJob {
                     sendKey(action.sym, action.states)

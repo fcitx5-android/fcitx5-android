@@ -14,6 +14,7 @@
     <string name="hide_key_config">Hide hotkey configurations</string>
     <string name="_not_available_">(Not Available)</string>
     <string name="button_haptic_feedback">Haptic feedback on keypress</string>
+    <string name="button_up_haptic_feedback">Haptic feedback on keyup</string>
     <string name="button_vibration_milliseconds">Keypress vibration duration</string>
     <string name="button_press">Press</string>
     <string name="button_long_press">Long press</string>
@@ -106,6 +107,8 @@
     <string name="key_border">Enable key border</string>
     <string name="brightness">Brightness</string>
     <string name="key_radius">Key radius</string>
+    <string name="text_editing_button_radius">Text editing button radius</string>
+    <string name="clipboard_entry_radius">Clipboard entry radius</string>
     <string name="key_horizontal_margin">Key horizontal margin</string>
     <string name="key_vertical_margin">Key vertical margin</string>
     <string name="configure">Configure</string>
@@ -259,4 +262,5 @@
     <string name="open_rime_user_data_dir">Application data directory will be opened. RIME user data directory is located in \"data/rime\".</string>
     <string name="restart_to_apply_settings">Application will restart to apply new settings. Proceed?</string>
     <string name="space_swipe_move_cursor">Swipe on space key to move cursor</string>
+    <string name="please_wait">Please wait…</string>
 </resources>

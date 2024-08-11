@@ -1,8 +1,10 @@
+import org.gradle.accessors.dm.LibrariesForLibs
+
 plugins {
     `kotlin-dsl`
     kotlin("plugin.serialization") version embeddedKotlinVersion
     `maven-publish`
-    id("com.palantir.git-version") version "3.0.0"
+    alias(libs.plugins.gitVersion)
     `java-gradle-plugin`
 }
 
@@ -20,6 +22,9 @@ dependencies {
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.aboutlibraries.plugin)
     implementation(libs.kotlinx.serialization.json)
+    // A workaround to enable version catalog usage in the convention plugin,
+    // see https://github.com/gradle/gradle/issues/15383#issuecomment-779893192
+    implementation(files(LibrariesForLibs::class.java.protectionDomain.codeSource.location))
 }
 
 gradlePlugin {
@@ -40,10 +45,6 @@ gradlePlugin {
             id = "org.fcitx.fcitx5.android.build-metadata"
             implementationClass = "BuildMetadataPlugin"
         }
-        register("cmakeDir") {
-            id = "org.fcitx.fcitx5.android.cmake-dir"
-            implementationClass = "CMakeDirPlugin"
-        }
         register("dataDescriptor") {
             id = "org.fcitx.fcitx5.android.data-descriptor"
             implementationClass = "DataDescriptorPlugin"
@@ -63,10 +64,6 @@ gradlePlugin {
         register("nativeLibConvention") {
             id = "org.fcitx.fcitx5.android.native-lib-convention"
             implementationClass = "NativeLibConventionPlugin"
-        }
-        register("androidSdkPath") {
-            id = "org.fcitx.fcitx5.android.android-sdk-path"
-            implementationClass = "AndroidSdkPathPlugin"
         }
     }
 }

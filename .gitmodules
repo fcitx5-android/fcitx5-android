@@ -52,3 +52,6 @@
 [submodule "plugin/clipboard-filter/ClearURLsRules"]
 	path = plugin/clipboard-filter/ClearURLsRules
 	url = https://github.com/ClearURLs/Rules.git
+[submodule "plugin/thai/src/main/cpp/fcitx5-libthai"]
+	path = plugin/thai/src/main/cpp/fcitx5-libthai
+	url = https://github.com/fcitx/fcitx5-libthai

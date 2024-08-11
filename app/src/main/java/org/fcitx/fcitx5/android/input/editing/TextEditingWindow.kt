@@ -7,6 +7,7 @@ package org.fcitx.fcitx5.android.input.editing
 import android.view.KeyEvent
 import android.view.View
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.clipboard.ClipboardWindow
@@ -24,6 +25,10 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
     private val windowManager: InputWindowManager by manager.must()
     private val theme by manager.theme()
 
+    private val buttonRipple by ThemeManager.prefs.keyRippleEffect
+    private val buttonBorder by ThemeManager.prefs.keyBorder
+    private val buttonRadius by ThemeManager.prefs.textEditingButtonRadius
+
     private var hasSelection = false
     private var userSelection = false
 
@@ -32,7 +37,7 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
     }
 
     private val ui by lazy {
-        TextEditingUi(context, theme).apply {
+        TextEditingUi(context, theme, buttonRipple, buttonBorder, buttonRadius.toFloat()).apply {
             fun CustomGestureView.onClickWithRepeating(block: () -> Unit) {
                 setOnClickListener { block() }
                 repeatEnabled = true

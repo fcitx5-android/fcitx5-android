@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later
  * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
  */
-#ifndef _FCITX5_ANDROID_ANDROIDKEYBOARD_H_
-#define _FCITX5_ANDROID_ANDROIDKEYBOARD_H_
+#ifndef FCITX5_ANDROID_ANDROIDKEYBOARD_H
+#define FCITX5_ANDROID_ANDROIDKEYBOARD_H
 
 #include <fcitx-config/iniparser.h>
 #include <fcitx-utils/inputbuffer.h>
@@ -59,8 +59,7 @@ public:
     static int constexpr MaxBufferSize = 20;
     static int constexpr SpellCandidateSize = 20;
 
-    AndroidKeyboardEngine(Instance *instance);
-    ~AndroidKeyboardEngine() = default;
+    explicit AndroidKeyboardEngine(Instance *instance);
 
     Instance *instance() { return instance_; }
 
@@ -133,4 +132,4 @@ public:
 
 }
 
-#endif //_FCITX5_ANDROID_ANDROIDKEYBOARD_H_
+#endif //FCITX5_ANDROID_ANDROIDKEYBOARD_H

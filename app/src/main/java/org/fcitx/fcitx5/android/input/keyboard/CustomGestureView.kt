@@ -59,6 +59,9 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
     private var longPressJob: Job? = null
 
     @Volatile
+    var longPressFeedbackEnabled = true
+
+    @Volatile
     private var repeatStarted = false
     var repeatEnabled = false
     private var repeatJob: Job? = null
@@ -90,7 +93,9 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
     private val touchSlop: Float = ViewConfiguration.get(ctx).scaledTouchSlop.toFloat()
 
     init {
+        // disable system sound effect and haptic feedback
         isSoundEffectsEnabled = false
+        isHapticFeedbackEnabled = false
     }
 
     override fun setEnabled(enabled: Boolean) {
@@ -148,7 +153,9 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                     longPressJob?.cancel()
                     longPressJob = lifecycleScope.launch {
                         delay(longPressDelay.toLong())
-                        InputFeedbacks.hapticFeedback(this@CustomGestureView, true)
+                        if (longPressFeedbackEnabled) {
+                            InputFeedbacks.hapticFeedback(this@CustomGestureView, true)
+                        }
                         longPressTriggered = performLongClick()
                     }
                 }
@@ -173,6 +180,7 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
             }
             MotionEvent.ACTION_UP -> {
                 isPressed = false
+                InputFeedbacks.hapticFeedback(this, longPress = true, keyUp = true)
                 dispatchGestureEvent(GestureType.Up, event.x, event.y)
                 val shouldPerformClick = !(touchMovedOutside ||
                         longPressTriggered ||

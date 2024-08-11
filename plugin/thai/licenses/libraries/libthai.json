@@ -1,0 +1,11 @@
+{
+    "uniqueId": "tlwg/libthai",
+    "artifactVersion": "0.1.29",
+    "description": "Thai language support routines",
+    "name": "tlwg/libthai",
+    "website": "https://github.com/tlwg/libthai",
+    "tag": "native",
+    "licenses": [
+        "LGPL-2.1-only"
+    ]
+}

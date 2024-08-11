@@ -34,7 +34,7 @@ object InputMethodUtil {
                 it.packageName == BuildConfig.APPLICATION_ID && it.serviceName == serviceName
             } ?: false
         } else {
-            getSecureSettings(Settings.Secure.DEFAULT_INPUT_METHOD) == componentName
+            getSecureSettings<String>(Settings.Secure.DEFAULT_INPUT_METHOD) == componentName
         }
     }
 

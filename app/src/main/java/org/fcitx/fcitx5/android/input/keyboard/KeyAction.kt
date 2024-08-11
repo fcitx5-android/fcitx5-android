@@ -4,22 +4,22 @@
  */
 package org.fcitx.fcitx5.android.input.keyboard
 
-import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
+import org.fcitx.fcitx5.android.core.ScancodeMapping
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
 
 sealed class KeyAction {
 
-    data class FcitxKeyAction(var act: String) : KeyAction()
+    data class FcitxKeyAction(
+        val act: String,
+        val code: Int = ScancodeMapping.charToScancode(act[0]),
+        val states: KeyStates = KeyStates.Virtual
+    ) : KeyAction()
 
-    data class SymAction(val sym: KeySym, val states: KeyStates = VirtualState) : KeyAction() {
-        companion object {
-            val VirtualState = KeyStates(KeyState.Virtual)
-        }
-    }
+    data class SymAction(val sym: KeySym, val states: KeyStates = KeyStates.Virtual) : KeyAction()
 
-    data class CommitAction(var text: String) : KeyAction()
+    data class CommitAction(val text: String) : KeyAction()
 
     data class CapsAction(val lock: Boolean) : KeyAction()
 
@@ -39,5 +39,5 @@ sealed class KeyAction {
 
     data class PickerSwitchAction(val key: PickerWindow.Key? = null) : KeyAction()
 
-    data object SpaceLongPressAction: KeyAction()
+    data object SpaceLongPressAction : KeyAction()
 }

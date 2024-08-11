@@ -77,10 +77,10 @@ public:
 
 class JEnv {
 private:
-    JNIEnv *env;
+    JNIEnv *env = nullptr;
 
 public:
-    JEnv(JavaVM *jvm) {
+    explicit JEnv(JavaVM *jvm) {
         if (jvm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) == JNI_EDETACHED) {
             jvm->AttachCurrentThread(&env, nullptr);
         }
@@ -138,7 +138,10 @@ public:
     jfieldID PinyinCustomPhraseOrder;
     jfieldID PinyinCustomPhraseValue;
 
-    GlobalRefSingleton(JavaVM *jvm_) : jvm(jvm_) {
+    jclass CandidateAction;
+    jmethodID CandidateActionInit;
+
+    explicit GlobalRefSingleton(JavaVM *jvm_) : jvm(jvm_) {
         JNIEnv *env;
         jvm->AttachCurrentThread(&env, nullptr);
 
@@ -184,9 +187,12 @@ public:
         PinyinCustomPhraseKey = env->GetFieldID(PinyinCustomPhrase, "key", "Ljava/lang/String;");
         PinyinCustomPhraseOrder = env->GetFieldID(PinyinCustomPhrase, "order", "I");
         PinyinCustomPhraseValue = env->GetFieldID(PinyinCustomPhrase, "value", "Ljava/lang/String;");
+
+        CandidateAction = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("org/fcitx/fcitx5/android/core/CandidateAction")));
+        CandidateActionInit = env->GetMethodID(CandidateAction, "<init>", "(ILjava/lang/String;ZLjava/lang/String;ZZ)V");
     }
 
-    const JEnv AttachEnv() const { return JEnv(jvm); }
+    [[nodiscard]] JEnv AttachEnv() const { return JEnv(jvm); }
 };
 
 extern GlobalRefSingleton *GlobalRef;

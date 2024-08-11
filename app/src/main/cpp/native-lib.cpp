@@ -81,7 +81,7 @@ public:
         return uv_run(get_event_base(), UV_RUN_ONCE);
     }
 
-    void startup(fcitx::AndroidLibraryDependency dependency,
+    void startup(const fcitx::AndroidLibraryDependency& dependency,
                  const std::function<void(fcitx::AddonInstance *)> &setupCallback) {
         p_instance = std::make_unique<fcitx::Instance>(0, nullptr);
         p_instance->addonManager().registerLoader(std::make_unique<fcitx::AndroidSharedLibraryLoader>(dependency));
@@ -118,10 +118,6 @@ public:
 
     bool select(int idx) {
         return p_frontend->call<fcitx::IAndroidFrontend::selectCandidate>(idx);
-    }
-
-    bool forgetCandidate(int idx) {
-        return p_frontend->call<fcitx::IAndroidFrontend::forgetCandidate>(idx);
     }
 
     bool isInputPanelEmpty() {
@@ -417,6 +413,18 @@ public:
 
     std::vector<std::string> getCandidates(int offset, int limit) {
         return p_frontend->call<fcitx::IAndroidFrontend::getCandidates>(offset, limit);
+    }
+
+    std::vector<CandidateActionEntity> getCandidateActions(int idx) {
+        auto actions = std::vector<CandidateActionEntity>();
+        for (const auto &a: p_frontend->call<fcitx::IAndroidFrontend::getCandidateActions>(idx)) {
+            actions.emplace_back(a);
+        }
+        return actions;
+    }
+
+    void triggerCandidateAction(int idx, int actionIdx) {
+        return p_frontend->call<fcitx::IAndroidFrontend::triggerCandidateAction>(idx, actionIdx);
     }
 
     void save() {
@@ -724,28 +732,31 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_reloadFcitxConfig(JNIEnv *env, jclass c
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxString(JNIEnv *env, jclass clazz, jstring key, jint state, jboolean up, jint timestamp) {
+Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxString(JNIEnv *env, jclass clazz, jstring key, jint state, jint code, jboolean up, jint timestamp) {
     RETURN_IF_NOT_RUNNING
     fcitx::Key parsedKey{fcitx::Key::keySymFromString(CString(env, key)),
-                         fcitx::KeyStates(static_cast<uint32_t>(state))};
+                         fcitx::KeyStates(static_cast<uint32_t>(state)),
+                         code + /* evdev offset */ 8};
     Fcitx::Instance().sendKey(parsedKey, up, timestamp);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxChar(JNIEnv *env, jclass clazz, jchar c, jint state, jboolean up, jint timestamp) {
+Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeyToFcitxChar(JNIEnv *env, jclass clazz, jchar c, jint state, jint code, jboolean up, jint timestamp) {
     RETURN_IF_NOT_RUNNING
     const fcitx::Key parsedKey{fcitx::Key::keySymFromString(reinterpret_cast<const char *>(&c)),
-                               fcitx::KeyStates(static_cast<uint32_t>(state))};
+                               fcitx::KeyStates(static_cast<uint32_t>(state)),
+                               code + /* evdev offset */ 8};
     Fcitx::Instance().sendKey(parsedKey, up, timestamp);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeySymToFcitx(JNIEnv *env, jclass clazz, jint sym, jint state, jboolean up, jint timestamp) {
+Java_org_fcitx_fcitx5_android_core_Fcitx_sendKeySymToFcitx(JNIEnv *env, jclass clazz, jint sym, jint state, jint code, jboolean up, jint timestamp) {
     RETURN_IF_NOT_RUNNING
     fcitx::Key key{fcitx::KeySym(static_cast<uint32_t>(sym)),
-                   fcitx::KeyStates(static_cast<uint32_t>(state))};
+                   fcitx::KeyStates(static_cast<uint32_t>(state)),
+                   code + /* evdev offset */ 8};
     Fcitx::Instance().sendKey(key, up, timestamp);
 }
 
@@ -753,16 +764,7 @@ extern "C"
 JNIEXPORT jboolean JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_selectCandidate(JNIEnv *env, jclass clazz, jint idx) {
     RETURN_VALUE_IF_NOT_RUNNING(false)
-    FCITX_DEBUG() << "selectCandidate: #" << idx;
     return Fcitx::Instance().select(idx);
-}
-
-extern "C"
-JNIEXPORT jboolean JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_forgetCandidate(JNIEnv *env, jclass clazz, jint idx) {
-    RETURN_VALUE_IF_NOT_RUNNING(false)
-    FCITX_DEBUG() << "forgetCandidate: #" << idx;
-    return Fcitx::Instance().forgetCandidate(idx);
 }
 
 extern "C"
@@ -1025,6 +1027,27 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_getFcitxCandidates(JNIEnv *env, jclass 
         env->SetObjectArrayElement(array, i, str);
     }
     return array;
+}
+
+extern "C"
+JNIEXPORT jobjectArray JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_getFcitxCandidateActions(JNIEnv *env, jclass clazz, jint idx) {
+    RETURN_VALUE_IF_NOT_RUNNING(nullptr)
+    auto actions = Fcitx::Instance().getCandidateActions(idx);
+    int size = static_cast<int>(actions.size());
+    jobjectArray array = env->NewObjectArray(size, GlobalRef->CandidateAction, nullptr);
+    for (int i = 0; i < size; i++) {
+        auto obj = JRef(env, fcitxCandidateActionToObject(env, actions[i]));
+        env->SetObjectArrayElement(array, i, obj);
+    }
+    return array;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_triggerFcitxCandidateAction(JNIEnv *env, jclass clazz, jint idx, jint action_idx) {
+    RETURN_IF_NOT_RUNNING
+    Fcitx::Instance().triggerCandidateAction(idx, action_idx);
 }
 
 extern "C"

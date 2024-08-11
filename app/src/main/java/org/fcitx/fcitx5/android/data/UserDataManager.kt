@@ -14,6 +14,7 @@ import org.fcitx.fcitx5.android.utils.Const
 import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.errorRuntime
 import org.fcitx.fcitx5.android.utils.extract
+import org.fcitx.fcitx5.android.utils.versionCodeCompat
 import org.fcitx.fcitx5.android.utils.withTempDir
 import timber.log.Timber
 import java.io.File
@@ -30,7 +31,7 @@ object UserDataManager {
     @Serializable
     data class Metadata(
         val packageName: String,
-        val versionCode: Int,
+        val versionCode: Long,
         val versionName: String,
         val exportTime: Long
     )
@@ -68,9 +69,10 @@ object UserDataManager {
             writeFileTree(recentlyUsedDir, "recently_used", zipStream)
             // metadata
             zipStream.putNextEntry(ZipEntry("metadata.json"))
+            val pkgInfo = appContext.packageManager.getPackageInfo(appContext.packageName, 0)
             val metadata = Metadata(
-                BuildConfig.APPLICATION_ID,
-                BuildConfig.VERSION_CODE,
+                pkgInfo.packageName,
+                pkgInfo.versionCodeCompat,
                 Const.versionName,
                 timestamp
             )
