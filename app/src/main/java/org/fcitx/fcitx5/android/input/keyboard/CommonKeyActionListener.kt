@@ -137,7 +137,7 @@ class CommonKeyActionListener :
                         Stopped -> {
                             backspaceSwipeState = if (
                                 preeditState.isEmpty &&
-                                horizontalCandidate.adapter.total == 0
+                                horizontalCandidate.adapter.total <= 0 // total is -1 on initialization
                             ) {
                                 service.applySelectionOffset(action.start, action.end)
                                 Selection
