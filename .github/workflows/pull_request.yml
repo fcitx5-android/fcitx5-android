@@ -66,16 +66,16 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Build Debug APK
+      - name: Build Release APK
         run: |
-          ./gradlew :app:assembleDebug
-          ./gradlew :assembleDebugPlugins
+          ./gradlew :app:assembleRelease
+          ./gradlew :assembleReleasePlugins
 
       - name: Upload app
         uses: actions/upload-artifact@v4
         with:
           name: app-${{ matrix.os }}
-          path: app/build/outputs/apk/debug/
+          path: app/build/outputs/apk/release/
 
       - name: Pack plugins
         shell: bash
@@ -85,7 +85,7 @@ jobs:
           do
             if [ -d "plugin/${i}" ]
             then
-              mv "plugin/${i}/build/outputs/apk/debug" "plugins-to-upload/${i}"
+              mv "plugin/${i}/build/outputs/apk/release" "plugins-to-upload/${i}"
             fi
           done
 
