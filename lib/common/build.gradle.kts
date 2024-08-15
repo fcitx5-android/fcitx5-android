@@ -7,15 +7,6 @@ plugins {
 android {
     namespace = "org.fcitx.fcitx5.android.lib.common"
 
-    buildTypes {
-        release {
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-            consumerProguardFiles("proguard-rules.pro")
-        }
-    }
     buildFeatures {
         aidl = true
     }
