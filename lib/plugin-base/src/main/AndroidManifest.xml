@@ -9,6 +9,9 @@
         <package android:name="org.fcitx.fcitx5.android" />
     </queries>
 
+    <!-- permission required to request self-uninstall -->
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+
     <application>
         <activity
             android:name=".AboutActivity"

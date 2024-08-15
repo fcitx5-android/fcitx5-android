@@ -1,9 +1,10 @@
-@file:Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
-
 /**
  * Copyright (C) 2021-2023 Fcitx 5 for Android Contributors
  * SPDX-License-Identifier: LGPL-2.1-or-later
  */
+
+@file:Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
+
 package org.fcitx.fcitx5.android.lib.plugin_base
 
 import android.annotation.SuppressLint
@@ -21,19 +22,40 @@ import android.preference.PreferenceActivity
 import android.preference.PreferenceCategory
 import android.preference.PreferenceFragment
 import android.preference.PreferenceScreen
+import android.provider.Settings
+import android.view.Menu
 import android.widget.Toast
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.entity.License
 import org.xmlpull.v1.XmlPullParser
 
-@SuppressLint("ExportedPreferenceActivity")
 class AboutActivity : PreferenceActivity() {
+
+    // disallow loading any external fragment
+    override fun isValidFragment(fragmentName: String?) = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        actionBar?.setDisplayHomeAsUpEnabled(true)
         fragmentManager.beginTransaction()
             .replace(android.R.id.content, AboutContentFragment())
             .commit()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menu.add(R.string.app_info).setOnMenuItemClickListener {
+            startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                setData(Uri.fromParts("package", packageName, null))
+            })
+            true
+        }
+        menu.add(R.string.uninstall).setOnMenuItemClickListener {
+            startActivity(Intent(Intent.ACTION_DELETE).apply {
+                setData(Uri.fromParts("package", packageName, null))
+            })
+            true
+        }
+        return super.onCreateOptionsMenu(menu)
     }
 
     class AboutContentFragment : PreferenceFragment() {
