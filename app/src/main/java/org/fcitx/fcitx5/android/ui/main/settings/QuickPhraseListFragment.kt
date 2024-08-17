@@ -214,7 +214,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                 getText(R.string.quickphrase_editor),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply { description = CHANNEL_ID }
-            notificationManager.createNotificationChannel(channel)
+            requireContext().notificationManager.createNotificationChannel(channel)
         }
     }
 
@@ -269,7 +269,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
         resetDustman()
         // save the reference to NotificationManager, in case we need to cancel notification
         // after Fragment detached
-        val nm = notificationManager
+        val nm = requireContext().notificationManager
         lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
             if (busy.compareAndSet(false, true)) {
                 val id = RELOAD_ID++

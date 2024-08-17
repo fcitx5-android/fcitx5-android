@@ -6,6 +6,7 @@ package org.fcitx.fcitx5.android.utils
 
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Point
 import android.os.Build
 import org.fcitx.fcitx5.android.BuildConfig
 
@@ -20,8 +21,16 @@ object DeviceInfo {
         appendLine("Model (product): ${Build.MODEL} (${Build.PRODUCT})")
         appendLine("Manufacturer: ${Build.MANUFACTURER}")
         appendLine("Tags: ${Build.TAGS}")
+        @Suppress("DEPRECATION") // we really want the physical display size
+        val size = Point().also {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                context.display!!
+            } else {
+                context.windowManager.defaultDisplay
+            }.getRealSize(it)
+        }
+        appendLine("Screen Size: ${size.x} x ${size.y}")
         val metrics = context.resources.displayMetrics
-        appendLine("Screen Size: ${metrics.widthPixels} x ${metrics.heightPixels}")
         appendLine("Screen Density: ${metrics.density}")
         appendLine(
             "Screen orientation: ${

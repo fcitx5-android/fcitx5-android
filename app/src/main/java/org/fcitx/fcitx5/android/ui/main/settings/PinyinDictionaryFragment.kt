@@ -117,7 +117,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDiction
                 getText(R.string.pinyin_dict),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply { description = CHANNEL_ID }
-            notificationManager.createNotificationChannel(channel)
+            requireContext().notificationManager.createNotificationChannel(channel)
         }
     }
 
@@ -172,7 +172,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDiction
         // Save the reference to NotificationManager, because reloadDict() could be called
         // right before the Fragment detached from Activity, and at the time reload completes,
         // Fragment is no longer attached to a Context, thus unable to cancel the notification.
-        val nm = notificationManager
+        val nm = requireContext().notificationManager
         lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
             if (busy.compareAndSet(false, true)) {
                 val id = RELOAD_ID++
