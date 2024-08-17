@@ -31,6 +31,8 @@ class FcitxComponentPlugin : Plugin<Project> {
     }
 
     override fun apply(target: Project) {
+        val installTask = target.task(INSTALL_TASK)
+        val deleteTask = target.task(DELETE_TASK)
         registerCMakeTask(target, "generate-desktop-file", "config")
         registerCMakeTask(target, "translation-file", "translation")
         registerCleanTask(target)
@@ -43,8 +45,8 @@ class FcitxComponentPlugin : Plugin<Project> {
                 registerCMakeTask(target, "translation-file", "translation", project)
             }
             if (ext.excludeFiles.isNotEmpty()) {
-                target.task(DELETE_TASK) {
-                    dependsOn(target.tasks.findByName(INSTALL_TASK))
+                deleteTask.apply {
+                    dependsOn(installTask)
                     doLast {
                         ext.excludeFiles.forEach {
                             project.assetsDir.resolve(it).delete()
@@ -83,8 +85,7 @@ class FcitxComponentPlugin : Plugin<Project> {
                 }
             }
         }
-        val dependencyTask = project.tasks.findByName(INSTALL_TASK) ?: project.task(INSTALL_TASK)
-        dependencyTask.dependsOn(task)
+        project.tasks.getByName(INSTALL_TASK).dependsOn(task)
     }
 
     private fun registerCleanTask(project: Project) {
