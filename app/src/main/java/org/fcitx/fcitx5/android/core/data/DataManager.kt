@@ -29,6 +29,11 @@ import kotlin.concurrent.withLock
  */
 object DataManager {
 
+    data class PluginSet(
+        val loaded: Set<PluginDescriptor>,
+        val failed: Map<String, PluginLoadFailed>
+    )
+
     const val PLUGIN_INTENT = "${BuildConfig.APPLICATION_ID}.plugin.MANIFEST"
 
     private val lock = ReentrantLock()
@@ -69,6 +74,8 @@ object DataManager {
     fun getLoadedPlugins(): Set<PluginDescriptor> = loadedPlugins
     fun getFailedPlugins(): Map<String, PluginLoadFailed> = failedPlugins
 
+    fun getSyncedPluginSet() = PluginSet(loadedPlugins, failedPlugins)
+
     /**
      * Will be cleared after each sync
      */
@@ -77,7 +84,7 @@ object DataManager {
     fun addOnNextSyncedCallback(block: () -> Unit) =
         callbacks.add(block)
 
-    fun detectPlugins(): Pair<Set<PluginDescriptor>, Map<String, PluginLoadFailed>> {
+    fun detectPlugins(): PluginSet {
         val toLoad = mutableSetOf<PluginDescriptor>()
         val preloadFailed = mutableMapOf<String, PluginLoadFailed>()
 
@@ -190,7 +197,7 @@ object DataManager {
                 preloadFailed[packageName] = PluginLoadFailed.PluginDescriptorParseError
             }
         }
-        return toLoad to preloadFailed
+        return PluginSet(toLoad, preloadFailed)
     }
 
     fun sync() = lock.withLock {

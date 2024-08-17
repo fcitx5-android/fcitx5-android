@@ -5,8 +5,11 @@
 package org.fcitx.fcitx5.android.ui.main
 
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
@@ -27,34 +30,91 @@ import org.fcitx.fcitx5.android.utils.addPreference
 
 class PluginFragment : PaddingPreferenceFragment() {
 
-    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        lifecycleScope.launch {
-            val needsReload = if (DataManager.synced) {
-                val (newPluginsToLoad, _) = DataManager.detectPlugins()
-                newPluginsToLoad != DataManager.getLoadedPlugins()
-            } else {
-                DataManager.waitSynced()
-                false
-            }
-            preferenceScreen = createPreferenceScreen(needsReload)
+    private var firstRun = true
+
+    private lateinit var synced: DataManager.PluginSet
+    private lateinit var detected: DataManager.PluginSet
+
+    private val packageChangeReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            refreshPreferencesWhenNeeded()
         }
     }
 
-    private fun createPreferenceScreen(needsReload: Boolean): PreferenceScreen =
+    private fun DataManager.whenSynced(block: () -> Unit) {
+        lifecycleScope.launch {
+            if (!synced) {
+                suspendCancellableCoroutine {
+                    if (synced) {
+                        it.resumeWith(Result.success(Unit))
+                    } else {
+                        addOnNextSyncedCallback {
+                            it.resumeWith(Result.success(Unit))
+                        }
+                    }
+                }
+            }
+            block.invoke()
+        }
+    }
+
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        DataManager.whenSynced {
+            synced = DataManager.getSyncedPluginSet()
+            detected = DataManager.detectPlugins()
+            preferenceScreen = createPreferenceScreen()
+        }
+    }
+
+    private fun refreshPreferencesWhenNeeded() {
+        DataManager.whenSynced {
+            val newDetected = DataManager.detectPlugins()
+            if (detected != newDetected) {
+                detected = newDetected
+                preferenceScreen = createPreferenceScreen()
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        requireContext().registerReceiver(packageChangeReceiver, IntentFilter().apply {
+            addAction(Intent.ACTION_PACKAGE_ADDED)
+            addAction(Intent.ACTION_PACKAGE_REMOVED)
+            addAction(Intent.ACTION_PACKAGE_REPLACED)
+            addDataScheme("package")
+        })
+        /**
+         * [onResume] got called after [onCreatePreferences] when the fragment is created and
+         * shown for the first time
+         */
+        if (firstRun) {
+            firstRun = false
+            return
+        }
+        // try refresh plugin list when the user navigate back from other apps
+        refreshPreferencesWhenNeeded()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        requireContext().unregisterReceiver(packageChangeReceiver)
+    }
+
+    private fun createPreferenceScreen(): PreferenceScreen =
         preferenceManager.createPreferenceScreen(requireContext()).apply {
-            if (needsReload) {
+            if (synced != detected) {
                 addPreference(R.string.plugin_needs_reload, icon = R.drawable.ic_baseline_info_24) {
                     DataManager.addOnNextSyncedCallback {
-                        // recreate the plugin list
-                        // we only check new plugins on the first creation
-                        preferenceScreen = createPreferenceScreen(false)
+                        synced = DataManager.getSyncedPluginSet()
+                        detected = DataManager.detectPlugins()
+                        preferenceScreen = createPreferenceScreen()
                     }
                     // DataManager.sync and and restart fcitx
                     FcitxDaemon.restartFcitx()
                 }
             }
-            val loaded = DataManager.getLoadedPlugins()
-            val failed = DataManager.getFailedPlugins()
+            val (loaded, failed) = synced
             if (loaded.isEmpty() && failed.isEmpty()) {
                 // use PreferenceCategory to show a divider below the "reload" preference
                 addCategory(R.string.no_plugins) {
@@ -111,15 +171,6 @@ class PluginFragment : PaddingPreferenceFragment() {
                 }
             }
         }
-
-    private suspend fun DataManager.waitSynced() = suspendCancellableCoroutine {
-        if (synced)
-            it.resumeWith(Result.success(Unit))
-        else
-            addOnNextSyncedCallback {
-                it.resumeWith(Result.success(Unit))
-            }
-    }
 
     private fun startPluginAboutActivity(pkg: String): Boolean {
         val ctx = requireContext()
