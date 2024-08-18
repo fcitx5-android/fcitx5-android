@@ -13,6 +13,7 @@
       <w>fcitx</w>
       <w>fmtlib</w>
       <w>icuuid</w>
+      <w>inputmethodservice</w>
       <w>iostreams</w>
       <w>iter</w>
       <w>jbytes</w>
@@ -21,6 +22,7 @@
       <w>jstring</w>
       <w>jyutping</w>
       <w>kawaii</w>
+      <w>keypress</w>
       <w>lgpl</w>
       <w>libevent</w>
       <w>libime</w>
@@ -37,6 +39,7 @@
       <w>shijienihao</w>
       <w>shuangpin</w>
       <w>sinhala</w>
+      <w>snackbar</w>
       <w>spdx</w>
       <w>stringutils</w>
       <w>unfocus</w>

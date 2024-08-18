@@ -82,6 +82,17 @@ class InputView(
     val theme: Theme
 ) : ConstraintLayout(service) {
 
+    var handleEvents = true
+        set(value) {
+            field = value
+            if (field) {
+                setupFcitxEventHandler()
+            } else {
+                eventHandlerJob?.cancel()
+                eventHandlerJob = null
+            }
+        }
+
     private var shouldUpdateNavbarForeground = false
     private var shouldUpdateNavbarBackground = false
 
@@ -107,7 +118,15 @@ class InputView(
         setOnClickListener(placeholderOnClickListener)
     }
 
-    private val eventHandlerJob: Job
+    private var eventHandlerJob: Job? = null
+
+    private fun setupFcitxEventHandler() {
+        eventHandlerJob = service.lifecycleScope.launch {
+            fcitx.runImmediately { eventFlow }.collect {
+                handleFcitxEvent(it)
+            }
+        }
+    }
 
     private val scope = DynamicScope()
     private val themedContext = context.withTheme(R.style.Theme_InputViewTheme)
@@ -203,11 +222,7 @@ class InputView(
         // MUST call before any operation
         setupScope()
 
-        eventHandlerJob = service.lifecycleScope.launch {
-            fcitx.runImmediately { eventFlow }.collect {
-                handleFcitxEvent(it)
-            }
-        }
+        setupFcitxEventHandler()
 
         // restore punctuation mapping in case of InputView recreation
         fcitx.launchOnReady {
@@ -226,6 +241,7 @@ class InputView(
 
         broadcaster.onImeUpdate(fcitx.runImmediately { inputMethodEntryCached })
 
+        // TODO should be moved outside of InputView
         service.window.window!!.also {
             when (navbarBackground) {
                 NavbarBackground.None -> {
@@ -454,7 +470,7 @@ class InputView(
         showingDialog?.dismiss()
         // cancel eventHandlerJob and then clear DynamicScope,
         // implies that InputView should not be attached again after detached.
-        eventHandlerJob.cancel()
+        handleEvents = false
         scope.clear()
         super.onDetachedFromWindow()
     }

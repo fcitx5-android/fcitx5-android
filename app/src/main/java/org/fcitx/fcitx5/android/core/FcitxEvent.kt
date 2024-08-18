@@ -13,7 +13,7 @@ sealed class FcitxEvent<T>(open val data: T) {
 
         override val eventType = EventType.Candidate
 
-        data class Data(val total: Int, val candidates: Array<String>) {
+        data class Data(val total: Int = -1, val candidates: Array<String> = emptyArray()) {
 
             override fun toString(): String =
                 "total=$total, candidates=[${candidates.joinToString(limit = 5)}]"

@@ -27,7 +27,7 @@ import splitties.views.dsl.core.textView
 import splitties.views.dsl.core.verticalLayout
 import splitties.views.horizontalPadding
 
-class PreeditUi(override val ctx: Context, private val theme: Theme) : Ui {
+open class PreeditUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     class CursorSpan(ctx: Context, @ColorInt color: Int, metrics: Paint.FontMetricsInt) :
         DynamicDrawableSpan() {
@@ -45,13 +45,13 @@ class PreeditUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     private val keyBorder by ThemeManager.prefs.keyBorder
 
-    private val barBackground = when (theme) {
+    open val bkgColor = when (theme) {
         is Theme.Builtin -> if (keyBorder) theme.backgroundColor else theme.barColor
         is Theme.Custom -> theme.backgroundColor
     }
 
     private fun createTextView() = textView {
-        backgroundColor = barBackground
+        backgroundColor = bkgColor
         horizontalPadding = dp(8)
         setTextColor(theme.keyTextColor)
         textSize = 16f
