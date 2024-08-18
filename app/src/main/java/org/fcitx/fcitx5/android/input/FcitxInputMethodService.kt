@@ -83,6 +83,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     private lateinit var pkgNameCache: PackageNameCache
 
+    private lateinit var decorView: View
+    private lateinit var contentView: FrameLayout
     private var inputView: InputView? = null
     private var candidatesView: CandidatesView? = null
 
@@ -120,12 +122,14 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     private fun recreateInputView(theme: Theme) {
-        // InputView should be created first in onCreateInputView
-        // setInputView should be used to 'replace' current InputView only
-        InputView(this, fcitx, theme).also {
-            inputView = it
-            setInputView(it)
-        }
+        // InputView should be first created in `onCreateInputView`
+        // `setInputView` should only be used to 'replace' current InputView
+        inputView = InputView(this, fcitx, theme)
+        setInputView(inputView!!)
+        // replace CandidatesView manually
+        contentView.removeView(candidatesView)
+        candidatesView = CandidatesView(this, fcitx, ThemeManager.activeTheme)
+        contentView.addView(candidatesView)
     }
 
     private fun postJob(scope: CoroutineScope, block: suspend () -> Unit): Job {
@@ -416,14 +420,17 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onCreateInputView(): View {
-        candidatesView = CandidatesView(this, fcitx, ThemeManager.activeTheme)
         // onCreateInputView will be called once, when the input area is first displayed,
         // during each onConfigurationChanged period.
         // That is, onCreateInputView would be called again, after system dark mode changes,
         // or screen orientation changes.
-        return InputView(this, fcitx, ThemeManager.activeTheme).also {
-            inputView = it
-        }
+        decorView = window.window!!.decorView
+        contentView = decorView.findViewById(android.R.id.content)
+        candidatesView = CandidatesView(this, fcitx, ThemeManager.activeTheme)
+        // put CandidatesView directly under content view
+        contentView.addView(candidatesView)
+        inputView = InputView(this, fcitx, ThemeManager.activeTheme)
+        return inputView!!
     }
 
     override fun setInputView(view: View) {
@@ -432,14 +439,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         } catch (e: Exception) {
             Timber.w("Device does not support android.R.attr.colorAccent which it should have.")
         }
-        val decor = window.window?.decorView ?: return
+        super.setInputView(view)
         // input method layout has not changed in 11 years:
         // https://android.googlesource.com/platform/frameworks/base/+/ae3349e1c34f7aceddc526cd11d9ac44951e97b6/core/res/res/layout/input_method.xml
-        // put CandidatesView directly under parentPanel
-        decor.findViewById<FrameLayout>(android.R.id.content).addView(candidatesView!!)
-        super.setInputView(view)
         // expand inputArea to fullscreen
-        decor.findViewById<FrameLayout>(android.R.id.inputArea)
+        decorView.findViewById<FrameLayout>(android.R.id.inputArea)
             .updateLayoutParams<ViewGroup.LayoutParams> {
                 height = ViewGroup.LayoutParams.MATCH_PARENT
             }
@@ -461,7 +465,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     override fun onComputeInsets(outInsets: Insets) {
         Timber.d("onComputeInsets")
         if (candidatesView?.handleEvents == true) {
-            val h = window.window!!.decorView.height
+            val h = decorView.height
             outInsets.apply {
                 contentTopInsets = h
                 visibleTopInsets = h
@@ -635,30 +639,39 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         inputView?.updateSelection(newSelStart, newSelEnd)
     }
 
+    private val contentSize = floatArrayOf(0f, 0f)
     private val decorLocation = floatArrayOf(0f, 0f)
     private val decorLocationInt = intArrayOf(0, 0)
     private var decorLocationUpdated = false
 
     private fun updateDecorLocation() {
-        window.window!!.decorView.getLocationOnScreen(decorLocationInt)
+        contentSize[0] = contentView.width.toFloat()
+        contentSize[1] = contentView.height.toFloat()
+        decorView.getLocationOnScreen(decorLocationInt)
         decorLocation[0] = decorLocationInt[0].toFloat()
         decorLocation[1] = decorLocationInt[1].toFloat()
         decorLocationUpdated = true
     }
 
-    private val anchorPosition = floatArrayOf(0f, 0f)
+    private val anchorPosition = floatArrayOf(0f, 0f, 0f, 0f)
 
     override fun onUpdateCursorAnchorInfo(info: CursorAnchorInfo) {
         anchorPosition[0] = info.insertionMarkerHorizontal
         anchorPosition[1] = info.insertionMarkerBottom
+        anchorPosition[2] = info.insertionMarkerHorizontal
+        anchorPosition[3] = info.insertionMarkerTop
+        // params of `Matrix.mapPoints` must be [x0, y0, x1, y1]
         info.matrix.mapPoints(anchorPosition)
         // avoid calling `decorView.getLocationOnScreen` repeatedly
         if (!decorLocationUpdated) {
             updateDecorLocation()
         }
-        anchorPosition[0] -= decorLocation[0]
-        anchorPosition[1] -= decorLocation[1]
-        candidatesView?.updatePosition(anchorPosition)
+        val (xOffset, yOffset) = decorLocation
+        anchorPosition[0] -= xOffset
+        anchorPosition[1] -= yOffset
+        anchorPosition[2] -= xOffset
+        anchorPosition[3] -= yOffset
+        candidatesView?.updateCursorAnchor(anchorPosition, contentSize)
     }
 
     private fun handleCursorUpdate(newSelStart: Int, newSelEnd: Int, updateIndex: Int) {

@@ -9,11 +9,9 @@ import android.annotation.SuppressLint
 import android.graphics.Color
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import androidx.annotation.Size
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -66,13 +64,19 @@ class CandidatesView(
     private var inputPanel = FcitxEvent.InputPanelEvent.Data()
     private var candidates = FcitxEvent.CandidateListEvent.Data()
 
+    /**
+     * horizontal, bottom, top
+     */
+    private val anchorPosition = floatArrayOf(0f, 0f, 0f)
+    private val parentSize = floatArrayOf(0f, 0f)
+
     private val preeditUi = object : PreeditUi(ctx, theme) {
         override val bkgColor = Color.TRANSPARENT
     }
 
     // TODO ui orientation from fcitx
     private val candidatesUi = horizontalLayout {
-        horizontalPadding = dp(4)
+        horizontalPadding = dp(8)
     }
 
     private fun handleFcitxEvent(it: FcitxEvent<*>) {
@@ -103,6 +107,7 @@ class CandidatesView(
             preeditUi.update(inputPanel)
             preeditUi.root.isVisible = preeditUi.visible
             updateCandidates()
+            updatePosition()
         } else {
             visibility = View.GONE
         }
@@ -117,16 +122,30 @@ class CandidatesView(
                     text.textSize = 16f
                     text.text = "${i + 1}. ${candidates.candidates[i]}"
                 }
-                addView(item.root, lParams { endMargin = if (i == limit - 1) 0 else dp(4) })
+                addView(item.root, lParams { endMargin = if (i == limit - 1) 0 else dp(8) })
             }
         }
     }
 
-    fun updatePosition(@Size(2) pos: FloatArray) {
-        updateLayoutParams<FrameLayout.LayoutParams> {
-            leftMargin = pos[0].toInt()
-            topMargin = pos[1].toInt()
-        }
+    private fun updatePosition() {
+        val (horizontal, bottom, top) = anchorPosition
+        val (parentWidth, parentHeight) = parentSize
+        val selfWidth = width.toFloat()
+        val selfHeight = height.toFloat()
+        translationX =
+            if (horizontal + selfWidth > parentWidth) parentWidth - selfWidth else horizontal
+        translationY = if (bottom + selfHeight > parentHeight) top - selfHeight else bottom
+    }
+
+    fun updateCursorAnchor(@Size(4) anchor: FloatArray, @Size(2) parent: FloatArray) {
+        val (horizontal, bottom, _, top) = anchor
+        val (parentWidth, parentHeight) = parent
+        anchorPosition[0] = horizontal
+        anchorPosition[1] = bottom
+        anchorPosition[2] = top
+        parentSize[0] = parentWidth
+        parentSize[1] = parentHeight
+        updatePosition()
     }
 
     private fun setupFcitxEventHandler() {
