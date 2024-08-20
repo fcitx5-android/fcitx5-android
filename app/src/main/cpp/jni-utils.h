@@ -141,6 +141,9 @@ public:
     jclass CandidateAction;
     jmethodID CandidateActionInit;
 
+    jclass Candidate;
+    jmethodID CandidateInit;
+
     explicit GlobalRefSingleton(JavaVM *jvm_) : jvm(jvm_) {
         JNIEnv *env;
         jvm->AttachCurrentThread(&env, nullptr);
@@ -190,6 +193,9 @@ public:
 
         CandidateAction = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("org/fcitx/fcitx5/android/core/CandidateAction")));
         CandidateActionInit = env->GetMethodID(CandidateAction, "<init>", "(ILjava/lang/String;ZLjava/lang/String;ZZ)V");
+
+        Candidate = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("org/fcitx/fcitx5/android/core/FcitxEvent$Candidate")));
+        CandidateInit = env->GetMethodID(Candidate, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
     }
 
     [[nodiscard]] JEnv AttachEnv() const { return JEnv(jvm); }

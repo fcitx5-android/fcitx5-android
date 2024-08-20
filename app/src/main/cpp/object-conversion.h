@@ -173,4 +173,13 @@ jobject fcitxCandidateActionToObject(JNIEnv *env, const CandidateActionEntity &a
     return obj;
 }
 
+jobject candidateEntityToObject(JNIEnv *env, const CandidateEntity &c) {
+    auto obj = env->NewObject(GlobalRef->Candidate, GlobalRef->CandidateInit,
+                              *JString(env, c.label),
+                              *JString(env, c.text),
+                              *JString(env, c.comment)
+    );
+    return obj;
+}
+
 #endif //FCITX5_ANDROID_OBJECT_CONVERSION_H

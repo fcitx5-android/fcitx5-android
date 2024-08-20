@@ -9,6 +9,11 @@
 #include <fcitx/menu.h>
 #include <fcitx/inputcontext.h>
 #include <fcitx/candidateaction.h>
+#include <fcitx/inputmethodengine.h>
+#include <fcitx/inputmethodentry.h>
+#include <fcitx/candidatelist.h>
+
+#include <utility>
 
 class InputMethodStatus {
 public:
@@ -100,6 +105,38 @@ public:
             icon(act.icon()),
             isCheckable(act.isCheckable()),
             isChecked(act.isChecked()) {}
+};
+
+class CandidateEntity {
+public:
+    std::string label;
+    std::string text;
+    std::string comment;
+
+    explicit CandidateEntity(const fcitx::CandidateWord &c, const fcitx::Text &label) :
+            label(label.toString()),
+            text(c.text().toString()),
+            comment(c.comment().toString()) {}
+};
+
+class PagedCandidateEntity {
+public:
+    std::vector<CandidateEntity> candidates;
+    int cursorIndex;
+    fcitx::CandidateLayoutHint layoutHint;
+    bool hasPrev;
+    bool hasNext;
+
+    explicit PagedCandidateEntity(std::vector<CandidateEntity> candidates,
+                                  int cursorIndex,
+                                  fcitx::CandidateLayoutHint layoutHint,
+                                  bool hasPrev,
+                                  bool hasNext) :
+            candidates(std::move(candidates)),
+            cursorIndex(cursorIndex),
+            layoutHint(layoutHint),
+            hasPrev(hasPrev),
+            hasNext(hasNext) {}
 };
 
 #endif //FCITX5_ANDROID_HELPER_TYPES_H

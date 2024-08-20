@@ -10,6 +10,8 @@
 #include <fcitx/candidateaction.h>
 #include <fcitx-utils/key.h>
 
+#include "../helper-types.h"
+
 typedef std::function<void(const std::vector<std::string> &, const int)> CandidateListCallback;
 typedef std::function<void(const std::string &, const int)> CommitStringCallback;
 typedef std::function<void(const fcitx::Text &)> ClientPreeditCallback;
@@ -19,6 +21,7 @@ typedef std::function<void()> InputMethodChangeCallback;
 typedef std::function<void()> StatusAreaUpdateCallback;
 typedef std::function<void(const int, const int)> DeleteSurroundingCallback;
 typedef std::function<void(const std::string &)> ToastCallback;
+typedef std::function<void(const PagedCandidateEntity &)> PagedCandidateCallback;
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, keyEvent,
                              void(const fcitx::Key &, bool isRelease, const int timestamp))
@@ -62,6 +65,9 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, triggerCandidateAction,
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, showToast,
                              void(const std::string &))
 
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setCandidatePagingMode,
+                             void(const int))
+
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setCandidateListCallback,
                              void(const CandidateListCallback &))
 
@@ -88,5 +94,8 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setDeleteSurroundingCallback,
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setToastCallback,
                              void(const ToastCallback &))
+
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setPagedCandidateCallback,
+                             void(const PagedCandidateCallback &))
 
 #endif // FCITX5_ANDROID_ANDROIDFRONTEND_PUBLIC_H

@@ -66,9 +66,12 @@ public:
                 filterText(ip.auxUp()),
                 filterText(ip.auxDown())
         );
+    }
+
+    void updateCandidatesBulk() {
         std::vector<std::string> candidates;
         int size = 0;
-        const auto &list = ip.candidateList();
+        const auto &list = inputPanel().candidateList();
         if (list) {
             const auto &bulk = list->toBulk();
             if (bulk) {
@@ -94,6 +97,32 @@ public:
             }
         }
         frontend_->updateCandidateList(candidates, size);
+    }
+
+    void updateCandidatesPaged() {
+        const auto &list = inputPanel().candidateList();
+        if (!list) {
+            PagedCandidateEntity empty({}, -1, CandidateLayoutHint::NotSet, false, false);
+            frontend_->updatePagedCandidate(empty);
+            return;
+        }
+        int cursorIndex = list->cursorIndex();
+        CandidateLayoutHint layoutHint = list->layoutHint();
+        bool hasPrev = false;
+        bool hasNext = false;
+        const auto &pageable = list->toPageable();
+        if (pageable) {
+            hasPrev = pageable->hasPrev();
+            hasNext = pageable->hasNext();
+        }
+        int size = list->size();
+        std::vector<CandidateEntity> candidates;
+        candidates.reserve(size);
+        for (int i = 0; i < size; i++) {
+            candidates.emplace_back(list->candidate(i), list->label(i));
+        }
+        PagedCandidateEntity paged(candidates, cursorIndex, layoutHint, hasPrev, hasNext);
+        frontend_->updatePagedCandidate(paged);
     }
 
     bool selectCandidate(int idx) {
@@ -220,7 +249,8 @@ AndroidFrontend::AndroidFrontend(Instance *instance)
           focusGroup_("android", instance->inputContextManager()),
           activeIC_(nullptr),
           icCache_(),
-          eventHandlers_() {
+          eventHandlers_(),
+          pagingMode_(0) {
     eventHandlers_.emplace_back(instance_->watchEvent(
             EventType::InputContextInputMethodActivated,
             EventWatcherPhase::Default,
@@ -236,7 +266,14 @@ AndroidFrontend::AndroidFrontend(Instance *instance)
                 auto &e = static_cast<InputContextFlushUIEvent &>(event);
                 switch (e.component()) {
                     case UserInterfaceComponent::InputPanel: {
-                        if (activeIC_) activeIC_->updateInputPanel();
+                        if (activeIC_) {
+                            activeIC_->updateInputPanel();
+                            if (pagingMode_ == 0) {
+                                activeIC_->updateCandidatesBulk();
+                            } else {
+                                activeIC_->updateCandidatesPaged();
+                            }
+                        }
                         break;
                     }
                     case UserInterfaceComponent::StatusArea: {
@@ -368,6 +405,14 @@ void AndroidFrontend::showToast(const std::string &s) {
     toastCallback(s);
 }
 
+void AndroidFrontend::setCandidatePagingMode(const int mode) {
+    pagingMode_ = mode;
+}
+
+void AndroidFrontend::updatePagedCandidate(const PagedCandidateEntity &paged) {
+    pagedCandidateCallback(paged);
+}
+
 void AndroidFrontend::setCommitStringCallback(const CommitStringCallback &callback) {
     commitStringCallback = callback;
 }
@@ -398,6 +443,10 @@ void AndroidFrontend::setDeleteSurroundingCallback(const DeleteSurroundingCallba
 
 void AndroidFrontend::setToastCallback(const ToastCallback &callback) {
     toastCallback = callback;
+}
+
+void AndroidFrontend::setPagedCandidateCallback(const PagedCandidateCallback &callback) {
+    pagedCandidateCallback = callback;
 }
 
 class AndroidFrontendFactory : public AddonFactory {

@@ -102,4 +102,6 @@ interface FcitxAPI {
     suspend fun getCandidateActions(idx: Int): Array<CandidateAction>
     suspend fun triggerCandidateAction(idx: Int, actionIdx: Int)
 
+    suspend fun setCandidatePagingMode(mode: Int)
+
 }

@@ -607,10 +607,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         if (!restarting && !super.onEvaluateInputViewShown()) {
             currentInputConnection?.monitorCursorAnchor()
         }
+        val useVirtualKeyboard = super.onEvaluateInputViewShown()
         postFcitxJob {
             focus(true)
+            setCandidatePagingMode(if (useVirtualKeyboard) 0 else 1)
         }
-        if (super.onEvaluateInputViewShown()) {
+        if (useVirtualKeyboard) {
             candidatesView?.handleEvents = false
             inputView?.handleEvents = true
             inputView?.visibility = View.VISIBLE

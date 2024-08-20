@@ -427,6 +427,10 @@ public:
         return p_frontend->call<fcitx::IAndroidFrontend::triggerCandidateAction>(idx, actionIdx);
     }
 
+    void setCandidatePagingMode(int mode) {
+        return p_frontend->call<fcitx::IAndroidFrontend::setCandidatePagingMode>(mode);
+    }
+
     void save() {
         p_instance->save();
     }
@@ -678,6 +682,25 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
         env->SetObjectArrayElement(vararg, 0, intArray);
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 8, *vararg);
     };
+    auto pagedCandidateCallback = [](const PagedCandidateEntity &paged) {
+        auto env = GlobalRef->AttachEnv();
+        const int size = static_cast<int>(paged.candidates.size());
+        auto candidatesArray = JRef<jobjectArray>(env, env->NewObjectArray(size, GlobalRef->Candidate, nullptr));
+        for (int i = 0; i < size; ++i) {
+            env->SetObjectArrayElement(candidatesArray, i, candidateEntityToObject(env, paged.candidates[i]));
+        }
+        auto cursorIndex = JRef(env, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, paged.cursorIndex));
+        auto layoutHint = JRef(env, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, static_cast<int>(paged.layoutHint)));
+        auto hasPrev = JRef(env, env->NewObject(GlobalRef->Boolean, GlobalRef->BooleanInit, paged.hasPrev));
+        auto hasNext = JRef(env, env->NewObject(GlobalRef->Boolean, GlobalRef->BooleanInit, paged.hasNext));
+        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(5, GlobalRef->Object, nullptr));
+        env->SetObjectArrayElement(vararg, 0, candidatesArray);
+        env->SetObjectArrayElement(vararg, 1, cursorIndex);
+        env->SetObjectArrayElement(vararg, 2, layoutHint);
+        env->SetObjectArrayElement(vararg, 3, hasPrev);
+        env->SetObjectArrayElement(vararg, 4, hasNext);
+        env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 9, *vararg);
+    };
     auto toastCallback = [](const std::string &s) {
         auto env = GlobalRef->AttachEnv();
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->ShowToast, *JString(env, s));
@@ -697,6 +720,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
         androidfrontend->template call<fcitx::IAndroidFrontend::setInputMethodChangeCallback>(imChangeCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setStatusAreaUpdateCallback>(statusAreaUpdateCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setDeleteSurroundingCallback>(deleteSurroundingCallback);
+        androidfrontend->template call<fcitx::IAndroidFrontend::setPagedCandidateCallback>(pagedCandidateCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setToastCallback>(toastCallback);
     });
     FCITX_INFO() << "Finishing startup";
@@ -1048,6 +1072,13 @@ JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_triggerFcitxCandidateAction(JNIEnv *env, jclass clazz, jint idx, jint action_idx) {
     RETURN_IF_NOT_RUNNING
     Fcitx::Instance().triggerCandidateAction(idx, action_idx);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_setFcitxCandidatePagingMode(JNIEnv *env, jclass clazz, jint mode) {
+    RETURN_IF_NOT_RUNNING
+    Fcitx::Instance().setCandidatePagingMode(mode);
 }
 
 extern "C"

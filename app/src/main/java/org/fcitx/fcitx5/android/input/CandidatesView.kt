@@ -7,12 +7,16 @@ package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.Size
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayout
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
@@ -29,14 +33,10 @@ import splitties.views.dsl.constraintlayout.lParams
 import splitties.views.dsl.constraintlayout.startOfParent
 import splitties.views.dsl.constraintlayout.topOfParent
 import splitties.views.dsl.core.add
-import splitties.views.dsl.core.endMargin
-import splitties.views.dsl.core.horizontalLayout
-import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.withTheme
 import splitties.views.dsl.core.wrapContent
 import splitties.views.horizontalPadding
 import splitties.views.verticalPadding
-import kotlin.math.min
 
 @SuppressLint("ViewConstructor")
 class CandidatesView(
@@ -62,7 +62,7 @@ class CandidatesView(
     private var eventHandlerJob: Job? = null
 
     private var inputPanel = FcitxEvent.InputPanelEvent.Data()
-    private var candidates = FcitxEvent.CandidateListEvent.Data()
+    private var paged = FcitxEvent.PagedCandidateEvent.Data()
 
     /**
      * horizontal, bottom, top
@@ -74,20 +74,26 @@ class CandidatesView(
         override val bkgColor = Color.TRANSPARENT
     }
 
-    // TODO ui orientation from fcitx
-    private val candidatesUi = horizontalLayout {
+    // TODO is it better to use RecyclerView + FlexboxLayoutManager ?
+    private val candidatesLayout = FlexboxLayout(ctx).apply {
         horizontalPadding = dp(8)
+        flexDirection = FlexDirection.ROW
+        flexWrap = FlexWrap.WRAP
+        // DividerVertical of FlexboxLayout is the vertical divider line between row of items
+        showDividerVertical = FlexboxLayout.SHOW_DIVIDER_MIDDLE
+        dividerDrawableVertical = GradientDrawable().apply {
+            setSize(dp(4), 0)
+        }
     }
 
     private fun handleFcitxEvent(it: FcitxEvent<*>) {
         when (it) {
-            // TODO make a new candidate page event
-            is FcitxEvent.CandidateListEvent -> {
-                candidates = it.data
-                updateUI()
-            }
             is FcitxEvent.InputPanelEvent -> {
                 inputPanel = it.data
+                updateUI()
+            }
+            is FcitxEvent.PagedCandidateEvent -> {
+                paged = it.data
                 updateUI()
             }
             else -> {}
@@ -96,7 +102,7 @@ class CandidatesView(
 
     private fun evaluateVisibility(): Boolean {
         return inputPanel.preedit.isNotEmpty() ||
-                candidates.total > 0 ||
+                paged.candidates.isNotEmpty() ||
                 inputPanel.auxUp.isNotEmpty() ||
                 inputPanel.auxDown.isNotEmpty()
     }
@@ -114,17 +120,20 @@ class CandidatesView(
     }
 
     private fun updateCandidates() {
-        candidatesUi.apply {
-            removeAllViews()
-            val limit = min(candidates.candidates.size, 5)
-            for (i in 0..<limit) {
-                val item = CandidateItemUi(ctx, theme).apply {
-                    text.textSize = 16f
-                    text.text = "${i + 1}. ${candidates.candidates[i]}"
-                }
-                addView(item.root, lParams { endMargin = if (i == limit - 1) 0 else dp(8) })
-            }
+        candidatesLayout.removeAllViews()
+        candidatesLayout.flexDirection = when (paged.layoutHint) {
+            FcitxEvent.PagedCandidateEvent.LayoutHint.Vertical -> FlexDirection.COLUMN
+            else -> FlexDirection.ROW
         }
+        paged.candidates.forEach {
+            val item = CandidateItemUi(ctx, theme).apply {
+                text.textSize = 16f
+                // TODO different font for comment
+                text.text = "${it.label}${it.text} ${it.comment}"
+            }
+            candidatesLayout.addView(item.root, FlexboxLayout.LayoutParams(-2, -2))
+        }
+        // TODO paging indicator
     }
 
     private fun updatePosition() {
@@ -163,7 +172,7 @@ class CandidatesView(
             topOfParent()
             startOfParent()
         })
-        add(candidatesUi, lParams(wrapContent, wrapContent) {
+        add(candidatesLayout, lParams(wrapContent, wrapContent) {
             below(preeditUi.root)
             startOfParent()
             bottomOfParent()

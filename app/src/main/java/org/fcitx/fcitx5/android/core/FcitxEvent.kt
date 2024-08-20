@@ -6,6 +6,8 @@ package org.fcitx.fcitx5.android.core
 
 sealed class FcitxEvent<T>(open val data: T) {
 
+    data class Candidate(val label: String, val text: String, val comment: String)
+
     abstract val eventType: EventType
 
     data class CandidateListEvent(override val data: Data) :
@@ -121,9 +123,32 @@ sealed class FcitxEvent<T>(open val data: T) {
     data class DeleteSurroundingEvent(override val data: Data) :
         FcitxEvent<DeleteSurroundingEvent.Data>(data) {
 
-            override val eventType = EventType.DeleteSurrounding
+        override val eventType = EventType.DeleteSurrounding
 
         data class Data(val before: Int, val after: Int)
+    }
+
+    data class PagedCandidateEvent(override val data: Data) :
+        FcitxEvent<PagedCandidateEvent.Data>(data) {
+
+        override val eventType = EventType.PagedCandidate
+
+        enum class LayoutHint(value: Int) {
+            NotSet(0), Vertical(1), Horizontal(2);
+
+            companion object {
+                private val Types = entries.toTypedArray()
+                fun of(value: Int) = Types[value]
+            }
+        }
+
+        data class Data(
+            val candidates: Array<Candidate> = emptyArray(),
+            val cursorIndex: Int = -1,
+            val layoutHint: LayoutHint = LayoutHint.NotSet,
+            val hasPrev: Boolean = false,
+            val hasNext: Boolean = false
+        )
     }
 
     data class UnknownEvent(override val data: Array<Any>) : FcitxEvent<Array<Any>>(data) {
@@ -156,12 +181,13 @@ sealed class FcitxEvent<T>(open val data: T) {
         Change,
         StatusArea,
         DeleteSurrounding,
+        PagedCandidate,
         Unknown
     }
 
     companion object {
 
-        private val Types = EventType.values()
+        private val Types = EventType.entries.toTypedArray()
 
         @Suppress("UNCHECKED_CAST")
         fun create(type: Int, params: Array<Any>) =
@@ -206,6 +232,15 @@ sealed class FcitxEvent<T>(open val data: T) {
                 EventType.DeleteSurrounding -> (params[0] as IntArray).let {
                     DeleteSurroundingEvent(DeleteSurroundingEvent.Data(it[0], it[1]))
                 }
+                EventType.PagedCandidate -> PagedCandidateEvent(
+                    PagedCandidateEvent.Data(
+                        params[0] as Array<Candidate>,
+                        params[1] as Int,
+                        PagedCandidateEvent.LayoutHint.of(params[2] as Int),
+                        params[3] as Boolean,
+                        params[4] as Boolean
+                    )
+                )
                 else -> UnknownEvent(params)
             }
     }
