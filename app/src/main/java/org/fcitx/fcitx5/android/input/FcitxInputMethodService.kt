@@ -24,6 +24,7 @@ import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InlineSuggestionsRequest
 import android.view.inputmethod.InlineSuggestionsResponse
+import android.view.inputmethod.InputMethodManager
 import android.view.inputmethod.InputMethodSubtype
 import android.widget.FrameLayout
 import android.widget.inline.InlinePresentationSpec
@@ -87,6 +88,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private lateinit var contentView: FrameLayout
     private var inputView: InputView? = null
     private var candidatesView: CandidatesView? = null
+
+    private var startedInput = false
+    private var startedInputView = false
 
     private var capabilityFlags = CapabilityFlags.DefaultFlags
 
@@ -170,6 +174,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             }
         }
         super.onCreate()
+        decorView = window.window!!.decorView
+        contentView = decorView.findViewById(android.R.id.content)
     }
 
     private fun handleFcitxEvent(event: FcitxEvent<*>) {
@@ -424,8 +430,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // during each onConfigurationChanged period.
         // That is, onCreateInputView would be called again, after system dark mode changes,
         // or screen orientation changes.
-        decorView = window.window!!.decorView
-        contentView = decorView.findViewById(android.R.id.content)
         candidatesView = CandidatesView(this, fcitx, ThemeManager.activeTheme)
         // put CandidatesView directly under content view
         contentView.addView(candidatesView)
@@ -463,7 +467,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private var inputViewLocation = intArrayOf(0, 0)
 
     override fun onComputeInsets(outInsets: Insets) {
-        Timber.d("onComputeInsets")
         if (candidatesView?.handleEvents == true) {
             val h = decorView.height
             outInsets.apply {
@@ -516,6 +519,21 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        // request to show floating CandidatesView when pressing physical keyboard
+        if (!startedInputView && event.displayLabel.isLetterOrDigit() && !super.onEvaluateInputViewShown()) {
+            postFcitxJob {
+                focus(true)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                requestShowSelf(InputMethodManager.SHOW_IMPLICIT)
+            } else {
+                @Suppress("DEPRECATION")
+                inputMethodManager.showSoftInputFromInputMethod(
+                    window.window!!.attributes.token,
+                    InputMethodManager.SHOW_FORCED
+                )
+            }
+        }
         return forwardKeyEvent(event) || super.onKeyDown(keyCode, event)
     }
 
@@ -577,6 +595,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onStartInput(attribute: EditorInfo, restarting: Boolean) {
+        startedInput = true
         // update selection as soon as possible
         // sometimes when restarting input, onUpdateSelection happens before onStartInput, and
         // initialSel{Start,End} is outdated. but it's the client app's responsibility to send
@@ -601,13 +620,14 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onStartInputView(info: EditorInfo, restarting: Boolean) {
+        startedInputView = true
         Timber.d("onStartInputView: restarting=$restarting")
+        val useVirtualKeyboard = super.onEvaluateInputViewShown()
         // monitor cursor anchor only when needed, ie
         // InputView just becomes visible && using floating CandidatesView
-        if (!restarting && !super.onEvaluateInputViewShown()) {
+        if (!restarting && !useVirtualKeyboard) {
             currentInputConnection?.monitorCursorAnchor()
         }
-        val useVirtualKeyboard = super.onEvaluateInputViewShown()
         postFcitxJob {
             focus(true)
             setCandidatePagingMode(if (useVirtualKeyboard) 0 else 1)
@@ -866,6 +886,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
+        startedInputView = false
         Timber.d("onFinishInputView: finishingInput=$finishingInput")
         currentInputConnection?.run {
             finishComposingText()
@@ -880,6 +901,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onFinishInput() {
+        startedInput = false
         Timber.d("onFinishInput")
         capabilityFlags = CapabilityFlags.DefaultFlags
     }
