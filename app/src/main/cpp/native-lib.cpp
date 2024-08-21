@@ -685,6 +685,11 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
     auto pagedCandidateCallback = [](const PagedCandidateEntity &paged) {
         auto env = GlobalRef->AttachEnv();
         const int size = static_cast<int>(paged.candidates.size());
+        if (size == 0) {
+            auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(0, GlobalRef->Object, nullptr));
+            env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 9, *vararg);
+            return;
+        }
         auto candidatesArray = JRef<jobjectArray>(env, env->NewObjectArray(size, GlobalRef->Candidate, nullptr));
         for (int i = 0; i < size; ++i) {
             env->SetObjectArrayElement(candidatesArray, i, candidateEntityToObject(env, paged.candidates[i]));

@@ -102,8 +102,7 @@ public:
     void updateCandidatesPaged() {
         const auto &list = inputPanel().candidateList();
         if (!list) {
-            PagedCandidateEntity empty({}, -1, CandidateLayoutHint::NotSet, false, false);
-            frontend_->updatePagedCandidate(empty);
+            frontend_->updatePagedCandidate(PagedCandidateEntity::Empty);
             return;
         }
         int cursorIndex = list->cursorIndex();

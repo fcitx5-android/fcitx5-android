@@ -62,7 +62,7 @@ class CandidatesView(
     private var eventHandlerJob: Job? = null
 
     private var inputPanel = FcitxEvent.InputPanelEvent.Data()
-    private var paged = FcitxEvent.PagedCandidateEvent.Data()
+    private var paged = FcitxEvent.PagedCandidateEvent.Data.Empty
 
     /**
      * horizontal, bottom, top
