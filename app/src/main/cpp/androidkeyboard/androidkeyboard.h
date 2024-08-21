@@ -31,6 +31,8 @@ FCITX_CONFIGURATION(
         Option<bool>
             enableWordHint{this, "EnableWordHint", _("Enable word hint"), true};
         Option<bool>
+            hintOnPhysicalKeyboard{this, "WordHintOnPhysicalKeyboard", _("Enable word hint when using physical keyboard"), false};
+        Option<bool>
             editorControlledWordHint{this, "EditorControlledWordHint", _("Disable word hint based on editor attributes"), true};
         Option<int, IntConstrain>
             pageSize{this, "PageSize", _("Word hint page size"), 5, IntConstrain(3, 10)};
@@ -95,10 +97,10 @@ public:
 
     auto factory() { return &factory_; }
 
-    // Return true if chr is pushed to buffer.
-    // Return false if chr will be skipped by buffer, usually this means caller
-    // need to call commit buffer and forward chr manually.
-    bool updateBuffer(InputContext *inputContext, const std::string &chr);
+    // Return true if event is pushed to buffer.
+    // Return false if event will be skipped by buffer, usually this means caller
+    // need to call commit buffer and forward event manually.
+    bool updateBuffer(InputContext *inputContext, const KeyEvent& event);
 
     // Commit current buffer, also reset the state.
     // See also preeditString().

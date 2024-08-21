@@ -108,8 +108,7 @@ void AndroidKeyboardEngine::keyEvent(const InputMethodEntry &entry, KeyEvent &ev
         }
         if (key.isLAZ() || key.isUAZ() || validSym ||
             (!buffer.empty() && key.checkKeyList(FCITX_HYPHEN_APOS))) {
-            auto text = Key::keySymToUTF8(key.sym());
-            if (updateBuffer(inputContext, text)) {
+            if (updateBuffer(inputContext, event)) {
                 return event.filterAndAccept();
             }
         }
@@ -283,7 +282,7 @@ void AndroidKeyboardEngine::updateUI(InputContext *inputContext) {
     inputContext->updateUserInterface(UserInterfaceComponent::InputPanel);
 }
 
-bool AndroidKeyboardEngine::updateBuffer(InputContext *inputContext, const std::string &chr) {
+bool AndroidKeyboardEngine::updateBuffer(InputContext *inputContext, const KeyEvent& event) {
     auto *entry = instance_->inputMethodEntry(inputContext);
     if (!entry) {
         return false;
@@ -292,6 +291,7 @@ bool AndroidKeyboardEngine::updateBuffer(InputContext *inputContext, const std::
     auto *state = inputContext->propertyFor(&factory_);
     // word hint is disabled, input is password, or language not supported
     if (!*config_.enableWordHint ||
+        (!*config_.hintOnPhysicalKeyboard && !event.isVirtual()) ||
         (*config_.editorControlledWordHint && inputContext->capabilityFlags().test(CapabilityFlag::NoSpellCheck)) ||
         inputContext->capabilityFlags().test(CapabilityFlag::Password) ||
         !supportHint(entry->languageCode())) {
@@ -305,7 +305,7 @@ bool AndroidKeyboardEngine::updateBuffer(InputContext *inputContext, const std::
         buffer.type(preedit);
     }
 
-    buffer.type(chr);
+    buffer.type(Key::keySymToUTF8(event.key().sym()));
 
     if (buffer.size() >= MaxBufferSize) {
         commitBuffer(inputContext);
