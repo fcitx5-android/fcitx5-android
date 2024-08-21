@@ -65,8 +65,6 @@ open class PreeditUi(override val ctx: Context, private val theme: Theme) : Ui {
         private set
 
     override val root: View = verticalLayout {
-        alpha = 0.8f
-        visibility = View.INVISIBLE
         add(upView, lParams())
         add(downView, lParams())
     }
