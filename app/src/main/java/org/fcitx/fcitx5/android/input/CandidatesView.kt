@@ -8,7 +8,6 @@ package org.fcitx.fcitx5.android.input
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -16,10 +15,11 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.Size
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
-import com.google.android.flexbox.FlexboxLayout
+import com.google.android.flexbox.FlexboxLayoutManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
@@ -41,10 +41,12 @@ import splitties.views.dsl.constraintlayout.lParams
 import splitties.views.dsl.constraintlayout.matchConstraints
 import splitties.views.dsl.constraintlayout.startOfParent
 import splitties.views.dsl.constraintlayout.topOfParent
+import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.imageView
 import splitties.views.dsl.core.withTheme
 import splitties.views.dsl.core.wrapContent
+import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.horizontalPadding
 import splitties.views.imageDrawable
 import splitties.views.verticalPadding
@@ -87,16 +89,67 @@ class CandidatesView(
         override val bkgColor = Color.TRANSPARENT
     }
 
-    // TODO is it better to use RecyclerView + FlexboxLayoutManager ?
-    private val candidatesLayout = FlexboxLayout(ctx).apply {
-        horizontalPadding = dp(8)
-        flexDirection = FlexDirection.ROW
-        flexWrap = FlexWrap.WRAP
-        // DividerVertical of FlexboxLayout is the vertical divider line between row of items
-        showDividerVertical = FlexboxLayout.SHOW_DIVIDER_MIDDLE
-        dividerDrawableVertical = GradientDrawable().apply {
-            setSize(dp(4), 0)
+    inner class UiViewHolder(val ui: Ui) : RecyclerView.ViewHolder(ui.root)
+
+    private val candidatesAdapter = object : RecyclerView.Adapter<UiViewHolder>() {
+        override fun getItemCount() =
+            paged.candidates.size + (if (paged.hasPrev || paged.hasNext) 1 else 0)
+
+        override fun getItemViewType(position: Int) = if (position < paged.candidates.size) 0 else 1
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UiViewHolder {
+            return when (viewType) {
+                0 -> UiViewHolder(CandidateItemUi(ctx, theme).apply {
+                    text.textSize = 16f
+                })
+                else -> UiViewHolder(object : Ui {
+                    override val ctx = this@CandidatesView.ctx
+                    override val root = this@CandidatesView.paginationLayout
+                })
+            }
         }
+
+        override fun onBindViewHolder(holder: UiViewHolder, position: Int) {
+            when (getItemViewType(position)) {
+                0 -> {
+                    holder.ui as CandidateItemUi
+                    val candidate = paged.candidates[position]
+                    // TODO different font for comment
+                    holder.ui.text.text = "${candidate.label}${candidate.text} ${candidate.comment}"
+                    if (position == paged.cursorIndex) {
+                        holder.ui.text.setTextColor(theme.genericActiveForegroundColor)
+                        holder.ui.root.backgroundColor = theme.genericActiveBackgroundColor
+                    } else {
+                        holder.ui.text.setTextColor(theme.keyTextColor)
+                        holder.ui.root.backgroundColor = Color.TRANSPARENT
+                    }
+                }
+                else -> {
+                    prevIcon.alpha = if (paged.hasPrev) 1f else 0.4f
+                    nextIcon.alpha = if (paged.hasNext) 1f else 0.4f
+                }
+            }
+        }
+    }
+
+    private val candidatesLayoutManager = object : FlexboxLayoutManager(ctx) {
+        init {
+            flexDirection = FlexDirection.ROW
+            flexWrap = FlexWrap.WRAP
+            alignItems = AlignItems.FLEX_START
+        }
+
+        override fun onLayoutCompleted(state: RecyclerView.State?) {
+            super.onLayoutCompleted(state)
+            shouldUpdatePosition = true
+        }
+    }
+
+    private val recyclerView = recyclerView {
+        isFocusable = false
+        horizontalPadding = dp(8)
+        adapter = candidatesAdapter
+        layoutManager = candidatesLayoutManager
         // update position after layout child views and before drawing to avoid flicker
         viewTreeObserver.addOnPreDrawListener {
             if (shouldUpdatePosition) {
@@ -124,9 +177,10 @@ class CandidatesView(
             centerVertically()
             before(nextIcon)
         })
-        layoutParams = FlexboxLayout.LayoutParams(wrapContent, wrapContent).apply {
+        layoutParams = FlexboxLayoutManager.LayoutParams(wrapContent, wrapContent).apply {
             flexGrow = 1f
             alignSelf = AlignItems.STRETCH
+            minHeight = dp(20)
         }
     }
 
@@ -162,30 +216,13 @@ class CandidatesView(
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun updateCandidates() {
-        candidatesLayout.removeAllViews()
-        candidatesLayout.flexDirection = when (paged.layoutHint) {
+        candidatesLayoutManager.flexDirection = when (paged.layoutHint) {
             FcitxEvent.PagedCandidateEvent.LayoutHint.Vertical -> FlexDirection.COLUMN
             else -> FlexDirection.ROW
         }
-        paged.candidates.forEachIndexed { i, it ->
-            val item = CandidateItemUi(ctx, theme).apply {
-                text.textSize = 16f
-                // TODO different font for comment
-                text.text = "${it.label}${it.text} ${it.comment}"
-                if (i == paged.cursorIndex) {
-                    root.backgroundColor = theme.genericActiveBackgroundColor
-                    text.setTextColor(theme.genericActiveForegroundColor)
-                }
-            }
-            candidatesLayout.addView(item.root, FlexboxLayout.LayoutParams(-2, -2))
-        }
-        if (paged.hasPrev || paged.hasNext) {
-            prevIcon.alpha = if (paged.hasPrev) 1f else 0.4f
-            nextIcon.alpha = if (paged.hasNext) 1f else 0.4f
-            candidatesLayout.addView(paginationLayout)
-        }
-        shouldUpdatePosition = true
+        candidatesAdapter.notifyDataSetChanged()
     }
 
     private fun updatePosition() {
@@ -225,12 +262,13 @@ class CandidatesView(
             topOfParent()
             startOfParent()
         })
-        add(candidatesLayout, lParams(wrapContent, wrapContent) {
+        add(recyclerView, lParams(wrapContent, wrapContent) {
             below(preeditUi.root)
             startOfParent()
             bottomOfParent()
         })
 
+        isFocusable = false
         layoutParams = ViewGroup.LayoutParams(wrapContent, wrapContent)
     }
 
