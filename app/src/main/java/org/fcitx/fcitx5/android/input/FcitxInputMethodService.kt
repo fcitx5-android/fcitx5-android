@@ -524,10 +524,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             postFcitxJob {
                 focus(true)
             }
+            @Suppress("DEPRECATION")
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                requestShowSelf(InputMethodManager.SHOW_IMPLICIT)
+                requestShowSelf(InputMethodManager.SHOW_FORCED)
             } else {
-                @Suppress("DEPRECATION")
                 inputMethodManager.showSoftInputFromInputMethod(
                     window.window!!.attributes.token,
                     InputMethodManager.SHOW_FORCED

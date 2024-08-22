@@ -40,7 +40,6 @@ object SubtypeManager {
                 .setSubtypeId(im.uniqueName.hashCode())
                 .setSubtypeExtraValue(im.uniqueName)
                 .setSubtypeNameOverride(im.displayName)
-                .setSubtypeLocale(im.languageCode)
                 .setSubtypeMode(MODE_KEYBOARD)
                 .setIsAsciiCapable(im.uniqueName == IM_KEYBOARD)
                 .build()
