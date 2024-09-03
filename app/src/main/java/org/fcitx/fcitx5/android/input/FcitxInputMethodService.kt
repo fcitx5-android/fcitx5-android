@@ -643,6 +643,13 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             candidatesView?.handleEvents = true
             inputView?.handleEvents = false
             inputView?.visibility = View.GONE
+            //set default position
+            updateDecorLocation(false)
+            anchorPosition[0] = 0f
+            anchorPosition[1] = contentSize[1]
+            anchorPosition[2] = 0f
+            anchorPosition[3] = contentSize[1]
+            candidatesView?.updateCursorAnchor(anchorPosition, contentSize)
         }
     }
 
@@ -666,13 +673,13 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private val decorLocationInt = intArrayOf(0, 0)
     private var decorLocationUpdated = false
 
-    private fun updateDecorLocation() {
+    private fun updateDecorLocation(flag: Boolean) {
         contentSize[0] = contentView.width.toFloat()
         contentSize[1] = contentView.height.toFloat()
         decorView.getLocationOnScreen(decorLocationInt)
         decorLocation[0] = decorLocationInt[0].toFloat()
         decorLocation[1] = decorLocationInt[1].toFloat()
-        decorLocationUpdated = true
+        decorLocationUpdated = flag
     }
 
     private val anchorPosition = floatArrayOf(0f, 0f, 0f, 0f)
@@ -686,7 +693,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         info.matrix.mapPoints(anchorPosition)
         // avoid calling `decorView.getLocationOnScreen` repeatedly
         if (!decorLocationUpdated) {
-            updateDecorLocation()
+            updateDecorLocation(true)
         }
         val (xOffset, yOffset) = decorLocation
         anchorPosition[0] -= xOffset
