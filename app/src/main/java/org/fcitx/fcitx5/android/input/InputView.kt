@@ -86,7 +86,9 @@ class InputView(
         set(value) {
             field = value
             if (field) {
-                setupFcitxEventHandler()
+                if (eventHandlerJob == null) {
+                    setupFcitxEventHandler()
+                }
             } else {
                 eventHandlerJob?.cancel()
                 eventHandlerJob = null
