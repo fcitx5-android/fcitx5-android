@@ -16,14 +16,15 @@ class AddonConfigFragment : FcitxPreferenceFragment() {
         val addon = requireStringArg(ARG_UNIQUE_NAME)
         val raw = fcitx.getAddonConfig(addon)
         if (addon == "table") {
-            val desc = raw["desc"]["TableGlobalConfig"]
-            val androidTable = RawConfig(
-                "AndroidTable", subItems = arrayOf(
-                    RawConfig("Type", "External"),
-                    RawConfig("Description", getString(R.string.manage_table_im))
+            // append android specific "Manage Table Input Methods" to config of table addon
+            raw.findByName("desc")?.findByName("TableGlobalConfig")?.let {
+                it.subItems = (it.subItems ?: emptyArray()) + RawConfig(
+                    "AndroidTable", subItems = arrayOf(
+                        RawConfig("Type", "External"),
+                        RawConfig("Description", getString(R.string.manage_table_im))
+                    )
                 )
-            )
-            desc.subItems = (desc.subItems ?: arrayOf()) + androidTable
+            }
         }
         return raw
     }
