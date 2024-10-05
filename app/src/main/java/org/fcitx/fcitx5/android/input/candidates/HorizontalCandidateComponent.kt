@@ -39,6 +39,7 @@ import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
+import org.fcitx.fcitx5.android.utils.item
 import org.mechdancer.dependency.manager.must
 import splitties.dimensions.dp
 import splitties.resources.styledColor
@@ -198,9 +199,8 @@ class HorizontalCandidateComponent :
         }
     }
 
-    private fun triggerCandidateAction(idx: Int, actionIdx: Int): Boolean {
+    private fun triggerCandidateAction(idx: Int, actionIdx: Int) {
         fcitx.runIfReady { triggerCandidateAction(idx, actionIdx) }
-        return true
     }
 
     private var candidateActionMenu: PopupMenu? = null
@@ -223,7 +223,7 @@ class HorizontalCandidateComponent :
                     isEnabled = false
                 }
                 actions.forEach { action ->
-                    menu.add(action.text).setOnMenuItemClickListener {
+                    menu.item(action.text) {
                         triggerCandidateAction(idx, action.id)
                     }
                 }

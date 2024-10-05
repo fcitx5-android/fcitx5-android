@@ -37,6 +37,7 @@ import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import org.fcitx.fcitx5.android.utils.NaiveDustman
 import org.fcitx.fcitx5.android.utils.importErrorDialog
+import org.fcitx.fcitx5.android.utils.item
 import org.fcitx.fcitx5.android.utils.materialTextInput
 import org.fcitx.fcitx5.android.utils.notificationManager
 import org.fcitx.fcitx5.android.utils.onPositiveButtonClick
@@ -102,16 +103,12 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                             icon = R.drawable.ic_baseline_expand_more_24
                             setOnClickListener {
                                 PopupMenu(requireContext(), this).apply {
-                                    menu.add(getString(R.string.edit)).setOnMenuItemClickListener {
-                                        edit()
-                                        true
-                                    }
-                                    menu.add(getString(R.string.reset)).setOnMenuItemClickListener {
+                                    menu.item(R.string.edit) { edit() }
+                                    menu.item(R.string.reset) {
                                         entry.deleteOverride()
                                         ui.updateItem(ui.indexItem(entry), entry)
                                         // not sure if the content changes
                                         dustman.forceDirty()
-                                        true
                                     }
                                     show()
                                 }

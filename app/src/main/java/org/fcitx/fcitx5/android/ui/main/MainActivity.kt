@@ -11,7 +11,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
-import android.view.MenuItem
 import android.view.ViewGroup
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -21,6 +20,7 @@ import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.forEach
 import androidx.core.view.updateLayoutParams
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -30,9 +30,9 @@ import org.fcitx.fcitx5.android.databinding.ActivityMainBinding
 import org.fcitx.fcitx5.android.ui.main.settings.PinyinDictionaryFragment
 import org.fcitx.fcitx5.android.ui.setup.SetupActivity
 import org.fcitx.fcitx5.android.utils.Const
+import org.fcitx.fcitx5.android.utils.item
 import org.fcitx.fcitx5.android.utils.startActivity
 import splitties.dimensions.dp
-import splitties.resources.drawable
 import splitties.resources.styledColor
 import splitties.views.topPadding
 
@@ -118,80 +118,40 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupToolbarMenu(menu: Menu) {
-        menu.apply {
-            add(R.string.save).apply {
-                icon = drawable(R.drawable.ic_baseline_save_24)!!.apply {
-                    setTint(styledColor(android.R.attr.colorControlNormal))
-                }
-                setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
-                viewModel.toolbarSaveButtonOnClickListener.apply {
-                    observe(this@MainActivity) { listener -> isVisible = listener != null }
-                    setValue(value)
-                }
-                setOnMenuItemClickListener {
-                    viewModel.toolbarSaveButtonOnClickListener.value?.invoke()
-                    true
-                }
-            }
-            val aboutMenus = mutableListOf<MenuItem>()
-            add(R.string.faq).apply {
-                aboutMenus.add(this)
-                setOnMenuItemClickListener {
-                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Const.faqUrl)))
-                    true
-                }
-            }
-            add(R.string.developer).apply {
-                aboutMenus.add(this)
-                setOnMenuItemClickListener {
-                    navController.navigate(R.id.action_mainFragment_to_developerFragment)
-                    true
-                }
-            }
-            add(R.string.about).apply {
-                aboutMenus.add(this)
-                setOnMenuItemClickListener {
-                    navController.navigate(R.id.action_mainFragment_to_aboutFragment)
-                    true
-                }
-            }
-            viewModel.aboutButton.apply {
-                observe(this@MainActivity) { enabled ->
-                    aboutMenus.forEach { menu -> menu.isVisible = enabled }
-                }
-                setValue(value)
-            }
-
-            add(R.string.edit).apply {
-                icon = drawable(R.drawable.ic_baseline_edit_24)!!.apply {
-                    setTint(styledColor(android.R.attr.colorControlNormal))
-                }
-                setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
-                viewModel.toolbarEditButtonVisible.apply {
-                    observe(this@MainActivity) { isVisible = it }
-                    setValue(value)
-                }
-                setOnMenuItemClickListener {
-                    viewModel.toolbarEditButtonOnClickListener.value?.invoke()
-                    true
-                }
-            }
-
-            add(R.string.delete).apply {
-                icon = drawable(R.drawable.ic_baseline_delete_24)!!.apply {
-                    setTint(styledColor(android.R.attr.colorControlNormal))
-                }
-                setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
-                viewModel.toolbarDeleteButtonOnClickListener.apply {
-                    observe(this@MainActivity) { listener -> isVisible = listener != null }
-                    setValue(value)
-                }
-                setOnMenuItemClickListener {
-                    viewModel.toolbarDeleteButtonOnClickListener.value?.invoke()
-                    true
-                }
-            }
+        val iconTint = styledColor(android.R.attr.colorControlNormal)
+        menu.item(R.string.save, R.drawable.ic_baseline_save_24, iconTint, true) {
+            viewModel.toolbarSaveButtonOnClickListener.value?.invoke()
+        }.apply {
+            viewModel.toolbarSaveButtonOnClickListener
+                .observe(this@MainActivity) { listener -> isVisible = listener != null }
         }
+        val aboutMenuItems = listOf(
+            menu.item(R.string.faq) {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Const.faqUrl)))
+            },
+            menu.item(R.string.developer) {
+                navController.navigate(R.id.action_mainFragment_to_developerFragment)
+            },
+            menu.item(R.string.about) {
+                navController.navigate(R.id.action_mainFragment_to_aboutFragment)
+            }
+        )
+        viewModel.aboutButton.observe(this@MainActivity) { enabled ->
+            aboutMenuItems.forEach { menu -> menu.isVisible = enabled }
+        }
+        menu.item(R.string.edit, R.drawable.ic_baseline_edit_24, iconTint, true) {
+            viewModel.toolbarEditButtonOnClickListener.value?.invoke()
+        }.apply {
+            viewModel.toolbarEditButtonVisible.observe(this@MainActivity) { isVisible = it }
+        }
+        menu.item(R.string.delete, R.drawable.ic_baseline_delete_24, iconTint, true) {
+            viewModel.toolbarDeleteButtonOnClickListener.value?.invoke()
+        }.apply {
+            viewModel.toolbarDeleteButtonOnClickListener
+                .observe(this@MainActivity) { listener -> isVisible = listener != null }
+        }
+        // all menus should be invisible and enabled on demand
+        menu.forEach { it.isVisible = false }
     }
 
     private var needNotifications by AppPrefs.getInstance().internal.needNotifications

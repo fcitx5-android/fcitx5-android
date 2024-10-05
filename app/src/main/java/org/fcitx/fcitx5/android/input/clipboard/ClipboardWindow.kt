@@ -46,6 +46,7 @@ import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.EventStateMachine
+import org.fcitx.fcitx5.android.utils.item
 import org.mechdancer.dependency.manager.must
 import splitties.dimensions.dp
 import splitties.resources.styledColor
@@ -164,27 +165,18 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     private fun promptDeleteAll(skipPinned: Boolean) {
         promptMenu?.dismiss()
         promptMenu = PopupMenu(context, ui.deleteAllButton).apply {
-            menu.apply {
-                add(buildSpannedString {
-                    bold {
-                        color(context.styledColor(android.R.attr.colorAccent)) {
-                            append(context.getString(if (skipPinned) R.string.delete_all_except_pinned else R.string.delete_all_pinned_items))
-                        }
+            menu.add(buildSpannedString {
+                bold {
+                    color(context.styledColor(android.R.attr.colorAccent)) {
+                        append(context.getString(if (skipPinned) R.string.delete_all_except_pinned else R.string.delete_all_pinned_items))
                     }
-                }).apply {
-                    isEnabled = false
                 }
-                add(android.R.string.cancel).apply {
-                    setOnMenuItemClickListener { true }
-                }
-                add(android.R.string.ok).apply {
-                    setOnMenuItemClickListener {
-                        service.lifecycleScope.launch {
-                            val ids = ClipboardManager.deleteAll(skipPinned)
-                            showUndoSnackbar(*ids)
-                        }
-                        true
-                    }
+            }).isEnabled = false
+            menu.add(android.R.string.cancel)
+            menu.item(android.R.string.ok) {
+                service.lifecycleScope.launch {
+                    val ids = ClipboardManager.deleteAll(skipPinned)
+                    showUndoSnackbar(*ids)
                 }
             }
             setOnDismissListener {

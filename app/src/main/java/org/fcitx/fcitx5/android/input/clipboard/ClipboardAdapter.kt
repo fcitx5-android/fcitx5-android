@@ -7,8 +7,6 @@ package org.fcitx.fcitx5.android.input.clipboard
 import android.os.Build
 import android.view.ViewGroup
 import android.widget.PopupMenu
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -16,7 +14,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardEntry
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.utils.DeviceUtil
-import splitties.resources.drawable
+import org.fcitx.fcitx5.android.utils.item
 import splitties.resources.styledColor
 import kotlin.math.min
 
@@ -98,26 +96,22 @@ abstract class ClipboardAdapter(
                 onPaste(entry)
             }
             root.setOnLongClickListener {
-                val iconColor = ctx.styledColor(android.R.attr.colorControlNormal)
                 val popup = PopupMenu(ctx, root)
-                fun menuItem(@StringRes title: Int, @DrawableRes ic: Int, callback: () -> Unit) {
-                    popup.menu.add(title).apply {
-                        icon = ctx.drawable(ic)?.apply { setTint(iconColor) }
-                        setOnMenuItemClickListener {
-                            callback()
-                            true
-                        }
+                val menu = popup.menu
+                val iconTint = ctx.styledColor(android.R.attr.colorControlNormal)
+                if (entry.pinned) {
+                    menu.item(R.string.unpin, R.drawable.ic_outline_push_pin_24, iconTint) {
+                        onUnpin(entry.id)
+                    }
+                } else {
+                    menu.item(R.string.pin, R.drawable.ic_baseline_push_pin_24, iconTint) {
+                        onPin(entry.id)
                     }
                 }
-                if (entry.pinned) menuItem(R.string.unpin, R.drawable.ic_outline_push_pin_24) {
-                    onUnpin(entry.id)
-                } else menuItem(R.string.pin, R.drawable.ic_baseline_push_pin_24) {
-                    onPin(entry.id)
-                }
-                menuItem(R.string.edit, R.drawable.ic_baseline_edit_24) {
+                menu.item(R.string.edit, R.drawable.ic_baseline_edit_24, iconTint) {
                     onEdit(entry.id)
                 }
-                menuItem(R.string.delete, R.drawable.ic_baseline_delete_24) {
+                menu.item(R.string.delete, R.drawable.ic_baseline_delete_24, iconTint) {
                     onDelete(entry.id)
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !DeviceUtil.isSamsungOneUI) {
