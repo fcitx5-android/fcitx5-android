@@ -1,30 +1,23 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
  */
+
 package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
-import android.app.Dialog
 import android.content.res.Configuration
-import android.graphics.Color
 import android.os.Build
 import android.view.View
 import android.view.View.OnClickListener
-import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.ImageView
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.CapabilityFlags
 import org.fcitx.fcitx5.android.core.FcitxEvent
@@ -49,7 +42,6 @@ import org.fcitx.fcitx5.android.input.picker.symbolPicker
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
-import org.fcitx.fcitx5.android.utils.styledFloat
 import org.fcitx.fcitx5.android.utils.unset
 import org.mechdancer.dependency.DynamicScope
 import org.mechdancer.dependency.manager.wrapToUniqueComponent
@@ -77,26 +69,10 @@ import splitties.views.imageDrawable
 
 @SuppressLint("ViewConstructor")
 class InputView(
-    val service: FcitxInputMethodService,
-    val fcitx: FcitxConnection,
-    val theme: Theme
-) : ConstraintLayout(service) {
-
-    var handleEvents = true
-        set(value) {
-            field = value
-            if (field) {
-                if (eventHandlerJob == null) {
-                    setupFcitxEventHandler()
-                }
-            } else {
-                eventHandlerJob?.cancel()
-                eventHandlerJob = null
-            }
-        }
-
-    private var shouldUpdateNavbarForeground = false
-    private var shouldUpdateNavbarBackground = false
+    service: FcitxInputMethodService,
+    fcitx: FcitxConnection,
+    theme: Theme
+) : BaseInputView(service, fcitx, theme) {
 
     private val keyBorder by ThemeManager.prefs.keyBorder
     private val navbarBackground by ThemeManager.prefs.navbarBackground
@@ -118,16 +94,6 @@ class InputView(
         // height as keyboardBottomPadding
         // bottomMargin as WindowInsets (Navigation Bar) offset
         setOnClickListener(placeholderOnClickListener)
-    }
-
-    private var eventHandlerJob: Job? = null
-
-    private fun setupFcitxEventHandler() {
-        eventHandlerJob = service.lifecycleScope.launch {
-            fcitx.runImmediately { eventFlow }.collect {
-                handleFcitxEvent(it)
-            }
-        }
     }
 
     private val scope = DynamicScope()
@@ -224,8 +190,6 @@ class InputView(
         // MUST call before any operation
         setupScope()
 
-        setupFcitxEventHandler()
-
         // restore punctuation mapping in case of InputView recreation
         fcitx.launchOnReady {
             punctuation.updatePunctuationMapping(it.statusAreaActionsCached)
@@ -243,42 +207,14 @@ class InputView(
 
         broadcaster.onImeUpdate(fcitx.runImmediately { inputMethodEntryCached })
 
-        // TODO should be moved outside of InputView
-        service.window.window!!.also {
-            when (navbarBackground) {
-                NavbarBackground.None -> {
-                    WindowCompat.setDecorFitsSystemWindows(it, true)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        it.isNavigationBarContrastEnforced = true
+        if (navbarBackground == NavbarBackground.Full) {
+            ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
+                insets.getInsets(WindowInsetsCompat.Type.navigationBars()).let {
+                    bottomPaddingSpace.updateLayoutParams<LayoutParams> {
+                        bottomMargin = it.bottom
                     }
                 }
-                NavbarBackground.ColorOnly -> {
-                    shouldUpdateNavbarForeground = true
-                    shouldUpdateNavbarBackground = true
-                    WindowCompat.setDecorFitsSystemWindows(it, true)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        it.isNavigationBarContrastEnforced = false
-                    }
-                }
-                NavbarBackground.Full -> {
-                    shouldUpdateNavbarForeground = true
-                    // allow draw behind navigation bar
-                    WindowCompat.setDecorFitsSystemWindows(it, false)
-                    // transparent navigation bar
-                    it.navigationBarColor = Color.TRANSPARENT
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        // don't apply scrim to transparent navigation bar
-                        it.isNavigationBarContrastEnforced = false
-                    }
-                    ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
-                        insets.getInsets(WindowInsetsCompat.Type.navigationBars()).let {
-                            bottomPaddingSpace.updateLayoutParams<LayoutParams> {
-                                bottomMargin = it.bottom
-                            }
-                        }
-                        WindowInsetsCompat.CONSUMED
-                    }
-                }
+                WindowInsetsCompat.CONSUMED
             }
         }
 
@@ -347,8 +283,8 @@ class InputView(
         val sidePadding = keyboardSidePaddingPx
         if (sidePadding == 0) {
             // hide side padding space views when unnecessary
-            leftPaddingSpace.visibility = View.GONE
-            rightPaddingSpace.visibility = View.GONE
+            leftPaddingSpace.visibility = GONE
+            rightPaddingSpace.visibility = GONE
             windowManager.view.updateLayoutParams<LayoutParams> {
                 startToEnd = unset
                 endToStart = unset
@@ -356,8 +292,8 @@ class InputView(
                 endOfParent()
             }
         } else {
-            leftPaddingSpace.visibility = View.VISIBLE
-            rightPaddingSpace.visibility = View.VISIBLE
+            leftPaddingSpace.visibility = VISIBLE
+            rightPaddingSpace.visibility = VISIBLE
             leftPaddingSpace.updateLayoutParams {
                 width = sidePadding
             }
@@ -379,22 +315,6 @@ class InputView(
      * called when [InputView] is about to show, or restart
      */
     fun startInput(info: EditorInfo, capFlags: CapabilityFlags, restarting: Boolean = false) {
-        if (!restarting) {
-            if (shouldUpdateNavbarForeground || shouldUpdateNavbarBackground) {
-                service.window.window!!.also {
-                    if (shouldUpdateNavbarForeground) {
-                        WindowCompat.getInsetsController(it, it.decorView)
-                            .isAppearanceLightNavigationBars = !theme.isDark
-                    }
-                    if (shouldUpdateNavbarBackground) {
-                        it.navigationBarColor = when (theme) {
-                            is Theme.Builtin -> if (keyBorder) theme.backgroundColor else theme.keyboardColor
-                            is Theme.Custom -> theme.backgroundColor
-                        }
-                    }
-                }
-            }
-        }
         broadcaster.onStartInput(info, capFlags)
         returnKeyDrawable.updateDrawableOnEditorInfo(info)
         if (focusChangeResetKeyboard || !restarting) {
@@ -402,7 +322,7 @@ class InputView(
         }
     }
 
-    private fun handleFcitxEvent(it: FcitxEvent<*>) {
+    override fun handleFcitxEvent(it: FcitxEvent<*>) {
         when (it) {
             is FcitxEvent.CandidateListEvent -> {
                 broadcaster.onCandidateUpdate(it.data)
@@ -430,35 +350,6 @@ class InputView(
         broadcaster.onSelectionUpdate(start, end)
     }
 
-    private var showingDialog: Dialog? = null
-
-    fun showDialog(dialog: Dialog) {
-        showingDialog?.dismiss()
-        val windowToken = windowToken
-        check(windowToken != null) { "InputView Token is null." }
-        val window = dialog.window!!
-        window.attributes.apply {
-            token = windowToken
-            type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
-        }
-        window.addFlags(
-            WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM or
-                    WindowManager.LayoutParams.FLAG_DIM_BEHIND
-        )
-        window.setDimAmount(themedContext.styledFloat(android.R.attr.backgroundDimAmount))
-        showingDialog = dialog.apply {
-            setOnDismissListener { this@InputView.showingDialog = null }
-            show()
-        }
-    }
-
-    /**
-     * called when [InputView] is being hidden
-     */
-    fun finishInput() {
-        showingDialog?.dismiss()
-    }
-
     @RequiresApi(Build.VERSION_CODES.R)
     fun handleInlineSuggestions(response: InlineSuggestionsResponse): Boolean {
         return kawaiiBar.handleInlineSuggestions(response)
@@ -469,10 +360,7 @@ class InputView(
             it.unregisterOnChangeListener(onKeyboardSizeChangeListener)
         }
         ViewCompat.setOnApplyWindowInsetsListener(this, null)
-        showingDialog?.dismiss()
-        // cancel eventHandlerJob and then clear DynamicScope,
-        // implies that InputView should not be attached again after detached.
-        handleEvents = false
+        // clear DynamicScope, implies that InputView should not be attached again after detached.
         scope.clear()
         super.onDetachedFromWindow()
     }

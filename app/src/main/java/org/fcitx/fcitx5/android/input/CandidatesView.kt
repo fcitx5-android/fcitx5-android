@@ -8,21 +8,16 @@ package org.fcitx.fcitx5.android.input
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnPreDrawListener
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import androidx.annotation.Size
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
@@ -54,28 +49,12 @@ import splitties.views.verticalPadding
 
 @SuppressLint("ViewConstructor")
 class CandidatesView(
-    val service: FcitxInputMethodService,
-    val fcitx: FcitxConnection,
-    val theme: Theme
-) : ConstraintLayout(service) {
-
-    var handleEvents = false
-        set(value) {
-            field = value
-            visibility = View.GONE
-            if (field) {
-                if (eventHandlerJob == null) {
-                    setupFcitxEventHandler()
-                }
-            } else {
-                eventHandlerJob?.cancel()
-                eventHandlerJob = null
-            }
-        }
+    service: FcitxInputMethodService,
+    fcitx: FcitxConnection,
+    theme: Theme
+) : BaseInputView(service, fcitx, theme) {
 
     private val ctx = context.withTheme(R.style.Theme_InputViewTheme)
-
-    private var eventHandlerJob: Job? = null
 
     private var inputPanel = FcitxEvent.InputPanelEvent.Data()
     private var paged = FcitxEvent.PagedCandidateEvent.Data.Empty
@@ -189,7 +168,7 @@ class CandidatesView(
         }
     }
 
-    private fun handleFcitxEvent(it: FcitxEvent<*>) {
+    override fun handleFcitxEvent(it: FcitxEvent<*>) {
         when (it) {
             is FcitxEvent.InputPanelEvent -> {
                 inputPanel = it.data
@@ -213,11 +192,11 @@ class CandidatesView(
     private fun updateUI() {
         if (evaluateVisibility()) {
             preeditUi.update(inputPanel)
-            preeditUi.root.visibility = if (preeditUi.visible) View.VISIBLE else View.GONE
+            preeditUi.root.visibility = if (preeditUi.visible) VISIBLE else GONE
             updateCandidates()
-            visibility = View.VISIBLE
+            visibility = VISIBLE
         } else {
-            visibility = View.GONE
+            visibility = GONE
         }
     }
 
@@ -258,15 +237,10 @@ class CandidatesView(
         updatePosition()
     }
 
-    private fun setupFcitxEventHandler() {
-        eventHandlerJob = service.lifecycleScope.launch {
-            fcitx.runImmediately { eventFlow }.collect {
-                handleFcitxEvent(it)
-            }
-        }
-    }
-
     init {
+        // invisible by default
+        visibility = GONE
+
         verticalPadding = dp(8)
         backgroundColor = theme.backgroundColor
         add(preeditUi.root, lParams(wrapContent, wrapContent) {
@@ -284,7 +258,6 @@ class CandidatesView(
     }
 
     override fun onDetachedFromWindow() {
-        handleEvents = false
         viewTreeObserver.removeOnPreDrawListener(updatePositionListener)
         super.onDetachedFromWindow()
     }

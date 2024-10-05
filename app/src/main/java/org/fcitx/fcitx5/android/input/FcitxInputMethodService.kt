@@ -1,10 +1,12 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
  */
+
 package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Color
@@ -20,6 +22,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
+import android.view.WindowManager
 import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InlineSuggestionsRequest
@@ -35,6 +38,8 @@ import androidx.autofill.inline.common.ImageViewStyle
 import androidx.autofill.inline.common.TextViewStyle
 import androidx.autofill.inline.common.ViewStyle
 import androidx.autofill.inline.v1.InlineSuggestionUi
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.CoroutineScope
@@ -59,19 +64,20 @@ import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.data.theme.ThemePrefs.NavbarBackground
 import org.fcitx.fcitx5.android.input.cursor.CursorRange
 import org.fcitx.fcitx5.android.input.cursor.CursorTracker
 import org.fcitx.fcitx5.android.utils.InputMethodUtil
 import org.fcitx.fcitx5.android.utils.alpha
 import org.fcitx.fcitx5.android.utils.inputMethodManager
 import org.fcitx.fcitx5.android.utils.monitorCursorAnchor
+import org.fcitx.fcitx5.android.utils.styledFloat
 import org.fcitx.fcitx5.android.utils.withBatchEdit
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
 import splitties.resources.styledColor
 import timber.log.Timber
 import kotlin.math.max
-
 
 class FcitxInputMethodService : LifecycleInputMethodService() {
 
@@ -116,6 +122,44 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     private val inlineSuggestions by AppPrefs.getInstance().keyboard.inlineSuggestions
 
+    private val keyBorder by ThemeManager.prefs.keyBorder
+    private val navbarBackground by ThemeManager.prefs.navbarBackground
+
+    private var shouldUpdateNavbarForeground = false
+    private var shouldUpdateNavbarBackground = false
+
+    private fun evaluateNavbarUpdates() {
+        val w = window.window!!
+        when (navbarBackground) {
+            NavbarBackground.None -> {
+                shouldUpdateNavbarForeground = false
+                shouldUpdateNavbarBackground = false
+                WindowCompat.setDecorFitsSystemWindows(w, true)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    w.isNavigationBarContrastEnforced = true
+                }
+            }
+            NavbarBackground.ColorOnly -> {
+                shouldUpdateNavbarForeground = true
+                shouldUpdateNavbarBackground = true
+                WindowCompat.setDecorFitsSystemWindows(w, true)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    w.isNavigationBarContrastEnforced = false
+                }
+            }
+            NavbarBackground.Full -> {
+                shouldUpdateNavbarForeground = true
+                shouldUpdateNavbarBackground = false
+                WindowCompat.setDecorFitsSystemWindows(w, false)
+                w.navigationBarColor = Color.TRANSPARENT
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    // don't apply scrim to transparent navigation bar
+                    w.isNavigationBarContrastEnforced = false
+                }
+            }
+        }
+    }
+
     @Keep
     private val recreateInputViewListener = ManagedPreference.OnChangeListener<Any> { _, _ ->
         recreateInputView(ThemeManager.activeTheme)
@@ -126,15 +170,20 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         recreateInputView(it)
     }
 
+    private fun setupInputViews(theme: Theme): View {
+        evaluateNavbarUpdates()
+        // replace CandidatesView manually
+        contentView.removeView(candidatesView)
+        candidatesView = CandidatesView(this, fcitx, theme)
+        // put CandidatesView directly under content view
+        contentView.addView(candidatesView)
+        return InputView(this, fcitx, theme).also { inputView = it }
+    }
+
     private fun recreateInputView(theme: Theme) {
         // InputView should be first created in `onCreateInputView`
         // `setInputView` should only be used to 'replace' current InputView
-        inputView = InputView(this, fcitx, theme)
-        setInputView(inputView!!)
-        // replace CandidatesView manually
-        contentView.removeView(candidatesView)
-        candidatesView = CandidatesView(this, fcitx, ThemeManager.activeTheme)
-        contentView.addView(candidatesView)
+        setInputView(setupInputViews(theme))
     }
 
     private fun postJob(scope: CoroutineScope, block: suspend () -> Unit): Job {
@@ -424,6 +473,19 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     override fun onWindowShown() {
         super.onWindowShown()
         InputFeedbacks.syncSystemPrefs()
+        val w = window.window!!
+        val theme = ThemeManager.activeTheme
+        // navbar foreground/background color would reset every time window shows
+        if (shouldUpdateNavbarForeground) {
+            WindowCompat.getInsetsController(w, decorView)
+                .isAppearanceLightNavigationBars = !theme.isDark
+        }
+        if (shouldUpdateNavbarBackground) {
+            w.navigationBarColor = when (theme) {
+                is Theme.Builtin -> if (keyBorder) theme.backgroundColor else theme.keyboardColor
+                is Theme.Custom -> theme.backgroundColor
+            }
+        }
     }
 
     override fun onCreateInputView(): View {
@@ -431,24 +493,20 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // during each onConfigurationChanged period.
         // That is, onCreateInputView would be called again, after system dark mode changes,
         // or screen orientation changes.
-        candidatesView = CandidatesView(this, fcitx, ThemeManager.activeTheme)
-        // put CandidatesView directly under content view
-        contentView.addView(candidatesView)
-        inputView = InputView(this, fcitx, ThemeManager.activeTheme)
-        return inputView!!
+        return setupInputViews(ThemeManager.activeTheme)
     }
 
     override fun setInputView(view: View) {
         try {
             highlightColor = view.styledColor(android.R.attr.colorAccent).alpha(0.4f)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             Timber.w("Device does not support android.R.attr.colorAccent which it should have.")
         }
         super.setInputView(view)
         // input method layout has not changed in 11 years:
         // https://android.googlesource.com/platform/frameworks/base/+/ae3349e1c34f7aceddc526cd11d9ac44951e97b6/core/res/res/layout/input_method.xml
         // expand inputArea to fullscreen
-        decorView.findViewById<FrameLayout>(android.R.id.inputArea)
+        contentView.findViewById<FrameLayout>(android.R.id.inputArea)
             .updateLayoutParams<ViewGroup.LayoutParams> {
                 height = ViewGroup.LayoutParams.MATCH_PARENT
             }
@@ -673,8 +731,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private var decorLocationUpdated = false
 
     private fun updateDecorLocation() {
+        val navbarInsets = WindowInsetsCompat.toWindowInsetsCompat(decorView.rootWindowInsets)
+            .getInsets(WindowInsetsCompat.Type.navigationBars())
         contentSize[0] = contentView.width.toFloat()
-        contentSize[1] = contentView.height.toFloat()
+        // dodge navbar when navbarBackground == NavbarBackground.Full
+        contentSize[1] = contentView.height.toFloat() - navbarInsets.bottom.toFloat()
         decorView.getLocationOnScreen(decorLocationInt)
         decorLocation[0] = decorLocationInt[0].toFloat()
         decorLocation[1] = decorLocationInt[1].toFloat()
@@ -694,10 +755,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             anchorPosition[2] = horizontal
             anchorPosition[3] = bounds.top
         } else {
-        anchorPosition[0] = info.insertionMarkerHorizontal
-        anchorPosition[1] = info.insertionMarkerBottom
-        anchorPosition[2] = info.insertionMarkerHorizontal
-        anchorPosition[3] = info.insertionMarkerTop
+            anchorPosition[0] = info.insertionMarkerHorizontal
+            anchorPosition[1] = info.insertionMarkerBottom
+            anchorPosition[2] = info.insertionMarkerHorizontal
+            anchorPosition[3] = info.insertionMarkerTop
         }
         // params of `Matrix.mapPoints` must be [x0, y0, x1, y1]
         info.matrix.mapPoints(anchorPosition)
@@ -762,7 +823,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     // because setComposingText(text, cursor) can only put cursor at end of composing,
-    // sometimes onUpdateCursorAnchorInfo/onUpdateSelection would receive event with wrong cursor position.
+    // sometimes onUpdateSelection would receive event with wrong cursor position.
     // those events need to be filtered.
     // because of https://android.googlesource.com/platform/frameworks/base.git/+/refs/tags/android-11.0.0_r45/core/java/android/view/inputmethod/BaseInputConnection.java#851
     // it's not possible to set cursor inside composing text
@@ -770,7 +831,18 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         val ic = currentInputConnection ?: return
         val lastSelection = selection.latest
         ic.beginBatchEdit()
-        if (!composingText.spanEquals(text)) {
+        if (composingText.spanEquals(text)) {
+            // composing text content is up-to-date
+            // update cursor only when it's not empty AND cursor position is valid
+            if (text.length > 0 && text.cursor >= 0) {
+                val p = text.cursor + composing.start
+                if (p != lastSelection.start) {
+                    Timber.d("updateComposingText: set Android selection ($p, $p)")
+                    ic.setSelection(p, p)
+                    selection.predict(p)
+                }
+            }
+        } else {
             // composing text content changed
             Timber.d("updateComposingText: '$text' lastSelection=$lastSelection")
             if (text.isEmpty()) {
@@ -802,17 +874,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 }
             }
             Timber.d("updateComposingText: composing=$composing")
-        } else {
-            // composing text content is up-to-date
-            // update cursor only when it's not empty AND cursor position is valid
-            if (text.length > 0 && text.cursor >= 0) {
-                val p = text.cursor + composing.start
-                if (p != lastSelection.start) {
-                    Timber.d("updateComposingText: set Android selection ($p, $p)")
-                    ic.setSelection(p, p)
-                    selection.predict(p)
-                }
-            }
         }
         composingText = text
         ic.endBatchEdit()
@@ -905,17 +966,17 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onFinishInputView(finishingInput: Boolean) {
         startedInputView = false
+        decorLocationUpdated = false
         Timber.d("onFinishInputView: finishingInput=$finishingInput")
         currentInputConnection?.run {
             finishComposingText()
             monitorCursorAnchor(false)
-            decorLocationUpdated = false
         }
         resetComposingState()
         postFcitxJob {
             focus(false)
         }
-        inputView?.finishInput()
+        showingDialog?.dismiss()
     }
 
     override fun onFinishInput() {
@@ -945,6 +1006,27 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         super.onDestroy()
         // Fcitx might be used in super.onDestroy()
         FcitxDaemon.disconnect(javaClass.name)
+    }
+
+    private var showingDialog: Dialog? = null
+
+    fun showDialog(dialog: Dialog) {
+        showingDialog?.dismiss()
+        dialog.window?.also {
+            it.attributes.apply {
+                token = decorView.windowToken
+                type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
+            }
+            it.addFlags(
+                WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM or WindowManager.LayoutParams.FLAG_DIM_BEHIND
+            )
+            it.setDimAmount(styledFloat(android.R.attr.backgroundDimAmount))
+        }
+        dialog.setOnDismissListener {
+            showingDialog = null
+        }
+        dialog.show()
+        showingDialog = dialog
     }
 
     @Suppress("ConstPropertyName")

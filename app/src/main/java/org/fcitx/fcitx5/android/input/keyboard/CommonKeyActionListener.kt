@@ -15,7 +15,6 @@ import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
-import org.fcitx.fcitx5.android.input.dependency.inputView
 import org.fcitx.fcitx5.android.input.dialog.AddMoreInputMethodsPrompt
 import org.fcitx.fcitx5.android.input.dialog.InputMethodPickerDialog
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener.BackspaceSwipeState.Reset
@@ -50,7 +49,6 @@ class CommonKeyActionListener :
     private val context by manager.context()
     private val fcitx by manager.fcitx()
     private val service by manager.inputMethodService()
-    private val inputView by manager.inputView()
     private val preeditState: PreeditEmptyStateComponent by manager.must()
     private val horizontalCandidate: HorizontalCandidateComponent by manager.must()
     private val windowManager: InputWindowManager by manager.must()
@@ -82,7 +80,7 @@ class CommonKeyActionListener :
     private fun showInputMethodPicker() {
         fcitx.launchOnReady {
             service.lifecycleScope.launch {
-                inputView.showDialog(InputMethodPickerDialog.build(it, service, context))
+                service.showDialog(InputMethodPickerDialog.build(it, service, context))
             }
         }
     }
@@ -114,7 +112,7 @@ class CommonKeyActionListener :
                             service.postFcitxJob {
                                 if (enabledIme().size < 2) {
                                     service.lifecycleScope.launch {
-                                        inputView.showDialog(AddMoreInputMethodsPrompt.build(context))
+                                        service.showDialog(AddMoreInputMethodsPrompt.build(context))
                                     }
                                 } else {
                                     enumerateIme()
