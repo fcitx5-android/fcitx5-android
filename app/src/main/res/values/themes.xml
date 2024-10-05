@@ -10,13 +10,6 @@
         <item name="colorLogVerbose">@color/grey_700</item>
     </style>
 
-    <style name="Theme.CropActivityTheme" parent="Theme.AppCompat.DayNight">
-        <item name="android:statusBarColor">?android:attr/colorPrimary</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
-    </style>
-
     <style name="Theme.InputViewTheme" parent="@android:style/Theme.DeviceDefault.Settings" />
 
     <style name="Theme.DialogTheme" parent="@android:style/Theme.DeviceDefault.Light.Dialog" />

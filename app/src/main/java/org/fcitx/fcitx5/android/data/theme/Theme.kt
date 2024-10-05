@@ -12,9 +12,9 @@ import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
+import org.fcitx.fcitx5.android.utils.DarkenColorFilter
 import org.fcitx.fcitx5.android.utils.RectSerializer
 import org.fcitx.fcitx5.android.utils.appContext
-import org.fcitx.fcitx5.android.utils.DarkenColorFilter
 import java.io.File
 
 @Serializable
@@ -88,6 +88,7 @@ sealed class Theme : Parcelable {
             val srcFilePath: String,
             val brightness: Int = 70,
             val cropRect: @Serializable(RectSerializer::class) Rect?,
+            val cropRotation: Int = 0
         ) : Parcelable {
             fun toDrawable(): Drawable? {
                 val cropped = File(croppedFilePath)
@@ -205,6 +206,7 @@ sealed class Theme : Parcelable {
             originBackgroundImage: String,
             brightness: Int = 70,
             cropBackgroundRect: Rect? = null,
+            cropBackgroundRotation: Int = 0
         ) = Custom(
             name,
             isDark,
@@ -212,7 +214,8 @@ sealed class Theme : Parcelable {
                 croppedBackgroundImage,
                 originBackgroundImage,
                 brightness,
-                cropBackgroundRect
+                cropBackgroundRect,
+                cropBackgroundRotation
             ),
             backgroundColor,
             barColor,

@@ -62,12 +62,9 @@
             android:configChanges="orientation|screenSize"
             android:exported="false"
             android:label="@string/edit_theme" />
-        <!-- don't export CropImageActivity -->
         <activity
-            android:name="com.canhub.cropper.CropImageActivity"
-            android:exported="false"
-            android:theme="@style/Theme.CropActivityTheme"
-            tools:replace="android:exported" />
+            android:name=".ui.main.CropImageActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.main.MainActivity"
             android:exported="true"

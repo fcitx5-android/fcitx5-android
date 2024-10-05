@@ -5,15 +5,14 @@
 package org.fcitx.fcitx5.android.ui.main.settings.theme
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.Menu
@@ -29,15 +28,10 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
-import com.canhub.cropper.CropImageContract
-import com.canhub.cropper.CropImageContractOptions
-import com.canhub.cropper.CropImageOptions
-import com.canhub.cropper.CropImageView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
@@ -46,11 +40,14 @@ import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeFilesManager
 import org.fcitx.fcitx5.android.data.theme.ThemePreset
 import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
+import org.fcitx.fcitx5.android.ui.main.CropImageActivity.CropContract
+import org.fcitx.fcitx5.android.ui.main.CropImageActivity.CropOption
+import org.fcitx.fcitx5.android.ui.main.CropImageActivity.CropResult
 import org.fcitx.fcitx5.android.utils.DarkenColorFilter
+import org.fcitx.fcitx5.android.utils.item
 import org.fcitx.fcitx5.android.utils.parcelable
 import splitties.dimensions.dp
 import splitties.resources.color
-import splitties.resources.drawable
 import splitties.resources.resolveThemeAttribute
 import splitties.resources.styledColor
 import splitties.resources.styledDrawable
@@ -218,11 +215,11 @@ class CustomThemeActivity : AppCompatActivity() {
     private lateinit var theme: Theme.Custom
 
     private class BackgroundStates {
-        lateinit var launcher: ActivityResultLauncher<CropImageContractOptions>
+        lateinit var launcher: ActivityResultLauncher<CropOption>
         var srcImageExtension: String? = null
         var srcImageBuffer: ByteArray? = null
-        var tempImageFile: File? = null
         var cropRect: Rect? = null
+        var cropRotation: Int = 0
         lateinit var croppedBitmap: Bitmap
         lateinit var filteredDrawable: BitmapDrawable
         lateinit var srcImageFile: File
@@ -242,21 +239,15 @@ class CustomThemeActivity : AppCompatActivity() {
         background: Theme.Custom.CustomBackground,
         darkKeys: Boolean
     ) {
-        theme = if (darkKeys)
-            ThemePreset.TransparentLight.deriveCustomBackground(
-                theme.name,
-                background.croppedFilePath,
-                background.srcFilePath,
-                brightnessSeekBar.progress,
-                background.cropRect
-            ) else
-            ThemePreset.TransparentDark.deriveCustomBackground(
-                theme.name,
-                background.croppedFilePath,
-                background.srcFilePath,
-                brightnessSeekBar.progress,
-                background.cropRect
-            )
+        val template = if (darkKeys) ThemePreset.TransparentLight else ThemePreset.TransparentDark
+        theme = template.deriveCustomBackground(
+            theme.name,
+            background.croppedFilePath,
+            background.srcFilePath,
+            brightnessSeekBar.progress,
+            background.cropRect,
+            background.cropRotation
+        )
         previewUi.setTheme(theme, filteredDrawable)
     }
 
@@ -269,6 +260,7 @@ class CustomThemeActivity : AppCompatActivity() {
                 croppedImageFile = File(it.croppedFilePath)
                 srcImageFile = File(it.srcFilePath)
                 cropRect = it.cropRect
+                cropRotation = it.cropRotation
                 croppedBitmap = BitmapFactory.decodeFile(it.croppedFilePath)
                 filteredDrawable = BitmapDrawable(resources, croppedBitmap)
             }
@@ -312,29 +304,27 @@ class CustomThemeActivity : AppCompatActivity() {
         whenHasBackground { background ->
             brightnessSeekBar.progress = background.brightness
             variantSwitch.isChecked = !theme.isDark
-            launcher = registerForActivityResult(CropImageContract()) {
-                if (!it.isSuccessful) {
-                    if (newCreated)
-                        cancel()
-                    else
-                        return@registerForActivityResult
-                } else {
-                    if (newCreated) {
-                        srcImageExtension = MimeTypeMap.getSingleton()
-                            .getExtensionFromMimeType(contentResolver.getType(it.originalUri!!))
-                        srcImageBuffer =
-                            contentResolver.openInputStream(it.originalUri!!)!!
-                                .use { x -> x.readBytes() }
+            launcher = registerForActivityResult(CropContract()) {
+                when (it) {
+                    CropResult.Fail -> {
+                        if (newCreated) {
+                            cancel()
+                        }
                     }
-                    cropRect = it.cropRect!!
-                    croppedBitmap = Bitmap.createScaledBitmap(
-                        it.getBitmap(this@CustomThemeActivity)!!,
-                        previewUi.intrinsicWidth,
-                        previewUi.intrinsicHeight,
-                        true
-                    )
-                    filteredDrawable = BitmapDrawable(resources, croppedBitmap)
-                    updateState()
+                    is CropResult.Success -> {
+                        if (newCreated) {
+                            srcImageExtension = MimeTypeMap.getSingleton()
+                                .getExtensionFromMimeType(contentResolver.getType(it.srcUri))
+                            srcImageBuffer =
+                                contentResolver.openInputStream(it.srcUri)!!
+                                    .use { x -> x.readBytes() }
+                        }
+                        cropRect = it.rect
+                        cropRotation = it.rotation
+                        croppedBitmap = it.bitmap
+                        filteredDrawable = BitmapDrawable(resources, croppedBitmap)
+                        updateState()
+                    }
                 }
             }
             cropLabel.setOnClickListener {
@@ -377,37 +367,19 @@ class CustomThemeActivity : AppCompatActivity() {
     }
 
     private fun BackgroundStates.launchCrop(w: Int, h: Int) {
-        if (tempImageFile == null || tempImageFile?.exists() != true) {
-            tempImageFile = File.createTempFile("cropped", ".png", cacheDir)
-        }
-        launcher.launch(
-            CropImageContractOptions(
-                uri = srcImageFile.takeIf { it.exists() }?.toUri(),
-                CropImageOptions(
-                    initialCropWindowRectangle = cropRect,
-                    guidelines = CropImageView.Guidelines.ON_TOUCH,
-                    borderLineColor = Color.WHITE,
-                    borderLineThickness = dp(1f),
-                    borderCornerColor = Color.WHITE,
-                    borderCornerOffset = 0f,
-                    imageSourceIncludeGallery = true,
-                    imageSourceIncludeCamera = false,
-                    aspectRatioX = w,
-                    aspectRatioY = h,
-                    fixAspectRatio = true,
-                    customOutputUri = tempImageFile!!.toUri(),
-                    outputCompressFormat = Bitmap.CompressFormat.PNG,
-                    cropMenuCropButtonIcon = R.drawable.ic_baseline_done_24,
-                    showProgressBar = true,
-                    progressBarColor = styledColor(android.R.attr.colorAccent),
-                    activityMenuIconColor = styledColor(android.R.attr.colorControlNormal),
-                    activityMenuTextColor = styledColor(android.R.attr.colorForeground),
-                    activityBackgroundColor = styledColor(android.R.attr.colorBackground),
-                    toolbarColor = styledColor(android.R.attr.colorPrimary),
-                    toolbarBackButtonColor = styledColor(android.R.attr.colorControlNormal)
+        if (newCreated) {
+            launcher.launch(CropOption.New(w, h))
+        } else {
+            launcher.launch(
+                CropOption.Edit(
+                    width = w,
+                    height = h,
+                    Uri.fromFile(srcImageFile),
+                    initialRect = cropRect,
+                    initialRotation = cropRotation
                 )
             )
-        )
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -419,11 +391,8 @@ class CustomThemeActivity : AppCompatActivity() {
     }
 
     private fun cancel() {
-        whenHasBackground {
-            tempImageFile?.delete()
-        }
         setResult(
-            Activity.RESULT_CANCELED,
+            RESULT_CANCELED,
             Intent().apply { putExtra(RESULT, null as BackgroundResult?) }
         )
         finish()
@@ -433,7 +402,6 @@ class CustomThemeActivity : AppCompatActivity() {
         lifecycleScope.withLoadingDialog(this) {
             whenHasBackground {
                 withContext(Dispatchers.IO) {
-                    tempImageFile?.delete()
                     croppedImageFile.delete()
                     croppedImageFile.outputStream().use {
                         croppedBitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
@@ -452,14 +420,15 @@ class CustomThemeActivity : AppCompatActivity() {
                 }
             }
             setResult(
-                Activity.RESULT_OK,
+                RESULT_OK,
                 Intent().apply {
                     var newTheme = theme
                     whenHasBackground {
                         newTheme = theme.copy(
                             backgroundImage = it.copy(
                                 brightness = brightnessSeekBar.progress,
-                                cropRect = cropRect
+                                cropRect = cropRect,
+                                cropRotation = cropRotation
                             )
                         )
                     }
@@ -477,7 +446,7 @@ class CustomThemeActivity : AppCompatActivity() {
 
     private fun delete() {
         setResult(
-            Activity.RESULT_OK,
+            RESULT_OK,
             Intent().apply {
                 putExtra(RESULT, BackgroundResult.Deleted(theme.name))
             }
@@ -498,26 +467,14 @@ class CustomThemeActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         if (!newCreated) {
-            menu.add(R.string.delete).apply {
-                icon = drawable(R.drawable.ic_baseline_delete_24)!!.apply {
-                    setTint(color(R.color.red_400))
-                }
-                setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
-                setOnMenuItemClickListener {
-                    promptDelete()
-                    true
-                }
+            val iconTint = color(R.color.red_400)
+            menu.item(R.string.save, R.drawable.ic_baseline_delete_24, iconTint, true) {
+                promptDelete()
             }
         }
-        menu.add(R.string.save).apply {
-            icon = drawable(R.drawable.ic_baseline_done_24)!!.apply {
-                setTint(styledColor(android.R.attr.colorControlNormal))
-            }
-            setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
-            setOnMenuItemClickListener {
-                done()
-                true
-            }
+        val iconTint = styledColor(android.R.attr.colorControlNormal)
+        menu.item(R.string.save, R.drawable.ic_baseline_check_24, iconTint, true) {
+            done()
         }
         return true
     }
