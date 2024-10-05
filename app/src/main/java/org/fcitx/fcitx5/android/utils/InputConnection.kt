@@ -27,8 +27,7 @@ fun InputConnection.monitorCursorAnchor(enable: Boolean = true): Boolean {
         )
     }
     if (!scheduled) {
-        scheduled =
-            requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
+        scheduled = requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR)
     }
     return scheduled
 }

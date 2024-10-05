@@ -29,7 +29,6 @@ import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.candidates.CandidateItemUi
 import org.fcitx.fcitx5.android.input.preedit.PreeditUi
-import org.fcitx.fcitx5.android.utils.styledFloat
 import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.views.backgroundColor
@@ -171,8 +170,8 @@ class CandidatesView(
         scaleType = ImageView.ScaleType.CENTER_CROP
     }
 
-    private val prevIcon = createIcon(R.drawable.ic_baseline_arrow_left_24)
-    private val nextIcon = createIcon(R.drawable.ic_baseline_arrow_right_24)
+    private val prevIcon = createIcon(R.drawable.ic_baseline_arrow_prev_24)
+    private val nextIcon = createIcon(R.drawable.ic_baseline_arrow_next_24)
 
     private val paginationLayout = constraintLayout {
         add(nextIcon, lParams(dp(10), matchConstraints) {
@@ -236,8 +235,14 @@ class CandidatesView(
         val (parentWidth, parentHeight) = parentSize
         val selfWidth = width.toFloat()
         val selfHeight = height.toFloat()
-        translationX =
-            if (horizontal + selfWidth > parentWidth) parentWidth - selfWidth else horizontal
+        if (layoutDirection == LAYOUT_DIRECTION_RTL) {
+            val rtlOffset = parentWidth - horizontal
+            translationX =
+                if (rtlOffset + selfWidth > parentWidth) selfWidth - parentWidth else -rtlOffset
+        } else {
+            translationX =
+                if (horizontal + selfWidth > parentWidth) parentWidth - selfWidth else horizontal
+        }
         translationY = if (bottom + selfHeight > parentHeight) top - selfHeight else bottom
         shouldUpdatePosition = false
     }

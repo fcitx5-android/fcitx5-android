@@ -91,6 +91,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     private var startedInput = false
     private var startedInputView = false
+    private var isNullInputType = true
 
     private var capabilityFlags = CapabilityFlags.DefaultFlags
 
@@ -520,7 +521,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         // request to show floating CandidatesView when pressing physical keyboard
-        if (!startedInputView && event.displayLabel.isLetterOrDigit() && !super.onEvaluateInputViewShown()) {
+        if (!startedInputView &&
+            !isNullInputType &&
+            event.displayLabel.isLetterOrDigit() &&
+            !super.onEvaluateInputViewShown()
+        ) {
             postFcitxJob {
                 focus(true)
             }
@@ -601,6 +606,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // initialSel{Start,End} is outdated. but it's the client app's responsibility to send
         // right cursor position, try to workaround this would simply introduce more bugs.
         selection.resetTo(attribute.initialSelStart, attribute.initialSelEnd)
+        isNullInputType = attribute.inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL
         resetComposingState()
         val flags = CapabilityFlags.fromEditorInfo(attribute)
         capabilityFlags = flags
@@ -678,10 +684,21 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private val anchorPosition = floatArrayOf(0f, 0f, 0f, 0f)
 
     override fun onUpdateCursorAnchorInfo(info: CursorAnchorInfo) {
+        val bounds = info.getCharacterBounds(0)
+        if (bounds != null) {
+            // anchor to start of composing span instead of insertion mark if available
+            val horizontal =
+                if (candidatesView?.layoutDirection == View.LAYOUT_DIRECTION_RTL) bounds.right else bounds.left
+            anchorPosition[0] = horizontal
+            anchorPosition[1] = bounds.bottom
+            anchorPosition[2] = horizontal
+            anchorPosition[3] = bounds.top
+        } else {
         anchorPosition[0] = info.insertionMarkerHorizontal
         anchorPosition[1] = info.insertionMarkerBottom
         anchorPosition[2] = info.insertionMarkerHorizontal
         anchorPosition[3] = info.insertionMarkerTop
+        }
         // params of `Matrix.mapPoints` must be [x0, y0, x1, y1]
         info.matrix.mapPoints(anchorPosition)
         // avoid calling `decorView.getLocationOnScreen` repeatedly
@@ -816,7 +833,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     @SuppressLint("RestrictedApi")
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreateInlineSuggestionsRequest(uiExtras: Bundle): InlineSuggestionsRequest? {
-        if (!inlineSuggestions) return null
+        // ignore inline suggestion when disabled by user || using physical keyboard with floating candidates view
+        if (!inlineSuggestions || candidatesView?.handleEvents == true) return null
         val theme = ThemeManager.activeTheme
         val chipDrawable =
             if (theme.isDark) R.drawable.bkg_inline_suggestion_dark else R.drawable.bkg_inline_suggestion_light
@@ -872,8 +890,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onInlineSuggestionsResponse(response: InlineSuggestionsResponse): Boolean {
-        if (!inlineSuggestions) return false
-        return inputView?.handleInlineSuggestions(response) ?: false
+        if (!inlineSuggestions || candidatesView?.handleEvents == true) return false
+        return inputView?.handleInlineSuggestions(response) == true
     }
 
     fun nextInputMethodApp() {
