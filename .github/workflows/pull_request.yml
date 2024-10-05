@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-22.04
+          - ubuntu-24.04
           - macos-13
           - macos-14
           - windows-2022
@@ -46,7 +46,7 @@ jobs:
           sdkmanager --install "cmake;3.22.1"
 
       - name: Install system dependencies (Ubuntu)
-        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
           sudo apt update
           sudo apt install extra-cmake-modules gettext
@@ -57,14 +57,14 @@ jobs:
           brew install extra-cmake-modules
 
       - name: Install system dependencies (Windows)
-        if: ${{ matrix.os == 'windows-2022' }}
+        if: ${{ startsWith(matrix.os, 'windows') }}
         run: |
           C:/msys64/usr/bin/pacman -Syu --noconfirm
           C:/msys64/usr/bin/pacman -S --noconfirm mingw-w64-ucrt-x86_64-gettext mingw-w64-ucrt-x86_64-extra-cmake-modules
           Add-Content $env:GITHUB_PATH "C:/msys64/ucrt64/bin"
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build Release APK
         run: |

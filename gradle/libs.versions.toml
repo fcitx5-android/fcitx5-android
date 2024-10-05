@@ -1,21 +1,21 @@
 [versions]
-androidGradlePlugin = "8.5.2"
-androidDesugarJDKLibs = "2.0.4"
-kotlin = "2.0.10"
-ksp = "2.0.10-1.0.24"
-lifecycle = "2.8.4"
-navigation = "2.7.7"
+androidGradlePlugin = "8.7.0"
+androidDesugarJDKLibs = "2.1.2"
+kotlin = "2.0.20"
+ksp = "2.0.20-1.0.25"
+lifecycle = "2.8.6"
+navigation = "2.8.2"
 room = "2.6.1"
 splitties = "3.0.0"
-aboutlibraries = "11.2.2"
+aboutlibraries = "11.2.3"
 
 [libraries]
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 android-desugarJDKLibs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "androidDesugarJDKLibs" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
-kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version = "1.8.1" }
+kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version = "1.9.0" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.6.3" }
-androidx-activity = { module = "androidx.activity:activity-ktx", version = "1.9.1" }
+androidx-activity = { module = "androidx.activity:activity-ktx", version = "1.9.2" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.0" }
 androidx-autofill = { module = "androidx.autofill:autofill", version = "1.1.0" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.1.4" }
@@ -35,11 +35,11 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
-androidx-startup = { module = "androidx.startup:startup-runtime", version = "1.1.1" }
+androidx-startup = { module = "androidx.startup:startup-runtime", version = "1.2.0" }
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version = "1.1.0" }
 material = { module = "com.google.android.material:material", version = "1.12.0" }
 arrow = { module = "io.arrow-kt:arrow-core", version = "1.2.4" }
-imagecropper = { module = "com.vanniktech:android-image-cropper", version = "4.5.0" }
+imagecropper = { module = "com.vanniktech:android-image-cropper", version = "4.6.0" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version = "3.0.0" }
 dependency = { module = "org.mechdancer:dependency", version = "0.1.2" }
 timber = { module = "com.jakewharton.timber:timber", version = "5.0.1" }
@@ -55,7 +55,7 @@ splitties-views-recyclerview = { module = "com.louiscad.splitties:splitties-view
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutlibraries" }
 aboutlibraries-plugin = { module = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin", version.ref = "aboutlibraries" }
 junit = { module = "junit:junit", version = "4.13.2" }
-androidx-test-runner = { module = "androidx.test:runner", version = "1.6.1" }
+androidx-test-runner = { module = "androidx.test:runner", version = "1.6.2" }
 androidx-test-rules = { module = "androidx.test:rules", version = "1.6.1" }
 androidx-lifecycle-testing = { module = "androidx.lifecycle:lifecycle-runtime-testing", version.ref = "lifecycle" }
 kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version = "1.18.1" }

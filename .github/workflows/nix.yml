@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-22.04
+          - ubuntu-24.04
           - macos-14
     runs-on: ${{ matrix.os }}
     steps:
@@ -19,10 +19,10 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
-      - uses: cachix/install-nix-action@v26
+      - uses: cachix/install-nix-action@v29
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: cachix/cachix-action@v14
+      - uses: cachix/cachix-action@v15
         with:
           name: fcitx5-android
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"

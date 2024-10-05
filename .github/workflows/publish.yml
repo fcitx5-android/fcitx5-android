@@ -10,7 +10,7 @@ on:
 
 jobs:
   publish:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Fetch source code
         uses: actions/checkout@v4
@@ -35,7 +35,7 @@ jobs:
           packages: cmake;3.22.1
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Publish build convention and libs
         env:
