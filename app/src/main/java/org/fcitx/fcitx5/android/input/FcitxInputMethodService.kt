@@ -760,12 +760,20 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             anchorPosition[2] = info.insertionMarkerHorizontal
             anchorPosition[3] = info.insertionMarkerTop
         }
-        // params of `Matrix.mapPoints` must be [x0, y0, x1, y1]
-        info.matrix.mapPoints(anchorPosition)
         // avoid calling `decorView.getLocationOnScreen` repeatedly
         if (!decorLocationUpdated) {
             updateDecorLocation()
         }
+        if (anchorPosition.any(Float::isNaN)) {
+            anchorPosition[0] = 0f
+            anchorPosition[1] = contentSize[1]
+            anchorPosition[2] = 0f
+            anchorPosition[3] = contentSize[1]
+            candidatesView?.updateCursorAnchor(anchorPosition, contentSize)
+            return
+        }
+        // params of `Matrix.mapPoints` must be [x0, y0, x1, y1]
+        info.matrix.mapPoints(anchorPosition)
         val (xOffset, yOffset) = decorLocation
         anchorPosition[0] -= xOffset
         anchorPosition[1] -= yOffset
