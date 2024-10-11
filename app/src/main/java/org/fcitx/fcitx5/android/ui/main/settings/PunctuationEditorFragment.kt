@@ -131,6 +131,7 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
                         block(PunctuationMapEntry(key, mapping, altMappingField.str))
                         return@onClick true
                     }
+                    .setCanceledOnTouchOutside(false)
             }
         }
         resetDustman()

@@ -190,6 +190,8 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
                 positiveButton.isEnabled = false
                 importConfAndDictUri()
                 false
+            }.apply {
+                setCanceledOnTouchOutside(false)
             }
     }
 

@@ -110,6 +110,7 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
                         block(QuickPhraseEntry(keyword, phraseField.str))
                         return@onClick true
                     }
+                    .setCanceledOnTouchOutside(false)
             }
         }
         ui.addOnItemChangedListener(this)

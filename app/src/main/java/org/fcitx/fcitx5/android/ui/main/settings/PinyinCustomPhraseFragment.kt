@@ -111,6 +111,7 @@ class PinyinCustomPhraseFragment : Fragment(), OnItemChangedListener<PinyinCusto
                     hint = orderLabel
                 }
                 orderField.apply {
+                    isSingleLine = true
                     inputType =
                         InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_NORMAL or InputType.TYPE_NUMBER_FLAG_SIGNED
                     imeOptions = EditorInfo.IME_ACTION_NEXT
@@ -118,9 +119,13 @@ class PinyinCustomPhraseFragment : Fragment(), OnItemChangedListener<PinyinCusto
                 val (phraseLayout, phraseField) = materialTextInput {
                     hint = phraseLabel
                 }
+                phraseField.apply {
+                    isSingleLine = false
+                    maxLines = 8
+                }
                 entry?.apply {
                     keyField.setText(key)
-                    orderField.setText(order.absoluteValue.toString())
+                    orderField.setText(order.absoluteValue.toString(10))
                     phraseField.setText(value)
                 }
                 val layout = verticalLayout {
@@ -156,6 +161,7 @@ class PinyinCustomPhraseFragment : Fragment(), OnItemChangedListener<PinyinCusto
                         block(PinyinCustomPhrase(key, order, phrase))
                         return@onClick true
                     }
+                    .setCanceledOnTouchOutside(false)
             }
         }
         ui.addOnItemChangedListener(this)
