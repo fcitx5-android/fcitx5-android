@@ -101,7 +101,7 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
                         val popup = PopupMenu(context, view)
                         val menu = popup.menu
                         val hasDivider =
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && !DeviceUtil.isHMOS) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && !DeviceUtil.isHMOS && !DeviceUtil.isHonorMagicOS) {
                                 menu.setGroupDividerEnabled(true)
                                 true
                             } else {
