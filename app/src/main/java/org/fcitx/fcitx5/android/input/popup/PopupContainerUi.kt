@@ -15,7 +15,8 @@ import kotlin.math.roundToInt
 abstract class PopupContainerUi(
     override val ctx: Context,
     val theme: Theme,
-    val bounds: Rect,
+    val outerBounds: Rect,
+    val triggerBounds: Rect,
     val onDismissSelf: PopupContainerUi.() -> Unit
 ) : Ui {
 
@@ -25,22 +26,28 @@ abstract class PopupContainerUi(
     abstract override val root: View
 
     /**
-     * Offset on X axis to put this [PopupKeyboardUi] relative to popup trigger view [bounds]
+     * Offset on X axis to put this [PopupKeyboardUi] relative to popup trigger view [triggerBounds]
      */
     abstract val offsetX: Int
 
     /**
-     * Offset on Y axis to put this [PopupKeyboardUi] relative to popup trigger view [bounds]
+     * Offset on Y axis to put this [PopupKeyboardUi] relative to popup trigger view [triggerBounds]
      */
     abstract val offsetY: Int
 
-    fun calcInitialFocusedColumn(columnCount: Int, columnWidth: Int, bounds: Rect): Int {
-        val leftSpace = bounds.left
-        val rightSpace = ctx.resources.displayMetrics.widthPixels - bounds.right
+    fun calcInitialFocusedColumn(
+        columnCount: Int,
+        columnWidth: Int,
+        outerBounds: Rect,
+        triggerBounds: Rect
+    ): Int {
+        // assume trigger bounds inside outer bounds
+        val leftSpace = triggerBounds.left - outerBounds.left
+        val rightSpace = outerBounds.right - triggerBounds.right
         var col = (columnCount - 1) / 2
         while (columnWidth * col > leftSpace) col--
         while (columnWidth * (columnCount - col - 1) > rightSpace) col++
-        return col
+        return col.coerceIn(0, columnCount - 1)
     }
 
     /**

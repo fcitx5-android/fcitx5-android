@@ -30,7 +30,8 @@ import kotlin.math.roundToInt
 /**
  * @param ctx [Context]
  * @param theme [Theme]
- * @param bounds bound [Rect] of popup trigger view. Used to calculate free space of both sides and
+ * @param outerBounds bound [Rect] of [PopupComponent] root view.
+ * @param triggerBounds bound [Rect] of popup trigger view. Used to calculate free space of both sides and
  * determine column order. See [focusColumn] and [columnOrder].
  * @param onDismissSelf callback when popup keyboard wants to close
  * @param radius popup keyboard and key radius
@@ -44,7 +45,8 @@ import kotlin.math.roundToInt
 class PopupKeyboardUi(
     override val ctx: Context,
     theme: Theme,
-    bounds: Rect,
+    outerBounds: Rect,
+    triggerBounds: Rect,
     onDismissSelf: PopupContainerUi.() -> Unit = {},
     private val radius: Float,
     private val keyWidth: Int,
@@ -52,7 +54,7 @@ class PopupKeyboardUi(
     private val popupHeight: Int,
     private val keys: Array<String>,
     private val labels: Array<String>
-) : PopupContainerUi(ctx, theme, bounds, onDismissSelf) {
+) : PopupContainerUi(ctx, theme, outerBounds, triggerBounds, onDismissSelf) {
 
     class PopupKeyUi(override val ctx: Context, val theme: Theme, val text: String) : Ui {
 
@@ -93,7 +95,7 @@ class PopupKeyboardUi(
         columnCount = (keyCount / rowCount).roundToInt()
 
         focusRow = 0
-        focusColumn = calcInitialFocusedColumn(columnCount, keyWidth, bounds)
+        focusColumn = calcInitialFocusedColumn(columnCount, keyWidth, outerBounds, triggerBounds)
     }
 
     /**
@@ -125,8 +127,8 @@ class PopupKeyboardUi(
      * Applying only `1.` parts of both X and Y offset, the origin should transform from `o` to `p`.
      * `2.` parts of both offset transform it from `p` to `c`.
      */
-    override val offsetX = ((bounds.width() - keyWidth) / 2) - (keyWidth * focusColumn)
-    override val offsetY = (bounds.height() - popupHeight) - (keyHeight * (rowCount - 1))
+    override val offsetX = ((triggerBounds.width() - keyWidth) / 2) - (keyWidth * focusColumn)
+    override val offsetY = (triggerBounds.height() - popupHeight) - (keyHeight * (rowCount - 1))
 
     private val columnOrder = createColumnOrder(columnCount, focusColumn)
 

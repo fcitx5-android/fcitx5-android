@@ -25,10 +25,11 @@ import kotlin.math.floor
 class PopupMenuUi(
     override val ctx: Context,
     theme: Theme,
-    bounds: Rect,
+    outerBounds: Rect,
+    triggerBounds: Rect,
     onDismissSelf: PopupContainerUi.() -> Unit = {},
     private val items: Array<KeyDef.Popup.Menu.Item>
-) : PopupContainerUi(ctx, theme, bounds, onDismissSelf) {
+) : PopupContainerUi(ctx, theme, outerBounds, triggerBounds, onDismissSelf) {
 
     private val keySize = ctx.dp(48)
 
@@ -50,9 +51,10 @@ class PopupMenuUi(
     )
 
     private val columnCount = items.size
-    private val focusColumn = calcInitialFocusedColumn(columnCount, keySize, bounds)
+    private val focusColumn =
+        calcInitialFocusedColumn(columnCount, keySize, outerBounds, triggerBounds)
 
-    override val offsetX = ((bounds.width() - keySize) / 2) - (keySize * focusColumn)
+    override val offsetX = ((triggerBounds.width() - keySize) / 2) - (keySize * focusColumn)
     override val offsetY = ctx.dp(-52)
 
     private val columnOrder = createColumnOrder(columnCount, focusColumn)
