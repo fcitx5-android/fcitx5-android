@@ -42,4 +42,8 @@ object DeviceUtil {
         getSystemProperty("ro.magic.systemversion").isNotEmpty()
     }
 
+    val isFlyme: Boolean by lazy {
+        Build.DISPLAY.lowercase().contains("flyme")
+    }
+
 }
