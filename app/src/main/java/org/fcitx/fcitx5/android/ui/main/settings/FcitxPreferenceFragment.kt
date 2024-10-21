@@ -13,11 +13,11 @@ import androidx.preference.isEmpty
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxAPI
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
-import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.ui.common.PaddingPreferenceFragment
 import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
@@ -45,8 +45,11 @@ abstract class FcitxPreferenceFragment : PaddingPreferenceFragment() {
 
     private fun save() {
         if (!configLoaded) return
-        fcitx.launchOnReady {
-            saveConfig(it, raw["cfg"])
+        // launch "saveConfig" job under supervisorJob scope
+        scope.launch {
+            fcitx.runOnReady {
+                saveConfig(this, raw["cfg"])
+            }
         }
     }
 
@@ -57,7 +60,7 @@ abstract class FcitxPreferenceFragment : PaddingPreferenceFragment() {
                 // prevent "back" from navigating away from this Fragment when it's still saving
                 override fun handleOnBackPressed() {
                     lifecycleScope.withLoadingDialog(requireContext(), R.string.saving) {
-                        // complete the parent job and wait for all children
+                        // complete the parent job and wait all "saveConfig" jobs to finish
                         supervisorJob.complete()
                         supervisorJob.join()
                         scope.cancel()
