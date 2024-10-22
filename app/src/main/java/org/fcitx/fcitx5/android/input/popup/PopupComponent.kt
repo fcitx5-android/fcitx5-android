@@ -131,13 +131,7 @@ class PopupComponent :
             keys,
             labels
         )
-        root.apply {
-            add(keyboardUi.root, lParams {
-                leftMargin = bounds.left + keyboardUi.offsetX
-                topMargin = bounds.top + keyboardUi.offsetY
-            })
-        }
-        showingContainerUi[viewId] = keyboardUi
+        showPopupContainer(viewId, keyboardUi)
     }
 
     private fun showMenu(viewId: Int, menu: KeyDef.Popup.Menu, bounds: Rect) {
@@ -152,13 +146,17 @@ class PopupComponent :
             { dismissPopup(viewId) },
             menu.items,
         )
+        showPopupContainer(viewId, menuUi)
+    }
+
+    private fun showPopupContainer(viewId: Int, ui: PopupContainerUi) {
         root.apply {
-            add(menuUi.root, lParams {
-                leftMargin = bounds.left + menuUi.offsetX
-                topMargin = bounds.top + menuUi.offsetY
+            add(ui.root, lParams {
+                leftMargin = ui.triggerBounds.left + ui.offsetX - rootBounds.left
+                topMargin = ui.triggerBounds.top + ui.offsetY - rootBounds.top
             })
         }
-        showingContainerUi[viewId] = menuUi
+        showingContainerUi[viewId] = ui
     }
 
     private fun changeFocus(viewId: Int, x: Float, y: Float): Boolean {
