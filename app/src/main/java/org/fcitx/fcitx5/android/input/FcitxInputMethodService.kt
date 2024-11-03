@@ -42,7 +42,6 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -186,12 +185,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         setInputView(setupInputViews(theme))
     }
 
-    private fun postJob(scope: CoroutineScope, block: suspend () -> Unit): Job {
-        val job = scope.launch(start = CoroutineStart.LAZY) { block() }
-        jobs.trySend(job)
-        return job
-    }
-
     /**
      * Post a fcitx operation to [jobs] to be executed
      *
@@ -199,8 +192,13 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
      * subsequent operations can start if the prior operation is not finished (suspended),
      * [postFcitxJob] ensures that operations are executed sequentially.
      */
-    fun postFcitxJob(block: suspend FcitxAPI.() -> Unit) =
-        postJob(fcitx.lifecycleScope) { fcitx.runOnReady(block) }
+    fun postFcitxJob(block: suspend FcitxAPI.() -> Unit): Job {
+        val job = fcitx.lifecycleScope.launch(start = CoroutineStart.LAZY) {
+            fcitx.runOnReady(block)
+        }
+        jobs.trySend(job)
+        return job
+    }
 
     override fun onCreate() {
         fcitx = FcitxDaemon.connect(javaClass.name)

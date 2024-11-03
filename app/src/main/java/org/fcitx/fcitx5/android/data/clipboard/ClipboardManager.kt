@@ -8,6 +8,8 @@ import android.content.ClipboardManager
 import android.content.Context
 import androidx.annotation.Keep
 import androidx.room.Room
+import androidx.room.withTransaction
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -23,6 +25,7 @@ import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.utils.WeakHashSet
 import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.clipboardManager
+import timber.log.Timber
 
 object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
@@ -149,18 +152,25 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
             ?.let { ClipboardEntry.fromClipData(it, transformer) }
             ?.takeIf { it.text.isNotBlank() }
             ?.let { e ->
-                launch {
+                val handler = CoroutineExceptionHandler { _, exception ->
+                    Timber.w("Failed to update clipboard database: $exception")
+                    updateLastEntry(e)
+                }
+                launch(handler) {
                     mutex.withLock {
                         clbDao.find(e.text, e.sensitive)?.let {
                             updateLastEntry(it.copy(timestamp = e.timestamp))
                             clbDao.updateTime(it.id, e.timestamp)
                             return@launch
                         }
-                        val rowId = clbDao.insert(e)
-                        removeOutdated()
+                        val insertedEntry = clbDb.withTransaction {
+                            val rowId = clbDao.insert(e)
+                            removeOutdated()
+                            // new entry can be deleted immediately if clipboard limit == 0
+                            clbDao.get(rowId) ?: e
+                        }
+                        updateLastEntry(insertedEntry)
                         updateItemCount()
-                        // new entry can be deleted immediately if clipboard limit == 0
-                        updateLastEntry(clbDao.get(rowId) ?: e)
                     }
                 }
             }
