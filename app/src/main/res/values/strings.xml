@@ -62,7 +62,7 @@
     <string name="delete">Delete</string>
     <string name="clipboard">Clipboard</string>
     <string name="keyboard_height">Keyboard height</string>
-    <string name="keyboard">Keyboard</string>
+    <string name="virtual_keyboard">Virtual Keyboard</string>
     <string name="clipboard_suggestion_timeout">Clipboard suggestion timeout</string>
     <string name="version">Version</string>
     <string name="build_time">Build time</string>
@@ -268,4 +268,11 @@
     <string name="flip_horizontally">Flip horizontally</string>
     <string name="flip_vertically">Flip vertically</string>
     <string name="crop">Crop</string>
+    <string name="candidates_window">Candidates Window</string>
+    <string name="show_candidates_window">Show candidates window</string>
+    <string name="follow_input_device">Depends on input device</string>
+    <string name="candidates_orientation">Candidates orientation</string>
+    <string name="automatic">Automatic</string>
+    <string name="horizontal">Horizontal</string>
+    <string name="vertical">Vertical</string>
 </resources>

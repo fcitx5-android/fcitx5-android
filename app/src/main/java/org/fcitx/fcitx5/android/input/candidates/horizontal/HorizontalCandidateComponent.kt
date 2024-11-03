@@ -1,8 +1,9 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
  */
-package org.fcitx.fcitx5.android.input.candidates
+
+package org.fcitx.fcitx5.android.input.candidates.horizontal
 
 import android.content.res.Configuration
 import android.graphics.drawable.ShapeDrawable
@@ -29,10 +30,11 @@ import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.BooleanKey.Ex
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesUpdated
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
-import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateMode.AlwaysFillWidth
-import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateMode.AutoFillWidth
-import org.fcitx.fcitx5.android.input.candidates.HorizontalCandidateMode.NeverFillWidth
-import org.fcitx.fcitx5.android.input.candidates.adapter.HorizontalCandidateViewAdapter
+import org.fcitx.fcitx5.android.input.candidates.CandidateItemUi
+import org.fcitx.fcitx5.android.input.candidates.CandidateViewHolder
+import org.fcitx.fcitx5.android.input.candidates.horizontal.HorizontalCandidateMode.AlwaysFillWidth
+import org.fcitx.fcitx5.android.input.candidates.horizontal.HorizontalCandidateMode.AutoFillWidth
+import org.fcitx.fcitx5.android.input.candidates.horizontal.HorizontalCandidateMode.NeverFillWidth
 import org.fcitx.fcitx5.android.input.candidates.expanded.decoration.FlexboxVerticalDecoration
 import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
 import org.fcitx.fcitx5.android.input.dependency.context

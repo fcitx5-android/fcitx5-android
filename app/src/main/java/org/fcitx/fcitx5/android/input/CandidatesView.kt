@@ -6,46 +6,29 @@
 package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
-import android.content.res.ColorStateList
-import android.graphics.Color
 import android.view.ViewGroup
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.ViewTreeObserver.OnPreDrawListener
-import android.widget.ImageView
-import androidx.annotation.DrawableRes
 import androidx.annotation.Size
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.flexbox.AlignItems
-import com.google.android.flexbox.FlexDirection
-import com.google.android.flexbox.FlexWrap
-import com.google.android.flexbox.FlexboxLayoutManager
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
-import org.fcitx.fcitx5.android.input.candidates.CandidateItemUi
+import org.fcitx.fcitx5.android.input.candidates.floating.PagedCandidatesUi
 import org.fcitx.fcitx5.android.input.preedit.PreeditUi
 import splitties.dimensions.dp
-import splitties.resources.drawable
 import splitties.views.backgroundColor
-import splitties.views.dsl.constraintlayout.before
 import splitties.views.dsl.constraintlayout.below
 import splitties.views.dsl.constraintlayout.bottomOfParent
-import splitties.views.dsl.constraintlayout.centerVertically
-import splitties.views.dsl.constraintlayout.constraintLayout
-import splitties.views.dsl.constraintlayout.endOfParent
 import splitties.views.dsl.constraintlayout.lParams
-import splitties.views.dsl.constraintlayout.matchConstraints
 import splitties.views.dsl.constraintlayout.startOfParent
 import splitties.views.dsl.constraintlayout.topOfParent
-import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
-import splitties.views.dsl.core.imageView
 import splitties.views.dsl.core.withTheme
 import splitties.views.dsl.core.wrapContent
-import splitties.views.dsl.recyclerview.recyclerView
-import splitties.views.horizontalPadding
-import splitties.views.imageDrawable
-import splitties.views.verticalPadding
+import splitties.views.padding
+import splitties.views.setPaddingDp
 
 @SuppressLint("ViewConstructor")
 class CandidatesView(
@@ -55,6 +38,8 @@ class CandidatesView(
 ) : BaseInputView(service, fcitx, theme) {
 
     private val ctx = context.withTheme(R.style.Theme_InputViewTheme)
+
+    private val orientation by AppPrefs.getInstance().candidates.orientation
 
     private var inputPanel = FcitxEvent.InputPanelEvent.Data()
     private var paged = FcitxEvent.PagedCandidateEvent.Data.Empty
@@ -67,116 +52,34 @@ class CandidatesView(
 
     private var shouldUpdatePosition = false
 
-    private val preeditUi = object : PreeditUi(ctx, theme) {
-        override val bkgColor = Color.TRANSPARENT
+    private val layoutListener = OnGlobalLayoutListener {
+        shouldUpdatePosition = true
     }
 
-    inner class UiViewHolder(val ui: Ui) : RecyclerView.ViewHolder(ui.root)
-
-    private val candidatesAdapter = object : RecyclerView.Adapter<UiViewHolder>() {
-        override fun getItemCount() =
-            paged.candidates.size + (if (paged.hasPrev || paged.hasNext) 1 else 0)
-
-        override fun getItemViewType(position: Int) = if (position < paged.candidates.size) 0 else 1
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UiViewHolder {
-            return when (viewType) {
-                0 -> UiViewHolder(CandidateItemUi(ctx, theme).apply {
-                    text.textSize = 16f
-                })
-                else -> UiViewHolder(object : Ui {
-                    override val ctx = this@CandidatesView.ctx
-                    override val root = this@CandidatesView.paginationLayout
-                })
-            }
-        }
-
-        override fun onBindViewHolder(holder: UiViewHolder, position: Int) {
-            when (getItemViewType(position)) {
-                0 -> {
-                    holder.ui as CandidateItemUi
-                    val candidate = paged.candidates[position]
-                    // TODO different font for comment
-                    holder.ui.text.text = "${candidate.label}${candidate.text} ${candidate.comment}"
-                    if (position == paged.cursorIndex) {
-                        holder.ui.text.setTextColor(theme.genericActiveForegroundColor)
-                        holder.ui.root.backgroundColor = theme.genericActiveBackgroundColor
-                    } else {
-                        holder.ui.text.setTextColor(theme.keyTextColor)
-                        holder.ui.root.backgroundColor = Color.TRANSPARENT
-                    }
-                }
-                else -> {
-                    prevIcon.alpha = if (paged.hasPrev) 1f else 0.4f
-                    nextIcon.alpha = if (paged.hasNext) 1f else 0.4f
-                }
-            }
-        }
-    }
-
-    private val candidatesLayoutManager = object : FlexboxLayoutManager(ctx) {
-        init {
-            flexDirection = FlexDirection.ROW
-            flexWrap = FlexWrap.WRAP
-            alignItems = AlignItems.FLEX_START
-        }
-
-        override fun onLayoutCompleted(state: RecyclerView.State?) {
-            super.onLayoutCompleted(state)
-            shouldUpdatePosition = true
-        }
-    }
-
-    private val updatePositionListener = OnPreDrawListener {
+    private val preDrawListener = OnPreDrawListener {
         if (shouldUpdatePosition) {
             updatePosition()
         }
         true
     }
 
-    private val recyclerView = recyclerView {
-        isFocusable = false
-        horizontalPadding = dp(8)
-        adapter = candidatesAdapter
-        layoutManager = candidatesLayoutManager
-        // update position after layout child views and before drawing to avoid flicker
-        this@CandidatesView.viewTreeObserver.addOnPreDrawListener(updatePositionListener)
-    }
+    private val preeditUi = PreeditUi(ctx, theme, setupTextView = {
+        setPaddingDp(3, 1, 3, 1)
+    })
 
-    private fun createIcon(@DrawableRes icon: Int) = imageView {
-        imageTintList = ColorStateList.valueOf(theme.keyTextColor)
-        imageDrawable = drawable(icon)
-        scaleType = ImageView.ScaleType.CENTER_CROP
-    }
-
-    private val prevIcon = createIcon(R.drawable.ic_baseline_arrow_prev_24)
-    private val nextIcon = createIcon(R.drawable.ic_baseline_arrow_next_24)
-
-    private val paginationLayout = constraintLayout {
-        add(nextIcon, lParams(dp(10), matchConstraints) {
-            centerVertically()
-            endOfParent()
-        })
-        add(prevIcon, lParams(dp(10), matchConstraints) {
-            centerVertically()
-            before(nextIcon)
-        })
-        layoutParams = FlexboxLayoutManager.LayoutParams(wrapContent, wrapContent).apply {
-            flexGrow = 1f
-            alignSelf = AlignItems.STRETCH
-            minHeight = dp(20)
-        }
+    private val candidatesUi = PagedCandidatesUi(ctx, theme).apply {
+        root.viewTreeObserver.addOnGlobalLayoutListener(layoutListener)
     }
 
     override fun handleFcitxEvent(it: FcitxEvent<*>) {
         when (it) {
             is FcitxEvent.InputPanelEvent -> {
                 inputPanel = it.data
-                updateUI()
+                updateUi()
             }
             is FcitxEvent.PagedCandidateEvent -> {
                 paged = it.data
-                updateUI()
+                updateUi()
             }
             else -> {}
         }
@@ -189,24 +92,15 @@ class CandidatesView(
                 inputPanel.auxDown.isNotEmpty()
     }
 
-    private fun updateUI() {
+    private fun updateUi() {
         if (evaluateVisibility()) {
             preeditUi.update(inputPanel)
             preeditUi.root.visibility = if (preeditUi.visible) VISIBLE else GONE
-            updateCandidates()
+            candidatesUi.update(paged, orientation)
             visibility = VISIBLE
         } else {
             visibility = GONE
         }
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    private fun updateCandidates() {
-        candidatesLayoutManager.flexDirection = when (paged.layoutHint) {
-            FcitxEvent.PagedCandidateEvent.LayoutHint.Vertical -> FlexDirection.COLUMN
-            else -> FlexDirection.ROW
-        }
-        candidatesAdapter.notifyDataSetChanged()
     }
 
     private fun updatePosition() {
@@ -241,13 +135,14 @@ class CandidatesView(
         // invisible by default
         visibility = GONE
 
-        verticalPadding = dp(8)
+        // TODO make it customizable
+        padding = dp(4)
         backgroundColor = theme.backgroundColor
         add(preeditUi.root, lParams(wrapContent, wrapContent) {
             topOfParent()
             startOfParent()
         })
-        add(recyclerView, lParams(wrapContent, wrapContent) {
+        add(candidatesUi.root, lParams(wrapContent, wrapContent) {
             below(preeditUi.root)
             startOfParent()
             bottomOfParent()
@@ -257,8 +152,15 @@ class CandidatesView(
         layoutParams = ViewGroup.LayoutParams(wrapContent, wrapContent)
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        candidatesUi.root.viewTreeObserver.addOnGlobalLayoutListener(layoutListener)
+        viewTreeObserver.addOnPreDrawListener(preDrawListener)
+    }
+
     override fun onDetachedFromWindow() {
-        viewTreeObserver.removeOnPreDrawListener(updatePositionListener)
+        viewTreeObserver.removeOnPreDrawListener(preDrawListener)
+        candidatesUi.root.viewTreeObserver.removeOnGlobalLayoutListener(layoutListener)
         super.onDetachedFromWindow()
     }
 }

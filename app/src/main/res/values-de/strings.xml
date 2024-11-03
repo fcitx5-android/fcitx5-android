@@ -56,7 +56,7 @@
     <string name="delete">Löschen</string>
     <string name="clipboard">Zwischenablage</string>
     <string name="keyboard_height">Tastaturhöhe</string>
-    <string name="keyboard">Tastatur</string>
+    <string name="virtual_keyboard">Tastatur</string>
     <string name="version">Version</string>
     <string name="build_git_hash">Git Hash erzeugen</string>
     <string name="source_code">Quelltext</string>

@@ -2,6 +2,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later
  * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
  */
+
 package org.fcitx.fcitx5.android.input.candidates
 
 import android.content.Context
@@ -31,7 +32,7 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
         background = pressHighlightDrawable(theme.keyPressHighlightColor)
 
         /**
-         * candidate long press feedback is handled by [HorizontalCandidateComponent.showCandidateActionMenu]
+         * candidate long press feedback is handled by [org.fcitx.fcitx5.android.input.candidates.horizontal.HorizontalCandidateComponent.showCandidateActionMenu]
          */
         longPressFeedbackEnabled = false
 

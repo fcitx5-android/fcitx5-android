@@ -73,7 +73,7 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
                 ReloadConfig
             ),
             StatusAreaEntry.Android(
-                context.getString(R.string.keyboard),
+                context.getString(R.string.virtual_keyboard),
                 R.drawable.ic_baseline_keyboard_24,
                 Keyboard
             )

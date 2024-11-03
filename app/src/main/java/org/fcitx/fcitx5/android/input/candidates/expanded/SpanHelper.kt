@@ -2,10 +2,10 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later
  * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
  */
+
 package org.fcitx.fcitx5.android.input.candidates.expanded
 
 import androidx.recyclerview.widget.GridLayoutManager
-import org.fcitx.fcitx5.android.input.candidates.adapter.GridPagingCandidateViewAdapter
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min

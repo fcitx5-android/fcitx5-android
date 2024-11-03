@@ -42,7 +42,7 @@
     <string name="delete">Eliminar</string>
     <string name="clipboard">Portapapeles</string>
     <string name="keyboard_height">Altura de teclado</string>
-    <string name="keyboard">Teclado</string>
+    <string name="virtual_keyboard">Teclado</string>
     <string name="version">Versión</string>
     <string name="source_code">Código fuente</string>
     <string name="privacy_policy">Normativa de privacidad</string>

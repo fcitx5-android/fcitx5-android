@@ -44,6 +44,13 @@
             app:popEnterAnim="@animator/nav_default_pop_enter_anim"
             app:popExitAnim="@animator/nav_default_pop_exit_anim" />
         <action
+            android:id="@+id/action_mainFragment_to_candidatesSettingsFragment"
+            app:destination="@id/candidatesSettingsFragment"
+            app:enterAnim="@animator/nav_default_enter_anim"
+            app:exitAnim="@animator/nav_default_exit_anim"
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim" />
+        <action
             android:id="@+id/action_mainFragment_to_clipboardSettingsFragment"
             app:destination="@id/clipboardSettingsFragment"
             app:enterAnim="@animator/nav_default_enter_anim"
@@ -234,7 +241,11 @@
     <fragment
         android:id="@+id/keyboardSettingsFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.settings.behavior.KeyboardSettingsFragment"
-        android:label="@string/keyboard" />
+        android:label="@string/virtual_keyboard" />
+    <fragment
+        android:id="@+id/candidatesSettingsFragment"
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.behavior.CandidatesSettingsFragment"
+        android:label="@string/virtual_keyboard" />
     <fragment
         android:id="@+id/clipboardSettingsFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.settings.behavior.ClipboardSettingsFragment"

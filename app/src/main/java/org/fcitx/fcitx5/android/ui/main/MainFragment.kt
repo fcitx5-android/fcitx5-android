@@ -61,14 +61,19 @@ class MainFragment : PaddingPreferenceFragment() {
             }
             addCategory("Android") {
                 addDestinationPreference(
-                    R.string.keyboard,
+                    R.string.theme,
+                    R.drawable.ic_baseline_palette_24,
+                    R.id.action_mainFragment_to_themeFragment
+                )
+                addDestinationPreference(
+                    R.string.virtual_keyboard,
                     R.drawable.ic_baseline_keyboard_24,
                     R.id.action_mainFragment_to_keyboardSettingsFragment
                 )
                 addDestinationPreference(
-                    R.string.theme,
-                    R.drawable.ic_baseline_palette_24,
-                    R.id.action_mainFragment_to_themeFragment
+                    R.string.candidates_window,
+                    R.drawable.ic_baseline_list_alt_24,
+                    R.id.action_mainFragment_to_candidatesSettingsFragment
                 )
                 addDestinationPreference(
                     R.string.clipboard,
