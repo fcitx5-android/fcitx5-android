@@ -183,8 +183,8 @@ object DataManager {
                             domain,
                             description,
                             hasService,
-                            info.versionName,
-                            info.applicationInfo.nativeLibraryDir,
+                            info.versionName ?: "",
+                            info.applicationInfo?.nativeLibraryDir ?: "",
                             libraryDependency
                         )
                     )

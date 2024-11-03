@@ -7,13 +7,13 @@ import org.gradle.api.JavaVersion
 object Versions {
 
     val java = JavaVersion.VERSION_11
-    const val compileSdk = 34
+    const val compileSdk = 35
     const val minSdk = 23
-    const val targetSdk = 34
+    const val targetSdk = 35
 
     const val defaultCMake = "3.22.1"
     const val defaultNDK = "25.2.9519653"
-    const val defaultBuildTools = "34.0.0"
+    const val defaultBuildTools = "35.0.0"
 
     // NOTE: increase this value to bump version code
     const val baseVersionCode = 7

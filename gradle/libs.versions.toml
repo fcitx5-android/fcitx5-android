@@ -1,10 +1,10 @@
 [versions]
-androidGradlePlugin = "8.7.0"
+androidGradlePlugin = "8.7.2"
 androidDesugarJDKLibs = "2.1.2"
 kotlin = "2.0.20"
 ksp = "2.0.20-1.0.25"
-lifecycle = "2.8.6"
-navigation = "2.8.2"
+lifecycle = "2.8.7"
+navigation = "2.8.3"
 room = "2.6.1"
 splitties = "3.0.0"
 aboutlibraries = "11.2.3"
@@ -15,12 +15,12 @@ android-desugarJDKLibs = { group = "com.android.tools", name = "desugar_jdk_libs
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version = "1.9.0" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.6.3" }
-androidx-activity = { module = "androidx.activity:activity-ktx", version = "1.9.2" }
+androidx-activity = { module = "androidx.activity:activity-ktx", version = "1.9.3" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.0" }
 androidx-autofill = { module = "androidx.autofill:autofill", version = "1.1.0" }
-androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.1.4" }
+androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.2.0" }
 androidx-coordinatorlayout = { module = "androidx.coordinatorlayout:coordinatorlayout", version = "1.2.0" }
-androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.13.1" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.15.0" }
 androidx-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-livedata = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }

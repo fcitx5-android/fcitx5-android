@@ -403,8 +403,10 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
             val libraryNames = arrayListOf<String>()
             val libraryDependency = arrayListOf<Array<String>>()
             plugins.forEach {
-                nativeLibDir.append(':')
-                nativeLibDir.append(it.nativeLibraryDir)
+                if (it.nativeLibraryDir.isNotBlank()) {
+                    nativeLibDir.append(':')
+                    nativeLibDir.append(it.nativeLibraryDir)
+                }
                 it.domain?.let { d ->
                     extDomains.add(d)
                 }

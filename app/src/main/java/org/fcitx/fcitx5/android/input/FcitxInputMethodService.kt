@@ -150,6 +150,13 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 shouldUpdateNavbarForeground = true
                 shouldUpdateNavbarBackground = false
                 WindowCompat.setDecorFitsSystemWindows(w, false)
+                /**
+                 * Why on earth does it deprecated? It says
+                 * https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-15.0.0_r3/core/java/android/view/Window.java#2720
+                 * "If the app targets VANILLA_ICE_CREAM or above, the color will be transparent and cannot be changed"
+                 * but actually not.
+                 */
+                @Suppress("DEPRECATION")
                 w.navigationBarColor = Color.TRANSPARENT
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     // don't apply scrim to transparent navigation bar
@@ -479,6 +486,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 .isAppearanceLightNavigationBars = !theme.isDark
         }
         if (shouldUpdateNavbarBackground) {
+            @Suppress("DEPRECATION")
             w.navigationBarColor = when (theme) {
                 is Theme.Builtin -> if (keyBorder) theme.backgroundColor else theme.keyboardColor
                 is Theme.Custom -> theme.backgroundColor
