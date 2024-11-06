@@ -10,5 +10,6 @@ import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceEnum
 
 enum class FloatingCandidatesMode(override val stringRes: Int) : ManagedPreferenceEnum {
     SystemDefault(R.string.system_default),
-    InputDevice(R.string.follow_input_device)
+    InputDevice(R.string.follow_input_device),
+    Disabled(R.string.disabled)
 }

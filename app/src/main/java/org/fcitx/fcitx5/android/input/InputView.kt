@@ -204,6 +204,8 @@ class InputView(
         windowManager.addEssentialWindow(symbolPicker)
         windowManager.addEssentialWindow(emojiPicker)
         windowManager.addEssentialWindow(emoticonPicker)
+        // show KeyboardWindow by default
+        windowManager.attachWindow(KeyboardWindow)
 
         broadcaster.onImeUpdate(fcitx.runImmediately { inputMethodEntryCached })
 

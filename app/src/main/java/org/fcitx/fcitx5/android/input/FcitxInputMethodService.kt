@@ -6,6 +6,7 @@
 package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
+import android.annotation.TargetApi
 import android.app.Dialog
 import android.content.res.ColorStateList
 import android.content.res.Configuration
@@ -27,7 +28,6 @@ import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InlineSuggestionsRequest
 import android.view.inputmethod.InlineSuggestionsResponse
-import android.view.inputmethod.InputMethodManager
 import android.view.inputmethod.InputMethodSubtype
 import android.widget.FrameLayout
 import android.widget.inline.InlinePresentationSpec
@@ -68,6 +68,7 @@ import org.fcitx.fcitx5.android.input.cursor.CursorRange
 import org.fcitx.fcitx5.android.input.cursor.CursorTracker
 import org.fcitx.fcitx5.android.utils.InputMethodUtil
 import org.fcitx.fcitx5.android.utils.alpha
+import org.fcitx.fcitx5.android.utils.forceShowSelf
 import org.fcitx.fcitx5.android.utils.inputMethodManager
 import org.fcitx.fcitx5.android.utils.monitorCursorAnchor
 import org.fcitx.fcitx5.android.utils.styledFloat
@@ -94,9 +95,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private var inputView: InputView? = null
     private var candidatesView: CandidatesView? = null
 
-    private var startedInput = false
-    private var startedInputView = false
-    private var isNullInputType = true
+    private val inputDeviceMgr = InputDeviceManager()
 
     private var capabilityFlags = CapabilityFlags.DefaultFlags
 
@@ -176,14 +175,18 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         recreateInputView(it)
     }
 
-    private fun setupInputViews(theme: Theme): View {
+    private fun setupInputViews(theme: Theme): InputView {
         evaluateNavbarUpdates()
+        val newInputView = InputView(this, fcitx, theme)
+        val newCandidatesView = CandidatesView(this, fcitx, theme)
         // replace CandidatesView manually
         contentView.removeView(candidatesView)
-        candidatesView = CandidatesView(this, fcitx, theme)
         // put CandidatesView directly under content view
-        contentView.addView(candidatesView)
-        return InputView(this, fcitx, theme).also { inputView = it }
+        contentView.addView(newCandidatesView)
+        inputView = newInputView
+        candidatesView = newCandidatesView
+        inputDeviceMgr.setViews(newInputView, newCandidatesView)
+        return newInputView
     }
 
     private fun recreateInputView(theme: Theme) {
@@ -477,6 +480,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onWindowShown() {
         super.onWindowShown()
+        try {
+            highlightColor = styledColor(android.R.attr.colorAccent).alpha(0.4f)
+        } catch (_: Exception) {
+            Timber.w("Device does not support android.R.attr.colorAccent which it should have.")
+        }
         InputFeedbacks.syncSystemPrefs()
         val w = window.window!!
         val theme = ThemeManager.activeTheme
@@ -503,11 +511,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun setInputView(view: View) {
-        try {
-            highlightColor = view.styledColor(android.R.attr.colorAccent).alpha(0.4f)
-        } catch (_: Exception) {
-            Timber.w("Device does not support android.R.attr.colorAccent which it should have.")
-        }
         super.setInputView(view)
         // input method layout has not changed in 11 years:
         // https://android.googlesource.com/platform/frameworks/base/+/ae3349e1c34f7aceddc526cd11d9ac44951e97b6/core/res/res/layout/input_method.xml
@@ -553,6 +556,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     @SuppressLint("MissingSuperCall")
     override fun onEvaluateInputViewShown() = true
 
+    fun superEvaluateInputViewShown() = super.onEvaluateInputViewShown()
+
     override fun onEvaluateFullscreenMode() = false
 
     private fun forwardKeyEvent(event: KeyEvent): Boolean {
@@ -585,29 +590,32 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         // request to show floating CandidatesView when pressing physical keyboard
-        if (!startedInputView &&
-            !isNullInputType &&
-            event.displayLabel.isLetterOrDigit() &&
-            !super.onEvaluateInputViewShown()
-        ) {
+        if (inputDeviceMgr.evaluateOnKeyDown(event, this)) {
             postFcitxJob {
                 focus(true)
             }
-            @Suppress("DEPRECATION")
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                requestShowSelf(InputMethodManager.SHOW_FORCED)
-            } else {
-                inputMethodManager.showSoftInputFromInputMethod(
-                    window.window!!.attributes.token,
-                    InputMethodManager.SHOW_FORCED
-                )
-            }
+            forceShowSelf()
         }
         return forwardKeyEvent(event) || super.onKeyDown(keyCode, event)
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
         return forwardKeyEvent(event) || super.onKeyUp(keyCode, event)
+    }
+
+    // Added in API level 14, deprecated in 29
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
+    override fun onViewClicked(focusChanged: Boolean) {
+        super.onViewClicked(focusChanged)
+        if (Build.VERSION.SDK_INT < 34) {
+            inputDeviceMgr.evaluateOnViewClicked(this)
+        }
+    }
+
+    @TargetApi(34)
+    override fun onUpdateEditorToolType(toolType: Int) {
+        super.onUpdateEditorToolType(toolType)
+        inputDeviceMgr.evaluateOnUpdateEditorToolType(toolType, this)
     }
 
     private var firstBindInput = true
@@ -664,13 +672,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onStartInput(attribute: EditorInfo, restarting: Boolean) {
-        startedInput = true
         // update selection as soon as possible
         // sometimes when restarting input, onUpdateSelection happens before onStartInput, and
         // initialSel{Start,End} is outdated. but it's the client app's responsibility to send
         // right cursor position, try to workaround this would simply introduce more bugs.
         selection.resetTo(attribute.initialSelStart, attribute.initialSelEnd)
-        isNullInputType = attribute.inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL
         resetComposingState()
         val flags = CapabilityFlags.fromEditorInfo(attribute)
         capabilityFlags = flags
@@ -690,29 +696,20 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onStartInputView(info: EditorInfo, restarting: Boolean) {
-        startedInputView = true
         Timber.d("onStartInputView: restarting=$restarting")
-        val useVirtualKeyboard = super.onEvaluateInputViewShown()
-        // monitor cursor anchor only when needed, ie
-        // InputView just becomes visible && using floating CandidatesView
-        if (!restarting && !useVirtualKeyboard) {
-            currentInputConnection?.monitorCursorAnchor()
-        }
         postFcitxJob {
             focus(true)
-            setCandidatePagingMode(if (useVirtualKeyboard) 0 else 1)
         }
-        if (useVirtualKeyboard) {
-            candidatesView?.handleEvents = false
-            inputView?.handleEvents = true
-            inputView?.visibility = View.VISIBLE
+        if (inputDeviceMgr.evaluateOnStartInputView(info, this)) {
             // because onStartInputView will always be called after onStartInput,
             // editorInfo and capFlags should be up-to-date
             inputView?.startInput(info, capabilityFlags, restarting)
         } else {
-            candidatesView?.handleEvents = true
-            inputView?.handleEvents = false
-            inputView?.visibility = View.GONE
+            // monitor cursor anchor only when needed, ie
+            // InputView just becomes visible && using floating CandidatesView
+            if (!restarting) {
+                currentInputConnection?.monitorCursorAnchor()
+            }
         }
     }
 
@@ -909,7 +906,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreateInlineSuggestionsRequest(uiExtras: Bundle): InlineSuggestionsRequest? {
         // ignore inline suggestion when disabled by user || using physical keyboard with floating candidates view
-        if (!inlineSuggestions || candidatesView?.handleEvents == true) return null
+        if (!inlineSuggestions || !inputDeviceMgr.isVirtualKeyboard) return null
         val theme = ThemeManager.activeTheme
         val chipDrawable =
             if (theme.isDark) R.drawable.bkg_inline_suggestion_dark else R.drawable.bkg_inline_suggestion_light
@@ -969,20 +966,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         return inputView?.handleInlineSuggestions(response) == true
     }
 
-    fun nextInputMethodApp() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            switchToNextInputMethod(false)
-        } else {
-            @Suppress("DEPRECATION")
-            inputMethodManager.switchToNextInputMethod(window.window!!.attributes.token, false)
-        }
-    }
-
     override fun onFinishInputView(finishingInput: Boolean) {
-        startedInputView = false
-        decorLocationUpdated = false
         Timber.d("onFinishInputView: finishingInput=$finishingInput")
-        currentInputConnection?.run {
+        decorLocationUpdated = false
+        inputDeviceMgr.onFinishInputView()
+        currentInputConnection?.apply {
             finishComposingText()
             monitorCursorAnchor(false)
         }
@@ -994,7 +982,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onFinishInput() {
-        startedInput = false
         Timber.d("onFinishInput")
         capabilityFlags = CapabilityFlags.DefaultFlags
     }
