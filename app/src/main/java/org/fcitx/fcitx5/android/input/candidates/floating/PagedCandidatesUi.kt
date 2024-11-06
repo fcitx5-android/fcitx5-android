@@ -8,6 +8,7 @@ package org.fcitx.fcitx5.android.input.candidates.floating
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.ViewGroup
+import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexDirection
@@ -16,13 +17,14 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.core.FcitxEvent.PagedCandidateEvent.LayoutHint
 import org.fcitx.fcitx5.android.data.theme.Theme
-import splitties.dimensions.dp
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.recyclerview.recyclerView
 
 class PagedCandidatesUi(override val ctx: Context, val theme: Theme) : Ui {
 
     private var data = FcitxEvent.PagedCandidateEvent.Data.Empty
+
+    private var isVertical = false
 
     sealed class UiHolder(open val ui: Ui) : RecyclerView.ViewHolder(ui.root) {
         class Candidate(override val ui: LabeledCandidateItemUi) : UiHolder(ui)
@@ -42,8 +44,6 @@ class PagedCandidatesUi(override val ctx: Context, val theme: Theme) : Ui {
                     val wrap = ViewGroup.LayoutParams.WRAP_CONTENT
                     ui.root.layoutParams = FlexboxLayoutManager.LayoutParams(wrap, wrap).apply {
                         flexGrow = 1f
-                        alignSelf = AlignItems.STRETCH
-                        minHeight = ctx.dp(20)
                     }
                 }
             }
@@ -57,6 +57,9 @@ class PagedCandidatesUi(override val ctx: Context, val theme: Theme) : Ui {
                 }
                 is UiHolder.Pagination -> {
                     holder.ui.update(data)
+                    holder.ui.root.updateLayoutParams<FlexboxLayoutManager.LayoutParams> {
+                        alignSelf = if (isVertical) AlignItems.STRETCH else AlignItems.CENTER
+                    }
                 }
             }
         }
@@ -78,10 +81,9 @@ class PagedCandidatesUi(override val ctx: Context, val theme: Theme) : Ui {
         orientation: FloatingCandidatesOrientation
     ) {
         this.data = data
-        val isVertical = when (orientation) {
+        this.isVertical = when (orientation) {
             FloatingCandidatesOrientation.Automatic -> data.layoutHint == LayoutHint.Vertical
-            FloatingCandidatesOrientation.Horizontal -> false
-            FloatingCandidatesOrientation.Vertical -> true
+            else -> orientation == FloatingCandidatesOrientation.Vertical
         }
         candidatesLayoutManager.apply {
             if (isVertical) {

@@ -20,7 +20,6 @@ import splitties.views.dsl.constraintlayout.centerVertically
 import splitties.views.dsl.constraintlayout.constraintLayout
 import splitties.views.dsl.constraintlayout.endOfParent
 import splitties.views.dsl.constraintlayout.lParams
-import splitties.views.dsl.constraintlayout.matchConstraints
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.imageView
@@ -40,11 +39,13 @@ class PaginationUi(override val ctx: Context, val theme: Theme) : Ui {
     private val disabledAlpha = styledFloat(android.R.attr.disabledAlpha)
 
     override val root = constraintLayout {
-        add(nextIcon, lParams(dp(10), matchConstraints) {
+        val w = dp(10)
+        val h = dp(20)
+        add(nextIcon, lParams(w, h) {
             centerVertically()
             endOfParent()
         })
-        add(prevIcon, lParams(dp(10), matchConstraints) {
+        add(prevIcon, lParams(w, h) {
             centerVertically()
             before(nextIcon)
         })
