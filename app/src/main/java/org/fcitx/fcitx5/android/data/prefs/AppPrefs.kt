@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.data.prefs
 
@@ -268,9 +268,46 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
         )
 
         val orientation = enumList(
-            R.string.candidates_orientation, "candidates_window_orientation",
+            R.string.candidates_orientation,
+            "candidates_window_orientation",
             FloatingCandidatesOrientation.Automatic
         )
+
+        val windowMinWidth = int(
+            R.string.candidates_window_min_width,
+            "candidates_window_min_width",
+            0,
+            0,
+            640,
+            "dp",
+            10
+        )
+
+        val windowPadding =
+            int(R.string.candidates_window_padding, "candidates_window_padding", 4, 0, 32, "dp")
+
+        val fontSize =
+            int(R.string.candidates_font_size, "candidates_window_font_size", 20, 4, 64, "sp")
+
+        val itemPaddingVertical: ManagedPreference.PInt
+        val itemPaddingHorizontal: ManagedPreference.PInt
+
+        init {
+            val (primary, secondary) = twinInt(
+                R.string.candidates_padding,
+                R.string.vertical,
+                "candidates_item_padding_vertical",
+                2,
+                R.string.horizontal,
+                "candidates_item_padding_horizontal",
+                4,
+                0,
+                64,
+                "dp"
+            )
+            itemPaddingVertical = primary
+            itemPaddingHorizontal = secondary
+        }
     }
 
     inner class Clipboard : ManagedPreferenceCategory(R.string.clipboard, sharedPreferences) {

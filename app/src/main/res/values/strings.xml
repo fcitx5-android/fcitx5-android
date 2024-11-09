@@ -271,8 +271,12 @@
     <string name="candidates_window">Candidates Window</string>
     <string name="show_candidates_window">Show candidates window</string>
     <string name="follow_input_device">Depends on input device</string>
-    <string name="candidates_orientation">Candidates orientation</string>
+    <string name="candidates_orientation">Candidates list orientation</string>
     <string name="automatic">Automatic</string>
     <string name="horizontal">Horizontal</string>
     <string name="vertical">Vertical</string>
+    <string name="candidates_font_size">Candidate word font size</string>
+    <string name="candidates_padding">Candidate word padding</string>
+    <string name="candidates_window_min_width">Candidate window minimum width</string>
+    <string name="candidates_window_padding">Candidate window padding</string>
 </resources>

@@ -7,6 +7,7 @@ package org.fcitx.fcitx5.android.input.candidates.floating
 
 import android.content.Context
 import android.graphics.Color
+import android.widget.TextView
 import androidx.core.text.buildSpannedString
 import androidx.core.text.color
 import org.fcitx.fcitx5.android.core.FcitxEvent
@@ -14,17 +15,15 @@ import org.fcitx.fcitx5.android.data.theme.Theme
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.textView
-import splitties.views.setPaddingDp
 
 class LabeledCandidateItemUi(
     override val ctx: Context,
     val theme: Theme,
-    val textSize: Float = 16f // sp
+    setupTextView: TextView.() -> Unit
 ) : Ui {
 
     override val root = textView {
-        textSize = this@LabeledCandidateItemUi.textSize
-        setPaddingDp(3, 1, 3, 1)
+        setupTextView(this)
     }
 
     fun update(candidate: FcitxEvent.Candidate, active: Boolean) {

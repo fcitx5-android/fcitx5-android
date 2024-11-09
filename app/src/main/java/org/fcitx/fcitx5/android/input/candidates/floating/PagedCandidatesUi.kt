@@ -8,6 +8,7 @@ package org.fcitx.fcitx5.android.input.candidates.floating
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.AlignItems
@@ -20,7 +21,11 @@ import org.fcitx.fcitx5.android.data.theme.Theme
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.recyclerview.recyclerView
 
-class PagedCandidatesUi(override val ctx: Context, val theme: Theme) : Ui {
+class PagedCandidatesUi(
+    override val ctx: Context,
+    val theme: Theme,
+    private val setupTextView: TextView.() -> Unit
+) : Ui {
 
     private var data = FcitxEvent.PagedCandidateEvent.Data.Empty
 
@@ -39,7 +44,7 @@ class PagedCandidatesUi(override val ctx: Context, val theme: Theme) : Ui {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UiHolder {
             return when (viewType) {
-                0 -> UiHolder.Candidate(LabeledCandidateItemUi(ctx, theme))
+                0 -> UiHolder.Candidate(LabeledCandidateItemUi(ctx, theme, setupTextView))
                 else -> UiHolder.Pagination(PaginationUi(ctx, theme)).apply {
                     val wrap = ViewGroup.LayoutParams.WRAP_CONTENT
                     ui.root.layoutParams = FlexboxLayoutManager.LayoutParams(wrap, wrap).apply {
@@ -58,6 +63,7 @@ class PagedCandidatesUi(override val ctx: Context, val theme: Theme) : Ui {
                 is UiHolder.Pagination -> {
                     holder.ui.update(data)
                     holder.ui.root.updateLayoutParams<FlexboxLayoutManager.LayoutParams> {
+                        width = if (isVertical) ViewGroup.LayoutParams.MATCH_PARENT else ViewGroup.LayoutParams.WRAP_CONTENT
                         alignSelf = if (isVertical) AlignItems.STRETCH else AlignItems.CENTER
                     }
                 }

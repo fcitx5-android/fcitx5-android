@@ -61,6 +61,7 @@ import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.data.InputFeedbacks
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceProvider
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.data.theme.ThemePrefs.NavbarBackground
@@ -165,34 +166,44 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    @Keep
-    private val recreateInputViewListener = ManagedPreference.OnChangeListener<Any> { _, _ ->
-        recreateInputView(ThemeManager.activeTheme)
-    }
-
-    @Keep
-    private val onThemeChangeListener = ThemeManager.OnThemeChangeListener {
-        recreateInputView(it)
-    }
-
-    private fun setupInputViews(theme: Theme): InputView {
-        evaluateNavbarUpdates()
+    private fun replaceInputView(theme: Theme): InputView {
         val newInputView = InputView(this, fcitx, theme)
+        setInputView(newInputView)
+        inputDeviceMgr.setInputView(newInputView)
+        inputView = newInputView
+        return newInputView
+    }
+
+    private fun replaceCandidateView(theme: Theme): CandidatesView {
         val newCandidatesView = CandidatesView(this, fcitx, theme)
         // replace CandidatesView manually
         contentView.removeView(candidatesView)
         // put CandidatesView directly under content view
         contentView.addView(newCandidatesView)
-        inputView = newInputView
+        inputDeviceMgr.setCandidatesView(newCandidatesView)
         candidatesView = newCandidatesView
-        inputDeviceMgr.setViews(newInputView, newCandidatesView)
-        return newInputView
+        return newCandidatesView
     }
 
-    private fun recreateInputView(theme: Theme) {
-        // InputView should be first created in `onCreateInputView`
-        // `setInputView` should only be used to 'replace' current InputView
-        setInputView(setupInputViews(theme))
+    private fun replaceInputViews(theme: Theme) {
+        evaluateNavbarUpdates()
+        replaceInputView(theme)
+        replaceCandidateView(theme)
+    }
+
+    @Keep
+    private val recreateInputViewListener = ManagedPreference.OnChangeListener<Any> { _, _ ->
+        replaceInputView(ThemeManager.activeTheme)
+    }
+
+    @Keep
+    private val recreateCandidatesViewListener = ManagedPreferenceProvider.OnChangeListener {
+        replaceCandidateView(ThemeManager.activeTheme)
+    }
+
+    @Keep
+    private val onThemeChangeListener = ThemeManager.OnThemeChangeListener {
+        replaceInputViews(it)
     }
 
     /**
@@ -223,6 +234,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         pkgNameCache = PackageNameCache(this)
         AppPrefs.getInstance().apply {
             keyboard.expandKeypressArea.registerOnChangeListener(recreateInputViewListener)
+            candidates.registerOnChangeListener(recreateCandidatesViewListener)
             advanced.disableAnimation.registerOnChangeListener(recreateInputViewListener)
         }
         ThemeManager.addOnChangedListener(onThemeChangeListener)
@@ -502,12 +514,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    override fun onCreateInputView(): View {
-        // onCreateInputView will be called once, when the input area is first displayed,
-        // during each onConfigurationChanged period.
-        // That is, onCreateInputView would be called again, after system dark mode changes,
-        // or screen orientation changes.
-        return setupInputViews(ThemeManager.activeTheme)
+    override fun onCreateInputView(): View? {
+        replaceInputViews(ThemeManager.activeTheme)
+        // We will call `setInputView` by ourselves. This is fine.
+        return null
     }
 
     override fun setInputView(view: View) {
@@ -535,20 +545,20 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private var inputViewLocation = intArrayOf(0, 0)
 
     override fun onComputeInsets(outInsets: Insets) {
-        if (candidatesView?.handleEvents == true) {
+        if (inputDeviceMgr.isVirtualKeyboard) {
+            inputView?.keyboardView?.getLocationInWindow(inputViewLocation)
+            outInsets.apply {
+                contentTopInsets = inputViewLocation[1]
+                visibleTopInsets = inputViewLocation[1]
+                touchableInsets = Insets.TOUCHABLE_INSETS_VISIBLE
+            }
+        } else {
             val h = decorView.height
             outInsets.apply {
                 contentTopInsets = h
                 visibleTopInsets = h
                 touchableInsets = Insets.TOUCHABLE_INSETS_VISIBLE
             }
-            return
-        }
-        inputView?.keyboardView?.getLocationInWindow(inputViewLocation)
-        outInsets.apply {
-            contentTopInsets = inputViewLocation[1]
-            visibleTopInsets = inputViewLocation[1]
-            touchableInsets = Insets.TOUCHABLE_INSETS_VISIBLE
         }
     }
 
@@ -962,7 +972,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onInlineSuggestionsResponse(response: InlineSuggestionsResponse): Boolean {
-        if (!inlineSuggestions || candidatesView?.handleEvents == true) return false
+        if (!inlineSuggestions || !inputDeviceMgr.isVirtualKeyboard) return false
         return inputView?.handleInlineSuggestions(response) == true
     }
 
@@ -1001,6 +1011,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     override fun onDestroy() {
         AppPrefs.getInstance().apply {
             keyboard.expandKeypressArea.unregisterOnChangeListener(recreateInputViewListener)
+            candidates.unregisterOnChangeListener(recreateCandidatesViewListener)
             advanced.disableAnimation.unregisterOnChangeListener(recreateInputViewListener)
         }
         ThemeManager.removeOnChangedListener(onThemeChangeListener)

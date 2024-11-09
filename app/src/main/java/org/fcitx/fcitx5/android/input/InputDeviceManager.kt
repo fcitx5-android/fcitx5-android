@@ -19,9 +19,12 @@ class InputDeviceManager {
     private var inputView: InputView? = null
     private var candidatesView: CandidatesView? = null
 
-    private fun setupViewEvents(isVirtual: Boolean) {
+    private fun setupInputViewEvents(isVirtual: Boolean) {
         inputView?.handleEvents = isVirtual
         inputView?.visibility = if (isVirtual) View.VISIBLE else View.GONE
+    }
+
+    private fun setupCandidatesViewEvents(isVirtual: Boolean) {
         candidatesView?.handleEvents = !isVirtual
         // hide CandidatesView when entering virtual keyboard mode,
         // but preserve the visibility when entering physical keyboard mode (in case it's empty)
@@ -30,16 +33,25 @@ class InputDeviceManager {
         }
     }
 
+    private fun setupViewEvents(isVirtual: Boolean) {
+        setupInputViewEvents(isVirtual)
+        setupCandidatesViewEvents(isVirtual)
+    }
+
     var isVirtualKeyboard = true
         private set(value) {
             field = value
             setupViewEvents(value)
         }
 
-    fun setViews(inputView: InputView, candidatesView: CandidatesView) {
+    fun setInputView(inputView: InputView) {
         this.inputView = inputView
+        setupInputViewEvents(this.isVirtualKeyboard)
+    }
+
+    fun setCandidatesView(candidatesView: CandidatesView) {
         this.candidatesView = candidatesView
-        setupViewEvents(this.isVirtualKeyboard)
+        setupCandidatesViewEvents(this.isVirtualKeyboard)
     }
 
     private fun applyMode(service: FcitxInputMethodService, useVirtualKeyboard: Boolean) {
@@ -107,6 +119,7 @@ class InputDeviceManager {
     }
 
     fun evaluateOnViewClicked(service: FcitxInputMethodService) {
+        if (!startedInputView) return
         val useVirtualKeyboard = when (candidatesViewMode) {
             FloatingCandidatesMode.SystemDefault -> service.superEvaluateInputViewShown()
             else -> true
@@ -115,6 +128,7 @@ class InputDeviceManager {
     }
 
     fun evaluateOnUpdateEditorToolType(toolType: Int, service: FcitxInputMethodService) {
+        if (!startedInputView) return
         val useVirtualKeyboard = when (candidatesViewMode) {
             FloatingCandidatesMode.SystemDefault -> service.superEvaluateInputViewShown()
             FloatingCandidatesMode.InputDevice ->

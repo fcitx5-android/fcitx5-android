@@ -9,6 +9,7 @@ import android.annotation.SuppressLint
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.ViewTreeObserver.OnPreDrawListener
+import android.widget.TextView
 import androidx.annotation.Size
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxEvent
@@ -21,14 +22,15 @@ import splitties.dimensions.dp
 import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.below
 import splitties.views.dsl.constraintlayout.bottomOfParent
+import splitties.views.dsl.constraintlayout.centerHorizontally
 import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.matchConstraints
 import splitties.views.dsl.constraintlayout.startOfParent
 import splitties.views.dsl.constraintlayout.topOfParent
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.withTheme
 import splitties.views.dsl.core.wrapContent
 import splitties.views.padding
-import splitties.views.setPaddingDp
 
 @SuppressLint("ViewConstructor")
 class CandidatesView(
@@ -39,7 +41,13 @@ class CandidatesView(
 
     private val ctx = context.withTheme(R.style.Theme_InputViewTheme)
 
-    private val orientation by AppPrefs.getInstance().candidates.orientation
+    private val candidatesPrefs = AppPrefs.getInstance().candidates
+    private val orientation by candidatesPrefs.orientation
+    private val windowMinWidth by candidatesPrefs.windowMinWidth
+    private val windowPadding by candidatesPrefs.windowPadding
+    private val fontSize by candidatesPrefs.fontSize
+    private val itemPaddingVertical by candidatesPrefs.itemPaddingVertical
+    private val itemPaddingHorizontal by candidatesPrefs.itemPaddingHorizontal
 
     private var inputPanel = FcitxEvent.InputPanelEvent.Data()
     private var paged = FcitxEvent.PagedCandidateEvent.Data.Empty
@@ -63,11 +71,16 @@ class CandidatesView(
         true
     }
 
-    private val preeditUi = PreeditUi(ctx, theme, setupTextView = {
-        setPaddingDp(3, 1, 3, 1)
-    })
+    private val setupTextView: TextView.() -> Unit = {
+        textSize = fontSize.toFloat()
+        val v = dp(itemPaddingVertical)
+        val h = dp(itemPaddingHorizontal)
+        setPadding(h, v, h, v)
+    }
 
-    private val candidatesUi = PagedCandidatesUi(ctx, theme).apply {
+    private val preeditUi = PreeditUi(ctx, theme, setupTextView)
+
+    private val candidatesUi = PagedCandidatesUi(ctx, theme, setupTextView).apply {
         root.viewTreeObserver.addOnGlobalLayoutListener(layoutListener)
     }
 
@@ -135,16 +148,17 @@ class CandidatesView(
         // invisible by default
         visibility = GONE
 
-        // TODO make it customizable
-        padding = dp(4)
+        minWidth = dp(windowMinWidth)
+        padding = dp(windowPadding)
         backgroundColor = theme.backgroundColor
         add(preeditUi.root, lParams(wrapContent, wrapContent) {
             topOfParent()
             startOfParent()
         })
-        add(candidatesUi.root, lParams(wrapContent, wrapContent) {
+        add(candidatesUi.root, lParams(matchConstraints, wrapContent) {
+            matchConstraintMinWidth = wrapContent
             below(preeditUi.root)
-            startOfParent()
+            centerHorizontally()
             bottomOfParent()
         })
 
