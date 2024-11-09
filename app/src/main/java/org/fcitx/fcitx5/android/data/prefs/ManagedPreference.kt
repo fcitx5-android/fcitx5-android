@@ -35,7 +35,7 @@ abstract class ManagedPreference<T : Any>(
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) = setValue(value)
 
-    private val listeners by lazy {
+    private val listeners = lazy {
         WeakHashSet<OnChangeListener<T>>()
     }
 
@@ -47,17 +47,19 @@ abstract class ManagedPreference<T : Any>(
      * or simply mark the listener with [@Keep][androidx.annotation.Keep] .
      */
     fun registerOnChangeListener(listener: OnChangeListener<T>) {
-        listeners.add(listener)
+        if (!listeners.isInitialized()) return
+        listeners.value.add(listener)
     }
 
     fun unregisterOnChangeListener(listener: OnChangeListener<T>) {
-        listeners.remove(listener)
+        if (!listeners.isInitialized()) return
+        listeners.value.remove(listener)
     }
 
     fun fireChange() {
-        if (listeners.isEmpty()) return
+        if (!listeners.isInitialized()) return
         val newValue = getValue()
-        listeners.forEach { it.onChange(key, newValue) }
+        listeners.value.forEach { it.onChange(key, newValue) }
     }
 
     class PBool(sharedPreferences: SharedPreferences, key: String, defaultValue: Boolean) :

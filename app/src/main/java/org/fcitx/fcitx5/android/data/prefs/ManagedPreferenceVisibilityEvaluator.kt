@@ -15,14 +15,12 @@ class ManagedPreferenceVisibilityEvaluator(
 
     // it would be better to declare the dependency relationship, rather than reevaluating on each value changed
     @Keep
-    private val onValueChangeListener = ManagedPreference.OnChangeListener<Any> { _, _ ->
+    private val onValueChangeListener = ManagedPreferenceProvider.OnChangeListener {
         evaluateVisibility()
     }
 
     init {
-        provider.managedPreferences.forEach { (_, pref) ->
-            pref.registerOnChangeListener(onValueChangeListener)
-        }
+        provider.registerOnChangeListener(onValueChangeListener)
     }
 
     fun evaluateVisibility() {
@@ -40,9 +38,7 @@ class ManagedPreferenceVisibilityEvaluator(
     }
 
     fun destroy() {
-        provider.managedPreferences.forEach { (_, pref) ->
-            pref.unregisterOnChangeListener(onValueChangeListener)
-        }
+        provider.unregisterOnChangeListener(onValueChangeListener)
     }
 
 }

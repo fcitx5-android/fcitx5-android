@@ -11,7 +11,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
-import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceProvider
 import org.fcitx.fcitx5.android.utils.WeakHashSet
 import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.isDarkMode
@@ -119,7 +119,7 @@ object ThemeManager {
     }
 
     @Keep
-    private val onThemePrefsChange = ManagedPreference.OnChangeListener<Any> { key, _ ->
+    private val onThemePrefsChange = ManagedPreferenceProvider.OnChangeListener { key ->
         if (prefs.dayNightModePrefNames.contains(key)) {
             activeTheme = evaluateActiveTheme()
         } else {
@@ -130,9 +130,7 @@ object ThemeManager {
     fun init(configuration: Configuration) {
         isDarkMode = configuration.isDarkMode()
         // fire all `OnThemeChangedListener`s on theme preferences change
-        prefs.managedPreferences.values.forEach {
-            it.registerOnChangeListener(onThemePrefsChange)
-        }
+        prefs.registerOnChangeListener(onThemePrefsChange)
         _activeTheme = evaluateActiveTheme()
     }
 

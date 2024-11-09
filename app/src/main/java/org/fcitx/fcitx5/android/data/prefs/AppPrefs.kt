@@ -6,6 +6,7 @@ package org.fcitx.fcitx5.android.data.prefs
 
 import android.content.SharedPreferences
 import android.os.Build
+import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
@@ -318,10 +319,12 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
     val clipboard = Clipboard().register()
     val advanced = Advanced().register()
 
+    @Keep
     private val onSharedPreferenceChangeListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == null) return@OnSharedPreferenceChangeListener
             providers.forEach {
-                it.managedPreferences[key]?.fireChange()
+                it.fireChange(key)
             }
         }
 

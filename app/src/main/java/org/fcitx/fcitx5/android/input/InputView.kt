@@ -24,7 +24,7 @@ import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
-import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceProvider
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.data.theme.ThemePrefs.NavbarBackground
@@ -180,8 +180,10 @@ class InputView(
         }
 
     @Keep
-    private val onKeyboardSizeChangeListener = ManagedPreference.OnChangeListener<Int> { _, _ ->
-        updateKeyboardSize()
+    private val onKeyboardSizeChangeListener = ManagedPreferenceProvider.OnChangeListener { key ->
+        if (keyboardSizePrefs.any { it.key == key }) {
+            updateKeyboardSize()
+        }
     }
 
     val keyboardView: View
@@ -193,10 +195,6 @@ class InputView(
         // restore punctuation mapping in case of InputView recreation
         fcitx.launchOnReady {
             punctuation.updatePunctuationMapping(it.statusAreaActionsCached)
-        }
-
-        keyboardSizePrefs.forEach {
-            it.registerOnChangeListener(onKeyboardSizeChangeListener)
         }
 
         // make sure KeyboardWindow's view has been created before it receives any broadcast
@@ -273,6 +271,8 @@ class InputView(
             centerVertically()
             centerHorizontally()
         })
+
+        keyboardPrefs.registerOnChangeListener(onKeyboardSizeChangeListener)
     }
 
     private fun updateKeyboardSize() {
@@ -358,9 +358,7 @@ class InputView(
     }
 
     override fun onDetachedFromWindow() {
-        keyboardSizePrefs.forEach {
-            it.unregisterOnChangeListener(onKeyboardSizeChangeListener)
-        }
+        keyboardPrefs.unregisterOnChangeListener(onKeyboardSizeChangeListener)
         ViewCompat.setOnApplyWindowInsetsListener(this, null)
         // clear DynamicScope, implies that InputView should not be attached again after detached.
         scope.clear()
