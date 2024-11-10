@@ -127,11 +127,11 @@
     <string name="exception_logcat_created">Logcat 程序已經建立</string>
     <string name="exception_quickphrase_parse">剖析快速片語失敗：%1$s</string>
     <string name="exception_quickphrase_filename">%1$s 副檔名並不是快速片語</string>
-    <string name="exception_theme_filename">%1$s 副檔名並不是一個主題</string>
+    <string name="exception_theme_filename">%1$s 的副檔名並不是主題</string>
     <string name="exception_theme_unknown">%1$s 是未知主題</string>
-    <string name="exception_libime_dict_filename">%1$s 副檔名並不是 libime dict</string>
-    <string name="exception_text_dict_filename">%1$s副檔名並不是 text dict</string>
-    <string name="exception_sougou_dict_filename">%1$s 副檔名並不是 sogou dict</string>
+    <string name="exception_libime_dict_filename">%1$s 的副檔名並不是 libime 詞庫</string>
+    <string name="exception_text_dict_filename">%1$s 的副檔名並不是純文字詞庫</string>
+    <string name="exception_sougou_dict_filename">%1$s 的副檔名並不是搜狗細胞詞庫</string>
     <string name="exception_dict_filename">%1$s 副檔名並不是字典</string>
     <string name="exception_theme_json">無法找到主題 Json</string>
     <string name="exception_theme_name_clash">主題名稱與內建主題相沖突</string>
@@ -208,7 +208,7 @@
     <string name="num_items_deleted">已刪除 %1$d 項</string>
     <string name="delete_theme">刪除主題</string>
     <string name="delete_theme_msg">確定要刪除主題 “%1$s” 嗎？</string>
-    <string name="capture_heap_dump">捕獲 heap 傾印資料</string>
+    <string name="capture_heap_dump">捕獲堆積記憶體傾印資料</string>
     <string name="plugins">外掛程式</string>
     <string name="plugins_loaded">已載入</string>
     <string name="plugins_failed">載入失敗</string>
@@ -256,7 +256,7 @@
     <string name="_cannot_be_empty">%1$s不能為空</string>
     <string name="action_forget_candidate_word">忘記詞彙</string>
     <string name="clipboard_mask_sensitive">隱藏敏感訊息（如密碼）</string>
-    <string name="open_rime_user_data_dir">即將開啓應用數據目錄。RIME 用户數據目錄位於 “data/rime”。</string>
+    <string name="open_rime_user_data_dir">即將開啓應用資料目錄。RIME 用户資料目錄位於 “data/rime”。</string>
     <string name="restart_to_apply_settings">應用程式將重新啓動以應用新設定。是否繼續？</string>
     <string name="space_swipe_move_cursor">划動空格以移動游標</string>
 </resources>
