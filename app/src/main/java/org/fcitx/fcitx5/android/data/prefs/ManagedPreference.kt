@@ -47,7 +47,6 @@ abstract class ManagedPreference<T : Any>(
      * or simply mark the listener with [@Keep][androidx.annotation.Keep] .
      */
     fun registerOnChangeListener(listener: OnChangeListener<T>) {
-        if (!listeners.isInitialized()) return
         listeners.value.add(listener)
     }
 
@@ -57,7 +56,7 @@ abstract class ManagedPreference<T : Any>(
     }
 
     fun fireChange() {
-        if (!listeners.isInitialized()) return
+        if (!listeners.isInitialized() || listeners.value.isEmpty()) return
         val newValue = getValue()
         listeners.value.forEach { it.onChange(key, newValue) }
     }

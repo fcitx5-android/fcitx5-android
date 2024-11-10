@@ -132,7 +132,8 @@ class InputDeviceManager {
         val useVirtualKeyboard = when (candidatesViewMode) {
             FloatingCandidatesMode.SystemDefault -> service.superEvaluateInputViewShown()
             FloatingCandidatesMode.InputDevice ->
-                toolType == MotionEvent.TOOL_TYPE_FINGER || toolType == MotionEvent.TOOL_TYPE_STYLUS
+                // switch to virtual keyboard on touch screen events, otherwise preserve current mode
+                if (toolType == MotionEvent.TOOL_TYPE_FINGER) true else isVirtualKeyboard
             FloatingCandidatesMode.Disabled -> true
         }
         applyMode(service, useVirtualKeyboard)

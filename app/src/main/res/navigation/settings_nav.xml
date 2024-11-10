@@ -245,7 +245,7 @@
     <fragment
         android:id="@+id/candidatesSettingsFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.settings.behavior.CandidatesSettingsFragment"
-        android:label="@string/virtual_keyboard" />
+        android:label="@string/candidates_window" />
     <fragment
         android:id="@+id/clipboardSettingsFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.settings.behavior.ClipboardSettingsFragment"
