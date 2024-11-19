@@ -379,11 +379,14 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             ).forEach {
                 it.putValueTo(this@edit)
             }
-            keyboard.managedPreferences.forEach {
-                it.value.putValueTo(this@edit)
-            }
-            clipboard.managedPreferences.forEach {
-                it.value.putValueTo(this@edit)
+            listOf(
+                keyboard,
+                candidates,
+                clipboard
+            ).forEach { category ->
+                category.managedPreferences.forEach {
+                    it.value.putValueTo(this@edit)
+                }
             }
         }
     }

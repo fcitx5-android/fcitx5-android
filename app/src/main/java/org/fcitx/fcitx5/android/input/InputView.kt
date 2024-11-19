@@ -15,7 +15,6 @@ import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.ImageView
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import org.fcitx.fcitx5.android.R
@@ -27,7 +26,6 @@ import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceProvider
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
-import org.fcitx.fcitx5.android.data.theme.ThemePrefs.NavbarBackground
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcaster
 import org.fcitx.fcitx5.android.input.broadcast.PreeditEmptyStateComponent
@@ -75,7 +73,6 @@ class InputView(
 ) : BaseInputView(service, fcitx, theme) {
 
     private val keyBorder by ThemeManager.prefs.keyBorder
-    private val navbarBackground by ThemeManager.prefs.navbarBackground
 
     private val customBackground = imageView {
         scaleType = ImageView.ScaleType.CENTER_CROP
@@ -207,17 +204,6 @@ class InputView(
 
         broadcaster.onImeUpdate(fcitx.runImmediately { inputMethodEntryCached })
 
-        if (navbarBackground == NavbarBackground.Full) {
-            ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
-                insets.getInsets(WindowInsetsCompat.Type.navigationBars()).let {
-                    bottomPaddingSpace.updateLayoutParams<LayoutParams> {
-                        bottomMargin = it.bottom
-                    }
-                }
-                WindowInsetsCompat.CONSUMED
-            }
-        }
-
         customBackground.imageDrawable = theme.backgroundDrawable(keyBorder)
 
         keyboardView = constraintLayout {
@@ -313,6 +299,12 @@ class InputView(
         kawaiiBar.view.setPadding(sidePadding, 0, sidePadding, 0)
     }
 
+    override fun onApplyWindowInsets(insets: WindowInsetsCompat) {
+        bottomPaddingSpace.updateLayoutParams<LayoutParams> {
+            bottomMargin = getNavBarBottomInset(insets)
+        }
+    }
+
     /**
      * called when [InputView] is about to show, or restart
      */
@@ -359,7 +351,6 @@ class InputView(
 
     override fun onDetachedFromWindow() {
         keyboardPrefs.unregisterOnChangeListener(onKeyboardSizeChangeListener)
-        ViewCompat.setOnApplyWindowInsetsListener(this, null)
         // clear DynamicScope, implies that InputView should not be attached again after detached.
         scope.clear()
         super.onDetachedFromWindow()

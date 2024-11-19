@@ -6,7 +6,9 @@
 package org.fcitx.fcitx5.android.data.theme
 
 import android.content.SharedPreferences
+import android.os.Build
 import androidx.annotation.StringRes
+import androidx.core.content.edit
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceCategory
@@ -103,8 +105,16 @@ class ThemePrefs(sharedPreferences: SharedPreferences) :
     val navbarBackground = enumList(
         R.string.navbar_background,
         "navbar_background",
-        NavbarBackground.ColorOnly
-    )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) NavbarBackground.Full else NavbarBackground.ColorOnly,
+        // 35+ forces edge to edge
+        enableUiOn = { Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM }
+    ).apply {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            sharedPreferences.edit {
+                remove(this@apply.key)
+            }
+        }
+    }
 
     /**
      * When [followSystemDayNightTheme] is disabled, this theme is used.

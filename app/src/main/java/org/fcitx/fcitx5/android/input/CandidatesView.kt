@@ -6,11 +6,13 @@
 package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
+import android.os.Build
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.ViewTreeObserver.OnPreDrawListener
 import android.widget.TextView
 import androidx.annotation.Size
+import androidx.core.view.WindowInsetsCompat
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
@@ -84,6 +86,8 @@ class CandidatesView(
         root.viewTreeObserver.addOnGlobalLayoutListener(layoutListener)
     }
 
+    private var bottomInsets = 0
+
     override fun handleFcitxEvent(it: FcitxEvent<*>) {
         when (it) {
             is FcitxEvent.InputPanelEvent -> {
@@ -129,7 +133,8 @@ class CandidatesView(
             translationX =
                 if (horizontal + selfWidth > parentWidth) parentWidth - selfWidth else horizontal
         }
-        translationY = if (bottom + selfHeight > parentHeight) top - selfHeight else bottom
+        translationY =
+            if (bottom + selfHeight > parentHeight - bottomInsets) top - selfHeight else bottom
         shouldUpdatePosition = false
     }
 
@@ -164,6 +169,11 @@ class CandidatesView(
 
         isFocusable = false
         layoutParams = ViewGroup.LayoutParams(wrapContent, wrapContent)
+    }
+
+    override fun onApplyWindowInsets(insets: WindowInsetsCompat) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) return
+        bottomInsets = getNavBarBottomInset(insets)
     }
 
     override fun onAttachedToWindow() {
