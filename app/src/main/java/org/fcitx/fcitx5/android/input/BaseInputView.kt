@@ -5,6 +5,7 @@
 
 package org.fcitx.fcitx5.android.input
 
+import android.view.WindowInsets
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
@@ -51,10 +52,11 @@ abstract class BaseInputView(
 
     private val navbarBackground by ThemeManager.prefs.navbarBackground
 
-    protected fun getNavBarBottomInset(insets: WindowInsetsCompat): Int {
+    protected fun getNavBarBottomInset(windowInsets: WindowInsets): Int {
         if (navbarBackground != ThemePrefs.NavbarBackground.Full) {
             return 0
         }
+        val insets = WindowInsetsCompat.toWindowInsetsCompat(windowInsets)
         // use navigation bar insets when available
         val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
         // in case navigation bar insets goes wrong (eg. on LineageOS 21+ with gesture navigation)
@@ -70,8 +72,6 @@ abstract class BaseInputView(
         }
         return insetsBottom
     }
-
-    abstract fun onApplyWindowInsets(insets: WindowInsetsCompat)
 
     override fun onDetachedFromWindow() {
         handleEvents = false

@@ -10,12 +10,12 @@ import android.content.res.Configuration
 import android.os.Build
 import android.view.View
 import android.view.View.OnClickListener
+import android.view.WindowInsets
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.ImageView
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.CapabilityFlags
@@ -299,10 +299,11 @@ class InputView(
         kawaiiBar.view.setPadding(sidePadding, 0, sidePadding, 0)
     }
 
-    override fun onApplyWindowInsets(insets: WindowInsetsCompat) {
+    override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {
         bottomPaddingSpace.updateLayoutParams<LayoutParams> {
             bottomMargin = getNavBarBottomInset(insets)
         }
+        return insets
     }
 
     /**

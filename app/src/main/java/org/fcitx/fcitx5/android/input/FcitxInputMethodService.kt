@@ -38,9 +38,6 @@ import androidx.autofill.inline.common.ImageViewStyle
 import androidx.autofill.inline.common.TextViewStyle
 import androidx.autofill.inline.common.ViewStyle
 import androidx.autofill.inline.v1.InlineSuggestionUi
-import androidx.core.view.OnApplyWindowInsetsListener
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.CoroutineStart
@@ -125,31 +122,26 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     private val inlineSuggestions by AppPrefs.getInstance().keyboard.inlineSuggestions
 
-    private val inputViewInsetsListener = OnApplyWindowInsetsListener { view, insets ->
-        (view as BaseInputView).onApplyWindowInsets(insets)
-        WindowInsetsCompat.CONSUMED
-    }
-
     private fun replaceInputView(theme: Theme): InputView {
-        inputView?.also { ViewCompat.setOnApplyWindowInsetsListener(it, null) }
         val newInputView = InputView(this, fcitx, theme)
         setInputView(newInputView)
         inputDeviceMgr.setInputView(newInputView)
-        ViewCompat.setOnApplyWindowInsetsListener(newInputView, inputViewInsetsListener)
         inputView = newInputView
+        // on API 35+, we must call requestApplyInsets() manually after replacing views,
+        // otherwise View#onApplyWindowInsets won't be called. ¯\_(ツ)_/¯
+        newInputView.requestApplyInsets()
         return newInputView
     }
 
     private fun replaceCandidateView(theme: Theme): CandidatesView {
-        candidatesView?.also { ViewCompat.setOnApplyWindowInsetsListener(it, null) }
         val newCandidatesView = CandidatesView(this, fcitx, theme)
         // replace CandidatesView manually
         contentView.removeView(candidatesView)
         // put CandidatesView directly under content view
         contentView.addView(newCandidatesView)
         inputDeviceMgr.setCandidatesView(newCandidatesView)
-        ViewCompat.setOnApplyWindowInsetsListener(newCandidatesView, inputViewInsetsListener)
         candidatesView = newCandidatesView
+        newCandidatesView.requestApplyInsets()
         return newCandidatesView
     }
 
@@ -963,8 +955,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onDestroy() {
-        inputView?.let { ViewCompat.setOnApplyWindowInsetsListener(it, null) }
-        candidatesView?.let { ViewCompat.setOnApplyWindowInsetsListener(it, null) }
         AppPrefs.getInstance().apply {
             keyboard.expandKeypressArea.unregisterOnChangeListener(recreateInputViewListener)
             candidates.unregisterOnChangeListener(recreateCandidatesViewListener)

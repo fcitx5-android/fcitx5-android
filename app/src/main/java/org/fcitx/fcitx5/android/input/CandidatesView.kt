@@ -10,9 +10,9 @@ import android.os.Build
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.ViewTreeObserver.OnPreDrawListener
+import android.view.WindowInsets
 import android.widget.TextView
 import androidx.annotation.Size
-import androidx.core.view.WindowInsetsCompat
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
@@ -171,9 +171,11 @@ class CandidatesView(
         layoutParams = ViewGroup.LayoutParams(wrapContent, wrapContent)
     }
 
-    override fun onApplyWindowInsets(insets: WindowInsetsCompat) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) return
-        bottomInsets = getNavBarBottomInset(insets)
+    override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            bottomInsets = getNavBarBottomInset(insets)
+        }
+        return insets
     }
 
     override fun onAttachedToWindow() {
