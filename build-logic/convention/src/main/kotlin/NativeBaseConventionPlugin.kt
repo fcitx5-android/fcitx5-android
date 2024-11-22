@@ -1,7 +1,8 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
  */
+
 import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -11,16 +12,20 @@ import org.gradle.kotlin.dsl.task
 open class NativeBaseConventionPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
-        @Suppress("UnstableApiUsage")
+        val prebuiltDir = target.rootProject.projectDir
+            .resolve("lib/fcitx5/src/main/cpp/prebuilt").absolutePath
         target.extensions.configure(CommonExtension::class.java) {
             ndkVersion = target.ndkVersion
             defaultConfig {
                 minSdk = Versions.minSdk
+                @Suppress("UnstableApiUsage")
                 externalNativeBuild {
                     cmake {
                         arguments(
                             "-DANDROID_STL=c++_shared",
-                            "-DANDROID_USE_LEGACY_TOOLCHAIN_FILE=OFF"
+                            "-DANDROID_USE_LEGACY_TOOLCHAIN_FILE=OFF",
+                            "-DVERSION_NAME=${Versions.baseVersionName}",
+                            "-DPREBUILT_DIR=$prebuiltDir"
                         )
                     }
                 }

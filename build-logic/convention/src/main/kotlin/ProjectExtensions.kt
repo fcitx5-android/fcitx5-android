@@ -12,12 +12,15 @@ import java.io.File
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
-fun Project.runCmd(cmd: String): String = ByteArrayOutputStream().use {
-    project.exec {
-        commandLine = cmd.split(" ")
-        standardOutput = it
+fun Project.runCmd(cmd: String, defaultValue: String = ""): String {
+    val stdout = ByteArrayOutputStream()
+    val result = stdout.use {
+        project.exec {
+            commandLine = cmd.split(" ")
+            standardOutput = stdout
+        }
     }
-    it.toString().trim()
+    return if (result.exitValue == 0) stdout.toString().trim() else defaultValue
 }
 
 val Project.libs get() = the<LibrariesForLibs>()
@@ -39,12 +42,12 @@ val Project.buildToolsVersion
 
 val Project.buildVersionName
     get() = ep("BUILD_VERSION_NAME", "buildVersionName") {
-        runCmd("git describe --tags --long --always")
+        runCmd("git describe --tags --long --always", Versions.baseVersionName)
     }
 
 val Project.buildCommitHash
     get() = ep("BUILD_COMMIT_HASH", "buildCommitHash") {
-        runCmd("git rev-parse HEAD")
+        runCmd("git rev-parse HEAD", "N/A")
     }
 
 val Project.buildTimestamp

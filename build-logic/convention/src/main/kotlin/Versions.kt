@@ -1,7 +1,8 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
  */
+
 import org.gradle.api.JavaVersion
 
 object Versions {
@@ -17,6 +18,7 @@ object Versions {
 
     // NOTE: increase this value to bump version code
     const val baseVersionCode = 7
+    const val baseVersionName = "0.0.9"
 
     val supportedABIs = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
     const val fallbackABI = "arm64-v8a"

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(fcitx5-android-plugin-rime VERSION 0.0.9)
+project(fcitx5-android-plugin-rime VERSION ${VERSION_NAME})
 
 # For reproducible build
 add_link_options("LINKER:--hash-style=gnu,--build-id=none")
@@ -14,11 +14,8 @@ find_package(ECM MODULE)
 find_package(Fcitx5Core MODULE)
 find_package(Fcitx5Module MODULE)
 
-set(PREBUILT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../lib/fcitx5/src/main/cpp/prebuilt")
-
-set(Rime_VERSION "1.9.0")
+set(Rime_VERSION "1.12.0")
 set(Rime_dependencies
-        "${PREBUILT_DIR}/boost/${ANDROID_ABI}/lib/libboost_filesystem.a"
         log # glog links to android log
         "${PREBUILT_DIR}/glog/${ANDROID_ABI}/lib/libglog.a"
         "${PREBUILT_DIR}/leveldb/${ANDROID_ABI}/lib/libleveldb.a"
@@ -27,6 +24,7 @@ set(Rime_dependencies
         "${PREBUILT_DIR}/opencc/${ANDROID_ABI}/lib/libopencc.a"
         "${PREBUILT_DIR}/yaml-cpp/${ANDROID_ABI}/lib/libyaml-cpp.a"
         )
+
 add_library(Rime_static STATIC IMPORTED)
 set_target_properties(Rime_static PROPERTIES
         IMPORTED_LOCATION "${PREBUILT_DIR}/librime/${ANDROID_ABI}/lib/librime.a"

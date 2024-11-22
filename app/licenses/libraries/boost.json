@@ -1,6 +1,6 @@
 {
     "uniqueId": "boostorg/boost",
-    "artifactVersion": "1.83.0",
+    "artifactVersion": "1.86.0",
     "description": "Free peer-reviewed portable C++ source libraries",
     "name": "boostorg/boost",
     "website": "https://www.boost.org/",

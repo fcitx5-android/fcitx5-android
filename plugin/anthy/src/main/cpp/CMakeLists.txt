@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(fcitx5-android-plugin-anthy VERSION 0.0.9)
+project(fcitx5-android-plugin-anthy VERSION ${VERSION_NAME})
 
 # For reproducible build
 add_link_options("LINKER:--hash-style=gnu,--build-id=none")
@@ -14,6 +14,7 @@ find_package(ECM MODULE)
 find_package(Fcitx5Core MODULE)
 find_package(Fcitx5Module MODULE)
 
+option(ENABLE_TEST "" OFF)
 set(BUILD_SHARED_LIBS OFF)
 # anthy have some GCC pragma that LLVM doesn't recognize
 add_compile_options("-Wno-unknown-warning-option")

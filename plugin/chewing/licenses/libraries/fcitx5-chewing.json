@@ -1,6 +1,6 @@
 {
     "uniqueId": "fcitx/fcitx5-chewing",
-    "artifactVersion": "5.1.4",
+    "artifactVersion": "5.1.6",
     "description": "Chewing Wrapper for Fcitx",
     "name": "fcitx/fcitx5-chewing",
     "website": "https://github.com/fcitx/fcitx5-chewing",

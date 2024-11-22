@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(fcitx5-android-lib-fcitx5-lua VERSION 0.0.9)
+project(fcitx5-android-lib-fcitx5-lua VERSION ${VERSION_NAME})
 
 # For reproducible build
 add_link_options("LINKER:--hash-style=gnu,--build-id=none")
@@ -16,9 +16,6 @@ find_package(Fcitx5Module MODULE)
 
 # dummy target to export src/main/cpp/cmake
 add_custom_target(cmake)
-
-# prebuilt dir. at least it works.
-set(PREBUILT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../fcitx5/src/main/cpp/prebuilt")
 
 # prebuilt lua
 set(Lua_DIR "${PREBUILT_DIR}/lua/${ANDROID_ABI}/share/cmake/Lua")

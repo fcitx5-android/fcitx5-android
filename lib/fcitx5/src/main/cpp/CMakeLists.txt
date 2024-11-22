@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(fcitx5-android-lib-fcitx5 VERSION 0.0.9)
+project(fcitx5-android-lib-fcitx5 VERSION ${VERSION_NAME})
 
 # For reproducible build
 add_link_options("LINKER:--hash-style=gnu,--build-id=none")
@@ -14,9 +14,6 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 # cmake/FindECM.cmake
 find_package(ECM)
-
-# prebuilt dir
-set(PREBUILT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/prebuilt")
 
 # prebuilt fmt
 set(fmt_DIR "${PREBUILT_DIR}/fmt/${ANDROID_ABI}/lib/cmake/fmt")

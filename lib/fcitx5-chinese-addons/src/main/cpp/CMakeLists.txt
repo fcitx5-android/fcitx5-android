@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(fcitx5-android-lib-fcitx5-chinese-addons VERSION 0.0.9)
+project(fcitx5-android-lib-fcitx5-chinese-addons VERSION ${VERSION_NAME})
 
 # For reproducible build
 add_link_options("LINKER:--hash-style=gnu,--build-id=none")
@@ -31,16 +31,13 @@ find_package(Fcitx5ModuleLuaAddonLoader MODULE)
 # dummy target to export src/main/cpp/cmake
 add_custom_target(cmake)
 
-# prebuilt dir. at least it works.
-set(PREBUILT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../fcitx5/src/main/cpp/prebuilt")
-
 # prebuilt fmt
 set(fmt_DIR "${PREBUILT_DIR}/fmt/${ANDROID_ABI}/lib/cmake/fmt")
 find_package(fmt)
 
 # prebuilt boost
 list(APPEND CMAKE_FIND_ROOT_PATH "${PREBUILT_DIR}/boost/${ANDROID_ABI}/lib/cmake")
-find_package(Boost 1.83.0 REQUIRED COMPONENTS iostreams CONFIG)
+find_package(Boost 1.86.0 REQUIRED COMPONENTS iostreams CONFIG)
 
 # prebuilt marisa-tire, OpenCC needs it
 set(marisa_DIR "${PREBUILT_DIR}/marisa/${ANDROID_ABI}/lib/cmake/marisa")

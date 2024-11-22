@@ -1,9 +1,22 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
  * SPDX-FileCopyrightText: Copyright 2016-2016 CSSlayer <wengxt@gmail.com>
- * SPDX-FileCopyrightText: Copyright 2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2023-2024 Fcitx5 for Android Contributors
  * SPDX-FileComment: Modified from https://github.com/fcitx/fcitx5/blob/5.1.1/src/lib/fcitx/addonloader.cpp
  */
+
+#include <exception>
+#include <memory>
+#include <string>
+#include <utility>
+#include <fcitx-utils/flags.h>
+#include <fcitx-utils/library.h>
+#include <fcitx-utils/log.h>
+#include <fcitx-utils/standardpath.h>
+#include <fcitx-utils/stringutils.h>
+#include <fcitx/addoninfo.h>
+#include <fcitx/addonloader.h>
+#include <fcitx/addoninstance.h>
 #include "androidaddonloader.h"
 
 #define FCITX_LIBRARY_SUFFIX ".so"
@@ -65,7 +78,7 @@ AddonInstance *AndroidSharedLibraryLoader::load(const AddonInfo &info,
             try {
                 registry_.emplace(
                         info.uniqueName(),
-                        std::make_unique<AndroidSharedLibraryFactory>(std::move(lib)));
+                        std::make_unique<AndroidSharedLibraryFactory>(info, std::move(lib)));
             } catch (const std::exception &e) {
             }
             break;

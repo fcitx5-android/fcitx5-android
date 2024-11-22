@@ -1,6 +1,6 @@
 {
     "uniqueId": "chewing/libchewing",
-    "artifactVersion": "0.8.4",
+    "artifactVersion": "0.8.5",
     "description": "An intelligent phonetic (Zhuyin/Bopomofo) input method",
     "name": "chewing/libchewing",
     "website": "https://github.com/chewing/libchewing",
