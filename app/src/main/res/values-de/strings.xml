@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name_release">Fcitx5 für Android</string>
-    <string name="app_name_debug">Fcitx5 für Android (Debug)</string>
+    <string name="app_name_release">Fcitx5</string>
+    <string name="app_name_debug">Fcitx5 (Debug)</string>
     <string name="save">Speichern</string>
     <string name="input_methods">Eingabemethoden</string>
     <string name="add_input_method">Eingabemethode hinzufügen</string>

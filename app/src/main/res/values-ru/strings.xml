@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name_release">Fcitx5 для Android</string>
-    <string name="app_name_debug">Fcitx5 для Android (отладка)</string>
+    <string name="app_name_release">Fcitx5</string>
+    <string name="app_name_debug">Fcitx5 (отладка)</string>
     <string name="save">Сохранить</string>
     <string name="input_methods">Методы ввода</string>
     <string name="add_input_method">Добавить метод ввода</string>
@@ -13,7 +13,8 @@
     <string name="ignore_sys_cursor">Игнорировать позицию системного курсора</string>
     <string name="hide_key_config">Скрыть конфигурации горячих клавиш</string>
     <string name="_not_available_">(Недоступно)</string>
-    <string name="button_haptic_feedback">Тактильная обратная связь при нажатии клавиши</string>
+    <string name="button_haptic_feedback">Вибрация при нажатии клавиши</string>
+    <string name="button_up_haptic_feedback">Вибрация при отпускании клавиши</string>
     <string name="button_vibration_milliseconds">Длительность вибрации при нажатии клавиши</string>
     <string name="button_press">Нажать</string>
     <string name="button_long_press">Длительное нажатие</string>
@@ -37,7 +38,7 @@
     <string name="importing">Импортирование</string>
     <string name="import_error">Ошибка импорта</string>
     <string name="dict_already_exists">Словарь уже существует</string>
-    <string name="invalid_dict">Недопустимый тип словаря</string>
+    <string name="invalid_dict">Неверный тип словаря</string>
     <string name="whether_import_dict">Хотите импортировать этот словарь?</string>
     <string name="import_">Импорт</string>
     <string name="synced">Синхронизировано!</string>
@@ -61,7 +62,7 @@
     <string name="delete">Удалить</string>
     <string name="clipboard">Буфер обмена</string>
     <string name="keyboard_height">Высота клавиатуры</string>
-    <string name="virtual_keyboard">Клавиатура</string>
+    <string name="virtual_keyboard">Виртуальная клавиатура</string>
     <string name="clipboard_suggestion_timeout">Тайм-аут предложения буфера обмена</string>
     <string name="version">Версия</string>
     <string name="build_time">Время сборки</string>
@@ -72,7 +73,7 @@
     <string name="open_source_licenses">Лицензии с открытым исходным кодом</string>
     <string name="licenses_of_third_party_libraries">Лицензии сторонних библиотек</string>
     <string name="github_repo">Репозиторий GitHub</string>
-    <string name="expanded_candidate_grid_span_count">Стиль таблицы для увеличения количества столбцов слов-кандидатов</string>
+    <string name="expanded_candidate_grid_span_count">Увеличение количества столбцов слов-кандидатов при использовании стиля таблицы</string>
     <string name="no_config_options">В настоящее время параметры конфигурации недоступны</string>
     <string name="unimplemented_type">⛔ Нереализованный тип</string>
     <string name="select">Выбрать</string>
@@ -93,7 +94,7 @@
     <string name="keyboard_long_press_delay">Задержка при длительном нажатии клавиши</string>
     <string name="quickphrase_editor">Редактор быстрых фраз</string>
     <string name="quickphrase_already_exists">Быстрая фраза уже существует</string>
-    <string name="invalid_quickphrase">Недопустимый тип быстрой фразы</string>
+    <string name="invalid_quickphrase">Неверный тип быстрой фразы</string>
     <string name="create_new">Создать новый</string>
     <string name="name">Имя</string>
     <string name="reset">Перезагрузить</string>
@@ -106,6 +107,8 @@
     <string name="key_border">Активировать ограничение клавиш</string>
     <string name="brightness">Яркость</string>
     <string name="key_radius">Радиус клавиш</string>
+    <string name="text_editing_button_radius">Радиус кнопки редактирования текста</string>
+    <string name="clipboard_entry_radius">Радиус входа в буфер обмена</string>
     <string name="key_horizontal_margin">Горизонтальное поле клавиш</string>
     <string name="key_vertical_margin">Вертикальное поле клавиш</string>
     <string name="configure">Настроить</string>
@@ -137,7 +140,7 @@
     <string name="exception_theme_name_clash">Название темы конфликтует со встроенными темами</string>
     <string name="exception_theme_src_image">Не удалось сохранить исходное изображение фона темы</string>
     <string name="exception_theme_cropped_image">Не удалось сохранить обрезанное изображение фона темы</string>
-    <string name="follow_system_day_night_theme">Следовать системной теме «день-ночь»</string>
+    <string name="follow_system_day_night_theme">Следовать системной теме «день/ночь»</string>
     <string name="follow_system_day_night_theme_summary">Переопределить выбор темы вручную</string>
     <string name="light_mode_theme">Светлая тема</string>
     <string name="dark_mode_theme">Темная тема</string>
@@ -188,11 +191,11 @@
     <string name="table_conf_select_title">Файл конфигурации метода ввода (.conf или .conf.in)</string>
     <string name="table_dict_select_title">Словарь кодовой таблицы (.dict или .txt)</string>
     <string name="exception_table_conf_filename">Расширение \"%1$s\" не указывает на файл конфигурации метода ввода кодовой таблицы (.conf или .conf.in)</string>
-    <string name="exception_table_dict_filename">Расширение \"%1$s\" не указывает на словарь кодовой таблицы (.dict или .txt).</string>
-    <string name="exception_table_import_both_files">Пожалуйста, выберите оба вышеуказанных файла перед импортом</string>
+    <string name="exception_table_dict_filename">Расширение \"%1$s\" не указывает на файл словаря кодовой таблицы (.dict или .txt).</string>
+    <string name="exception_table_import_both_files">Пожалуйста, выберите оба вышеуказанных файла для импорта</string>
     <string name="notification_permission_message">Без разрешения на публикацию уведомлений мы не сможем уведомить вас о выполнении некоторых сложных операций.</string>
     <string name="notification_permission_title">Нет разрешения на уведомление</string>
-    <string name="toolbar_num_row_on_password">Показывать числовую строку на панели инструментов при вводе пароля</string>
+    <string name="toolbar_num_row_on_password">Показывать строку с цифрами на панели инструментов при вводе пароля</string>
     <string name="space_long_press_behavior">Поведение при длительном нажатии клавиши пробела</string>
     <string name="space_behavior_none">Нет</string>
     <string name="space_behavior_enumerate">Перечислить методы ввода</string>
@@ -216,7 +219,7 @@
     <string name="invalid_plugin_descriptor">Неверный дескриптор плагина</string>
     <string name="missing_data_descriptor">Отсутствует дескриптор данных</string>
     <string name="invalid_data_descriptor">Неверный дескриптор данных</string>
-    <string name="incompatible_api">Несовместимый api: %1$s</string>
+    <string name="incompatible_api">Несовместимый API: %1$s</string>
     <string name="path_conflict">Путь \"%1$s\" уже принадлежит %2$s</string>
     <string name="main_program">основная программа</string>
     <string name="edit_theme">Изменить тему</string>
@@ -232,7 +235,7 @@
     <string name="button_sound">Звуковой эффект при нажатии клавиш</string>
     <string name="button_sound_volume">Громкость звукового эффекта при нажатии клавиш</string>
     <string name="clipboard_return_after_paste">Возврат в буфер обмена после вставки</string>
-    <string name="theme_message_follow_system_day_night_mode_enabled">Невозможно переключить тему вручную, пока включен режим «Следовать системному темному режиму».</string>
+    <string name="theme_message_follow_system_day_night_mode_enabled">Невозможно вручную переключить тему, пока включен режим «Следовать системному дневному/ночному режиму».</string>
     <string name="disable_it">Отключить это</string>
     <string name="reset_keyboard_on_focus_change">Переключиться обратно на клавиатуру при изменении фокуса</string>
     <string name="export_user_data">Экспорт пользовательских данных</string>
@@ -259,4 +262,21 @@
     <string name="open_rime_user_data_dir">Будет открыт каталог данных приложения. Каталог пользовательских данных RIME находится в директории \"data/rime\".</string>
     <string name="restart_to_apply_settings">Для применения новых настроек, приложение будет перезапущено. Продолжить?</string>
     <string name="space_swipe_move_cursor">Провести по клавише пробела, чтобы переместить курсор</string>
+    <string name="please_wait">Пожалуйста, подождите…</string>
+    <string name="rotate">Повернуть</string>
+    <string name="flip">Перевернуть</string>
+    <string name="flip_horizontally">Перевернуть горизонтально</string>
+    <string name="flip_vertically">Перевернуть вертикально</string>
+    <string name="crop">Обрезать</string>
+    <string name="candidates_window">Окно кандидатов</string>
+    <string name="show_candidates_window">Показать окно кандидатов</string>
+    <string name="follow_input_device">Зависит от устройства ввода</string>
+    <string name="candidates_orientation">Ориентация списка кандидатов</string>
+    <string name="automatic">Автоматическая</string>
+    <string name="horizontal">Горизонтальная</string>
+    <string name="vertical">Вертикальная</string>
+    <string name="candidates_font_size">Размер шрифта слова-кандидата</string>
+    <string name="candidates_padding">Отступ от слова-кандидата</string>
+    <string name="candidates_window_min_width">Минимальная ширина окна кандидата</string>
+    <string name="candidates_window_padding">Поле окна кандидата</string>
 </resources>

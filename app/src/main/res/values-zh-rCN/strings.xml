@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name_release">小企鹅输入法5</string>
-    <string name="app_name_debug">小企鹅输入法5 (调试)</string>
+    <string name="app_name_release">小企鹅输入法</string>
+    <string name="app_name_debug">小企鹅输入法 (调试)</string>
     <string name="save">保存</string>
     <string name="input_methods">输入法</string>
     <string name="add_input_method">添加输入法</string>
@@ -38,7 +38,7 @@
     <string name="importing">正在导入</string>
     <string name="import_error">导入错误</string>
     <string name="dict_already_exists">词库已存在</string>
-    <string name="invalid_dict">词库类型无效</string>
+    <string name="invalid_dict">词典类型无效</string>
     <string name="whether_import_dict">您想导入这个词库吗？</string>
     <string name="import_">导入</string>
     <string name="synced">已同步！</string>
@@ -62,7 +62,7 @@
     <string name="delete">删除</string>
     <string name="clipboard">剪贴板</string>
     <string name="keyboard_height">键盘高度</string>
-    <string name="virtual_keyboard">键盘</string>
+    <string name="virtual_keyboard">虚拟键盘</string>
     <string name="clipboard_suggestion_timeout">剪贴板提示超时</string>
     <string name="version">版本</string>
     <string name="build_time">构建时间</string>
@@ -107,6 +107,8 @@
     <string name="key_border">启用按键边框</string>
     <string name="brightness">亮度</string>
     <string name="key_radius">按键圆角半径</string>
+    <string name="text_editing_button_radius">文本编辑按钮圆角半径</string>
+    <string name="clipboard_entry_radius">剪贴板条目圆角半径</string>
     <string name="key_horizontal_margin">按键横向边距</string>
     <string name="key_vertical_margin">按键纵向边距</string>
     <string name="configure">配置</string>
@@ -174,23 +176,23 @@
     <string name="vivo_keypress_workaround">解决 vivo Origin OS 按键检测问题</string>
     <string name="invalid_im">无效的输入法配置文件：\n%1$s</string>
     <string name="invalid_table_dict">无效的词典：\n%1$s</string>
-    <string name="exception_table_im">码表输入法配置文件（ .conf 或 .conf.in ）未找到</string>
-    <string name="exception_table">码表词典（ .dict 或 .txt ）未找到</string>
+    <string name="exception_table_im">未找到码表输入法配置文件（ .conf 或 .conf.in ）</string>
+    <string name="exception_table">未找到码表词典（ .dict 或 .txt ）</string>
     <string name="table_im">码表输入法</string>
     <string name="manage_table_im">管理码表输入法</string>
     <string name="exception_table_im_filename">\"%1$s\" 的拓展名不是码表输入法包（ .zip ）</string>
-    <string name="table_already_exists">码表输入法配置文件 \"%1$s\" 已存在</string>
+    <string name="table_already_exists">\"%1$s\" 码表输入法配置文件已存在</string>
     <string name="table_file_does_not_exist_title">码表不可用</string>
-    <string name="table_file_does_not_exist_message">码表词典 \"%1$s\" 不存在。请检查词典文件，或重新导入。</string>
+    <string name="table_file_does_not_exist_message">码表词典 \"%1$s\" 不存在。请检查词典文件或重新导入。</string>
     <string name="import_table">导入码表</string>
     <string name="table_from_zip">从 zip 导入…</string>
     <string name="table_select_files">从单独的文件导入…</string>
     <string name="table_file_placeholder">选择文件…</string>
     <string name="table_conf_select_title">输入法配置文件（ .conf 或 .conf.in ）</string>
-    <string name="table_dict_select_title">码表词典（ .dict 或 .txt ）</string>
+    <string name="table_dict_select_title">码表词典文件（ .dict 或 .txt ）</string>
     <string name="exception_table_conf_filename">\"%1$s\" 的拓展名不是码表输入法配置文件（ .conf 或 .conf.in ）</string>
     <string name="exception_table_dict_filename">\"%1$s\" 的拓展名不是码表词典（ .dict 或 .txt ）</string>
-    <string name="exception_table_import_both_files">请先选择以上两个文件再导入</string>
+    <string name="exception_table_import_both_files">请先选择以上两个文件导入</string>
     <string name="notification_permission_message">没有发送通知的权限，我们无法在一些耗时操作完成时通知您。</string>
     <string name="notification_permission_title">没有通知权限</string>
     <string name="toolbar_num_row_on_password">输入密码时在工具栏上显示数字行</string>
@@ -250,7 +252,7 @@
     <string name="clear_clp_db_confirm">剪贴板数据库将会被完全清空，包括已置顶的条目。继续吗？</string>
     <string name="expand_keypress_area">将按键范围扩展至边缘</string>
     <string name="update_table">更新码表</string>
-    <string name="table_dict_replace_message">码表词典 \"%1$s\" 存在。您可以导入新词典并替换它。</string>
+    <string name="table_dict_replace_message">码表词典 \"%1$s\" 已存在。您可以导入新词典并替换它。</string>
     <string name="lang_switch_key_behavior">语言切换键行为</string>
     <string name="lang_switch_behavior_next_ime_app">切换至下一个输入法应用</string>
     <string name="cannot_be_empty">不能为空</string>
@@ -260,4 +262,21 @@
     <string name="open_rime_user_data_dir">即将打开应用数据目录。 RIME 用户数据目录位于“data/rime”。</string>
     <string name="restart_to_apply_settings">应用将重启以应用新设置。继续吗？</string>
     <string name="space_swipe_move_cursor">划动空格键以移动光标</string>
+    <string name="please_wait">请稍候…</string>
+    <string name="rotate">旋转</string>
+    <string name="flip">翻转</string>
+    <string name="flip_horizontally">水平翻转</string>
+    <string name="flip_vertically">垂直翻转</string>
+    <string name="crop">裁剪</string>
+    <string name="candidates_window">候选窗口</string>
+    <string name="show_candidates_window">显示候选词窗口</string>
+    <string name="follow_input_device">根据输入设备而定</string>
+    <string name="candidates_orientation">候选词列表方向</string>
+    <string name="automatic">自动</string>
+    <string name="horizontal">横向</string>
+    <string name="vertical">纵向</string>
+    <string name="candidates_font_size">候选词字体大小</string>
+    <string name="candidates_padding">候选词边距</string>
+    <string name="candidates_window_min_width">候选窗口最小宽度</string>
+    <string name="candidates_window_padding">候选窗口边距</string>
 </resources>

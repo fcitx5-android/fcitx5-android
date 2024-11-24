@@ -28,6 +28,12 @@ msgstr ""
 msgid "Enable word hint"
 msgstr ""
 
+msgid "Enable word hint when using physical keyboard"
+msgstr ""
+
+msgid "Disable word hint based on editor attributes"
+msgstr ""
+
 msgid "Word hint page size"
 msgstr ""
 
@@ -36,3 +42,9 @@ msgstr ""
 
 msgid "Insert space between words"
 msgstr "Insertar espacio entre palabras"
+
+msgid "Android Toast & Notification"
+msgstr ""
+
+msgid "Hidden Notifications"
+msgstr ""

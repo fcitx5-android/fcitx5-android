@@ -29,6 +29,9 @@ msgstr "Подсказка слова"
 msgid "Enable word hint"
 msgstr "Включить подсказку слова"
 
+msgid "Enable word hint when using physical keyboard"
+msgstr "Включить подсказки слов при использовании физической клавиатуры"
+
 msgid "Disable word hint based on editor attributes"
 msgstr "Отключить подсказки слов в зависимости от свойств редактора"
 

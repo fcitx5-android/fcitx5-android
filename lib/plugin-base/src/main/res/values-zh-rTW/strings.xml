@@ -8,4 +8,6 @@
     <string name="plugin_info">外掛程式資訊</string>
     <string name="licenses">開放原始碼授權條款</string>
     <string name="has_service">包含行程間通訊服務</string>
+    <string name="app_info">應用程式資訊</string>
+    <string name="uninstall">解除安裝</string>
 </resources>

@@ -9,7 +9,7 @@ msgstr ""
 "POT-Creation-Date: 2022-02-14 18:51+0800\n"
 "PO-Revision-Date: 2022-03-18 22:18+0000\n"
 "Last-Translator: Ettore Atalan <atalanttore@googlemail.com>, 2022\n"
-"Language-Team: German (https://www.transifex.com/fcitx/teams/12005/de/)\n"
+"Language-Team: German (https://app.transifex.com/fcitx/teams/12005/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -28,6 +28,12 @@ msgstr "Worthinweis"
 msgid "Enable word hint"
 msgstr "Worthinweis aktivieren"
 
+msgid "Enable word hint when using physical keyboard"
+msgstr ""
+
+msgid "Disable word hint based on editor attributes"
+msgstr ""
+
 msgid "Word hint page size"
 msgstr "Seitengröße des Worthinweises"
 
@@ -35,4 +41,10 @@ msgid "Choose key modifier"
 msgstr ""
 
 msgid "Insert space between words"
+msgstr ""
+
+msgid "Android Toast & Notification"
+msgstr ""
+
+msgid "Hidden Notifications"
 msgstr ""

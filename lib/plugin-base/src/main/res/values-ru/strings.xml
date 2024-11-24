@@ -8,4 +8,6 @@
     <string name="plugin_info">Информация о плагине</string>
     <string name="licenses">Лицензии с открытым исходным кодом</string>
     <string name="has_service">Содержит службу IPC</string>
+    <string name="app_info">Информация о приложении</string>
+    <string name="uninstall">Удалить</string>
 </resources>

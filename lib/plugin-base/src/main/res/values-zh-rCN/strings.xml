@@ -8,4 +8,6 @@
     <string name="plugin_info">插件信息</string>
     <string name="licenses">开源许可</string>
     <string name="has_service">包含跨进程通信服务</string>
+    <string name="app_info">应用信息</string>
+    <string name="uninstall">卸载</string>
 </resources>

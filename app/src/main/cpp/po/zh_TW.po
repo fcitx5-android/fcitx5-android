@@ -2,8 +2,7 @@
 # Translators:
 # 黃柏諺 <s8321414@gmail.com>, 2022
 # Jia-Bin, 2022
-# rocka, 2022
-# Lau YeeYu, 2024
+# Yiyu Liu, 2024
 # 
 msgid ""
 msgstr ""
@@ -11,7 +10,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: https://github.com/fcitx5-android/fcitx5-android/issues\n"
 "POT-Creation-Date: 2022-02-14 18:51+0800\n"
 "PO-Revision-Date: 2022-03-18 22:18+0000\n"
-"Last-Translator: Lau YeeYu, 2024\n"
+"Last-Translator: Yiyu Liu, 2024\n"
 "Language-Team: Chinese (Taiwan) (https://app.transifex.com/fcitx/teams/12005/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -26,16 +25,19 @@ msgid "Android Keyboard"
 msgstr "Android 鍵盤"
 
 msgid "Word hint"
-msgstr "單字提示"
+msgstr "字詞提示"
 
 msgid "Enable word hint"
-msgstr "啟用單字提示"
+msgstr "啟用字詞提示"
+
+msgid "Enable word hint when using physical keyboard"
+msgstr "在使用物理鍵盤時啟用字詞提示"
 
 msgid "Disable word hint based on editor attributes"
 msgstr "依據編輯器屬性禁用字詞提示"
 
 msgid "Word hint page size"
-msgstr "單字提示頁大小"
+msgstr "字詞提示頁大小"
 
 msgid "Choose key modifier"
 msgstr "選詞修飾鍵"

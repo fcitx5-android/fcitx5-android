@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name_release">アンドロイド用 Fcitx5</string>
-    <string name="app_name_debug">アンドロイド用 Fcitx5 (デバッグ)</string>
+    <string name="app_name_release">ファイテクス５</string>
+    <string name="app_name_debug">ファイテクス５ (デバッグ)</string>
     <string name="save">保存</string>
     <string name="input_methods">インプットメソッド</string>
     <string name="add_input_method">インプットメソッドの追加</string>
@@ -20,7 +20,7 @@
     <string name="button_vibration_amplitude">キー押下時の振動の大きさ</string>
     <string name="add">追加</string>
     <string name="edit">編集</string>
-    <string name="undo">取り消す</string>
+    <string name="undo">元に戻す</string>
     <string name="delete_and_sync_data">ランタイムデータを削除して同期する</string>
     <string name="delete_and_sync_data_message">現在のデータディレクトリを削除し、アプリにバンドルされているアセットから同期する</string>
     <string name="enable_ime">インプットメソッドを有効にする</string>
@@ -61,7 +61,7 @@
     <string name="delete">削除</string>
     <string name="clipboard">クリップボード</string>
     <string name="keyboard_height">キーボードの高さ</string>
-    <string name="virtual_keyboard">キーボード</string>
+    <string name="virtual_keyboard">ソフトウェアキーボード</string>
     <string name="clipboard_suggestion_timeout">クリップボード候補のタイムアウト</string>
     <string name="version">バージョン</string>
     <string name="build_time">ビルド時間</string>
@@ -153,8 +153,8 @@
     <string name="config_addon_not_loaded">利用可能な設定オプションがありません。もしかしたらこのアドオンはfcitxの起動時に無効になっているかもしれません</string>
     <string name="portrait">縦画面時</string>
     <string name="landscape">横画面時</string>
-    <string name="keyboard_bottom_padding">キーボードボタンの余白</string>
-    <string name="keyboard_side_padding">キーボード側面の空間</string>
+    <string name="keyboard_bottom_padding">キーボードの下部余白</string>
+    <string name="keyboard_side_padding">キーボードの側面余白</string>
     <string name="disable_addon_warn_title">アドオンを無効にする</string>
     <string name="disable_addon_warn_name">%1$s を無効にする場合 :</string>
     <string name="disable_addon_warn_dep">%1$s を無効にする</string>
@@ -206,7 +206,7 @@
     <string name="delete_all_except_pinned">固定されていないすべてのアイテムを削除しますか？</string>
     <string name="num_items_deleted">%1$d 個のアイテムを削除しました</string>
     <string name="delete_theme">テーマを削除</string>
-    <string name="delete_theme_msg">本当に\"%1$d\"テーマを削除しますか？</string>
+    <string name="delete_theme_msg">本当に\"%1$s\"テーマを削除しますか？</string>
     <string name="capture_heap_dump">ヒープダンプを取得する</string>
     <string name="plugins">プラグイン</string>
     <string name="plugins_loaded">読み込みました</string>
@@ -249,4 +249,9 @@
     <string name="lang_switch_behavior_next_ime_app">次のインプットメゾッドアプリに切り替える</string>
     <string name="cannot_be_empty">空にできません</string>
     <string name="_cannot_be_empty">%1$s を空にできません</string>
+    <string name="rotate">右回転</string>
+    <string name="flip">反転</string>
+    <string name="flip_horizontally">左右反転</string>
+    <string name="flip_vertically">上下反転</string>
+    <string name="crop">切り取り</string>
     </resources>
