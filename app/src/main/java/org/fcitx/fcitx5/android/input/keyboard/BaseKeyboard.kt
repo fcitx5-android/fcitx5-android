@@ -21,6 +21,7 @@ import org.fcitx.fcitx5.android.data.InputFeedbacks
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.input.cursor.CursorRange
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.GestureType
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListener
 import org.fcitx.fcitx5.android.input.popup.PopupAction
@@ -66,6 +67,8 @@ abstract class BaseKeyboard(
     }
 
     private val vivoKeypressWorkaround by prefs.advanced.vivoKeypressWorkaround
+
+    private val hapticFeedback by prefs.keyboard.hapticFeedback
 
     var popupActionListener: PopupActionListener? = null
 
@@ -156,6 +159,9 @@ abstract class BaseKeyboard(
                 is ReturnKey -> InputFeedbacks.SoundEffect.Return
                 else -> InputFeedbacks.SoundEffect.Standard
             }
+            val vibration: ((View, Boolean) -> Unit)? = if (hapticFeedback) { view, extraConditions ->
+                if (selection.end > 0 && selection.start > 0 && extraConditions) InputFeedbacks.hapticFeedback(view)
+            } else null
             if (def is SpaceKey) {
                 spaceKeys.add(this)
                 swipeEnabled = spaceSwipeMoveCursor.getValue()
@@ -172,7 +178,7 @@ abstract class BaseKeyboard(
                                 val action = KeyAction.SymAction(KeySym(sym), KeyStates.Empty)
                                 repeat(count.absoluteValue) {
                                     onAction(action)
-                                    InputFeedbacks.hapticFeedback(view)
+                                    vibration?.invoke(view, selection.end >= selection.start)
                                 }
                                 true
                             }
@@ -191,7 +197,7 @@ abstract class BaseKeyboard(
                             val count = event.countX
                             if (count != 0) {
                                 onAction(KeyAction.MoveSelectionAction(count))
-                                InputFeedbacks.hapticFeedback(view)
+                                vibration?.invoke(view, selection.end > selection.start)
                                 true
                             } else false
                         }
@@ -218,9 +224,9 @@ abstract class BaseKeyboard(
                     }
                     is KeyDef.Behavior.Repeat -> {
                         repeatEnabled = true
-                        onRepeatListener = if (def is BackspaceKey) { view ->
+                        onRepeatListener = if (hapticFeedback && def is BackspaceKey) { view ->
                             onAction(it.action)
-                            InputFeedbacks.hapticFeedback(view)
+                            vibration?.invoke(view, selection.end >= selection.start)
                         } else { _ -> onAction(it.action) }
                     }
                     is KeyDef.Behavior.Swipe -> {
@@ -479,6 +485,11 @@ abstract class BaseKeyboard(
         onAction(action, KeyActionListener.Source.Popup)
         onPopupAction(PopupAction.DismissAction(viewId))
         return true
+    }
+
+    private val selection = CursorRange()
+    fun onSelectionUpdate(start: Int, end: Int) {
+        selection.update(start, end)
     }
 
     open fun onAttach() {

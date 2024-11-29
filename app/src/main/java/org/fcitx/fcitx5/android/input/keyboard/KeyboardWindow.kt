@@ -159,6 +159,10 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
         currentKeyboard?.onReturnDrawableUpdate(resourceId)
     }
 
+    override fun onSelectionUpdate(start: Int, end: Int) {
+        currentKeyboard?.onSelectionUpdate(start, end)
+    }
+
     override fun onAttached() {
         currentKeyboard?.let {
             it.keyActionListener = keyActionListener
