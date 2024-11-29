@@ -162,7 +162,7 @@ abstract class BaseKeyboard(
                 swipeRepeatEnabled = true
                 swipeThresholdX = selectionSwipeThreshold
                 swipeThresholdY = disabledSwipeThreshold
-                onGestureListener = OnGestureListener { _, event ->
+                onGestureListener = OnGestureListener { view, event ->
                     when (event.type) {
                         GestureType.Move -> when (val count = event.countX) {
                             0 -> false
@@ -172,6 +172,7 @@ abstract class BaseKeyboard(
                                 val action = KeyAction.SymAction(KeySym(sym), KeyStates.Empty)
                                 repeat(count.absoluteValue) {
                                     onAction(action)
+                                    InputFeedbacks.hapticFeedback(view)
                                 }
                                 true
                             }
@@ -184,12 +185,13 @@ abstract class BaseKeyboard(
                 swipeRepeatEnabled = true
                 swipeThresholdX = selectionSwipeThreshold
                 swipeThresholdY = disabledSwipeThreshold
-                onGestureListener = OnGestureListener { _, event ->
+                onGestureListener = OnGestureListener { view, event ->
                     when (event.type) {
                         GestureType.Move -> {
                             val count = event.countX
                             if (count != 0) {
                                 onAction(KeyAction.MoveSelectionAction(count))
+                                InputFeedbacks.hapticFeedback(view)
                                 true
                             } else false
                         }
@@ -216,9 +218,10 @@ abstract class BaseKeyboard(
                     }
                     is KeyDef.Behavior.Repeat -> {
                         repeatEnabled = true
-                        onRepeatListener = { _ ->
+                        onRepeatListener = if (def is BackspaceKey) { view ->
                             onAction(it.action)
-                        }
+                            InputFeedbacks.hapticFeedback(view)
+                        } else { _ -> onAction(it.action) }
                     }
                     is KeyDef.Behavior.Swipe -> {
                         swipeEnabled = true
