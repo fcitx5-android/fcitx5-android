@@ -17,19 +17,24 @@ import splitties.views.dsl.core.matchParent
 
 abstract class GridPagingCandidateViewAdapter(theme: Theme) : PagingCandidateViewAdapter(theme) {
 
+    companion object {
+        // 20f here is chosen randomly, since we only care about the ratio
+        private const val TEXT_SIZE = 20f
+    }
+
     // cache measureWidth
-    private val measuredWidths = LruCache<String, Float>(200)
+    private val measuredWidths = object : LruCache<String, Float>(200) {
+        private val cachedPaint = Paint().apply { textSize = TEXT_SIZE }
+        private val cachedRect = Rect()
+        override fun create(key: String): Float {
+            cachedPaint.getTextBounds(key, 0, key.length, cachedRect)
+            return cachedRect.width() / TEXT_SIZE
+        }
+    }
 
     fun measureWidth(position: Int): Float {
         val candidate = getItem(position) ?: return 0f
-        return measuredWidths[candidate] ?: run {
-            val paint = Paint()
-            val bounds = Rect()
-            // 20f here is chosen randomly, since we only care about the ratio
-            paint.textSize = 20f
-            paint.getTextBounds(candidate, 0, candidate.length, bounds)
-            (bounds.width() / 20f).also { measuredWidths.put(candidate, it) }
-        }
+        return measuredWidths[candidate]
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CandidateViewHolder {

@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
  */
 
 package org.fcitx.fcitx5.android.input.candidates.expanded.window
@@ -8,14 +8,12 @@ package org.fcitx.fcitx5.android.input.candidates.expanded.window
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RectShape
 import android.view.View
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
@@ -26,10 +24,10 @@ import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
 import org.fcitx.fcitx5.android.input.broadcast.ReturnKeyDrawableComponent
 import org.fcitx.fcitx5.android.input.candidates.CandidateViewHolder
-import org.fcitx.fcitx5.android.input.candidates.horizontal.HorizontalCandidateComponent
-import org.fcitx.fcitx5.android.input.candidates.expanded.PagingCandidateViewAdapter
 import org.fcitx.fcitx5.android.input.candidates.expanded.CandidatesPagingSource
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateLayout
+import org.fcitx.fcitx5.android.input.candidates.expanded.PagingCandidateViewAdapter
+import org.fcitx.fcitx5.android.input.candidates.horizontal.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
@@ -57,7 +55,6 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
 
     protected val disableAnimation by AppPrefs.getInstance().advanced.disableAnimation
 
-    private lateinit var lifecycleCoroutineScope: LifecycleCoroutineScope
     private lateinit var candidateLayout: ExpandedCandidateLayout
 
     protected val dividerDrawable by lazy {
@@ -98,13 +95,19 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
     private var offsetJob: Job? = null
 
     private val candidatesPager by lazy {
-        Pager(PagingConfig(pageSize = 48)) {
-            CandidatesPagingSource(
-                fcitx,
-                total = horizontalCandidate.adapter.total,
-                offset = adapter.offset
-            )
-        }
+        Pager(
+            config = PagingConfig(
+                pageSize = 48,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                CandidatesPagingSource(
+                    fcitx,
+                    total = horizontalCandidate.adapter.total,
+                    offset = adapter.offset
+                )
+            }
+        )
     }
     private var candidatesSubmitJob: Job? = null
 
@@ -113,19 +116,23 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
     abstract fun nextPage()
 
     override fun onAttached() {
-        lifecycleCoroutineScope = candidateLayout.findViewTreeLifecycleOwner()!!.lifecycleScope
         bar.expandButtonStateMachine.push(ExpandedCandidatesAttached)
         candidateLayout.embeddedKeyboard.also {
             it.onReturnDrawableUpdate(returnKeyDrawable.resourceId)
             it.keyActionListener = keyActionListener
         }
-        offsetJob = lifecycleCoroutineScope.launch {
+        offsetJob = service.lifecycleScope.launch {
             horizontalCandidate.expandedCandidateOffset.collect {
-                updateCandidatesWithOffset(it)
+                if (it <= 0) {
+                    windowManager.attachWindow(KeyboardWindow)
+                } else {
+                    candidateLayout.resetPosition()
+                    adapter.refreshWithOffset(it)
+                }
             }
         }
-        candidatesSubmitJob = lifecycleCoroutineScope.launch {
-            candidatesPager.flow.collect {
+        candidatesSubmitJob = service.lifecycleScope.launch {
+            candidatesPager.flow.collectLatest {
                 adapter.submitData(it)
             }
         }
@@ -138,18 +145,6 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
         holder.itemView.setOnLongClickListener {
             horizontalCandidate.showCandidateActionMenu(holder.idx, holder.text, holder.ui)
             true
-        }
-    }
-
-    private fun updateCandidatesWithOffset(offset: Int) {
-        val candidates = horizontalCandidate.adapter.candidates
-        if (candidates.isEmpty()) {
-            windowManager.attachWindow(KeyboardWindow)
-        } else {
-            adapter.refreshWithOffset(offset)
-            lifecycleCoroutineScope.launch(Dispatchers.Main) {
-                candidateLayout.resetPosition()
-            }
         }
     }
 

@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
  */
 
 package org.fcitx.fcitx5.android.input.candidates.expanded.window
@@ -59,9 +59,9 @@ class FlexboxExpandedCandidateWindow :
                 addOnScrollListener(object : RecyclerView.OnScrollListener() {
                     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                         this@FlexboxExpandedCandidateWindow.layoutManager.apply {
-                            pageUpBtn.isEnabled = findFirstCompletelyVisibleItemPosition() != 0
+                            pageUpBtn.isEnabled = findFirstCompletelyVisibleItemPosition() > 0
                             pageDnBtn.isEnabled =
-                                findLastCompletelyVisibleItemPosition() != itemCount - 1
+                                findLastCompletelyVisibleItemPosition() < itemCount - 1
                         }
                     }
                 })
