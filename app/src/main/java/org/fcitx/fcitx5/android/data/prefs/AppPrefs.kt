@@ -45,6 +45,9 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             "vivo_keypress_workaround",
             DeviceUtil.isVivoOriginOS
         )
+        val ignoreSystemWindowInsets = switch(
+            R.string.ignore_system_window_insets, "ignore_system_window_insets", false
+        )
     }
 
     inner class Keyboard : ManagedPreferenceCategory(R.string.virtual_keyboard, sharedPreferences) {

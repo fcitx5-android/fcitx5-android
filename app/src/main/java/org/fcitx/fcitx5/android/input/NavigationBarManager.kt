@@ -7,9 +7,11 @@ package org.fcitx.fcitx5.android.input
 
 import android.graphics.Color
 import android.os.Build
+import android.view.View
 import android.view.Window
 import androidx.annotation.ColorInt
 import androidx.core.view.WindowCompat
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.data.theme.ThemePrefs.NavbarBackground
@@ -95,6 +97,23 @@ class NavigationBarManager {
                     is Theme.Custom -> theme.backgroundColor
                 }
             )
+        }
+    }
+
+    private val ignoreSystemWindowInsets by AppPrefs.getInstance().advanced.ignoreSystemWindowInsets
+
+    private val emptyOnApplyWindowInsetsListener = View.OnApplyWindowInsetsListener { _, insets ->
+        insets
+    }
+
+    fun setupInputView(v: BaseInputView) {
+        if (ignoreSystemWindowInsets) {
+            // suppress the view's own onApplyWindowInsets
+            v.setOnApplyWindowInsetsListener(emptyOnApplyWindowInsetsListener)
+        } else {
+            // on API 35+, we must call requestApplyInsets() manually after replacing views,
+            // otherwise View#onApplyWindowInsets won't be called. ¯\_(ツ)_/¯
+            v.requestApplyInsets()
         }
     }
 }

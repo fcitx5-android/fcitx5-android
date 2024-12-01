@@ -118,18 +118,22 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     private var highlightColor: Int = 0x66008577 // material_deep_teal_500 with alpha 0.4
 
-    private val ignoreSystemCursor by AppPrefs.getInstance().advanced.ignoreSystemCursor
+    private val prefs = AppPrefs.getInstance()
+    private val inlineSuggestions by prefs.keyboard.inlineSuggestions
+    private val ignoreSystemCursor by prefs.advanced.ignoreSystemCursor
 
-    private val inlineSuggestions by AppPrefs.getInstance().keyboard.inlineSuggestions
+    private val recreateInputViewPrefs: Array<ManagedPreference<*>> = arrayOf(
+        prefs.keyboard.expandKeypressArea,
+        prefs.advanced.disableAnimation,
+        prefs.advanced.ignoreSystemWindowInsets,
+    )
 
     private fun replaceInputView(theme: Theme): InputView {
         val newInputView = InputView(this, fcitx, theme)
         setInputView(newInputView)
         inputDeviceMgr.setInputView(newInputView)
+        navbarMgr.setupInputView(newInputView)
         inputView = newInputView
-        // on API 35+, we must call requestApplyInsets() manually after replacing views,
-        // otherwise View#onApplyWindowInsets won't be called. ¯\_(ツ)_/¯
-        newInputView.requestApplyInsets()
         return newInputView
     }
 
@@ -140,8 +144,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // put CandidatesView directly under content view
         contentView.addView(newCandidatesView)
         inputDeviceMgr.setCandidatesView(newCandidatesView)
+        navbarMgr.setupInputView(newCandidatesView)
         candidatesView = newCandidatesView
-        newCandidatesView.requestApplyInsets()
         return newCandidatesView
     }
 
@@ -192,11 +196,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             }
         }
         pkgNameCache = PackageNameCache(this)
-        AppPrefs.getInstance().apply {
-            keyboard.expandKeypressArea.registerOnChangeListener(recreateInputViewListener)
-            candidates.registerOnChangeListener(recreateCandidatesViewListener)
-            advanced.disableAnimation.registerOnChangeListener(recreateInputViewListener)
+        recreateInputViewPrefs.forEach {
+            it.registerOnChangeListener(recreateInputViewListener)
         }
+        prefs.candidates.registerOnChangeListener(recreateCandidatesViewListener)
         ThemeManager.addOnChangedListener(onThemeChangeListener)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             postFcitxJob {
@@ -955,11 +958,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onDestroy() {
-        AppPrefs.getInstance().apply {
-            keyboard.expandKeypressArea.unregisterOnChangeListener(recreateInputViewListener)
-            candidates.unregisterOnChangeListener(recreateCandidatesViewListener)
-            advanced.disableAnimation.unregisterOnChangeListener(recreateInputViewListener)
+        recreateInputViewPrefs.forEach {
+            it.unregisterOnChangeListener(recreateInputViewListener)
         }
+        prefs.candidates.unregisterOnChangeListener(recreateCandidatesViewListener)
         ThemeManager.removeOnChangedListener(onThemeChangeListener)
         super.onDestroy()
         // Fcitx might be used in super.onDestroy()
