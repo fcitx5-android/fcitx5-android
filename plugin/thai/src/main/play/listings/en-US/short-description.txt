@@ -1,0 +1,1 @@
+Thai input method for Fcitx5

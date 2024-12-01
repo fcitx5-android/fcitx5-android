@@ -1,0 +1,1 @@
+RIME (Rime Input Method Engine) support for Fcitx5

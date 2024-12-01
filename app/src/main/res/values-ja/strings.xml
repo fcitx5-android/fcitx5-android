@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name_release">ファイテクス５</string>
-    <string name="app_name_debug">ファイテクス５ (デバッグ)</string>
+    <string name="app_name_release">Fcitx5</string>
+    <string name="app_name_debug">Fcitx5 (デバッグ)</string>
     <string name="save">保存</string>
     <string name="input_methods">インプットメソッド</string>
     <string name="add_input_method">インプットメソッドの追加</string>

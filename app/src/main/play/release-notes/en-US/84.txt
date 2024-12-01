@@ -1,0 +1,60 @@
+# 0.1.0 - Candidates Window for Physical Keyboard
+
+## Highlights
+
+- The input method will show a floating candidates window and hide virtual keyboard when you start typing with a physical keyboard
+- Adopt fcitx5 "candidate action" API, to pin candidates in Pinyin/Shuangpin and forget words in RIME
+- The application now targets Android API 35, and handles navigation bar or system gesture insets more reliably
+- The application name has been to "小企鹅输入法" in Chinese, and "Fcitx5" for non-Chinese languages
+
+### New plugins
+
+- Thai, this is finally possible since scancode is sent to fcitx along with the keysym
+
+### Notable changes
+
+- Removed some bundled table input methods that nobody would use: 晚风、冰蝉全息、仓颉（简体中文）
+Some actually useful ones can be found in our F-Droid repo: https://f5a.torus.icu/fdroid/repo/ , or updater: https://github.com/fcitx5-android/fcitx5-android-updater
+- "Advanced - Ignore system cursor position" has been disabled by default, it should be stable enough
+- "Theme - Navigation bar background" now defaults to "Keyboard background image" on Oreo+ devices
+
+### Build process improvements
+
+- Removed many unnecessary files in APK, eg. baseline.prof, vcsInfo, dependenciesInfo, kotlin-tooling-metadata.json ...
+- Make use of AGP's splits.abi and signingConfig feature, and make prefab related tasks run more reliably
+
+## New features
+
+- Add mapping to other brace characters on top of current "(" & ")" (#494)
+- Adopt fcitx5 candidate action API
+- Show text instead of indeterminate progress bar when animation disabled
+- Swipe down voice input / expand candidate button to hide keyboard
+- Add option to perform haptic feedback on keyup
+- Configurable clipboard entry radius
+- Apply keyBorder prefs to Text Editing and Symbol Picker
+- Allow cursor to move out of preedit in androidkeyboard
+- Send keycode/scancode to fcitx
+- Reset caps lock state after switching input method
+- Allow uninstalling plugin from AboutActivity
+- Refresh PluginFragment on resume/package change
+- Show floating CandidatesView for hardware keyboard
+- Disable word hint for physical keyboard by default
+- Option to show CandidatesView by input device
+
+## Bug fixes
+
+- Toolbar would became blank when trigger and exit unicode addon right after changing theme
+- Remove discouraged degree celsius/fahrenheit symbols in symbol picker
+- Only perform long press haptic feedback when the pressed key has long press action
+- Fix composing state tracking when interrupting input
+- Fix toolbar title reset when rotating screen
+- Fix undoing consecutive deletions in ClipboardWindow
+- Fix first backspace swipe after initialization
+- Write physical display size instead of some random size without navbar when exporting logs
+- Fix crash when opening table addon config while it's not loaded
+- Disable "CanceledOnTouchOutside" for complex dialogs to avoid it being dismissed by accident
+- Disable menu group divider on Honor MagicOS devices
+- Hide PopupMenu icon on Flyme because of layout issues
+- Hopefully fixes crash on some devices when longpress "P" in landscape mode
+- Fix some English strings
+- Fix navbar insets detection on some devices
