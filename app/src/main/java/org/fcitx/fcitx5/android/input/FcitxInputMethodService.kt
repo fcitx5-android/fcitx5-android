@@ -194,6 +194,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         pkgNameCache = PackageNameCache(this)
         AppPrefs.getInstance().apply {
             keyboard.expandKeypressArea.registerOnChangeListener(recreateInputViewListener)
+            keyboard.moreVibration.registerOnChangeListener(recreateInputViewListener)
             candidates.registerOnChangeListener(recreateCandidatesViewListener)
             advanced.disableAnimation.registerOnChangeListener(recreateInputViewListener)
         }
@@ -957,6 +958,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     override fun onDestroy() {
         AppPrefs.getInstance().apply {
             keyboard.expandKeypressArea.unregisterOnChangeListener(recreateInputViewListener)
+            keyboard.moreVibration.unregisterOnChangeListener(recreateInputViewListener)
             candidates.unregisterOnChangeListener(recreateCandidatesViewListener)
             advanced.disableAnimation.unregisterOnChangeListener(recreateInputViewListener)
         }

@@ -279,4 +279,5 @@
     <string name="candidates_padding">Candidate word padding</string>
     <string name="candidates_window_min_width">Candidate window minimum width</string>
     <string name="candidates_window_padding">Candidate window padding</string>
+    <string name="more_vibration">More vibration</string>
 </resources>
