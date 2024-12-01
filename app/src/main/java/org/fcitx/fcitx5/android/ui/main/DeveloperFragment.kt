@@ -93,12 +93,29 @@ class DeveloperFragment : PaddingPreferenceFragment() {
                 isIconSpaceReserved = false
                 isSingleLineTitle = false
             })
+            addPreference(R.string.restart_fcitx_instance) {
+                AlertDialog.Builder(context)
+                    .setTitle(R.string.restart_fcitx_instance)
+                    .setMessage(R.string.restart_fcitx_instance_confirm)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        lifecycleScope.launch {
+                            withContext(NonCancellable + Dispatchers.IO) {
+                                FcitxDaemon.stopFcitx()
+                                withContext(Dispatchers.Main) {
+                                    context.toast(R.string.done)
+                                }
+                            }
+                        }
+                    }
+                    .show()
+            }
             addPreference(R.string.delete_and_sync_data) {
                 AlertDialog.Builder(context)
                     .setTitle(R.string.delete_and_sync_data)
                     .setMessage(R.string.delete_and_sync_data_message)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
-                        lifecycleScope.launch(Dispatchers.IO) {
+                        lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
                             DataManager.deleteAndSync()
                             withContext(Dispatchers.Main) {
                                 context.toast(R.string.synced)
@@ -113,7 +130,7 @@ class DeveloperFragment : PaddingPreferenceFragment() {
                     .setTitle(R.string.clear_clb_db)
                     .setMessage(R.string.clear_clp_db_confirm)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
-                        lifecycleScope.launch(Dispatchers.IO) {
+                        lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
                             ClipboardManager.nukeTable()
                             withContext(Dispatchers.Main) {
                                 context.toast(R.string.done)
