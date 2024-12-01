@@ -23,11 +23,17 @@ import android.preference.PreferenceCategory
 import android.preference.PreferenceFragment
 import android.preference.PreferenceScreen
 import android.provider.Settings
+import android.view.LayoutInflater
 import android.view.Menu
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowInsets
+import android.widget.ListView
 import android.widget.Toast
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.entity.License
 import org.xmlpull.v1.XmlPullParser
+import kotlin.math.max
 
 class AboutActivity : PreferenceActivity() {
 
@@ -165,6 +171,32 @@ class AboutActivity : PreferenceActivity() {
                 }
             }
             preferenceScreen = screen
+        }
+
+        override fun onCreateView(
+            inflater: LayoutInflater?,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View? {
+            val view = super.onCreateView(inflater, container, savedInstanceState)
+            // 35+ forces edge-to-edge
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && view != null) {
+                val listView = view.findViewById<ListView>(android.R.id.list)
+                listView.clipToPadding = false
+                listView.setOnApplyWindowInsetsListener { v, insets ->
+                    val status = insets.getInsets(WindowInsets.Type.statusBars())
+                    val navbar = insets.getInsets(WindowInsets.Type.navigationBars())
+                    val gesture = insets.getInsets(WindowInsets.Type.mandatorySystemGestures())
+                    v.setPadding(
+                        v.paddingLeft,
+                        status.top,
+                        v.paddingRight,
+                        max(navbar.bottom, gesture.bottom)
+                    )
+                    insets
+                }
+            }
+            return view
         }
 
         private fun showLicenseDialog(uniqueId: String, licenses: Set<License>): Boolean {
