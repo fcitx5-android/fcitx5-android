@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
  */
 #include <jni.h>
 
@@ -41,7 +41,6 @@
 #include "customphrase.h"
 
 #include "androidfrontend/androidfrontend_public.h"
-#include "androidaddonloader/androidaddonloader.h"
 #include "jni-utils.h"
 #include "nativestreambuf.h"
 #include "helper-types.h"
@@ -81,10 +80,9 @@ public:
         return uv_run(get_event_base(), UV_RUN_ONCE);
     }
 
-    void startup(const fcitx::AndroidLibraryDependency& dependency,
-                 const std::function<void(fcitx::AddonInstance *)> &setupCallback) {
+    void startup(const std::function<void(fcitx::AddonInstance *)> &setupCallback) {
         p_instance = std::make_unique<fcitx::Instance>(0, nullptr);
-        p_instance->addonManager().registerLoader(std::make_unique<fcitx::AndroidSharedLibraryLoader>(dependency));
+        p_instance->addonManager().registerDefaultLoader(nullptr);
         p_dispatcher = std::make_unique<fcitx::EventDispatcher>();
         p_dispatcher->attach(&p_instance->eventLoop());
         p_instance->initialize();
@@ -507,9 +505,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
         jstring appLib,
         jstring extData,
         jstring extCache,
-        jobjectArray extDomains,
-        jobjectArray libraryNames,
-        jobjectArray libraryDependencies) {
+        jobjectArray extDomains) {
     if (Fcitx::Instance().isRunning()) {
         FCITX_ERROR() << "Fcitx is already running!";
         return;
@@ -581,21 +577,6 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
     for (int i = 0; i < extDomainsSize; i++) {
         auto domain = JRef<jstring>(env, env->GetObjectArrayElement(extDomains, i));
         fcitx::registerDomain(CString(env, domain), locale_dir_char);
-    }
-
-    std::unordered_map<std::string, std::unordered_set<std::string>> depsMap;
-    const int librarySize = env->GetArrayLength(libraryNames);
-    for (int i = 0; i < librarySize; i++) {
-        auto jstringName = JRef<jstring>(env, env->GetObjectArrayElement(libraryNames, i));
-        auto lib = CString(env, jstringName);
-        auto jobjectArrayDeps = JRef<jobjectArray>(env, env->GetObjectArrayElement(libraryDependencies, i));
-        const int depSize = env->GetArrayLength(jobjectArrayDeps);
-        std::unordered_set<std::string> depSet(depSize);
-        for (int j = 0; j < depSize; j++) {
-            auto jstringDepName = JRef<jstring>(env, env->GetObjectArrayElement(jobjectArrayDeps, j));
-            depSet.emplace(CString(env, jstringDepName));
-        }
-        depsMap.emplace(lib, depSet);
     }
 
     auto candidateListCallback = [](const std::vector<std::string> &candidates, const int size) {
@@ -714,7 +695,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
     umask(007);
     fcitx::StandardPath::global().syncUmask();
 
-    Fcitx::Instance().startup(depsMap, [&](auto *androidfrontend) {
+    Fcitx::Instance().startup([&](auto *androidfrontend) {
         FCITX_INFO() << "Setting up callback";
         readyCallback();
         androidfrontend->template call<fcitx::IAndroidFrontend::setCandidateListCallback>(candidateListCallback);

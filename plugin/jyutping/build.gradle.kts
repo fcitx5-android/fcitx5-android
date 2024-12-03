@@ -45,6 +45,19 @@ android {
     }
 }
 
+fcitxComponent {
+    modifyFiles = mapOf(
+        "usr/share/fcitx5/addon/jyutping.conf" to {
+            it.writeText(
+                it.readText().replace(
+                    "Library=libjyutping",
+                    "Library=libIMEJyutping;libjyutping"
+                )
+            )
+        }
+    )
+}
+
 aboutLibraries {
     configPath = "plugin/jyutping/licenses"
 }
