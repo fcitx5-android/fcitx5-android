@@ -86,11 +86,11 @@ class HorizontalCandidateComponent :
 
     val expandedCandidateOffset = _expandedCandidateOffset.asSharedFlow()
 
-    private fun refreshExpanded() {
-        _expandedCandidateOffset.tryEmit(view.childCount)
+    private fun refreshExpanded(childCount: Int) {
+        _expandedCandidateOffset.tryEmit(childCount)
         bar.expandButtonStateMachine.push(
             ExpandedCandidatesUpdated,
-            ExpandedCandidatesEmpty to (adapter.total == layoutManager.childCount)
+            ExpandedCandidatesEmpty to (adapter.total == childCount)
         )
     }
 
@@ -119,14 +119,15 @@ class HorizontalCandidateComponent :
             override fun canScrollHorizontally() = false
             override fun onLayoutCompleted(state: RecyclerView.State) {
                 super.onLayoutCompleted(state)
+                val cnt = this.childCount
                 if (secondLayoutPassNeeded) {
-                    if (childCount < adapter.candidates.size) {
+                    if (cnt < adapter.candidates.size) {
                         // [^2] RecyclerView can't display all candidates
                         // update LayoutParams in onLayoutCompleted would trigger another
                         // onLayoutCompleted, skip the second one to avoid infinite loop
                         if (secondLayoutPassDone) return
                         secondLayoutPassDone = true
-                        for (i in 0 until childCount) {
+                        for (i in 0 until cnt) {
                             getChildAt(i)!!.updateLayoutParams<LayoutParams> {
                                 flexGrow = 1f
                             }
@@ -135,7 +136,7 @@ class HorizontalCandidateComponent :
                         secondLayoutPassNeeded = false
                     }
                 }
-                refreshExpanded()
+                refreshExpanded(cnt)
             }
             // no need to override `generate{,Default}LayoutParams`, because HorizontalCandidateViewAdapter
             // guarantees ViewHolder's layoutParams to be `FlexboxLayoutManager.LayoutParams`
@@ -194,7 +195,7 @@ class HorizontalCandidateComponent :
         adapter.updateCandidates(candidates, total)
         // not sure why empty candidates won't trigger `FlexboxLayoutManager#onLayoutCompleted()`
         if (candidates.isEmpty()) {
-            refreshExpanded()
+            refreshExpanded(0)
         }
     }
 
