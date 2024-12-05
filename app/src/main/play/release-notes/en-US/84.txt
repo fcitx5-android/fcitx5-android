@@ -5,7 +5,7 @@
 - The input method will show a floating candidates window and hide virtual keyboard when you start typing with a physical keyboard
 - Adopt fcitx5 "candidate action" API, to pin candidates in Pinyin/Shuangpin and forget words in RIME
 - The application now targets Android API 35, and handles navigation bar or system gesture insets more reliably
-- The application name has been to "小企鹅输入法" in Chinese, and "Fcitx5" for non-Chinese languages
+- The application has been renamed to "小企鹅输入法" in Chinese, and "Fcitx5" for non-Chinese languages
 
 ### New plugins
 
@@ -25,7 +25,7 @@ Some actually useful ones can be found in our F-Droid repo: https://f5a.torus.ic
 
 ## New features
 
-- Add mapping to other brace characters on top of current "(" & ")" (#494)
+- Add mapping to other brace characters on top of current "(" & ")"
 - Adopt fcitx5 candidate action API
 - Show text instead of indeterminate progress bar when animation disabled
 - Swipe down voice input / expand candidate button to hide keyboard
