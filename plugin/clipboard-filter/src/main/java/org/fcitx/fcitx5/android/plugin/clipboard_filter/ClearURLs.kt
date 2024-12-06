@@ -47,8 +47,10 @@ object ClearURLs {
         )["providers"]
     }
 
+    private val urlPattern = Regex("^https?://", RegexOption.IGNORE_CASE)
+
     fun transform(text: String): String {
-        if (!text.startsWith("http"))
+        if (!urlPattern.containsMatchIn(text))
             return text
         var x = text
         var matched = false
