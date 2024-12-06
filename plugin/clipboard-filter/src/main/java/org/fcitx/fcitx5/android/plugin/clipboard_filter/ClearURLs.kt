@@ -14,10 +14,9 @@ import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import java.net.URLDecoder
+import java.net.URLEncoder
 
 typealias RegexAsString = @Serializable(with = RegexSerializer::class) Regex
-typealias SearchParam = UrlQuerySanitizer.ParameterValuePair
-typealias SearchParams = List<UrlQuerySanitizer.ParameterValuePair>
 
 object ClearURLs {
     @Serializable
@@ -27,7 +26,7 @@ object ClearURLs {
         val completeProvider: Boolean = false,
         val rules: List<RegexAsString>? = null,
         val rawRules: List<RegexAsString>? = null,
-        val referralMarketing: List<String>? = null,
+        val referralMarketing: List<RegexAsString>? = null,
         val exceptions: List<RegexAsString>? = null,
         val redirections: List<RegexAsString>? = null,
         val forceRedirection: Boolean = false
@@ -48,61 +47,94 @@ object ClearURLs {
         )["providers"]
     }
 
-    private val querySanitizer = UrlQuerySanitizer().apply {
-        allowUnregisteredParamaters = true
-    }
-
     fun transform(text: String): String {
+        if (!text.startsWith("http"))
+            return text
         var x = text
+        var matched = false
         catalog?.let { map ->
             for ((_, provider) in map) {
                 // matches url pattern
-                if (provider.urlPattern.find(x) == null)
+                if (!provider.urlPattern.containsMatchIn(x))
                     continue
                 // not in exceptions
-                if (provider.exceptions?.any { it.find(x) != null } == true)
+                if (provider.exceptions?.any { it.containsMatchIn(x) } == true)
                     continue
+                matched = true
                 // apply redirections
                 provider.redirections?.forEach { redirection ->
-                    redirection.find(x)?.let { matchResult ->
-                        matchResult.groupValues.takeIf { it.size > 1 }?.let {
-                            x = decodeURL(it[1])
-                        }
+                    redirection.matchEntire(x)?.groupValues?.getOrNull(1)?.let {
+                        x = decodeURL(it)
                     }
                 }
                 provider.rawRules?.forEach { rawRule ->
                     x = rawRule.replace(x, "")
                 }
                 // apply rules (if any)
-                val result = provider.rules.takeIf { !it.isNullOrEmpty() }
-                    ?.let { rules ->
-                        val uri = Uri.parse(x)
-                        val newQuery = parseParams(uri.query).filterBy(rules).join()
-                        val newFragment = parseParams(uri.fragment).filterBy(rules).join()
-                        uri.buildUpon().encodedQuery(newQuery).fragment(newFragment).toString()
-                    } ?: x
-                Log.d("ClearURLs", "$text -> $result")
-                return result
+                if (provider.rules.isNullOrEmpty())
+                    continue
+                /**
+                 * merge rules with referralMarketing
+                 * https://docs.clearurls.xyz/1.26.1/specs/rules/#referralmarketing
+                 * https://github.com/ClearURLs/Addon/blob/deec80b763179fa5c3559a37e3c9a6f1b28d0886/clearurls.js#L449
+                 */
+                val rules =
+                    if (provider.referralMarketing.isNullOrEmpty()) provider.rules
+                    else provider.rules + provider.referralMarketing
+                val uri = Uri.parse(x)
+                x = uri.buildUpon()
+                    .encodedQuery(filterParams(uri.query, rules))
+                    /**
+                     * clear #fragments too
+                     * https://github.com/ClearURLs/Addon/blob/deec80b763179fa5c3559a37e3c9a6f1b28d0886/clearurls.js#L109
+                     */
+                    .encodedFragment(filterParams(uri.fragment, rules))
+                    .toString()
             }
-            // no matching rules
+            if (matched) {
+                Log.d("ClearURLs", "$text -> $x")
+            }
             return x
         } ?: throw IllegalStateException("Catalog is unavailable")
     }
 
-    private fun decodeURL(url: String) =
-        URLDecoder.decode(url.replace("+", "%2B"), "UTF-8").replace("%2B", "+")
+    private const val UTF8 = "UTF-8"
 
-    private fun parseParams(str: String?): SearchParams {
-        if (str.isNullOrEmpty()) return emptyList()
-        querySanitizer.parseQuery(str)
+    /**
+     * mimic the js impl
+     * https://github.com/ClearURLs/Addon/blob/deec80b763179fa5c3559a37e3c9a6f1b28d0886/core_js/tools.js#L243
+     */
+    private fun decodeURL(str: String): String {
+        var a = str
+        var b = URLDecoder.decode(str, UTF8)
+        while (a != b) {
+            a = b
+            b = URLDecoder.decode(b, UTF8)
+        }
+        return b
+    }
+
+    private fun encodeURL(str: String) = URLEncoder.encode(str, UTF8)
+
+    private val querySanitizer = UrlQuerySanitizer().apply {
+        allowUnregisteredParamaters = true
+        unregisteredParameterValueSanitizer = UrlQuerySanitizer.getAllButNulLegal()
+    }
+
+    private fun filterParams(params: String?, rules: List<Regex>): String? {
+        if (params.isNullOrEmpty()) return params
+        querySanitizer.parseQuery(params)
         return querySanitizer.parameterList
+            .filter { param ->
+                /**
+                 * match rules with search parameter keys
+                 * https://github.com/ClearURLs/Addon/blob/deec80b763179fa5c3559a37e3c9a6f1b28d0886/clearurls.js#L122
+                 */
+                rules.all { !it.matches(param.mParameter) }
+            }
+            .joinToString("&") {
+                if (it.mValue.isEmpty()) encodeURL(it.mParameter)
+                else "${encodeURL(it.mParameter)}=${encodeURL(it.mValue)}"
+            }
     }
-
-    private fun SearchParams.filterBy(rules: List<Regex>) = filter { param ->
-        rules.all { !it.matches(param.mParameter) }
-    }
-
-    private fun SearchParam.join() = "${mParameter}=${mValue}"
-
-    private fun SearchParams.join() = joinToString("&") { it.join() }
 }

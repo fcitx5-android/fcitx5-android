@@ -14,5 +14,10 @@ import kotlinx.serialization.encoding.Encoder
 object RegexSerializer : KSerializer<Regex> {
     override val descriptor = PrimitiveSerialDescriptor("RegexSerializer", PrimitiveKind.STRING)
     override fun serialize(encoder: Encoder, value: Regex) = encoder.encodeString(value.toString())
-    override fun deserialize(decoder: Decoder) = Regex(decoder.decodeString())
+
+    /**
+     * ClearURLs JavaScript implementation use regex flag "gi"
+     * https://github.com/ClearURLs/Addon/blob/deec80b763179fa5c3559a37e3c9a6f1b28d0886/clearurls.js#L94
+     */
+    override fun deserialize(decoder: Decoder) = Regex(decoder.decodeString(), RegexOption.IGNORE_CASE)
 }
