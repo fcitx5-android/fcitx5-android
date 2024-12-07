@@ -22,11 +22,11 @@ object ClearURLs {
         /** all patterns starts with https? */
         val urlPattern: RegexAsString,
         val completeProvider: Boolean = false,
-        val rules: List<RegexAsString>? = null,
-        val rawRules: List<RegexAsString>? = null,
-        val referralMarketing: List<RegexAsString>? = null,
-        val exceptions: List<RegexAsString>? = null,
-        val redirections: List<RegexAsString>? = null,
+        val rules: List<RegexAsString> = emptyList(),
+        val rawRules: List<RegexAsString> = emptyList(),
+        val referralMarketing: List<RegexAsString> = emptyList(),
+        val exceptions: List<RegexAsString> = emptyList(),
+        val redirections: List<RegexAsString> = emptyList(),
         val forceRedirection: Boolean = false
     )
 
@@ -48,7 +48,7 @@ object ClearURLs {
     private val urlPattern = Regex("^https?://", RegexOption.IGNORE_CASE)
 
     fun transform(text: String): String {
-        if (!urlPattern.containsMatchIn(text))
+        if (!urlPattern.matchesAt(text, 0))
             return text
         var x = text
         var matched = false
@@ -58,30 +58,26 @@ object ClearURLs {
                 if (!provider.urlPattern.containsMatchIn(x))
                     continue
                 // not in exceptions
-                if (provider.exceptions?.any { it.containsMatchIn(x) } == true)
+                if (provider.exceptions.any { it.containsMatchIn(x) })
                     continue
                 matched = true
                 // apply redirections
-                provider.redirections?.forEach { redirection ->
+                provider.redirections.forEach { redirection ->
                     redirection.matchEntire(x)?.groupValues?.getOrNull(1)?.let {
                         x = decodeURL(it)
+                        log(if (BuildConfig.DEBUG) "$text ~> $x" else "(redirect)")
                         return x
                     }
                 }
-                provider.rawRules?.forEach { rawRule ->
+                provider.rawRules.forEach { rawRule ->
                     x = rawRule.replace(x, "")
                 }
-                // apply rules (if any)
-                if (provider.rules.isNullOrEmpty())
-                    continue
                 /**
-                 * merge rules with referralMarketing
+                 * apply rules and referralMarketing
                  * https://docs.clearurls.xyz/1.26.1/specs/rules/#referralmarketing
                  * https://github.com/ClearURLs/Addon/blob/deec80b763179fa5c3559a37e3c9a6f1b28d0886/clearurls.js#L449
                  */
-                val rules =
-                    if (provider.referralMarketing.isNullOrEmpty()) provider.rules
-                    else provider.rules + provider.referralMarketing
+                val rules = provider.rules + provider.referralMarketing
                 val uri = Uri.parse(x)
                 x = uri.buildUpon()
                     .encodedQuery(filterParams(uri.query, rules))
@@ -93,7 +89,7 @@ object ClearURLs {
                     .toString()
             }
             if (matched) {
-                Log.d("ClearURLs", "$text -> $x")
+                log(if (BuildConfig.DEBUG) "$text -> $x" else "(clear)")
             }
             return x
         } ?: throw IllegalStateException("Catalog is unavailable")
@@ -104,12 +100,12 @@ object ClearURLs {
      * https://github.com/ClearURLs/Addon/blob/deec80b763179fa5c3559a37e3c9a6f1b28d0886/core_js/tools.js#L243
      */
     private fun decodeURL(str: String): String {
-        var a = str
-        var b = Uri.decode(str)
-        while (a != b) {
+        var a: String
+        var b: String = str
+        do {
             a = b
             b = Uri.decode(b)
-        }
+        } while (a != b)
         return b
     }
 
@@ -135,5 +131,9 @@ object ClearURLs {
                 if (it.mValue.isEmpty()) encodeQuery(it.mParameter)
                 else "${encodeQuery(it.mParameter)}=${encodeQuery(it.mValue)}"
             }
+    }
+
+    private fun log(msg: String) {
+        Log.d("ClearURLs", msg)
     }
 }
