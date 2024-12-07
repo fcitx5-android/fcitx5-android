@@ -29,7 +29,7 @@ class MainService : FcitxPluginService() {
 
     override fun start() {
         connection = bindFcitxRemoteService(BuildConfig.MAIN_APPLICATION_ID) {
-            Log.d("ClearURLsService", "Bind to fcitx remote")
+            log("Bind to fcitx remote")
             it.registerClipboardEntryTransformer(transformer)
         }
     }
@@ -39,7 +39,11 @@ class MainService : FcitxPluginService() {
             connection.remoteService?.unregisterClipboardEntryTransformer(transformer)
         }
         unbindService(connection)
-        Log.d("ClearURLsService", "Unbind from fcitx remote")
+        log("Unbind from fcitx remote")
+    }
+
+    private fun log(msg: String) {
+        Log.d("ClearURLsService", msg)
     }
 
 }
