@@ -282,4 +282,5 @@
     <string name="restart_fcitx_instance">Restart fcitx instance</string>
     <string name="restart_fcitx_instance_confirm">Fcitx instance will be destroyed and reinitialized. Proceed?</string>
     <string name="ignore_system_window_insets">Ignore system WindowInsets</string>
+    <string name="browse_user_data_dir">Browse user data directory</string>
 </resources>

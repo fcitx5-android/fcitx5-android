@@ -4,13 +4,16 @@
  */
 package org.fcitx.fcitx5.android.ui.main.settings.behavior
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.Preference
 import androidx.preference.PreferenceScreen
+import androidx.preference.PreferenceViewHolder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
@@ -25,6 +28,8 @@ import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.addPreference
+import org.fcitx.fcitx5.android.utils.buildDocumentsProviderIntent
+import org.fcitx.fcitx5.android.utils.buildPrimaryStorageIntent
 import org.fcitx.fcitx5.android.utils.formatDateTime
 import org.fcitx.fcitx5.android.utils.importErrorDialog
 import org.fcitx.fcitx5.android.utils.iso8601UTCDateTime
@@ -102,6 +107,35 @@ class AdvancedSettingsFragment : ManagedPreferenceFragment(AppPrefs.getInstance(
     }
 
     override fun onPreferenceUiCreated(screen: PreferenceScreen) {
+        screen.addPreference(object : Preference(requireContext()) {
+            init {
+                setTitle(R.string.browse_user_data_dir)
+                isSingleLineTitle = false
+                isIconSpaceReserved = false
+                setOnPreferenceClickListener {
+                    try {
+                        context.startActivity(buildDocumentsProviderIntent())
+                    } catch (e: Exception) {
+                        context.toast(e)
+                    }
+                    true
+                }
+            }
+
+            override fun onBindViewHolder(holder: PreferenceViewHolder) {
+                super.onBindViewHolder(holder)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    holder.itemView.setOnLongClickListener {
+                        try {
+                            context.startActivity(buildPrimaryStorageIntent())
+                        } catch (e: Exception) {
+                            context.toast(e)
+                        }
+                        true
+                    }
+                }
+            }
+        })
         screen.addPreference(R.string.export_user_data) {
             val ctx = requireContext()
             lifecycleScope.launch {
