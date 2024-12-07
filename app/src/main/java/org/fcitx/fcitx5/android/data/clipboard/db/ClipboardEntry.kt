@@ -10,6 +10,7 @@ import android.os.Build
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import org.fcitx.fcitx5.android.utils.timestamp
 
 @Entity(tableName = ClipboardEntry.TABLE_NAME)
 data class ClipboardEntry(
@@ -52,6 +53,7 @@ data class ClipboardEntry(
             }
             return ClipboardEntry(
                 text = if (transformer != null) transformer(str) else str,
+                timestamp = clipData.timestamp(),
                 type = desc.getMimeType(0),
                 sensitive = sensitive
             )
