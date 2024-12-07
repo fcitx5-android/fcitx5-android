@@ -13,8 +13,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
-import java.net.URLDecoder
-import java.net.URLEncoder
 
 typealias RegexAsString = @Serializable(with = RegexSerializer::class) Regex
 
@@ -67,6 +65,7 @@ object ClearURLs {
                 provider.redirections?.forEach { redirection ->
                     redirection.matchEntire(x)?.groupValues?.getOrNull(1)?.let {
                         x = decodeURL(it)
+                        return x
                     }
                 }
                 provider.rawRules?.forEach { rawRule ->
@@ -100,23 +99,21 @@ object ClearURLs {
         } ?: throw IllegalStateException("Catalog is unavailable")
     }
 
-    private const val UTF8 = "UTF-8"
-
     /**
      * mimic the js impl
      * https://github.com/ClearURLs/Addon/blob/deec80b763179fa5c3559a37e3c9a6f1b28d0886/core_js/tools.js#L243
      */
     private fun decodeURL(str: String): String {
         var a = str
-        var b = URLDecoder.decode(str, UTF8)
+        var b = Uri.decode(str)
         while (a != b) {
             a = b
-            b = URLDecoder.decode(b, UTF8)
+            b = Uri.decode(b)
         }
         return b
     }
 
-    private fun encodeURL(str: String) = URLEncoder.encode(str, UTF8)
+    private fun encodeQuery(str: String) = Uri.encode(str, " ").replace(" ", "+")
 
     private val querySanitizer = UrlQuerySanitizer().apply {
         allowUnregisteredParamaters = true
@@ -135,8 +132,8 @@ object ClearURLs {
                 rules.all { !it.matches(param.mParameter) }
             }
             .joinToString("&") {
-                if (it.mValue.isEmpty()) encodeURL(it.mParameter)
-                else "${encodeURL(it.mParameter)}=${encodeURL(it.mValue)}"
+                if (it.mValue.isEmpty()) encodeQuery(it.mParameter)
+                else "${encodeQuery(it.mParameter)}=${encodeQuery(it.mValue)}"
             }
     }
 }
