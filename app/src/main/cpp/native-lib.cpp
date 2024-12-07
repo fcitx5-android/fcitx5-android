@@ -630,15 +630,17 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 5, *vararg);
     };
     auto imChangeCallback = []() {
-        auto env = GlobalRef->AttachEnv();
-        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(1, GlobalRef->Object, nullptr));
         std::unique_ptr<InputMethodStatus> status = Fcitx::Instance().inputMethodStatus();
         if (!status) return;
+        auto env = GlobalRef->AttachEnv();
+        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(1, GlobalRef->Object, nullptr));
         auto obj = JRef(env, fcitxInputMethodStatusToJObject(env, *status));
         env->SetObjectArrayElement(vararg, 0, obj);
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 6, *vararg);
     };
     auto statusAreaUpdateCallback = []() {
+        std::unique_ptr<InputMethodStatus> status = Fcitx::Instance().inputMethodStatus();
+        if (!status) return;
         auto env = GlobalRef->AttachEnv();
         auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(static_cast<int>(2), GlobalRef->Object, nullptr));
         const auto actions = Fcitx::Instance().statusAreaActions();
@@ -649,7 +651,6 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
             env->SetObjectArrayElement(actionArray, i++, obj);
         }
         env->SetObjectArrayElement(vararg, 0, actionArray);
-        std::unique_ptr<InputMethodStatus> status = Fcitx::Instance().inputMethodStatus();
         auto statusObj = JRef(env, fcitxInputMethodStatusToJObject(env, *status));
         env->SetObjectArrayElement(vararg, 1, statusObj);
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 7, *vararg);
