@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.ui.main.settings.behavior
 
@@ -11,9 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.preference.Preference
 import androidx.preference.PreferenceScreen
-import androidx.preference.PreferenceViewHolder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
@@ -71,12 +69,8 @@ class AdvancedSettingsFragment : ManagedPreferenceFragment(AppPrefs.getInstance(
                             }
                             withContext(Dispatchers.Main) {
                                 AppUtil.showRestartNotification(ctx)
-                                ctx.toast(
-                                    getString(
-                                        R.string.user_data_imported,
-                                        formatDateTime(metadata.exportTime)
-                                    )
-                                )
+                                val exportTime = formatDateTime(metadata.exportTime)
+                                ctx.toast(getString(R.string.user_data_imported, exportTime))
                             }
                         } catch (e: Exception) {
                             // re-start fcitx in case importing failed
@@ -107,37 +101,25 @@ class AdvancedSettingsFragment : ManagedPreferenceFragment(AppPrefs.getInstance(
     }
 
     override fun onPreferenceUiCreated(screen: PreferenceScreen) {
-        screen.addPreference(object : Preference(requireContext()) {
-            init {
-                setTitle(R.string.browse_user_data_dir)
-                isSingleLineTitle = false
-                isIconSpaceReserved = false
-                setOnPreferenceClickListener {
-                    try {
-                        context.startActivity(buildDocumentsProviderIntent())
-                    } catch (e: Exception) {
-                        context.toast(e)
-                    }
-                    true
+        val ctx = requireContext()
+        screen.addPreference(
+            R.string.browse_user_data_dir,
+            onClick = {
+                try {
+                    ctx.startActivity(buildDocumentsProviderIntent())
+                } catch (e: Exception) {
+                    ctx.toast(e)
                 }
-            }
-
-            override fun onBindViewHolder(holder: PreferenceViewHolder) {
-                super.onBindViewHolder(holder)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    holder.itemView.setOnLongClickListener {
-                        try {
-                            context.startActivity(buildPrimaryStorageIntent())
-                        } catch (e: Exception) {
-                            context.toast(e)
-                        }
-                        true
-                    }
+            },
+            onLongClick = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) ({
+                try {
+                    ctx.startActivity(buildPrimaryStorageIntent())
+                } catch (e: Exception) {
+                    ctx.toast(e)
                 }
-            }
-        })
+            }) else null
+        )
         screen.addPreference(R.string.export_user_data) {
-            val ctx = requireContext()
             lifecycleScope.launch {
                 lifecycleScope.withLoadingDialog(ctx) {
                     viewModel.fcitx.runOnReady {
@@ -149,7 +131,6 @@ class AdvancedSettingsFragment : ManagedPreferenceFragment(AppPrefs.getInstance(
             }
         }
         screen.addPreference(R.string.import_user_data) {
-            val ctx = requireContext()
             AlertDialog.Builder(ctx)
                 .setIconAttribute(android.R.attr.alertDialogIcon)
                 .setTitle(R.string.import_user_data)

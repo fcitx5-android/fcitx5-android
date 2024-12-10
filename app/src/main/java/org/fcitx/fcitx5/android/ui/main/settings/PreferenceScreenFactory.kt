@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.ui.main.settings
 
@@ -20,7 +20,6 @@ import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceScreen
-import androidx.preference.PreferenceViewHolder
 import arrow.core.getOrElse
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.Key
@@ -30,6 +29,7 @@ import org.fcitx.fcitx5.android.ui.main.modified.MySwitchPreference
 import org.fcitx.fcitx5.android.ui.main.settings.addon.AddonConfigFragment
 import org.fcitx.fcitx5.android.ui.main.settings.global.GlobalConfigFragment
 import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
+import org.fcitx.fcitx5.android.utils.LongClickPreference
 import org.fcitx.fcitx5.android.utils.buildDocumentsProviderIntent
 import org.fcitx.fcitx5.android.utils.buildPrimaryStorageIntent
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor
@@ -166,36 +166,30 @@ object PreferenceScreenFactory {
             }
         }
 
-        fun rimeUserDataDir(title: String): Preference = object : Preference(context) {
-            init {
-                setOnPreferenceClickListener {
-                    AlertDialog.Builder(context)
-                        .setTitle(title)
-                        .setMessage(R.string.open_rime_user_data_dir)
-                        .setNegativeButton(android.R.string.cancel, null)
-                        .setPositiveButton(android.R.string.ok) { _, _ ->
-                            try {
-                                context.startActivity(buildDocumentsProviderIntent())
-                            } catch (e: Exception) {
-                                context.toast(e)
-                            }
-                        }
-                        .show()
-                    true
-                }
-            }
-
-            // make it a hidden option, because of compatibility issues
-            override fun onBindViewHolder(holder: PreferenceViewHolder) {
-                super.onBindViewHolder(holder)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    holder.itemView.setOnLongClickListener {
+        fun rimeUserDataDir(title: String): Preference = LongClickPreference(context).apply {
+            setOnPreferenceClickListener {
+                AlertDialog.Builder(context)
+                    .setTitle(title)
+                    .setMessage(R.string.open_rime_user_data_dir)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
                         try {
-                            context.startActivity(buildPrimaryStorageIntent("data/rime"))
+                            context.startActivity(buildDocumentsProviderIntent())
                         } catch (e: Exception) {
                             context.toast(e)
                         }
-                        true
+                    }
+                    .show()
+                true
+            }
+
+            // make it a hidden option, because of compatibility issues
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                setOnPreferenceLongClickListener {
+                    try {
+                        context.startActivity(buildPrimaryStorageIntent("data/rime"))
+                    } catch (e: Exception) {
+                        context.toast(e)
                     }
                 }
             }
