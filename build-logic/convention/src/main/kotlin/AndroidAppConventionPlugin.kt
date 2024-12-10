@@ -42,14 +42,7 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
                 release {
                     isMinifyEnabled = true
                     isShrinkResources = true
-                    signingConfig = target.signKey?.let {
-                        signingConfigs.create("release") {
-                            storeFile = it
-                            storePassword = target.signKeyPwd
-                            keyAlias = target.signKeyAlias
-                            keyPassword = target.signKeyPwd
-                        }
-                    }
+                    signingConfig = signingConfigs.fromProjectEnv(target)
                 }
                 debug {
                     applicationIdSuffix = ".debug"
@@ -75,6 +68,7 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
                     excludes += setOf(
                         "/META-INF/*.version",
                         "/META-INF/*.kotlin_module",  // cannot be excluded actually
+                        "/META-INF/androidx/**",
                         "/DebugProbesKt.bin",
                         "/kotlin-tooling-metadata.json"
                     )

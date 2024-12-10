@@ -1,13 +1,14 @@
 [versions]
-androidGradlePlugin = "8.7.2"
+androidGradlePlugin = "8.7.3"
 androidDesugarJDKLibs = "2.1.3"
-kotlin = "2.0.21"
-ksp = "2.0.21-1.0.28"
+kotlin = "2.1.0"
+ksp = "2.1.0-1.0.29"
 lifecycle = "2.8.7"
 navigation = "2.8.4"
 room = "2.6.1"
 splitties = "3.0.0"
 aboutlibraries = "11.2.3"
+arrow = "2.0.0"
 
 [libraries]
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
@@ -38,7 +39,8 @@ androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "ro
 androidx-startup = { module = "androidx.startup:startup-runtime", version = "1.2.0" }
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version = "1.1.0" }
 material = { module = "com.google.android.material:material", version = "1.12.0" }
-arrow = { module = "io.arrow-kt:arrow-core", version = "1.2.4" }
+arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
+arrow-functions = { module = "io.arrow-kt:arrow-functions", version.ref = "arrow" }
 imagecropper = { module = "com.vanniktech:android-image-cropper", version = "4.6.0" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version = "3.0.0" }
 dependency = { module = "org.mechdancer:dependency", version = "0.1.2" }

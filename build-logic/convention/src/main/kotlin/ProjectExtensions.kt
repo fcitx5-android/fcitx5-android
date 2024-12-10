@@ -3,7 +3,9 @@
  * SPDX-FileCopyrightText: Copyright 2024 Fcitx5 for Android Contributors
  */
 
+import com.android.build.gradle.internal.dsl.SigningConfig
 import org.gradle.accessors.dm.LibrariesForLibs
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.kotlin.dsl.the
@@ -98,3 +100,14 @@ val Project.signKeyPwd: String?
 
 val Project.signKeyAlias: String?
     get() = epn("SIGN_KEY_ALIAS", "signKeyAlias")
+
+fun NamedDomainObjectContainer<SigningConfig>.fromProjectEnv(project: Project): SigningConfig? {
+    val keyFile = project.signKey ?: return null
+    val name = "release"
+    return findByName(name) ?: create(name) {
+        storeFile = keyFile
+        storePassword = project.signKeyPwd
+        keyAlias = project.signKeyAlias
+        keyPassword = project.signKeyPwd
+    }
+}
