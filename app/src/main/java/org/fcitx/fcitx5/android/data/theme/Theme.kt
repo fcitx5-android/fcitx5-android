@@ -30,6 +30,9 @@ sealed class Theme : Parcelable {
     abstract val keyBackgroundColor: Int
     abstract val keyTextColor: Int
 
+    //  Color of candidate text
+    abstract val candidateTextColor: Int
+
     abstract val altKeyBackgroundColor: Int
     abstract val altKeyTextColor: Int
 
@@ -67,6 +70,7 @@ sealed class Theme : Parcelable {
         override val keyboardColor: Int,
         override val keyBackgroundColor: Int,
         override val keyTextColor: Int,
+        override val candidateTextColor: Int,
         override val altKeyBackgroundColor: Int,
         override val altKeyTextColor: Int,
         override val accentKeyBackgroundColor: Int,
@@ -115,6 +119,7 @@ sealed class Theme : Parcelable {
         override val keyboardColor: Int,
         override val keyBackgroundColor: Int,
         override val keyTextColor: Int,
+        override val candidateTextColor: Int,
         override val altKeyBackgroundColor: Int,
         override val altKeyTextColor: Int,
         override val accentKeyBackgroundColor: Int,
@@ -140,6 +145,7 @@ sealed class Theme : Parcelable {
             keyboardColor: Number,
             keyBackgroundColor: Number,
             keyTextColor: Number,
+            candidateTextColor: Number,
             altKeyBackgroundColor: Number,
             altKeyTextColor: Number,
             accentKeyBackgroundColor: Number,
@@ -161,6 +167,7 @@ sealed class Theme : Parcelable {
             keyboardColor.toInt(),
             keyBackgroundColor.toInt(),
             keyTextColor.toInt(),
+            candidateTextColor.toInt(),
             altKeyBackgroundColor.toInt(),
             altKeyTextColor.toInt(),
             accentKeyBackgroundColor.toInt(),
@@ -185,6 +192,7 @@ sealed class Theme : Parcelable {
             keyboardColor,
             keyBackgroundColor,
             keyTextColor,
+            candidateTextColor,
             altKeyBackgroundColor,
             altKeyTextColor,
             accentKeyBackgroundColor,
@@ -222,6 +230,7 @@ sealed class Theme : Parcelable {
             keyboardColor,
             keyBackgroundColor,
             keyTextColor,
+            candidateTextColor,
             altKeyBackgroundColor,
             altKeyTextColor,
             accentKeyBackgroundColor,

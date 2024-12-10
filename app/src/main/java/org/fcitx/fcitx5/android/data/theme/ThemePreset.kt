@@ -14,6 +14,7 @@ object ThemePreset {
         keyboardColor = 0xffeceff1,
         keyBackgroundColor = 0xfffbfbfc,
         keyTextColor = 0xff37474f,
+        candidateTextColor = 0xff37474f,
         altKeyBackgroundColor = 0xffdfe2e4,
         // Google Pinyin's symbol color on alphabet key: #727d82
         altKeyTextColor = 0xff7a858a,
@@ -38,6 +39,7 @@ object ThemePreset {
         keyboardColor = 0xff263238,
         keyBackgroundColor = 0xff404a50,
         keyTextColor = 0xffd9dbdc,
+        candidateTextColor = 0xffd9dbdc,
         altKeyBackgroundColor = 0xff313c42,
         // Google Pinyin's symbol color on alphabet key: #b3b7b9
         altKeyTextColor = 0xffadb1b3,
@@ -62,6 +64,7 @@ object ThemePreset {
         keyboardColor = 0xfffafafa,
         keyBackgroundColor = 0xffffffff,
         keyTextColor = 0xff212121,
+        candidateTextColor = 0xff212121,
         altKeyBackgroundColor = 0xffe1e1e1,
         // Google Pinyin's symbol color on alphabet key: #4e4e4e
         altKeyTextColor = 0xff6e6e6e,
@@ -86,6 +89,7 @@ object ThemePreset {
         keyboardColor = 0xff2d2d2d,
         keyBackgroundColor = 0xff464646,
         keyTextColor = 0xfffafafa,
+        candidateTextColor = 0xfffafafa,
         altKeyBackgroundColor = 0xff373737,
         // Google Pinyin's symbol color on alphabet key: #d6d6d6
         altKeyTextColor = 0xffacacac,
@@ -110,6 +114,7 @@ object ThemePreset {
         keyboardColor = 0xff1565c0,
         keyBackgroundColor = 0xff3f80cb,
         keyTextColor = 0xffffffff,
+        candidateTextColor = 0xffffffff,
         altKeyBackgroundColor = 0xff2771c4,
         // Google Pinyin's symbol color on alphabet key: #d6d6d6
         altKeyTextColor = 0xffa9c6e7,
@@ -134,6 +139,7 @@ object ThemePreset {
         keyboardColor = 0xff000000,
         keyBackgroundColor = 0xff2e2e2e,
         keyTextColor = 0xffffffff,
+        candidateTextColor = 0xffffffff,
         altKeyBackgroundColor = 0xff141414,
         // Google Pinyin's symbol color on alphabet key: #d9e6f5
         altKeyTextColor = 0xffa1a1a1,
@@ -158,6 +164,7 @@ object ThemePreset {
         keyboardColor = 0xffECEFF4,
         keyBackgroundColor = 0xffECEFF4,
         keyTextColor = 0xff2E3440,
+        candidateTextColor = 0xff2E3440,
         altKeyBackgroundColor = 0xffE5E9F0,
         altKeyTextColor = 0xff434C5E,
         accentKeyBackgroundColor = 0xff5E81AC,
@@ -181,6 +188,7 @@ object ThemePreset {
         keyboardColor = 0xff2E3440,
         keyBackgroundColor = 0xff4C566A,
         keyTextColor = 0xffECEFF4,
+        candidateTextColor = 0xffECEFF4,
         altKeyBackgroundColor = 0xff3B4252,
         altKeyTextColor = 0xffD8DEE9,
         accentKeyBackgroundColor = 0xff88C0D0,
@@ -204,6 +212,7 @@ object ThemePreset {
         keyboardColor = 0xff272822,
         keyBackgroundColor = 0xff33342c,
         keyTextColor = 0xffd6d6d6,
+        candidateTextColor = 0xffd6d6d6,
         altKeyBackgroundColor = 0xff2d2e27,
         altKeyTextColor = 0xff797979,
         accentKeyBackgroundColor = 0xffb05279,
@@ -230,6 +239,7 @@ object ThemePreset {
         keyboardColor = 0x00000000,
         keyBackgroundColor = 0x4bffffff,
         keyTextColor = 0xffffffff,
+        candidateTextColor = 0xffffffff,
         altKeyBackgroundColor = 0x0cffffff,
         altKeyTextColor = 0xc9ffffff,
         accentKeyBackgroundColor = 0xff5e97f6,
@@ -256,6 +266,7 @@ object ThemePreset {
         keyboardColor = 0x00000000,
         keyBackgroundColor = 0x4bffffff,
         keyTextColor = 0xff000000,
+        candidateTextColor = 0xff000000,
         altKeyBackgroundColor = 0x0cffffff,
         altKeyTextColor = 0xb9000000,
         accentKeyBackgroundColor = 0xff5e97f6,
