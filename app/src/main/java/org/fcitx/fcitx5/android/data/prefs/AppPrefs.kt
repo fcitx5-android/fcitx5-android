@@ -83,6 +83,8 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             buttonLongPressVibrationMilliseconds = secondary
         }
 
+        val hapticFeedback = switch(R.string.haptic_feedback, "haptic_feedback", false)
+
         val buttonPressVibrationAmplitude: ManagedPreference.PInt
         val buttonLongPressVibrationAmplitude: ManagedPreference.PInt
 
