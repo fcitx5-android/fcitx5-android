@@ -67,7 +67,7 @@ abstract class BaseKeyboard(
 
     private val vivoKeypressWorkaround by prefs.advanced.vivoKeypressWorkaround
 
-    private val moreVibration by prefs.keyboard.moreVibration
+    private val hapticFeedback by prefs.keyboard.hapticFeedback
 
     var popupActionListener: PopupActionListener? = null
 
@@ -158,7 +158,7 @@ abstract class BaseKeyboard(
                 is ReturnKey -> InputFeedbacks.SoundEffect.Return
                 else -> InputFeedbacks.SoundEffect.Standard
             }
-            val vibration: ((view: View) -> Unit)? = if (moreVibration) { view ->
+            val vibration: ((view: View) -> Unit)? = if (hapticFeedback) { view ->
                 InputFeedbacks.hapticFeedback(view)
             } else null
             if (def is SpaceKey) {
@@ -223,7 +223,7 @@ abstract class BaseKeyboard(
                     }
                     is KeyDef.Behavior.Repeat -> {
                         repeatEnabled = true
-                        onRepeatListener = if (moreVibration && def is BackspaceKey) { view ->
+                        onRepeatListener = if (hapticFeedback && def is BackspaceKey) { view ->
                             onAction(it.action)
                             InputFeedbacks.hapticFeedback(view)
                         } else { _ -> onAction(it.action) }
