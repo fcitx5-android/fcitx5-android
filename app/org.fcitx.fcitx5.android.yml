@@ -32,7 +32,7 @@ Builds:
     rm:
       - lib/fcitx5/src/main/cpp/prebuilt
     prebuild:
-      - sdkmanager 'cmake;3.22.1'
+      - sdkmanager 'cmake;3.31.1'
       - sed -i -e '/ImportQualifiedPost/d' $$fcitx5-android-prebuilder$$/src/Main.hs
       - sed -i -e 's/import \(.*\) qualified as/import qualified \1 as/g' $$fcitx5-android-prebuilder$$/src/*.hs
       - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' ../build-logic/convention/build.gradle.kts
