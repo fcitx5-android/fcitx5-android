@@ -26,6 +26,6 @@ add_subdirectory(fcitx5-chewing)
 
 set(ASSETS_DIR "${CMAKE_CURRENT_LIST_DIR}/../../main/assets")
 add_custom_target(prebuilt-assets
-        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_CURRENT_LIST_DIR}/chewing-data" "${ASSETS_DIR}/usr/share/libchewing"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${PREBUILT_DIR}/chewing-dict" "${ASSETS_DIR}/usr/share/libchewing"
         COMMENT "Copying prebuilt assets to :app"
 )
