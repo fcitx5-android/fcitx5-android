@@ -1,6 +1,7 @@
 plugins {
     id("org.fcitx.fcitx5.android.lib-convention")
     id("org.fcitx.fcitx5.android.native-lib-convention")
+    id("org.fcitx.fcitx5.android.fcitx-devel-files")
     id("org.fcitx.fcitx5.android.fcitx-headers")
 }
 
@@ -14,6 +15,7 @@ android {
                 targets(
                     // dummy "cmake" target
                     "cmake",
+                    "devel",
                     // fcitx5
                     "Fcitx5Core",
                     "Fcitx5Config",
@@ -34,6 +36,10 @@ android {
         create("cmake") {
             headerOnly = true
             headers = "src/main/cpp/cmake"
+        }
+        create("devel") {
+            headerOnly = true
+            headers = "build/devel/usr/lib/cmake"
         }
         val headersPrefix = "build/headers/usr/include/Fcitx5"
         create("Fcitx5Core") {

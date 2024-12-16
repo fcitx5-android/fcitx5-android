@@ -12,9 +12,6 @@ import org.gradle.kotlin.dsl.task
 import java.io.File
 import kotlin.io.path.isSymbolicLink
 
-/**
- * Add task installFcitxConfig and installFcitxTranslation, using a random variant's cxx dir
- */
 class FcitxComponentPlugin : Plugin<Project> {
 
     abstract class FcitxComponentExtension {

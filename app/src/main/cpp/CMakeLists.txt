@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.31)
 
 project(fcitx5-android VERSION ${VERSION_NAME})
 
@@ -67,20 +67,31 @@ target_link_libraries(native-lib
 
 add_custom_target(copy-fcitx5-modules
         # fcitx5
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::clipboard,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::imselector,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::quickphrase,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::spell,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5::unicode,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_PROPERTY:fcitx5::clipboard,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_PROPERTY:fcitx5::imselector,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_PROPERTY:fcitx5::quickphrase,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_PROPERTY:fcitx5::spell,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_PROPERTY:fcitx5::unicode,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
         # fcitx5-lua
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5-lua::luaaddonloader,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_PROPERTY:fcitx5-lua::luaaddonloader,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
         # fcitx5-chinese-addons
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5-chinese-addons::pinyin,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5-chinese-addons::table,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5-chinese-addons::scel2org5,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5-chinese-addons::chttrans,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5-chinese-addons::fullwidth,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5-chinese-addons::pinyinhelper,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:fcitx5-chinese-addons::punctuation,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_PROPERTY:fcitx5-chinese-addons::pinyin,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_PROPERTY:fcitx5-chinese-addons::table,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_PROPERTY:fcitx5-chinese-addons::scel2org5,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_PROPERTY:fcitx5-chinese-addons::chttrans,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_PROPERTY:fcitx5-chinese-addons::fullwidth,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_PROPERTY:fcitx5-chinese-addons::pinyinhelper,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_PROPERTY:fcitx5-chinese-addons::punctuation,IMPORTED_LOCATION> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
         COMMENT "Copying fcitx5 module libraries to :app"
         )
+
+set(ASSETS_DIR "${CMAKE_CURRENT_LIST_DIR}/../../main/assets")
+add_custom_target(prebuilt-assets
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PREBUILT_DIR}/spell-dict/en_dict.fscd" "${ASSETS_DIR}/usr/share/fcitx5/spell/en_dict.fscd"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PREBUILT_DIR}/chinese-addons-data/pinyin/chaizi.dict" "${ASSETS_DIR}/usr/share/fcitx5/pinyin/chaizi.dict"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${PREBUILT_DIR}/chinese-addons-data/pinyinhelper" "${ASSETS_DIR}/usr/share/fcitx5/pinyinhelper"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${PREBUILT_DIR}/libime/table" "${ASSETS_DIR}/usr/share/fcitx5/table"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${PREBUILT_DIR}/libime/data" "${ASSETS_DIR}/usr/share/libime"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${PREBUILT_DIR}/opencc/data" "${ASSETS_DIR}/usr/share/opencc"
+        COMMENT "Copying prebuilt assets to :app"
+)

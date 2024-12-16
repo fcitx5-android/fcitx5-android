@@ -17,7 +17,8 @@ android {
         externalNativeBuild {
             cmake {
                 targets(
-                    "anthy"
+                    "anthy",
+                    "prebuilt-assets"
                 )
             }
         }

@@ -24,6 +24,8 @@ android {
                     "native-lib",
                     // copy fcitx5 built-in addon libraries
                     "copy-fcitx5-modules",
+                    // install prebuilt assets files
+                    "prebuilt-assets",
                     // android specific modules
                     "androidfrontend",
                     "androidkeyboard",
