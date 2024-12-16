@@ -24,7 +24,6 @@ unset(BUILD_SHARED_LIBS)
 set(ANTHY_TARGET anthy-unicode)
 add_subdirectory(fcitx5-anthy)
 
-
 set(ASSETS_DIR "${CMAKE_CURRENT_LIST_DIR}/../../main/assets")
 add_custom_target(prebuilt-assets
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/anthy-unicode.conf" "${ASSETS_DIR}/usr/share/anthy/anthy-unicode.conf"

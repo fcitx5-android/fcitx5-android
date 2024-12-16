@@ -18,7 +18,8 @@ android {
             cmake {
                 targets(
                     "jyutping",
-                    "libime_jyutpingdict"
+                    "libime_jyutpingdict",
+                    "prebuilt-assets"
                 )
             }
         }

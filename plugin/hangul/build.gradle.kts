@@ -17,7 +17,8 @@ android {
         externalNativeBuild {
             cmake {
                 targets(
-                    "hangul"
+                    "hangul",
+                    "prebuilt-assets"
                 )
             }
         }

@@ -17,7 +17,8 @@ android {
         externalNativeBuild {
             cmake {
                 targets(
-                    "chewing"
+                    "chewing",
+                    "prebuilt-assets"
                 )
             }
         }
