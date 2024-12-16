@@ -13,7 +13,7 @@ class NativeAppConventionPlugin : NativeBaseConventionPlugin() {
     override fun apply(target: Project) {
         super.apply(target)
 
-        target.pluginManager.apply("com.android.application")
+        target.pluginManager.apply(target.libs.plugins.android.application.get().pluginId)
 
         target.extensions.configure<BaseAppModuleExtension> {
             packaging {

@@ -13,7 +13,7 @@ class NativeLibConventionPlugin : NativeBaseConventionPlugin() {
     override fun apply(target: Project) {
         super.apply(target)
 
-        target.pluginManager.apply("com.android.library")
+        target.pluginManager.apply(target.libs.plugins.android.library.get().pluginId)
 
         target.extensions.configure<LibraryExtension> {
             packaging {

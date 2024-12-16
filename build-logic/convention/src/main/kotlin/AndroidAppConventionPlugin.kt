@@ -28,7 +28,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
 
     override fun apply(target: Project) {
-        target.pluginManager.apply("com.android.application")
+        target.pluginManager.apply(target.libs.plugins.android.application.get().pluginId)
 
         super.apply(target)
 
