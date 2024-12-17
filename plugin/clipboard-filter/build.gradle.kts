@@ -13,6 +13,13 @@ android {
         applicationId = "org.fcitx.fcitx5.android.plugin.clipboard_filter"
     }
 
+    sourceSets {
+        getByName("main") {
+            // TODO: only include data.min.json
+            assets.setSrcDirs(listOf("src/main/assets", "ClearURLsRules"))
+        }
+    }
+
     buildTypes {
         release {
             resValue("string", "app_name", "@string/app_name_release")

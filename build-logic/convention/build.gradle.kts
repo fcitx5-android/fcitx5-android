@@ -53,10 +53,6 @@ gradlePlugin {
             id = "org.fcitx.fcitx5.android.fcitx-component"
             implementationClass = "FcitxComponentPlugin"
         }
-        register("fcitxDevelFiles") {
-            id = "org.fcitx.fcitx5.android.fcitx-devel-files"
-            implementationClass = "FcitxDevelFilesPlugin"
-        }
         register("fcitxHeaders") {
             id = "org.fcitx.fcitx5.android.fcitx-headers"
             implementationClass = "FcitxHeadersPlugin"

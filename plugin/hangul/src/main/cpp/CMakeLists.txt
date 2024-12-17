@@ -24,8 +24,4 @@ set(HANGUL_TARGET Hangul_static)
 option(ENABLE_TEST "" OFF)
 add_subdirectory(fcitx5-hangul)
 
-set(ASSETS_DIR "${CMAKE_CURRENT_LIST_DIR}/../../main/assets")
-add_custom_target(prebuilt-assets
-        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${PREBUILT_DIR}/libhangul/data/libhangul" "${ASSETS_DIR}/usr/share/libhangul"
-        COMMENT "Copying prebuilt assets to :app"
-)
+install(DIRECTORY "${PREBUILT_DIR}/libhangul/data/libhangul" DESTINATION "${FCITX_INSTALL_DATADIR}" COMPONENT prebuilt-assets)

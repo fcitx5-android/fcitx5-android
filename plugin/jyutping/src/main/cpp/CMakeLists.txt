@@ -44,8 +44,4 @@ add_subdirectory(libime-jyutping)
 # rename to include executable in apk
 set_target_properties(libime_jyutpingdict PROPERTIES OUTPUT_NAME libime_jyutpingdict.so)
 
-set(ASSETS_DIR "${CMAKE_CURRENT_LIST_DIR}/../../main/assets")
-add_custom_target(prebuilt-assets
-        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${PREBUILT_DIR}/libime-jyutping" "${ASSETS_DIR}/usr/share/libime"
-        COMMENT "Copying prebuilt assets to :app"
-)
+install(DIRECTORY "${PREBUILT_DIR}/libime-jyutping/" DESTINATION "${FCITX_INSTALL_DATADIR}/libime" COMPONENT prebuilt-assets)

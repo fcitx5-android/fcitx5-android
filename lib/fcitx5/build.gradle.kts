@@ -1,8 +1,11 @@
 plugins {
     id("org.fcitx.fcitx5.android.lib-convention")
     id("org.fcitx.fcitx5.android.native-lib-convention")
-    id("org.fcitx.fcitx5.android.fcitx-devel-files")
     id("org.fcitx.fcitx5.android.fcitx-headers")
+}
+
+fcitxHeaders {
+    installDevelComponent = true
 }
 
 android {

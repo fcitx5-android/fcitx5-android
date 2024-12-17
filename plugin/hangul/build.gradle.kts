@@ -7,6 +7,10 @@ plugins {
     id("org.fcitx.fcitx5.android.fcitx-component")
 }
 
+fcitxComponent {
+    installPrebuiltAssets = true
+}
+
 android {
     namespace = "org.fcitx.fcitx5.android.plugin.hangul"
 
@@ -17,8 +21,7 @@ android {
         externalNativeBuild {
             cmake {
                 targets(
-                    "hangul",
-                    "prebuilt-assets"
+                    "hangul"
                 )
             }
         }
