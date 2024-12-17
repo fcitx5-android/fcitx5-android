@@ -32,7 +32,7 @@ jobs:
       - name: Setup Android environment
         uses: android-actions/setup-android@v3
         with:
-          packages: cmake;3.31.1
+          packages: cmake;3.30.5
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
