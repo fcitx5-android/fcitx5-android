@@ -1,3 +1,5 @@
+import com.android.build.gradle.tasks.MergeSourceSetFolders
+
 plugins {
     id("org.fcitx.fcitx5.android.app-convention")
     id("org.fcitx.fcitx5.android.plugin-app-convention")
@@ -13,13 +15,6 @@ android {
         applicationId = "org.fcitx.fcitx5.android.plugin.clipboard_filter"
     }
 
-    sourceSets {
-        getByName("main") {
-            // TODO: only include data.min.json
-            assets.setSrcDirs(listOf("src/main/assets", "ClearURLsRules"))
-        }
-    }
-
     buildTypes {
         release {
             resValue("string", "app_name", "@string/app_name_release")
@@ -30,12 +25,22 @@ android {
     }
 }
 
-aboutLibraries {
-    configPath = "plugin/clipboard-filter/licenses"
+// copy ClearURLsRules/data.min.json to apk assets
+tasks.withType<MergeSourceSetFolders>().all {
+    // mergeDebugAssets or mergeReleaseAssets
+    if (name.endsWith("Assets")) {
+        tasks.register<Copy>("${name}Pre") {
+            with(copySpec {
+                from("ClearURLsRules")
+                include("data.min.json")
+            })
+            into(this@all.outputs.files.files.first())
+        }.let { this@all.dependsOn(it) }
+    }
 }
 
-generateDataDescriptor{
-    excludes.add("data.min.json")
+aboutLibraries {
+    configPath = "plugin/clipboard-filter/licenses"
 }
 
 dependencies {
