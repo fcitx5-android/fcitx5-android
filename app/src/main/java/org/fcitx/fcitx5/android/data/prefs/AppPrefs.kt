@@ -83,6 +83,8 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             buttonLongPressVibrationMilliseconds = secondary
         }
 
+        val hapticOnRepeat = switch(R.string.haptic_on_repeat, "haptic_on_repeat", false)
+
         val buttonPressVibrationAmplitude: ManagedPreference.PInt
         val buttonLongPressVibrationAmplitude: ManagedPreference.PInt
 
