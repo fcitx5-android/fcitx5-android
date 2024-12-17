@@ -126,7 +126,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         prefs.keyboard.expandKeypressArea,
         prefs.advanced.disableAnimation,
         prefs.advanced.ignoreSystemWindowInsets,
-        prefs.keyboard.hapticFeedback,
     )
 
     private fun replaceInputView(theme: Theme): InputView {
@@ -928,7 +927,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onFinishInputView(finishingInput: Boolean) {
         Timber.d("onFinishInputView: finishingInput=$finishingInput")
-        inputView?.updateSelection(0, 0)
         decorLocationUpdated = false
         inputDeviceMgr.onFinishInputView()
         currentInputConnection?.apply {
