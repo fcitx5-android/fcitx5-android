@@ -29,8 +29,8 @@ android {
 tasks.withType<MergeSourceSetFolders>().all {
     // mergeDebugAssets or mergeReleaseAssets
     if (name.endsWith("Assets")) {
-        val outDir = outputDir.asFile.get()
         doLast {
+            val outDir = outputDir.asFile.get()
             file("ClearURLsRules/data.min.json").copyTo(outDir.resolve("data.min.json"))
         }
     }
