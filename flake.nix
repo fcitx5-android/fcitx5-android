@@ -30,7 +30,7 @@
 
               # Update versions here
               # This should match to build-logic/convention/src/main/kotlin/Versions.kt
-              cmakeVersion = "3.30.5";
+              cmakeVersion = "3.31.1";
               buildToolsVersion = "35.0.0";
               platformToolsVersion = "35.0.2";
               platformVersion = "35";

@@ -70,11 +70,24 @@ Discuss on Telegram: [@fcitx5_android_group](https://t.me/fcitx5_android_group) 
 ### Dependencies
 
 - Android SDK Platform & Build-Tools 35.
-- Android NDK (Side by side) 25 & CMake 3.30.5, they can be installed using SDK Manager in Android Studio or `sdkmanager` command line.
+- Android NDK (Side by side) 25 & CMake 3.31.1, they can be installed using SDK Manager in Android Studio or `sdkmanager` command line.
 - [KDE/extra-cmake-modules](https://github.com/KDE/extra-cmake-modules)
 - GNU Gettext >= 0.20 (for `msgfmt` binary; or install `appstream` if you really have to use gettext <= 0.19.)
 
 ### How to set up development environment
+
+<details>
+<summary>Prerequisites for Windows</summary>
+
+- Enable [Developer Mode](https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development) so that symlinks can be created without administrator privilege.
+
+- Enable symlink support for `git`:
+
+    ```shell
+    git config --global core.symlinks true
+    ```
+
+</details>
 
 First, clone this repository and fetch all submodules:
 

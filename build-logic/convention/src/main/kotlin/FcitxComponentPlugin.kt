@@ -114,6 +114,8 @@ class FcitxComponentPlugin : Plugin<Project> {
                     commandLine(cmake, "--install", ".", "--component", "modules")
                 }
             }
+            // otherwise module libraries won't be included in apk
+            runAfterNativeBuild(project)
         }
         project.tasks.getByName(INSTALL_TASK).dependsOn(task)
     }
