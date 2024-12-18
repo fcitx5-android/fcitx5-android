@@ -29,13 +29,10 @@ android {
 tasks.withType<MergeSourceSetFolders>().all {
     // mergeDebugAssets or mergeReleaseAssets
     if (name.endsWith("Assets")) {
-        tasks.register<Copy>("${name}Pre") {
-            with(copySpec {
-                from("ClearURLsRules")
-                include("data.min.json")
-            })
-            into(this@all.outputs.files.files.first())
-        }.let { this@all.dependsOn(it) }
+        val outDir = outputDir.asFile.get()
+        doLast {
+            file("ClearURLsRules/data.min.json").copyTo(outDir.resolve("data.min.json"))
+        }
     }
 }
 
