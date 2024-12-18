@@ -66,16 +66,14 @@ target_link_libraries(native-lib
         )
 
 # copy module libraries from dependency lib
-install(FILES
-        # fcitx5
+add_custom_target(copy-fcitx5-modules
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
         $<TARGET_PROPERTY:fcitx5::clipboard,IMPORTED_LOCATION>
         $<TARGET_PROPERTY:fcitx5::imselector,IMPORTED_LOCATION>
         $<TARGET_PROPERTY:fcitx5::quickphrase,IMPORTED_LOCATION>
         $<TARGET_PROPERTY:fcitx5::spell,IMPORTED_LOCATION>
         $<TARGET_PROPERTY:fcitx5::unicode,IMPORTED_LOCATION>
-        # fcitx5-lua
         $<TARGET_PROPERTY:fcitx5-lua::luaaddonloader,IMPORTED_LOCATION>
-        # fcitx5-chinese-addons
         $<TARGET_PROPERTY:fcitx5-chinese-addons::pinyin,IMPORTED_LOCATION>
         $<TARGET_PROPERTY:fcitx5-chinese-addons::table,IMPORTED_LOCATION>
         $<TARGET_PROPERTY:fcitx5-chinese-addons::scel2org5,IMPORTED_LOCATION>
@@ -83,8 +81,8 @@ install(FILES
         $<TARGET_PROPERTY:fcitx5-chinese-addons::fullwidth,IMPORTED_LOCATION>
         $<TARGET_PROPERTY:fcitx5-chinese-addons::pinyinhelper,IMPORTED_LOCATION>
         $<TARGET_PROPERTY:fcitx5-chinese-addons::punctuation,IMPORTED_LOCATION>
-        DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-        COMPONENT modules
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMENT "Copying fcitx5 module libraries to :app"
         )
 
 # install prebuilt assets

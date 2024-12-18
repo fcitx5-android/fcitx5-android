@@ -18,7 +18,6 @@ class FcitxComponentPlugin : Plugin<Project> {
         var includeLibs: List<String> = emptyList()
         var excludeFiles: List<String> = emptyList()
         var modifyFiles: Map<String, (File) -> Unit> = emptyMap()
-        var installModulesComponent: Boolean = false
         var installPrebuiltAssets: Boolean = false
     }
 
@@ -54,9 +53,6 @@ class FcitxComponentPlugin : Plugin<Project> {
                         }
                     }
                 }
-            }
-            if (ext.installModulesComponent) {
-                registerInstallModulesTask(target)
             }
             if (ext.installPrebuiltAssets) {
                 registerCMakeTask(target, "", "prebuilt-assets")
@@ -101,21 +97,6 @@ class FcitxComponentPlugin : Plugin<Project> {
                     }
                 }
             }
-        }
-        project.tasks.getByName(INSTALL_TASK).dependsOn(task)
-    }
-
-    private fun registerInstallModulesTask(project: Project) {
-        val task = project.task("installModuleLibraries") {
-            runAfterNativeConfigure(project) {
-                val cmake = it.variant.module.cmake!!.cmakeExe!!
-                project.exec {
-                    workingDir = it.cxxBuildFolder
-                    commandLine(cmake, "--install", ".", "--component", "modules")
-                }
-            }
-            // otherwise module libraries won't be included in apk
-            runAfterNativeBuild(project)
         }
         project.tasks.getByName(INSTALL_TASK).dependsOn(task)
     }

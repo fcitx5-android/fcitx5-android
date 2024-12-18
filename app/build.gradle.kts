@@ -22,6 +22,8 @@ android {
                 targets(
                     // jni
                     "native-lib",
+                    // copy fcitx5 built-in addon libraries
+                    "copy-fcitx5-modules",
                     // android specific modules
                     "androidfrontend",
                     "androidkeyboard",
@@ -80,7 +82,6 @@ fcitxComponent {
     excludeFiles = listOf("cangjie", "erbi", "qxm", "wanfeng").map {
         "usr/share/fcitx5/inputmethod/$it.conf"
     }
-    installModulesComponent = true
     installPrebuiltAssets = true
 }
 
