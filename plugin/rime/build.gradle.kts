@@ -42,6 +42,30 @@ android {
     }
 }
 
+val copyRimeSharedData = tasks.register<Copy>("copyRimeSharedData") {
+    from(listOf(
+        "default.yaml",
+        "rime-essay/essay.txt",
+        "rime-prelude/key_bindings.yaml",
+        "rime-prelude/punctuation.yaml",
+        "rime-prelude/symbols.yaml",
+        "rime-luna-pinyin/luna_pinyin_fluency.schema.yaml",
+        "rime-luna-pinyin/luna_pinyin_simp.schema.yaml",
+        "rime-luna-pinyin/luna_pinyin_tw.schema.yaml",
+        "rime-luna-pinyin/luna_pinyin.dict.yaml",
+        "rime-luna-pinyin/luna_pinyin.schema.yaml",
+        "rime-luna-pinyin/luna_quanpin.schema.yaml",
+        "rime-luna-pinyin/pinyin.yaml",
+        "rime-stroke/stroke.dict.yaml",
+        "rime-stroke/stroke.schema.yaml",
+    ).map { "src/main/cpp/$it" })
+    into(layout.projectDirectory.dir("src/main/assets/usr/share/rime-data/"))
+}
+
+tasks.withType<DataDescriptorPlugin.DataDescriptorTask>().all {
+    dependsOn(copyRimeSharedData)
+}
+
 generateDataDescriptor {
     symlinks.put("usr/share/rime-data/opencc", "usr/share/opencc")
 }
