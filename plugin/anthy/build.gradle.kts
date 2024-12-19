@@ -42,8 +42,8 @@ android {
     }
 }
 
-aboutLibraries {
-    configPath = "plugin/anthy/licenses"
+fcitxComponent {
+    installPrebuiltAssets = true
 }
 
 dependencies {

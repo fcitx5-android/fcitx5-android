@@ -43,3 +43,5 @@ option(ENABLE_TEST "" OFF)
 add_subdirectory(libime-jyutping)
 # rename to include executable in apk
 set_target_properties(libime_jyutpingdict PROPERTIES OUTPUT_NAME libime_jyutpingdict.so)
+
+install(DIRECTORY "${PREBUILT_DIR}/libime-jyutping/" DESTINATION "${FCITX_INSTALL_DATADIR}/libime" COMPONENT prebuilt-assets)

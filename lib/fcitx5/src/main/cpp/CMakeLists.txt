@@ -7,6 +7,8 @@ add_link_options("LINKER:--hash-style=gnu,--build-id=none")
 
 # dummy target to export src/main/cpp/cmake
 add_custom_target(cmake)
+# dummy target to export build/devel/usr/lib/cmake
+add_custom_target(devel)
 # dummy target to export "notifications_public.h"
 add_custom_target(notifications)
 
