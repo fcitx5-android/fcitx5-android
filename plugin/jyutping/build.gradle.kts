@@ -7,10 +7,6 @@ plugins {
     id("org.fcitx.fcitx5.android.fcitx-component")
 }
 
-fcitxComponent {
-    installPrebuiltAssets = true
-}
-
 android {
     namespace = "org.fcitx.fcitx5.android.plugin.jyutping"
 
@@ -60,10 +56,7 @@ fcitxComponent {
             )
         }
     )
-}
-
-aboutLibraries {
-    configPath = "plugin/jyutping/licenses"
+    installPrebuiltAssets = true
 }
 
 dependencies {

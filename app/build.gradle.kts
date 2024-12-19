@@ -67,10 +67,6 @@ kotlin {
     }
 }
 
-aboutLibraries {
-    configPath = "app/licenses"
-}
-
 fcitxComponent {
     includeLibs = listOf(
         "fcitx5",

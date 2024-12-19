@@ -7,10 +7,6 @@ plugins {
     id("org.fcitx.fcitx5.android.fcitx-component")
 }
 
-fcitxComponent {
-    installPrebuiltAssets = true
-}
-
 android {
     namespace = "org.fcitx.fcitx5.android.plugin.rime"
 
@@ -46,12 +42,12 @@ android {
     }
 }
 
-generateDataDescriptor {
-    symlinks.put("usr/share/rime-data/opencc", "usr/share/opencc")
+fcitxComponent {
+    installPrebuiltAssets = true
 }
 
-aboutLibraries {
-    configPath = "plugin/rime/licenses"
+generateDataDescriptor {
+    symlinks.put("usr/share/rime-data/opencc", "usr/share/opencc")
 }
 
 dependencies {

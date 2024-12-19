@@ -1,4 +1,5 @@
 import com.android.build.gradle.tasks.MergeSourceSetFolders
+import kotlinx.serialization.json.Json
 
 plugins {
     id("org.fcitx.fcitx5.android.app-convention")
@@ -30,14 +31,12 @@ tasks.withType<MergeSourceSetFolders>().all {
     // mergeDebugAssets or mergeReleaseAssets
     if (name.endsWith("Assets")) {
         doLast {
-            val outDir = outputDir.asFile.get()
-            file("ClearURLsRules/data.min.json").copyTo(outDir.resolve("data.min.json"))
+            val inFile = file("ClearURLsRules/data.min.json")
+            val outFile = outputDir.asFile.get().resolve("data.min.json")
+            // minify json
+            outFile.writeText(Json.parseToJsonElement(inFile.readText()).toString())
         }
     }
-}
-
-aboutLibraries {
-    configPath = "plugin/clipboard-filter/licenses"
 }
 
 dependencies {
