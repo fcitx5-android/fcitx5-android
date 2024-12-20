@@ -12,6 +12,7 @@
 <li>Japanese (via Anthy Plugin)</li>
 <li>Korean (via Hangul Plugin)</li>
 <li>Sinhala (via Sayura Plugin)</li>
+<li>Thai (via Thai Plugin)
 <li>Generic (via RIME Plugin, supports importing custom schemas)</li>
 </ul>
 <b>Features</b>
@@ -23,9 +24,4 @@
 <li>Popup preview on key press</li>
 <li>Long press popup keyboard for convenient symbol input</li>
 <li>Symbol and Emoji picker</li>
-</ul>
-<b>Work in progress</b>
-<ul>
-<li>Customizable keyboard layout</li>
-<li>More input methods</li>
 </ul>
