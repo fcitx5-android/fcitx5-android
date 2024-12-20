@@ -56,10 +56,7 @@ fcitxComponent {
             )
         }
     )
-}
-
-aboutLibraries {
-    configPath = "plugin/jyutping/licenses"
+    installPrebuiltAssets = true
 }
 
 dependencies {

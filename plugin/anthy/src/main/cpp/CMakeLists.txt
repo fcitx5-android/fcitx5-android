@@ -23,3 +23,10 @@ unset(BUILD_SHARED_LIBS)
 
 set(ANTHY_TARGET anthy-unicode)
 add_subdirectory(fcitx5-anthy)
+
+install(FILES
+        "${PREBUILT_DIR}/anthy-dict/anthy.dic"
+        "${CMAKE_CURRENT_LIST_DIR}/anthy-unicode.conf"
+        DESTINATION "${FCITX_INSTALL_DATADIR}/anthy"
+        COMPONENT prebuilt-assets
+        )

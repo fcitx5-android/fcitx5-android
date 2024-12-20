@@ -23,3 +23,5 @@ set_target_properties(Chewing_static PROPERTIES
 set(CHEWING_TARGET Chewing_static)
 option(ENABLE_TEST "" OFF)
 add_subdirectory(fcitx5-chewing)
+
+install(DIRECTORY "${PREBUILT_DIR}/chewing-dict/" DESTINATION "${FCITX_INSTALL_DATADIR}/libchewing" COMPONENT prebuilt-assets)

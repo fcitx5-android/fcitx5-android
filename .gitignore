@@ -1,21 +1,12 @@
 # Module :app
 # Installed data
-/app/src/main/assets/usr/share/fcitx5/addon
-/app/src/main/assets/usr/share/fcitx5/chttrans
-/app/src/main/assets/usr/share/fcitx5/data
-/app/src/main/assets/usr/share/fcitx5/default
-/app/src/main/assets/usr/share/fcitx5/inputmethod
-/app/src/main/assets/usr/share/fcitx5/lua
-/app/src/main/assets/usr/share/fcitx5/punctuation
-/app/src/main/assets/usr/share/fcitx5/unicode
-/app/src/main/assets/usr/share/locale
+/app/src/main/assets/usr/
 # Generated asset descriptor
 /app/src/main/assets/descriptor.json
 
 # Plugins
 # Installed data
-/plugin/*/src/main/assets/usr/share/fcitx5
-/plugin/*/src/main/assets/usr/share/locale
+/plugin/*/src/main/assets/usr/
 # Generated asset descriptor
 /plugin/*/src/main/assets/descriptor.json
 

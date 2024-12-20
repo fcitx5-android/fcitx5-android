@@ -42,8 +42,8 @@ android {
     }
 }
 
-aboutLibraries {
-    configPath = "plugin/hangul/licenses"
+fcitxComponent {
+    installPrebuiltAssets = true
 }
 
 dependencies {

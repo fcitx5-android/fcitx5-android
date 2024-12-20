@@ -141,6 +141,7 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
         target.pluginManager.apply(target.libs.plugins.aboutlibraries.get().pluginId)
 
         target.configure<AboutLibrariesExtension> {
+            configPath = target.rootProject.relativePath(target.file("licenses"))
             excludeFields = arrayOf(
                 "generated", "developers", "organization", "scm", "funding", "content"
             )
