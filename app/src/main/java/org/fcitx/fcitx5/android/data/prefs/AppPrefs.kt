@@ -62,6 +62,8 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             "haptic_on_keyup",
             false
         ) { hapticOnKeyPress.getValue() != InputFeedbackMode.Disabled }
+        val hapticOnRepeat = switch(R.string.haptic_on_repeat, "haptic_on_repeat", false)
+
         val buttonPressVibrationMilliseconds: ManagedPreference.PInt
         val buttonLongPressVibrationMilliseconds: ManagedPreference.PInt
 
