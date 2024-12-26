@@ -7,6 +7,8 @@ package org.fcitx.fcitx5.android.input.editing
 import android.view.KeyEvent
 import android.view.View
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.data.InputFeedbacks
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
@@ -25,6 +27,8 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
     private val windowManager: InputWindowManager by manager.must()
     private val theme by manager.theme()
 
+    private val hapticOnRepeat by AppPrefs.getInstance().keyboard.hapticOnRepeat
+
     private val buttonRipple by ThemeManager.prefs.keyRippleEffect
     private val buttonBorder by ThemeManager.prefs.keyBorder
     private val buttonRadius by ThemeManager.prefs.textEditingButtonRadius
@@ -41,7 +45,10 @@ class TextEditingWindow : InputWindow.ExtendedInputWindow<TextEditingWindow>(),
             fun CustomGestureView.onClickWithRepeating(block: () -> Unit) {
                 setOnClickListener { block() }
                 repeatEnabled = true
-                onRepeatListener = { block() }
+                onRepeatListener = {
+                    block()
+                    if (hapticOnRepeat) InputFeedbacks.hapticFeedback(this)
+                }
             }
 
             leftButton.onClickWithRepeating { sendDirectionKey(KeyEvent.KEYCODE_DPAD_LEFT) }

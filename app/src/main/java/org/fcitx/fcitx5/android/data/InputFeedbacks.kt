@@ -6,6 +6,7 @@ package org.fcitx.fcitx5.android.data
 
 import android.media.AudioManager
 import android.os.Build
+import android.os.Build.VERSION
 import android.os.VibrationEffect
 import android.provider.Settings
 import android.view.HapticFeedbackConstants
@@ -70,7 +71,11 @@ object InputFeedbacks {
         } else {
             duration = buttonPressVibrationMilliseconds.toLong()
             amplitude = buttonPressVibrationAmplitude
-            hfc = HapticFeedbackConstants.KEYBOARD_TAP
+            hfc = if (VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 && keyUp) {
+                HapticFeedbackConstants.KEYBOARD_RELEASE
+            } else {
+                HapticFeedbackConstants.KEYBOARD_TAP
+            }
         }
         val useVibrator = duration != 0L
 
