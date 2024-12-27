@@ -25,7 +25,7 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
         textSize = 20f // sp
         isSingleLine = true
         gravity = gravityCenter
-        setTextColor(theme.keyTextColor)
+        setTextColor(theme.candidateTextColor)
     }
 
     override val root = view(::CustomGestureView) {

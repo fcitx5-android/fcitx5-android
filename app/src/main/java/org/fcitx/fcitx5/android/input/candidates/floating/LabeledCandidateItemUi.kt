@@ -27,8 +27,8 @@ class LabeledCandidateItemUi(
     }
 
     fun update(candidate: FcitxEvent.Candidate, active: Boolean) {
-        val fg = if (active) theme.genericActiveForegroundColor else theme.keyTextColor
-        val altFg = if (active) theme.genericActiveForegroundColor else theme.altKeyTextColor
+        val fg = if (active) theme.genericActiveForegroundColor else theme.candidateLabelColor
+        val altFg = if (active) theme.genericActiveForegroundColor else theme.candidateCommentColor
         root.text = buildSpannedString {
             color(fg) { append(candidate.label) }
             color(fg) { append(candidate.text) }
