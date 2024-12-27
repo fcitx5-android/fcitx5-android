@@ -28,7 +28,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
 
     override fun apply(target: Project) {
-        target.pluginManager.apply("com.android.application")
+        target.pluginManager.apply(target.libs.plugins.android.application.get().pluginId)
 
         super.apply(target)
 
@@ -141,6 +141,7 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
         target.pluginManager.apply(target.libs.plugins.aboutlibraries.get().pluginId)
 
         target.configure<AboutLibrariesExtension> {
+            configPath = target.rootProject.relativePath(target.file("licenses"))
             excludeFields = arrayOf(
                 "generated", "developers", "organization", "scm", "funding", "content"
             )

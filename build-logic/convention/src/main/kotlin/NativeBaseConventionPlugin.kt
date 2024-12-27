@@ -12,8 +12,7 @@ import org.gradle.kotlin.dsl.task
 open class NativeBaseConventionPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
-        val prebuiltDir = target.rootProject.projectDir
-            .resolve("lib/fcitx5/src/main/cpp/prebuilt").absolutePath
+        val prebuiltDir = target.rootProject.projectDir.resolve("lib/fcitx5/src/main/cpp/prebuilt")
         target.extensions.configure(CommonExtension::class.java) {
             ndkVersion = target.ndkVersion
             defaultConfig {
@@ -25,7 +24,7 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
                             "-DANDROID_STL=c++_shared",
                             "-DANDROID_USE_LEGACY_TOOLCHAIN_FILE=OFF",
                             "-DVERSION_NAME=${Versions.baseVersionName}",
-                            "-DPREBUILT_DIR=$prebuiltDir"
+                            "-DPREBUILT_DIR=${prebuiltDir.absolutePath}"
                         )
                     }
                 }

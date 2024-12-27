@@ -67,6 +67,8 @@ abstract class BaseKeyboard(
 
     private val vivoKeypressWorkaround by prefs.advanced.vivoKeypressWorkaround
 
+    private val hapticOnRepeat by prefs.keyboard.hapticOnRepeat
+
     var popupActionListener: PopupActionListener? = null
 
     private val selectionSwipeThreshold = dp(10f)
@@ -162,7 +164,7 @@ abstract class BaseKeyboard(
                 swipeRepeatEnabled = true
                 swipeThresholdX = selectionSwipeThreshold
                 swipeThresholdY = disabledSwipeThreshold
-                onGestureListener = OnGestureListener { _, event ->
+                onGestureListener = OnGestureListener { view, event ->
                     when (event.type) {
                         GestureType.Move -> when (val count = event.countX) {
                             0 -> false
@@ -172,6 +174,7 @@ abstract class BaseKeyboard(
                                 val action = KeyAction.SymAction(KeySym(sym), KeyStates.Empty)
                                 repeat(count.absoluteValue) {
                                     onAction(action)
+                                    if (hapticOnRepeat) InputFeedbacks.hapticFeedback(view)
                                 }
                                 true
                             }
@@ -184,12 +187,13 @@ abstract class BaseKeyboard(
                 swipeRepeatEnabled = true
                 swipeThresholdX = selectionSwipeThreshold
                 swipeThresholdY = disabledSwipeThreshold
-                onGestureListener = OnGestureListener { _, event ->
+                onGestureListener = OnGestureListener { view, event ->
                     when (event.type) {
                         GestureType.Move -> {
                             val count = event.countX
                             if (count != 0) {
                                 onAction(KeyAction.MoveSelectionAction(count))
+                                if (hapticOnRepeat) InputFeedbacks.hapticFeedback(view)
                                 true
                             } else false
                         }
@@ -216,8 +220,9 @@ abstract class BaseKeyboard(
                     }
                     is KeyDef.Behavior.Repeat -> {
                         repeatEnabled = true
-                        onRepeatListener = { _ ->
+                        onRepeatListener = { view ->
                             onAction(it.action)
+                            if (hapticOnRepeat) InputFeedbacks.hapticFeedback(view)
                         }
                     }
                     is KeyDef.Behavior.Swipe -> {

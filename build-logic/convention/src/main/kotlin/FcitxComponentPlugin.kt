@@ -12,21 +12,20 @@ import org.gradle.kotlin.dsl.task
 import java.io.File
 import kotlin.io.path.isSymbolicLink
 
-/**
- * Add task installFcitxConfig and installFcitxTranslation, using a random variant's cxx dir
- */
 class FcitxComponentPlugin : Plugin<Project> {
 
     abstract class FcitxComponentExtension {
-        var installLibraries: List<String> = emptyList()
+        var includeLibs: List<String> = emptyList()
         var excludeFiles: List<String> = emptyList()
         var modifyFiles: Map<String, (File) -> Unit> = emptyMap()
+        var installPrebuiltAssets: Boolean = false
     }
 
     companion object {
         const val INSTALL_TASK = "installFcitxComponent"
         const val DELETE_TASK = "deleteFcitxComponentExcludeFiles"
         const val CLEAN_TASK = "cleanFcitxComponents"
+        const val EXTENSION = "fcitxComponent"
 
         val DEPENDENT_TASKS = arrayOf(INSTALL_TASK, DELETE_TASK)
     }
@@ -37,10 +36,10 @@ class FcitxComponentPlugin : Plugin<Project> {
         registerCMakeTask(target, "generate-desktop-file", "config")
         registerCMakeTask(target, "translation-file", "translation")
         registerCleanTask(target)
-        target.extensions.create<FcitxComponentExtension>("fcitxComponent")
+        target.extensions.create<FcitxComponentExtension>(EXTENSION)
         target.afterEvaluate {
-            val ext = extensions.getByName<FcitxComponentExtension>("fcitxComponent")
-            ext.installLibraries.forEach {
+            val ext = extensions.getByName<FcitxComponentExtension>(EXTENSION)
+            ext.includeLibs.forEach {
                 val project = rootProject.project(":lib:$it")
                 registerCMakeTask(target, "generate-desktop-file", "config", project)
                 registerCMakeTask(target, "translation-file", "translation", project)
@@ -55,6 +54,9 @@ class FcitxComponentPlugin : Plugin<Project> {
                     }
                 }
             }
+            if (ext.installPrebuiltAssets) {
+                registerCMakeTask(target, "", "prebuilt-assets")
+            }
         }
     }
 
@@ -67,17 +69,20 @@ class FcitxComponentPlugin : Plugin<Project> {
         component: String,
         sourceProject: Project = project
     ) {
+        val componentName = component.split('-').joinToString("") { it.capitalized() }
         val taskName = if (project === sourceProject) {
-            "installProject${component.capitalized()}"
+            "installProject$componentName"
         } else {
-            "installLibrary${component.capitalized()}[${sourceProject.name}]"
+            "installLibrary$componentName[${sourceProject.name}]"
         }
         val task = project.task(taskName) {
             runAfterNativeConfigure(sourceProject) { abiModel ->
                 val cmake = abiModel.variant.module.cmake!!.cmakeExe!!
-                sourceProject.exec {
-                    workingDir = abiModel.cxxBuildFolder
-                    commandLine(cmake, "--build", ".", "--target", target)
+                if (target.isNotEmpty()) {
+                    sourceProject.exec {
+                        workingDir = abiModel.cxxBuildFolder
+                        commandLine(cmake, "--build", ".", "--target", target)
+                    }
                 }
                 sourceProject.exec {
                     workingDir = abiModel.cxxBuildFolder

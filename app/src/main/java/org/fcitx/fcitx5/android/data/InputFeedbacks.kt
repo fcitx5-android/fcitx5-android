@@ -37,21 +37,21 @@ object InputFeedbacks {
         systemHapticFeedback = getSystemSettings<Int>(Settings.System.HAPTIC_FEEDBACK_ENABLED) == 1
     }
 
-    private val soundOnKeyPress by AppPrefs.getInstance().keyboard.soundOnKeyPress
-    private val soundOnKeyPressVolume by AppPrefs.getInstance().keyboard.soundOnKeyPressVolume
-    private val hapticOnKeyPress by AppPrefs.getInstance().keyboard.hapticOnKeyPress
-    private val hapticOnKeyUp by AppPrefs.getInstance().keyboard.hapticOnKeyUp
-    private val buttonPressVibrationMilliseconds by AppPrefs.getInstance().keyboard.buttonPressVibrationMilliseconds
-    private val buttonLongPressVibrationMilliseconds by AppPrefs.getInstance().keyboard.buttonLongPressVibrationMilliseconds
-    private val buttonPressVibrationAmplitude by AppPrefs.getInstance().keyboard.buttonPressVibrationAmplitude
-    private val buttonLongPressVibrationAmplitude by AppPrefs.getInstance().keyboard.buttonLongPressVibrationAmplitude
+    private val keyboardPrefs = AppPrefs.getInstance().keyboard
+
+    private val soundOnKeyPress by keyboardPrefs.soundOnKeyPress
+    private val soundOnKeyPressVolume by keyboardPrefs.soundOnKeyPressVolume
+    private val hapticOnKeyPress by keyboardPrefs.hapticOnKeyPress
+    private val hapticOnKeyUp by keyboardPrefs.hapticOnKeyUp
+    private val buttonPressVibrationMilliseconds by keyboardPrefs.buttonPressVibrationMilliseconds
+    private val buttonLongPressVibrationMilliseconds by keyboardPrefs.buttonLongPressVibrationMilliseconds
+    private val buttonPressVibrationAmplitude by keyboardPrefs.buttonPressVibrationAmplitude
+    private val buttonLongPressVibrationAmplitude by keyboardPrefs.buttonLongPressVibrationAmplitude
 
     private val vibrator = appContext.vibrator
 
     private val hasAmplitudeControl =
         (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) && vibrator.hasAmplitudeControl()
-
-    private val audioManager = appContext.audioManager
 
     fun hapticFeedback(view: View, longPress: Boolean = false, keyUp: Boolean = false) {
         when (hapticOnKeyPress) {
@@ -84,11 +84,13 @@ object InputFeedbacks {
                 vibrator.vibrate(duration)
             }
         } else {
-            // it says "Starting TIRAMISU only privileged apps can ignore user settings for touch feedback"
-            // but we still seem to be able to use `FLAG_IGNORE_GLOBAL_SETTING`
-            @Suppress("DEPRECATION")
-            val flags =
-                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING or HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING
+            var flags = HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
+            if (hapticOnKeyPress == InputFeedbackMode.Enabled) {
+                // it says "Starting TIRAMISU only privileged apps can ignore user settings for touch feedback"
+                // but we still seem to be able to use `FLAG_IGNORE_GLOBAL_SETTING`
+                @Suppress("DEPRECATION")
+                flags = flags or HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING
+            }
             view.performHapticFeedback(hfc, flags)
         }
     }
@@ -96,6 +98,8 @@ object InputFeedbacks {
     enum class SoundEffect {
         Standard, SpaceBar, Delete, Return
     }
+
+    private val audioManager = appContext.audioManager
 
     fun soundEffect(effect: SoundEffect) {
         when (soundOnKeyPress) {

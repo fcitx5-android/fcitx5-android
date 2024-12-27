@@ -39,3 +39,22 @@ set_target_properties(Rime_static PROPERTIES
 set(RIME_TARGET "-Wl,--whole-archive" Rime_static "-Wl,--no-whole-archive")
 set(RIME_DATA_DIR "${CMAKE_INSTALL_DATADIR}/rime-data")
 add_subdirectory(fcitx5-rime)
+
+install(FILES
+        "default.yaml"
+        "rime-essay/essay.txt"
+        "rime-prelude/key_bindings.yaml"
+        "rime-prelude/punctuation.yaml"
+        "rime-prelude/symbols.yaml"
+        "rime-luna-pinyin/luna_pinyin_fluency.schema.yaml"
+        "rime-luna-pinyin/luna_pinyin_simp.schema.yaml"
+        "rime-luna-pinyin/luna_pinyin_tw.schema.yaml"
+        "rime-luna-pinyin/luna_pinyin.dict.yaml"
+        "rime-luna-pinyin/luna_pinyin.schema.yaml"
+        "rime-luna-pinyin/luna_quanpin.schema.yaml"
+        "rime-luna-pinyin/pinyin.yaml"
+        "rime-stroke/stroke.dict.yaml"
+        "rime-stroke/stroke.schema.yaml"
+        DESTINATION "${FCITX_INSTALL_DATADIR}/rime-data"
+        COMPONENT prebuilt-assets
+        )

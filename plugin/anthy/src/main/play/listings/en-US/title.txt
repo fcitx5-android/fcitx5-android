@@ -1,1 +1,1 @@
-Fcitx5
+Fcitx5 (Anthy Plugin)

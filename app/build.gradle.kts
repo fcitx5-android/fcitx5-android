@@ -67,12 +67,8 @@ kotlin {
     }
 }
 
-aboutLibraries {
-    configPath = "app/licenses"
-}
-
 fcitxComponent {
-    installLibraries = listOf(
+    includeLibs = listOf(
         "fcitx5",
         "fcitx5-lua",
         "libime",
@@ -82,6 +78,7 @@ fcitxComponent {
     excludeFiles = listOf("cangjie", "erbi", "qxm", "wanfeng").map {
         "usr/share/fcitx5/inputmethod/$it.conf"
     }
+    installPrebuiltAssets = true
 }
 
 ksp {

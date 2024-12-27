@@ -9,7 +9,7 @@ import org.gradle.kotlin.dsl.withType
 class AndroidLibConventionPlugin : AndroidBaseConventionPlugin() {
 
     override fun apply(target: Project) {
-        target.pluginManager.apply("com.android.library")
+        target.pluginManager.apply(target.libs.plugins.android.library.get().pluginId)
 
         super.apply(target)
 

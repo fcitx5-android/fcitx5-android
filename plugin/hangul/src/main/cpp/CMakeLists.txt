@@ -23,3 +23,5 @@ set_target_properties(Hangul_static PROPERTIES
 set(HANGUL_TARGET Hangul_static)
 option(ENABLE_TEST "" OFF)
 add_subdirectory(fcitx5-hangul)
+
+install(DIRECTORY "${PREBUILT_DIR}/libhangul/data/libhangul" DESTINATION "${FCITX_INSTALL_DATADIR}" COMPONENT prebuilt-assets)

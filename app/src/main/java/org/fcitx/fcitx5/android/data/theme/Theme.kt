@@ -32,6 +32,8 @@ sealed class Theme : Parcelable {
 
     //  Color of candidate text
     abstract val candidateTextColor: Int
+    abstract val candidateLabelColor: Int
+    abstract val candidateCommentColor: Int
 
     abstract val altKeyBackgroundColor: Int
     abstract val altKeyTextColor: Int
@@ -71,6 +73,8 @@ sealed class Theme : Parcelable {
         override val keyBackgroundColor: Int,
         override val keyTextColor: Int,
         override val candidateTextColor: Int,
+        override val candidateLabelColor: Int,
+        override val candidateCommentColor: Int,
         override val altKeyBackgroundColor: Int,
         override val altKeyTextColor: Int,
         override val accentKeyBackgroundColor: Int,
@@ -120,6 +124,8 @@ sealed class Theme : Parcelable {
         override val keyBackgroundColor: Int,
         override val keyTextColor: Int,
         override val candidateTextColor: Int,
+        override val candidateLabelColor: Int,
+        override val candidateCommentColor: Int,
         override val altKeyBackgroundColor: Int,
         override val altKeyTextColor: Int,
         override val accentKeyBackgroundColor: Int,
@@ -146,6 +152,8 @@ sealed class Theme : Parcelable {
             keyBackgroundColor: Number,
             keyTextColor: Number,
             candidateTextColor: Number,
+            candidateLabelColor: Number,
+            candidateCommentColor: Number,
             altKeyBackgroundColor: Number,
             altKeyTextColor: Number,
             accentKeyBackgroundColor: Number,
@@ -168,6 +176,8 @@ sealed class Theme : Parcelable {
             keyBackgroundColor.toInt(),
             keyTextColor.toInt(),
             candidateTextColor.toInt(),
+            candidateLabelColor.toInt(),
+            candidateCommentColor.toInt(),
             altKeyBackgroundColor.toInt(),
             altKeyTextColor.toInt(),
             accentKeyBackgroundColor.toInt(),
@@ -193,6 +203,8 @@ sealed class Theme : Parcelable {
             keyBackgroundColor,
             keyTextColor,
             candidateTextColor,
+            candidateLabelColor,
+            candidateCommentColor,
             altKeyBackgroundColor,
             altKeyTextColor,
             accentKeyBackgroundColor,
@@ -231,6 +243,8 @@ sealed class Theme : Parcelable {
             keyBackgroundColor,
             keyTextColor,
             candidateTextColor,
+            candidateLabelColor,
+            candidateCommentColor,
             altKeyBackgroundColor,
             altKeyTextColor,
             accentKeyBackgroundColor,

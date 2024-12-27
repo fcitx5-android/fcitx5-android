@@ -14,7 +14,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 open class AndroidBaseConventionPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
-        target.pluginManager.apply("org.jetbrains.kotlin.android")
+        target.pluginManager.apply(target.libs.plugins.kotlin.android.get().pluginId)
 
         target.extensions.configure(CommonExtension::class.java) {
             compileSdk = Versions.compileSdk
