@@ -57,21 +57,9 @@ object CustomThemeSerializer : JsonTransformingSerializer<Theme.Custom>(Theme.Cu
         listOf(
             MigrationStrategy("2.1") {
                 JsonObject(it.toMutableMap().apply {
-                    if (get("candidateTextColor") != null) {
-                        put("candidateTextColor", getValue("candidateTextColor"))
-                    } else {
-                        put("candidateTextColor", getValue("keyTextColor"))
-                    }
-                    if (get("candidateLabelColor") != null) {
-                        put("candidateLabelColor", getValue("candidateLabelColor"))
-                    } else {
-                        put("candidateLabelColor", getValue("keyTextColor"))
-                    }
-                    if (get("candidateCommentColor") != null) {
-                        put("candidateCommentColor", getValue("candidateCommentColor"))
-                    } else {
-                        put("candidateCommentColor", getValue("altKeyTextColor"))
-                    }
+                    put("candidateTextColor", getValue("keyTextColor"))
+                    put("candidateLabelColor", getValue("keyTextColor"))
+                    put("candidateCommentColor", getValue("altKeyTextColor"))
                 })
             },
             MigrationStrategy("2.0") {
