@@ -55,3 +55,6 @@
 [submodule "plugin/thai/src/main/cpp/fcitx5-libthai"]
 	path = plugin/thai/src/main/cpp/fcitx5-libthai
 	url = https://github.com/fcitx/fcitx5-libthai
+[submodule "plugin/mozc/src/main/cpp/fcitx5-mozc"]
+	path = plugin/mozc/src/main/cpp/fcitx5-mozc
+	url = https://github.com/fcitx-contrib/fcitx5-mozc
