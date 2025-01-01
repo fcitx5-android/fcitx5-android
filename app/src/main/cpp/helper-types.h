@@ -113,10 +113,10 @@ public:
     std::string text;
     std::string comment;
 
-    explicit CandidateEntity(const fcitx::CandidateWord &c, const fcitx::Text &label) :
-            label(label.toString()),
-            text(c.text().toString()),
-            comment(c.comment().toString()) {}
+    explicit CandidateEntity(std::string label, std::string text, std::string comment) :
+            label(std::move(label)),
+            text(std::move(text)),
+            comment(std::move(comment)) {}
 };
 
 class PagedCandidateEntity {
@@ -142,7 +142,8 @@ public:
 
 private:
     PagedCandidateEntity() :
-            candidates({}), cursorIndex(-1), layoutHint(fcitx::CandidateLayoutHint::NotSet), hasPrev(false), hasNext(false) {}
+            candidates({}), cursorIndex(-1), layoutHint(fcitx::CandidateLayoutHint::NotSet),
+            hasPrev(false), hasNext(false) {}
 };
 
 PagedCandidateEntity PagedCandidateEntity::Empty = PagedCandidateEntity();

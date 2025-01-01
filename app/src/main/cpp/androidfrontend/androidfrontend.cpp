@@ -4,6 +4,7 @@
  */
 #include <fcitx/addonfactory.h>
 #include <fcitx/addonmanager.h>
+#include <fcitx/candidatelist.h>
 #include <fcitx/inputcontextmanager.h>
 #include <fcitx/inputmethodengine.h>
 #include <fcitx/focusgroup.h>
@@ -49,7 +50,8 @@ public:
         const int before = -offset;
         const int after = offset + static_cast<int>(size);
         if (before < 0 || after < 0) {
-            FCITX_WARN() << "Invalid deleteSurrounding request: offset=" << offset << ", size=" << size;
+            FCITX_WARN() << "Invalid deleteSurrounding request: offset=" << offset << ", size="
+                         << size;
             return;
         }
         frontend_->deleteSurrounding(before, after);
@@ -118,7 +120,12 @@ public:
         std::vector<CandidateEntity> candidates;
         candidates.reserve(size);
         for (int i = 0; i < size; i++) {
-            candidates.emplace_back(list->candidate(i), list->label(i));
+            const auto &c = list->candidate(i);
+            candidates.emplace_back(
+                    filterString(list->label(i)),
+                    filterString(c.text()),
+                    filterString(c.comment())
+            );
         }
         PagedCandidateEntity paged(candidates, cursorIndex, layoutHint, hasPrev, hasNext);
         frontend_->updatePagedCandidate(paged);
