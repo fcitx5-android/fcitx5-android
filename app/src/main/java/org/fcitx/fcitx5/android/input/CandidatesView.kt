@@ -123,6 +123,12 @@ class CandidatesView(
     private fun updatePosition() {
         val (horizontal, bottom, top) = anchorPosition
         val (parentWidth, parentHeight) = parentSize
+        if (parentWidth <= 0 || parentHeight <= 0) {
+            // panic, bail
+            translationX = 0f
+            translationY = 0f
+            return
+        }
         val selfWidth = width.toFloat()
         val selfHeight = height.toFloat()
         if (layoutDirection == LAYOUT_DIRECTION_RTL) {
