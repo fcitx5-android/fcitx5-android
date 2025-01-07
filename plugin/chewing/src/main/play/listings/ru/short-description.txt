@@ -1,0 +1,1 @@
+Поддержка движка Chewing (метод ввода Zhuyin/Bopomofo) для Fcitx5
