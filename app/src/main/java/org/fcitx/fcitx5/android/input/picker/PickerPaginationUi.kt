@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.input.picker
 
@@ -58,6 +58,9 @@ class PickerPaginationUi(override val ctx: Context, val theme: Theme) : Ui {
     }
 
     fun updateScrollProgress(current: Int, progress: Float) {
+        if (pageCount <= 1) {
+            return
+        }
         highlight.updateLayoutParams<ConstraintLayout.LayoutParams> {
             marginStart = ((current + progress) * highlight.width).roundToInt()
         }
