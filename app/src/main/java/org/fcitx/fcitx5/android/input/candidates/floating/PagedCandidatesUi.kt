@@ -36,6 +36,8 @@ class PagedCandidatesUi(
         class Pagination(override val ui: PaginationUi) : UiHolder(ui)
     }
 
+    var onCandidateClick: ((Int) -> Unit)? = null
+
     private val candidatesAdapter = object : RecyclerView.Adapter<UiHolder>() {
         override fun getItemCount() =
             data.candidates.size + (if (data.hasPrev || data.hasNext) 1 else 0)
@@ -59,6 +61,9 @@ class PagedCandidatesUi(
                 is UiHolder.Candidate -> {
                     val candidate = data.candidates[position]
                     holder.ui.update(candidate, active = position == data.cursorIndex)
+                    holder.ui.root.setOnClickListener {
+                        onCandidateClick?.invoke(position)
+                    }
                 }
                 is UiHolder.Pagination -> {
                     holder.ui.update(data)

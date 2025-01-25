@@ -16,6 +16,7 @@ import androidx.annotation.Size
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
+import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.candidates.floating.PagedCandidatesUi
@@ -73,6 +74,8 @@ class CandidatesView(
         true
     }
 
+    private val touchEventReceiverWindow = TouchEventReceiverWindow(this)
+
     private val setupTextView: TextView.() -> Unit = {
         textSize = fontSize.toFloat()
         val v = dp(itemPaddingVertical)
@@ -84,6 +87,9 @@ class CandidatesView(
 
     private val candidatesUi = PagedCandidatesUi(ctx, theme, setupTextView).apply {
         root.viewTreeObserver.addOnGlobalLayoutListener(layoutListener)
+        onCandidateClick = { index ->
+            fcitx.launchOnReady { it.select(index) }
+        }
     }
 
     private var bottomInsets = 0
@@ -114,8 +120,10 @@ class CandidatesView(
             preeditUi.update(inputPanel)
             preeditUi.root.visibility = if (preeditUi.visible) VISIBLE else GONE
             candidatesUi.update(paged, orientation)
+            touchEventReceiverWindow.showup()
             visibility = VISIBLE
         } else {
+            touchEventReceiverWindow.dismiss()
             visibility = GONE
         }
     }
