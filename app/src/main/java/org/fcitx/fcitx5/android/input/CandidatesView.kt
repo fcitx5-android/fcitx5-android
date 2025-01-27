@@ -16,6 +16,7 @@ import androidx.annotation.Size
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
+import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.candidates.floating.PagedCandidatesUi
@@ -73,6 +74,8 @@ class CandidatesView(
         true
     }
 
+    private val touchEventReceiverWindow = TouchEventReceiverWindow(this)
+
     private val setupTextView: TextView.() -> Unit = {
         textSize = fontSize.toFloat()
         val v = dp(itemPaddingVertical)
@@ -82,7 +85,11 @@ class CandidatesView(
 
     private val preeditUi = PreeditUi(ctx, theme, setupTextView)
 
-    private val candidatesUi = PagedCandidatesUi(ctx, theme, setupTextView).apply {
+    private val candidatesUi = PagedCandidatesUi(ctx, theme, setupTextView,
+        onCandidateClick = { index -> fcitx.launchOnReady { it.select(index) } },
+        onPrevPage = { fcitx.launchOnReady { it.offsetCandidatePage(-1) } },
+        onNextPage = { fcitx.launchOnReady { it.offsetCandidatePage(1) } }
+    ).apply {
         root.viewTreeObserver.addOnGlobalLayoutListener(layoutListener)
     }
 
@@ -116,6 +123,7 @@ class CandidatesView(
             candidatesUi.update(paged, orientation)
             visibility = VISIBLE
         } else {
+            touchEventReceiverWindow.dismiss()
             visibility = GONE
         }
     }
@@ -141,6 +149,8 @@ class CandidatesView(
         }
         translationY =
             if (bottom + selfHeight > parentHeight - bottomInsets) top - selfHeight else bottom
+        // update touchEventReceiverWindow's position after CandidatesView's
+        touchEventReceiverWindow.showup()
         shouldUpdatePosition = false
     }
 
@@ -193,6 +203,7 @@ class CandidatesView(
     override fun onDetachedFromWindow() {
         viewTreeObserver.removeOnPreDrawListener(preDrawListener)
         candidatesUi.root.viewTreeObserver.removeOnGlobalLayoutListener(layoutListener)
+        touchEventReceiverWindow.dismiss()
         super.onDetachedFromWindow()
     }
 }

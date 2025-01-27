@@ -131,7 +131,7 @@ public:
         frontend_->updatePagedCandidate(paged);
     }
 
-    bool selectCandidate(int idx) {
+    bool selectCandidateBulk(int idx) {
         const auto &list = inputPanel().candidateList();
         if (!list) {
             return false;
@@ -143,6 +143,20 @@ public:
             } else {
                 list->candidate(idx).select(this);
             }
+        } catch (const std::invalid_argument &e) {
+            FCITX_WARN() << "selectCandidate index out of range";
+            return false;
+        }
+        return true;
+    }
+
+    bool selectCandidatePaged(int idx) {
+        const auto &list = inputPanel().candidateList();
+        if (!list) {
+            return false;
+        }
+        try {
+            list->candidate(idx).select(this);
         } catch (const std::invalid_argument &e) {
             FCITX_WARN() << "selectCandidate index out of range";
             return false;
@@ -237,6 +251,27 @@ public:
         }
     }
 
+    void offsetCandidatePage(int delta) {
+        if (delta == 0) {
+            return;
+        }
+        const auto &list = inputPanel().candidateList();
+        if (!list) {
+            return;
+        }
+        const auto &pageable = list->toPageable();
+        if (!pageable) {
+            return;
+        }
+        if (delta > 0 && pageable->hasNext()) {
+            pageable->next();
+            updateUserInterface(UserInterfaceComponent::InputPanel);
+        } else if (delta < 0 && pageable->hasPrev()) {
+            pageable->prev();
+            updateUserInterface(UserInterfaceComponent::InputPanel);
+        }
+    }
+
 private:
     AndroidFrontend *frontend_;
     int uid_;
@@ -328,7 +363,11 @@ void AndroidFrontend::releaseInputContext(const int uid) {
 
 bool AndroidFrontend::selectCandidate(int idx) {
     if (!activeIC_) return false;
-    return activeIC_->selectCandidate(idx);
+    if (pagingMode_) {
+        return activeIC_->selectCandidatePaged(idx);
+    } else {
+        return activeIC_->selectCandidateBulk(idx);
+    }
 }
 
 std::vector<CandidateAction> AndroidFrontend::getCandidateActions(const int idx) {
@@ -417,6 +456,11 @@ void AndroidFrontend::setCandidatePagingMode(const int mode) {
 
 void AndroidFrontend::updatePagedCandidate(const PagedCandidateEntity &paged) {
     pagedCandidateCallback(paged);
+}
+
+void AndroidFrontend::offsetCandidatePage(int delta) {
+    if (!activeIC_) return;
+    activeIC_->offsetCandidatePage(delta);
 }
 
 void AndroidFrontend::setCommitStringCallback(const CommitStringCallback &callback) {
