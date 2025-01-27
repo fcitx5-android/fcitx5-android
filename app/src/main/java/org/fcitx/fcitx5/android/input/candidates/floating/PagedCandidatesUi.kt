@@ -84,6 +84,7 @@ class PagedCandidatesUi(
         isFocusable = false
         adapter = candidatesAdapter
         layoutManager = candidatesLayoutManager
+        overScrollMode = View.OVER_SCROLL_NEVER
     }
 
     @SuppressLint("NotifyDataSetChanged")
