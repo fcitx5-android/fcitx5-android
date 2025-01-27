@@ -237,6 +237,27 @@ public:
         }
     }
 
+    void offsetCandidatePage(int delta) {
+        if (delta == 0) {
+            return;
+        }
+        const auto &list = inputPanel().candidateList();
+        if (!list) {
+            return;
+        }
+        const auto &pageable = list->toPageable();
+        if (!pageable) {
+            return;
+        }
+        if (delta > 0 && pageable->hasNext()) {
+            pageable->next();
+            updateUserInterface(UserInterfaceComponent::InputPanel);
+        } else if (delta < 0 && pageable->hasPrev()) {
+            pageable->prev();
+            updateUserInterface(UserInterfaceComponent::InputPanel);
+        }
+    }
+
 private:
     AndroidFrontend *frontend_;
     int uid_;
@@ -417,6 +438,11 @@ void AndroidFrontend::setCandidatePagingMode(const int mode) {
 
 void AndroidFrontend::updatePagedCandidate(const PagedCandidateEntity &paged) {
     pagedCandidateCallback(paged);
+}
+
+void AndroidFrontend::offsetCandidatePage(int delta) {
+    if (!activeIC_) return;
+    activeIC_->offsetCandidatePage(delta);
 }
 
 void AndroidFrontend::setCommitStringCallback(const CommitStringCallback &callback) {

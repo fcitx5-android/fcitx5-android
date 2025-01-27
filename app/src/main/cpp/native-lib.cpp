@@ -429,6 +429,10 @@ public:
         return p_frontend->call<fcitx::IAndroidFrontend::setCandidatePagingMode>(mode);
     }
 
+    void offsetCandidatePage(int delta) {
+        return p_frontend->call<fcitx::IAndroidFrontend::offsetCandidatePage>(delta);
+    }
+
     void save() {
         p_instance->save();
     }
@@ -1066,6 +1070,13 @@ JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_setFcitxCandidatePagingMode(JNIEnv *env, jclass clazz, jint mode) {
     RETURN_IF_NOT_RUNNING
     Fcitx::Instance().setCandidatePagingMode(mode);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_offsetFcitxCandidatePage(JNIEnv *env, jclass clazz, jint delta) {
+    RETURN_IF_NOT_RUNNING
+    Fcitx::Instance().offsetCandidatePage(delta);
 }
 
 extern "C"

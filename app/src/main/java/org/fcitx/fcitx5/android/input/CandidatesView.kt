@@ -85,11 +85,12 @@ class CandidatesView(
 
     private val preeditUi = PreeditUi(ctx, theme, setupTextView)
 
-    private val candidatesUi = PagedCandidatesUi(ctx, theme, setupTextView).apply {
+    private val candidatesUi = PagedCandidatesUi(ctx, theme, setupTextView,
+        onCandidateClick = { index -> fcitx.launchOnReady { it.select(index) } },
+        onPrevPage = { fcitx.launchOnReady { it.offsetCandidatePage(-1) } },
+        onNextPage = { fcitx.launchOnReady { it.offsetCandidatePage(1) } }
+    ).apply {
         root.viewTreeObserver.addOnGlobalLayoutListener(layoutListener)
-        onCandidateClick = { index ->
-            fcitx.launchOnReady { it.select(index) }
-        }
     }
 
     private var bottomInsets = 0

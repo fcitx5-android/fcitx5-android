@@ -7,6 +7,7 @@ package org.fcitx.fcitx5.android.input.candidates.floating
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.view.updateLayoutParams
@@ -24,7 +25,10 @@ import splitties.views.dsl.recyclerview.recyclerView
 class PagedCandidatesUi(
     override val ctx: Context,
     val theme: Theme,
-    private val setupTextView: TextView.() -> Unit
+    private val setupTextView: TextView.() -> Unit,
+    private val onCandidateClick: (Int) -> Unit,
+    private val onPrevPage: () -> Unit,
+    private val onNextPage: () -> Unit
 ) : Ui {
 
     private var data = FcitxEvent.PagedCandidateEvent.Data.Empty
@@ -35,8 +39,6 @@ class PagedCandidatesUi(
         class Candidate(override val ui: LabeledCandidateItemUi) : UiHolder(ui)
         class Pagination(override val ui: PaginationUi) : UiHolder(ui)
     }
-
-    var onCandidateClick: ((Int) -> Unit)? = null
 
     private val candidatesAdapter = object : RecyclerView.Adapter<UiHolder>() {
         override fun getItemCount() =
@@ -52,6 +54,12 @@ class PagedCandidatesUi(
                     ui.root.layoutParams = FlexboxLayoutManager.LayoutParams(wrap, wrap).apply {
                         flexGrow = 1f
                     }
+                    ui.prevIcon.setOnClickListener {
+                        onPrevPage.invoke()
+                    }
+                    ui.nextIcon.setOnClickListener {
+                        onNextPage.invoke()
+                    }
                 }
             }
         }
@@ -62,7 +70,7 @@ class PagedCandidatesUi(
                     val candidate = data.candidates[position]
                     holder.ui.update(candidate, active = position == data.cursorIndex)
                     holder.ui.root.setOnClickListener {
-                        onCandidateClick?.invoke(position)
+                        onCandidateClick.invoke(position)
                     }
                 }
                 is UiHolder.Pagination -> {

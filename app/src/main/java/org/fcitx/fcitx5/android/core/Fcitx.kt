@@ -73,7 +73,13 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
     override suspend fun save() = withFcitxContext { saveFcitxState() }
     override suspend fun reloadConfig() = withFcitxContext { reloadFcitxConfig() }
 
-    override suspend fun sendKey(key: String, states: UInt, code: Int, up: Boolean, timestamp: Int) =
+    override suspend fun sendKey(
+        key: String,
+        states: UInt,
+        code: Int,
+        up: Boolean,
+        timestamp: Int
+    ) =
         withFcitxContext { sendKeyToFcitxString(key, states.toInt(), code, up, timestamp) }
 
     override suspend fun sendKey(c: Char, states: UInt, code: Int, up: Boolean, timestamp: Int) =
@@ -82,7 +88,13 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
     override suspend fun sendKey(sym: Int, states: UInt, code: Int, up: Boolean, timestamp: Int) =
         withFcitxContext { sendKeySymToFcitx(sym, states.toInt(), code, up, timestamp) }
 
-    override suspend fun sendKey(sym: KeySym, states: KeyStates, code: Int, up: Boolean, timestamp: Int) =
+    override suspend fun sendKey(
+        sym: KeySym,
+        states: KeyStates,
+        code: Int,
+        up: Boolean,
+        timestamp: Int
+    ) =
         withFcitxContext { sendKeySymToFcitx(sym.sym, states.toInt(), code, up, timestamp) }
 
     override suspend fun select(idx: Int): Boolean = withFcitxContext { selectCandidate(idx) }
@@ -172,6 +184,9 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
     override suspend fun setCandidatePagingMode(mode: Int) =
         withFcitxContext { setFcitxCandidatePagingMode(mode) }
 
+    override suspend fun offsetCandidatePage(delta: Int) =
+        withFcitxContext { offsetFcitxCandidatePage(delta) }
+
     init {
         if (lifecycle.currentState != FcitxLifecycle.State.STOPPED)
             throw IllegalAccessException("Fcitx5 has already been created!")
@@ -233,7 +248,13 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         external fun reloadFcitxConfig()
 
         @JvmStatic
-        external fun sendKeyToFcitxString(key: String, state: Int, code: Int, up: Boolean, timestamp: Int)
+        external fun sendKeyToFcitxString(
+            key: String,
+            state: Int,
+            code: Int,
+            up: Boolean,
+            timestamp: Int
+        )
 
         @JvmStatic
         external fun sendKeyToFcitxChar(c: Char, state: Int, code: Int, up: Boolean, timestamp: Int)
@@ -342,6 +363,9 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
 
         @JvmStatic
         external fun setFcitxCandidatePagingMode(mode: Int)
+
+        @JvmStatic
+        external fun offsetFcitxCandidatePage(delta: Int)
 
         @JvmStatic
         external fun loopOnce()
