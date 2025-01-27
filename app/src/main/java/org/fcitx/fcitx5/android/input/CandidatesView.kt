@@ -120,7 +120,6 @@ class CandidatesView(
             preeditUi.update(inputPanel)
             preeditUi.root.visibility = if (preeditUi.visible) VISIBLE else GONE
             candidatesUi.update(paged, orientation)
-            touchEventReceiverWindow.showup()
             visibility = VISIBLE
         } else {
             touchEventReceiverWindow.dismiss()
@@ -149,6 +148,8 @@ class CandidatesView(
         }
         translationY =
             if (bottom + selfHeight > parentHeight - bottomInsets) top - selfHeight else bottom
+        // update touchEventReceiverWindow's position after CandidatesView's
+        touchEventReceiverWindow.showup()
         shouldUpdatePosition = false
     }
 
@@ -201,6 +202,7 @@ class CandidatesView(
     override fun onDetachedFromWindow() {
         viewTreeObserver.removeOnPreDrawListener(preDrawListener)
         candidatesUi.root.viewTreeObserver.removeOnGlobalLayoutListener(layoutListener)
+        touchEventReceiverWindow.dismiss()
         super.onDetachedFromWindow()
     }
 }
