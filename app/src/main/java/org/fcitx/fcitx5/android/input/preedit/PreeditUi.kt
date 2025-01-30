@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.input.preedit
 
@@ -62,13 +62,9 @@ open class PreeditUi(
         add(downView, lParams())
     }
 
-    private fun updateTextView(view: TextView, str: CharSequence, visible: Boolean) = view.run {
-        if (visible) {
-            text = str
-            if (visibility == View.GONE) visibility = View.VISIBLE
-        } else if (visibility != View.GONE) {
-            visibility = View.GONE
-        }
+    private fun updateTextView(view: TextView, str: CharSequence, visible: Boolean) {
+        view.text = str
+        view.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
     fun update(inputPanel: FcitxEvent.InputPanelEvent.Data) {
@@ -92,7 +88,11 @@ open class PreeditUi(
         val hasUp = upString.isNotEmpty()
         val hasDown = downString.isNotEmpty()
         visible = hasUp || hasDown
-        if (!visible) return
+        if (!visible) {
+            updateTextView(upView, "", false)
+            updateTextView(downView, "", false)
+            return
+        }
         val upStringWithCursor = if (upCursor < 0 || upCursor == upString.length) {
             upString
         } else buildSpannedString {

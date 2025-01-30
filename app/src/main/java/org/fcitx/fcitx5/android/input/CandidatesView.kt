@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2024-2025 Fcitx5 for Android Contributors
  */
 
 package org.fcitx.fcitx5.android.input
@@ -34,6 +34,7 @@ import splitties.views.dsl.core.add
 import splitties.views.dsl.core.withTheme
 import splitties.views.dsl.core.wrapContent
 import splitties.views.padding
+import kotlin.math.roundToInt
 
 @SuppressLint("ViewConstructor")
 class CandidatesView(
@@ -63,10 +64,19 @@ class CandidatesView(
 
     private var shouldUpdatePosition = false
 
+    /**
+     * layout update may or may not cause [CandidatesView]'s size [onSizeChanged],
+     * in either case, we should reposition it
+     */
     private val layoutListener = OnGlobalLayoutListener {
         shouldUpdatePosition = true
     }
 
+    /**
+     * [CandidatesView]'s position is calculated based on it's size,
+     * so we need to recalculate the position after layout,
+     * and before any actual drawing to avoid flicker
+     */
     private val preDrawListener = OnPreDrawListener {
         if (shouldUpdatePosition) {
             updatePosition()
@@ -89,9 +99,7 @@ class CandidatesView(
         onCandidateClick = { index -> fcitx.launchOnReady { it.select(index) } },
         onPrevPage = { fcitx.launchOnReady { it.offsetCandidatePage(-1) } },
         onNextPage = { fcitx.launchOnReady { it.offsetCandidatePage(1) } }
-    ).apply {
-        root.viewTreeObserver.addOnGlobalLayoutListener(layoutListener)
-    }
+    )
 
     private var bottomInsets = 0
 
@@ -117,19 +125,23 @@ class CandidatesView(
     }
 
     private fun updateUi() {
+        preeditUi.update(inputPanel)
+        preeditUi.root.visibility = if (preeditUi.visible) VISIBLE else GONE
+        candidatesUi.update(paged, orientation)
         if (evaluateVisibility()) {
-            preeditUi.update(inputPanel)
-            preeditUi.root.visibility = if (preeditUi.visible) VISIBLE else GONE
-            candidatesUi.update(paged, orientation)
             visibility = VISIBLE
         } else {
+            // RecyclerView won't update its items when ancestor view is GONE
+            visibility = INVISIBLE
             touchEventReceiverWindow.dismiss()
-            visibility = GONE
         }
     }
 
     private fun updatePosition() {
-        val (horizontal, bottom, top) = anchorPosition
+        if (visibility != VISIBLE) {
+            // skip unnecessary updates
+            return
+        }
         val (parentWidth, parentHeight) = parentSize
         if (parentWidth <= 0 || parentHeight <= 0) {
             // panic, bail
@@ -137,20 +149,23 @@ class CandidatesView(
             translationY = 0f
             return
         }
-        val selfWidth = width.toFloat()
-        val selfHeight = height.toFloat()
-        if (layoutDirection == LAYOUT_DIRECTION_RTL) {
+        val (horizontal, bottom, top) = anchorPosition
+        val w: Int = width
+        val h: Int = height
+        val selfWidth = w.toFloat()
+        val selfHeight = h.toFloat()
+        val tX: Float = if (layoutDirection == LAYOUT_DIRECTION_RTL) {
             val rtlOffset = parentWidth - horizontal
-            translationX =
-                if (rtlOffset + selfWidth > parentWidth) selfWidth - parentWidth else -rtlOffset
+            if (rtlOffset + selfWidth > parentWidth) selfWidth - parentWidth else -rtlOffset
         } else {
-            translationX =
-                if (horizontal + selfWidth > parentWidth) parentWidth - selfWidth else horizontal
+            if (horizontal + selfWidth > parentWidth) parentWidth - selfWidth else horizontal
         }
-        translationY =
+        val tY: Float =
             if (bottom + selfHeight > parentHeight - bottomInsets) top - selfHeight else bottom
+        translationX = tX
+        translationY = tY
         // update touchEventReceiverWindow's position after CandidatesView's
-        touchEventReceiverWindow.showup()
+        touchEventReceiverWindow.showAt(tX.roundToInt(), tY.roundToInt(), w, h)
         shouldUpdatePosition = false
     }
 
@@ -167,7 +182,7 @@ class CandidatesView(
 
     init {
         // invisible by default
-        visibility = GONE
+        visibility = INVISIBLE
 
         minWidth = dp(windowMinWidth)
         padding = dp(windowPadding)

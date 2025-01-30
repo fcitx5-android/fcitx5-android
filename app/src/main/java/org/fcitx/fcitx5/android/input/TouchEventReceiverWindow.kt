@@ -28,20 +28,24 @@ class TouchEventReceiverWindow(
 
     private var isWindowShowing = false
 
+    fun showAt(x: Int, y: Int, w: Int, h: Int) {
+        isWindowShowing = true
+        if (window.isShowing) {
+            window.update(x, y, w, h)
+        } else {
+            window.width = w
+            window.height = h
+            window.showAtLocation(contentView, Gravity.TOP or Gravity.START, x, y)
+        }
+    }
+
     private val cachedLocation = intArrayOf(0, 0)
 
-    fun showup() {
-        isWindowShowing = true
+    fun show() {
         val (x, y) = cachedLocation.also { contentView.getLocationInWindow(it) }
         val width = contentView.width
         val height = contentView.height
-        if (window.isShowing) {
-            window.update(x, y, width, height)
-        } else {
-            window.width = width
-            window.height = height
-            window.showAtLocation(contentView, Gravity.NO_GRAVITY, x, y)
-        }
+        showAt(x, y, width, height)
     }
 
     fun dismiss() {
