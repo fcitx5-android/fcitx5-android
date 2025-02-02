@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.input.keyboard
 
@@ -171,7 +171,7 @@ abstract class BaseKeyboard(
                             else -> {
                                 val sym =
                                     if (count > 0) FcitxKeyMapping.FcitxKey_Right else FcitxKeyMapping.FcitxKey_Left
-                                val action = KeyAction.SymAction(KeySym(sym), KeyStates.Empty)
+                                val action = KeyAction.SymAction(KeySym(sym), KeyStates.Virtual)
                                 repeat(count.absoluteValue) {
                                     onAction(action)
                                     if (hapticOnRepeat) InputFeedbacks.hapticFeedback(view)

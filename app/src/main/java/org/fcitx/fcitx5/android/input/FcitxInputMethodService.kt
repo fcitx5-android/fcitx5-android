@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 
 package org.fcitx.fcitx5.android.input
@@ -49,6 +49,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.CapabilityFlags
 import org.fcitx.fcitx5.android.core.FcitxAPI
 import org.fcitx.fcitx5.android.core.FcitxEvent
+import org.fcitx.fcitx5.android.core.FcitxKeyMapping
 import org.fcitx.fcitx5.android.core.FormattedText
 import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
@@ -219,10 +220,16 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             is FcitxEvent.KeyEvent -> event.data.let event@{
                 if (it.states.virtual) {
                     // KeyEvent from virtual keyboard
-                    when (it.unicode) {
-                        '\b'.code -> handleBackspaceKey()
-                        '\r'.code -> handleReturnKey()
-                        else -> commitText(Char(it.unicode).toString())
+                    when (it.sym.sym) {
+                        FcitxKeyMapping.FcitxKey_BackSpace -> handleBackspaceKey()
+                        FcitxKeyMapping.FcitxKey_Return -> handleReturnKey()
+                        FcitxKeyMapping.FcitxKey_Left -> sendDownUpKeyEvents(KeyEvent.KEYCODE_DPAD_LEFT)
+                        FcitxKeyMapping.FcitxKey_Right -> sendDownUpKeyEvents(KeyEvent.KEYCODE_DPAD_RIGHT)
+                        else -> if (it.unicode > 0) {
+                            commitText(Character.toString(it.unicode))
+                        } else {
+                            Timber.w("Unhandled Virtual KeyEvent: $it")
+                        }
                     }
                 } else {
                     // KeyEvent from physical keyboard (or input method engine forwardKey)
@@ -244,7 +251,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     } else {
                         // no matching keyCode, commit character once on key down
                         if (!it.up && it.unicode > 0) {
-                            commitText(Char(it.unicode).toString())
+                            commitText(Character.toString(it.unicode))
                         } else {
                             Timber.w("Unhandled Fcitx KeyEvent: $it")
                         }
