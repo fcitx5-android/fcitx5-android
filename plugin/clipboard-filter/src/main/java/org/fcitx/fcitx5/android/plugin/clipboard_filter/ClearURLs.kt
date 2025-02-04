@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.plugin.clipboard_filter
 
@@ -84,8 +84,10 @@ object ClearURLs {
                     /**
                      * clear #fragments too
                      * https://github.com/ClearURLs/Addon/blob/deec80b763179fa5c3559a37e3c9a6f1b28d0886/clearurls.js#L109
+                     * but skip URL encode because of reasons
+                     * https://github.com/ClearURLs/Addon/blob/d8da43ac297e5df51a9c7276579ac3332adfa801/core_js/utils/URLHashParams.js#L65
                      */
-                    .encodedFragment(filterParams(uri.fragment, rules))
+                    .encodedFragment(filterParams(uri.fragment, rules, encode = false))
                     .toString()
             }
             if (matched) {
@@ -116,7 +118,14 @@ object ClearURLs {
         unregisteredParameterValueSanitizer = UrlQuerySanitizer.getAllButNulLegal()
     }
 
-    private fun filterParams(params: String?, rules: List<Regex>): String? {
+    private fun UrlQuerySanitizer.ParameterValuePair.stringify(encode: Boolean = true): String {
+        val k = if (encode) encodeQuery(mParameter) else mParameter
+        if (mValue.isEmpty()) return k
+        val v = if (encode) encodeQuery(mValue) else mValue
+        return "$k=$v"
+    }
+
+    private fun filterParams(params: String?, rules: List<Regex>, encode: Boolean = true): String? {
         if (params.isNullOrEmpty()) return params
         querySanitizer.parseQuery(params)
         return querySanitizer.parameterList
@@ -127,10 +136,7 @@ object ClearURLs {
                  */
                 rules.all { !it.matches(param.mParameter) }
             }
-            .joinToString("&") {
-                if (it.mValue.isEmpty()) encodeQuery(it.mParameter)
-                else "${encodeQuery(it.mParameter)}=${encodeQuery(it.mValue)}"
-            }
+            .joinToString("&") { it.stringify(encode) }
     }
 
     private fun log(msg: String) {
