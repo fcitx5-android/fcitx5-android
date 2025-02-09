@@ -310,6 +310,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             )
         }
         candidateUi.expandButton.setIcon(R.drawable.ic_baseline_expand_more_24)
+        candidateUi.expandButton.contentDescription = context.getString(R.string.expand_more_candidates)
     }
 
     // set expand candidate button to close expand candidate
@@ -318,6 +319,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             windowManager.attachWindow(KeyboardWindow)
         }
         candidateUi.expandButton.setIcon(R.drawable.ic_baseline_expand_less_24)
+        candidateUi.expandButton.contentDescription = context.getString(R.string.expand_less_candidates)
     }
 
     // should be used with setExpandButtonToAttach or setExpandButtonToDetach

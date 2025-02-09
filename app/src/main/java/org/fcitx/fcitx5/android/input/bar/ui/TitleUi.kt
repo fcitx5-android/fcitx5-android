@@ -29,7 +29,9 @@ import splitties.views.gravityVerticalCenter
 
 class TitleUi(override val ctx: Context, theme: Theme) : Ui {
 
-    private val backButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_back_24, theme)
+    private val backButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_back_24, theme).apply {
+        contentDescription = ctx.getString(R.string.go_back)
+    }
 
     private val titleText = textView {
         typeface = Typeface.defaultFromStyle(Typeface.BOLD)

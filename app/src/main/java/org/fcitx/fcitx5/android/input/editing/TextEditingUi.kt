@@ -46,21 +46,33 @@ class TextEditingUi(
             setIcon(icon)
         }
 
-    val upButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_up_24)
+    val upButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_up_24).apply {
+        contentDescription = ctx.getString(R.string.move_cursor_up)
+    }
 
-    val rightButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_right_24)
+    val rightButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_right_24).apply {
+        contentDescription = ctx.getString(R.string.move_cursor_right)
+    }
 
-    val downButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_down_24)
+    val downButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_down_24).apply {
+        contentDescription = ctx.getString(R.string.move_cursor_down)
+    }
 
-    val leftButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_left_24)
+    val leftButton = iconButton(R.drawable.ic_baseline_keyboard_arrow_left_24).apply {
+        contentDescription = ctx.getString(R.string.move_cursor_left)
+    }
 
     val selectButton = textButton(R.string.select).apply {
         enableActivatedState()
     }
 
-    val homeButton = iconButton(R.drawable.ic_baseline_first_page_24)
+    val homeButton = iconButton(R.drawable.ic_baseline_first_page_24).apply {
+        contentDescription = ctx.getString(R.string.go_to_start)
+    }
 
-    val endButton = iconButton(R.drawable.ic_baseline_last_page_24)
+    val endButton = iconButton(R.drawable.ic_baseline_last_page_24).apply {
+        contentDescription = ctx.getString(R.string.go_to_end)
+    }
 
     val selectAllButton = textButton(android.R.string.selectAll, altStyle = true)
 
@@ -74,6 +86,7 @@ class TextEditingUi(
 
     val backspaceButton = iconButton(R.drawable.ic_baseline_backspace_24, altStyle = true).apply {
         soundEffect = InputFeedbacks.SoundEffect.Delete
+        contentDescription = ctx.getString(R.string.backspace)
     }
 
     override val root = constraintLayout {
@@ -177,7 +190,9 @@ class TextEditingUi(
         }
     }
 
-    val clipboardButton = ToolButton(ctx, R.drawable.ic_clipboard, theme)
+    val clipboardButton = ToolButton(ctx, R.drawable.ic_clipboard, theme).apply {
+        contentDescription = ctx.getString(R.string.clipboard)
+    }
 
     val extension = horizontalLayout {
         add(clipboardButton, lParams(dp(40), dp(40)))

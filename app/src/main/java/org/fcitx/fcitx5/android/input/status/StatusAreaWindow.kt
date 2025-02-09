@@ -183,12 +183,14 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
 
     private val editorInfoButton by lazy {
         ToolButton(context, R.drawable.ic_baseline_info_24, theme).apply {
+            contentDescription = context.getString(R.string.editor_info_inspector)
             setOnClickListener { windowManager.attachWindow(EditorInfoWindow()) }
         }
     }
 
     private val settingsButton by lazy {
         ToolButton(context, R.drawable.ic_baseline_settings_24, theme).apply {
+            contentDescription = context.getString(R.string.go_to_app)
             setOnClickListener { AppUtil.launchMain(context) }
         }
     }
