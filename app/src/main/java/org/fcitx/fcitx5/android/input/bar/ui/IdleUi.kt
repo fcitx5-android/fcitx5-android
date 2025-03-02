@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.input.bar.ui
 
@@ -162,13 +162,13 @@ class IdleUi(
     }
 
     fun setHideKeyboardIsVoiceInput(isVoiceInput: Boolean, callback: View.OnClickListener) {
-        hideKeyboardButton.setIcon(
-            if (isVoiceInput) R.drawable.ic_baseline_keyboard_voice_24
-            else R.drawable.ic_baseline_arrow_drop_down_24
-        )
-        hideKeyboardButton.contentDescription =
-            if (isVoiceInput) ctx.getString(R.string.go_to_voice_input)
-            else ctx.getString(R.string.hide_keyboard)
+        if (isVoiceInput) {
+            hideKeyboardButton.setIcon(R.drawable.ic_baseline_keyboard_voice_24)
+            hideKeyboardButton.contentDescription = ctx.getString(R.string.switch_to_voice_input)
+        } else {
+            hideKeyboardButton.setIcon(R.drawable.ic_baseline_arrow_drop_down_24)
+            hideKeyboardButton.contentDescription = ctx.getString(R.string.hide_keyboard)
+        }
         hideKeyboardButton.setOnClickListener(callback)
     }
 

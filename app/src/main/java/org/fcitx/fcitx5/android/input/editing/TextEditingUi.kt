@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.input.editing
 
@@ -67,11 +67,11 @@ class TextEditingUi(
     }
 
     val homeButton = iconButton(R.drawable.ic_baseline_first_page_24).apply {
-        contentDescription = ctx.getString(R.string.go_to_start)
+        contentDescription = ctx.getString(R.string.move_cursor_to_start)
     }
 
     val endButton = iconButton(R.drawable.ic_baseline_last_page_24).apply {
-        contentDescription = ctx.getString(R.string.go_to_end)
+        contentDescription = ctx.getString(R.string.move_cursor_to_end)
     }
 
     val selectAllButton = textButton(android.R.string.selectAll, altStyle = true)
