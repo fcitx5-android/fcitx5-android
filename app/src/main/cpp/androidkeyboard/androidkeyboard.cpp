@@ -248,14 +248,22 @@ void AndroidKeyboardEngine::resetState(InputContext *inputContext, bool fromCand
 void AndroidKeyboardEngine::updateCandidate(const InputMethodEntry &entry, InputContext *inputContext) {
     inputContext->inputPanel().reset();
     auto *state = inputContext->propertyFor(&factory_);
+    const auto userInput = state->buffer_.userInput();
     std::vector<std::pair<std::string, std::string>> results;
     if (spell()) {
         results = spell()->call<ISpell::hintForDisplay>(entry.languageCode(),
                                                         SpellProvider::Default,
-                                                        state->buffer_.userInput(),
+                                                        userInput,
                                                         SpellCandidateSize);
     }
     auto candidateList = std::make_unique<CommonCandidateList>();
+    if (results.empty() || results.front().second != userInput) {
+        // TODO: comply with fcitx5 spell module's delim " _-,./?!%"
+        // it's fine in androidkeyboard because only "-" won't commit buffer
+        const auto segments = stringutils::split(userInput, "-");
+        const auto label = segments.size() > 1 ? segments.back() : userInput;
+        candidateList->append<AndroidKeyboardCandidateWord>(this, Text(label), userInput);
+    }
     for (const auto &result: results) {
         candidateList->append<AndroidKeyboardCandidateWord>(this, Text(result.first), result.second);
     }
