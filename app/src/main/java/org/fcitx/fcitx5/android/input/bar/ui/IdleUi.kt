@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.input.bar.ui
 
@@ -130,6 +130,7 @@ class IdleUi(
         if (activate == inPrivate) return
         inPrivate = activate
         updateMenuButtonIcon()
+        updateMenuButtonContentDescription()
         updateMenuButtonRotation(instant = true)
     }
 
@@ -137,6 +138,14 @@ class IdleUi(
         menuButton.image.imageResource =
             if (inPrivate) R.drawable.ic_view_private
             else R.drawable.ic_baseline_expand_more_24
+    }
+
+    private fun updateMenuButtonContentDescription() {
+        menuButton.contentDescription = when {
+            inPrivate -> ctx.getString(R.string.private_mode)
+            currentState == State.Toolbar -> ctx.getString(R.string.hide_toolbar)
+            else -> ctx.getString(R.string.expand_toolbar)
+        }
     }
 
     private fun updateMenuButtonRotation(instant: Boolean = false) {
@@ -153,10 +162,13 @@ class IdleUi(
     }
 
     fun setHideKeyboardIsVoiceInput(isVoiceInput: Boolean, callback: View.OnClickListener) {
-        hideKeyboardButton.setIcon(
-            if (isVoiceInput) R.drawable.ic_baseline_keyboard_voice_24
-            else R.drawable.ic_baseline_arrow_drop_down_24
-        )
+        if (isVoiceInput) {
+            hideKeyboardButton.setIcon(R.drawable.ic_baseline_keyboard_voice_24)
+            hideKeyboardButton.contentDescription = ctx.getString(R.string.switch_to_voice_input)
+        } else {
+            hideKeyboardButton.setIcon(R.drawable.ic_baseline_arrow_drop_down_24)
+            hideKeyboardButton.contentDescription = ctx.getString(R.string.hide_keyboard)
+        }
         hideKeyboardButton.setOnClickListener(callback)
     }
 
@@ -205,6 +217,7 @@ class IdleUi(
             popup.dismissAll()
         }
         currentState = state
+        updateMenuButtonContentDescription()
         updateMenuButtonRotation(instant = !fromUser)
     }
 }

@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.input.bar.ui
 
@@ -29,7 +29,9 @@ import splitties.views.gravityVerticalCenter
 
 class TitleUi(override val ctx: Context, theme: Theme) : Ui {
 
-    private val backButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_back_24, theme)
+    private val backButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_back_24, theme).apply {
+        contentDescription = ctx.getString(R.string.back_to_keyboard)
+    }
 
     private val titleText = textView {
         typeface = Typeface.defaultFromStyle(Typeface.BOLD)

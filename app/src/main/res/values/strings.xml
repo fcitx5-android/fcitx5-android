@@ -284,4 +284,23 @@
     <string name="ignore_system_window_insets">Ignore system WindowInsets</string>
     <string name="browse_user_data_dir">Browse user data directory</string>
     <string name="haptic_on_repeat">Haptic feedback on key repeat</string>
+    <string name="redo">Redo</string>
+    <string name="status_area">Status area</string>
+    <string name="expand_candidates_list">Expand candidates list</string>
+    <string name="hide_candidates_list">Hide candidates list</string>
+    <string name="switch_to_voice_input">Switch to voice input</string>
+    <string name="hide_keyboard">Hide keyboard</string>
+    <string name="private_mode">Private mode (tap to toggle toolbar)</string>
+    <string name="hide_toolbar">Hide toolbar</string>
+    <string name="expand_toolbar">Expand toolbar</string>
+    <string name="back_to_keyboard">Back to keyboard</string>
+    <string name="backspace">Backspace</string>
+    <string name="move_cursor_up">Move cursor up</string>
+    <string name="move_cursor_right">Move cursor right</string>
+    <string name="move_cursor_down">Move cursor down</string>
+    <string name="move_cursor_left">Move cursor left</string>
+    <string name="move_cursor_to_start">Move cursor to start</string>
+    <string name="move_cursor_to_end">Move cursor to end</string>
+    <string name="open_input_method_settings">Open input method settings</string>
+    <string name="delete_all">Delete all</string>
 </resources>
