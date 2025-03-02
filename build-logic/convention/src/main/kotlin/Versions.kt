@@ -14,7 +14,7 @@ object Versions {
 
     const val defaultCMake = "3.22.1"
     const val defaultNDK = "25.2.9519653"
-    const val defaultBuildTools = "35.0.0"
+    const val defaultBuildTools = "35.0.1"
 
     // NOTE: increase this value to bump version code
     const val baseVersionCode = 8
