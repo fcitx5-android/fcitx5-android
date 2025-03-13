@@ -41,7 +41,13 @@ object ThemeManager {
     fun getTheme(name: String) =
         customThemes.find { it.name == name } ?: BuiltinThemes.find { it.name == name }
 
-    fun getAllThemes() = customThemes + BuiltinThemes
+    fun getAllThemes(): List<Theme> {
+        val themes = customThemes + BuiltinThemes
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            return listOf(ThemeDynamicProvider.current.MaterialYou) + themes
+        }
+        return themes
+    }
 
     fun refreshThemes() {
         customThemes.clear()
@@ -147,6 +153,15 @@ object ThemeManager {
             prefs.managedPreferences.forEach {
                 it.value.putValueTo(this@edit)
             }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    fun onSystemPlatteChange() {
+        if (_activeTheme.name == "MaterialYou") {
+            println("We are using M3 and system platte change!")
+            ThemeDynamicProvider.current = ThemeDynamic()
+            _activeTheme = ThemeDynamicProvider.current.MaterialYou
         }
     }
 
