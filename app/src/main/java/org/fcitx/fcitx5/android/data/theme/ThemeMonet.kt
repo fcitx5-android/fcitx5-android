@@ -1,57 +1,60 @@
 package org.fcitx.fcitx5.android.data.theme
 
 import android.os.Build
-import androidx.annotation.RequiresApi
 import org.fcitx.fcitx5.android.utils.appContext
 
 // Ref:
 // https://github.com/material-components/material-components-android/blob/master/docs/theming/Color.md
-// https://github.com/material-components/material-components-android/tree/6f41625f5780d8d3e9a0261ee23b84f08b46dcd2/lib/java/com/google/android/material/color/res/color-v31
 // https://www.figma.com/community/file/809865700885504168/material-3-android-15
+// https://material-foundation.github.io/material-theme-builder/
 
 // FIXME: SDK < 34 can only have approximate color values, maybe we can implement our own color algorithm.
 // See: https://github.com/XayahSuSuSu/Android-DataBackup/blob/e8b087fb55519c659bebdc46c0217731fe80a0d7/source/core/ui/src/main/kotlin/com/xayah/core/ui/material3/DynamicTonalPalette.kt#L185
-@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+
 object ThemeMonet {
     val light
-        get() = Theme.Monet(
-            isDark = false,
-            surfaceContainer = appContext.getColor(colorRolesLight.surfaceContainer),
-            surfaceBright = appContext.getColor(colorRolesLight.surfaceBright),
-            onSurface = appContext.getColor(colorRolesLight.onSurface),
-            inversePrimary = appContext.getColor(colorRolesLight.inversePrimary),
-            onPrimaryContainer = appContext.getColor(colorRolesLight.onPrimaryContainer),
-            secondaryContainer = appContext.getColor(colorRolesLight.secondaryContainer),
-            onSecondaryContainer = appContext.getColor(colorRolesLight.onSecondaryContainer)
-        )
+        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) // Real Monet colors
+            Theme.Monet(
+                isDark = false,
+                surfaceContainer = appContext.getColor(android.R.color.system_surface_container_light),
+                surfaceBright = appContext.getColor(android.R.color.system_surface_bright_light),
+                onSurface = appContext.getColor(android.R.color.system_on_surface_light),
+                inversePrimary = appContext.getColor(android.R.color.system_accent1_200),
+                onPrimaryContainer = appContext.getColor(android.R.color.system_on_primary_container_light),
+                secondaryContainer = appContext.getColor(android.R.color.system_secondary_container_light),
+                onSecondaryContainer = appContext.getColor(android.R.color.system_on_secondary_container_light)
+            )
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) // Approximate color values
+            Theme.Monet(
+                isDark = false,
+                surfaceContainer = appContext.getColor(android.R.color.system_neutral1_50), // N94
+                surfaceBright = appContext.getColor(android.R.color.system_neutral1_10), // N98
+                onSurface = appContext.getColor(android.R.color.system_neutral1_900),
+                inversePrimary = appContext.getColor(android.R.color.system_accent1_200),
+                onPrimaryContainer = appContext.getColor(android.R.color.system_accent1_700),
+                secondaryContainer = appContext.getColor(android.R.color.system_accent2_100),
+                onSecondaryContainer = appContext.getColor(android.R.color.system_accent2_700)
+            )
+        else // Static MD3 colors, based on #769CDF
+            Theme.Monet(
+                isDark = false,
+                surfaceContainer = 0xffededf4.toInt(),
+                surfaceBright = 0xfff9f9ff.toInt(),
+                onSurface = 0xff191c20.toInt(),
+                inversePrimary = 0xffaac7ff.toInt(),
+                onPrimaryContainer = 0xff284777.toInt(),
+                secondaryContainer = 0xffdae2f9.toInt(),
+                onSecondaryContainer = 0xff3e4759.toInt(),
+            )
     val dark
         get() = Theme.Monet(
             isDark = true,
-            surfaceContainer = appContext.getColor(colorRolesDark.surfaceContainer),
-            surfaceBright = appContext.getColor(colorRolesDark.surfaceBright),
-            onSurface = appContext.getColor(colorRolesDark.onSurface),
-            inversePrimary = appContext.getColor(colorRolesDark.inversePrimary),
-            onPrimaryContainer = appContext.getColor(colorRolesDark.onPrimaryContainer),
-            secondaryContainer = appContext.getColor(colorRolesDark.secondaryContainer),
-            onSecondaryContainer = appContext.getColor(colorRolesDark.onSecondaryContainer)
+            surfaceContainer = appContext.getColor(android.R.color.system_surface_container_dark),
+            surfaceBright = appContext.getColor(android.R.color.system_surface_bright_dark),
+            onSurface = appContext.getColor(android.R.color.system_on_surface_dark),
+            inversePrimary = appContext.getColor(android.R.color.system_primary_light),
+            onPrimaryContainer = appContext.getColor(android.R.color.system_on_primary_container_dark),
+            secondaryContainer = appContext.getColor(android.R.color.system_secondary_container_dark),
+            onSecondaryContainer = appContext.getColor(android.R.color.system_on_secondary_container_dark)
         )
-
-    private data object colorRolesLight {
-        const val surfaceContainer = android.R.color.system_surface_container_light
-        const val surfaceBright = android.R.color.system_surface_bright_light
-        const val onSurface = android.R.color.system_on_surface_light
-        const val inversePrimary = android.R.color.system_primary_dark
-        const val onPrimaryContainer = android.R.color.system_on_primary_container_light
-        const val secondaryContainer = android.R.color.system_secondary_container_light
-        const val onSecondaryContainer = android.R.color.system_on_secondary_container_light
-    }
-    private data object colorRolesDark {
-        const val surfaceContainer = android.R.color.system_surface_container_dark
-        const val surfaceBright = android.R.color.system_surface_bright_dark
-        const val onSurface = android.R.color.system_on_surface_dark
-        const val inversePrimary = android.R.color.system_primary_light
-        const val onPrimaryContainer = android.R.color.system_on_primary_container_dark
-        const val secondaryContainer = android.R.color.system_secondary_container_dark
-        const val onSecondaryContainer = android.R.color.system_on_secondary_container_dark
-    }
 }
