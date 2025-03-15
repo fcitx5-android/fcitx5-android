@@ -94,7 +94,7 @@ class NavigationBarManager {
             window.setNavbarBackgroundColor(
                 when (theme) {
                     is Theme.Builtin -> if (keyBorder) theme.backgroundColor else theme.keyboardColor
-                    is Theme.Custom -> theme.backgroundColor
+                    is Theme.Custom, is Theme.Monet -> theme.backgroundColor
                 }
             )
         }

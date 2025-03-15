@@ -36,7 +36,7 @@ GitHub: [![release version](https://img.shields.io/github/v/release/fcitx5-andro
 - Virtual Keyboard (layout not customizable yet)
 - Expandable candidate view
 - Clipboard management (plain text only)
-- Theming (custom color scheme and background image)
+- Theming (custom color scheme, background image and dynamic color aka monet color after Android 12)
 - Popup preview on key press
 - Long press popup keyboard for convenient symbol input
 - Symbol and Emoji picker

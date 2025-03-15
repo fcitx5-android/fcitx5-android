@@ -41,7 +41,7 @@ object ThemeManager {
     fun getTheme(name: String) =
         customThemes.find { it.name == name } ?: BuiltinThemes.find { it.name == name }
 
-    fun getAllThemes() = customThemes + BuiltinThemes
+    fun getAllThemes() = listOf(ThemeMonet.light, ThemeMonet.dark) + customThemes + BuiltinThemes
 
     fun refreshThemes() {
         customThemes.clear()
