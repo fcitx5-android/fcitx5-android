@@ -166,9 +166,6 @@ class FcitxApplication : Application() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         ThemeManager.onSystemDarkModeChange(newConfig.isDarkMode())
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            ThemeManager.onSystemPlatteChange()
-        }
         Locales.onLocaleChange(resources.configuration)
     }
 

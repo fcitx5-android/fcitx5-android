@@ -261,4 +261,80 @@ sealed class Theme : Parcelable {
         )
     }
 
+    @Parcelize
+    data class Monet(
+        override val name: String,
+        override val isDark: Boolean,
+        override val backgroundColor: Int,
+        override val barColor: Int,
+        override val keyboardColor: Int,
+        override val keyBackgroundColor: Int,
+        override val keyTextColor: Int,
+        override val candidateTextColor: Int,
+        override val candidateLabelColor: Int,
+        override val candidateCommentColor: Int,
+        override val altKeyBackgroundColor: Int,
+        override val altKeyTextColor: Int,
+        override val accentKeyBackgroundColor: Int,
+        override val accentKeyTextColor: Int,
+        override val keyPressHighlightColor: Int,
+        override val keyShadowColor: Int,
+        override val popupBackgroundColor: Int,
+        override val popupTextColor: Int,
+        override val spaceBarColor: Int,
+        override val dividerColor: Int,
+        override val clipboardEntryColor: Int,
+        override val genericActiveBackgroundColor: Int,
+        override val genericActiveForegroundColor: Int
+    ) : Theme() {
+        constructor(
+            isDark: Boolean,
+            surfaceContainer: Int,
+            surfaceBright: Int,
+            onSurface: Int,
+            inversePrimary: Int,
+            onPrimaryContainer: Int,
+            secondaryContainer: Int,
+            onSecondaryContainer: Int,
+        ) : this(
+            name = "Monet" + if (isDark) "Dark" else "Light",
+            isDark = isDark,
+            backgroundColor = surfaceContainer,
+            barColor = surfaceBright,
+            keyboardColor = surfaceContainer,
+            keyBackgroundColor = surfaceBright,
+            keyTextColor = onSurface,
+            candidateTextColor = onSurface,
+            candidateLabelColor = onSurface,
+            candidateCommentColor = onSurface,
+            altKeyBackgroundColor = secondaryContainer,
+            altKeyTextColor = onSecondaryContainer,
+            accentKeyBackgroundColor = inversePrimary,
+            accentKeyTextColor = onPrimaryContainer,
+            keyPressHighlightColor = inversePrimary,
+            keyShadowColor = 0x000000,
+            popupBackgroundColor = surfaceContainer,
+            popupTextColor = onSurface,
+            spaceBarColor = surfaceBright,
+            dividerColor = surfaceBright,
+            clipboardEntryColor = surfaceBright,
+            genericActiveBackgroundColor = inversePrimary,
+            genericActiveForegroundColor = onPrimaryContainer
+        )
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

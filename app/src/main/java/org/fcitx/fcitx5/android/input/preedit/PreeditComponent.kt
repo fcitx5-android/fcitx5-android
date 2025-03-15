@@ -29,7 +29,7 @@ class PreeditComponent : UniqueComponent<PreeditComponent>(), Dependent, InputBr
         val keyBorder = ThemeManager.prefs.keyBorder.getValue()
         val bkgColor = when (theme) {
             is Theme.Builtin -> if (keyBorder) theme.backgroundColor else theme.barColor
-            is Theme.Custom -> theme.backgroundColor
+            is Theme.Custom, is Theme.Monet -> theme.backgroundColor
         }
         PreeditUi(context, theme, setupTextView = {
             backgroundColor = bkgColor
