@@ -300,7 +300,7 @@ sealed class Theme : Parcelable {
             name = "Monet" + if (isDark) "Dark" else "Light",
             isDark = isDark,
             backgroundColor = surfaceContainer,
-            barColor = surfaceBright,
+            barColor = surfaceContainer,
             keyboardColor = surfaceContainer,
             keyBackgroundColor = surfaceBright,
             keyTextColor = onSurface,
