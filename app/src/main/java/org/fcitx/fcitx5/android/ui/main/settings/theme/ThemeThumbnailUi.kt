@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.ui.main.settings.theme
 
@@ -9,6 +9,7 @@ import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.OvalShape
+import android.os.Build
 import android.view.View
 import android.view.ViewOutlineProvider
 import android.widget.ImageView
@@ -25,6 +26,7 @@ import splitties.views.dsl.constraintlayout.constraintLayout
 import splitties.views.dsl.constraintlayout.endOfParent
 import splitties.views.dsl.constraintlayout.lParams
 import splitties.views.dsl.constraintlayout.rightOfParent
+import splitties.views.dsl.constraintlayout.startOfParent
 import splitties.views.dsl.constraintlayout.topOfParent
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
@@ -59,6 +61,12 @@ class ThemeThumbnailUi(override val ctx: Context) : Ui {
         imageResource = R.drawable.ic_baseline_edit_24
     }
 
+    val dynamicIcon = imageView {
+        setPaddingDp(5, 5, 5, 5)
+        scaleType = ImageView.ScaleType.FIT_CENTER
+        imageResource = R.drawable.ic_baseline_auto_awesome_24
+    }
+
     override val root = constraintLayout {
         outlineProvider = ViewOutlineProvider.BOUNDS
         elevation = dp(2f)
@@ -80,6 +88,10 @@ class ThemeThumbnailUi(override val ctx: Context) : Ui {
             topOfParent()
             endOfParent()
         })
+        add(dynamicIcon, lParams(dp(32), dp(32)) {
+            topOfParent()
+            startOfParent()
+        })
     }
 
     fun setTheme(theme: Theme) {
@@ -100,6 +112,11 @@ class ThemeThumbnailUi(override val ctx: Context) : Ui {
         editButton.apply {
             visibility = if (theme is Theme.Custom) View.VISIBLE else View.GONE
             background = rippleDrawable(theme.keyPressHighlightColor)
+            imageTintList = foregroundTint
+        }
+        dynamicIcon.apply {
+            visibility =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && theme is Theme.Monet) View.VISIBLE else View.GONE
             imageTintList = foregroundTint
         }
         checkMark.imageTintList = foregroundTint

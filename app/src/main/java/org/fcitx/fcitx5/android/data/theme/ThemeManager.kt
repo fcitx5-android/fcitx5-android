@@ -12,6 +12,7 @@ import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceProvider
+import org.fcitx.fcitx5.android.data.theme.ThemeManager.activeTheme
 import org.fcitx.fcitx5.android.utils.WeakHashSet
 import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.isDarkMode
@@ -36,12 +37,14 @@ object ThemeManager {
 
     val DefaultTheme = ThemePreset.PixelDark
 
+    private var monetThemes = listOf(ThemeMonet.getLight(), ThemeMonet.getDark())
+
     private val customThemes: MutableList<Theme.Custom> = ThemeFilesManager.listThemes()
 
     fun getTheme(name: String) =
         customThemes.find { it.name == name } ?: BuiltinThemes.find { it.name == name }
 
-    fun getAllThemes() = customThemes + BuiltinThemes
+    fun getAllThemes() = customThemes + monetThemes + BuiltinThemes
 
     fun refreshThemes() {
         customThemes.clear()
@@ -134,8 +137,11 @@ object ThemeManager {
         _activeTheme = evaluateActiveTheme()
     }
 
-    fun onSystemDarkModeChange(isDark: Boolean) {
-        isDarkMode = isDark
+    fun onSystemPlatteChange(newConfig: Configuration) {
+        isDarkMode = newConfig.isDarkMode()
+        monetThemes = listOf(ThemeMonet.getLight(), ThemeMonet.getDark())
+        // `ManagedThemePreference` finds a theme with same name in `getAllThemes()`
+        // thus `evaluateActiveTheme()` should be called after updating `monetThemes`
         activeTheme = evaluateActiveTheme()
     }
 
