@@ -1,0 +1,43 @@
+# 0.1.1 - Bug Fixes and Improvements
+
+This is a rather small release focusing on improving stability, so don't expect many exciting new features ...
+
+## Highlights
+
+- New option to enable "Haptic feedback on key repeat"
+- New theme properties for candidate label/text/comment color
+- Click to turn pages/select candidates when using CandidatesView for physical keyboard
+
+### Notable changes
+
+- "Follow system day/night theme" has been enabled by default, which should be stable enough
+
+### Build process improvements
+
+- Removed all symlinks across git submodules to simplify the build process on Windows
+
+## New features
+
+- Register a BroadcastReceiver to restart fcitx instance externally
+- Add a shortcut in developer settings to restart fcitx instance
+- New option to ignore system WindowInsets
+- Enable "follow_system_dark_mode" by default 
+- Make ClearURLs compliant with the JavaScript implementation
+- Add option to open DocumentsUI and browse user data dir
+- Add option "Haptic feedback on key repeat"
+- Add theme properties for candidate label/text/comment color 
+- Make CandidatesView touchable
+- Add content description to buttons on toolbar and TextEditing window
+- Always prepend user input as androidkeyboard candidate
+
+## Bug fixes
+
+- Fix edge-to-edge in plugin's AboutActivity
+- Fix ExpandedCandidateWindow self-detach on predict candidates
+- Fix potential null pointer dereference
+- Workaround duplicated onPrimaryClipChanged callback
+- Try follow system "Vibration & haptics" settings
+- Apply fcitx input filter to paged candidates
+- Improve CandidatesView positioning when monitoring cursor anchor fails
+- Send key with KeyStates.Virtual on space swipe
+- Workaround Samsung One UI 7.0 navbar coloring
