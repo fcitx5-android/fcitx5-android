@@ -279,4 +279,9 @@
     <string name="candidates_padding">候選詞邊距</string>
     <string name="candidates_window_min_width">候選窗口最小寬度</string>
     <string name="candidates_window_padding">候選窗口邊距</string>
-</resources>
+    <string name="restart_fcitx_instance">重新啟動 Fcitx 實例</string>
+    <string name="restart_fcitx_instance_confirm">Fcitx 實例將被銷燬並重新初始化。繼續嗎？</string>
+    <string name="ignore_system_window_insets">忽略系統窗口邊襯區 (WindowInsets)</string>
+    <string name="browse_user_data_dir">瀏覽用户資料目錄</string>
+    <string name="haptic_on_repeat">重複按鍵時的觸覺回饋</string>
+    </resources>

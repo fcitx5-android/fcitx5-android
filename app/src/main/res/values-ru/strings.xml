@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name_release">Fcitx5</string>
-    <string name="app_name_debug">Fcitx5 (отладка)</string>
+    <string name="app_name_debug">Fcitx5 (Отладка)</string>
     <string name="save">Сохранить</string>
     <string name="input_methods">Методы ввода</string>
     <string name="add_input_method">Добавить метод ввода</string>
@@ -279,4 +279,28 @@
     <string name="candidates_padding">Отступ от слова-кандидата</string>
     <string name="candidates_window_min_width">Минимальная ширина окна кандидата</string>
     <string name="candidates_window_padding">Поле окна кандидата</string>
+    <string name="restart_fcitx_instance">Перезапустить экземпляр fcitx</string>
+    <string name="restart_fcitx_instance_confirm">Экземпляр Fcitx будет уничтожен и повторно инициализирован. Продолжить?</string>
+    <string name="ignore_system_window_insets">Игнорировать поля системного окна</string>
+    <string name="browse_user_data_dir">Просмотр каталога пользовательских данных</string>
+    <string name="haptic_on_repeat">Вибрация при повторном нажатии клавиши</string>
+    <string name="redo">Повторить</string>
+    <string name="status_area">Область состояния</string>
+    <string name="expand_candidates_list">Развернуть список кандидатов</string>
+    <string name="hide_candidates_list">Скрыть список кандидатов</string>
+    <string name="switch_to_voice_input">Переключиться на голосовой ввод</string>
+    <string name="hide_keyboard">Скрыть клавиатуру</string>
+    <string name="private_mode">Приватный режим (нажмите, чтобы переключить панель инструментов)</string>
+    <string name="hide_toolbar">Скрыть панель инструментов</string>
+    <string name="expand_toolbar">Развернуть панель инструментов</string>
+    <string name="back_to_keyboard">Вернуться к клавиатуре</string>
+    <string name="backspace">Backspace</string>
+    <string name="move_cursor_up">Переместить курсор вверх</string>
+    <string name="move_cursor_right">Переместить курсор вправо</string>
+    <string name="move_cursor_down">Переместить курсор вниз</string>
+    <string name="move_cursor_left">Переместить курсор влево</string>
+    <string name="move_cursor_to_start">Переместите курсор к началу</string>
+    <string name="move_cursor_to_end">Переместить курсор к концу</string>
+    <string name="open_input_method_settings">Открыть настройки метода ввода</string>
+    <string name="delete_all">Удалить всё</string>
 </resources>

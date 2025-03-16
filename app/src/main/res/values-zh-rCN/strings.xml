@@ -169,7 +169,7 @@
     <string name="swipe_up">上划</string>
     <string name="disabled">禁用</string>
     <string name="system_default">系统默认</string>
-    <string name="editor_info_inspector">EditorInfo 检查器</string>
+    <string name="editor_info_inspector">编辑器信息 (EditorInfo) 检查器</string>
     <string name="default_">默认</string>
     <string name="saving">保存中</string>
     <string name="delete_all_pinned_items">要删除所有置顶条目吗？</string>
@@ -279,4 +279,28 @@
     <string name="candidates_padding">候选词边距</string>
     <string name="candidates_window_min_width">候选窗口最小宽度</string>
     <string name="candidates_window_padding">候选窗口边距</string>
+    <string name="restart_fcitx_instance">重启 Fcitx 实例</string>
+    <string name="restart_fcitx_instance_confirm">Fcitx 实例将被销毁并重新初始化。继续吗？</string>
+    <string name="ignore_system_window_insets">忽略系统窗口边衬区 (WindowInsets)</string>
+    <string name="browse_user_data_dir">浏览用户数据目录</string>
+    <string name="haptic_on_repeat">重复按键时的振动反馈</string>
+    <string name="redo">重做</string>
+    <string name="status_area">状态区域</string>
+    <string name="expand_candidates_list">展开候选词列表</string>
+    <string name="hide_candidates_list">隐藏</string>
+    <string name="switch_to_voice_input">切换到语音输入</string>
+    <string name="hide_keyboard">隐藏键盘</string>
+    <string name="private_mode">隐私模式（点击以切换工具栏）</string>
+    <string name="hide_toolbar">隐藏工具栏</string>
+    <string name="expand_toolbar">展开工具栏</string>
+    <string name="back_to_keyboard">返回键盘</string>
+    <string name="backspace">退格</string>
+    <string name="move_cursor_up">向上移动光标</string>
+    <string name="move_cursor_right">向右移动光标</string>
+    <string name="move_cursor_down">向下移动光标</string>
+    <string name="move_cursor_left">向左移动</string>
+    <string name="move_cursor_to_start">把光标移动到开头</string>
+    <string name="move_cursor_to_end">把光标移动到结尾</string>
+    <string name="open_input_method_settings">打开输入法设置</string>
+    <string name="delete_all">全部删除</string>
 </resources>
