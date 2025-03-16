@@ -1,3 +1,7 @@
+/*
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * SPDX-FileCopyrightText: Copyright 2025 Fcitx5 for Android Contributors
+ */
 package org.fcitx.fcitx5.android.data.theme
 
 import android.os.Build
@@ -17,67 +21,73 @@ object ThemeMonet {
             Theme.Monet(
                 isDark = false,
                 surfaceContainer = appContext.getColor(android.R.color.system_surface_container_light),
+                surfaceContainerHigh = appContext.getColor(android.R.color.system_surface_container_highest_light),
                 surfaceBright = appContext.getColor(android.R.color.system_surface_bright_light),
                 onSurface = appContext.getColor(android.R.color.system_on_surface_light),
-                inversePrimary = appContext.getColor(android.R.color.system_accent1_200),
-                onPrimaryContainer = appContext.getColor(android.R.color.system_on_primary_container_light),
+                primary = appContext.getColor(android.R.color.system_primary_light),
+                onPrimary = appContext.getColor(android.R.color.system_on_primary_light),
                 secondaryContainer = appContext.getColor(android.R.color.system_secondary_container_light),
-                onSecondaryContainer = appContext.getColor(android.R.color.system_on_secondary_container_light)
+                onSurfaceVariant = appContext.getColor(android.R.color.system_on_surface_variant_light)
             )
         else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) // Approximate color values
             Theme.Monet(
                 isDark = false,
-                surfaceContainer = appContext.getColor(android.R.color.system_neutral1_50), // N94
-                surfaceBright = appContext.getColor(android.R.color.system_neutral1_10), // N98
+                surfaceContainer = appContext.getColor(android.R.color.system_neutral1_50), // neutral94
+                surfaceContainerHigh = appContext.getColor(android.R.color.system_neutral2_100), // neutral92
+                surfaceBright = appContext.getColor(android.R.color.system_neutral1_10), // neutral98
                 onSurface = appContext.getColor(android.R.color.system_neutral1_900),
-                inversePrimary = appContext.getColor(android.R.color.system_accent1_200),
-                onPrimaryContainer = appContext.getColor(android.R.color.system_accent1_700),
+                primary = appContext.getColor(android.R.color.system_accent1_600),
+                onPrimary = appContext.getColor(android.R.color.system_accent1_0),
                 secondaryContainer = appContext.getColor(android.R.color.system_accent2_100),
-                onSecondaryContainer = appContext.getColor(android.R.color.system_accent2_700)
+                onSurfaceVariant = appContext.getColor(android.R.color.system_accent2_700)
             )
         else // Static MD3 colors, based on #769CDF
             Theme.Monet(
                 isDark = false,
                 surfaceContainer = 0xffededf4.toInt(),
+                surfaceContainerHigh = 0xffe7e8ee.toInt(),
                 surfaceBright = 0xfff9f9ff.toInt(),
                 onSurface = 0xff191c20.toInt(),
-                inversePrimary = 0xffaac7ff.toInt(),
-                onPrimaryContainer = 0xff284777.toInt(),
+                primary = 0xff415f91.toInt(),
+                onPrimary = 0xffffffff.toInt(),
                 secondaryContainer = 0xffdae2f9.toInt(),
-                onSecondaryContainer = 0xff3e4759.toInt(),
+                onSurfaceVariant = 0xff44474e.toInt(),
             )
     val dark
         get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) // Real Monet colors
             Theme.Monet(
                 isDark = true,
                 surfaceContainer = appContext.getColor(android.R.color.system_surface_container_dark),
+                surfaceContainerHigh = appContext.getColor(android.R.color.system_surface_container_high_dark),
                 surfaceBright = appContext.getColor(android.R.color.system_surface_bright_dark),
                 onSurface = appContext.getColor(android.R.color.system_on_surface_dark),
-                inversePrimary = appContext.getColor(android.R.color.system_accent1_600),
-                onPrimaryContainer = appContext.getColor(android.R.color.system_on_primary_container_dark),
+                primary = appContext.getColor(android.R.color.system_primary_dark),
+                onPrimary = appContext.getColor(android.R.color.system_on_primary_dark),
                 secondaryContainer = appContext.getColor(android.R.color.system_secondary_container_dark),
-                onSecondaryContainer = appContext.getColor(android.R.color.system_on_secondary_container_dark)
+                onSurfaceVariant = appContext.getColor(android.R.color.system_on_surface_variant_dark)
             )
         else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) // Approximate color values
             Theme.Monet(
                 isDark = true,
-                surfaceContainer = appContext.getColor(android.R.color.system_neutral1_900), // N12
-                surfaceBright = appContext.getColor(android.R.color.system_neutral1_800), // N24
+                surfaceContainer = appContext.getColor(android.R.color.system_neutral1_900), // neutral12
+                surfaceContainerHigh = appContext.getColor(android.R.color.system_neutral2_1000), // neutral17
+                surfaceBright = appContext.getColor(android.R.color.system_neutral1_800), // neutral24
                 onSurface = appContext.getColor(android.R.color.system_neutral1_100),
-                inversePrimary = appContext.getColor(android.R.color.system_accent1_600),
-                onPrimaryContainer = appContext.getColor(android.R.color.system_accent1_100),
+                primary = appContext.getColor(android.R.color.system_accent1_200),
+                onPrimary = appContext.getColor(android.R.color.system_accent1_800),
                 secondaryContainer = appContext.getColor(android.R.color.system_accent2_700),
-                onSecondaryContainer = appContext.getColor(android.R.color.system_accent2_100)
+                onSurfaceVariant = appContext.getColor(android.R.color.system_accent2_200)
             )
         else // Static MD3 colors, based on #769CDF
             Theme.Monet(
                 isDark = true,
                 surfaceContainer = 0xff1d2024.toInt(),
+                surfaceContainerHigh = 0xff282a2f.toInt(),
                 surfaceBright = 0xff37393e.toInt(),
                 onSurface = 0xffe2e2e9.toInt(),
-                inversePrimary = 0xff415f91.toInt(),
-                onPrimaryContainer = 0xffd6e3ff.toInt(),
+                primary = 0xffaac7ff.toInt(),
+                onPrimary = 0xff0a305f.toInt(),
                 secondaryContainer = 0xff3e4759.toInt(),
-                onSecondaryContainer = 0xffdae2f9.toInt(),
+                onSurfaceVariant = 0xffc4c6d0.toInt(),
             )
 }

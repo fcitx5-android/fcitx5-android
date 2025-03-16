@@ -14,6 +14,7 @@ import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import org.fcitx.fcitx5.android.utils.DarkenColorFilter
 import org.fcitx.fcitx5.android.utils.RectSerializer
+import org.fcitx.fcitx5.android.utils.alpha
 import org.fcitx.fcitx5.android.utils.appContext
 import java.io.File
 
@@ -290,51 +291,37 @@ sealed class Theme : Parcelable {
         constructor(
             isDark: Boolean,
             surfaceContainer: Int,
+            surfaceContainerHigh: Int,
             surfaceBright: Int,
             onSurface: Int,
-            inversePrimary: Int,
-            onPrimaryContainer: Int,
+            primary: Int,
+            onPrimary: Int,
             secondaryContainer: Int,
-            onSecondaryContainer: Int,
+            onSurfaceVariant: Int,
         ) : this(
             name = "Monet" + if (isDark) "Dark" else "Light",
             isDark = isDark,
             backgroundColor = surfaceContainer,
-            barColor = surfaceContainer,
+            barColor = surfaceContainerHigh,
             keyboardColor = surfaceContainer,
             keyBackgroundColor = surfaceBright,
             keyTextColor = onSurface,
             candidateTextColor = onSurface,
             candidateLabelColor = onSurface,
-            candidateCommentColor = onSurface,
+            candidateCommentColor = onSurfaceVariant,
             altKeyBackgroundColor = secondaryContainer,
-            altKeyTextColor = onSecondaryContainer,
-            accentKeyBackgroundColor = inversePrimary,
-            accentKeyTextColor = onPrimaryContainer,
-            keyPressHighlightColor = inversePrimary,
+            altKeyTextColor = onSurfaceVariant,
+            accentKeyBackgroundColor = primary,
+            accentKeyTextColor = onPrimary,
+            keyPressHighlightColor = onSurface.alpha(if (isDark) 0.2f else 0.12f),
             keyShadowColor = 0x000000,
             popupBackgroundColor = surfaceContainer,
             popupTextColor = onSurface,
             spaceBarColor = surfaceBright,
             dividerColor = surfaceBright,
             clipboardEntryColor = surfaceBright,
-            genericActiveBackgroundColor = inversePrimary,
-            genericActiveForegroundColor = onPrimaryContainer
+            genericActiveBackgroundColor = primary,
+            genericActiveForegroundColor = onPrimary
         )
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
