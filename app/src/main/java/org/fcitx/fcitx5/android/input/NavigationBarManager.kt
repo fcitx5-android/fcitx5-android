@@ -15,6 +15,7 @@ import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.data.theme.ThemePrefs.NavbarBackground
+import org.fcitx.fcitx5.android.utils.DeviceUtil
 
 class NavigationBarManager {
 
@@ -68,6 +69,10 @@ class NavigationBarManager {
                 window.useSystemNavbarBackground(false)
                 window.setNavbarBackgroundColor(Color.TRANSPARENT)
                 window.enforceNavbarContrast(false)
+                // it seems One UI 7.0 (Android 15) does not allow drawing behind navbar
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && DeviceUtil.isSamsungOneUI) {
+                    shouldUpdateNavbarBackground = true
+                }
             }
         }
     }
