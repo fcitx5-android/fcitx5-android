@@ -12,6 +12,7 @@ import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceProvider
+import org.fcitx.fcitx5.android.data.theme.ThemeManager.activeTheme
 import org.fcitx.fcitx5.android.utils.WeakHashSet
 import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.isDarkMode
@@ -34,6 +35,10 @@ object ThemeManager {
         ThemePreset.AMOLEDBlack,
     )
 
+    private var MonetThemes = listOf(
+        ThemeMonet.getLight(), ThemeMonet.getDark()
+    )
+
     val DefaultTheme = ThemePreset.PixelDark
 
     private val customThemes: MutableList<Theme.Custom> = ThemeFilesManager.listThemes()
@@ -41,7 +46,7 @@ object ThemeManager {
     fun getTheme(name: String) =
         customThemes.find { it.name == name } ?: BuiltinThemes.find { it.name == name }
 
-    fun getAllThemes() = listOf(ThemeMonet.light, ThemeMonet.dark) + customThemes + BuiltinThemes
+    fun getAllThemes() = customThemes + MonetThemes + BuiltinThemes
 
     fun refreshThemes() {
         customThemes.clear()
@@ -134,8 +139,11 @@ object ThemeManager {
         _activeTheme = evaluateActiveTheme()
     }
 
-    fun onSystemDarkModeChange(isDark: Boolean) {
+    fun onSystemPlatteChange(isDark: Boolean) {
         isDarkMode = isDark
+        MonetThemes = listOf(
+            ThemeMonet.getLight(), ThemeMonet.getDark()
+        )
         activeTheme = evaluateActiveTheme()
     }
 

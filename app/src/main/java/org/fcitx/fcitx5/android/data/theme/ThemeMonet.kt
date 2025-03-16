@@ -16,8 +16,8 @@ import org.fcitx.fcitx5.android.utils.appContext
 // See: https://github.com/XayahSuSuSu/Android-DataBackup/blob/e8b087fb55519c659bebdc46c0217731fe80a0d7/source/core/ui/src/main/kotlin/com/xayah/core/ui/material3/DynamicTonalPalette.kt#L185
 
 object ThemeMonet {
-    val light
-        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) // Real Monet colors
+    fun getLight(): Theme.Monet =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) // Real Monet colors
             Theme.Monet(
                 isDark = false,
                 surfaceContainer = appContext.getColor(android.R.color.system_surface_container_light),
@@ -53,8 +53,9 @@ object ThemeMonet {
                 secondaryContainer = 0xffdae2f9.toInt(),
                 onSurfaceVariant = 0xff44474e.toInt(),
             )
-    val dark
-        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) // Real Monet colors
+
+    fun getDark(): Theme.Monet =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) // Real Monet colors
             Theme.Monet(
                 isDark = true,
                 surfaceContainer = appContext.getColor(android.R.color.system_surface_container_dark),
@@ -90,4 +91,5 @@ object ThemeMonet {
                 secondaryContainer = 0xff3e4759.toInt(),
                 onSurfaceVariant = 0xffc4c6d0.toInt(),
             )
+
 }
