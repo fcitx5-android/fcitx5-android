@@ -35,18 +35,16 @@ object ThemeManager {
         ThemePreset.AMOLEDBlack,
     )
 
-    private var MonetThemes = listOf(
-        ThemeMonet.getLight(), ThemeMonet.getDark()
-    )
-
     val DefaultTheme = ThemePreset.PixelDark
+
+    private var monetThemes = listOf(ThemeMonet.getLight(), ThemeMonet.getDark())
 
     private val customThemes: MutableList<Theme.Custom> = ThemeFilesManager.listThemes()
 
     fun getTheme(name: String) =
         customThemes.find { it.name == name } ?: BuiltinThemes.find { it.name == name }
 
-    fun getAllThemes() = customThemes + MonetThemes + BuiltinThemes
+    fun getAllThemes() = customThemes + monetThemes + BuiltinThemes
 
     fun refreshThemes() {
         customThemes.clear()
@@ -139,11 +137,11 @@ object ThemeManager {
         _activeTheme = evaluateActiveTheme()
     }
 
-    fun onSystemPlatteChange(isDark: Boolean) {
-        isDarkMode = isDark
-        MonetThemes = listOf(
-            ThemeMonet.getLight(), ThemeMonet.getDark()
-        )
+    fun onSystemPlatteChange(newConfig: Configuration) {
+        isDarkMode = newConfig.isDarkMode()
+        monetThemes = listOf(ThemeMonet.getLight(), ThemeMonet.getDark())
+        // `ManagedThemePreference` finds a theme with same name in `getAllThemes()`
+        // thus `evaluateActiveTheme()` should be called after updating `monetThemes`
         activeTheme = evaluateActiveTheme()
     }
 
