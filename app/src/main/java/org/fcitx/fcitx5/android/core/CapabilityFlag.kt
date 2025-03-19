@@ -148,6 +148,7 @@ value class CapabilityFlags constructor(val flags: ULong) {
                             }
                             if (equals(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)) {
                                 flags += CapabilityFlag.Sensitive
+                                flags += CapabilityFlag.NoSpellCheck
                             }
                             if (equals(InputType.TYPE_TEXT_VARIATION_URI)) {
                                 flags += CapabilityFlag.Url
