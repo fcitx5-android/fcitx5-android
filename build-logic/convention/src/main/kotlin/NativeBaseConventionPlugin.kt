@@ -22,7 +22,6 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
                     cmake {
                         arguments(
                             "-DANDROID_STL=c++_shared",
-                            "-DANDROID_USE_LEGACY_TOOLCHAIN_FILE=OFF",
                             "-DVERSION_NAME=${Versions.baseVersionName}",
                             "-DPREBUILT_DIR=${prebuiltDir.absolutePath}"
                         )
