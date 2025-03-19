@@ -303,4 +303,5 @@
     <string name="move_cursor_to_end">Move cursor to end</string>
     <string name="open_input_method_settings">Open input method settings</string>
     <string name="delete_all">Delete all</string>
+    <string name="share">Share</string>
 </resources>

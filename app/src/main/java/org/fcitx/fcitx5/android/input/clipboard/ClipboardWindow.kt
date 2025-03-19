@@ -5,6 +5,7 @@
 package org.fcitx.fcitx5.android.input.clipboard
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -101,6 +102,17 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
 
             override fun onEdit(id: Int) {
                 AppUtil.launchClipboardEdit(context, id)
+            }
+
+            override fun onShare(entry: ClipboardEntry) {
+                val target = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, entry.text)
+                }
+                val chooser = Intent.createChooser(target, null).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                service.startActivity(chooser)
             }
 
             override fun onDelete(id: Int) {

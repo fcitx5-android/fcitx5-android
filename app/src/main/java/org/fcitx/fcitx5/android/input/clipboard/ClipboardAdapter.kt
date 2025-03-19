@@ -111,6 +111,9 @@ abstract class ClipboardAdapter(
                 menu.item(R.string.edit, R.drawable.ic_baseline_edit_24, iconTint) {
                     onEdit(entry.id)
                 }
+                menu.item(R.string.share, R.drawable.ic_baseline_share_24, iconTint) {
+                    onShare(entry)
+                }
                 menu.item(R.string.delete, R.drawable.ic_baseline_delete_24, iconTint) {
                     onDelete(entry.id)
                 }
@@ -142,6 +145,8 @@ abstract class ClipboardAdapter(
     abstract fun onUnpin(id: Int)
 
     abstract fun onEdit(id: Int)
+
+    abstract fun onShare(entry: ClipboardEntry)
 
     abstract fun onDelete(id: Int)
 
