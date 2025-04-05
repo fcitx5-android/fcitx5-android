@@ -19,6 +19,7 @@ add_custom_target(cmake)
 # prebuilt boost
 list(APPEND CMAKE_FIND_ROOT_PATH "${PREBUILT_DIR}/boost/${ANDROID_ABI}/lib/cmake")
 find_package(Boost 1.87.0 REQUIRED COMPONENTS iostreams CONFIG)
+add_compile_definitions("BOOST_ALL_NO_EMBEDDED_GDB_SCRIPTS")
 
 # prebuilt zstd
 set(zstd_DIR "${PREBUILT_DIR}/zstd/${ANDROID_ABI}/lib/cmake/zstd")
