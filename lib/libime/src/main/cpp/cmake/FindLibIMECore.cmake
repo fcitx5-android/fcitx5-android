@@ -6,7 +6,9 @@ find_package(libime REQUIRED CONFIG)
 
 if (NOT TARGET LibIME::Core)
     # fix target dependency
-    set_target_properties(libime::IMECore PROPERTIES INTERFACE_LINK_LIBRARIES fcitx5::Fcitx5Utils)
+    set_target_properties(libime::IMECore PROPERTIES
+            INTERFACE_LINK_LIBRARIES "fcitx5::Fcitx5Utils;Boost::boost"
+    )
     # fix target name
     add_library(LibIME::Core ALIAS libime::IMECore)
 endif()

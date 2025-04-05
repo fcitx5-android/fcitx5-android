@@ -19,10 +19,10 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
-      - uses: cachix/install-nix-action@v30
+      - uses: cachix/install-nix-action@v31
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: cachix/cachix-action@v15
+      - uses: cachix/cachix-action@v16
         with:
           name: fcitx5-android
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
