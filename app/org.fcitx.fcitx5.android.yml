@@ -21,9 +21,9 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y g++ libtool make automake gettext bzip2 xz-utils zstd pkg-config
-        cmake extra-cmake-modules ninja-build libboost-all-dev opencc
-        ghc cabal-install libghc-shake-dev libghc-aeson-pretty-dev libghc-js-flot-data
-        haskell-js-dgtable-utils python-is-python3
+        cmake extra-cmake-modules ninja-build libsystemd-dev libboost-all-dev
+        ghc cabal-install libghc-shake-dev libghc-aeson-pretty-dev libghc-js-flot-data haskell-js-dgtable-utils 
+        python-is-python3 opencc
     gradle:
       - yes
     binary: https://jenkins.fcitx-im.org/job/android/job/fcitx5-android/lastSuccessfulBuild/artifact/out/org.fcitx.fcitx5.android-%v-%abi-release.apk
