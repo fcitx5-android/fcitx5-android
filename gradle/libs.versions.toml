@@ -1,9 +1,9 @@
 [versions]
-androidGradlePlugin = "8.8.2"
-kotlin = "2.1.10"
-ksp = "2.1.10-1.0.31"
+androidGradlePlugin = "8.9.1"
+kotlin = "2.1.20"
+ksp = "2.1.20-1.0.31"
 lifecycle = "2.8.7"
-navigation = "2.8.8"
+navigation = "2.8.9"
 room = "2.6.1"
 splitties = "3.0.0"
 aboutlibraries = "11.6.3"

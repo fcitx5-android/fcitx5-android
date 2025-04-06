@@ -37,7 +37,7 @@ jobs:
 
       - name: Install Android NDK
         run: |
-          sdkmanager --install "cmake;3.22.1"
+          sdkmanager --install "cmake;3.31.6"
 
       - name: Install system dependencies (Ubuntu)
         if: ${{ startsWith(matrix.os, 'ubuntu') }}

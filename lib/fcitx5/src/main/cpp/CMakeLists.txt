@@ -17,10 +17,6 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 # cmake/FindECM.cmake
 find_package(ECM)
 
-# prebuilt fmt
-set(fmt_DIR "${PREBUILT_DIR}/fmt/${ANDROID_ABI}/lib/cmake/fmt")
-find_package(fmt)
-
 # prebuilt libintl-lite
 set(LibIntl_DIR "${PREBUILT_DIR}/libintl-lite/${ANDROID_ABI}/lib/cmake")
 find_package(LibIntl)

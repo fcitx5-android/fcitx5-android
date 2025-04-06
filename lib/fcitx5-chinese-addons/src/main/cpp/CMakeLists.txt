@@ -31,13 +31,10 @@ find_package(Fcitx5ModuleLuaAddonLoader MODULE)
 # dummy target to export src/main/cpp/cmake
 add_custom_target(cmake)
 
-# prebuilt fmt
-set(fmt_DIR "${PREBUILT_DIR}/fmt/${ANDROID_ABI}/lib/cmake/fmt")
-find_package(fmt)
-
 # prebuilt boost
 list(APPEND CMAKE_FIND_ROOT_PATH "${PREBUILT_DIR}/boost/${ANDROID_ABI}/lib/cmake")
-find_package(Boost 1.86.0 REQUIRED COMPONENTS iostreams CONFIG)
+find_package(Boost 1.87.0 REQUIRED COMPONENTS iostreams CONFIG)
+add_compile_definitions("BOOST_ALL_NO_EMBEDDED_GDB_SCRIPTS")
 
 # prebuilt marisa-tire, OpenCC needs it
 set(marisa_DIR "${PREBUILT_DIR}/marisa/${ANDROID_ABI}/lib/cmake/marisa")

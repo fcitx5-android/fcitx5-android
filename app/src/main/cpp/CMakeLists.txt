@@ -31,10 +31,6 @@ add_subdirectory(androidfrontend)
 add_subdirectory(androidkeyboard)
 add_subdirectory(androidnotification)
 
-# prebuilt fmt
-set(fmt_DIR "${PREBUILT_DIR}/fmt/${ANDROID_ABI}/lib/cmake/fmt")
-find_package(fmt)
-
 # prebuilt libuv
 set(libuv_DIR "${PREBUILT_DIR}/libuv/${ANDROID_ABI}/lib/cmake/libuv")
 find_package(libuv)
@@ -46,7 +42,7 @@ find_package(Boost 1.86.0 REQUIRED COMPONENTS headers iostreams CONFIG)
 set(CHINESE_ADDONS_PINYIN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../lib/fcitx5-chinese-addons/src/main/cpp/fcitx5-chinese-addons/im/pinyin")
 add_library(pinyin-customphrase STATIC "${CHINESE_ADDONS_PINYIN_DIR}/customphrase.cpp")
 target_include_directories(pinyin-customphrase INTERFACE "${CHINESE_ADDONS_PINYIN_DIR}")
-target_link_libraries(pinyin-customphrase PRIVATE fmt::fmt-header-only Fcitx5::Utils LibIME::Core)
+target_link_libraries(pinyin-customphrase PRIVATE Fcitx5::Utils LibIME::Core)
 
 add_library(native-lib SHARED native-lib.cpp)
 target_link_libraries(native-lib

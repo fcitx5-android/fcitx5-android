@@ -8,8 +8,7 @@ find_package(LibIMECore MODULE)
 
 if (NOT TARGET LibIME::Table)
     # fix target dependency
-    set_target_properties(libime::IMETable PROPERTIES INTERFACE_LINK_LIBRARIES fcitx5::Fcitx5Utils)
-    set_target_properties(libime::IMEPinyin PROPERTIES INTERFACE_LINK_LIBRARIES libime::IMECore)
+    set_target_properties(libime::IMETable PROPERTIES INTERFACE_LINK_LIBRARIES libime::IMECore)
     # fix target name
     add_library(LibIME::Table ALIAS libime::IMETable)
 endif()
