@@ -270,6 +270,7 @@
     <string name="crop">Crop</string>
     <string name="candidates_window">Candidates Window</string>
     <string name="show_candidates_window">Show candidates window</string>
+    <string name="candidates_window_radius">candidates window radius</string>
     <string name="follow_input_device">Depends on input device</string>
     <string name="candidates_orientation">Candidates list orientation</string>
     <string name="automatic">Automatic</string>

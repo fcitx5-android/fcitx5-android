@@ -6,8 +6,12 @@
 package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
+import android.graphics.drawable.GradientDrawable
+import android.graphics.Outline
 import android.os.Build
+import android.view.View
 import android.view.ViewGroup
+import android.view.ViewOutlineProvider
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.ViewTreeObserver.OnPreDrawListener
 import android.view.WindowInsets
@@ -49,6 +53,7 @@ class CandidatesView(
     private val orientation by candidatesPrefs.orientation
     private val windowMinWidth by candidatesPrefs.windowMinWidth
     private val windowPadding by candidatesPrefs.windowPadding
+    private val windowRadius by candidatesPrefs.windowRadius
     private val fontSize by candidatesPrefs.fontSize
     private val itemPaddingVertical by candidatesPrefs.itemPaddingVertical
     private val itemPaddingHorizontal by candidatesPrefs.itemPaddingHorizontal
@@ -186,7 +191,27 @@ class CandidatesView(
 
         minWidth = dp(windowMinWidth)
         padding = dp(windowPadding)
-        backgroundColor = theme.backgroundColor
+        val shapeDrawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = dp(windowRadius).toFloat()
+            setColor(theme.backgroundColor)
+        }
+        background = shapeDrawable
+        clipToOutline = true
+        outlineProvider = object : ViewOutlineProvider() {
+            override fun getOutline(view: View, outline: Outline) {
+                val paddingPx = dp(windowPadding)
+                val radiusPx = dp(windowRadius)
+                val effectiveRadius = (radiusPx - paddingPx).toFloat().coerceAtLeast(0f)
+                outline.setRoundRect(
+                    paddingPx.toInt(),
+                    paddingPx.toInt(),
+                    (view.width - paddingPx).toInt(),
+                    (view.height - paddingPx).toInt(),
+                    effectiveRadius
+                )
+            }
+        }
         add(preeditUi.root, lParams(wrapContent, wrapContent) {
             topOfParent()
             startOfParent()
