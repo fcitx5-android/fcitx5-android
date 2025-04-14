@@ -6,6 +6,6 @@
     "website": "https://github.com/fcitx/fcitx5-chewing",
     "tag": "native",
     "licenses": [
-        "GPL-2.0-or-later"
+        "LGPL-2.1-or-later"
     ]
 }
