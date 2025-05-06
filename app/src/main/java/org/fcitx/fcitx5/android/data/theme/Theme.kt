@@ -324,8 +324,9 @@ sealed class Theme : Parcelable {
             genericActiveForegroundColor = onPrimary
         )
 
+        @OptIn(ExperimentalStdlibApi::class)
         fun toCustom() = Custom(
-            name = name,
+            name = name + "#" + this.accentKeyBackgroundColor.toHexString(), // Use primary color as identifier
             isDark = isDark,
             backgroundImage = null,
             backgroundColor = backgroundColor,
