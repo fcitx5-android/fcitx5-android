@@ -323,5 +323,32 @@ sealed class Theme : Parcelable {
             genericActiveBackgroundColor = primary,
             genericActiveForegroundColor = onPrimary
         )
+
+        fun toCustom() = Custom(
+            name = name,
+            isDark = isDark,
+            backgroundImage = null,
+            backgroundColor = backgroundColor,
+            barColor = barColor,
+            keyboardColor = keyboardColor,
+            keyBackgroundColor = keyBackgroundColor,
+            keyTextColor = keyTextColor,
+            candidateTextColor = candidateTextColor,
+            candidateLabelColor = candidateLabelColor,
+            candidateCommentColor = candidateCommentColor,
+            altKeyBackgroundColor = altKeyBackgroundColor,
+            altKeyTextColor = altKeyTextColor,
+            accentKeyBackgroundColor = accentKeyBackgroundColor,
+            accentKeyTextColor = accentKeyTextColor,
+            keyPressHighlightColor = keyPressHighlightColor,
+            keyShadowColor = keyShadowColor,
+            popupBackgroundColor = popupBackgroundColor,
+            popupTextColor = popupTextColor,
+            spaceBarColor = spaceBarColor,
+            dividerColor = dividerColor,
+            clipboardEntryColor = clipboardEntryColor,
+            genericActiveBackgroundColor = genericActiveBackgroundColor,
+            genericActiveForegroundColor = genericActiveForegroundColor
+        )
     }
 }
