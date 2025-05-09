@@ -25,7 +25,7 @@ GitHub: [![release version](https://img.shields.io/github/v/release/fcitx5-andro
   - Zhuyin/Bopomofo (via [Chewing Plugin](./plugin/chewing))
   - Jyutping (via [Jyutping Plugin](./plugin/jyutping/), powered by [libime-jyutping](https://github.com/fcitx/libime-jyutping))
 - Vietnamese (via [UniKey Plugin](./plugin/unikey), supports Telex, VNI and VIQR)
-- Japanese (via [Anthy Plugin](./plugin/anthy))
+- Japanese (via [Mozc Plugin](./plugin/mozc) and [Anthy Plugin](./plugin/anthy))
 - Korean (via [Hangul Plugin](./plugin/hangul))
 - Sinhala (via [Sayura Plugin](./plugin/sayura))
 - Thai (via [Thai Plugin](./plugin/thai))
@@ -94,6 +94,7 @@ First, clone this repository and fetch all submodules:
 ```shell
 git clone git@github.com:fcitx5-android/fcitx5-android.git
 git submodule update --init --recursive
+git clone git@github.com:google/mozc plugin/mozc/src/main/cpp/fcitx5-mozc/mozc --depth=1 --recurse-submodules
 ```
 
 Install `extra-cmake-modules` and `gettext` with your system package manager:
