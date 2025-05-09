@@ -40,6 +40,7 @@ class AutoScaleTextView @JvmOverloads constructor(
     }
 
     var scaleMode = Mode.None
+    var enableBaselineAdjust = false
 
     private lateinit var text: String
 
@@ -91,22 +92,27 @@ class AutoScaleTextView @JvmOverloads constructor(
 
     private fun measureTextBounds(): Rect {
         if (needsMeasureText) {
-            val paint = paint
-            paint.getFontMetrics(fontMetrics)
-            val codePointCount = Character.codePointCount(text, 0, text.length)
-            if (codePointCount == 1) {
-                // use actual text bounds when there is only one "character",
-                // eg. full-width punctuation
-                paint.getTextBounds(text, 0, text.length, textBounds)
-            } else {
-                textBounds.set(
-                    /* left = */ 0,
-                    /* top = */ floor(fontMetrics.top).toInt(),
-                    /* right = */ ceil(paint.measureText(text)).toInt(),
-                    /* bottom = */ ceil(fontMetrics.bottom).toInt()
-                )
-            }
+            measureTextBounds(text, textBounds)
             needsMeasureText = false
+        }
+        return textBounds
+    }
+
+    private fun measureTextBounds(text: String, textBounds: Rect): Rect {
+        val paint = paint
+        paint.getFontMetrics(fontMetrics)
+        val codePointCount = Character.codePointCount(text, 0, text.length)
+        if (codePointCount == 1) {
+            // use actual text bounds when there is only one "character",
+            // eg. full-width punctuation
+            paint.getTextBounds(text, 0, text.length, textBounds)
+        } else {
+            textBounds.set(
+                /* left = */ 0,
+                /* top = */ floor(fontMetrics.top).toInt(),
+                /* right = */ ceil(paint.measureText(text)).toInt(),
+                /* bottom = */ ceil(fontMetrics.bottom).toInt()
+            )
         }
         return textBounds
     }
@@ -153,8 +159,15 @@ class AutoScaleTextView @JvmOverloads constructor(
             textScaleX = 1.0f
             textScaleY = 1.0f
         }
-        val fontHeight = (fontMetrics.bottom - fontMetrics.top) * textScaleY
-        val fontOffsetY = fontMetrics.top * textScaleY
+        val offsetBounds = Rect()
+        val refChar = if (text.isNotEmpty() && text[0].isLowerCase()) "o" else "O"
+        measureTextBounds(refChar, offsetBounds)
+        val scaleY = textScaleY
+        val (fontHeight, fontOffsetY) = if (enableBaselineAdjust) {
+            offsetBounds.height() * scaleY to offsetBounds.top * scaleY
+        } else {
+            (fontMetrics.bottom - fontMetrics.top) * scaleY to fontMetrics.top * scaleY
+        }
         translateY = (contentHeight.toFloat() - fontHeight) / 2.0f - fontOffsetY + paddingTop
     }
 

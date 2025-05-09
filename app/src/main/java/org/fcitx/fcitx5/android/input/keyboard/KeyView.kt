@@ -252,6 +252,7 @@ open class TextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.Text) 
                 Variant.Accent -> theme.accentKeyTextColor
             }
         )
+        enableBaselineAdjust = ThemeManager.prefs.punctuationPosition.getValue() != PunctuationPosition.Bottom
     }
 
     init {
