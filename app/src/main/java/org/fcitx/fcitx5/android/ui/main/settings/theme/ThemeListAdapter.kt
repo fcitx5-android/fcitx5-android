@@ -127,6 +127,9 @@ abstract class ThemeListAdapter : RecyclerView.Adapter<ThemeListAdapter.ViewHold
                     if (theme is Theme.Custom) {
                         onExportTheme(theme)
                         true
+                    } else if (theme is Theme.Monet) {
+                        onExportTheme(theme.toCustom())
+                        true
                     } else false
                 }
                 editButton.setOnClickListener {
