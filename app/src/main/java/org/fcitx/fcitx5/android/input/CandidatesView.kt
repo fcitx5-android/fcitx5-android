@@ -6,8 +6,10 @@
 package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.view.ViewGroup
+import android.view.ViewOutlineProvider
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.ViewTreeObserver.OnPreDrawListener
 import android.view.WindowInsets
@@ -22,7 +24,6 @@ import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.candidates.floating.PagedCandidatesUi
 import org.fcitx.fcitx5.android.input.preedit.PreeditUi
 import splitties.dimensions.dp
-import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.below
 import splitties.views.dsl.constraintlayout.bottomOfParent
 import splitties.views.dsl.constraintlayout.centerHorizontally
@@ -49,6 +50,7 @@ class CandidatesView(
     private val orientation by candidatesPrefs.orientation
     private val windowMinWidth by candidatesPrefs.windowMinWidth
     private val windowPadding by candidatesPrefs.windowPadding
+    private val windowRadius by candidatesPrefs.windowRadius
     private val fontSize by candidatesPrefs.fontSize
     private val itemPaddingVertical by candidatesPrefs.itemPaddingVertical
     private val itemPaddingHorizontal by candidatesPrefs.itemPaddingHorizontal
@@ -186,7 +188,13 @@ class CandidatesView(
 
         minWidth = dp(windowMinWidth)
         padding = dp(windowPadding)
-        backgroundColor = theme.backgroundColor
+        background = GradientDrawable().apply {
+            setColor(theme.backgroundColor)
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = dp(windowRadius).toFloat()
+        }
+        clipToOutline = true
+        outlineProvider = ViewOutlineProvider.BACKGROUND
         add(preeditUi.root, lParams(wrapContent, wrapContent) {
             topOfParent()
             startOfParent()
