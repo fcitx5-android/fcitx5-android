@@ -17,6 +17,7 @@ import org.gradle.api.internal.provider.Providers
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.io.File
 
 /**
  * The prototype of an Android Application
@@ -141,13 +142,17 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
         target.pluginManager.apply(target.libs.plugins.aboutlibraries.get().pluginId)
 
         target.configure<AboutLibrariesExtension> {
-            configPath = target.rootProject.relativePath(target.file("licenses"))
-            excludeFields = arrayOf(
-                "generated", "developers", "organization", "scm", "funding", "content"
-            )
-            fetchRemoteLicense = false
-            fetchRemoteFunding = false
-            includePlatform = false
+            collect {
+                configPath.set(File("licenses"))
+                fetchRemoteLicense.set(false)
+                fetchRemoteFunding.set(false)
+                includePlatform.set(false)
+            }
+            export {
+                excludeFields.set(
+                    setOf("generated", "developers", "organization", "scm", "funding", "content")
+                )
+            }
         }
 
         target.dependencies.add("coreLibraryDesugaring", target.libs.android.desugarJDKLibs)

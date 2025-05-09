@@ -6,7 +6,6 @@
 package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
-import android.annotation.TargetApi
 import android.app.Dialog
 import android.content.res.ColorStateList
 import android.content.res.Configuration
@@ -581,7 +580,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    @TargetApi(34)
+    @RequiresApi(34)
     override fun onUpdateEditorToolType(toolType: Int) {
         super.onUpdateEditorToolType(toolType)
         inputDeviceMgr.evaluateOnUpdateEditorToolType(toolType, this)
