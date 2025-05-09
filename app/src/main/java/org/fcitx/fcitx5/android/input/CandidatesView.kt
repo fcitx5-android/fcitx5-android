@@ -7,9 +7,7 @@ package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
 import android.graphics.drawable.GradientDrawable
-import android.graphics.Outline
 import android.os.Build
-import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
@@ -26,7 +24,6 @@ import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.candidates.floating.PagedCandidatesUi
 import org.fcitx.fcitx5.android.input.preedit.PreeditUi
 import splitties.dimensions.dp
-import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.below
 import splitties.views.dsl.constraintlayout.bottomOfParent
 import splitties.views.dsl.constraintlayout.centerHorizontally
@@ -191,27 +188,13 @@ class CandidatesView(
 
         minWidth = dp(windowMinWidth)
         padding = dp(windowPadding)
-        val shapeDrawable = GradientDrawable().apply {
+        background = GradientDrawable().apply {
+            setColor(theme.backgroundColor)
             shape = GradientDrawable.RECTANGLE
             cornerRadius = dp(windowRadius).toFloat()
-            setColor(theme.backgroundColor)
         }
-        background = shapeDrawable
         clipToOutline = true
-        outlineProvider = object : ViewOutlineProvider() {
-            override fun getOutline(view: View, outline: Outline) {
-                val paddingPx = dp(windowPadding)
-                val radiusPx = dp(windowRadius)
-                val effectiveRadius = (radiusPx - paddingPx).toFloat().coerceAtLeast(0f)
-                outline.setRoundRect(
-                    paddingPx.toInt(),
-                    paddingPx.toInt(),
-                    (view.width - paddingPx).toInt(),
-                    (view.height - paddingPx).toInt(),
-                    effectiveRadius
-                )
-            }
-        }
+        outlineProvider = ViewOutlineProvider.BACKGROUND
         add(preeditUi.root, lParams(wrapContent, wrapContent) {
             topOfParent()
             startOfParent()
