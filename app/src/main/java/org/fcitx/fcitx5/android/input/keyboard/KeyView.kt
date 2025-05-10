@@ -17,6 +17,7 @@ import android.graphics.drawable.InsetDrawable
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.StateListDrawable
 import android.util.TypedValue
+import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
 import androidx.annotation.ColorInt
@@ -53,6 +54,13 @@ import kotlin.math.roundToInt
 
 abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearance) :
     CustomGestureView(ctx) {
+
+    interface KeyPressListener {
+        fun onKeyDown(view: KeyView)
+        fun onKeyUp(view: KeyView)
+    }
+
+    var keyPressListener: KeyPressListener? = null
 
     val bordered: Boolean
     val rippled: Boolean
@@ -230,6 +238,19 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                 )
             }
         }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                keyPressListener?.onKeyDown(this)
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                keyPressListener?.onKeyUp(this)
+            }
+        }
+        return super.onTouchEvent(event)
     }
 }
 

@@ -85,6 +85,8 @@ abstract class BaseKeyboard(
      */
     private val touchTarget = hashMapOf<Int, View>()
 
+    private var keyActionBuffer: KeyAction? = null
+
     init {
         isMotionEventSplittingEnabled = true
         keyRows = keyLayout.map { row ->
@@ -208,8 +210,17 @@ abstract class BaseKeyboard(
             def.behaviors.forEach {
                 when (it) {
                     is KeyDef.Behavior.Press -> {
-                        setOnClickListener { _ ->
-                            onAction(it.action)
+                        keyPressListener = object : KeyView.KeyPressListener {
+                            override fun onKeyDown(view: KeyView) {
+                                keyActionBuffer?.let { action -> onAction(action) }
+                                keyActionBuffer = it.action
+                            }
+                            override fun onKeyUp(view: KeyView) {
+                                keyActionBuffer?.let { action ->
+                                    onAction(action)
+                                    keyActionBuffer = null
+                                }
+                            }
                         }
                     }
                     is KeyDef.Behavior.LongPress -> {
