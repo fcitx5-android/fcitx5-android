@@ -210,16 +210,19 @@ abstract class BaseKeyboard(
             def.behaviors.forEach {
                 when (it) {
                     is KeyDef.Behavior.Press -> {
-                        keyPressListener = object : KeyView.KeyPressListener {
-                            override fun onKeyDown(view: KeyView) {
+                        keyPressListener = object : CustomGestureView.KeyPressListener {
+                            override fun onKeyDown(view: CustomGestureView) {
                                 keyActionBuffer?.let { action -> onAction(action) }
                                 keyActionBuffer = it.action
                             }
-                            override fun onKeyUp(view: KeyView) {
+                            override fun onKeyUp(view: CustomGestureView) {
                                 keyActionBuffer?.let { action ->
                                     onAction(action)
                                     keyActionBuffer = null
                                 }
+                            }
+                            override fun onLongPress(view: CustomGestureView) {
+                                keyActionBuffer = null
                             }
                         }
                     }
