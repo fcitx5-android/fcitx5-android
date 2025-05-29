@@ -191,24 +191,6 @@ public:
         return candidates;
     }
 
-    bool doesCandidateHaveAction(const int idx) {
-        const auto &list = inputPanel().candidateList();
-        if (!list) return false;
-        const auto &actionable = list->toActionable();
-        if (!actionable) return false;
-        if (idx >= list->size()) {
-            const auto &bulk = list->toBulk();
-            if (bulk && idx < bulk->totalSize()) {
-                const auto &c = bulk->candidateFromAll(idx);
-                return actionable->hasAction(c);
-            }
-            return false;
-        } else {
-            const auto &c = list->candidate(idx);
-            return actionable->hasAction(c);
-        }
-    }
-
     std::vector<CandidateAction> getCandidateAction(const int idx) {
         std::vector<CandidateAction> actions;
         const auto &list = inputPanel().candidateList();
@@ -217,10 +199,14 @@ public:
             if (actionable) {
                 if (idx >= list->size()) {
                     const auto &bulk = list->toBulk();
-                    if (bulk && idx < bulk->totalSize()) {
-                        const auto &c = bulk->candidateFromAll(idx);
-                        for (const auto &a: actionable->candidateActions(c)) {
-                            actions.emplace_back(a);
+                    if (bulk) {
+                        try {
+                            const auto &c = bulk->candidateFromAll(idx);
+                            for (const auto &a: actionable->candidateActions(c)) {
+                                actions.emplace_back(a);
+                            }
+                        } catch (const std::exception &e) {
+                            FCITX_WARN() << "getCandidateAction(" << idx << ") failed:" << e.what();
                         }
                     }
                 } else {
