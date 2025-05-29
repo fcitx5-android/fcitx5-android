@@ -92,8 +92,8 @@ class InputDeviceManager(private val onChange: (Boolean) -> Unit) {
      */
     fun evaluateOnKeyDown(e: KeyEvent, service: FcitxInputMethodService): Boolean {
         if (startedInputView) {
-            // filter out back/home/volume buttons
-            if (e.isPrintingKey) {
+            // filter out back/home/volume buttons and combination keys
+            if (e.isPrintingKey && e.hasNoModifiers()) {
                 // evaluate virtual keyboard visibility when pressing physical keyboard while InputView visible
                 evaluateOnKeyDownInner(service)
             }
@@ -102,7 +102,7 @@ class InputDeviceManager(private val onChange: (Boolean) -> Unit) {
         } else {
             // force show InputView when focusing on text input (likely inputType is not TYPE_NULL)
             // and pressing any digit/letter/punctuation key on physical keyboard
-            val showInputView = !isNullInputType && e.isPrintingKey
+            val showInputView = !isNullInputType && e.isPrintingKey && e.hasNoModifiers()
             if (showInputView) {
                 evaluateOnKeyDownInner(service)
             }
