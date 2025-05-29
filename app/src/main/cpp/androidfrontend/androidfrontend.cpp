@@ -227,9 +227,13 @@ public:
         if (!actionable) return;
         if (idx >= list->size()) {
             const auto &bulk = list->toBulk();
-            if (bulk && idx < bulk->totalSize()) {
-                const auto &c = bulk->candidateFromAll(idx);
-                actionable->triggerAction(c, actionIdx);
+            if (bulk) {
+                try {
+                    const auto &c = bulk->candidateFromAll(idx);
+                    actionable->triggerAction(c, actionIdx);
+                } catch (const std::exception &e) {
+                    FCITX_WARN() << "triggerCandidateAction(" << idx << ") failed:" << e.what();
+                }
             }
         } else {
             const auto &c = list->candidate(idx);
