@@ -163,11 +163,13 @@ class CandidatesView(
         } else {
             if (horizontal + selfWidth > parentWidth) parentWidth - selfWidth else horizontal
         }
-        val bottomSpace = parentHeight - bottomInsets
+        val bottomLimit = parentHeight - bottomInsets
+        val bottomSpace = bottomLimit - bottom
         // move CandidatesView above cursor anchor, only when
-        // bottom space is not enough && top space is larger than bottom
-        val tY: Float =
-            if (bottom + selfHeight > bottomSpace && top > bottomSpace) top - selfHeight else bottom
+        val tY: Float = if (
+            bottom + selfHeight > bottomLimit   // bottom space is not enough
+            && top > bottomSpace                // top space is larger than bottom
+        ) top - selfHeight else bottom
         translationX = tX
         translationY = tY
         // update touchEventReceiverWindow's position after CandidatesView's
