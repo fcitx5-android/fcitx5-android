@@ -698,7 +698,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
     };
 
     umask(007);
-    fcitx::StandardPath::global().syncUmask();
+    fcitx::StandardPaths::global().syncUmask();
 
     Fcitx::Instance().startup([&](auto *androidfrontend) {
         FCITX_INFO() << "Setting up callback";
@@ -1172,7 +1172,7 @@ Java_org_fcitx_fcitx5_android_data_table_TableManager_checkTableDictFormat(JNIEn
 extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_org_fcitx_fcitx5_android_data_pinyin_CustomPhraseManager_load(JNIEnv *env, jclass clazz) {
-    auto fp = fcitx::StandardPath::global().open(fcitx::StandardPath::Type::PkgData, "pinyin/customphrase", O_RDONLY);
+    auto fp = fcitx::StandardPaths::global().open(fcitx::StandardPathsType::PkgData, "pinyin/customphrase");
     if (fp.fd() < 0) {
         FCITX_INFO() << "cannot open pinyin/customphrase";
         return nullptr;
@@ -1218,8 +1218,8 @@ Java_org_fcitx_fcitx5_android_data_pinyin_CustomPhraseManager_save(JNIEnv *env, 
                        *CString(env, phraseValue),
                        static_cast<int>(phraseOrder));
     }
-    fcitx::StandardPath::global().safeSave(
-            fcitx::StandardPath::Type::PkgData, "pinyin/customphrase",
+    fcitx::StandardPaths::global().safeSave(
+            fcitx::StandardPathsType::PkgData, "pinyin/customphrase",
             [&](int fd) {
                 boost::iostreams::stream_buffer<boost::iostreams::file_descriptor_sink>
                         buffer(fd, boost::iostreams::file_descriptor_flags::never_close_handle);
