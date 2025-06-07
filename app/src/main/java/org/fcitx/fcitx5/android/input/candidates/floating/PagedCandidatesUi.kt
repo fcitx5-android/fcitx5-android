@@ -9,6 +9,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.TextView
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
@@ -50,10 +52,6 @@ class PagedCandidatesUi(
             return when (viewType) {
                 0 -> UiHolder.Candidate(LabeledCandidateItemUi(ctx, theme, setupTextView))
                 else -> UiHolder.Pagination(PaginationUi(ctx, theme)).apply {
-                    val wrap = ViewGroup.LayoutParams.WRAP_CONTENT
-                    ui.root.layoutParams = FlexboxLayoutManager.LayoutParams(wrap, wrap).apply {
-                        flexGrow = 1f
-                    }
                     ui.prevIcon.setOnClickListener {
                         onPrevPage.invoke()
                     }
@@ -61,6 +59,9 @@ class PagedCandidatesUi(
                         onNextPage.invoke()
                     }
                 }
+            }.apply {
+                // assign default LayoutParams, otherwise updateLayoutParams won't work
+                ui.root.layoutParams = FlexboxLayoutManager.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
             }
         }
 
@@ -72,11 +73,15 @@ class PagedCandidatesUi(
                     holder.ui.root.setOnClickListener {
                         onCandidateClick.invoke(position)
                     }
+                    holder.ui.root.updateLayoutParams<FlexboxLayoutManager.LayoutParams> {
+                        width = if (isVertical) MATCH_PARENT else WRAP_CONTENT
+                    }
                 }
                 is UiHolder.Pagination -> {
                     holder.ui.update(data)
                     holder.ui.root.updateLayoutParams<FlexboxLayoutManager.LayoutParams> {
-                        width = if (isVertical) ViewGroup.LayoutParams.MATCH_PARENT else ViewGroup.LayoutParams.WRAP_CONTENT
+                        flexGrow = 1f
+                        width = if (isVertical) MATCH_PARENT else WRAP_CONTENT
                         alignSelf = if (isVertical) AlignItems.STRETCH else AlignItems.CENTER
                     }
                 }
