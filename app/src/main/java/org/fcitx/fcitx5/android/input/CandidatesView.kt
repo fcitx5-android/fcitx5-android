@@ -97,7 +97,8 @@ class CandidatesView(
 
     private val preeditUi = PreeditUi(ctx, theme, setupTextView)
 
-    private val candidatesUi = PagedCandidatesUi(ctx, theme, setupTextView,
+    private val candidatesUi = PagedCandidatesUi(
+        ctx, theme, setupTextView,
         onCandidateClick = { index -> fcitx.launchOnReady { it.select(index) } },
         onPrevPage = { fcitx.launchOnReady { it.offsetCandidatePage(-1) } },
         onNextPage = { fcitx.launchOnReady { it.offsetCandidatePage(1) } }
@@ -162,8 +163,11 @@ class CandidatesView(
         } else {
             if (horizontal + selfWidth > parentWidth) parentWidth - selfWidth else horizontal
         }
+        val bottomSpace = parentHeight - bottomInsets
+        // move CandidatesView above cursor anchor, only when
+        // bottom space is not enough && top space is larger than bottom
         val tY: Float =
-            if (bottom + selfHeight > parentHeight - bottomInsets) top - selfHeight else bottom
+            if (bottom + selfHeight > bottomSpace && top > bottomSpace) top - selfHeight else bottom
         translationX = tX
         translationY = tY
         // update touchEventReceiverWindow's position after CandidatesView's
