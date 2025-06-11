@@ -76,13 +76,18 @@ object InputFeedbacks {
                 HapticFeedbackConstants.KEYBOARD_TAP
             }
         }
-        val useVibrator = duration != 0L || amplitude != 0
 
-        if (useVibrator) {
+        // there is `VibrationEffect.DEFAULT_AMPLITUDE` but no default duration;
+        // also `VibrationEffect.createOneShot()` only accepts positive duration.
+        // so changing amplitude without changing duration makes no sense
+        if (duration != 0L) {
             // on Android 13, if system haptic feedback was disabled, `vibrator.vibrate()` won't work
             // but `view.performHapticFeedback()` with `FLAG_IGNORE_GLOBAL_SETTING` still works
             if (hasAmplitudeControl && amplitude != 0) {
                 vibrator.vibrate(VibrationEffect.createOneShot(duration, amplitude))
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val ve = VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE)
+                vibrator.vibrate(ve)
             } else {
                 @Suppress("DEPRECATION")
                 vibrator.vibrate(duration)
