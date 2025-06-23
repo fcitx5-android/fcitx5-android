@@ -70,7 +70,10 @@ data class InputMethodEntry(
     constructor(name: String) : this("", name, "", "", "×", "", "", false)
 
     val displayName: String
-        get() = name.ifEmpty { uniqueName }
+        get() = when {
+            subMode.name.isNullOrEmpty() -> name.ifEmpty { uniqueName }
+            else -> label.ifEmpty { name.ifEmpty { uniqueName } }
+        }
 }
 
 @Parcelize
