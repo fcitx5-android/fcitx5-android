@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Fcitx5 (SMS OTP Plugin)</string>
+    <string name="app_name_debug">Fcitx5 (SMS OTP Plugin | Debug)</string>
+    <string name="app_name_release">Fcitx5 (SMS OTP Plugin)</string>
+    <string name="description">Read OTP from SMS message</string>
+</resources>

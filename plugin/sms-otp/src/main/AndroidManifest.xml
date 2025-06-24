@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+
+    <uses-permission android:name="${mainApplicationId}.permission.IPC" />
+
+    <application
+        android:icon="@mipmap/ic_launcher_plugin_generic"
+        android:label="@string/app_name">
+        <service
+            android:name=".MainService"
+            android:directBootAware="true"
+            android:exported="true"
+            android:permission="${mainApplicationId}.permission.PLUGIN"
+            tools:targetApi="26">
+            <intent-filter>
+                <action android:name="${mainApplicationId}.plugin.SERVICE" />
+            </intent-filter>
+        </service>
+        
+    </application>
+</manifest>
