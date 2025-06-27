@@ -1,13 +1,13 @@
 [versions]
-androidGradlePlugin = "8.10.0"
-kotlin = "2.1.20"
-ksp = "2.1.20-2.0.1"
-lifecycle = "2.9.0"
+androidGradlePlugin = "8.11.0"
+kotlin = "2.2.0"
+ksp = "2.2.0-2.0.2"
+lifecycle = "2.9.1"
 navigation = "2.9.0"
-room = "2.7.1"
+room = "2.7.2"
 splitties = "3.0.0"
-aboutlibraries = "12.1.2"
-arrow = "2.1.1"
+aboutlibraries = "12.2.3"
+arrow = "2.1.2"
 
 [libraries]
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
@@ -16,8 +16,8 @@ kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-pl
 kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version = "1.10.2" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.8.1" }
 androidx-activity = { module = "androidx.activity:activity-ktx", version = "1.10.1" }
-androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.0" }
-androidx-autofill = { module = "androidx.autofill:autofill", version = "1.1.0" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.1" }
+androidx-autofill = { module = "androidx.autofill:autofill", version = "1.3.0" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.2.1" }
 androidx-coordinatorlayout = { module = "androidx.coordinatorlayout:coordinatorlayout", version = "1.3.0" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.16.0" }
@@ -59,7 +59,7 @@ junit = { module = "junit:junit", version = "4.13.2" }
 androidx-test-runner = { module = "androidx.test:runner", version = "1.6.2" }
 androidx-test-rules = { module = "androidx.test:rules", version = "1.6.1" }
 androidx-lifecycle-testing = { module = "androidx.lifecycle:lifecycle-runtime-testing", version.ref = "lifecycle" }
-kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version = "2.1.0" }
+kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version = "2.2.0" }
 ksp = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 
 [plugins]
@@ -71,4 +71,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibraries" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
-gitVersion = { id = "com.palantir.git-version", version = "3.2.0" }
+gitVersion = { id = "com.palantir.git-version", version = "4.0.0" }
