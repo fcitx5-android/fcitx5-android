@@ -1,9 +1,10 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.input.picker
 
+import android.annotation.SuppressLint
 import android.view.Gravity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -12,6 +13,8 @@ import androidx.transition.Transition
 import androidx.viewpager2.widget.ViewPager2
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.broadcast.ReturnKeyDrawableComponent
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
@@ -121,8 +124,10 @@ class PickerWindow(
     override fun onCreateView() = PickerLayout(context, theme, switchKey).apply {
         pickerLayout = this
         val bordered = followKeyBorder && keyBorder
+        val withSkinTone = key === Key.Emoji
         pickerPagesAdapter = PickerPagesAdapter(
-            theme, keyActionListener, popupActionListener, data, density, key.name, bordered
+            theme, keyActionListener, popupActionListener, data,
+            density, key.name, bordered, withSkinTone
         )
         tabsUi.apply {
             setTabs(pickerPagesAdapter.categories)
@@ -165,10 +170,20 @@ class PickerWindow(
 
     override fun onCreateBarExtension() = pickerLayout.tabsUi.root
 
+    private val skinTonePreference = AppPrefs.getInstance().symbols.defaultEmojiSkinTone
+
+    @SuppressLint("NotifyDataSetChanged")
+    private val refreshPagesListener = ManagedPreference.OnChangeListener<Any> { _, _ ->
+        pickerPagesAdapter.notifyDataSetChanged()
+    }
+
     override fun onAttached() {
         pickerLayout.embeddedKeyboard.also {
             it.onReturnDrawableUpdate(returnKeyDrawable.resourceId)
             it.keyActionListener = keyActionListener
+        }
+        if (key === Key.Emoji) {
+            skinTonePreference.registerOnChangeListener(refreshPagesListener)
         }
     }
 
@@ -177,6 +192,9 @@ class PickerWindow(
         pickerLayout.embeddedKeyboard.keyActionListener = null
         service.lifecycleScope.launch(Dispatchers.IO) {
             pickerPagesAdapter.saveRecent()
+        }
+        if (key === Key.Emoji) {
+            skinTonePreference.unregisterOnChangeListener(refreshPagesListener)
         }
     }
 

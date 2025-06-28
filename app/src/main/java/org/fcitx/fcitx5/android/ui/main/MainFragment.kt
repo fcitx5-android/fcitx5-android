@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.ui.main
 
@@ -79,6 +79,11 @@ class MainFragment : PaddingPreferenceFragment() {
                     R.string.clipboard,
                     R.drawable.ic_clipboard,
                     R.id.action_mainFragment_to_clipboardSettingsFragment
+                )
+                addDestinationPreference(
+                    R.string.emoji_and_symbols,
+                    R.drawable.ic_baseline_emoji_symbols_24,
+                    R.id.action_mainFragment_to_symbolSettingsFragment
                 )
                 addDestinationPreference(
                     R.string.plugins,

@@ -58,6 +58,13 @@
             app:popEnterAnim="@animator/nav_default_pop_enter_anim"
             app:popExitAnim="@animator/nav_default_pop_exit_anim" />
         <action
+            android:id="@+id/action_mainFragment_to_symbolSettingsFragment"
+            app:destination="@id/symbolSettingsFragment"
+            app:enterAnim="@animator/nav_default_enter_anim"
+            app:exitAnim="@animator/nav_default_exit_anim"
+            app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+            app:popExitAnim="@animator/nav_default_pop_exit_anim" />
+        <action
             android:id="@+id/action_mainFragment_to_advancedSettingsFragment"
             app:destination="@id/advancedSettingsFragment"
             app:enterAnim="@animator/nav_default_enter_anim"
@@ -250,6 +257,10 @@
         android:id="@+id/clipboardSettingsFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.settings.behavior.ClipboardSettingsFragment"
         android:label="@string/clipboard" />
+    <fragment
+        android:id="@+id/symbolSettingsFragment"
+        android:name="org.fcitx.fcitx5.android.ui.main.settings.behavior.SymbolSettingsFragment"
+        android:label="@string/emoji_and_symbols" />
     <fragment
         android:id="@+id/advancedSettingsFragment"
         android:name="org.fcitx.fcitx5.android.ui.main.settings.behavior.AdvancedSettingsFragment"
