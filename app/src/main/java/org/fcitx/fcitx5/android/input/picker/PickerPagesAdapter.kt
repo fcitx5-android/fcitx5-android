@@ -4,6 +4,7 @@
  */
 package org.fcitx.fcitx5.android.input.picker
 
+import android.text.TextPaint
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.data.RecentlyUsed
@@ -19,7 +20,7 @@ class PickerPagesAdapter(
     private val density: PickerPageUi.Density,
     recentlyUsedFileName: String,
     private val bordered: Boolean = false,
-    private val withSkinTone: Boolean = false
+    private val isEmoji: Boolean = false
 ) : RecyclerView.Adapter<PickerPagesAdapter.ViewHolder>() {
 
     class ViewHolder(val ui: PickerPageUi) : RecyclerView.ViewHolder(ui.root)
@@ -47,9 +48,13 @@ class PickerPagesAdapter(
     val categories: List<PickerData.Category>
 
     init {
+        val data1 = if (isEmoji) {
+            val paint = TextPaint()
+            data.map { it.first to it.second.filter { ch -> paint.hasGlyph(ch) }.toTypedArray() }
+        } else data
         // Add recently used category
-        categories = listOf(PickerData.RecentlyUsedCategory) + data.map { it.first }
-        val concat = data.flatMap { it.second.toList() }
+        categories = listOf(PickerData.RecentlyUsedCategory) + data1.map { it.first }
+        val concat = data1.flatMap { it.second.toList() }
         // shift the start page of each category in data by one
         var start = 1
         var p = 0
@@ -57,8 +62,8 @@ class PickerPagesAdapter(
         // Add a placeholder for the recently used page
         // We will update it in [updateRecent]
         pages.add(arrayOf())
-        cats = Array(data.size) { i ->
-            val v = data[i].second
+        cats = Array(data1.size) { i ->
+            val v = data1[i].second
             val filled = v.size / density.pageSize
             val rest = v.size % density.pageSize
             val pageNum = filled + if (rest != 0) 1 else 0
@@ -117,7 +122,7 @@ class PickerPagesAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.ui.setItems(pages[position], withSkinTone)
+        holder.ui.setItems(pages[position], isEmoji)
     }
 
     override fun onViewAttachedToWindow(holder: ViewHolder) {

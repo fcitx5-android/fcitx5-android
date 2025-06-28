@@ -124,10 +124,10 @@ class PickerWindow(
     override fun onCreateView() = PickerLayout(context, theme, switchKey).apply {
         pickerLayout = this
         val bordered = followKeyBorder && keyBorder
-        val withSkinTone = key === Key.Emoji
+        val isEmoji = key === Key.Emoji
         pickerPagesAdapter = PickerPagesAdapter(
             theme, keyActionListener, popupActionListener, data,
-            density, key.name, bordered, withSkinTone
+            density, key.name, bordered, isEmoji
         )
         tabsUi.apply {
             setTabs(pickerPagesAdapter.categories)
