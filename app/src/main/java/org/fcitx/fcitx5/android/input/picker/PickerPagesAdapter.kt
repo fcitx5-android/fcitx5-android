@@ -18,7 +18,8 @@ class PickerPagesAdapter(
     data: List<Pair<PickerData.Category, Array<String>>>,
     private val density: PickerPageUi.Density,
     recentlyUsedFileName: String,
-    private val bordered: Boolean = false
+    private val bordered: Boolean = false,
+    private val withSkinTone: Boolean = false
 ) : RecyclerView.Adapter<PickerPagesAdapter.ViewHolder>() {
 
     class ViewHolder(val ui: PickerPageUi) : RecyclerView.ViewHolder(ui.root)
@@ -116,7 +117,7 @@ class PickerPagesAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.ui.setItems(pages[position])
+        holder.ui.setItems(pages[position], withSkinTone)
     }
 
     override fun onViewAttachedToWindow(holder: ViewHolder) {
@@ -126,7 +127,8 @@ class PickerPagesAdapter(
             holder.ui.popupActionListener = null
             // update RecentlyUsed when it's page attached
             updateRecent()
-            holder.ui.setItems(pages[0])
+            // RecentlyUsed content are already modified with skin tones
+            holder.ui.setItems(pages[0], withSkinTone = false)
         } else {
             holder.ui.popupActionListener = popupActionListener
         }
