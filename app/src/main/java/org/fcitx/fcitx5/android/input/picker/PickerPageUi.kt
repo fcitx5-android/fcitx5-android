@@ -179,7 +179,7 @@ class PickerPageUi(
         keyActionListener?.onKeyAction(CommitAction(str), Source.Keyboard)
     }
 
-    fun setItems(items: Array<String>, withSkinTone: Boolean = false) {
+    fun setItems(items: List<String>, withSkinTone: Boolean = false) {
         keyViews.forEachIndexed { i, keyView ->
             keyView.apply {
                 if (i >= items.size) {

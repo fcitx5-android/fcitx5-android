@@ -130,22 +130,20 @@ class PickerWindow(
             density, key.name, bordered, isEmoji
         )
         tabsUi.apply {
-            setTabs(pickerPagesAdapter.categories)
+            setTabs(pickerPagesAdapter.getCategoryList())
             setOnTabClickListener { i ->
-                pager.setCurrentItem(pickerPagesAdapter.getStartPageOfCategory(i), false)
+                pager.setCurrentItem(pickerPagesAdapter.getRangeOfCategoryIndex(i).first, false)
             }
         }
         pager.apply {
             adapter = pickerPagesAdapter
             // show first symbol category by default, rather than recently used
-            val initialPage = pickerPagesAdapter.getStartPageOfCategory(1)
-            setCurrentItem(initialPage, false)
+            val range = pickerPagesAdapter.getRangeOfCategoryIndex(1)
+            setCurrentItem(range.first, false)
             // update initial tab and page manually to avoid
             // "Adding or removing callbacks during dispatch to callbacks"
             tabsUi.activateTab(1)
-            paginationUi.updatePageCount(
-                pickerPagesAdapter.getCategoryRangeOfPage(initialPage).run { last - first + 1 }
-            )
+            paginationUi.updatePageCount(range.run { last - first + 1 })
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageScrolled(
                     position: Int,
@@ -153,15 +151,12 @@ class PickerWindow(
                     positionOffsetPixels: Int
                 ) {
                     val range = pickerPagesAdapter.getCategoryRangeOfPage(position)
-                    val start = range.first
-                    val total = range.last - start + 1
-                    val current = position - start
-                    paginationUi.updatePageCount(total)
-                    paginationUi.updateScrollProgress(current, positionOffset)
+                    paginationUi.updatePageCount(range.run { last - first + 1 })
+                    paginationUi.updateScrollProgress(position - range.first, positionOffset)
                 }
 
                 override fun onPageSelected(position: Int) {
-                    tabsUi.activateTab(pickerPagesAdapter.getCategoryOfPage(position))
+                    tabsUi.activateTab(pickerPagesAdapter.getCategoryIndexOfPage(position))
                     popup.dismissAll()
                 }
             })

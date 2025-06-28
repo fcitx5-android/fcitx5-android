@@ -26,66 +26,33 @@ class PickerPagesAdapter(
     class ViewHolder(val ui: PickerPageUi) : RecyclerView.ViewHolder(ui.root)
 
     /**
-     * calculated layout of data in the form of
-     * [(start page of the category, # of pages)]
-     * Note: unlike [ranges], [pages], and [categories],
-     * this does not include recently used category.
+     * list<`Category` to `[start, end]`>, starting with empty "RecentlyUsed" category
      */
-    private val cats: Array<Pair<Int, Int>>
-
-    private val ranges: List<IntRange>
-
-    private val pages: ArrayList<Array<String>>
+    private val categories: MutableList<Pair<PickerData.Category, IntRange>> = mutableListOf(
+        PickerData.RecentlyUsedCategory to IntRange(0, 0)
+    )
 
     /**
-     * INVARIANT: The recently used category only takes one page
-     * It does not interleave the layout calculation for data.
-     * See the note on [cats] for details
+     * list<page of symbols>, starting with empty "RecentlyUsed" page
      */
-    private val recentlyUsed = RecentlyUsed(recentlyUsedFileName, density.pageSize)
+    private val pages: MutableList<List<String>> = mutableListOf(listOf())
 
-    @Suppress("JoinDeclarationAndAssignment")
-    val categories: List<PickerData.Category>
+    fun getCategoryList(): List<PickerData.Category> {
+        return categories.map { it.first }
+    }
 
     init {
-        val data1 = if (isEmoji) {
-            val paint = TextPaint()
-            data.map { it.first to it.second.filter { ch -> paint.hasGlyph(ch) }.toTypedArray() }
-        } else data
-        // Add recently used category
-        categories = listOf(PickerData.RecentlyUsedCategory) + data1.map { it.first }
-        val concat = data1.flatMap { it.second.toList() }
-        // shift the start page of each category in data by one
-        var start = 1
-        var p = 0
-        pages = ArrayList()
-        // Add a placeholder for the recently used page
-        // We will update it in [updateRecent]
-        pages.add(arrayOf())
-        cats = Array(data1.size) { i ->
-            val v = data1[i].second
-            val filled = v.size / density.pageSize
-            val rest = v.size % density.pageSize
-            val pageNum = filled + if (rest != 0) 1 else 0
-            for (j in start until start + filled) {
-                pages.add(j, (p until p + density.pageSize).map {
-                    concat[it]
-                }.toTypedArray())
-                p += density.pageSize
-            }
-            if (rest != 0) {
-                pages.add(start + pageNum - 1, (p until p + rest).map {
-                    concat[it]
-                }.toTypedArray())
-                p += rest
-            }
-            (start to pageNum).also { start += pageNum }
+        val textPaint = TextPaint()
+        data.forEach { (cat, arr) ->
+            val chunks = arr.filter { if (isEmoji) textPaint.hasGlyph(it) else true }
+                .chunked(density.pageSize)
+            categories.add(cat to IntRange(pages.size, pages.size + chunks.size - 1))
+            pages.addAll(chunks)
         }
-        // Add recently used page
-        ranges = listOf(0..0) + cats.map { (start, pageNum) ->
-            start until start + pageNum
-        }
-        recentlyUsed.load()
+    }
+
+    private val recentlyUsed = RecentlyUsed(recentlyUsedFileName, density.pageSize).also {
+        it.load()
     }
 
     fun insertRecent(text: String) {
@@ -94,26 +61,24 @@ class PickerPagesAdapter(
     }
 
     private fun updateRecent() {
-        pages[0] = recentlyUsed.toOrderedList().toTypedArray()
+        pages[0] = recentlyUsed.toOrderedList()
     }
 
     fun saveRecent() {
         recentlyUsed.save()
     }
 
-    fun getCategoryOfPage(page: Int) =
-        ranges.indexOfFirst { page in it }
+    fun getCategoryIndexOfPage(page: Int): Int {
+        return categories.indexOfFirst { page in it.second }
+    }
 
-    fun getCategoryRangeOfPage(page: Int) =
-        ranges.find { page in it } ?: (0..0)
+    fun getCategoryRangeOfPage(page: Int): IntRange {
+        return categories.find { page in it.second }?.second ?: IntRange(0, 0)
+    }
 
-    fun getStartPageOfCategory(cat: Int) =
-        // Recently used category only has one page which must be the first page
-        if (cat == 0)
-            0
-        // Otherwise, we need offset it by one
-        else
-            cats[cat - 1].first
+    fun getRangeOfCategoryIndex(cat: Int): IntRange {
+        return categories[cat].second
+    }
 
     override fun getItemCount() = pages.size
 

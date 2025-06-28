@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.input.picker
 
@@ -8,7 +8,7 @@ import org.fcitx.fcitx5.android.R
 
 object PickerData {
 
-    class Category(val label: String = "", val icon: Int = 0)
+    data class Category(val label: String = "", val icon: Int = 0)
 
     val RecentlyUsedCategory = Category("⟳", R.drawable.ic_baseline_access_time_24)
 
