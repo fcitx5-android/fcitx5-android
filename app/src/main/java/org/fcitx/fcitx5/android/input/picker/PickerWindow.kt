@@ -7,12 +7,9 @@ package org.fcitx.fcitx5.android.input.picker
 import android.annotation.SuppressLint
 import android.view.Gravity
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
 import androidx.transition.Slide
 import androidx.transition.Transition
 import androidx.viewpager2.widget.ViewPager2
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
@@ -185,9 +182,6 @@ class PickerWindow(
     override fun onDetached() {
         popup.dismissAll()
         pickerLayout.embeddedKeyboard.keyActionListener = null
-        service.lifecycleScope.launch(Dispatchers.IO) {
-            pickerPagesAdapter.saveRecent()
-        }
         if (key === Key.Emoji) {
             skinTonePreference.unregisterOnChangeListener(refreshPagesListener)
         }

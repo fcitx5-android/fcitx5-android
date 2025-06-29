@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.data
 
@@ -65,8 +65,7 @@ object UserDataManager {
             writeFileTree(dataBasesDir, "databases", zipStream)
             // external
             writeFileTree(externalDir, "external", zipStream)
-            // recently_used
-            writeFileTree(recentlyUsedDir, "recently_used", zipStream)
+            // recently_used moved to SharedPreference and shoud not be exported
             // metadata
             zipStream.putNextEntry(ZipEntry("metadata.json"))
             val pkgInfo = appContext.packageManager.getPackageInfo(appContext.packageName, 0)
@@ -87,7 +86,6 @@ object UserDataManager {
         if (exists && isDir) {
             source.copyRecursively(target, overwrite = true)
         } else {
-            source.toString()
             Timber.w("Cannot import user data: path='${source.path}', exists=$exists, isDir=$isDir")
         }
     }
@@ -104,6 +102,7 @@ object UserDataManager {
                 copyDir(File(tempDir, "shared_prefs"), sharedPrefsDir)
                 copyDir(File(tempDir, "databases"), dataBasesDir)
                 copyDir(File(tempDir, "external"), externalDir)
+                // keep importing recently_used for backwords compatibility
                 copyDir(File(tempDir, "recently_used"), recentlyUsedDir)
                 metadata
             }

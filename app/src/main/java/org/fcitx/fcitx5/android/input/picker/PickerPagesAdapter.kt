@@ -51,21 +51,11 @@ class PickerPagesAdapter(
         }
     }
 
-    private val recentlyUsed = RecentlyUsed(recentlyUsedFileName, density.pageSize).also {
-        it.load()
-    }
+    private val recentlyUsed = RecentlyUsed(recentlyUsedFileName, density.pageSize)
 
     fun insertRecent(text: String) {
         if (text.length == 1 && text[0].code.let { it in Digit || it in FullWidthDigit }) return
         recentlyUsed.insert(text)
-    }
-
-    private fun updateRecent() {
-        pages[0] = recentlyUsed.toOrderedList()
-    }
-
-    fun saveRecent() {
-        recentlyUsed.save()
     }
 
     fun getCategoryIndexOfPage(page: Int): Int {
@@ -95,10 +85,8 @@ class PickerPagesAdapter(
         if (holder.bindingAdapterPosition == 0) {
             // prevent popup on RecentlyUsed page
             holder.ui.popupActionListener = null
-            // update RecentlyUsed when it's page attached
-            updateRecent()
             // RecentlyUsed content are already modified with skin tones
-            holder.ui.setItems(pages[0], withSkinTone = false)
+            holder.ui.setItems(recentlyUsed.items, withSkinTone = false)
         } else {
             holder.ui.popupActionListener = popupActionListener
         }
