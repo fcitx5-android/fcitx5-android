@@ -30,12 +30,23 @@ object EmojiModifier {
      * **Special Case 1:** Drop `U+FE0F` (Variation Selector-16) when combining with skin tone
      */
     private val SpecialCase1 = intArrayOf(
-        0x1F590, // 🖐️
-        0x270C,  // ✌️
         0x261D,  // ☝️
-        0x26F9   // ⛹️
+        0x26F9,  // ⛹️
+        0x270C,  // ✌️
+        0x1F3CB, // 🏋️
+        0x1F3CC, // 🏌️
+        0x1F574, // 🕴️
+        0x1F575, // 🕵️
+        0x1F590, // 🖐️
     )
     private const val VariationSelector16 = 0xFE0F
+
+    /**
+     * **Special Case 2:** Make `U+1F91D`(🤝 Handshake) in 🧑‍🤝‍🧑 not modifiable
+     */
+    private val SpecialCase2 = intArrayOf(
+        0x1F9D1, 0x200D, 0x1F91D, 0x200D, 0x1F9D1,
+    )
 
     private val defaultSkinTone by AppPrefs.getInstance().symbols.defaultEmojiSkinTone
 
@@ -48,7 +59,7 @@ object EmojiModifier {
         val sum = modifiable.sumOf { if (it) 1 else 0 }
         // bail if too crowded
         // eg. https://emojipedia.org/family-man-medium-light-skin-tone-woman-medium-light-skin-tone-girl-medium-light-skin-tone-boy-medium-light-skin-tone
-        return 0 < sum && sum <= 2
+        return sum == 1 || sum == 2
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
@@ -56,6 +67,10 @@ object EmojiModifier {
         val codePoints = emoji.codePoints().toArray()
         val modifiable = BooleanArray(codePoints.size) {
             UCharacter.hasBinaryProperty(codePoints[it], UProperty.EMOJI_MODIFIER_BASE)
+        }
+        // make U+1F91D not modifiable if the whole sequence is special
+        if (codePoints contentEquals SpecialCase2) {
+            modifiable[2] = false
         }
         return codePoints to modifiable
     }
