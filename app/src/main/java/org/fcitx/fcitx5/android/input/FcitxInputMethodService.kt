@@ -539,9 +539,14 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // try send charCode first, allow upper case and lower case character generating different KeySym
         // skip \t, because it's charCode is different from KeySym
         // skip \n, because fcitx wants \r for return
-        if (charCode > 0 && charCode != '\t'.code && charCode != '\n'.code) {
+        // skip ' ', because it would produce same KeySym regardless of the modifier
+        if (charCode > 0 && charCode != '\t'.code && charCode != '\n'.code && charCode != ' '.code) {
+            // drop modifier state when using combination keys to input number/symbol on some phones
+            // because fcitx doesn't recognize selection key with modifiers (eg. Alt+Q for 1)
+            // in which case event.getNumber().toInt() == event.getUnicodeChar()
+            val s = if (event.number.code == charCode) KeyStates.Empty else states
             postFcitxJob {
-                sendKey(charCode, states.states, event.scanCode, up, timestamp)
+                sendKey(charCode, s.states, event.scanCode, up, timestamp)
             }
             return true
         }
