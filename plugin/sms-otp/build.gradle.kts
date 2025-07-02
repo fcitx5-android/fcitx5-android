@@ -22,11 +22,18 @@ android {
             resValue("string", "app_name", "@string/app_name_debug")
         }
     }
+    sourceSets {
+        getByName("test") {
+            java.srcDir("src/main/java")
+        }
+    }
 }
 
 dependencies {
     implementation(project(":lib:plugin-base"))
     implementation(libs.kotlinx.serialization.json)
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:2.1.20")
 }
 
 
