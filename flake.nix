@@ -55,7 +55,7 @@
                       androidComposition.androidsdk
                       extra-cmake-modules
                       gettext
-                      python39
+                      python3
                       icu
                       androidStudio
                     ];
