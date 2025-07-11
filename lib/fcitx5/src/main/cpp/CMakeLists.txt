@@ -44,3 +44,5 @@ option(ENABLE_XDGAUTOSTART "" OFF)
 option(ENABLE_EMOJI "" OFF)
 option(ENABLE_LIBUUID "" OFF)
 add_subdirectory(fcitx5)
+# for std::osyncstream
+target_compile_options(Fcitx5Utils PRIVATE "-fexperimental-library")
