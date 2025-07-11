@@ -19,6 +19,7 @@ find_package(Gettext REQUIRED)
 set(FCITX_INSTALL_CMAKECONFIG_DIR "${FCITX5_DEVEL_FILES}")
 
 # mimic fcitx5/src/lib/fcitx-utils/Fcitx5UtilsConfig.cmake.in
+include("${CMAKE_CURRENT_LIST_DIR}/HookAddCustomCommand.cmake") # hook before macros
 include("${FCITX_INSTALL_CMAKECONFIG_DIR}/Fcitx5Utils/Fcitx5Macros.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/Fcitx5AndroidInstallDirs.cmake")
 
