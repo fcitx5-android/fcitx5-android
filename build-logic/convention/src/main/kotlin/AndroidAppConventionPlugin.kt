@@ -143,7 +143,7 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
 
         target.configure<AboutLibrariesExtension> {
             collect {
-                configPath.set(File("licenses"))
+                configPath.set(File("licenses").takeIf { it.exists() })
                 fetchRemoteLicense.set(false)
                 fetchRemoteFunding.set(false)
                 includePlatform.set(false)
