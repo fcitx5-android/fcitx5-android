@@ -19,43 +19,43 @@ import org.fcitx.fcitx5.android.utils.appContext
 import java.io.File
 
 @Serializable
-sealed class Theme : Parcelable {
+sealed interface Theme : Parcelable {
 
-    abstract val name: String
-    abstract val isDark: Boolean
+    val name: String
+    val isDark: Boolean
 
-    abstract val backgroundColor: Int
-    abstract val barColor: Int
-    abstract val keyboardColor: Int
+    val backgroundColor: Int
+    val barColor: Int
+    val keyboardColor: Int
 
-    abstract val keyBackgroundColor: Int
-    abstract val keyTextColor: Int
+    val keyBackgroundColor: Int
+    val keyTextColor: Int
 
     //  Color of candidate text
-    abstract val candidateTextColor: Int
-    abstract val candidateLabelColor: Int
-    abstract val candidateCommentColor: Int
+    val candidateTextColor: Int
+    val candidateLabelColor: Int
+    val candidateCommentColor: Int
 
-    abstract val altKeyBackgroundColor: Int
-    abstract val altKeyTextColor: Int
+    val altKeyBackgroundColor: Int
+    val altKeyTextColor: Int
 
-    abstract val accentKeyBackgroundColor: Int
-    abstract val accentKeyTextColor: Int
+    val accentKeyBackgroundColor: Int
+    val accentKeyTextColor: Int
 
-    abstract val keyPressHighlightColor: Int
-    abstract val keyShadowColor: Int
+    val keyPressHighlightColor: Int
+    val keyShadowColor: Int
 
-    abstract val popupBackgroundColor: Int
-    abstract val popupTextColor: Int
+    val popupBackgroundColor: Int
+    val popupTextColor: Int
 
-    abstract val spaceBarColor: Int
-    abstract val dividerColor: Int
-    abstract val clipboardEntryColor: Int
+    val spaceBarColor: Int
+    val dividerColor: Int
+    val clipboardEntryColor: Int
 
-    abstract val genericActiveBackgroundColor: Int
-    abstract val genericActiveForegroundColor: Int
+    val genericActiveBackgroundColor: Int
+    val genericActiveForegroundColor: Int
 
-    open fun backgroundDrawable(keyBorder: Boolean = false): Drawable {
+    fun backgroundDrawable(keyBorder: Boolean = false): Drawable {
         return ColorDrawable(if (keyBorder) backgroundColor else keyboardColor)
     }
 
@@ -88,8 +88,9 @@ sealed class Theme : Parcelable {
         override val dividerColor: Int,
         override val clipboardEntryColor: Int,
         override val genericActiveBackgroundColor: Int,
-        override val genericActiveForegroundColor: Int
-    ) : Theme() {
+        override val genericActiveForegroundColor: Int,
+        val suggestedPreferences: SuggestedPreferences? = null
+    ) : Theme {
         @Parcelize
         @Serializable
         data class CustomBackground(
@@ -112,6 +113,32 @@ sealed class Theme : Parcelable {
         override fun backgroundDrawable(keyBorder: Boolean): Drawable {
             return backgroundImage?.toDrawable() ?: super.backgroundDrawable(keyBorder)
         }
+
+        /**
+         * A custom theme may suggest some theme preferences to the user.
+         * These fields should be sync with ThemePrefs.kt
+         */
+        @Parcelize
+        @Serializable
+        data class SuggestedPreferences(
+            val keyBorder: Boolean? = null,
+            val keyRippleEffect: Boolean? = null,
+            val keyHorizontalMargin: Int? = null,
+            val keyHorizontalMarginLandscape: Int? = null,
+            val keyVerticalMargin: Int? = null,
+            val keyVerticalMarginLandscape: Int? = null,
+            val keyRadius: Int? = null,
+            val textEditingButtonRadius: Int? = null,
+            val clipboardEntryRadius: Int? = null,
+            /**
+             * 0: None, 1: Bottom, 2: Top right
+             */
+            val punctuationPosition: Int? = null,
+            /**
+             * 0: None, 1: Color only, 2: Full
+             */
+            val navbarBackground: Int? = null
+        ) : Parcelable
 
     }
 
@@ -140,7 +167,7 @@ sealed class Theme : Parcelable {
         override val clipboardEntryColor: Int,
         override val genericActiveBackgroundColor: Int,
         override val genericActiveForegroundColor: Int
-    ) : Theme() {
+    ) : Theme {
 
         // an alias to use 0xAARRGGBB color literal in code
         // because kotlin compiler treats `0xff000000` as Long, not Int
@@ -287,7 +314,7 @@ sealed class Theme : Parcelable {
         override val clipboardEntryColor: Int,
         override val genericActiveBackgroundColor: Int,
         override val genericActiveForegroundColor: Int
-    ) : Theme() {
+    ) : Theme {
         constructor(
             isDark: Boolean,
             surfaceContainer: Int,
