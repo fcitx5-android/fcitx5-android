@@ -11,7 +11,6 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -67,7 +66,7 @@ class AboutActivity : PreferenceActivity() {
     class AboutContentFragment : PreferenceFragment() {
 
         private val copyPreferenceSummaryListener = OnPreferenceClickListener {
-            (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
+            context.getSystemService(ClipboardManager::class.java)
                 .setPrimaryClip(ClipData.newPlainText("", it.summary))
             Toast.makeText(context, R.string.copied, Toast.LENGTH_SHORT).show()
             true
@@ -117,7 +116,7 @@ class AboutActivity : PreferenceActivity() {
             if (pluginXmlRes == 0) return
             val parser = resources.getXml(pluginXmlRes)
             var eventType = parser.eventType
-            var domain = ""
+            var gettextDomain = ""
             var apiVersion = ""
             var description = ""
             var text = ""
@@ -127,7 +126,7 @@ class AboutActivity : PreferenceActivity() {
                     XmlPullParser.TEXT -> text = parser.text
                     XmlPullParser.END_TAG -> when (parser.name) {
                         "apiVersion" -> apiVersion = text
-                        "domain" -> domain = text
+                        "domain" -> gettextDomain = text
                         "description" -> description = text.let {
                             if (it.startsWith("@string/")) {
                                 val resName = it.removePrefix("@string/")
@@ -143,7 +142,9 @@ class AboutActivity : PreferenceActivity() {
             screen.addCategory(R.string.plugin_info) {
                 addPreference(R.string.pkg_name, pkg)
                 addPreference(R.string.api_version, apiVersion)
-                addPreference(R.string.gettext_domain, domain)
+                if (gettextDomain.isNotBlank()) {
+                    addPreference(R.string.gettext_domain, gettextDomain)
+                }
                 addPreference(R.string.plugin_description, description)
                 addPreference(R.string.has_service, hasService.toString())
             }
@@ -220,6 +221,7 @@ class AboutActivity : PreferenceActivity() {
 
         private fun showLicenseContent(license: License) {
             if (license.url?.isNotBlank() == true) {
+                @SuppressLint("UseKtx")
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(license.url)))
             }
         }

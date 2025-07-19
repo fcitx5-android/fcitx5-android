@@ -90,11 +90,6 @@ jobs:
               (.versionCode = $versionCode) |=
               (.commit = \"$commitHash\")
           " $metadata
-          # TODO: remove this afterwards
-          # https://github.com/orgs/community/discussions/26676
-          yq -i ".Builds[0] |=
-              (.commit = \"${{ github.event.pull_request.head.sha }}\")
-          " $metadata
           prebuiltTreeURL=$(curl -L \
               -H "Accept: application/vnd.github+json" \
               -H "Authorization: Bearer ${{ github.token }}" \
