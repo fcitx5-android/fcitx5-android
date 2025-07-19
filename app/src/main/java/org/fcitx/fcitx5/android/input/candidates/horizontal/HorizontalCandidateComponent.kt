@@ -162,7 +162,6 @@ class HorizontalCandidateComponent :
                 }
             }
         }.apply {
-            id = R.id.candidate_view
             adapter = this@HorizontalCandidateComponent.adapter
             layoutManager = this@HorizontalCandidateComponent.layoutManager
             addItemDecoration(FlexboxVerticalDecoration(dividerDrawable))

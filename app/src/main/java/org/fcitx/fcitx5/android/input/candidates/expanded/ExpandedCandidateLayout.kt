@@ -88,7 +88,6 @@ class ExpandedCandidateLayout(context: Context, theme: Theme) : ConstraintLayout
     }
 
     init {
-        id = R.id.expanded_candidate_view
         if (!keyBorder) {
             backgroundColor = theme.barColor
         }

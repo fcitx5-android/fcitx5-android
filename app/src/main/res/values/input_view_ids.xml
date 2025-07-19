@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <item name="candidate_view" type="id" />
-    <item name="expand_candidate_btn" type="id" />
-    <item name="keyboard_view" type="id" />
-    <item name="expanded_candidate_view" type="id" />
-    <item name="input_window" type="id" />
-</resources>

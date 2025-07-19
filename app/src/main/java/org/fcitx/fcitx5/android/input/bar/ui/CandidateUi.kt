@@ -21,7 +21,6 @@ import splitties.views.dsl.core.add
 class CandidateUi(override val ctx: Context, theme: Theme, private val horizontalView: View) : Ui {
 
     val expandButton = ToolButton(ctx, R.drawable.ic_baseline_expand_more_24, theme).apply {
-        id = R.id.expand_candidate_btn
         visibility = View.INVISIBLE
     }
 

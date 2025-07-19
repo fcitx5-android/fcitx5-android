@@ -61,38 +61,6 @@ class AlphabetKey(
     )
 )
 
-class AlphabetDigitKey(
-    val character: String,
-    altText: String,
-    val sym: Int,
-    popup: Array<Popup>? = null
-) : KeyDef(
-    Appearance.AltText(
-        displayText = character,
-        altText = altText,
-        textSize = 23f
-    ),
-    setOf(
-        Behavior.Press(KeyAction.FcitxKeyAction(character)),
-        Behavior.Swipe(KeyAction.SymAction(KeySym(sym), NumLockState))
-    ),
-    popup ?: arrayOf(
-        Popup.AltPreview(character, altText),
-        Popup.Keyboard(character)
-    )
-) {
-    constructor(
-        char: String,
-        digit: Int,
-        popup: Array<Popup>? = null
-    ) : this(
-        char,
-        digit.toString(),
-        FcitxKeyMapping.FcitxKey_KP_0 + digit,
-        popup
-    )
-}
-
 class CapsKey : KeyDef(
     Appearance.Image(
         src = R.drawable.ic_capslock_none,
