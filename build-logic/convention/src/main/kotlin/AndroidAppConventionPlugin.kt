@@ -17,7 +17,6 @@ import org.gradle.api.internal.provider.Providers
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.io.File
 
 /**
  * The prototype of an Android Application
@@ -143,7 +142,7 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
 
         target.configure<AboutLibrariesExtension> {
             collect {
-                configPath.set(File("licenses").takeIf { it.exists() })
+                configPath.set(target.file("licenses").takeIf { it.exists() })
                 fetchRemoteLicense.set(false)
                 fetchRemoteFunding.set(false)
                 includePlatform.set(false)
