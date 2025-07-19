@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.utils.config
 
@@ -11,8 +11,10 @@ import arrow.core.raise.either
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import org.fcitx.fcitx5.android.core.RawConfig
+import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.Companion.parse
 
 sealed class ConfigDescriptor<T, U> : Parcelable {
+    abstract val raw: RawConfig
     abstract val name: String
     abstract val type: ConfigType<T>
     abstract val description: String?
@@ -34,6 +36,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
 
     @Parcelize
     data class ConfigInt(
+        override val raw: RawConfig,
         override val name: String,
         override val description: String? = null,
         override val defaultValue: Int? = null,
@@ -47,6 +50,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
 
     @Parcelize
     data class ConfigString(
+        override val raw: RawConfig,
         override val name: String,
         override val description: String? = null,
         override val defaultValue: String? = null,
@@ -58,6 +62,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
 
     @Parcelize
     data class ConfigBool(
+        override val raw: RawConfig,
         override val name: String,
         override val description: String? = null,
         override val defaultValue: Boolean? = null,
@@ -70,6 +75,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
 
     @Parcelize
     data class ConfigKey(
+        override val raw: RawConfig,
         override val name: String,
         override val description: String? = null,
         override val defaultValue: String? = null,
@@ -82,6 +88,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
 
     @Parcelize
     data class ConfigEnum(
+        override val raw: RawConfig,
         override val name: String,
         override val description: String? = null,
         override val defaultValue: String? = null,
@@ -96,6 +103,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
 
     @Parcelize
     data class ConfigCustom(
+        override val raw: RawConfig,
         override val name: String,
         override val type: ConfigType.TyCustom,
         override val description: String? = null,
@@ -109,6 +117,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
 
     @Parcelize
     data class ConfigList(
+        override val raw: RawConfig,
         override val name: String,
         override val type: ConfigType.TyList,
         override val description: String? = null,
@@ -124,6 +133,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
      */
     @Parcelize
     data class ConfigEnumList(
+        override val raw: RawConfig,
         override val name: String,
         override val description: String? = null,
         override val defaultValue: List<String>? = null,
@@ -138,6 +148,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
 
     @Parcelize
     data class ConfigExternal(
+        override val raw: RawConfig,
         override val name: String,
         override val description: String? = null,
         override val tooltip: String? = null,
@@ -206,11 +217,13 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                     when (it) {
                         ConfigType.TyBool ->
                             ConfigBool(
+                                raw,
                                 raw.name,
                                 raw.description,
                                 raw.defaultValue?.toBoolean()
                             )
                         is ConfigType.TyCustom -> ConfigCustom(
+                            raw,
                             raw.name,
                             it,
                             raw.description
@@ -218,6 +231,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                         ConfigType.TyEnum -> {
                             val entries = raw.enum ?: raise(ParseException.NoEnumFound(raw))
                             ConfigEnum(
+                                raw,
                                 raw.name,
                                 raw.description,
                                 raw.defaultValue,
@@ -227,6 +241,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                             )
                         }
                         ConfigType.TyInt -> ConfigInt(
+                            raw,
                             raw.name,
                             raw.description,
                             raw.defaultValue?.toInt(),
@@ -234,11 +249,17 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                             raw.intMax,
                             raw.intMin
                         )
-                        ConfigType.TyKey -> ConfigKey(raw.name, raw.description, raw.defaultValue)
+                        ConfigType.TyKey -> ConfigKey(
+                            raw,
+                            raw.name,
+                            raw.description,
+                            raw.defaultValue
+                        )
                         is ConfigType.TyList ->
                             if (it.subtype == ConfigType.TyEnum) {
                                 val entries = raw.enum ?: raise(ParseException.NoEnumFound(raw))
                                 ConfigEnumList(
+                                    raw,
                                     raw.name,
                                     raw.description,
                                     raw.findByName("DefaultValue")?.subItems?.map { ele -> ele.value },
@@ -248,6 +269,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                                 )
                             } else
                                 ConfigList(
+                                    raw,
                                     raw.name,
                                     it,
                                     raw.description,
@@ -264,11 +286,13 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                                     }
                                 )
                         ConfigType.TyString -> ConfigString(
+                            raw,
                             raw.name,
                             raw.description,
                             raw.defaultValue
                         )
                         ConfigType.TyExternal -> ConfigExternal(
+                            raw,
                             raw.name,
                             raw.description,
                             raw.tooltip,

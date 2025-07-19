@@ -1,9 +1,10 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.ui.main.settings
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.net.Uri
@@ -33,12 +34,14 @@ import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import org.fcitx.fcitx5.android.utils.NaiveDustman
 import org.fcitx.fcitx5.android.utils.importErrorDialog
+import org.fcitx.fcitx5.android.utils.lazyRoute
 import org.fcitx.fcitx5.android.utils.notificationManager
-import org.fcitx.fcitx5.android.utils.parcelable
 import org.fcitx.fcitx5.android.utils.queryFileName
 import java.util.concurrent.atomic.AtomicBoolean
 
 class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDictionary> {
+
+    private val args by lazyRoute<SettingsRoute.PinyinDict>()
 
     private val viewModel: MainViewModel by activityViewModels()
 
@@ -105,8 +108,8 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDiction
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        arguments?.parcelable<Uri>(INTENT_DATA_URI)
-            ?.let { importFromUri(it) }
+        @SuppressLint("UseKtx")
+        args.uri?.let { importFromUri(Uri.parse(it)) }
         super.onViewCreated(view, savedInstanceState)
     }
 
@@ -247,6 +250,5 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDiction
         private var RELOAD_ID = 0
         private var IMPORT_ID = 0
         const val CHANNEL_ID = "pinyin_dict"
-        const val INTENT_DATA_URI = "uri"
     }
 }

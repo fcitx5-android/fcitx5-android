@@ -1,11 +1,12 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.core
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 data class InputMethodSubMode(val name: String, val label: String, val icon: String) {
     constructor() : this("", "", "")
@@ -74,6 +75,7 @@ data class InputMethodEntry(
 }
 
 @Parcelize
+@Serializable
 data class RawConfig(
     val name: String,
     val comment: String,
@@ -158,6 +160,7 @@ data class AddonInfo(
     val dependencies: Array<String> = arrayOf(),
     val optionalDependencies: Array<String> = arrayOf(),
 ) {
+    @Suppress("UNUSED") // used in JNI
     constructor(
         uniqueName: String,
         name: String,
