@@ -115,6 +115,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
         if (def.viewId > 0) {
             id = def.viewId
         }
+        soundEffect = def.soundEffect
         // key border
         if ((bordered && def.border != Border.Off) || def.border == Border.On) {
             val bkgColor = when (def.variant) {

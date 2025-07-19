@@ -151,7 +151,6 @@ abstract class BaseKeyboard(
             is KeyDef.Appearance.Text -> TextKeyView(context, theme, def.appearance)
             is KeyDef.Appearance.Image -> ImageKeyView(context, theme, def.appearance)
         }.apply {
-            soundEffect = def.appearance.soundEffect
             if (def is SpaceKey) {
                 spaceKeys.add(this)
                 swipeEnabled = spaceSwipeMoveCursor.getValue()
