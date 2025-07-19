@@ -4,15 +4,12 @@
  */
 package org.fcitx.fcitx5.android.input.keyboard
 
-import android.graphics.Typeface
 import androidx.annotation.DrawableRes
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxKeyMapping
 import org.fcitx.fcitx5.android.core.KeyState
 import org.fcitx.fcitx5.android.core.KeyStates
 import org.fcitx.fcitx5.android.core.KeySym
-import org.fcitx.fcitx5.android.data.InputFeedbacks
-import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Border
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Variant
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
 
@@ -24,12 +21,7 @@ class SymbolKey(
     variant: Variant = Variant.Normal,
     popup: Array<Popup>? = null
 ) : KeyDef(
-    Appearance.Text(
-        displayText = symbol,
-        textSize = 23f,
-        percentWidth = percentWidth,
-        variant = variant
-    ),
+    Appearance.Symbol(symbol, percentWidth, variant),
     setOf(
         Behavior.Press(KeyAction.FcitxKeyAction(symbol))
     ),
@@ -45,12 +37,7 @@ class AlphabetKey(
     variant: Variant = Variant.Normal,
     popup: Array<Popup>? = null
 ) : KeyDef(
-    Appearance.AltText(
-        displayText = character,
-        altText = punctuation,
-        textSize = 23f,
-        variant = variant
-    ),
+    Appearance.Alphabet(character, punctuation, variant),
     setOf(
         Behavior.Press(KeyAction.FcitxKeyAction(character)),
         Behavior.Swipe(KeyAction.FcitxKeyAction(punctuation))
@@ -62,12 +49,7 @@ class AlphabetKey(
 )
 
 class CapsKey : KeyDef(
-    Appearance.Image(
-        src = R.drawable.ic_capslock_none,
-        viewId = R.id.button_caps,
-        percentWidth = 0.15f,
-        variant = Variant.Alternative
-    ),
+    Appearance.Caps,
     setOf(
         Behavior.Press(KeyAction.CapsAction(false)),
         Behavior.LongPress(KeyAction.CapsAction(true)),
@@ -81,10 +63,8 @@ class LayoutSwitchKey(
     percentWidth: Float = 0.15f,
     variant: Variant = Variant.Alternative
 ) : KeyDef(
-    Appearance.Text(
+    Appearance.TextLayoutSwitch(
         displayText,
-        textSize = 16f,
-        textStyle = Typeface.BOLD,
         percentWidth = percentWidth,
         variant = variant
     ),
@@ -97,13 +77,7 @@ class BackspaceKey(
     percentWidth: Float = 0.15f,
     variant: Variant = Variant.Alternative
 ) : KeyDef(
-    Appearance.Image(
-        src = R.drawable.ic_baseline_backspace_24,
-        percentWidth = percentWidth,
-        variant = variant,
-        viewId = R.id.button_backspace,
-        soundEffect = InputFeedbacks.SoundEffect.Delete
-    ),
+    Appearance.Backspace(percentWidth, variant),
     setOf(
         Behavior.Press(KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_BackSpace))),
         Behavior.Repeat(KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_BackSpace)))
@@ -126,13 +100,7 @@ class CommaKey(
     percentWidth: Float,
     variant: Variant,
 ) : KeyDef(
-    Appearance.ImageText(
-        displayText = ",",
-        textSize = 23f,
-        percentWidth = percentWidth,
-        variant = variant,
-        src = R.drawable.ic_baseline_tag_faces_24
-    ),
+    Appearance.Comma(percentWidth, variant),
     setOf(
         Behavior.Press(KeyAction.FcitxKeyAction(","))
     ),
@@ -173,14 +141,7 @@ class LanguageKey : KeyDef(
 )
 
 class SpaceKey : KeyDef(
-    Appearance.Text(
-        displayText = " ",
-        textSize = 13f,
-        percentWidth = 0f,
-        border = Border.Special,
-        viewId = R.id.button_space,
-        soundEffect = InputFeedbacks.SoundEffect.SpaceBar
-    ),
+    Appearance.Space,
     setOf(
         Behavior.Press(KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_space))),
         Behavior.LongPress(KeyAction.SpaceLongPressAction)
@@ -188,14 +149,7 @@ class SpaceKey : KeyDef(
 )
 
 class ReturnKey(percentWidth: Float = 0.15f) : KeyDef(
-    Appearance.Image(
-        src = R.drawable.ic_baseline_keyboard_return_24,
-        percentWidth = percentWidth,
-        variant = Variant.Accent,
-        border = Border.Special,
-        viewId = R.id.button_return,
-        soundEffect = InputFeedbacks.SoundEffect.Return
-    ),
+    Appearance.Return(percentWidth),
     setOf(
         Behavior.Press(KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_Return)))
     ),
@@ -252,16 +206,12 @@ class TextPickerSwitchKey(
     text: String,
     to: PickerWindow.Key,
     percentWidth: Float = 0.1f,
-    variant: Variant = Variant.AltForeground,
-    viewId: Int = -1
+    variant: Variant = Variant.AltForeground
 ) : KeyDef(
-    Appearance.Text(
+    Appearance.TextLayoutSwitch(
         displayText = text,
-        textSize = 16f,
         percentWidth = percentWidth,
         variant = variant,
-        viewId = viewId,
-        textStyle = Typeface.BOLD
     ),
     setOf(
         Behavior.Press(KeyAction.PickerSwitchAction(to))
@@ -280,19 +230,25 @@ class MiniSpaceKey : KeyDef(
     )
 )
 
-class NumPadKey(
+class NumPadSymbolKey(
     displayText: String,
     val sym: Int,
-    textSize: Float = 16f,
     percentWidth: Float = 0.1f,
     variant: Variant = Variant.Normal
 ) : KeyDef(
-    Appearance.Text(
-        displayText,
-        textSize = textSize,
-        percentWidth = percentWidth,
-        variant = variant
-    ),
+    Appearance.Symbol(displayText, percentWidth, variant),
+    setOf(
+        Behavior.Press(KeyAction.SymAction(KeySym(sym), NumLockState))
+    )
+)
+
+class NumPadNumberKey(
+    displayText: String,
+    val sym: Int,
+    percentWidth: Float = 0.1f,
+    variant: Variant = Variant.Normal
+) : KeyDef(
+    Appearance.NumPadNum(displayText, percentWidth, variant),
     setOf(
         Behavior.Press(KeyAction.SymAction(KeySym(sym), NumLockState))
     )

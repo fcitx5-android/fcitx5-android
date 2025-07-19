@@ -6,6 +6,7 @@ package org.fcitx.fcitx5.android.input.keyboard
 
 import android.graphics.Typeface
 import androidx.annotation.DrawableRes
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.InputFeedbacks
 
 open class KeyDef(
@@ -45,10 +46,112 @@ open class KeyDef(
             soundEffect: InputFeedbacks.SoundEffect = InputFeedbacks.SoundEffect.Standard
         ) : Appearance(percentWidth, variant, border, margin, viewId, soundEffect)
 
-        class AltText(
+        class TextLayoutSwitch(
+            displayText: String,
+            percentWidth: Float,
+            variant: Variant
+        ) : Text(
+            displayText,
+            textSize = 16f,
+            textStyle = Typeface.BOLD,
+            percentWidth = percentWidth,
+            variant = variant
+        )
+
+        class NumPadNum(
+            displayText: String,
+            percentWidth: Float,
+            variant: Variant
+        ) : Text(
+            displayText,
+            textSize = 30f,
+            percentWidth = percentWidth,
+            variant = variant
+        )
+
+        class NumRow(digit: String) : Text(
+            displayText = digit,
+            textSize = 21f,
+            border = Border.Off,
+            margin = false
+        )
+
+        class Symbol(
+            symbol: String,
+            percentWidth: Float,
+            variant: Variant
+        ) : Text(
+            displayText = symbol,
+            textSize = 23f,
+            percentWidth = percentWidth,
+            variant = variant
+        )
+
+        class Alphabet(
+            character: String,
+            punctuation: String,
+            variant: Variant
+        ) : AltText(
+            displayText = character,
+            altText = punctuation,
+            altTextSize = 10.666667f,
+            textSize = 23f,
+            variant = variant
+        )
+
+        object Space : Text(
+            displayText = " ",
+            textSize = 13f,
+            percentWidth = 0f,
+            border = Border.Special,
+            viewId = R.id.button_space,
+            soundEffect = InputFeedbacks.SoundEffect.SpaceBar
+        )
+
+        class Return(percentWidth: Float) : Image(
+            src = R.drawable.ic_baseline_keyboard_return_24,
+            percentWidth = percentWidth,
+            variant = Variant.Accent,
+            border = Border.Special,
+            viewId = R.id.button_return,
+            soundEffect = InputFeedbacks.SoundEffect.Return
+        )
+
+        class Comma(
+            percentWidth: Float,
+            variant: Variant,
+        ) : ImageText(
+            displayText = ",",
+            textSize = 23f,
+            percentWidth = percentWidth,
+            variant = variant,
+            src = R.drawable.ic_baseline_tag_faces_24
+        )
+
+        class Backspace(
+            percentWidth: Float,
+            variant: Variant,
+        ) : Image(
+            src = R.drawable.ic_baseline_backspace_24,
+            percentWidth = percentWidth,
+            variant = variant,
+            border = Border.Special,
+            viewId = R.id.button_backspace,
+            soundEffect = InputFeedbacks.SoundEffect.Delete
+        )
+
+        object Caps : Image(
+            src = R.drawable.ic_capslock_none,
+            viewId = R.id.button_caps,
+            percentWidth = 0.15f,
+            variant = Variant.Alternative
+        )
+
+        open class AltText(
             displayText: String,
             val altText: String,
             textSize: Float,
+            val altTextSize: Float,
             /**
              * `Int` constants in [Typeface].
              * Can be `NORMAL`(default), `BOLD`, `ITALIC` or `BOLD_ITALIC`
@@ -61,7 +164,7 @@ open class KeyDef(
             viewId: Int = -1,
         ) : Text(displayText, textSize, textStyle, percentWidth, variant, border, margin, viewId)
 
-        class Image(
+        open class Image(
             @DrawableRes
             val src: Int,
             percentWidth: Float = 0.1f,
@@ -72,7 +175,7 @@ open class KeyDef(
             soundEffect: InputFeedbacks.SoundEffect = InputFeedbacks.SoundEffect.Standard
         ) : Appearance(percentWidth, variant, border, margin, viewId, soundEffect)
 
-        class ImageText(
+        open class ImageText(
             displayText: String,
             textSize: Float,
             /**

@@ -41,11 +41,10 @@ class PickerLayout(context: Context, theme: Theme, switchKey: KeyDef) :
     ) {
 
         class PunctuationKey(val symbol: String) : KeyDef(
-            Appearance.Text(
-                displayText = symbol,
-                textSize = 23f,
-                percentWidth = 0.1f,
-                variant = Appearance.Variant.Alternative
+            Appearance.Symbol(
+                symbol,
+                0.1f,
+                Appearance.Variant.Alternative
             ),
             setOf(
                 Behavior.Press(KeyAction.FcitxKeyAction(symbol))
