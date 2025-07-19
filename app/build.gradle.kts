@@ -140,7 +140,6 @@ dependencies {
     androidTestImplementation(libs.junit)
 }
 
-@Suppress("UnstableApiUsage")
 configurations {
     all {
         // remove Baseline Profile Installer or whatever it is...
