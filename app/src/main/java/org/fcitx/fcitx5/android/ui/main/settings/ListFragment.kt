@@ -53,7 +53,7 @@ class ListFragment : Fragment() {
                 )
             }
             is ConfigDescriptor.ConfigList -> {
-                val ty = descriptor.type as ConfigType.TyList
+                val ty = descriptor.ty as ConfigType.TyList
                 when (ty.subtype) {
                     // does a list of booleans make sense?
                     ConfigType.TyBool -> {

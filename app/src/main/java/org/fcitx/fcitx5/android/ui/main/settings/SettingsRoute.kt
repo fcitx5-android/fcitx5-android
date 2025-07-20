@@ -12,7 +12,6 @@ import androidx.navigation.NavType
 import androidx.navigation.createGraph
 import androidx.navigation.fragment.fragment
 import androidx.savedstate.SavedState
-import arrow.core.getOrElse
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -104,7 +103,7 @@ sealed class SettingsRoute : Parcelable {
     data class ListConfig(val params: Params) : SettingsRoute() {
         @Parcelize
         @Serializable
-        data class Params(val cfg: RawConfig, val desc: RawConfig) : Parcelable {
+        data class Params(val cfg: RawConfig, val desc: ConfigDescriptor<*, *>) : Parcelable {
             companion object {
                 // https://developer.android.com/guide/navigation/design/kotlin-dsl#custom-types
                 val NavType = object : NavType<Params>(isNullableAllowed = false) {
@@ -129,11 +128,10 @@ sealed class SettingsRoute : Parcelable {
             }
         }
 
-        constructor(cfg: RawConfig, desc: RawConfig) : this(Params(cfg, desc))
+        constructor(cfg: RawConfig, desc: ConfigDescriptor<*, *>) : this(Params(cfg, desc))
 
         val desc: ConfigDescriptor<*, *>
-            get() = ConfigDescriptor.parse(params.desc).getOrElse { throw it }
-
+            get() = params.desc
         val cfg: RawConfig
             get() = params.cfg
     }

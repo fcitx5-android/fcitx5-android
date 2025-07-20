@@ -78,7 +78,7 @@ object PreferenceScreenFactory {
     ) {
 
         // Hide key related configs
-        if (hideKeyConfig && ConfigType.pretty(descriptor.type).contains("Key")) {
+        if (hideKeyConfig && ConfigType.pretty(descriptor.ty).contains("Key")) {
             return
         }
 
@@ -89,7 +89,7 @@ object PreferenceScreenFactory {
 
         fun stubPreference() = Preference(context).apply {
             summary =
-                "${context.getString(R.string.unimplemented_type)} '${ConfigType.pretty(descriptor.type)}'"
+                "${context.getString(R.string.unimplemented_type)} '${ConfigType.pretty(descriptor.ty)}'"
         }
 
         fun <T : Any> navigate(route: T): Boolean {
@@ -163,7 +163,7 @@ object PreferenceScreenFactory {
 
         fun listPreference(subtype: ConfigType<*>): Preference = object : Preference(context) {
             override fun onClick() {
-                navigate(SettingsRoute.ListConfig(cfg ?: RawConfig(), descriptor.raw))
+                navigate(SettingsRoute.ListConfig(cfg ?: RawConfig(), descriptor))
                 fragmentManager.setFragmentResultListener(
                     descriptor.name,
                     fragmentManager.primaryNavigationFragment!!
@@ -245,8 +245,8 @@ object PreferenceScreenFactory {
                 summaryProvider = FcitxKeyPreference.SimpleSummaryProvider
                 descriptor.defaultValue?.let { setDefaultValue(it) }
             }
-            is ConfigList -> if (descriptor.type.subtype in ListFragment.supportedSubtypes)
-                listPreference(descriptor.type.subtype)
+            is ConfigList -> if (descriptor.ty.subtype in ListFragment.supportedSubtypes)
+                listPreference(descriptor.ty.subtype)
             else
                 stubPreference()
             is ConfigString -> EditTextPreference(context).apply {
