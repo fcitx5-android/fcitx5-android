@@ -14,8 +14,6 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.data.quickphrase.BuiltinQuickPhrase
-import org.fcitx.fcitx5.android.data.quickphrase.CustomQuickPhrase
 import org.fcitx.fcitx5.android.data.quickphrase.QuickPhrase
 import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseData
 import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseEntry
@@ -31,17 +29,13 @@ import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.verticalLayout
 import splitties.views.setPaddingDp
-import java.io.File
+import timber.log.Timber
 
 class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickPhraseEntry> {
     private val args by lazyRoute<SettingsRoute.QuickPhraseEdit>()
 
     private val quickPhrase: QuickPhrase by lazy {
-        if (args.isBuiltIn) {
-            BuiltinQuickPhrase(File(args.path), File(args.override ?: ""))
-        } else {
-            CustomQuickPhrase(File(args.path))
-        }
+        args.param.quickPhrase
     }
 
     private lateinit var ui: BaseDynamicListUi<QuickPhraseEntry>

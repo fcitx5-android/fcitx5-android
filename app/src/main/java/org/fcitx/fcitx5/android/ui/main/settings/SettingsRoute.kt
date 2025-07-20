@@ -17,8 +17,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.RawConfig
-import org.fcitx.fcitx5.android.data.quickphrase.BuiltinQuickPhrase
-import org.fcitx.fcitx5.android.data.quickphrase.CustomQuickPhrase
 import org.fcitx.fcitx5.android.data.quickphrase.QuickPhrase
 import org.fcitx.fcitx5.android.ui.main.AboutFragment
 import org.fcitx.fcitx5.android.ui.main.DeveloperFragment
@@ -148,18 +146,32 @@ sealed class SettingsRoute : Parcelable {
     data object QuickPhraseList : SettingsRoute()
 
     @Serializable
-    data class QuickPhraseEdit(
-        val path: String,
-        val isBuiltIn: Boolean = false,
-        val override: String? = null
-    ) : SettingsRoute() {
-        companion object {
-            fun from(q: QuickPhrase) = when (q) {
-                is CustomQuickPhrase -> QuickPhraseEdit(q.file.absolutePath)
-                is BuiltinQuickPhrase -> QuickPhraseEdit(
-                    q.file.absolutePath, true, q.override?.file?.absolutePath
-                )
-                else -> throw IllegalArgumentException()
+    data class QuickPhraseEdit(val param: Param) : SettingsRoute() {
+        constructor(quickPhrase: QuickPhrase) : this(Param(quickPhrase))
+
+        @Serializable
+        @Parcelize
+        data class Param(
+            val quickPhrase: QuickPhrase
+        ) : Parcelable {
+            companion object {
+                val NavType = object : NavType<Param>(isNullableAllowed = false) {
+                    override fun put(bundle: SavedState, key: String, value: Param) {
+                        bundle.putParcelable(key, value)
+                    }
+
+                    override fun get(bundle: SavedState, key: String): Param? {
+                        return bundle.parcelable<Param>(key)
+                    }
+
+                    override fun serializeAsValue(value: Param): String {
+                        return Uri.encode(Json.encodeToString(value))
+                    }
+
+                    override fun parseValue(value: String): Param {
+                        return Json.decodeFromString(value)
+                    }
+                }
             }
         }
     }
@@ -237,7 +249,9 @@ sealed class SettingsRoute : Parcelable {
             fragment<QuickPhraseListFragment, QuickPhraseList> {
                 label = ctx.getString(R.string.quickphrase_editor)
             }
-            fragment<QuickPhraseEditFragment, QuickPhraseEdit>()
+            fragment<QuickPhraseEditFragment, QuickPhraseEdit>(
+                typeMap = mapOf(typeOf<QuickPhraseEdit.Param>() to QuickPhraseEdit.Param.NavType)
+            )
             fragment<TableInputMethodFragment, TableInputMethods> {
                 label = ctx.getString(R.string.table_im)
             }

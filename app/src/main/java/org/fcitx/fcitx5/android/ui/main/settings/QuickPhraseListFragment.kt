@@ -81,11 +81,13 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
             initSettingsButton = { entry ->
                 visibility = if (!entry.isEnabled) View.GONE else View.VISIBLE
                 fun edit() {
-                    navigateWithAnim(SettingsRoute.QuickPhraseEdit.from(entry))
+                    navigateWithAnim(SettingsRoute.QuickPhraseEdit(entry))
                     parentFragmentManager.setFragmentResultListener(
                         QuickPhraseEditFragment.RESULT,
                         this@QuickPhraseListFragment
                     ) { _, _ ->
+                        if (entry is BuiltinQuickPhrase)
+                            entry.evaluateOverride()
                         ui.updateItem(ui.indexItem(entry), entry)
                         // editor changed file content
                         dustman.forceDirty()
