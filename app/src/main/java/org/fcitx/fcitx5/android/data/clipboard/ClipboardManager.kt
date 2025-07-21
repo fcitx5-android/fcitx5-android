@@ -88,7 +88,7 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
         clbDb = Room
             .databaseBuilder(context, ClipboardDatabase::class.java, "clbdb")
             // allow wipe the database instead of crashing when downgrade
-            .fallbackToDestructiveMigrationOnDowngrade()
+            .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
             .build()
         clbDao = clbDb.clipboardDao()
         enabledListener.onChange(enabledPref.key, enabledPref.getValue())

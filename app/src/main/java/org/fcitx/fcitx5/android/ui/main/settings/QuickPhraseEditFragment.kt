@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.ui.main.settings
 
@@ -20,26 +20,29 @@ import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseEntry
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.utils.NaiveDustman
+import org.fcitx.fcitx5.android.utils.lazyRoute
 import org.fcitx.fcitx5.android.utils.materialTextInput
 import org.fcitx.fcitx5.android.utils.onPositiveButtonClick
-import org.fcitx.fcitx5.android.utils.serializable
 import org.fcitx.fcitx5.android.utils.str
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.verticalLayout
 import splitties.views.setPaddingDp
+import timber.log.Timber
 
 class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickPhraseEntry> {
+    private val args by lazyRoute<SettingsRoute.QuickPhraseEdit>()
+
+    private val quickPhrase: QuickPhrase by lazy {
+        args.param.quickPhrase
+    }
 
     private lateinit var ui: BaseDynamicListUi<QuickPhraseEntry>
-
-    private lateinit var quickPhrase: QuickPhrase
 
     private val dustman = NaiveDustman<QuickPhraseEntry>()
 
     override suspend fun initialize(): View {
-        quickPhrase = requireArguments().serializable(ARG)!!
         val initialEntries = withContext(Dispatchers.IO) {
             quickPhrase.loadData()
         }
@@ -185,7 +188,6 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
     }
 
     companion object {
-        const val ARG = "quickphrase"
         const val RESULT = "dirty"
     }
 

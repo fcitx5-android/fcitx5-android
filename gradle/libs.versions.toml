@@ -1,12 +1,12 @@
 [versions]
-androidGradlePlugin = "8.11.0"
+androidGradlePlugin = "8.11.1"
 kotlin = "2.2.0"
 ksp = "2.2.0-2.0.2"
-lifecycle = "2.9.1"
-navigation = "2.9.0"
+lifecycle = "2.9.2"
+navigation = "2.9.2"
 room = "2.7.2"
 splitties = "3.0.0"
-aboutlibraries = "12.2.3"
+aboutlibraries = "12.2.4"
 arrow = "2.1.2"
 
 [libraries]

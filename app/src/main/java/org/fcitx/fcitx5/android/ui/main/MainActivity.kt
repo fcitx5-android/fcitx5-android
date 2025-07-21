@@ -1,10 +1,11 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.ui.main
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -17,20 +18,23 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
-import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.forEach
 import androidx.core.view.updateLayoutParams
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.fragment.NavHostFragment
+import org.fcitx.fcitx5.android.BuildConfig
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.databinding.ActivityMainBinding
-import org.fcitx.fcitx5.android.ui.main.settings.PinyinDictionaryFragment
+import org.fcitx.fcitx5.android.ui.main.settings.SettingsRoute
 import org.fcitx.fcitx5.android.ui.setup.SetupActivity
 import org.fcitx.fcitx5.android.utils.Const
 import org.fcitx.fcitx5.android.utils.item
+import org.fcitx.fcitx5.android.utils.navigateWithAnim
+import org.fcitx.fcitx5.android.utils.parcelable
 import org.fcitx.fcitx5.android.utils.startActivity
 import splitties.dimensions.dp
 import splitties.resources.styledColor
@@ -65,6 +69,7 @@ class MainActivity : AppCompatActivity() {
         // because navController would change toolbar title, we need to control it by ourselves
         setupToolbarMenu(binding.toolbar.menu)
         navController = binding.navHostFragment.getFragment<NavHostFragment>().navController
+        navController.graph = SettingsRoute.createGraph(navController)
         binding.toolbar.setNavigationOnClickListener {
             // prevent navigate up when child fragment has enabled `OnBackPressedCallback`
             if (onBackPressedDispatcher.hasEnabledCallbacks()) {
@@ -82,37 +87,42 @@ class MainActivity : AppCompatActivity() {
         }
         navController.addOnDestinationChangedListener { _, dest, _ ->
             dest.label?.let { viewModel.setToolbarTitle(it.toString()) }
-            when (dest.id) {
-                R.id.themeFragment -> viewModel.disableToolbarShadow()
-                else -> viewModel.enableToolbarShadow()
+            if (dest.hasRoute<SettingsRoute.Theme>()) {
+                viewModel.disableToolbarShadow()
+            } else {
+                viewModel.enableToolbarShadow()
             }
         }
-        if (intent?.action == Intent.ACTION_MAIN && SetupActivity.shouldShowUp()) {
-            startActivity<SetupActivity>()
-        } else {
-            processIntent(intent)
-        }
-        addOnNewIntentListener {
-            processIntent(it)
-        }
+        processIntent(intent)
         checkNotificationPermission()
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        processIntent(intent)
+    }
+
     private fun processIntent(intent: Intent?) {
-        if (intent?.action == Intent.ACTION_VIEW) {
-            intent.data?.let {
+        val action = intent?.action ?: return
+        when (action) {
+            Intent.ACTION_MAIN -> if (SetupActivity.shouldShowUp()) {
+                startActivity<SetupActivity>()
+            }
+            Intent.ACTION_VIEW -> intent.data?.let {
                 AlertDialog.Builder(this)
                     .setTitle(R.string.pinyin_dict)
                     .setMessage(R.string.whether_import_dict)
                     .setNegativeButton(android.R.string.cancel) { _, _ -> }
                     .setPositiveButton(android.R.string.ok) { _, _ ->
-                        navController.popBackStack(R.id.mainFragment, false)
-                        navController.navigate(
-                            R.id.action_mainFragment_to_pinyinDictionaryFragment,
-                            bundleOf(PinyinDictionaryFragment.INTENT_DATA_URI to it)
-                        )
+                        navController.popBackStack(SettingsRoute.Index, false)
+                        navController.navigateWithAnim(SettingsRoute.PinyinDict(it))
                     }
                     .show()
+            }
+            Intent.ACTION_RUN -> {
+                val route = intent.parcelable<SettingsRoute>(EXTRA_SETTINGS_ROUTE) ?: return
+                navController.popBackStack(SettingsRoute.Index, false)
+                navController.navigateWithAnim(route)
             }
         }
     }
@@ -127,13 +137,14 @@ class MainActivity : AppCompatActivity() {
         }
         val aboutMenuItems = listOf(
             menu.item(R.string.faq) {
+                @SuppressLint("UseKtx")
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Const.faqUrl)))
             },
             menu.item(R.string.developer) {
-                navController.navigate(R.id.action_mainFragment_to_developerFragment)
+                navController.navigateWithAnim(SettingsRoute.Developer)
             },
             menu.item(R.string.about) {
-                navController.navigate(R.id.action_mainFragment_to_aboutFragment)
+                navController.navigateWithAnim(SettingsRoute.About)
             }
         )
         viewModel.aboutButton.observe(this@MainActivity) { enabled ->
@@ -197,6 +208,10 @@ class MainActivity : AppCompatActivity() {
             save()
         }
         super.onStop()
+    }
+
+    companion object {
+        const val EXTRA_SETTINGS_ROUTE = "${BuildConfig.APPLICATION_ID}.EXTRA_SETTINGS_ROUTE"
     }
 
 }

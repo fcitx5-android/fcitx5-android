@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.utils.config
 
@@ -9,17 +9,22 @@ import arrow.core.Either
 import arrow.core.flatMap
 import arrow.core.raise.either
 import kotlinx.parcelize.Parcelize
-import kotlinx.parcelize.RawValue
+import kotlinx.serialization.Serializable
 import org.fcitx.fcitx5.android.core.RawConfig
+import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.Companion.parse
+import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.ConfigList.ConfigListValue
 
+@Serializable
 sealed class ConfigDescriptor<T, U> : Parcelable {
     abstract val name: String
-    abstract val type: ConfigType<T>
+    // `type` is reserved in JSON serialization, so we use `ty` instead
+    abstract val ty: ConfigType<T>
     abstract val description: String?
     abstract val defaultValue: U?
     abstract val tooltip: String?
 
     @Parcelize
+    @Serializable
     data class ConfigTopLevelDef(
         val name: String,
         val values: List<ConfigDescriptor<*, *>>,
@@ -27,12 +32,14 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
     ) : Parcelable
 
     @Parcelize
+    @Serializable
     data class ConfigCustomTypeDef(
         val name: String,
         val values: List<ConfigDescriptor<*, *>>
     ) : Parcelable
 
     @Parcelize
+    @Serializable
     data class ConfigInt(
         override val name: String,
         override val description: String? = null,
@@ -41,46 +48,50 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
         val intMax: Int?,
         val intMin: Int?,
     ) : ConfigDescriptor<ConfigType.TyInt, Int>() {
-        override val type: ConfigType<ConfigType.TyInt>
+        override val ty: ConfigType<ConfigType.TyInt>
             get() = ConfigType.TyInt
     }
 
     @Parcelize
+    @Serializable
     data class ConfigString(
         override val name: String,
         override val description: String? = null,
         override val defaultValue: String? = null,
         override val tooltip: String? = null,
     ) : ConfigDescriptor<ConfigType.TyString, String>() {
-        override val type: ConfigType<ConfigType.TyString>
+        override val ty: ConfigType<ConfigType.TyString>
             get() = ConfigType.TyString
     }
 
     @Parcelize
+    @Serializable
     data class ConfigBool(
         override val name: String,
         override val description: String? = null,
         override val defaultValue: Boolean? = null,
         override val tooltip: String? = null,
     ) : ConfigDescriptor<ConfigType.TyBool, Boolean>() {
-        override val type: ConfigType<ConfigType.TyBool>
+        override val ty: ConfigType<ConfigType.TyBool>
             get() = ConfigType.TyBool
 
     }
 
     @Parcelize
+    @Serializable
     data class ConfigKey(
         override val name: String,
         override val description: String? = null,
         override val defaultValue: String? = null,
         override val tooltip: String? = null,
     ) : ConfigDescriptor<ConfigType.TyKey, String>() {
-        override val type: ConfigType<ConfigType.TyKey>
+        override val ty: ConfigType<ConfigType.TyKey>
             get() = ConfigType.TyKey
 
     }
 
     @Parcelize
+    @Serializable
     data class ConfigEnum(
         override val name: String,
         override val description: String? = null,
@@ -89,15 +100,16 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
         val entries: List<String>,
         val entriesI18n: List<String>?
     ) : ConfigDescriptor<ConfigType.TyEnum, String>() {
-        override val type: ConfigType<ConfigType.TyEnum>
+        override val ty: ConfigType<ConfigType.TyEnum>
             get() = ConfigType.TyEnum
 
     }
 
     @Parcelize
+    @Serializable
     data class ConfigCustom(
         override val name: String,
-        override val type: ConfigType.TyCustom,
+        override val ty: ConfigType.TyCustom,
         override val description: String? = null,
         override val tooltip: String? = null,
         // will be filled in parseTopLevel
@@ -108,21 +120,40 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
     }
 
     @Parcelize
+    @Serializable
     data class ConfigList(
         override val name: String,
-        override val type: ConfigType.TyList,
+        override val ty: ConfigType.TyList,
         override val description: String? = null,
         override val tooltip: String? = null,
         /**
-         * [Any?] is used for a union type. See [parse] for details.
+         * [ConfigListValue] is used for a union type. See [parse] for details.
          */
-        override val defaultValue: @RawValue List<Any?>? = null,
-    ) : ConfigDescriptor<ConfigType.TyList, List<Any?>>()
+        override val defaultValue: List<ConfigListValue>? = null,
+    ) : ConfigDescriptor<ConfigType.TyList, List<ConfigListValue>>() {
+        @Serializable
+        @Parcelize
+        sealed interface ConfigListValue : Parcelable {
+            @Serializable
+            @Parcelize
+            data class BoolValue(val value: Boolean) : ConfigListValue
+            @Serializable
+            @Parcelize
+            data class IntValue(val value: Int) : ConfigListValue
+            @Serializable
+            @Parcelize
+            data class KeyValue(val value: String) : ConfigListValue
+            @Serializable
+            @Parcelize
+            data class StringValue(val value: String) : ConfigListValue
+        }
+    }
 
     /**
      * Specialized [ConfigList] for enum
      */
     @Parcelize
+    @Serializable
     data class ConfigEnumList(
         override val name: String,
         override val description: String? = null,
@@ -132,11 +163,12 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
         val entriesI18n: List<String>?
     ) :
         ConfigDescriptor<ConfigType.TyList, List<String>>() {
-        override val type: ConfigType<ConfigType.TyList>
+        override val ty: ConfigType<ConfigType.TyList>
             get() = ConfigType.TyList(ConfigType.TyEnum)
     }
 
     @Parcelize
+    @Serializable
     data class ConfigExternal(
         override val name: String,
         override val description: String? = null,
@@ -157,7 +189,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
             AndroidTable
         }
 
-        override val type: ConfigType<ConfigType.TyExternal>
+        override val ty: ConfigType<ConfigType.TyExternal>
             get() = ConfigType.TyExternal
         override val defaultValue: Nothing?
             get() = null
@@ -234,7 +266,11 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                             raw.intMax,
                             raw.intMin
                         )
-                        ConfigType.TyKey -> ConfigKey(raw.name, raw.description, raw.defaultValue)
+                        ConfigType.TyKey -> ConfigKey(
+                            raw.name,
+                            raw.description,
+                            raw.defaultValue
+                        )
                         is ConfigType.TyList ->
                             if (it.subtype == ConfigType.TyEnum) {
                                 val entries = raw.enum ?: raise(ParseException.NoEnumFound(raw))
@@ -254,10 +290,18 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                                     raw.tooltip,
                                     raw.findByName("DefaultValue")?.subItems?.map { ele ->
                                         when (it.subtype) {
-                                            ConfigType.TyBool -> ele.value.toBoolean()
-                                            ConfigType.TyInt -> ele.value.toInt()
-                                            ConfigType.TyKey -> ele.value
-                                            ConfigType.TyString -> ele.value
+                                            ConfigType.TyBool -> ConfigListValue.BoolValue(
+                                                ele.value.toBoolean()
+                                            )
+                                            ConfigType.TyInt -> ConfigListValue.IntValue(
+                                                ele.value.toInt()
+                                            )
+                                            ConfigType.TyKey -> ConfigListValue.KeyValue(
+                                                ele.value
+                                            )
+                                            ConfigType.TyString -> ConfigListValue.StringValue(
+                                                ele.value
+                                            )
                                             ConfigType.TyEnum -> error("Impossible!")
                                             else -> raise(ParseException.BadFormList(it))
                                         }
@@ -302,7 +346,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                     val parsed = parse(it).bind()
                     if (parsed is ConfigCustom)
                         parsed.customTypeDef = customTypeDef.find { cTy ->
-                            cTy.name == parsed.type.typeName
+                            cTy.name == parsed.ty.typeName
                         }
                     parsed
                 } ?: listOf()
