@@ -1,14 +1,12 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.ui.main.settings.addon
 
 import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.core.os.bundleOf
-import androidx.navigation.findNavController
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.AddonInfo
 import org.fcitx.fcitx5.android.core.FcitxAPI
@@ -17,6 +15,8 @@ import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.CheckBoxListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.ui.main.settings.ProgressFragment
+import org.fcitx.fcitx5.android.ui.main.settings.SettingsRoute
+import org.fcitx.fcitx5.android.utils.navigateWithAnim
 
 class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
 
@@ -120,12 +120,8 @@ class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
                         entry.uniqueName != "clipboard"
                     ) View.VISIBLE else View.INVISIBLE
                 setOnClickListener {
-                    it.findNavController().navigate(
-                        R.id.action_addonListFragment_to_addonConfigFragment,
-                        bundleOf(
-                            AddonConfigFragment.ARG_UNIQUE_NAME to entry.uniqueName,
-                            AddonConfigFragment.ARG_NAME to entry.displayName
-                        )
+                    navigateWithAnim(
+                        SettingsRoute.AddonConfig(entry.displayName, entry.uniqueName)
                     )
                 }
             },

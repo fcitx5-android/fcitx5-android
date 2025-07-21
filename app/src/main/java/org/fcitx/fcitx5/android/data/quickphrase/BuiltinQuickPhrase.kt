@@ -14,18 +14,13 @@ class BuiltinQuickPhrase(
 
     init {
         ensureFileExists()
+        evaluateOverride()
     }
 
-    var override: CustomQuickPhrase? =
-        if (overrideFile.exists())
-            CustomQuickPhrase(overrideFile)
-        else {
-            val disabledOverride = File(overrideFile.path + ".$DISABLE")
-            if (disabledOverride.exists())
-                CustomQuickPhrase(disabledOverride)
-            else
-                null
-        }
+    val overrideFilePath: String
+        get() = overrideFile.absolutePath
+
+    var override: CustomQuickPhrase? = null
         private set
 
     override val isEnabled: Boolean
@@ -35,6 +30,7 @@ class BuiltinQuickPhrase(
         if (override != null)
             return
         file.copyTo(overrideFile, overwrite = true)
+        // Update override
         override = CustomQuickPhrase(overrideFile)
     }
 
@@ -64,6 +60,21 @@ class BuiltinQuickPhrase(
     fun deleteOverride() {
         overrideFile.delete()
         override = null
+    }
+
+    /**
+     * Make sure [override] is set correctly.
+     */
+    fun evaluateOverride() {
+        override = if (overrideFile.exists())
+            CustomQuickPhrase(overrideFile)
+        else {
+            val disabledOverride = File(overrideFile.path + ".$DISABLE")
+            if (disabledOverride.exists())
+                CustomQuickPhrase(disabledOverride)
+            else
+                null
+        }
     }
 
     override fun toString(): String {
