@@ -225,13 +225,13 @@ class CandidatesView(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        candidatesUi.root.viewTreeObserver.addOnGlobalLayoutListener(layoutListener)
+        viewTreeObserver.addOnGlobalLayoutListener(layoutListener)
         viewTreeObserver.addOnPreDrawListener(preDrawListener)
     }
 
     override fun onDetachedFromWindow() {
         viewTreeObserver.removeOnPreDrawListener(preDrawListener)
-        candidatesUi.root.viewTreeObserver.removeOnGlobalLayoutListener(layoutListener)
+        viewTreeObserver.removeOnGlobalLayoutListener(layoutListener)
         touchEventReceiverWindow.dismiss()
         super.onDetachedFromWindow()
     }
