@@ -4,7 +4,6 @@
  */
 package org.fcitx.fcitx5.android.plugin.clipboard_filter
 
-import android.content.res.AssetManager
 import android.net.Uri
 import android.net.UrlQuerySanitizer
 import android.util.Log
@@ -36,65 +35,63 @@ object ClearURLs {
 
     private var catalog: Map<String, ClearURLsProvider>? = null
 
-    fun initCatalog(assetManager: AssetManager) {
-        if (catalog != null)
-            return
-        catalog = Json.decodeFromString(
-            catalogSerializer,
-            assetManager.open("data.min.json").bufferedReader().readText()
-        )["providers"]
+    fun initCatalog(rawRules: String) {
+        if (catalog != null) return
+        catalog = Json.decodeFromString(catalogSerializer, rawRules)["providers"]
     }
 
     private val urlPattern = Regex("^https?://", RegexOption.IGNORE_CASE)
 
     fun transform(text: String): String {
-        if (!urlPattern.matchesAt(text, 0))
-            return text
-        var x = text
+        if (!urlPattern.matchesAt(text, 0)) return text
+        val map = catalog ?: throw IllegalStateException("Catalog is unavailable")
+        return transformWith(text, map)
+    }
+
+    private fun transformWith(url: String, map: Map<String, ClearURLsProvider>): String {
+        var x = url
         var matched = false
-        catalog?.let { map ->
-            for ((_, provider) in map) {
-                // matches url pattern
-                if (!provider.urlPattern.containsMatchIn(x))
-                    continue
-                // not in exceptions
-                if (provider.exceptions.any { it.containsMatchIn(x) })
-                    continue
-                matched = true
-                // apply redirections
-                provider.redirections.forEach { redirection ->
-                    redirection.matchEntire(x)?.groupValues?.getOrNull(1)?.let {
-                        x = decodeURL(it)
-                        log(if (BuildConfig.DEBUG) "$text ~> $x" else "(redirect)")
-                        return x
-                    }
+        for ((_, provider) in map) {
+            // matches url pattern
+            if (!provider.urlPattern.containsMatchIn(x))
+                continue
+            // not in exceptions
+            if (provider.exceptions.any { it.containsMatchIn(x) })
+                continue
+            matched = true
+            // apply redirections
+            provider.redirections.forEach { redirection ->
+                redirection.matchAt(x, 0)?.groupValues?.getOrNull(1)?.let {
+                    x = decodeURL(it)
+                    log(if (BuildConfig.DEBUG) "$url ~> $x" else "(redirect)")
+                    return x
                 }
-                provider.rawRules.forEach { rawRule ->
-                    x = rawRule.replace(x, "")
-                }
+            }
+            provider.rawRules.forEach { rawRule ->
+                x = rawRule.replace(x, "")
+            }
+            /**
+             * apply rules and referralMarketing
+             * https://docs.clearurls.xyz/1.26.1/specs/rules/#referralmarketing
+             * https://github.com/ClearURLs/Addon/blob/deec80b763179fa5c3559a37e3c9a6f1b28d0886/clearurls.js#L449
+             */
+            val rules = provider.rules + provider.referralMarketing
+            val uri = Uri.parse(x)
+            x = uri.buildUpon()
+                .encodedQuery(filterParams(uri.query, rules))
                 /**
-                 * apply rules and referralMarketing
-                 * https://docs.clearurls.xyz/1.26.1/specs/rules/#referralmarketing
-                 * https://github.com/ClearURLs/Addon/blob/deec80b763179fa5c3559a37e3c9a6f1b28d0886/clearurls.js#L449
+                 * clear #fragments too
+                 * https://github.com/ClearURLs/Addon/blob/deec80b763179fa5c3559a37e3c9a6f1b28d0886/clearurls.js#L109
+                 * but skip URL encode because of reasons
+                 * https://github.com/ClearURLs/Addon/blob/d8da43ac297e5df51a9c7276579ac3332adfa801/core_js/utils/URLHashParams.js#L65
                  */
-                val rules = provider.rules + provider.referralMarketing
-                val uri = Uri.parse(x)
-                x = uri.buildUpon()
-                    .encodedQuery(filterParams(uri.query, rules))
-                    /**
-                     * clear #fragments too
-                     * https://github.com/ClearURLs/Addon/blob/deec80b763179fa5c3559a37e3c9a6f1b28d0886/clearurls.js#L109
-                     * but skip URL encode because of reasons
-                     * https://github.com/ClearURLs/Addon/blob/d8da43ac297e5df51a9c7276579ac3332adfa801/core_js/utils/URLHashParams.js#L65
-                     */
-                    .encodedFragment(filterParams(uri.fragment, rules, encode = false))
-                    .toString()
-            }
-            if (matched) {
-                log(if (BuildConfig.DEBUG) "$text -> $x" else "(clear)")
-            }
-            return x
-        } ?: throw IllegalStateException("Catalog is unavailable")
+                .encodedFragment(filterParams(uri.fragment, rules, encode = false))
+                .toString()
+        }
+        if (matched) {
+            log(if (BuildConfig.DEBUG) "$url -> $x" else "(clear)")
+        }
+        return x
     }
 
     /**

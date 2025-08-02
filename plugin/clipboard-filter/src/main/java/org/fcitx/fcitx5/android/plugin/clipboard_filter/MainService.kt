@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.plugin.clipboard_filter
 
@@ -24,7 +24,7 @@ class MainService : FcitxPluginService() {
     }
 
     override fun onCreate() {
-        ClearURLs.initCatalog(assets)
+        ClearURLs.initCatalog(assets.open("data.min.json").bufferedReader().readText())
     }
 
     override fun start() {
