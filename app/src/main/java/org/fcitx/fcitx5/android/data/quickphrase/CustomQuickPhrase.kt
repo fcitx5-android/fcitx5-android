@@ -4,17 +4,28 @@
  */
 package org.fcitx.fcitx5.android.data.quickphrase
 
+import kotlinx.parcelize.Parcelize
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.utils.errorArg
 import java.io.File
 
-class CustomQuickPhrase(file: File) : QuickPhrase() {
+@Parcelize
+class CustomQuickPhrase(
+    private var _file: File,
+    private var _enabled: Boolean = false
+) : QuickPhrase() {
 
-    override var isEnabled = false
-        private set
+    override var isEnabled: Boolean
+        get() = _enabled
+        private set(value) {
+            _enabled = value
+        }
 
-    override var file: File = file
-        private set
+    override var file: File
+        get() = _file
+        private set(value) {
+            _file = value
+        }
 
     override val name: String
         get() = if (isEnabled) super.name

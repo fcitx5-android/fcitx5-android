@@ -29,7 +29,6 @@ import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.verticalLayout
 import splitties.views.setPaddingDp
-import timber.log.Timber
 
 class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickPhraseEntry> {
     private val args by lazyRoute<SettingsRoute.QuickPhraseEdit>()
@@ -152,7 +151,7 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
             quickPhrase.saveData(QuickPhraseData(ui.entries))
             launch(Dispatchers.Main) {
                 // tell parent that we need to reload
-                parentFragmentManager.setFragmentResult(RESULT, bundleOf(RESULT to true))
+                parentFragmentManager.setFragmentResult(RESULT, bundleOf(RESULT to quickPhrase))
             }
         }
     }

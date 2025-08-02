@@ -4,12 +4,15 @@
  */
 package org.fcitx.fcitx5.android.data.quickphrase
 
+import kotlinx.parcelize.Parcelize
 import java.io.File
 
+@Parcelize
 class BuiltinQuickPhrase(
     override val file: File,
     // always be .mb (not disabled)
-    private val overrideFile: File
+    private val overrideFile: File,
+    private var _override: CustomQuickPhrase? = null
 ) : QuickPhrase() {
 
     init {
@@ -20,8 +23,11 @@ class BuiltinQuickPhrase(
     val overrideFilePath: String
         get() = overrideFile.absolutePath
 
-    var override: CustomQuickPhrase? = null
-        private set
+    var override: CustomQuickPhrase?
+        get() = _override
+        private set(value) {
+            _override = value
+        }
 
     override val isEnabled: Boolean
         get() = override?.isEnabled ?: true

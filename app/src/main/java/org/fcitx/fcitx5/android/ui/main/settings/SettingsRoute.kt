@@ -151,9 +151,7 @@ sealed class SettingsRoute : Parcelable {
 
         @Serializable
         @Parcelize
-        data class Param(
-            val quickPhrase: QuickPhrase
-        ) : Parcelable {
+        data class Param(val quickPhrase: QuickPhrase) : Parcelable {
             companion object {
                 val NavType = object : NavType<Param>(isNullableAllowed = false) {
                     override fun put(bundle: SavedState, key: String, value: Param) {

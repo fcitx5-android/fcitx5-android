@@ -40,6 +40,7 @@ import org.fcitx.fcitx5.android.utils.materialTextInput
 import org.fcitx.fcitx5.android.utils.navigateWithAnim
 import org.fcitx.fcitx5.android.utils.notificationManager
 import org.fcitx.fcitx5.android.utils.onPositiveButtonClick
+import org.fcitx.fcitx5.android.utils.parcelable
 import org.fcitx.fcitx5.android.utils.queryFileName
 import org.fcitx.fcitx5.android.utils.str
 import splitties.resources.drawable
@@ -85,10 +86,9 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                     parentFragmentManager.setFragmentResultListener(
                         QuickPhraseEditFragment.RESULT,
                         this@QuickPhraseListFragment
-                    ) { _, _ ->
-                        if (entry is BuiltinQuickPhrase)
-                            entry.evaluateOverride()
-                        ui.updateItem(ui.indexItem(entry), entry)
+                    ) listener@{ requestKey, result ->
+                        val newItem = result.parcelable<QuickPhrase>(requestKey) ?: return@listener
+                        ui.updateItem(ui.indexItem(entry), newItem)
                         // editor changed file content
                         dustman.forceDirty()
                     }
