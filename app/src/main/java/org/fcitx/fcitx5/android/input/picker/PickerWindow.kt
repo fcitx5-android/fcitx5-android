@@ -5,16 +5,13 @@
 package org.fcitx.fcitx5.android.input.picker
 
 import android.annotation.SuppressLint
-import android.view.Gravity
 import androidx.core.content.ContextCompat
-import androidx.transition.Slide
 import androidx.transition.Transition
 import androidx.viewpager2.widget.ViewPager2
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.broadcast.ReturnKeyDrawableComponent
-import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction
@@ -44,7 +41,6 @@ class PickerWindow(
         Emoticon
     }
 
-    private val service by manager.inputMethodService()
     private val theme by manager.theme()
     private val windowManager: InputWindowManager by manager.must()
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
@@ -56,19 +52,9 @@ class PickerWindow(
     private lateinit var pickerLayout: PickerLayout
     private lateinit var pickerPagesAdapter: PickerPagesAdapter
 
-    override fun enterAnimation(lastWindow: InputWindow): Transition? {
-        // disable animation switching between keyboard
-        return if (lastWindow !is KeyboardWindow && lastWindow !is PickerWindow)
-            Slide().apply { slideEdge = Gravity.BOTTOM }
-        else null
-    }
+    override fun enterAnimation(lastWindow: InputWindow): Transition? = null
 
-    override fun exitAnimation(nextWindow: InputWindow): Transition? {
-        // disable animation switching between keyboard
-        return if (nextWindow !is KeyboardWindow && nextWindow !is PickerWindow)
-            super.exitAnimation(nextWindow)
-        else null
-    }
+    override fun exitAnimation(nextWindow: InputWindow): Transition? = null
 
     private val keyActionListener = KeyActionListener { it, source ->
         when (it) {
@@ -118,10 +104,11 @@ class PickerWindow(
         }
     }
 
+    private val isEmoji = key === Key.Emoji
+
     override fun onCreateView() = PickerLayout(context, theme, switchKey).apply {
         pickerLayout = this
         val bordered = followKeyBorder && keyBorder
-        val isEmoji = key === Key.Emoji
         pickerPagesAdapter = PickerPagesAdapter(
             theme, keyActionListener, popupActionListener, data,
             density, key.name, bordered, isEmoji
@@ -162,7 +149,15 @@ class PickerWindow(
 
     override fun onCreateBarExtension() = pickerLayout.tabsUi.root
 
-    private val skinTonePreference = AppPrefs.getInstance().symbols.defaultEmojiSkinTone
+    val symbolPrefs = AppPrefs.getInstance().symbols
+    private val hideUnsupportedEmojisPrefs = symbolPrefs.hideUnsupportedEmojis
+    private val defaultEmojiSkinTonePrefs = symbolPrefs.defaultEmojiSkinTone
+
+    @SuppressLint("NotifyDataSetChanged")
+    private val initDataListener = ManagedPreference.OnChangeListener<Any> { _, _ ->
+        pickerPagesAdapter.rebuildCategories(hideUnsupportedEmojisPrefs.getValue())
+        pickerPagesAdapter.notifyDataSetChanged()
+    }.takeIf { isEmoji }
 
     @SuppressLint("NotifyDataSetChanged")
     private val refreshPagesListener = ManagedPreference.OnChangeListener<Any> { _, _ ->
@@ -174,16 +169,18 @@ class PickerWindow(
             it.onReturnDrawableUpdate(returnKeyDrawable.resourceId)
             it.keyActionListener = keyActionListener
         }
-        if (key === Key.Emoji) {
-            skinTonePreference.registerOnChangeListener(refreshPagesListener)
+        if (isEmoji) {
+            hideUnsupportedEmojisPrefs.registerOnChangeListener(initDataListener!!)
+            defaultEmojiSkinTonePrefs.registerOnChangeListener(refreshPagesListener)
         }
     }
 
     override fun onDetached() {
         popup.dismissAll()
         pickerLayout.embeddedKeyboard.keyActionListener = null
-        if (key === Key.Emoji) {
-            skinTonePreference.unregisterOnChangeListener(refreshPagesListener)
+        if (isEmoji) {
+            hideUnsupportedEmojisPrefs.unregisterOnChangeListener(initDataListener!!)
+            defaultEmojiSkinTonePrefs.unregisterOnChangeListener(refreshPagesListener)
         }
     }
 

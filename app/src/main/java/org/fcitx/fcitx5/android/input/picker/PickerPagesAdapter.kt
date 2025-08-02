@@ -8,6 +8,7 @@ import android.text.TextPaint
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.data.RecentlyUsed
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.KeyActionListener
 import org.fcitx.fcitx5.android.input.popup.PopupActionListener
@@ -16,7 +17,7 @@ class PickerPagesAdapter(
     val theme: Theme,
     private val keyActionListener: KeyActionListener,
     private val popupActionListener: PopupActionListener,
-    data: List<Pair<PickerData.Category, Array<String>>>,
+    private val rawData: List<Pair<PickerData.Category, Array<String>>>,
     private val density: PickerPageUi.Density,
     recentlyUsedFileName: String,
     private val bordered: Boolean = false,
@@ -37,18 +38,38 @@ class PickerPagesAdapter(
      */
     private val pages: MutableList<List<String>> = mutableListOf(listOf())
 
-    fun getCategoryList(): List<PickerData.Category> {
-        return categories.map { it.first }
-    }
-
-    init {
-        val textPaint = TextPaint()
+    private fun buildCategories(
+        data: List<Pair<PickerData.Category, Array<String>>>,
+        knowGraphOnly: Boolean = false
+    ) {
+        val textPaint = if (knowGraphOnly) TextPaint() else null
         data.forEach { (cat, arr) ->
-            val chunks = arr.filter { if (isEmoji) textPaint.hasGlyph(it) else true }
-                .chunked(density.pageSize)
+            val list = if (textPaint != null) {
+                arr.filter { textPaint.hasGlyph(it) }
+            } else {
+                arr.toList()
+            }
+            val chunks = list.chunked(density.pageSize)
             categories.add(cat to IntRange(pages.size, pages.size + chunks.size - 1))
             pages.addAll(chunks)
         }
+    }
+
+    init {
+        buildCategories(
+            rawData,
+            isEmoji && AppPrefs.getInstance().symbols.hideUnsupportedEmojis.getValue()
+        )
+    }
+
+    fun rebuildCategories(knowGraphOnly: Boolean = false) {
+        categories.clear()
+        // empty "RecentlyUsed" category
+        categories.add(PickerData.RecentlyUsedCategory to IntRange(0, 0))
+        pages.clear()
+        // empty "RecentlyUsed" page
+        pages.add(emptyList())
+        buildCategories(rawData, knowGraphOnly)
     }
 
     private val recentlyUsed = RecentlyUsed(recentlyUsedFileName, density.pageSize)
@@ -56,6 +77,10 @@ class PickerPagesAdapter(
     fun insertRecent(text: String) {
         if (text.length == 1 && text[0].code.let { it in Digit || it in FullWidthDigit }) return
         recentlyUsed.insert(text)
+    }
+
+    fun getCategoryList(): List<PickerData.Category> {
+        return categories.map { it.first }
     }
 
     fun getCategoryIndexOfPage(page: Int): Int {

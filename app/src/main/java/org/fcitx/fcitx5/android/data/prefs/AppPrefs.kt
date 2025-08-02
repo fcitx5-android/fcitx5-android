@@ -346,6 +346,12 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
     }
 
     inner class Symbols : ManagedPreferenceCategory(R.string.emoji_and_symbols, sharedPreferences) {
+        val hideUnsupportedEmojis = switch(
+            R.string.hide_unsupported_emojis,
+            "hide_unsupported_emojis",
+            true
+        )
+
         val defaultEmojiSkinTone = enumList(
             R.string.default_emoji_skin_tone,
             "default_emoji_skin_tone",
