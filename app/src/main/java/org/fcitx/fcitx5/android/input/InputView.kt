@@ -133,12 +133,12 @@ class InputView(
 
     private val focusChangeResetKeyboard by keyboardPrefs.focusChangeResetKeyboard
 
-    private val keyboardHeightPercent = keyboardPrefs.keyboardHeightPercent
-    private val keyboardHeightPercentLandscape = keyboardPrefs.keyboardHeightPercentLandscape
-    private val keyboardSidePadding = keyboardPrefs.keyboardSidePadding
-    private val keyboardSidePaddingLandscape = keyboardPrefs.keyboardSidePaddingLandscape
-    private val keyboardBottomPadding = keyboardPrefs.keyboardBottomPadding
-    private val keyboardBottomPaddingLandscape = keyboardPrefs.keyboardBottomPaddingLandscape
+    private val keyboardHeightPercent = ThemeManager.prefs.keyboardHeightPercent
+    private val keyboardHeightPercentLandscape = ThemeManager.prefs.keyboardHeightPercentLandscape
+    private val keyboardSidePadding = ThemeManager.prefs.keyboardSidePadding
+    private val keyboardSidePaddingLandscape = ThemeManager.prefs.keyboardSidePaddingLandscape
+    private val keyboardBottomPadding = ThemeManager.prefs.keyboardBottomPadding
+    private val keyboardBottomPaddingLandscape = ThemeManager.prefs.keyboardBottomPaddingLandscape
 
     private val keyboardSizePrefs = listOf(
         keyboardHeightPercent,

@@ -16,7 +16,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
-import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
@@ -47,13 +46,12 @@ class KeyboardPreviewUi(override val ctx: Context, val theme: Theme) : Ui {
     var intrinsicHeight: Int = -1
         private set
 
-    private val keyboardPrefs = AppPrefs.getInstance().keyboard
-    private val keyboardHeightPercent by keyboardPrefs.keyboardHeightPercent
-    private val keyboardHeightPercentLandscape by keyboardPrefs.keyboardHeightPercentLandscape
-    private val keyboardSidePadding by keyboardPrefs.keyboardSidePadding
-    private val keyboardSidePaddingLandscape by keyboardPrefs.keyboardSidePaddingLandscape
-    private val keyboardBottomPadding by keyboardPrefs.keyboardBottomPadding
-    private val keyboardBottomPaddingLandscape by keyboardPrefs.keyboardBottomPaddingLandscape
+    private val keyboardHeightPercent by ThemeManager.prefs.keyboardHeightPercent
+    private val keyboardHeightPercentLandscape by ThemeManager.prefs.keyboardHeightPercentLandscape
+    private val keyboardSidePadding by ThemeManager.prefs.keyboardSidePadding
+    private val keyboardSidePaddingLandscape by ThemeManager.prefs.keyboardSidePaddingLandscape
+    private val keyboardBottomPadding by ThemeManager.prefs.keyboardBottomPadding
+    private val keyboardBottomPaddingLandscape by ThemeManager.prefs.keyboardBottomPaddingLandscape
 
     private val keyboardSidePaddingPx: Int
         get() {

@@ -86,6 +86,66 @@ class ThemePrefs(sharedPreferences: SharedPreferences) :
     val clipboardEntryRadius =
         int(R.string.clipboard_entry_radius, "clipboard_entry_radius", 2, 0, 48, "dp")
 
+    val keyboardHeightPercent: ManagedPreference.PInt
+    val keyboardHeightPercentLandscape: ManagedPreference.PInt
+
+    init {
+        val (primary, secondary) = twinInt(
+            R.string.keyboard_height,
+            R.string.portrait,
+            "keyboard_height_percent",
+            30,
+            R.string.landscape,
+            "keyboard_height_percent_landscape",
+            49,
+            10,
+            90,
+            "%"
+        )
+        keyboardHeightPercent = primary
+        keyboardHeightPercentLandscape = secondary
+    }
+
+    val keyboardSidePadding: ManagedPreference.PInt
+    val keyboardSidePaddingLandscape: ManagedPreference.PInt
+
+    init {
+        val (primary, secondary) = twinInt(
+            R.string.keyboard_side_padding,
+            R.string.portrait,
+            "keyboard_side_padding",
+            0,
+            R.string.landscape,
+            "keyboard_side_padding_landscape",
+            0,
+            0,
+            300,
+            "dp"
+        )
+        keyboardSidePadding = primary
+        keyboardSidePaddingLandscape = secondary
+    }
+
+    val keyboardBottomPadding: ManagedPreference.PInt
+    val keyboardBottomPaddingLandscape: ManagedPreference.PInt
+
+    init {
+        val (primary, secondary) = twinInt(
+            R.string.keyboard_bottom_padding,
+            R.string.portrait,
+            "keyboard_bottom_padding",
+            0,
+            R.string.landscape,
+            "keyboard_bottom_padding_landscape",
+            0,
+            0,
+            100,
+            "dp"
+        )
+        keyboardBottomPadding = primary
+        keyboardBottomPaddingLandscape = secondary
+    }
+
     enum class PunctuationPosition(override val stringRes: Int) : ManagedPreferenceEnum {
         None(R.string.punctuation_pos_none),
         Bottom(R.string.punctuation_pos_bottom),
