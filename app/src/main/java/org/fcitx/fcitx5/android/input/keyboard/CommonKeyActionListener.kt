@@ -64,7 +64,7 @@ class CommonKeyActionListener :
 
     private var backspaceSwipeState = Stopped
 
-    private val keepComposingIMs = arrayOf("keyboard-us", "unikey")
+    private val keepComposingIMs = arrayOf("keyboard-us", "unikey", "hangul")
 
     private suspend fun FcitxAPI.commitAndReset() {
         if (clientPreeditCached.isEmpty() && inputPanelCached.preedit.isEmpty()) {
