@@ -28,5 +28,5 @@ suspend fun Context.importErrorDialog(t: Throwable) {
 }
 
 suspend fun Context.importErrorDialog(@StringRes resId: Int, vararg formatArgs: Any?) {
-    importErrorDialog(getString(resId, formatArgs))
+    importErrorDialog(getString(resId, *formatArgs))
 }
