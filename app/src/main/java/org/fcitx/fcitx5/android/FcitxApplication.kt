@@ -1,10 +1,9 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -27,7 +26,6 @@ import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.ui.main.LogActivity
 import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.Locales
-import org.fcitx.fcitx5.android.utils.isDarkMode
 import org.fcitx.fcitx5.android.utils.startActivity
 import org.fcitx.fcitx5.android.utils.userManager
 import timber.log.Timber
@@ -76,8 +74,11 @@ class FcitxApplication : Application() {
         private set
 
     val directBootAwareContext: Context
-        @SuppressLint("NewApi")
-        get() = if (isDirectBootMode) createDeviceProtectedStorageContext() else applicationContext
+        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isDirectBootMode) {
+            createDeviceProtectedStorageContext()
+        } else {
+            applicationContext
+        }
 
     override fun onCreate() {
         super.onCreate()
