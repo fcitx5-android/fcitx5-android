@@ -101,7 +101,7 @@ class DeveloperFragment : PaddingPreferenceFragment() {
                     .setPositiveButton(android.R.string.ok) { _, _ ->
                         lifecycleScope.launch {
                             withContext(NonCancellable + Dispatchers.IO) {
-                                FcitxDaemon.stopFcitx()
+                                FcitxDaemon.restartFcitx()
                                 withContext(Dispatchers.Main) {
                                     context.toast(R.string.done)
                                 }
