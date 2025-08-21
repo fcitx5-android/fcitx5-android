@@ -235,7 +235,7 @@ class ReturnKey(percentWidth: Float = 0.15f) : KeyDef(
         Popup.Menu(
             arrayOf(
                 Popup.Menu.Item(
-                    "Emoji", R.drawable.ic_baseline_tag_faces_24, KeyAction.PickerSwitchAction()
+                    "Enter", R.drawable.ic_baseline_keyboard_return_24, KeyAction.CommitAction("\n")
                 )
             )
         )
