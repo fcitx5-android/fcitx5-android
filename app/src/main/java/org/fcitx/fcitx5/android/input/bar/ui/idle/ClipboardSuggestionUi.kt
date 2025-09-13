@@ -31,11 +31,17 @@ import splitties.views.dsl.core.verticalMargin
 import splitties.views.dsl.core.wrapContent
 import splitties.views.imageDrawable
 
-class ClipboardSuggestionUi(override val ctx: Context, private val theme: Theme) : Ui {
+class ClipboardSuggestionUi(override val ctx: Context, private val theme: Theme, private val isOtp: Boolean) : Ui {
 
     private val icon = imageView {
-        imageDrawable = drawable(R.drawable.ic_clipboard)!!.apply {
-            setTint(theme.altKeyTextColor)
+        imageDrawable = if (isOtp) {
+            drawable(R.drawable.ic_baseline_library_books_24)!!.apply {
+                setTint(theme.altKeyTextColor)
+            }
+        } else {
+            drawable(R.drawable.ic_clipboard)!!.apply {
+                setTint(theme.altKeyTextColor)
+            }
         }
     }
 
