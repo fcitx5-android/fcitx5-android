@@ -124,4 +124,6 @@
     <string name="i_do_not_need_it">No lo necesito</string>
     <string name="grant_permission">Otorgar permiso</string>
     <string name="update_table">Actualizar tabla</string>
+    <string name="backspace_swipe_clear">Desliza hacia arriba en Eliminar para borrar el texto</string>
+    <string name="backspace_swipe_clear_summary">Mantén pulsado Eliminar y desliza hacia arriba para vaciar el campo actual</string>
     </resources>

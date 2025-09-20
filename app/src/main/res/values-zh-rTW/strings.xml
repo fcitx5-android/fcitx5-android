@@ -284,4 +284,6 @@
     <string name="ignore_system_window_insets">忽略系統窗口邊襯區 (WindowInsets)</string>
     <string name="browse_user_data_dir">瀏覽用户資料目錄</string>
     <string name="haptic_on_repeat">重複按鍵時的觸覺回饋</string>
+    <string name="backspace_swipe_clear">上滑刪除鍵以清除文字</string>
+    <string name="backspace_swipe_clear_summary">長按刪除鍵並向上滑動以清除目前欄位</string>
     </resources>
