@@ -161,4 +161,6 @@
     <string name="following_system_settings">Wie Systemeinstellungen</string>
     <string name="button_sound">Ton bei Tastendruck</string>
     <string name="button_sound_volume">Ton Tastendruck Lautstärke</string>
+    <string name="backspace_swipe_clear">Nach oben über die Löschtaste wischen, um Text zu löschen</string>
+    <string name="backspace_swipe_clear_summary">Löschtaste halten und nach oben wischen, um das aktuelle Feld zu leeren</string>
     </resources>

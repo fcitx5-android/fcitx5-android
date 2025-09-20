@@ -303,4 +303,6 @@
     <string name="move_cursor_to_end">Переместить курсор к концу</string>
     <string name="open_input_method_settings">Открыть настройки метода ввода</string>
     <string name="delete_all">Удалить всё</string>
+    <string name="backspace_swipe_clear">Проведите вверх по клавише Delete, чтобы очистить текст</string>
+    <string name="backspace_swipe_clear_summary">Удерживайте Delete и проведите вверх, чтобы очистить текущее поле</string>
 </resources>

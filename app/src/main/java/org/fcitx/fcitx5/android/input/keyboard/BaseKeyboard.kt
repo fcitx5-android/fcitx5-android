@@ -13,6 +13,7 @@ import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
 import androidx.core.view.updateLayoutParams
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxKeyMapping
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.core.KeyStates
@@ -23,6 +24,7 @@ import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.GestureType
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListener
+ 
 import org.fcitx.fcitx5.android.input.popup.PopupAction
 import org.fcitx.fcitx5.android.input.popup.PopupActionListener
 import splitties.dimensions.dp
@@ -62,6 +64,14 @@ abstract class BaseKeyboard(
     private val spaceSwipeChangeListener = ManagedPreference.OnChangeListener<Boolean> { _, v ->
         spaceKeys.forEach {
             it.swipeEnabled = v
+        }
+    }
+
+    private val backspaceKeys = mutableSetOf<KeyView>()
+    private val backspaceSwipeClear = prefs.keyboard.backspaceSwipeClear
+    private val backspaceSwipeChangeListener = ManagedPreference.OnChangeListener<Boolean> { _, enabled ->
+        backspaceKeys.forEach { key ->
+            key.swipeThresholdY = if (enabled) inputSwipeThreshold else disabledSwipeThreshold
         }
     }
 
@@ -141,7 +151,9 @@ abstract class BaseKeyboard(
                 centerHorizontally()
             })
         }
+        
         spaceSwipeMoveCursor.registerOnChangeListener(spaceSwipeChangeListener)
+        backspaceSwipeClear.registerOnChangeListener(backspaceSwipeChangeListener)
     }
 
     private fun createKeyView(def: KeyDef): KeyView {
@@ -186,10 +198,85 @@ abstract class BaseKeyboard(
                 swipeEnabled = true
                 swipeRepeatEnabled = true
                 swipeThresholdX = selectionSwipeThreshold
-                swipeThresholdY = disabledSwipeThreshold
+                swipeThresholdY =
+                    if (backspaceSwipeClear.getValue()) inputSwipeThreshold else disabledSwipeThreshold
+                backspaceKeys += this
+                var clearTriggered = false
+                var previewShown = false
+                var pressDown = false
+                var showRunnable: Runnable? = null
+                val previewDelayMs = 300L
                 onGestureListener = OnGestureListener { view, event ->
+                    view as KeyView
+                    val clearEnabled = backspaceSwipeClear.getValue()
                     when (event.type) {
+                        GestureType.Down -> {
+                            pressDown = true
+                            clearTriggered = false
+                            previewShown = false
+                            // cancel any previous scheduled task
+                            showRunnable?.let { view.removeCallbacks(it) }
+                            showRunnable = null
+                            if (clearEnabled) {
+                                // show preview only after delay if user is holding, not tapping
+                                val r = Runnable {
+                                    if (pressDown && !previewShown) {
+                                        onPopupAction(
+                                            PopupAction.PreviewAction(
+                                                view.id,
+                                                "",
+                                                view.bounds,
+                                                style = PopupAction.PreviewStyle.FitAbove
+                                            )
+                                        )
+                                        onPopupAction(PopupAction.PreviewArmedAction(view.id, false))
+                                        previewShown = true
+                                    }
+                                }
+                                showRunnable = r
+                                view.postDelayed(r, previewDelayMs)
+                            } else {
+                                onPopupAction(PopupAction.DismissAction(view.id))
+                            }
+                            false
+                        }
                         GestureType.Move -> {
+                            if (clearEnabled) {
+                                if (clearTriggered && event.totalY >= 0) {
+                                    clearTriggered = false
+                                    if (previewShown) onPopupAction(PopupAction.PreviewArmedAction(view.id, false))
+                                }
+                                if (!clearTriggered) {
+                                    val verticalDominant =
+                                        event.totalY <= -1 &&
+                                            event.totalY.absoluteValue >= event.totalX.absoluteValue
+                                    if (verticalDominant) {
+                                        // immediate intent to clear: cancel delayed show and reveal preview instantly
+                                        showRunnable?.let { view.removeCallbacks(it) }
+                                        showRunnable = null
+                                        if (!previewShown) {
+                                            onPopupAction(
+                                                PopupAction.PreviewAction(
+                                                    view.id,
+                                                    "",
+                                                    view.bounds,
+                                                    style = PopupAction.PreviewStyle.FitAbove
+                                                )
+                                            )
+                                            previewShown = true
+                                        }
+                                        clearTriggered = true
+                                        InputFeedbacks.hapticFeedback(view, longPress = true)
+                                        onPopupAction(PopupAction.PreviewArmedAction(view.id, true))
+                                        return@OnGestureListener true
+                                    }
+                                }
+                                if (previewShown) onPopupAction(PopupAction.PreviewArmedAction(view.id, clearTriggered))
+                            } else if (clearTriggered) {
+                                clearTriggered = false
+                                onPopupAction(PopupAction.DismissAction(view.id))
+                            }
+                            if (clearTriggered) return@OnGestureListener true
                             val count = event.countX
                             if (count != 0) {
                                 onAction(KeyAction.MoveSelectionAction(count))
@@ -198,8 +285,21 @@ abstract class BaseKeyboard(
                             } else false
                         }
                         GestureType.Up -> {
-                            onAction(KeyAction.DeleteSelectionAction(event.totalX))
-                            false
+                            pressDown = false
+                            showRunnable?.let { view.removeCallbacks(it) }
+                            showRunnable = null
+                            onPopupAction(PopupAction.DismissAction(view.id))
+                            if (clearEnabled && clearTriggered) {
+                                clearTriggered = false
+                                previewShown = false
+                                onAction(KeyAction.ClearAllAction)
+                                true
+                            } else {
+                                clearTriggered = false
+                                previewShown = false
+                                onAction(KeyAction.DeleteSelectionAction(event.totalX))
+                                false
+                            }
                         }
                         else -> false
                     }
