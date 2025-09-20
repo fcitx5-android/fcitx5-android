@@ -164,7 +164,13 @@ class CommonKeyActionListener :
                 }
                 is ClearAllAction -> {
                     backspaceSwipeState = Stopped
-                    service.clearEditorText()
+                    if (preeditState.isEmpty) {
+                        // No composing/preedit: clear entire editor content
+                        service.clearEditorText()
+                    } else {
+                        // Composing present (e.g., pinyin in-progress): discard composition only
+                        service.postFcitxJob { reset() }
+                    }
                 }
                 is PickerSwitchAction -> {
                     // update lastSymbolType only when specified explicitly
