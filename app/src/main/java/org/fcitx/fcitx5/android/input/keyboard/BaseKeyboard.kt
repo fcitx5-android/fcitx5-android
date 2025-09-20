@@ -202,22 +202,39 @@ abstract class BaseKeyboard(
                     if (backspaceSwipeClear.getValue()) inputSwipeThreshold else disabledSwipeThreshold
                 backspaceKeys += this
                 var clearTriggered = false
+                var previewShown = false
+                var pressDown = false
+                var showRunnable: Runnable? = null
+                val previewDelayMs = 300L
                 onGestureListener = OnGestureListener { view, event ->
                     view as KeyView
                     val clearEnabled = backspaceSwipeClear.getValue()
                     when (event.type) {
                         GestureType.Down -> {
+                            pressDown = true
                             clearTriggered = false
+                            previewShown = false
+                            // cancel any previous scheduled task
+                            showRunnable?.let { view.removeCallbacks(it) }
+                            showRunnable = null
                             if (clearEnabled) {
-                                onPopupAction(
-                                    PopupAction.PreviewAction(
-                                        view.id,
-                                        "",
-                                        view.bounds,
-                                        style = PopupAction.PreviewStyle.FitAbove
-                                    )
-                                )
-                                onPopupAction(PopupAction.PreviewArmedAction(view.id, false))
+                                // show preview only after delay if user is holding, not tapping
+                                val r = Runnable {
+                                    if (pressDown && !previewShown) {
+                                        onPopupAction(
+                                            PopupAction.PreviewAction(
+                                                view.id,
+                                                "",
+                                                view.bounds,
+                                                style = PopupAction.PreviewStyle.FitAbove
+                                            )
+                                        )
+                                        onPopupAction(PopupAction.PreviewArmedAction(view.id, false))
+                                        previewShown = true
+                                    }
+                                }
+                                showRunnable = r
+                                view.postDelayed(r, previewDelayMs)
                             } else {
                                 onPopupAction(PopupAction.DismissAction(view.id))
                             }
@@ -227,19 +244,34 @@ abstract class BaseKeyboard(
                             if (clearEnabled) {
                                 if (clearTriggered && event.totalY >= 0) {
                                     clearTriggered = false
+                                    if (previewShown) onPopupAction(PopupAction.PreviewArmedAction(view.id, false))
                                 }
                                 if (!clearTriggered) {
                                     val verticalDominant =
                                         event.totalY <= -1 &&
                                             event.totalY.absoluteValue >= event.totalX.absoluteValue
                                     if (verticalDominant) {
+                                        // immediate intent to clear: cancel delayed show and reveal preview instantly
+                                        showRunnable?.let { view.removeCallbacks(it) }
+                                        showRunnable = null
+                                        if (!previewShown) {
+                                            onPopupAction(
+                                                PopupAction.PreviewAction(
+                                                    view.id,
+                                                    "",
+                                                    view.bounds,
+                                                    style = PopupAction.PreviewStyle.FitAbove
+                                                )
+                                            )
+                                            previewShown = true
+                                        }
                                         clearTriggered = true
                                         InputFeedbacks.hapticFeedback(view, longPress = true)
                                         onPopupAction(PopupAction.PreviewArmedAction(view.id, true))
                                         return@OnGestureListener true
                                     }
                                 }
-                                onPopupAction(PopupAction.PreviewArmedAction(view.id, clearTriggered))
+                                if (previewShown) onPopupAction(PopupAction.PreviewArmedAction(view.id, clearTriggered))
                             } else if (clearTriggered) {
                                 clearTriggered = false
                                 onPopupAction(PopupAction.DismissAction(view.id))
@@ -253,13 +285,18 @@ abstract class BaseKeyboard(
                             } else false
                         }
                         GestureType.Up -> {
+                            pressDown = false
+                            showRunnable?.let { view.removeCallbacks(it) }
+                            showRunnable = null
                             onPopupAction(PopupAction.DismissAction(view.id))
                             if (clearEnabled && clearTriggered) {
                                 clearTriggered = false
+                                previewShown = false
                                 onAction(KeyAction.ClearAllAction)
                                 true
                             } else {
                                 clearTriggered = false
+                                previewShown = false
                                 onAction(KeyAction.DeleteSelectionAction(event.totalX))
                                 false
                             }
