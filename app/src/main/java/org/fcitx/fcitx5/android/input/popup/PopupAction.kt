@@ -12,15 +12,32 @@ sealed class PopupAction {
 
     abstract val viewId: Int
 
+    enum class PreviewStyle {
+        // Legacy tall preview bubble centered above key
+        Default,
+        // Same size as key and fully placed above it
+        FitAbove,
+    }
+
     data class PreviewAction(
         override val viewId: Int,
         val content: String,
-        val bounds: Rect
+        val bounds: Rect,
+        val style: PreviewStyle = PreviewStyle.Default
     ) : PopupAction()
 
     data class PreviewUpdateAction(
         override val viewId: Int,
         val content: String,
+    ) : PopupAction()
+
+    /**
+     * Update preview popup visual state (e.g., armed vs normal).
+     * When armed = true, preview may use a more prominent style.
+     */
+    data class PreviewArmedAction(
+        override val viewId: Int,
+        val armed: Boolean
     ) : PopupAction()
 
     data class DismissAction(

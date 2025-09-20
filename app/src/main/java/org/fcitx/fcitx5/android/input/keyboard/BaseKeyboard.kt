@@ -13,6 +13,7 @@ import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
 import androidx.core.view.updateLayoutParams
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxKeyMapping
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.core.KeyStates
@@ -23,6 +24,7 @@ import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.GestureType
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListener
+ 
 import org.fcitx.fcitx5.android.input.popup.PopupAction
 import org.fcitx.fcitx5.android.input.popup.PopupActionListener
 import splitties.dimensions.dp
@@ -66,6 +68,10 @@ abstract class BaseKeyboard(
     }
 
     private val backspaceKeys = mutableSetOf<KeyView>()
+    private val backspaceHintHoldText: CharSequence
+        get() = context.getText(R.string.backspace_swipe_hint_hold)
+    private val backspaceHintReleaseText: CharSequence
+        get() = context.getText(R.string.backspace_swipe_hint_release)
     private val backspaceSwipeClear = prefs.keyboard.backspaceSwipeClear
     private val backspaceSwipeChangeListener = ManagedPreference.OnChangeListener<Boolean> { _, enabled ->
         backspaceKeys.forEach { key ->
@@ -149,6 +155,7 @@ abstract class BaseKeyboard(
                 centerHorizontally()
             })
         }
+        
         spaceSwipeMoveCursor.registerOnChangeListener(spaceSwipeChangeListener)
         backspaceSwipeClear.registerOnChangeListener(backspaceSwipeChangeListener)
     }
@@ -200,19 +207,58 @@ abstract class BaseKeyboard(
                 backspaceKeys += this
                 var clearTriggered = false
                 onGestureListener = OnGestureListener { view, event ->
+                    view as KeyView
                     val clearEnabled = backspaceSwipeClear.getValue()
                     when (event.type) {
                         GestureType.Down -> {
                             clearTriggered = false
+                            if (clearEnabled) {
+                                onPopupAction(
+                                    PopupAction.PreviewAction(
+                                        view.id,
+                                        backspaceHintHoldText.toString(),
+                                        view.bounds,
+                                        style = PopupAction.PreviewStyle.FitAbove
+                                    )
+                                )
+                                onPopupAction(PopupAction.PreviewArmedAction(view.id, false))
+                            } else {
+                                onPopupAction(PopupAction.DismissAction(view.id))
+                            }
                             false
                         }
                         GestureType.Move -> {
-                            if (clearEnabled && !clearTriggered) {
-                                if (event.totalY <= -1 && event.totalY.absoluteValue >= event.totalX.absoluteValue) {
-                                    clearTriggered = true
-                                    InputFeedbacks.hapticFeedback(view, longPress = true)
-                                    return@OnGestureListener true
+                            if (clearEnabled) {
+                                if (clearTriggered && event.totalY >= 0) {
+                                    clearTriggered = false
                                 }
+                                if (!clearTriggered) {
+                                    val verticalDominant =
+                                        event.totalY <= -1 &&
+                                            event.totalY.absoluteValue >= event.totalX.absoluteValue
+                                    if (verticalDominant) {
+                                        clearTriggered = true
+                                        InputFeedbacks.hapticFeedback(view, longPress = true)
+                                        onPopupAction(
+                                            PopupAction.PreviewUpdateAction(
+                                                view.id,
+                                                backspaceHintReleaseText.toString()
+                                            )
+                                        )
+                                        onPopupAction(PopupAction.PreviewArmedAction(view.id, true))
+                                        return@OnGestureListener true
+                                    }
+                                }
+                                onPopupAction(
+                                    PopupAction.PreviewUpdateAction(
+                                        view.id,
+                                        (if (clearTriggered) backspaceHintReleaseText else backspaceHintHoldText).toString()
+                                    )
+                                )
+                                onPopupAction(PopupAction.PreviewArmedAction(view.id, clearTriggered))
+                            } else if (clearTriggered) {
+                                clearTriggered = false
+                                onPopupAction(PopupAction.DismissAction(view.id))
                             }
                             if (clearTriggered) return@OnGestureListener true
                             val count = event.countX
@@ -223,6 +269,7 @@ abstract class BaseKeyboard(
                             } else false
                         }
                         GestureType.Up -> {
+                            onPopupAction(PopupAction.DismissAction(view.id))
                             if (clearEnabled && clearTriggered) {
                                 clearTriggered = false
                                 onAction(KeyAction.ClearAllAction)

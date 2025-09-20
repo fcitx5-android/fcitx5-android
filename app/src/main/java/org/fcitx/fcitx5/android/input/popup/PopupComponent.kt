@@ -11,6 +11,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.input.broadcast.PunctuationComponent
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
@@ -78,25 +79,79 @@ class PopupComponent :
         }
     }
 
-    private fun showPopup(viewId: Int, content: String, bounds: Rect) {
+    private fun showPopup(
+        viewId: Int,
+        content: String,
+        bounds: Rect,
+        style: PopupAction.PreviewStyle
+    ) {
         showingEntryUi[viewId]?.apply {
             dismissJobs[viewId]?.also {
                 dismissJobs.remove(viewId)?.cancel()
             }
             lastShowTime = System.currentTimeMillis()
-            setText(content)
+            // Always clear armed state when (re)showing a preview
+            setArmed(false)
+            when (style) {
+                PopupAction.PreviewStyle.FitAbove -> showIcon(R.drawable.ic_baseline_delete_sweep_24)
+                else -> {
+                    showTextMode()
+                    setText(content)
+                }
+            }
             return
         }
         val popup = (freeEntryUi.poll()
             ?: PopupEntryUi(context, theme, popupKeyHeight, popupRadius)).apply {
             lastShowTime = System.currentTimeMillis()
-            setText(content)
+            // Always clear armed state when (re)showing a preview
+            setArmed(false)
+            when (style) {
+                PopupAction.PreviewStyle.FitAbove -> showIcon(R.drawable.ic_baseline_delete_sweep_24)
+                else -> {
+                    showTextMode()
+                    setText(content)
+                }
+            }
         }
+        // translate absolute bounds into root-local coordinates
+        val left = bounds.left - rootBounds.left
+        val top = bounds.top - rootBounds.top
+        val right = bounds.right - rootBounds.left
+        val bottom = bounds.bottom - rootBounds.top
+
+        val (w, h, lm, tm) = when (style) {
+            PopupAction.PreviewStyle.Default -> {
+                val w = popupWidth
+                val h = popupHeight
+                val lm = (left + right - w) / 2
+                val tm = bottom - h - keyBottomMargin
+                popup.setTextHeight(popupKeyHeight)
+                Quadruple(w, h, lm, tm)
+            }
+            PopupAction.PreviewStyle.FitAbove -> {
+                val keyW = right - left
+                val keyH = bottom - top
+                val widthScale = 1.2f
+                val heightScale = 0.7f
+                val w = (keyW * widthScale).toInt()
+                val h = (keyH * heightScale).toInt()
+                val centerX = (left + right) / 2
+                val lmUnclamped = centerX - w / 2
+                val gap = context.dp(4)
+                val tmUnclamped = top - gap - h
+                val rootW = rootBounds.width()
+                val lm = lmUnclamped.coerceIn(0, rootW - w)
+                val tm = tmUnclamped.coerceAtLeast(0)
+                popup.setTextHeight(h)
+                Quadruple(w, h, lm, tm)
+            }
+        }
+
         root.apply {
-            add(popup.root, lParams(popupWidth, popupHeight) {
-                // align popup bottom with key border bottom [^1]
-                topMargin = bounds.bottom - popupHeight - keyBottomMargin
-                leftMargin = (bounds.left + bounds.right - popupWidth) / 2
+            add(popup.root, lParams(w, h) {
+                leftMargin = lm
+                topMargin = tm
             })
         }
         showingEntryUi[viewId] = popup
@@ -110,8 +165,12 @@ class PopupComponent :
         val keys = PopupPreset[keyboard.label]
             ?: EmojiModifier.produceSkinTones(keyboard.label)
             ?: return
-        // clear popup preview text         OR create empty popup preview
-        showingEntryUi[viewId]?.setText("") ?: showPopup(viewId, "", bounds)
+        // clear popup preview text OR create empty popup preview
+        showingEntryUi[viewId]?.apply {
+            setArmed(false)
+            showTextMode()
+            setText("")
+        } ?: showPopup(viewId, "", bounds, PopupAction.PreviewStyle.Default)
         reallyShowKeyboard(viewId, keys, bounds)
     }
 
@@ -195,6 +254,7 @@ class PopupComponent :
     private fun dismissPopupEntry(viewId: Int, popup: PopupEntryUi) {
         showingEntryUi.remove(viewId)
         root.removeView(popup.root)
+        popup.resetForReuse()
         freeEntryUi.add(popup)
     }
 
@@ -222,8 +282,9 @@ class PopupComponent :
             when (this) {
                 is PopupAction.ChangeFocusAction -> outResult = changeFocus(viewId, x, y)
                 is PopupAction.DismissAction -> dismissPopup(viewId)
-                is PopupAction.PreviewAction -> showPopup(viewId, content, bounds)
+                is PopupAction.PreviewAction -> showPopup(viewId, content, bounds, style)
                 is PopupAction.PreviewUpdateAction -> updatePopup(viewId, content)
+                is PopupAction.PreviewArmedAction -> showingEntryUi[viewId]?.setArmed(armed)
                 is PopupAction.ShowKeyboardAction -> showKeyboard(viewId, keyboard, bounds)
                 is PopupAction.ShowMenuAction -> showMenu(viewId, menu, bounds)
                 is PopupAction.TriggerAction -> outAction = triggerFocused(viewId)
@@ -231,3 +292,5 @@ class PopupComponent :
         }
     }
 }
+
+private data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
