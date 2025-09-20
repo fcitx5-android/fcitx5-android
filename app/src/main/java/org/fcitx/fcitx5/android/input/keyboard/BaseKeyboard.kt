@@ -65,6 +65,14 @@ abstract class BaseKeyboard(
         }
     }
 
+    private val backspaceKeys = mutableSetOf<KeyView>()
+    private val backspaceSwipeClear = prefs.keyboard.backspaceSwipeClear
+    private val backspaceSwipeChangeListener = ManagedPreference.OnChangeListener<Boolean> { _, enabled ->
+        backspaceKeys.forEach { key ->
+            key.swipeThresholdY = if (enabled) inputSwipeThreshold else disabledSwipeThreshold
+        }
+    }
+
     private val vivoKeypressWorkaround by prefs.advanced.vivoKeypressWorkaround
 
     private val hapticOnRepeat by prefs.keyboard.hapticOnRepeat
@@ -142,6 +150,7 @@ abstract class BaseKeyboard(
             })
         }
         spaceSwipeMoveCursor.registerOnChangeListener(spaceSwipeChangeListener)
+        backspaceSwipeClear.registerOnChangeListener(backspaceSwipeChangeListener)
     }
 
     private fun createKeyView(def: KeyDef): KeyView {
@@ -186,10 +195,26 @@ abstract class BaseKeyboard(
                 swipeEnabled = true
                 swipeRepeatEnabled = true
                 swipeThresholdX = selectionSwipeThreshold
-                swipeThresholdY = disabledSwipeThreshold
+                swipeThresholdY =
+                    if (backspaceSwipeClear.getValue()) inputSwipeThreshold else disabledSwipeThreshold
+                backspaceKeys += this
+                var clearTriggered = false
                 onGestureListener = OnGestureListener { view, event ->
+                    val clearEnabled = backspaceSwipeClear.getValue()
                     when (event.type) {
+                        GestureType.Down -> {
+                            clearTriggered = false
+                            false
+                        }
                         GestureType.Move -> {
+                            if (clearEnabled && !clearTriggered) {
+                                if (event.totalY <= -1 && event.totalY.absoluteValue >= event.totalX.absoluteValue) {
+                                    clearTriggered = true
+                                    InputFeedbacks.hapticFeedback(view, longPress = true)
+                                    return@OnGestureListener true
+                                }
+                            }
+                            if (clearTriggered) return@OnGestureListener true
                             val count = event.countX
                             if (count != 0) {
                                 onAction(KeyAction.MoveSelectionAction(count))
@@ -198,8 +223,15 @@ abstract class BaseKeyboard(
                             } else false
                         }
                         GestureType.Up -> {
-                            onAction(KeyAction.DeleteSelectionAction(event.totalX))
-                            false
+                            if (clearEnabled && clearTriggered) {
+                                clearTriggered = false
+                                onAction(KeyAction.ClearAllAction)
+                                true
+                            } else {
+                                clearTriggered = false
+                                onAction(KeyAction.DeleteSelectionAction(event.totalX))
+                                false
+                            }
                         }
                         else -> false
                     }

@@ -26,6 +26,7 @@ import org.fcitx.fcitx5.android.input.keyboard.KeyAction.DeleteSelectionAction
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction.FcitxKeyAction
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction.LangSwitchAction
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction.MoveSelectionAction
+import org.fcitx.fcitx5.android.input.keyboard.KeyAction.ClearAllAction
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction.PickerSwitchAction
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction.QuickPhraseAction
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction.ShowInputMethodPickerAction
@@ -160,6 +161,10 @@ class CommonKeyActionListener :
                         }
                     }
                     backspaceSwipeState = Stopped
+                }
+                is ClearAllAction -> {
+                    backspaceSwipeState = Stopped
+                    service.clearEditorText()
                 }
                 is PickerSwitchAction -> {
                     // update lastSymbolType only when specified explicitly
