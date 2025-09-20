@@ -68,10 +68,6 @@ abstract class BaseKeyboard(
     }
 
     private val backspaceKeys = mutableSetOf<KeyView>()
-    private val backspaceHintHoldText: CharSequence
-        get() = context.getText(R.string.backspace_swipe_hint_hold)
-    private val backspaceHintReleaseText: CharSequence
-        get() = context.getText(R.string.backspace_swipe_hint_release)
     private val backspaceSwipeClear = prefs.keyboard.backspaceSwipeClear
     private val backspaceSwipeChangeListener = ManagedPreference.OnChangeListener<Boolean> { _, enabled ->
         backspaceKeys.forEach { key ->
@@ -216,7 +212,7 @@ abstract class BaseKeyboard(
                                 onPopupAction(
                                     PopupAction.PreviewAction(
                                         view.id,
-                                        backspaceHintHoldText.toString(),
+                                        "",
                                         view.bounds,
                                         style = PopupAction.PreviewStyle.FitAbove
                                     )
@@ -239,22 +235,10 @@ abstract class BaseKeyboard(
                                     if (verticalDominant) {
                                         clearTriggered = true
                                         InputFeedbacks.hapticFeedback(view, longPress = true)
-                                        onPopupAction(
-                                            PopupAction.PreviewUpdateAction(
-                                                view.id,
-                                                backspaceHintReleaseText.toString()
-                                            )
-                                        )
                                         onPopupAction(PopupAction.PreviewArmedAction(view.id, true))
                                         return@OnGestureListener true
                                     }
                                 }
-                                onPopupAction(
-                                    PopupAction.PreviewUpdateAction(
-                                        view.id,
-                                        (if (clearTriggered) backspaceHintReleaseText else backspaceHintHoldText).toString()
-                                    )
-                                )
                                 onPopupAction(PopupAction.PreviewArmedAction(view.id, clearTriggered))
                             } else if (clearTriggered) {
                                 clearTriggered = false
