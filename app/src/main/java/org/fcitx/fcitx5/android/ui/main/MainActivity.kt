@@ -5,7 +5,6 @@
 package org.fcitx.fcitx5.android.ui.main
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -137,7 +136,6 @@ class MainActivity : AppCompatActivity() {
         }
         val aboutMenuItems = listOf(
             menu.item(R.string.faq) {
-                @SuppressLint("UseKtx")
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Const.faqUrl)))
             },
             menu.item(R.string.developer) {

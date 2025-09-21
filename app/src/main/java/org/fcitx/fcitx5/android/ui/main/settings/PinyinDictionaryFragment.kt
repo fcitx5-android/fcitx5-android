@@ -4,7 +4,6 @@
  */
 package org.fcitx.fcitx5.android.ui.main.settings
 
-import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.net.Uri
@@ -108,7 +107,6 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDiction
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        @SuppressLint("UseKtx")
         args.uri?.let { importFromUri(Uri.parse(it)) }
         super.onViewCreated(view, savedInstanceState)
     }

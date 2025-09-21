@@ -221,7 +221,6 @@ class AboutActivity : PreferenceActivity() {
 
         private fun showLicenseContent(license: License) {
             if (license.url?.isNotBlank() == true) {
-                @SuppressLint("UseKtx")
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(license.url)))
             }
         }
