@@ -95,6 +95,11 @@ abstract class BaseKeyboard(
      */
     private val touchTarget = hashMapOf<Int, View>()
 
+    private fun dismissClearPopupIfAny() {
+        // Dismiss lingering Backspace clear-confirm popup if present
+        onPopupAction(PopupAction.DismissAction(R.id.button_backspace))
+    }
+
     init {
         isMotionEventSplittingEnabled = true
         keyRows = keyLayout.map { row ->
@@ -201,82 +206,13 @@ abstract class BaseKeyboard(
                 swipeThresholdY =
                     if (backspaceSwipeClear.getValue()) inputSwipeThreshold else disabledSwipeThreshold
                 backspaceKeys += this
-                var clearTriggered = false
-                var previewShown = false
-                var pressDown = false
-                var showRunnable: Runnable? = null
-                val previewDelayMs = 300L
+
+                // Horizontal selection move & repeat delete handled below; keep listener composable
+                val oldOnGestureListener = onGestureListener ?: OnGestureListener.Empty
                 onGestureListener = OnGestureListener { view, event ->
                     view as KeyView
-                    val clearEnabled = backspaceSwipeClear.getValue()
                     when (event.type) {
-                        GestureType.Down -> {
-                            pressDown = true
-                            clearTriggered = false
-                            previewShown = false
-                            // cancel any previous scheduled task
-                            showRunnable?.let { view.removeCallbacks(it) }
-                            showRunnable = null
-                            if (clearEnabled) {
-                                // show preview only after delay if user is holding, not tapping
-                                val r = Runnable {
-                                    if (pressDown && !previewShown) {
-                                        onPopupAction(
-                                            PopupAction.PreviewAction(
-                                                view.id,
-                                                "",
-                                                view.bounds,
-                                                style = PopupAction.PreviewStyle.FitAbove
-                                            )
-                                        )
-                                        onPopupAction(PopupAction.PreviewArmedAction(view.id, false))
-                                        previewShown = true
-                                    }
-                                }
-                                showRunnable = r
-                                view.postDelayed(r, previewDelayMs)
-                            } else {
-                                onPopupAction(PopupAction.DismissAction(view.id))
-                            }
-                            false
-                        }
                         GestureType.Move -> {
-                            if (clearEnabled) {
-                                if (clearTriggered && event.totalY >= 0) {
-                                    clearTriggered = false
-                                    if (previewShown) onPopupAction(PopupAction.PreviewArmedAction(view.id, false))
-                                }
-                                if (!clearTriggered) {
-                                    val verticalDominant =
-                                        event.totalY <= -1 &&
-                                            event.totalY.absoluteValue >= event.totalX.absoluteValue
-                                    if (verticalDominant) {
-                                        // immediate intent to clear: cancel delayed show and reveal preview instantly
-                                        showRunnable?.let { view.removeCallbacks(it) }
-                                        showRunnable = null
-                                        if (!previewShown) {
-                                            onPopupAction(
-                                                PopupAction.PreviewAction(
-                                                    view.id,
-                                                    "",
-                                                    view.bounds,
-                                                    style = PopupAction.PreviewStyle.FitAbove
-                                                )
-                                            )
-                                            previewShown = true
-                                        }
-                                        clearTriggered = true
-                                        InputFeedbacks.hapticFeedback(view, longPress = true)
-                                        onPopupAction(PopupAction.PreviewArmedAction(view.id, true))
-                                        return@OnGestureListener true
-                                    }
-                                }
-                                if (previewShown) onPopupAction(PopupAction.PreviewArmedAction(view.id, clearTriggered))
-                            } else if (clearTriggered) {
-                                clearTriggered = false
-                                onPopupAction(PopupAction.DismissAction(view.id))
-                            }
-                            if (clearTriggered) return@OnGestureListener true
                             val count = event.countX
                             if (count != 0) {
                                 onAction(KeyAction.MoveSelectionAction(count))
@@ -285,35 +221,24 @@ abstract class BaseKeyboard(
                             } else false
                         }
                         GestureType.Up -> {
-                            pressDown = false
-                            showRunnable?.let { view.removeCallbacks(it) }
-                            showRunnable = null
-                            onPopupAction(PopupAction.DismissAction(view.id))
-                            if (clearEnabled && clearTriggered) {
-                                clearTriggered = false
-                                previewShown = false
-                                onAction(KeyAction.ClearAllAction)
-                                true
-                            } else {
-                                clearTriggered = false
-                                previewShown = false
-                                onAction(KeyAction.DeleteSelectionAction(event.totalX))
-                                false
-                            }
+                            onAction(KeyAction.DeleteSelectionAction(event.totalX))
+                            false
                         }
                         else -> false
-                    }
+                    } || oldOnGestureListener.onGesture(view, event)
                 }
             }
             def.behaviors.forEach {
                 when (it) {
                     is KeyDef.Behavior.Press -> {
                         setOnClickListener { _ ->
+                            dismissClearPopupIfAny()
                             onAction(it.action)
                         }
                     }
                     is KeyDef.Behavior.LongPress -> {
                         setOnLongClickListener { _ ->
+                            dismissClearPopupIfAny()
                             onAction(it.action)
                             true
                         }
@@ -334,6 +259,7 @@ abstract class BaseKeyboard(
                             when (event.type) {
                                 GestureType.Up -> {
                                     if (!event.consumed && swipeSymbolDirection.checkY(event.totalY)) {
+                                        dismissClearPopupIfAny()
                                         onAction(it.action)
                                         true
                                     } else {
@@ -358,6 +284,7 @@ abstract class BaseKeyboard(
                     is KeyDef.Popup.Menu -> {
                         setOnLongClickListener { view ->
                             view as KeyView
+                            dismissClearPopupIfAny()
                             onPopupAction(PopupAction.ShowMenuAction(view.id, it, view.bounds))
                             // do not consume this LongClick gesture
                             false
@@ -380,6 +307,7 @@ abstract class BaseKeyboard(
                     is KeyDef.Popup.Keyboard -> {
                         setOnLongClickListener { view ->
                             view as KeyView
+                            dismissClearPopupIfAny()
                             onPopupAction(PopupAction.ShowKeyboardAction(view.id, it, view.bounds))
                             // do not consume this LongClick gesture
                             false
@@ -399,15 +327,61 @@ abstract class BaseKeyboard(
                             } || oldOnGestureListener.onGesture(view, event)
                         }
                     }
+                    is KeyDef.Popup.ClearConfirm -> {
+                        val clearEnabled = backspaceSwipeClear.getValue()
+                        if (!clearEnabled) return@forEach
+                        val oldOnGestureListener = onGestureListener ?: OnGestureListener.Empty
+
+                        val controller = BackspaceClearController(
+                            view = this,
+                            showDelayMs = 300L,
+                            callbacks = object : BackspaceClearController.Callbacks {
+                                override fun showClearConfirm(danger: Boolean) {
+                                    dismissClearPopupIfAny()
+                                    onPopupAction(
+                                        PopupAction.ShowClearConfirmAction(id, bounds, danger)
+                                    )
+                                }
+
+                                override fun changeFocus(x: Float, y: Float): Boolean =
+                                    onPopupChangeFocus(id, x, y)
+
+                                override fun trigger(): Boolean = onPopupTrigger(id)
+
+                                override fun dismiss() {
+                                    onPopupAction(PopupAction.DismissAction(id))
+                                }
+
+                                override fun setRepeatEnabled(enabled: Boolean) {
+                                    this@apply.repeatEnabled = enabled
+                                }
+                            }
+                        )
+
+                        onGestureListener = OnGestureListener { view, event ->
+                            when (event.type) {
+                                GestureType.Down -> {
+                                    controller.onDown()
+                                    false
+                                }
+                                GestureType.Move -> controller.onMove(event.totalX, event.totalY, event.x, event.y)
+                                GestureType.Up -> controller.onUp()
+                                else -> false
+                            } || oldOnGestureListener.onGesture(view, event)
+                        }
+                    }
                     is KeyDef.Popup.AltPreview -> {
                         val oldOnGestureListener = onGestureListener ?: OnGestureListener.Empty
                         onGestureListener = OnGestureListener { view, event ->
                             view as KeyView
                             if (popupOnKeyPress) {
                                 when (event.type) {
-                                    GestureType.Down -> onPopupAction(
-                                        PopupAction.PreviewAction(view.id, it.content, view.bounds)
-                                    )
+                                    GestureType.Down -> {
+                                        dismissClearPopupIfAny()
+                                        onPopupAction(
+                                            PopupAction.PreviewAction(view.id, it.content, view.bounds)
+                                        )
+                                    }
                                     GestureType.Move -> {
                                         val triggered = swipeSymbolDirection.checkY(event.totalY)
                                         val text = if (triggered) it.alternative else it.content
@@ -430,9 +404,12 @@ abstract class BaseKeyboard(
                             view as KeyView
                             if (popupOnKeyPress) {
                                 when (event.type) {
-                                    GestureType.Down -> onPopupAction(
-                                        PopupAction.PreviewAction(view.id, it.content, view.bounds)
-                                    )
+                                    GestureType.Down -> {
+                                        dismissClearPopupIfAny()
+                                        onPopupAction(
+                                            PopupAction.PreviewAction(view.id, it.content, view.bounds)
+                                        )
+                                    }
                                     GestureType.Up -> {
                                         onPopupAction(PopupAction.DismissAction(view.id))
                                     }
@@ -577,10 +554,13 @@ abstract class BaseKeyboard(
         val triggerAction = PopupAction.TriggerAction(viewId)
         // ask popup keyboard whether there's a pending KeyAction
         onPopupAction(triggerAction)
-        val action = triggerAction.outAction ?: return false
-        onAction(action, KeyActionListener.Source.Popup)
+        val action = triggerAction.outAction
+        // Always dismiss after trigger evaluation (even when no action)
         onPopupAction(PopupAction.DismissAction(viewId))
-        return true
+        return if (action != null) {
+            onAction(action, KeyActionListener.Source.Popup)
+            true
+        } else false
     }
 
     open fun onAttach() {

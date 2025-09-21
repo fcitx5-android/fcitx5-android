@@ -419,22 +419,38 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         val ic = currentInputConnection ?: return
         val inBatch = ic.beginBatchEdit()
         try {
-            ic.performContextMenuAction(android.R.id.selectAll)
-            ic.commitText("", 0)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                ic.deleteSurroundingTextInCodePoints(Int.MAX_VALUE, Int.MAX_VALUE)
-            } else {
-                ic.deleteSurroundingText(Int.MAX_VALUE, Int.MAX_VALUE)
+            var cleared = false
+            // Prefer platform-supported deletion first
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    ic.deleteSurroundingTextInCodePoints(Int.MAX_VALUE, Int.MAX_VALUE)
+                } else {
+                    @Suppress("DEPRECATION")
+                    ic.deleteSurroundingText(Int.MAX_VALUE, Int.MAX_VALUE)
+                }
+                cleared = true
+            } catch (_: Throwable) {
+                // fallback below
             }
-            ic.setSelection(0, 0)
+            if (!cleared) {
+                // Fallback: select all then commit empty
+                try {
+                    ic.performContextMenuAction(android.R.id.selectAll)
+                    ic.commitText("", 0)
+                    cleared = true
+                } catch (_: Throwable) {
+                    // last resort: nothing
+                }
+            }
+            if (cleared) {
+                ic.setSelection(0, 0)
+                selection.resetTo(0)
+                cursorUpdateIndex += 1
+                postFcitxJob { reset() }
+            }
         } finally {
-            if (inBatch) {
-                ic.endBatchEdit()
-            }
+            if (inBatch) ic.endBatchEdit()
         }
-        selection.resetTo(0)
-        cursorUpdateIndex += 1
-        postFcitxJob { reset() }
     }
 
     fun sendCombinationKeyEvents(

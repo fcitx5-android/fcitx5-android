@@ -79,9 +79,9 @@ class PopupEntryUi(override val ctx: Context, private val theme: Theme, keyHeigh
         }
     }
 
-    fun setArmed(armed: Boolean) {
+    fun setDangerHint(highlight: Boolean) {
         val bg = (root.background as? GradientDrawable) ?: return
-        if (armed) {
+        if (highlight) {
             bg.setColor(0xFFE53935.toInt())
             textView.setTextColor(0xFFFFFFFF.toInt())
             iconView.imageTintList = ColorStateList.valueOf(0xFFFFFFFF.toInt())
@@ -111,7 +111,7 @@ class PopupEntryUi(override val ctx: Context, private val theme: Theme, keyHeigh
 
     fun resetForReuse() {
         // restore visual defaults to avoid leaking state across pooled instances
-        setArmed(false)
+        setDangerHint(false)
         showTextMode()
         textView.text = ""
         iconView.setImageDrawable(null)

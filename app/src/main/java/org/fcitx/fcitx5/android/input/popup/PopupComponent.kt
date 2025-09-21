@@ -43,6 +43,17 @@ class PopupComponent :
 
     private val showingContainerUi = HashMap<Int, PopupContainerUi>()
 
+    private fun containerTag(viewId: Int) = "popup_container_$viewId"
+    private fun removeContainerViewsByTag(viewId: Int) {
+        val tag = containerTag(viewId)
+        var i = root.childCount - 1
+        while (i >= 0) {
+            val v = root.getChildAt(i)
+            if (v.tag == tag) root.removeViewAt(i)
+            i--
+        }
+    }
+
     private val keyBottomMargin by lazy {
         context.dp(ThemeManager.prefs.keyVerticalMargin.getValue())
     }
@@ -90,10 +101,10 @@ class PopupComponent :
                 dismissJobs.remove(viewId)?.cancel()
             }
             lastShowTime = System.currentTimeMillis()
-            // Always clear armed state when (re)showing a preview
-            setArmed(false)
+            // Always clear danger hint state when (re)showing a preview
+            setDangerHint(false)
             when (style) {
-                PopupAction.PreviewStyle.FitAbove -> showIcon(R.drawable.ic_baseline_delete_sweep_24)
+                PopupAction.PreviewStyle.WideAbove -> showIcon(R.drawable.ic_baseline_delete_sweep_24)
                 else -> {
                     showTextMode()
                     setText(content)
@@ -104,10 +115,10 @@ class PopupComponent :
         val popup = (freeEntryUi.poll()
             ?: PopupEntryUi(context, theme, popupKeyHeight, popupRadius)).apply {
             lastShowTime = System.currentTimeMillis()
-            // Always clear armed state when (re)showing a preview
-            setArmed(false)
+            // Always clear danger hint state when (re)showing a preview
+            setDangerHint(false)
             when (style) {
-                PopupAction.PreviewStyle.FitAbove -> showIcon(R.drawable.ic_baseline_delete_sweep_24)
+                PopupAction.PreviewStyle.WideAbove -> showIcon(R.drawable.ic_baseline_delete_sweep_24)
                 else -> {
                     showTextMode()
                     setText(content)
@@ -127,9 +138,9 @@ class PopupComponent :
                 val lm = (left + right - w) / 2
                 val tm = bottom - h - keyBottomMargin
                 popup.setTextHeight(popupKeyHeight)
-                Quadruple(w, h, lm, tm)
+                LayoutSpec(w, h, lm, tm)
             }
-            PopupAction.PreviewStyle.FitAbove -> {
+            PopupAction.PreviewStyle.WideAbove -> {
                 val keyW = right - left
                 val keyH = bottom - top
                 val widthScale = 1.2f
@@ -144,7 +155,7 @@ class PopupComponent :
                 val lm = lmUnclamped.coerceIn(0, rootW - w)
                 val tm = tmUnclamped.coerceAtLeast(0)
                 popup.setTextHeight(h)
-                Quadruple(w, h, lm, tm)
+                LayoutSpec(w, h, lm, tm)
             }
         }
 
@@ -167,7 +178,7 @@ class PopupComponent :
             ?: return
         // clear popup preview text OR create empty popup preview
         showingEntryUi[viewId]?.apply {
-            setArmed(false)
+            setDangerHint(false)
             showTextMode()
             setText("")
         } ?: showPopup(viewId, "", bounds, PopupAction.PreviewStyle.Default)
@@ -211,6 +222,13 @@ class PopupComponent :
     }
 
     private fun showPopupContainer(viewId: Int, ui: PopupContainerUi) {
+        // Remove any existing container for this viewId to avoid stacking/leaks
+        showingContainerUi[viewId]?.also { old ->
+            root.removeView(old.root)
+        }
+        // Defensive: also remove any stray views with the same tag
+        removeContainerViewsByTag(viewId)
+        ui.root.tag = containerTag(viewId)
         root.apply {
             add(ui.root, lParams {
                 leftMargin = ui.triggerBounds.left + ui.offsetX - rootBounds.left
@@ -249,6 +267,8 @@ class PopupComponent :
             showingContainerUi.remove(viewId)
             root.removeView(it.root)
         }
+        // Defensive cleanup in case multiple containers were added historically.
+        removeContainerViewsByTag(viewId)
     }
 
     private fun dismissPopupEntry(viewId: Int, popup: PopupEntryUi) {
@@ -284,13 +304,28 @@ class PopupComponent :
                 is PopupAction.DismissAction -> dismissPopup(viewId)
                 is PopupAction.PreviewAction -> showPopup(viewId, content, bounds, style)
                 is PopupAction.PreviewUpdateAction -> updatePopup(viewId, content)
-                is PopupAction.PreviewArmedAction -> showingEntryUi[viewId]?.setArmed(armed)
+                is PopupAction.PreviewDangerHintAction -> showingEntryUi[viewId]?.setDangerHint(danger)
                 is PopupAction.ShowKeyboardAction -> showKeyboard(viewId, keyboard, bounds)
                 is PopupAction.ShowMenuAction -> showMenu(viewId, menu, bounds)
+                is PopupAction.ShowClearConfirmAction -> {
+                    val existing = showingContainerUi[viewId]
+                    if (existing is PopupClearUi) {
+                        existing.setDangerHint(danger)
+                    } else {
+                        val ui = PopupClearUi(
+                            context,
+                            theme,
+                            rootBounds,
+                            bounds,
+                            danger,
+                        ) { dismissPopup(viewId) }
+                        showPopupContainer(viewId, ui)
+                    }
+                }
                 is PopupAction.TriggerAction -> outAction = triggerFocused(viewId)
             }
         }
     }
 }
 
-private data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
+private data class LayoutSpec(val width: Int, val height: Int, val leftMargin: Int, val topMargin: Int)

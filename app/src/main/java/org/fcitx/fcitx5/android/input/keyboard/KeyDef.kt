@@ -122,5 +122,10 @@ open class KeyDef(
         class Menu(val items: Array<Item>) : Popup() {
             class Item(val label: String, @DrawableRes val icon: Int, val action: KeyAction)
         }
+
+        /**
+         * Specialized clear-confirm popup for Backspace.
+         */
+        data object ClearConfirm : Popup()
     }
 }
