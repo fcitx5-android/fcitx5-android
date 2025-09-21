@@ -17,6 +17,7 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 @SuppressLint("AppCompatCustomView")
 class AutoScaleTextView @JvmOverloads constructor(
@@ -129,7 +130,7 @@ class AutoScaleTextView @JvmOverloads constructor(
 
         @SuppressLint("RtlHardcoded")
         val shouldAlignLeft = gravity and Gravity.HORIZONTAL_GRAVITY_MASK == Gravity.LEFT
-        if (textWidth >= contentWidth) {
+        if (textWidth > contentWidth) {
             when (scaleMode) {
                 Mode.None -> {
                     textScaleX = 1.0f
@@ -149,9 +150,9 @@ class AutoScaleTextView @JvmOverloads constructor(
                 }
             }
         } else {
-            translateX = if (shouldAlignLeft) leftAlignOffset else centerAlignOffset
             textScaleX = 1.0f
             textScaleY = 1.0f
+            translateX = if (shouldAlignLeft) leftAlignOffset else centerAlignOffset
         }
         val fontHeight = (fontMetrics.bottom - fontMetrics.top) * textScaleY
         val fontOffsetY = fontMetrics.top * textScaleY
@@ -175,5 +176,9 @@ class AutoScaleTextView @JvmOverloads constructor(
 
     override fun getTextScaleX(): Float {
         return textScaleX
+    }
+
+    override fun getBaseline(): Int {
+        return (-fontMetrics.top * textScaleY).roundToInt()
     }
 }
