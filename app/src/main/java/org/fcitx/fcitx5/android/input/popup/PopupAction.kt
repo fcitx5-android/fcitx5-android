@@ -57,8 +57,7 @@ sealed class PopupAction {
 
     /**
      * Show the dedicated clear-confirm container above Backspace.
-     * [danger] indicates whether to start in danger hint state (i.e., equivalent
-     * to the previous "armed" visual when user already swiped upward dominantly).
+     * [danger] indicates whether to start in danger hint state.
      */
     data class ShowClearConfirmAction(
         override val viewId: Int,
