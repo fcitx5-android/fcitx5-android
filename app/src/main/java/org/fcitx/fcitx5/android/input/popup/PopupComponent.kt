@@ -91,29 +91,13 @@ class PopupComponent :
                 dismissJobs.remove(viewId)?.cancel()
             }
             lastShowTime = System.currentTimeMillis()
-            // Always clear danger hint state when (re)showing a preview
-            setDangerHint(false)
-            when (style) {
-                PopupAction.PreviewStyle.WideAbove -> showIcon(R.drawable.ic_baseline_delete_sweep_24)
-                else -> {
-                    showTextMode()
-                    setText(content)
-                }
-            }
+            setText(content)
             return
         }
         val popup = (freeEntryUi.poll()
             ?: PopupEntryUi(context, theme, popupKeyHeight, popupRadius)).apply {
             lastShowTime = System.currentTimeMillis()
-            // Always clear danger hint state when (re)showing a preview
-            setDangerHint(false)
-            when (style) {
-                PopupAction.PreviewStyle.WideAbove -> showIcon(R.drawable.ic_baseline_delete_sweep_24)
-                else -> {
-                    showTextMode()
-                    setText(content)
-                }
-            }
+            setText(content)
         }
         // translate absolute bounds into root-local coordinates
         val left = bounds.left - rootBounds.left
@@ -148,11 +132,6 @@ class PopupComponent :
                 LayoutSpec(w, h, lm, tm)
             }
         }
-
-        // Defensive: in case a reused popup view still has a parent for any reason,
-        // detach it before adding to our root to avoid IllegalStateException.
-        (popup.root.parent as? ViewGroup)?.removeView(popup.root)
-
         root.apply {
             add(popup.root, lParams(w, h) {
                 leftMargin = lm
@@ -170,12 +149,8 @@ class PopupComponent :
         val keys = PopupPreset[keyboard.label]
             ?: EmojiModifier.produceSkinTones(keyboard.label)
             ?: return
-        // clear popup preview text OR create empty popup preview
-        showingEntryUi[viewId]?.apply {
-            setDangerHint(false)
-            showTextMode()
-            setText("")
-        } ?: showPopup(viewId, "", bounds, PopupAction.PreviewStyle.Default)
+        // clear popup preview text         OR create empty popup preview
+        showingEntryUi[viewId]?.setText("") ?: showPopup(viewId, "", bounds, PopupAction.PreviewStyle.Default)
         reallyShowKeyboard(viewId, keys, bounds)
     }
 
