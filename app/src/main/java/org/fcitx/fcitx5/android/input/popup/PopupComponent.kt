@@ -104,13 +104,7 @@ class PopupComponent :
             lastShowTime = System.currentTimeMillis()
             // Always clear danger hint state when (re)showing a preview
             setDangerHint(false)
-            when (style) {
-                PopupAction.PreviewStyle.WideAbove -> showIcon(R.drawable.ic_baseline_delete_sweep_24)
-                else -> {
-                    showTextMode()
-                    setText(content)
-                }
-            }
+            setText(content)
             return
         }
         val popup = (freeEntryUi.poll()
@@ -118,13 +112,7 @@ class PopupComponent :
             lastShowTime = System.currentTimeMillis()
             // Always clear danger hint state when (re)showing a preview
             setDangerHint(false)
-            when (style) {
-                PopupAction.PreviewStyle.WideAbove -> showIcon(R.drawable.ic_baseline_delete_sweep_24)
-                else -> {
-                    showTextMode()
-                    setText(content)
-                }
-            }
+            setText(content)
         }
         // translate absolute bounds into root-local coordinates
         val left = bounds.left - rootBounds.left
@@ -184,7 +172,6 @@ class PopupComponent :
         // clear popup preview text OR create empty popup preview
         showingEntryUi[viewId]?.apply {
             setDangerHint(false)
-            showTextMode()
             setText("")
         } ?: showPopup(viewId, "", bounds, PopupAction.PreviewStyle.Default)
         reallyShowKeyboard(viewId, keys, bounds)
