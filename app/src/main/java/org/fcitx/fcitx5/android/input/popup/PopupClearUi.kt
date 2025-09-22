@@ -116,11 +116,22 @@ class PopupClearUi(
         }
 
     override fun onChangeFocus(x: Float, y: Float): Boolean {
-        // x/y are relative to the container; mark highlighted if inside, else clear.
-        // Do NOT auto-dismiss while finger is down: spec expects sliding back
-        // to the key to turn white (stay visible) instead of disappearing.
+        // x/y are relative to the container.
+        // Mark highlighted if pointer is inside; otherwise show non-danger state.
         val inside = x >= 0 && y >= 0 && x < w && y < h
         danger = inside
+
+        // Borrow container dismissal semantics: if the pointer moves far enough
+        // away from this container, auto-dismiss in this same pointer stream
+        // (independent of any other fingers), so that callers don't need to
+        // inject cross-key cleanup.
+        val dismissSlop = ctx.dp(48) // generous threshold to allow small drift
+        val farOutside = x < -dismissSlop || y < -dismissSlop ||
+                x >= w + dismissSlop || y >= h + dismissSlop
+        if (farOutside) {
+            onDismissSelf(this)
+            return true
+        }
         return false
     }
 

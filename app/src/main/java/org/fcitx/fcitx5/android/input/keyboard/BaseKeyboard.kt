@@ -95,10 +95,8 @@ abstract class BaseKeyboard(
      */
     private val touchTarget = hashMapOf<Int, View>()
 
-    private fun dismissClearPopupIfAny() {
-        // Dismiss lingering Backspace clear-confirm popup if present
-        onPopupAction(PopupAction.DismissAction(R.id.button_backspace))
-    }
+    // Removed cross-key clear-confirm dismissal to rely on same-pointer
+    // lifecycle within PopupClearUi/BackspaceClearController.
 
     init {
         isMotionEventSplittingEnabled = true
@@ -232,13 +230,11 @@ abstract class BaseKeyboard(
                 when (it) {
                     is KeyDef.Behavior.Press -> {
                         setOnClickListener { _ ->
-                            dismissClearPopupIfAny()
                             onAction(it.action)
                         }
                     }
                     is KeyDef.Behavior.LongPress -> {
                         setOnLongClickListener { _ ->
-                            dismissClearPopupIfAny()
                             onAction(it.action)
                             true
                         }
@@ -259,7 +255,6 @@ abstract class BaseKeyboard(
                             when (event.type) {
                                 GestureType.Up -> {
                                     if (!event.consumed && swipeSymbolDirection.checkY(event.totalY)) {
-                                        dismissClearPopupIfAny()
                                         onAction(it.action)
                                         true
                                     } else {
@@ -284,7 +279,6 @@ abstract class BaseKeyboard(
                     is KeyDef.Popup.Menu -> {
                         setOnLongClickListener { view ->
                             view as KeyView
-                            dismissClearPopupIfAny()
                             onPopupAction(PopupAction.ShowMenuAction(view.id, it, view.bounds))
                             // do not consume this LongClick gesture
                             false
@@ -307,7 +301,6 @@ abstract class BaseKeyboard(
                     is KeyDef.Popup.Keyboard -> {
                         setOnLongClickListener { view ->
                             view as KeyView
-                            dismissClearPopupIfAny()
                             onPopupAction(PopupAction.ShowKeyboardAction(view.id, it, view.bounds))
                             // do not consume this LongClick gesture
                             false
@@ -337,7 +330,6 @@ abstract class BaseKeyboard(
                             showDelayMs = 300L,
                             callbacks = object : BackspaceClearController.Callbacks {
                                 override fun showClearConfirm(danger: Boolean) {
-                                    dismissClearPopupIfAny()
                                     onPopupAction(
                                         PopupAction.ShowClearConfirmAction(id, bounds, danger)
                                     )
@@ -377,7 +369,6 @@ abstract class BaseKeyboard(
                             if (popupOnKeyPress) {
                                 when (event.type) {
                                     GestureType.Down -> {
-                                        dismissClearPopupIfAny()
                                         onPopupAction(
                                             PopupAction.PreviewAction(view.id, it.content, view.bounds)
                                         )
@@ -405,7 +396,6 @@ abstract class BaseKeyboard(
                             if (popupOnKeyPress) {
                                 when (event.type) {
                                     GestureType.Down -> {
-                                        dismissClearPopupIfAny()
                                         onPopupAction(
                                             PopupAction.PreviewAction(view.id, it.content, view.bounds)
                                         )

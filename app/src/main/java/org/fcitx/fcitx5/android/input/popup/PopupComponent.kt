@@ -6,6 +6,7 @@ package org.fcitx.fcitx5.android.input.popup
 
 import android.graphics.Rect
 import android.view.View
+import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -158,6 +159,10 @@ class PopupComponent :
                 LayoutSpec(w, h, lm, tm)
             }
         }
+
+        // Defensive: in case a reused popup view still has a parent for any reason,
+        // detach it before adding to our root to avoid IllegalStateException.
+        (popup.root.parent as? ViewGroup)?.removeView(popup.root)
 
         root.apply {
             add(popup.root, lParams(w, h) {
