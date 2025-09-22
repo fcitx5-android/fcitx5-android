@@ -40,6 +40,7 @@
 #include <boost/iostreams/stream_buffer.hpp>
 #include "customphrase.h"
 
+#include "androidaddonloader/androidaddonloader.h"
 #include "androidfrontend/androidfrontend_public.h"
 #include "jni-utils.h"
 #include "nativestreambuf.h"
@@ -82,7 +83,7 @@ public:
 
     void startup(const std::function<void(fcitx::AddonInstance *)> &setupCallback) {
         p_instance = std::make_unique<fcitx::Instance>(0, nullptr);
-        p_instance->addonManager().registerDefaultLoader(nullptr);
+        p_instance->addonManager().registerLoader(std::make_unique<fcitx::AndroidSharedLibraryLoader>());
         p_dispatcher = std::make_unique<fcitx::EventDispatcher>();
         p_dispatcher->attach(&p_instance->eventLoop());
         p_instance->initialize();
@@ -527,7 +528,10 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
     const std::string data_home = fcitx::stringutils::joinPath(*extData_, "data");
     const std::string usr_share = fcitx::stringutils::joinPath(*appData_, "usr", "share");
     const std::string locale_dir = fcitx::stringutils::joinPath(usr_share, "locale");
-    const std::string libime_data = fcitx::stringutils::joinPath(usr_share, "libime");
+    const std::string libime_data = fcitx::stringutils::concat(
+            fcitx::stringutils::joinPath(*extData_, "data", "libime"), ":",
+            fcitx::stringutils::joinPath(usr_share, "libime")
+    );
     const std::string lua_path = fcitx::stringutils::concat(
             fcitx::stringutils::joinPath(data_home, "lua", "?.lua"), ";",
             fcitx::stringutils::joinPath(data_home, "lua", "?", "init.lua"), ";",
@@ -542,7 +546,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
     );
 
     // prevent StandardPath from resolving it's hardcoded installation path
-    setenv("SKIP_FCITX_PATH", "1", 1);
+    // setenv("SKIP_FCITX_PATH", "1", 1);
     // for fcitx default profile [DefaultInputMethod]
     setenv("LANG", lang_.c_str(), 1);
     // for libintl-lite loading gettext .mo translations

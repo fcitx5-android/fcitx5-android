@@ -4,7 +4,6 @@
  */
 package org.fcitx.fcitx5.android.ui.main
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -20,7 +19,6 @@ import org.fcitx.fcitx5.android.utils.navigateWithAnim
 
 class AboutFragment : PaddingPreferenceFragment() {
 
-    @SuppressLint("UseKtx")
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceScreen = preferenceManager.createPreferenceScreen(requireContext()).apply {
             addPreference(R.string.privacy_policy) {

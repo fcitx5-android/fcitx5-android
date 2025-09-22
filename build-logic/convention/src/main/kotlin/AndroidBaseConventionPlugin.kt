@@ -26,6 +26,9 @@ open class AndroidBaseConventionPlugin : Plugin<Project> {
                 sourceCompatibility = Versions.java
                 targetCompatibility = Versions.java
             }
+            lint {
+                disable += setOf("UseKtx")
+            }
         }
 
         target.tasks.withType<KotlinCompile> {
