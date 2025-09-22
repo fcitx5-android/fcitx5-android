@@ -417,39 +417,24 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     fun clearEditorText() {
         finishComposing()
         val ic = currentInputConnection ?: return
-        val inBatch = ic.beginBatchEdit()
-        try {
-            var cleared = false
-            // Prefer platform-supported deletion first
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val inBatch = ic.beginBatchEdit()
             try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                val ok = try {
+                    // API 24+ only
                     ic.deleteSurroundingTextInCodePoints(Int.MAX_VALUE, Int.MAX_VALUE)
-                } else {
-                    @Suppress("DEPRECATION")
-                    ic.deleteSurroundingText(Int.MAX_VALUE, Int.MAX_VALUE)
-                }
-                cleared = true
-            } catch (_: Throwable) {
-                // fallback below
-            }
-            if (!cleared) {
-                // Fallback: select all then commit empty
-                try {
-                    ic.performContextMenuAction(android.R.id.selectAll)
-                    ic.commitText("", 0)
-                    cleared = true
                 } catch (_: Throwable) {
-                    // last resort: nothing
+                    false // Silent failure: do not attempt to recover
                 }
+                if (ok) {
+                    ic.setSelection(0, 0)
+                    selection.resetTo(0)
+                    cursorUpdateIndex += 1
+                    postFcitxJob { reset() }
+                }
+            } finally {
+                if (inBatch) ic.endBatchEdit()
             }
-            if (cleared) {
-                ic.setSelection(0, 0)
-                selection.resetTo(0)
-                cursorUpdateIndex += 1
-                postFcitxJob { reset() }
-            }
-        } finally {
-            if (inBatch) ic.endBatchEdit()
         }
     }
 
