@@ -44,6 +44,17 @@ class PopupComponent :
 
     private val showingContainerUi = HashMap<Int, PopupContainerUi>()
 
+    private fun containerTag(viewId: Int) = "popup_container_$viewId"
+    private fun removeContainerViewsByTag(viewId: Int) {
+        val tag = containerTag(viewId)
+        var i = root.childCount - 1
+        while (i >= 0) {
+            val v = root.getChildAt(i)
+            if (v.tag == tag) root.removeViewAt(i)
+            i--
+        }
+    }
+
     private val keyBottomMargin by lazy {
         context.dp(ThemeManager.prefs.keyVerticalMargin.getValue())
     }
@@ -195,6 +206,9 @@ class PopupComponent :
         showingContainerUi[viewId]?.also { old ->
             root.removeView(old.root)
         }
+        // Defensive: also remove any stray views with the same tag
+        removeContainerViewsByTag(viewId)
+        ui.root.tag = containerTag(viewId)
         root.apply {
             add(ui.root, lParams {
                 leftMargin = ui.triggerBounds.left + ui.offsetX - rootBounds.left
@@ -233,6 +247,8 @@ class PopupComponent :
             showingContainerUi.remove(viewId)
             root.removeView(it.root)
         }
+        // Defensive cleanup in case multiple containers were added historically.
+        removeContainerViewsByTag(viewId)
     }
 
     private fun dismissPopupEntry(viewId: Int, popup: PopupEntryUi) {
