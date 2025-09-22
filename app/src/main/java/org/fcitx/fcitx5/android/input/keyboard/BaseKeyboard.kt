@@ -95,9 +95,6 @@ abstract class BaseKeyboard(
      */
     private val touchTarget = hashMapOf<Int, View>()
 
-    // Removed cross-key clear-confirm dismissal to rely on same-pointer
-    // lifecycle within PopupClearUi/BackspaceClearController.
-
     init {
         isMotionEventSplittingEnabled = true
         keyRows = keyLayout.map { row ->
