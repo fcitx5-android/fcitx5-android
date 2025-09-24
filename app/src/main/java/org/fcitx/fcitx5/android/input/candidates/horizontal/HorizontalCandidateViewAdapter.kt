@@ -40,9 +40,7 @@ open class HorizontalCandidateViewAdapter(val theme: Theme) :
 
     override fun getItemCount() = candidates.size
 
-    override fun getItemId(position: Int): Long {
-        return candidates[position].hashCode().toLong()
-    }
+    override fun getItemId(position: Int) = candidates.getOrNull(position).hashCode().toLong()
 
     @CallSuper
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CandidateViewHolder {

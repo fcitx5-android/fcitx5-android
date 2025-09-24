@@ -48,7 +48,7 @@ class PagedCandidatesUi(
         }
 
         override fun getItemId(position: Int): Long =
-            data.candidates[position].hashCode().toLong()
+            data.candidates.getOrNull(position).hashCode().toLong()
 
         override fun getItemCount() =
             data.candidates.size + (if (data.hasPrev || data.hasNext) 1 else 0)
