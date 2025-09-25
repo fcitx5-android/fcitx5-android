@@ -50,6 +50,11 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
     override var inputPanelCached = FcitxEvent.InputPanelEvent.Data()
         private set
 
+    // TODO: custom log rule
+    override fun setLogRule(verbose: Boolean) {
+        setupLogStream(verbose)
+    }
+
     // the computation is delayed to the first call of [getAddonReverseDependencies]
     private var addonGraph: ImmutableGraph<String, FcitxAPI.AddonDep>? = null
 
@@ -219,7 +224,6 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
 
         init {
             System.loadLibrary("native-lib")
-            setupLogStream(AppPrefs.getInstance().internal.verboseLog.getValue())
         }
 
         @JvmStatic
@@ -522,6 +526,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         DataManager.addOnNextSyncedCallback {
             FcitxPluginServices.connectAll()
         }
+        setupLogStream(AppPrefs.getInstance().internal.verboseLog.getValue())
         dispatcher.start()
     }
 

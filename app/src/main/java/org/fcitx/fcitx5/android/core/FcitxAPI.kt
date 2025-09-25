@@ -34,6 +34,8 @@ interface FcitxAPI {
 
     val inputPanelCached: FcitxEvent.InputPanelEvent.Data
 
+    fun setLogRule(verbose: Boolean)
+
     fun getAddonReverseDependencies(addon: String): List<Pair<String, AddonDep>>
 
     fun translate(str: String, domain: String = "fcitx5"): String

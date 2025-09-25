@@ -12,7 +12,6 @@ import android.content.IntentFilter
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Process
-import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
@@ -26,6 +25,7 @@ import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.ui.main.LogActivity
 import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.Locales
+import org.fcitx.fcitx5.android.utils.setupForest
 import org.fcitx.fcitx5.android.utils.startActivity
 import org.fcitx.fcitx5.android.utils.userManager
 import timber.log.Timber
@@ -121,20 +121,7 @@ class FcitxApplication : Application() {
         instance = this
         // we don't have AppPrefs available yet
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx)
-        if (BuildConfig.DEBUG || sharedPrefs.getBoolean("verbose_log", false)) {
-            Timber.plant(object : Timber.DebugTree() {
-                override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-                    super.log(priority, "[${Thread.currentThread().name}] $tag", message, t)
-                }
-            })
-        } else {
-            Timber.plant(object : Timber.Tree() {
-                override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-                    if (priority < Log.INFO) return
-                    Log.println(priority, "[${Thread.currentThread().name}]", message)
-                }
-            })
-        }
+        Timber.setupForest(verbose = sharedPrefs.getBoolean("verbose_log", false))
 
         Timber.d("isDirectBootMode=$isDirectBootMode")
 
