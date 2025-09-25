@@ -1,10 +1,9 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -12,11 +11,12 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.task
+import org.gradle.kotlin.dsl.register
 
 /**
  * Add task `generateBuildMetadata${Variant}`
  */
+@Suppress("unused")
 class BuildMetadataPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
@@ -32,7 +32,7 @@ class BuildMetadataPlugin : Plugin<Project> {
             applicationVariants.all {
                 val variantName = name.capitalized()
                 target.afterEvaluate {
-                    target.task<BuildMetadataTask>("generateBuildMetadata${variantName}") {
+                    target.tasks.register<BuildMetadataTask>("generateBuildMetadata${variantName}") {
                         val packageTask = packageApplicationProvider.get() // package${Variant} task
                         // create metadata file after package, because it's outputDirectory would
                         // be cleared at some time before package
