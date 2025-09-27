@@ -303,4 +303,6 @@
     <string name="move_cursor_to_end">把光标移动到结尾</string>
     <string name="open_input_method_settings">打开输入法设置</string>
     <string name="delete_all">全部删除</string>
+    <string name="backspace_swipe_clear">上滑删除键以清除文本</string>
+    <string name="backspace_swipe_clear_summary">长按删除键并向上滑动以清除当前输入框</string>
 </resources>

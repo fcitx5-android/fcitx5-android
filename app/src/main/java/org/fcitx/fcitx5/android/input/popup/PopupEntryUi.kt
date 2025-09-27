@@ -21,7 +21,7 @@ import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.view
 import splitties.views.gravityCenter
 
-class PopupEntryUi(override val ctx: Context, theme: Theme, keyHeight: Int, radius: Float) : Ui {
+class PopupEntryUi(override val ctx: Context, private val theme: Theme, keyHeight: Int, radius: Float) : Ui {
 
     var lastShowTime = -1L
 
@@ -46,5 +46,30 @@ class PopupEntryUi(override val ctx: Context, theme: Theme, keyHeight: Int, radi
 
     fun setText(text: String) {
         textView.text = text
+    }
+
+    fun setTextHeight(heightPx: Int) {
+        val lp = textView.layoutParams
+        if (lp != null && lp.height != heightPx) {
+            lp.height = heightPx
+            textView.layoutParams = lp
+        }
+    }
+
+    fun setDangerHint(highlight: Boolean) {
+        val bg = (root.background as? GradientDrawable) ?: return
+        if (highlight) {
+            bg.setColor(0xFFE53935.toInt())
+            textView.setTextColor(0xFFFFFFFF.toInt())
+        } else {
+            bg.setColor(theme.popupBackgroundColor)
+            textView.setTextColor(theme.popupTextColor)
+        }
+    }
+
+    fun resetForReuse() {
+        // restore visual defaults to avoid leaking state across pooled instances
+        setDangerHint(false)
+        textView.text = ""
     }
 }

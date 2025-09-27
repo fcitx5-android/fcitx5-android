@@ -91,4 +91,6 @@
     <string name="quickphrase_phrase">구문</string>
     <string name="reload_config">구성 새로고침</string>
     <string name="input_method_options">입력기 옵션</string>
+    <string name="backspace_swipe_clear">삭제 키를 위로 스와이프하여 텍스트 지우기</string>
+    <string name="backspace_swipe_clear_summary">삭제 키를 길게 누른 뒤 위로 스와이프하여 현재 필드를 지웁니다</string>
     </resources>

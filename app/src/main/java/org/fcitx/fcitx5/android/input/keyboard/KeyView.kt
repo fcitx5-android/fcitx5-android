@@ -112,8 +112,14 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
         isEnabled = true
         isClickable = true
         isHapticFeedbackEnabled = false
+        // Ensure every key has a stable, unique view id for popup bookkeeping.
+        // Some keys carry a predefined id (e.g., backspace/space/return). For all
+        // others, generate one so different physical keys don't share View.NO_ID (-1),
+        // which previously caused popup entries to collide by id.
         if (def.viewId > 0) {
             id = def.viewId
+        } else if (id == View.NO_ID) {
+            id = View.generateViewId()
         }
         // key border
         if ((bordered && def.border != Border.Off) || def.border == Border.On) {

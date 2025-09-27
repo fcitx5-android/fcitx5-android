@@ -6,11 +6,13 @@ package org.fcitx.fcitx5.android.input.popup
 
 import android.graphics.Rect
 import android.view.View
+import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.input.broadcast.PunctuationComponent
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
@@ -41,6 +43,17 @@ class PopupComponent :
     private val freeEntryUi = LinkedList<PopupEntryUi>()
 
     private val showingContainerUi = HashMap<Int, PopupContainerUi>()
+
+    private fun containerTag(viewId: Int) = "popup_container_$viewId"
+    private fun removeContainerViewsByTag(viewId: Int) {
+        val tag = containerTag(viewId)
+        var i = root.childCount - 1
+        while (i >= 0) {
+            val v = root.getChildAt(i)
+            if (v.tag == tag) root.removeViewAt(i)
+            i--
+        }
+    }
 
     private val keyBottomMargin by lazy {
         context.dp(ThemeManager.prefs.keyVerticalMargin.getValue())
@@ -78,25 +91,71 @@ class PopupComponent :
         }
     }
 
-    private fun showPopup(viewId: Int, content: String, bounds: Rect) {
+    private fun showPopup(
+        viewId: Int,
+        content: String,
+        bounds: Rect,
+        style: PopupAction.PreviewStyle
+    ) {
         showingEntryUi[viewId]?.apply {
             dismissJobs[viewId]?.also {
                 dismissJobs.remove(viewId)?.cancel()
             }
             lastShowTime = System.currentTimeMillis()
+            // Always clear danger hint state when (re)showing a preview
+            setDangerHint(false)
             setText(content)
             return
         }
         val popup = (freeEntryUi.poll()
             ?: PopupEntryUi(context, theme, popupKeyHeight, popupRadius)).apply {
             lastShowTime = System.currentTimeMillis()
+            // Always clear danger hint state when (re)showing a preview
+            setDangerHint(false)
             setText(content)
         }
+        // translate absolute bounds into root-local coordinates
+        val left = bounds.left - rootBounds.left
+        val top = bounds.top - rootBounds.top
+        val right = bounds.right - rootBounds.left
+        val bottom = bounds.bottom - rootBounds.top
+
+        val (w, h, lm, tm) = when (style) {
+            PopupAction.PreviewStyle.Default -> {
+                val w = popupWidth
+                val h = popupHeight
+                val lm = (left + right - w) / 2
+                val tm = bottom - h - keyBottomMargin
+                popup.setTextHeight(popupKeyHeight)
+                LayoutSpec(w, h, lm, tm)
+            }
+            PopupAction.PreviewStyle.WideAbove -> {
+                val keyW = right - left
+                val keyH = bottom - top
+                val widthScale = 1.2f
+                val heightScale = 0.7f
+                val w = (keyW * widthScale).toInt()
+                val h = (keyH * heightScale).toInt()
+                val centerX = (left + right) / 2
+                val lmUnclamped = centerX - w / 2
+                val gap = context.dp(4)
+                val tmUnclamped = top - gap - h
+                val rootW = rootBounds.width()
+                val lm = lmUnclamped.coerceIn(0, rootW - w)
+                val tm = tmUnclamped.coerceAtLeast(0)
+                popup.setTextHeight(h)
+                LayoutSpec(w, h, lm, tm)
+            }
+        }
+
+        // Defensive: in case a reused popup view still has a parent for any reason,
+        // detach it before adding to our root to avoid IllegalStateException.
+        (popup.root.parent as? ViewGroup)?.removeView(popup.root)
+
         root.apply {
-            add(popup.root, lParams(popupWidth, popupHeight) {
-                // align popup bottom with key border bottom [^1]
-                topMargin = bounds.bottom - popupHeight - keyBottomMargin
-                leftMargin = (bounds.left + bounds.right - popupWidth) / 2
+            add(popup.root, lParams(w, h) {
+                leftMargin = lm
+                topMargin = tm
             })
         }
         showingEntryUi[viewId] = popup
@@ -110,8 +169,11 @@ class PopupComponent :
         val keys = PopupPreset[keyboard.label]
             ?: EmojiModifier.produceSkinTones(keyboard.label)
             ?: return
-        // clear popup preview text         OR create empty popup preview
-        showingEntryUi[viewId]?.setText("") ?: showPopup(viewId, "", bounds)
+        // clear popup preview text OR create empty popup preview
+        showingEntryUi[viewId]?.apply {
+            setDangerHint(false)
+            setText("")
+        } ?: showPopup(viewId, "", bounds, PopupAction.PreviewStyle.Default)
         reallyShowKeyboard(viewId, keys, bounds)
     }
 
@@ -152,6 +214,13 @@ class PopupComponent :
     }
 
     private fun showPopupContainer(viewId: Int, ui: PopupContainerUi) {
+        // Remove any existing container for this viewId to avoid stacking/leaks
+        showingContainerUi[viewId]?.also { old ->
+            root.removeView(old.root)
+        }
+        // Defensive: also remove any stray views with the same tag
+        removeContainerViewsByTag(viewId)
+        ui.root.tag = containerTag(viewId)
         root.apply {
             add(ui.root, lParams {
                 leftMargin = ui.triggerBounds.left + ui.offsetX - rootBounds.left
@@ -190,11 +259,14 @@ class PopupComponent :
             showingContainerUi.remove(viewId)
             root.removeView(it.root)
         }
+        // Defensive cleanup in case multiple containers were added historically.
+        removeContainerViewsByTag(viewId)
     }
 
     private fun dismissPopupEntry(viewId: Int, popup: PopupEntryUi) {
         showingEntryUi.remove(viewId)
         root.removeView(popup.root)
+        popup.resetForReuse()
         freeEntryUi.add(popup)
     }
 
@@ -222,12 +294,30 @@ class PopupComponent :
             when (this) {
                 is PopupAction.ChangeFocusAction -> outResult = changeFocus(viewId, x, y)
                 is PopupAction.DismissAction -> dismissPopup(viewId)
-                is PopupAction.PreviewAction -> showPopup(viewId, content, bounds)
+                is PopupAction.PreviewAction -> showPopup(viewId, content, bounds, style)
                 is PopupAction.PreviewUpdateAction -> updatePopup(viewId, content)
+                is PopupAction.PreviewDangerHintAction -> showingEntryUi[viewId]?.setDangerHint(danger)
                 is PopupAction.ShowKeyboardAction -> showKeyboard(viewId, keyboard, bounds)
                 is PopupAction.ShowMenuAction -> showMenu(viewId, menu, bounds)
+                is PopupAction.ShowClearConfirmAction -> {
+                    val existing = showingContainerUi[viewId]
+                    if (existing is PopupClearUi) {
+                        existing.setDangerHint(danger)
+                    } else {
+                        val ui = PopupClearUi(
+                            context,
+                            theme,
+                            rootBounds,
+                            bounds,
+                            danger,
+                        ) { dismissPopup(viewId) }
+                        showPopupContainer(viewId, ui)
+                    }
+                }
                 is PopupAction.TriggerAction -> outAction = triggerFocused(viewId)
             }
         }
     }
 }
+
+private data class LayoutSpec(val width: Int, val height: Int, val leftMargin: Int, val topMargin: Int)

@@ -12,15 +12,31 @@ sealed class PopupAction {
 
     abstract val viewId: Int
 
+    enum class PreviewStyle {
+        // Legacy tall preview bubble centered above key
+        Default,
+        // Wide preview placed above the key (scaled, distinct from Default)
+        WideAbove,
+    }
+
     data class PreviewAction(
         override val viewId: Int,
         val content: String,
-        val bounds: Rect
+        val bounds: Rect,
+        val style: PreviewStyle = PreviewStyle.Default
     ) : PopupAction()
 
     data class PreviewUpdateAction(
         override val viewId: Int,
         val content: String,
+    ) : PopupAction()
+
+    /**
+     * Update preview popup visual state (e.g., danger hint vs normal).
+     */
+    data class PreviewDangerHintAction(
+        override val viewId: Int,
+        val danger: Boolean
     ) : PopupAction()
 
     data class DismissAction(
@@ -37,6 +53,16 @@ sealed class PopupAction {
         override val viewId: Int,
         val menu: KeyDef.Popup.Menu,
         val bounds: Rect
+    ) : PopupAction()
+
+    /**
+     * Show the dedicated clear-confirm container above Backspace.
+     * [danger] indicates whether to start in danger hint state.
+     */
+    data class ShowClearConfirmAction(
+        override val viewId: Int,
+        val bounds: Rect,
+        val danger: Boolean,
     ) : PopupAction()
 
     data class ChangeFocusAction(

@@ -254,4 +254,6 @@
     <string name="flip_horizontally">左右反転</string>
     <string name="flip_vertically">上下反転</string>
     <string name="crop">切り取り</string>
+    <string name="backspace_swipe_clear">削除キーを上にスワイプしてテキストをクリア</string>
+    <string name="backspace_swipe_clear_summary">削除キーを長押しして上にスワイプすると現在のフィールドをクリアします</string>
     </resources>
