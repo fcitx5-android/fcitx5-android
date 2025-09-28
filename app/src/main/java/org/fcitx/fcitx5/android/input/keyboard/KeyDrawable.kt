@@ -55,6 +55,6 @@ fun borderedKeyBackgroundDrawable(
         radiusDrawable(radius, bkgColor),
     )
 ).apply {
-    setLayerInset(0, hMargin, vMargin, hMargin, vMargin - shadowWidth)
+    setLayerInset(0, hMargin - shadowWidth, vMargin - shadowWidth, hMargin - shadowWidth, vMargin - shadowWidth)
     setLayerInset(1, hMargin, vMargin, hMargin, vMargin)
 }
