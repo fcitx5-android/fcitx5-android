@@ -48,13 +48,30 @@ fun borderedKeyBackgroundDrawable(
     radius: Float,
     shadowWidth: Int,
     hMargin: Int,
-    vMargin: Int
+    vMargin: Int,
+    shouldDrawBorder: Boolean = false
 ): Drawable = LayerDrawable(
     arrayOf(
         radiusDrawable(radius, shadowColor),
         radiusDrawable(radius, bkgColor),
     )
 ).apply {
-    setLayerInset(0, hMargin - shadowWidth, vMargin - shadowWidth, hMargin - shadowWidth, vMargin - shadowWidth)
+    if (shouldDrawBorder) {
+        setLayerInset(
+            0,
+            hMargin - shadowWidth,
+            vMargin - shadowWidth,
+            hMargin - shadowWidth,
+            vMargin - shadowWidth
+        )
+    } else {
+        setLayerInset(
+            0,
+            hMargin,
+            vMargin,
+            hMargin,
+            vMargin- shadowWidth
+        )
+    }
     setLayerInset(1, hMargin, vMargin, hMargin, vMargin)
 }

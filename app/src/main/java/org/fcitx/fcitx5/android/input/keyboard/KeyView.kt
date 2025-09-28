@@ -56,6 +56,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
 
     val bordered: Boolean
     val rippled: Boolean
+    val solidBordered: Boolean
     val radius: Float
     val hMargin: Int
     val vMargin: Int
@@ -64,6 +65,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
         val prefs = ThemeManager.prefs
         bordered = prefs.keyBorder.getValue()
         rippled = prefs.keyRippleEffect.getValue()
+        solidBordered = prefs.keySolidBorder.getValue()
         radius = dp(prefs.keyRadius.getValue().toFloat())
         val landscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         val hMarginPref =
@@ -126,7 +128,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
             // background: key border
             appearanceView.background = borderedKeyBackgroundDrawable(
                 bkgColor, theme.keyShadowColor,
-                radius, shadowWidth, hMargin, vMargin
+                radius, shadowWidth, hMargin, vMargin, solidBordered
             )
             // foreground: press highlight or ripple
             setupPressHighlight()
