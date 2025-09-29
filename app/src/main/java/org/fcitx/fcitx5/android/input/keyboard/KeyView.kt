@@ -124,7 +124,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                 Variant.Alternative -> theme.altKeyBackgroundColor
                 Variant.Accent -> theme.accentKeyBackgroundColor
             }
-            val shadowWidth = dp(1)
+            val shadowWidth = if (solidBordered) 1 else dp(1)
             // background: key border
             appearanceView.background = borderedKeyBackgroundDrawable(
                 bkgColor, theme.keyShadowColor,

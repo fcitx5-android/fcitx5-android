@@ -50,28 +50,27 @@ fun borderedKeyBackgroundDrawable(
     hMargin: Int,
     vMargin: Int,
     shouldDrawBorder: Boolean = false
-): Drawable = LayerDrawable(
-    arrayOf(
-        radiusDrawable(radius, shadowColor),
-        radiusDrawable(radius, bkgColor),
-    )
-).apply {
+): Drawable {
     if (shouldDrawBorder) {
-        setLayerInset(
-            0,
-            hMargin - shadowWidth,
-            vMargin - shadowWidth,
-            hMargin - shadowWidth,
-            vMargin - shadowWidth
-        )
+        val shape = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = radius
+
+            setColor(bkgColor)
+            setStroke(shadowWidth, shadowColor)
+        }
+        return InsetDrawable(shape, hMargin, vMargin, hMargin, vMargin)
     } else {
-        setLayerInset(
-            0,
-            hMargin,
-            vMargin,
-            hMargin,
-            vMargin- shadowWidth
-        )
+        return LayerDrawable(
+            arrayOf(
+                radiusDrawable(radius, shadowColor),
+                radiusDrawable(radius, bkgColor), // Use adjusted radius
+            )
+        ).apply {
+            setLayerInset( 0, hMargin, vMargin, hMargin, vMargin - shadowWidth )
+            setLayerInset(1, hMargin, vMargin, hMargin, vMargin)
+
+        }
+
     }
-    setLayerInset(1, hMargin, vMargin, hMargin, vMargin)
 }
