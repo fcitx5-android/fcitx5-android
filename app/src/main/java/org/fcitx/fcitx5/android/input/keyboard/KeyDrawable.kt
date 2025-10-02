@@ -42,35 +42,38 @@ fun insetOvalDrawable(
     hInset, vInset, hInset, vInset
 )
 
+fun shadowedKeyBackgroundDrawable(
+    @ColorInt bkgColor: Int,
+    @ColorInt shadowColor: Int,
+    radius: Float,
+    shadowWidth: Int,
+    hMargin: Int,
+    vMargin: Int
+): Drawable = LayerDrawable(
+    arrayOf(
+        radiusDrawable(radius, shadowColor),
+        radiusDrawable(radius, bkgColor), // Use adjusted radius
+    )
+).apply {
+    setLayerInset(0, hMargin, vMargin, hMargin, vMargin - shadowWidth)
+    setLayerInset(1, hMargin, vMargin, hMargin, vMargin)
+
+}
+
 fun borderedKeyBackgroundDrawable(
     @ColorInt bkgColor: Int,
     @ColorInt shadowColor: Int,
     radius: Float,
     shadowWidth: Int,
     hMargin: Int,
-    vMargin: Int,
-    shouldDrawBorder: Boolean = false
+    vMargin: Int
 ): Drawable {
-    if (shouldDrawBorder) {
-        val shape = GradientDrawable().apply {
-            shape = GradientDrawable.RECTANGLE
-            cornerRadius = radius
+    val shape = GradientDrawable().apply {
+        shape = GradientDrawable.RECTANGLE
+        cornerRadius = radius
 
-            setColor(bkgColor)
-            setStroke(shadowWidth, shadowColor)
-        }
-        return InsetDrawable(shape, hMargin, vMargin, hMargin, vMargin)
-    } else {
-        return LayerDrawable(
-            arrayOf(
-                radiusDrawable(radius, shadowColor),
-                radiusDrawable(radius, bkgColor), // Use adjusted radius
-            )
-        ).apply {
-            setLayerInset( 0, hMargin, vMargin, hMargin, vMargin - shadowWidth )
-            setLayerInset(1, hMargin, vMargin, hMargin, vMargin)
-
-        }
-
+        setColor(bkgColor)
+        setStroke(shadowWidth, shadowColor)
     }
+    return InsetDrawable(shape, hMargin, vMargin, hMargin, vMargin)
 }
