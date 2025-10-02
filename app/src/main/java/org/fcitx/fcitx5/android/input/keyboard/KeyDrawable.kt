@@ -42,7 +42,7 @@ fun insetOvalDrawable(
     hInset, vInset, hInset, vInset
 )
 
-fun borderedKeyBackgroundDrawable(
+fun shadowedKeyBackgroundDrawable(
     @ColorInt bkgColor: Int,
     @ColorInt shadowColor: Int,
     radius: Float,
@@ -52,9 +52,28 @@ fun borderedKeyBackgroundDrawable(
 ): Drawable = LayerDrawable(
     arrayOf(
         radiusDrawable(radius, shadowColor),
-        radiusDrawable(radius, bkgColor),
+        radiusDrawable(radius, bkgColor), // Use adjusted radius
     )
 ).apply {
     setLayerInset(0, hMargin, vMargin, hMargin, vMargin - shadowWidth)
     setLayerInset(1, hMargin, vMargin, hMargin, vMargin)
+
+}
+
+fun borderedKeyBackgroundDrawable(
+    @ColorInt bkgColor: Int,
+    @ColorInt shadowColor: Int,
+    radius: Float,
+    shadowWidth: Int,
+    hMargin: Int,
+    vMargin: Int
+): Drawable {
+    val shape = GradientDrawable().apply {
+        shape = GradientDrawable.RECTANGLE
+        cornerRadius = radius
+
+        setColor(bkgColor)
+        setStroke(shadowWidth, shadowColor)
+    }
+    return InsetDrawable(shape, hMargin, vMargin, hMargin, vMargin)
 }

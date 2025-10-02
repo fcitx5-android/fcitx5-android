@@ -56,6 +56,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
 
     val bordered: Boolean
     val rippled: Boolean
+    val solidBordered: Boolean
     val radius: Float
     val hMargin: Int
     val vMargin: Int
@@ -64,6 +65,7 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
         val prefs = ThemeManager.prefs
         bordered = prefs.keyBorder.getValue()
         rippled = prefs.keyRippleEffect.getValue()
+        solidBordered = prefs.keySolidBorder.getValue()
         radius = dp(prefs.keyRadius.getValue().toFloat())
         val landscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         val hMarginPref =
@@ -122,12 +124,14 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                 Variant.Alternative -> theme.altKeyBackgroundColor
                 Variant.Accent -> theme.accentKeyBackgroundColor
             }
-            val shadowWidth = dp(1)
+            val borderOrShadowWidth = dp(1)
             // background: key border
-            appearanceView.background = borderedKeyBackgroundDrawable(
+            appearanceView.background = if (solidBordered) borderedKeyBackgroundDrawable(
                 bkgColor, theme.keyShadowColor,
-                radius, shadowWidth, hMargin, vMargin
-            )
+                radius, borderOrShadowWidth, hMargin, vMargin
+            ) else shadowedKeyBackgroundDrawable(
+                bkgColor, theme.keyShadowColor,
+                radius, borderOrShadowWidth, hMargin, vMargin)
             // foreground: press highlight or ripple
             setupPressHighlight()
         } else {
@@ -159,8 +163,10 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
     }
 
     private fun highlightMaskDrawable(@ColorInt color: Int): Drawable {
-        return if (bordered) insetRadiusDrawable(hMargin, vMargin, radius, color)
-        else InsetDrawable(ColorDrawable(color), hMargin, vMargin, hMargin, vMargin)
+        return if (bordered) {
+            if (solidBordered) borderedKeyBackgroundDrawable(Color.TRANSPARENT, theme.keyShadowColor, radius, dp(2), hMargin, vMargin)
+            else insetRadiusDrawable(hMargin, vMargin, radius, color)
+        } else InsetDrawable(ColorDrawable(color), hMargin, vMargin, hMargin, vMargin)
     }
 
     override fun setEnabled(enabled: Boolean) {
