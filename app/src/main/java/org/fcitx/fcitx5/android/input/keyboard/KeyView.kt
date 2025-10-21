@@ -152,6 +152,16 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
                 // ripple should be masked with an opaque color
                 mask ?: highlightMaskDrawable(Color.WHITE)
             )
+        } else if (bordered && borderStroke) {
+            StateListDrawable().apply {
+                addState(
+                    intArrayOf(android.R.attr.state_pressed),
+                    borderedKeyBackgroundDrawable(
+                        Color.TRANSPARENT, theme.keyShadowColor,
+                        radius, dp(2), hMargin, vMargin
+                    )
+                )
+            }
         } else {
             StateListDrawable().apply {
                 addState(
@@ -164,10 +174,8 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
     }
 
     private fun highlightMaskDrawable(@ColorInt color: Int): Drawable {
-        return if (bordered) {
-            if (solidBordered) borderedKeyBackgroundDrawable(Color.TRANSPARENT, theme.keyShadowColor, radius, dp(2), hMargin, vMargin)
-            else insetRadiusDrawable(hMargin, vMargin, radius, color)
-        } else InsetDrawable(ColorDrawable(color), hMargin, vMargin, hMargin, vMargin)
+        return if (bordered) insetRadiusDrawable(hMargin, vMargin, radius, color)
+        else InsetDrawable(ColorDrawable(color), hMargin, vMargin, hMargin, vMargin)
     }
 
     override fun setEnabled(enabled: Boolean) {
