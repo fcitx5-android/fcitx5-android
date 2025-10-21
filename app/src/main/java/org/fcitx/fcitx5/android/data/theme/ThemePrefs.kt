@@ -36,7 +36,10 @@ class ThemePrefs(sharedPreferences: SharedPreferences) :
 
     val keyBorder = switch(R.string.key_border, "key_border", false)
 
-    val keySolidBorder = switch(R.string.key_solid_border, "key_solid_border", false)
+    val keyBorderStroke = switch(
+        R.string.key_border_stroke, "key_border_stroke", false,
+        enableUiOn = { keyBorder.getValue() }
+    )
 
     val keyRippleEffect = switch(R.string.key_ripple_effect, "key_ripple_effect", false)
 

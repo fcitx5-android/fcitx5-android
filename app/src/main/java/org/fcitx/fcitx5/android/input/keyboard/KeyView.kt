@@ -55,8 +55,8 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
     CustomGestureView(ctx) {
 
     val bordered: Boolean
+    val borderStroke: Boolean
     val rippled: Boolean
-    val solidBordered: Boolean
     val radius: Float
     val hMargin: Int
     val vMargin: Int
@@ -64,8 +64,8 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
     init {
         val prefs = ThemeManager.prefs
         bordered = prefs.keyBorder.getValue()
+        borderStroke = prefs.keyBorderStroke.getValue()
         rippled = prefs.keyRippleEffect.getValue()
-        solidBordered = prefs.keySolidBorder.getValue()
         radius = dp(prefs.keyRadius.getValue().toFloat())
         val landscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         val hMarginPref =
@@ -126,12 +126,13 @@ abstract class KeyView(ctx: Context, val theme: Theme, val def: KeyDef.Appearanc
             }
             val borderOrShadowWidth = dp(1)
             // background: key border
-            appearanceView.background = if (solidBordered) borderedKeyBackgroundDrawable(
+            appearanceView.background = if (borderStroke) borderedKeyBackgroundDrawable(
                 bkgColor, theme.keyShadowColor,
                 radius, borderOrShadowWidth, hMargin, vMargin
             ) else shadowedKeyBackgroundDrawable(
                 bkgColor, theme.keyShadowColor,
-                radius, borderOrShadowWidth, hMargin, vMargin)
+                radius, borderOrShadowWidth, hMargin, vMargin
+            )
             // foreground: press highlight or ripple
             setupPressHighlight()
         } else {
