@@ -13,7 +13,7 @@ import android.graphics.drawable.StateListDrawable
 import androidx.annotation.DrawableRes
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
-import org.fcitx.fcitx5.android.input.keyboard.borderedKeyBackgroundDrawable
+import org.fcitx.fcitx5.android.input.keyboard.shadowedKeyBackgroundDrawable
 import org.fcitx.fcitx5.android.input.keyboard.insetRadiusDrawable
 import org.fcitx.fcitx5.android.utils.borderDrawable
 import org.fcitx.fcitx5.android.utils.pressHighlightDrawable
@@ -49,7 +49,7 @@ class TextEditingButton(
     init {
         if (bordered) {
             val bkgColor = if (altStyle) theme.altKeyBackgroundColor else theme.keyBackgroundColor
-            background = borderedKeyBackgroundDrawable(
+            background = shadowedKeyBackgroundDrawable(
                 bkgColor, theme.keyShadowColor,
                 radius, shadowWidth, hInset, vInset
             )
@@ -126,14 +126,14 @@ class TextEditingButton(
             StateListDrawable().apply {
                 addState(
                     intArrayOf(android.R.attr.state_activated),
-                    borderedKeyBackgroundDrawable(
+                    shadowedKeyBackgroundDrawable(
                         theme.genericActiveBackgroundColor, theme.keyShadowColor,
                         radius, shadowWidth, hInset, vInset
                     )
                 )
                 addState(
                     intArrayOf(android.R.attr.state_enabled),
-                    borderedKeyBackgroundDrawable(
+                    shadowedKeyBackgroundDrawable(
                         theme.keyBackgroundColor, theme.keyShadowColor,
                         radius, shadowWidth, hInset, vInset
                     )
