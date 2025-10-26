@@ -93,7 +93,7 @@ object EditorInfoParser {
 
     private fun parseStringArray(arr: Any?): String {
         if (arr == null) return NULL
-        if (arr !is Array<*> || arr[0] !is String) return arr.toString()
+        if (arr !is Array<*>) return arr.toString()
         return arr.joinToString()
     }
 
