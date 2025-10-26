@@ -52,7 +52,7 @@ fun shadowedKeyBackgroundDrawable(
 ): Drawable = LayerDrawable(
     arrayOf(
         radiusDrawable(radius, shadowColor),
-        radiusDrawable(radius, bkgColor), // Use adjusted radius
+        radiusDrawable(radius, bkgColor),
     )
 ).apply {
     setLayerInset(0, hMargin, vMargin, hMargin, vMargin - shadowWidth)
