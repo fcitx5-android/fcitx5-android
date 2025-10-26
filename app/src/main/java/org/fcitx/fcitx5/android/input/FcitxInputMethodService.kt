@@ -414,6 +414,30 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         currentInputConnection?.commitText("", 1)
     }
 
+    fun clearEditorText() {
+        finishComposing()
+        val ic = currentInputConnection ?: return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val inBatch = ic.beginBatchEdit()
+            try {
+                val ok = try {
+                    // API 24+ only
+                    ic.deleteSurroundingTextInCodePoints(Int.MAX_VALUE, Int.MAX_VALUE)
+                } catch (_: Throwable) {
+                    false // Silent failure: do not attempt to recover
+                }
+                if (ok) {
+                    ic.setSelection(0, 0)
+                    selection.resetTo(0)
+                    cursorUpdateIndex += 1
+                    postFcitxJob { reset() }
+                }
+            } finally {
+                if (inBatch) ic.endBatchEdit()
+            }
+        }
+    }
+
     fun sendCombinationKeyEvents(
         keyEventCode: Int,
         alt: Boolean = false,

@@ -198,6 +198,8 @@
     <string name="notification_permission_title">No Notification Permission</string>
     <string name="toolbar_num_row_on_password">Show number row on toolbar when inputting password</string>
     <string name="space_long_press_behavior">Space key long press behavior</string>
+    <string name="backspace_swipe_clear">Swipe up on Delete to clear text</string>
+    <string name="backspace_swipe_clear_summary">Hold Delete and swipe up to clear the current field</string>
     <string name="space_behavior_none">None</string>
     <string name="space_behavior_enumerate">Enumerate input methods</string>
     <string name="space_behavior_activate">Toggle input method activate state</string>

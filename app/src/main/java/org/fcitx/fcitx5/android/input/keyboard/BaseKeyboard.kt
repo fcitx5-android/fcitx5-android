@@ -13,6 +13,7 @@ import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
 import androidx.core.view.updateLayoutParams
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxKeyMapping
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.core.KeyStates
@@ -23,6 +24,7 @@ import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.GestureType
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListener
+ 
 import org.fcitx.fcitx5.android.input.popup.PopupAction
 import org.fcitx.fcitx5.android.input.popup.PopupActionListener
 import splitties.dimensions.dp
@@ -62,6 +64,14 @@ abstract class BaseKeyboard(
     private val spaceSwipeChangeListener = ManagedPreference.OnChangeListener<Boolean> { _, v ->
         spaceKeys.forEach {
             it.swipeEnabled = v
+        }
+    }
+
+    private val backspaceKeys = mutableSetOf<KeyView>()
+    private val backspaceSwipeClear = prefs.keyboard.backspaceSwipeClear
+    private val backspaceSwipeChangeListener = ManagedPreference.OnChangeListener<Boolean> { _, enabled ->
+        backspaceKeys.forEach { key ->
+            key.swipeThresholdY = if (enabled) inputSwipeThreshold else disabledSwipeThreshold
         }
     }
 
@@ -141,7 +151,9 @@ abstract class BaseKeyboard(
                 centerHorizontally()
             })
         }
+        
         spaceSwipeMoveCursor.registerOnChangeListener(spaceSwipeChangeListener)
+        backspaceSwipeClear.registerOnChangeListener(backspaceSwipeChangeListener)
     }
 
     private fun createKeyView(def: KeyDef): KeyView {
@@ -186,8 +198,14 @@ abstract class BaseKeyboard(
                 swipeEnabled = true
                 swipeRepeatEnabled = true
                 swipeThresholdX = selectionSwipeThreshold
-                swipeThresholdY = disabledSwipeThreshold
+                swipeThresholdY =
+                    if (backspaceSwipeClear.getValue()) inputSwipeThreshold else disabledSwipeThreshold
+                backspaceKeys += this
+
+                // Horizontal selection move & repeat delete handled below; keep listener composable
+                val oldOnGestureListener = onGestureListener ?: OnGestureListener.Empty
                 onGestureListener = OnGestureListener { view, event ->
+                    view as KeyView
                     when (event.type) {
                         GestureType.Move -> {
                             val count = event.countX
@@ -202,7 +220,7 @@ abstract class BaseKeyboard(
                             false
                         }
                         else -> false
-                    }
+                    } || oldOnGestureListener.onGesture(view, event)
                 }
             }
             def.behaviors.forEach {
@@ -299,15 +317,59 @@ abstract class BaseKeyboard(
                             } || oldOnGestureListener.onGesture(view, event)
                         }
                     }
+                    is KeyDef.Popup.ClearConfirm -> {
+                        val clearEnabled = backspaceSwipeClear.getValue()
+                        if (!clearEnabled) return@forEach
+                        val oldOnGestureListener = onGestureListener ?: OnGestureListener.Empty
+
+                        val controller = BackspaceClearController(
+                            view = this,
+                            showDelayMs = 300L,
+                            callbacks = object : BackspaceClearController.Callbacks {
+                                override fun showClearConfirm(danger: Boolean) {
+                                    onPopupAction(
+                                        PopupAction.ShowClearConfirmAction(id, bounds, danger)
+                                    )
+                                }
+
+                                override fun changeFocus(x: Float, y: Float): Boolean =
+                                    onPopupChangeFocus(id, x, y)
+
+                                override fun trigger(): Boolean = onPopupTrigger(id)
+
+                                override fun dismiss() {
+                                    onPopupAction(PopupAction.DismissAction(id))
+                                }
+
+                                override fun setRepeatEnabled(enabled: Boolean) {
+                                    this@apply.repeatEnabled = enabled
+                                }
+                            }
+                        )
+
+                        onGestureListener = OnGestureListener { view, event ->
+                            when (event.type) {
+                                GestureType.Down -> {
+                                    controller.onDown()
+                                    false
+                                }
+                                GestureType.Move -> controller.onMove(event.totalX, event.totalY, event.x, event.y)
+                                GestureType.Up -> controller.onUp()
+                                else -> false
+                            } || oldOnGestureListener.onGesture(view, event)
+                        }
+                    }
                     is KeyDef.Popup.AltPreview -> {
                         val oldOnGestureListener = onGestureListener ?: OnGestureListener.Empty
                         onGestureListener = OnGestureListener { view, event ->
                             view as KeyView
                             if (popupOnKeyPress) {
                                 when (event.type) {
-                                    GestureType.Down -> onPopupAction(
-                                        PopupAction.PreviewAction(view.id, it.content, view.bounds)
-                                    )
+                                    GestureType.Down -> {
+                                        onPopupAction(
+                                            PopupAction.PreviewAction(view.id, it.content, view.bounds)
+                                        )
+                                    }
                                     GestureType.Move -> {
                                         val triggered = swipeSymbolDirection.checkY(event.totalY)
                                         val text = if (triggered) it.alternative else it.content
@@ -330,9 +392,11 @@ abstract class BaseKeyboard(
                             view as KeyView
                             if (popupOnKeyPress) {
                                 when (event.type) {
-                                    GestureType.Down -> onPopupAction(
-                                        PopupAction.PreviewAction(view.id, it.content, view.bounds)
-                                    )
+                                    GestureType.Down -> {
+                                        onPopupAction(
+                                            PopupAction.PreviewAction(view.id, it.content, view.bounds)
+                                        )
+                                    }
                                     GestureType.Up -> {
                                         onPopupAction(PopupAction.DismissAction(view.id))
                                     }
@@ -477,10 +541,13 @@ abstract class BaseKeyboard(
         val triggerAction = PopupAction.TriggerAction(viewId)
         // ask popup keyboard whether there's a pending KeyAction
         onPopupAction(triggerAction)
-        val action = triggerAction.outAction ?: return false
-        onAction(action, KeyActionListener.Source.Popup)
+        val action = triggerAction.outAction
+        // Always dismiss after trigger evaluation (even when no action)
         onPopupAction(PopupAction.DismissAction(viewId))
-        return true
+        return if (action != null) {
+            onAction(action, KeyActionListener.Source.Popup)
+            true
+        } else false
     }
 
     open fun onAttach() {
