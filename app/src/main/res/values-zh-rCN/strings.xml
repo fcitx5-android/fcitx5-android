@@ -122,6 +122,7 @@
     <string name="punctuation_position">标点位置</string>
     <string name="punctuation_pos_bottom">底部（仅限竖屏）</string>
     <string name="punctuation_pos_top_right">右上</string>
+    <string name="punctuation_pos_none">无</string>
     <string name="expand_toolbar_by_default">默认展开工具栏</string>
     <string name="popup_on_key_press">按键时弹出显示字符</string>
     <string name="disable_animation">禁用动画</string>
@@ -269,7 +270,8 @@
     <string name="flip_vertically">垂直翻转</string>
     <string name="crop">裁剪</string>
     <string name="candidates_window">候选窗口</string>
-    <string name="show_candidates_window">显示候选词窗口</string>
+    <string name="show_candidates_window">显示候选窗口</string>
+    <string name="candidates_window_radius">候选窗口圆角半径</string>
     <string name="follow_input_device">根据输入设备而定</string>
     <string name="candidates_orientation">候选词列表方向</string>
     <string name="automatic">自动</string>
@@ -303,4 +305,15 @@
     <string name="move_cursor_to_end">把光标移动到结尾</string>
     <string name="open_input_method_settings">打开输入法设置</string>
     <string name="delete_all">全部删除</string>
+    <string name="share">分享</string>
+    <string name="emoji_and_symbols">表情和符号</string>
+    <string name="default_emoji_skin_tone">默认表情肤色</string>
+    <string name="emoji_skin_tone_none">无</string>
+    <string name="emoji_skin_tone_type_1_2">🏻 浅肤色 (Type-1-2)</string>
+    <string name="emoji_skin_tone_type_3">🏼 中等浅肤色 (Type-3)</string>
+    <string name="emoji_skin_tone_type_4">🏽 中等肤色 (Type-4)</string>
+    <string name="emoji_skin_tone_type_5">🏾 中等深肤色 (Type-5)</string>
+    <string name="emoji_skin_tone_type_6">🏿 深肤色 (Type-6)</string>
+    <string name="hide_unsupported_emojis">隐藏不支持的表情</string>
+    <string name="key_border_stroke">启用按键边框描边</string>
 </resources>
