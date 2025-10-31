@@ -1,10 +1,11 @@
 [versions]
-androidGradlePlugin = "8.11.1"
-kotlin = "2.2.0"
-ksp = "2.2.0-2.0.2"
-lifecycle = "2.9.2"
-navigation = "2.9.2"
-room = "2.7.2"
+androidGradlePlugin = "8.13.0"
+kotlin = "2.2.21"
+ksp = "2.2.21-2.0.4"
+lifecycle = "2.9.4"
+navigation = "2.9.5"
+room = "2.8.3"
+test = "1.7.0"
 splitties = "3.0.0"
 aboutlibraries = "12.2.4"
 arrow = "2.1.2"
@@ -37,7 +38,7 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
 androidx-startup = { module = "androidx.startup:startup-runtime", version = "1.2.0" }
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version = "1.1.0" }
-material = { module = "com.google.android.material:material", version = "1.12.0" }
+material = { module = "com.google.android.material:material", version = "1.13.0" }
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 arrow-functions = { module = "io.arrow-kt:arrow-functions", version.ref = "arrow" }
 imagecropper = { module = "com.vanniktech:android-image-cropper", version = "4.6.0" }
@@ -56,8 +57,8 @@ splitties-views-recyclerview = { module = "com.louiscad.splitties:splitties-view
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutlibraries" }
 aboutlibraries-plugin = { module = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin", version.ref = "aboutlibraries" }
 junit = { module = "junit:junit", version = "4.13.2" }
-androidx-test-runner = { module = "androidx.test:runner", version = "1.6.2" }
-androidx-test-rules = { module = "androidx.test:rules", version = "1.6.1" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "test" }
+androidx-test-rules = { module = "androidx.test:rules", version.ref = "test" }
 androidx-lifecycle-testing = { module = "androidx.lifecycle:lifecycle-runtime-testing", version.ref = "lifecycle" }
 kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version = "2.2.0" }
 ksp = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
@@ -71,4 +72,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibraries" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
-gitVersion = { id = "com.palantir.git-version", version = "4.0.0" }
+gitVersion = { id = "com.palantir.git-version", version = "4.1.0" }
