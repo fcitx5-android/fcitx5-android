@@ -1,6 +1,6 @@
 {
     "uniqueId": "fcitx/fcitx5",
-    "artifactVersion": "5.1.12",
+    "artifactVersion": "5.1.16",
     "description": "Next generation of fcitx",
     "name": "fcitx/fcitx5",
     "website": "https://github.com/fcitx/fcitx5",
