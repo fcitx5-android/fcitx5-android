@@ -1,0 +1,12 @@
+{
+    "uniqueId": "facebook/zstd",
+    "artifactVersion": "1.5.7",
+    "description": "Zstandard - Fast real-time compression algorithm",
+    "name": "facebook/zstd",
+    "website": "https://www.zstd.net",
+    "tag": "native",
+    "licenses": [
+        "BSD-3-Clause",
+        "GPL-2.0-only"
+    ]
+}

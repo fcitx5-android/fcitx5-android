@@ -1,6 +1,6 @@
 {
     "uniqueId": "rime/librime",
-    "artifactVersion": "1.12.0",
+    "artifactVersion": "1.13.1",
     "description": "Rime Input Method Engine",
     "name": "rime/librime",
     "website": "https://github.com/rime/librime",
