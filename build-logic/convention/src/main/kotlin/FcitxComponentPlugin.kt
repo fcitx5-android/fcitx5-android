@@ -2,13 +2,21 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later
  * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
+import com.android.build.gradle.internal.cxx.model.CxxAbiModel
+import com.android.build.gradle.tasks.ExternalNativeBuildJsonTask
+import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.LogLevel
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Delete
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.withType
 import java.io.File
 import kotlin.io.path.isSymbolicLink
 
@@ -60,6 +68,48 @@ class FcitxComponentPlugin : Plugin<Project> {
         }
     }
 
+    abstract class InstallCMakeComponentTask : DefaultTask() {
+        @get:Input
+        abstract val target: Property<String>
+
+        @get:Input
+        abstract val component: Property<String>
+
+        @get:Input
+        abstract val sourceProject: Property<Project>
+
+        @get:Input
+        @get:Optional
+        abstract val abiModel: Property<CxxAbiModel>
+
+        @TaskAction
+        fun execute() {
+            val target = this.target.get()
+            val component = this.component.get()
+            val sourceProject = this.sourceProject.get()
+            val abiModel = abiModel.get()
+            val cmake = abiModel.variant.module.cmake!!.cmakeExe!!
+            if (target.isNotEmpty()) {
+                sourceProject.providers.exec {
+                    workingDir = abiModel.cxxBuildFolder
+                    commandLine(cmake, "--build", ".", "--target", target)
+                }.result.get()
+            }
+            sourceProject.providers.exec {
+                workingDir = abiModel.cxxBuildFolder
+                environment("DESTDIR", project.assetsDir.absolutePath)
+                commandLine(cmake, "--install", ".", "--component", component)
+            }.result.get()
+            val ext = project.extensions.getByName<FcitxComponentExtension>("fcitxComponent")
+            ext.modifyFiles.forEach { (path, function) ->
+                val file = project.assetsDir.resolve(path)
+                if (file.exists()) {
+                    function.invoke(file)
+                }
+            }
+        }
+    }
+
     /**
      * build [sourceProject]'s cmake [target], and install its [component] to [project]'s assets
      */
@@ -75,29 +125,13 @@ class FcitxComponentPlugin : Plugin<Project> {
         } else {
             "installLibrary$componentName[${sourceProject.name}]"
         }
-        // FIXME: this is deprecated, but `tasks.register` would result in task warming-up failure
-        val task = project.task(taskName) {
-            runAfterNativeConfigure(sourceProject) { abiModel ->
-                val cmake = abiModel.variant.module.cmake!!.cmakeExe!!
-                if (target.isNotEmpty()) {
-                    sourceProject.providers.exec {
-                        workingDir = abiModel.cxxBuildFolder
-                        commandLine(cmake, "--build", ".", "--target", target)
-                    }
-                }
-                sourceProject.providers.exec {
-                    workingDir = abiModel.cxxBuildFolder
-                    environment("DESTDIR", project.assetsDir.absolutePath)
-                    commandLine(cmake, "--install", ".", "--component", component)
-                }
-                val ext = project.extensions.getByName<FcitxComponentExtension>("fcitxComponent")
-                ext.modifyFiles.forEach { (path, function) ->
-                    val file = project.assetsDir.resolve(path)
-                    if (file.exists()) {
-                        function.invoke(file)
-                    }
-                }
-            }
+        val cxxAbiModel = sourceProject.getCxxAbiModelProperty()
+        val task = project.tasks.register<InstallCMakeComponentTask>(taskName) {
+            this.target.set(target)
+            this.component.set(component)
+            this.sourceProject.set(sourceProject)
+            this.abiModel.set(cxxAbiModel)
+            this.mustRunAfter(sourceProject.tasks.withType<ExternalNativeBuildJsonTask>())
         }
         project.tasks.getByName(INSTALL_TASK).dependsOn(task)
     }

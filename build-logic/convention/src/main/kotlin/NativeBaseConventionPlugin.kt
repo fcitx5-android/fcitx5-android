@@ -1,13 +1,13 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 
 import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Delete
-import org.gradle.kotlin.dsl.task
+import org.gradle.kotlin.dsl.register
 
 open class NativeBaseConventionPlugin : Plugin<Project> {
 
@@ -47,7 +47,7 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
     }
 
     private fun registerCleanCxxTask(project: Project) {
-        project.task<Delete>("cleanCxxIntermediates") {
+        project.tasks.register<Delete>("cleanCxxIntermediates") {
             delete(project.file(".cxx"))
         }.also {
             project.cleanTask.dependsOn(it)

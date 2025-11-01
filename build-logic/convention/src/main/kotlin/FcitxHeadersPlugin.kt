@@ -3,10 +3,17 @@
  * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 import com.android.build.api.variant.LibraryAndroidComponentsExtension
+import com.android.build.gradle.internal.cxx.model.CxxAbiModel
+import com.android.build.gradle.tasks.ExternalNativeBuildJsonTask
 import com.android.build.gradle.tasks.PrefabPackageConfigurationTask
+import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Delete
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByName
@@ -55,19 +62,39 @@ class FcitxHeadersPlugin : Plugin<Project> {
         }
     }
 
-    private fun registerInstallTask(project: Project, name: String, component: String, dest: File) {
-        // FIXME: this is deprecated, but `tasks.register` would result in task warming-up failure
-        val installHeadersTask = project.task(name) {
-            runAfterNativeConfigure(project) { abiModel ->
-                val cmake = abiModel.variant.module.cmake!!.cmakeExe!!
-                project.providers.exec {
-                    workingDir = abiModel.cxxBuildFolder
-                    environment("DESTDIR", dest.absolutePath)
-                    commandLine(cmake, "--install", ".", "--component", component)
-                }
-            }
-        }
+    abstract class InstallHeaderTask : DefaultTask() {
+        @get:Input
+        abstract val component: Property<String>
 
+        @get:Input
+        abstract val dest: Property<File>
+
+        @get:Input
+        @get:Optional
+        abstract val abiModel: Property<CxxAbiModel>
+
+        @TaskAction
+        fun execute() {
+            val component = this.component.get()
+            val dest = this.dest.get()
+            val abiModel = abiModel.get()
+            val cmake = abiModel.variant.module.cmake!!.cmakeExe!!
+            project.providers.exec {
+                workingDir = abiModel.cxxBuildFolder
+                environment("DESTDIR", dest.absolutePath)
+                commandLine(cmake, "--install", ".", "--component", component)
+            }.result.get()
+        }
+    }
+
+    private fun registerInstallTask(project: Project, name: String, component: String, dest: File) {
+        val cxxAbiModel = project.getCxxAbiModelProperty()
+        val installHeadersTask = project.tasks.register<InstallHeaderTask>(name) {
+            this.component.set(component)
+            this.dest.set(dest)
+            this.abiModel.set(cxxAbiModel)
+            this.mustRunAfter(project.tasks.withType<ExternalNativeBuildJsonTask>())
+        }
         // Make sure headers have been installed before configuring prefab package
         project.tasks.withType<PrefabPackageConfigurationTask>().all {
             dependsOn(installHeadersTask)
