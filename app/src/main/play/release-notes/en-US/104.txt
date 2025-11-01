@@ -1,0 +1,47 @@
+# 0.1.2 - Dynamic Color and Emoji Skin Tones
+
+## Highlights
+
+- Dynamic color themes for Android 12+, and monochrome variant of adaptive icon for Android 13+
+- New theme options: candidate window border radius, hide punctuation on keys, draw key border stroke instead of shadow
+- New option for Emoji Picker to hide unsupported emojis and change skin tone modifier
+
+### Notable changes
+
+- Recently used symbol and emojis are now saved as SharedPreference instead of plain text files, and will be migrated when opening the picker. Importing user data from older version will still work, but not vice versa
+- Improves compatibility for some devices with physical keyboard, eg. select candidate with combination keys
+
+### Build process improvements
+
+- Update Android NDK to r28, makes the app compatible with 16 KB page sizes
+- Migrate navigation graph xml to kotlin DSL
+- Make sure .mo files are reproducible across different gettext versions
+
+## New features
+
+- Dynamic color themes for Android 12+
+- Long press to share clipboard content
+- New preference for candidate window corner radius
+- Add option to hide punctuation on keyboard
+- Emoji skin tone selection and preference
+- Filter out unsupported emoji in picker
+- Add monochrome variant for adaptive icon (aka themed icon)
+- Allow changing verbose log option without restart
+- Add option to draw key border stroke instead of shadow
+
+## Bug fixes
+
+- Workaround some editors which misuse TYPE_TEXT_VARIATION_VISIBLE_PASSWORD as NoSpellCheck
+- Fix haptic feedback when amplitude not changed
+- Correct license of fcitx5-chewing
+- Don't show InputView on combination keys
+- Fix trigger candidate action in bulk candidate list
+- Fix long candidate line wrapping in vertical mode
+- Move CandidatesView above cursor only when there's larger space
+- Workaround modifier states for some phone keyboard
+- Fix CandidatesView OnGlobalLayoutListener memory leak
+- Fix ClearURLs redirection rules
+- Fix importErrorDialog message formatting
+- Tweak commitAndReset workaround for all languages
+- Fix "restart fcitx instance" in DeveloperFragment
+- Fix EditorInfoWindow crash on empty contentMimeTypes
