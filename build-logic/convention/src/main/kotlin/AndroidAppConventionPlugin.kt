@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
@@ -25,6 +25,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
  * - Provide default configuration for `android {...}`
  * - Add desugar JDK libs
  */
+@Suppress("unused")
 class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
 
     override fun apply(target: Project) {
