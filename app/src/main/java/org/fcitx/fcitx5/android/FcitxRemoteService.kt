@@ -23,6 +23,7 @@ import org.fcitx.fcitx5.android.core.reloadPinyinDict
 import org.fcitx.fcitx5.android.core.reloadQuickPhrase
 import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
+import org.fcitx.fcitx5.android.data.otp.OtpManager
 import org.fcitx.fcitx5.android.utils.Const
 import org.fcitx.fcitx5.android.utils.desc
 import org.fcitx.fcitx5.android.utils.descEquals
@@ -93,8 +94,8 @@ class FcitxRemoteService : Service() {
             Timber.d("unregisterClipboardEntryTransformer: ${transformer.desc}")
             scope.launch {
                 clipboardTransformers.remove(transformer)
-                        || clipboardTransformers.removeAll { it.descEquals(transformer) }
-                        || return@launch
+                    || clipboardTransformers.removeAll { it.descEquals(transformer) }
+                    || return@launch
                 updateClipboardManager()
             }
         }
@@ -105,6 +106,13 @@ class FcitxRemoteService : Service() {
 
         override fun reloadQuickPhrase() {
             FcitxDaemon.getFirstConnectionOrNull()?.runIfReady { reloadQuickPhrase() }
+        }
+
+        override fun updateOtp(otp: String?) {
+            Timber.d("updateOtp called: $otp")
+            otp?.let {
+                OtpManager.updateOtp(it)
+            }
         }
     }
 
