@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2024-2025 Fcitx5 for Android Contributors
  */
 
 import com.android.build.gradle.internal.dsl.SigningConfig
@@ -9,20 +9,19 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.kotlin.dsl.the
-import java.io.ByteArrayOutputStream
 import java.io.File
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 fun Project.runCmd(cmd: String, defaultValue: String = ""): String {
-    val stdout = ByteArrayOutputStream()
-    val result = stdout.use {
-        project.exec {
-            commandLine = cmd.split(" ")
-            standardOutput = stdout
-        }
+    val output = providers.exec {
+        commandLine = cmd.split(" ")
     }
-    return if (result.exitValue == 0) stdout.toString().trim() else defaultValue
+    return if (output.result.get().exitValue == 0) {
+        output.standardOutput.asText.get().trim()
+    } else {
+        defaultValue
+    }
 }
 
 val Project.libs get() = the<LibrariesForLibs>()

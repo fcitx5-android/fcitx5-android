@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import org.gradle.api.Plugin
@@ -36,7 +36,7 @@ class AndroidPluginAppConventionPlugin : Plugin<Project> {
             applicationVariants.all {
                 val pluginsTaskName = "assemble${name.capitalized()}Plugins"
                 val pluginsTask = target.rootProject.tasks.findByName(pluginsTaskName)
-                    ?: target.rootProject.task(pluginsTaskName)
+                    ?: target.rootProject.tasks.register(pluginsTaskName).get()
                 pluginsTask.dependsOn(assembleProvider)
             }
         }
