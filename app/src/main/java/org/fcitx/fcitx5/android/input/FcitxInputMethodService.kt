@@ -653,6 +653,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         resetComposingState()
         val flags = CapabilityFlags.fromEditorInfo(attribute)
         capabilityFlags = flags
+        // EditorInfo may change between onStartInput and onStartInputView
+        inputDeviceMgr.notifyOnStartInput(attribute)
         Timber.d("onStartInput: initialSel=${selection.current}, restarting=$restarting")
         // wait until InputContext created/activated
         postFcitxJob {

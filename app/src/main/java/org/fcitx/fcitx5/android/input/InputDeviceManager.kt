@@ -72,6 +72,10 @@ class InputDeviceManager(private val onChange: (Boolean) -> Unit) {
 
     private var candidatesViewMode by AppPrefs.getInstance().candidates.mode
 
+    fun notifyOnStartInput(attribute: EditorInfo) {
+        isNullInputType = attribute.inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL
+    }
+
     /**
      * @return should use virtual keyboard
      */
