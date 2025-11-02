@@ -13,6 +13,9 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
         val prebuiltDir = target.rootProject.projectDir.resolve("lib/fcitx5/src/main/cpp/prebuilt")
+        val isBuildingBundle = target.rootProject.gradle.startParameter.taskNames.any {
+            it.startsWith("${target.path}:bundle")
+        }
         target.extensions.configure(CommonExtension::class.java) {
             ndkVersion = target.ndkVersion
             defaultConfig {
@@ -34,12 +37,16 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
                     path("src/main/cpp/CMakeLists.txt")
                 }
             }
-            splits.abi {
-                isEnable = true
-                isUniversalApk = false
-                reset()
-                (target.buildAbiOverride?.split(",") ?: Versions.supportedABIs).forEach {
-                    include(it)
+            // split apks should be disabled when building bundle
+            // https://issuetracker.google.com/issues/402800800
+            if (!isBuildingBundle) {
+                splits.abi {
+                    isEnable = true
+                    isUniversalApk = false
+                    reset()
+                    (target.buildAbiOverride?.split(",") ?: Versions.supportedABIs).forEach {
+                        include(it)
+                    }
                 }
             }
         }
