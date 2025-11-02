@@ -14,6 +14,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.RegularFile
 import org.gradle.api.internal.provider.AbstractProperty
 import org.gradle.api.internal.provider.Providers
+import org.gradle.api.plugins.BasePluginExtension
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -134,7 +135,10 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
                 }
                 // applicationId is not set upon apply
                 it.defaultConfig {
-                    target.setProperty("archivesBaseName", "$applicationId-$versionName")
+                    // https://www.norio.be/blog/archivesBaseName-removed-from-gradle9.html
+                    target.extensions.configure<BasePluginExtension> {
+                        archivesName.set("$applicationId-$versionName")
+                    }
                 }
             }
         }
