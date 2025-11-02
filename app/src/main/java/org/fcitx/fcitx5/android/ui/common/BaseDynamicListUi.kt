@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.ui.common
 
@@ -13,6 +13,7 @@ import android.widget.CheckBox
 import android.widget.ImageButton
 import androidx.activity.OnBackPressedDispatcher
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnAttach
@@ -21,9 +22,8 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.ItemTouchHelper
 import arrow.core.identity
-import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
+import com.google.android.material.behavior.HideViewOnScrollBehavior
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.utils.onPositiveButtonClick
@@ -52,7 +52,6 @@ import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.gravityEndBottom
 import splitties.views.imageDrawable
 import splitties.views.recyclerview.verticalLayoutManager
-import kotlin.math.min
 
 abstract class BaseDynamicListUi<T>(
     override val ctx: Context,
@@ -174,15 +173,6 @@ abstract class BaseDynamicListUi<T>(
                 action.invoke()
                 suspendUndo = false
             }
-            .addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                override fun onShown(transientBottomBar: Snackbar) {
-                    // snackbar is invisible when it attached to parent,
-                    // but change visibility won't trigger `onDependentViewChanged`.
-                    // so we need to update fab position when snackbar fully shown
-                    // see [^1]
-                    fab.translationY = -transientBottomBar.view.height.toFloat()
-                }
-            })
             .show()
     }
 
@@ -310,7 +300,12 @@ abstract class BaseDynamicListUi<T>(
         add(fab, defaultLParams {
             gravity = gravityEndBottom
             margin = dp(16)
-            behavior = object : HideBottomViewOnScrollBehavior<FloatingActionButton>() {
+            behavior = object : HideViewOnScrollBehavior<FloatingActionButton>(EDGE_BOTTOM) {
+                /**
+                 * the `translationY` FAB needs to be shown above the snackbar
+                 */
+                var scrollInOffset = 0f
+
                 @SuppressLint("RestrictedApi")
                 override fun layoutDependsOn(
                     parent: CoordinatorLayout,
@@ -325,10 +320,11 @@ abstract class BaseDynamicListUi<T>(
                     child: FloatingActionButton,
                     dependency: View
                 ): Boolean {
+                    scrollInOffset = dependency.translationY - dependency.height
                     // [^1]: snackbar is invisible when it attached to parent
-                    // update fab position only when snackbar is visible
-                    if (dependency.isVisible) {
-                        child.translationY = min(0f, dependency.translationY - dependency.height)
+                    // update FAB position only when snackbar is visible
+                    if (isScrolledIn && dependency.isVisible) {
+                        child.translationY = scrollInOffset
                         return true
                     }
                     return false
@@ -339,7 +335,23 @@ abstract class BaseDynamicListUi<T>(
                     child: FloatingActionButton,
                     dependency: View
                 ) {
-                    child.translationY = 0f
+                    // if the user dismiss the snackbar manually while FAB is visible,
+                    // move the FAB back to its normal position
+                    if (isScrolledIn) {
+                        child.animate().translationY(0f)
+                    }
+                }
+            }.apply {
+                addOnScrollStateChangedListener { view, _ ->
+                    // overwrite FAB's position when scrolling in while snackbar is visible
+                    if (isScrolledIn && scrollInOffset < 0f) {
+                        // need to post because `HideViewOnScrollBehavior#slideIn` starts animation
+                        // after notifying all onScrollStateChangedListeners
+                        ContextCompat.getMainExecutor(ctx).execute {
+                            view.clearAnimation()
+                            view.animate().translationY(scrollInOffset)
+                        }
+                    }
                 }
             }
         })
