@@ -73,13 +73,11 @@ class MainService : FcitxPluginService() {
       object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
           val messages = android.provider.Telephony.Sms.Intents.getMessagesFromIntent(intent)
-          for (sms in messages) {
-            val message = sms.messageBody
-            val code = extractOtp(message)
-            if (code != null) {
-              log("OTP Detected: $code")
-              tryInputOtp(context, code)
-            }
+          val fullMessage = messages.joinToString("") { it.messageBody }
+          val code = extractOtp(fullMessage)
+          if (code != null) {
+            log("OTP Detected: $code")
+            tryInputOtp(context, code)
           }
         }
       }
