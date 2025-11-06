@@ -86,6 +86,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private val cachedKeyEvents = LruCache<Int, KeyEvent>(78)
     private var cachedKeyEventIndex = 0
 
+    /**
+     * Saves MetaState produced by hardware keyboard with "sticky" modifier keys, to clear them in order.
+     * See also [InputConnection#clearMetaKeyStates(int)](https://developer.android.com/reference/android/view/inputmethod/InputConnection#clearMetaKeyStates(int))
+     */
+    private var lastMetaState: Int = 0
+
     private lateinit var pkgNameCache: PackageNameCache
 
     private lateinit var decorView: View
@@ -235,6 +241,19 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     // use cached event if available
                     cachedKeyEvents.remove(it.timestamp)?.let { keyEvent ->
                         currentInputConnection?.sendKeyEvent(keyEvent)
+                        if (KeyEvent.isModifierKey(keyEvent.keyCode)) {
+                            when (keyEvent.action) {
+                                KeyEvent.ACTION_DOWN -> {
+                                    // save current metaState when modifier key down
+                                    lastMetaState = keyEvent.metaState
+                                }
+                                KeyEvent.ACTION_UP -> {
+                                    // only clear metaState that would be missing when this modifier key up
+                                    currentInputConnection?.clearMetaKeyStates(lastMetaState xor keyEvent.metaState)
+                                    lastMetaState = keyEvent.metaState
+                                }
+                            }
+                        }
                         return@event
                     }
                     // simulate key event
