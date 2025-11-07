@@ -552,27 +552,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // KeyUp and KeyDown events actually can happen on the same time
         val timestamp = cachedKeyEventIndex++
         cachedKeyEvents.put(timestamp, event)
-        val up = event.action == KeyEvent.ACTION_UP
-        val states = KeyStates.fromKeyEvent(event)
-        val charCode = event.unicodeChar
-        // try send charCode first, allow upper case and lower case character generating different KeySym
-        // skip \t, because it's charCode is different from KeySym
-        // skip \n, because fcitx wants \r for return
-        // skip ' ', because it would produce same KeySym regardless of the modifier
-        if (charCode > 0 && charCode != '\t'.code && charCode != '\n'.code && charCode != ' '.code) {
-            // drop modifier state when using combination keys to input number/symbol on some phones
-            // because fcitx doesn't recognize selection key with modifiers (eg. Alt+Q for 1)
-            // in which case event.getNumber().toInt() == event.getUnicodeChar()
-            val s = if (event.number.code == charCode) KeyStates.Empty else states
+        val sym = KeySym.fromKeyEvent(event)
+        if (sym != null) {
+            val states = KeyStates.fromKeyEvent(event)
+            val up = event.action == KeyEvent.ACTION_UP
             postFcitxJob {
-                sendKey(charCode, s.states, event.scanCode, up, timestamp)
-            }
-            return true
-        }
-        val keySym = KeySym.fromKeyEvent(event)
-        if (keySym != null) {
-            postFcitxJob {
-                sendKey(keySym, states, event.scanCode, up, timestamp)
+                sendKey(sym, states, event.scanCode, up, timestamp)
             }
             return true
         }

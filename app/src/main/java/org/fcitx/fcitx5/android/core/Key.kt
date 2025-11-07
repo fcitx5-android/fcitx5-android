@@ -24,7 +24,7 @@ data class Key(
     override fun toString() = portableString
 
     companion object {
-        val None = Key( 0, 0, "", "")
+        val None = Key(0, 0, "", "")
 
         @JvmStatic
         external fun parse(raw: String): Key
