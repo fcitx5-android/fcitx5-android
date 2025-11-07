@@ -102,7 +102,8 @@ value class KeyStates(val states: UInt) {
             // in which case event.getNumber().toInt() == event.getUnicodeChar()
             // ... but some keys can have event.getNumber() return 0, need to check displayLabel as well
             val unicode = event.unicodeChar
-            if (unicode > 0) {
+            // skip ' ', because it would produce same unicodeChar regardless of the modifier
+            if (unicode > 0 && unicode != ' '.code) {
                 val char = unicode.toChar()
                 if (char == event.number || event.displayLabel.uppercaseChar() != char.uppercaseChar()) {
                     return Empty

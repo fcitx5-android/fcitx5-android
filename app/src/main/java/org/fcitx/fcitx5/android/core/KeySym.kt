@@ -23,8 +23,6 @@ value class KeySym(val sym: Int) {
                 charCode != '\t'.code &&
                 // skip \n, because fcitx wants \r for return
                 charCode != '\n'.code &&
-                // skip ' ', because it would produce same KeySym regardless of the modifier
-                charCode != ' '.code &&
                 // skip Android's private-use character
                 charCode != KeyCharacterMap.HEX_INPUT.code &&
                 charCode != KeyCharacterMap.PICKER_DIALOG_INPUT.code
