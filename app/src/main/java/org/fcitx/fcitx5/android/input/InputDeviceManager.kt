@@ -5,13 +5,13 @@
 
 package org.fcitx.fcitx5.android.input
 
-import android.text.InputType
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.candidates.floating.FloatingCandidatesMode
+import org.fcitx.fcitx5.android.utils.isTypeNull
 import org.fcitx.fcitx5.android.utils.monitorCursorAnchor
 
 class InputDeviceManager(private val onChange: (Boolean) -> Unit) {
@@ -69,11 +69,12 @@ class InputDeviceManager(private val onChange: (Boolean) -> Unit) {
 
     private var startedInputView = false
     private var isNullInputType = true
+    private var hasKeyDown = false
 
     private var candidatesViewMode by AppPrefs.getInstance().candidates.mode
 
     fun notifyOnStartInput(attribute: EditorInfo) {
-        isNullInputType = attribute.inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL
+        isNullInputType = attribute.isTypeNull()
     }
 
     /**
@@ -81,7 +82,7 @@ class InputDeviceManager(private val onChange: (Boolean) -> Unit) {
      */
     fun evaluateOnStartInputView(info: EditorInfo, service: FcitxInputMethodService): Boolean {
         startedInputView = true
-        isNullInputType = info.inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL
+        isNullInputType = info.isTypeNull()
         val useVirtualKeyboard = when (candidatesViewMode) {
             FloatingCandidatesMode.SystemDefault -> service.superEvaluateInputViewShown()
             FloatingCandidatesMode.InputDevice -> isVirtualKeyboard
@@ -92,12 +93,13 @@ class InputDeviceManager(private val onChange: (Boolean) -> Unit) {
     }
 
     /**
-     * @return should force show input views
+     * @return should force show input views on hardware key down
      */
     fun evaluateOnKeyDown(e: KeyEvent, service: FcitxInputMethodService): Boolean {
+        hasKeyDown = true
         if (startedInputView) {
             // filter out back/home/volume buttons and combination keys
-            if (e.isPrintingKey && e.hasNoModifiers()) {
+            if (e.unicodeChar != 0) {
                 // evaluate virtual keyboard visibility when pressing physical keyboard while InputView visible
                 evaluateOnKeyDownInner(service)
             }
@@ -106,7 +108,7 @@ class InputDeviceManager(private val onChange: (Boolean) -> Unit) {
         } else {
             // force show InputView when focusing on text input (likely inputType is not TYPE_NULL)
             // and pressing any digit/letter/punctuation key on physical keyboard
-            val showInputView = !isNullInputType && e.isPrintingKey && e.hasNoModifiers()
+            val showInputView = !isNullInputType && e.unicodeChar != 0
             if (showInputView) {
                 evaluateOnKeyDownInner(service)
             }
@@ -144,7 +146,15 @@ class InputDeviceManager(private val onChange: (Boolean) -> Unit) {
         applyMode(service, useVirtualKeyboard)
     }
 
+    /**
+     * @return should force show inputView for [CandidatesView] when input method changes
+     */
+    fun evaluateOnInputMethodChange(): Boolean {
+        return if (isVirtualKeyboard || startedInputView) false else hasKeyDown
+    }
+
     fun onFinishInputView() {
         startedInputView = false
+        hasKeyDown = false
     }
 }

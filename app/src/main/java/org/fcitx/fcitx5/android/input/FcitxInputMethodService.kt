@@ -68,6 +68,7 @@ import org.fcitx.fcitx5.android.utils.InputMethodUtil
 import org.fcitx.fcitx5.android.utils.alpha
 import org.fcitx.fcitx5.android.utils.forceShowSelf
 import org.fcitx.fcitx5.android.utils.inputMethodManager
+import org.fcitx.fcitx5.android.utils.isTypeNull
 import org.fcitx.fcitx5.android.utils.monitorCursorAnchor
 import org.fcitx.fcitx5.android.utils.styledFloat
 import org.fcitx.fcitx5.android.utils.withBatchEdit
@@ -305,6 +306,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     skipNextSubtypeChange = im
                     // [^1]: notify system that input method subtype has changed
                     switchInputMethod(InputMethodUtil.componentName, subtype)
+                }
+                if (inputDeviceMgr.evaluateOnInputMethodChange()) {
+                    // show inputView for [CandidatesView] when it's likely changed by the user
+                    forceShowSelf()
                 }
             }
             else -> {}
@@ -675,6 +680,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // EditorInfo may change between onStartInput and onStartInputView
         inputDeviceMgr.notifyOnStartInput(attribute)
         Timber.d("onStartInput: initialSel=${selection.current}, restarting=$restarting")
+        val isNullType = attribute.isTypeNull()
         // wait until InputContext created/activated
         postFcitxJob {
             if (restarting) {
@@ -686,6 +692,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             // EditorInfo can be different in onStartInput and onStartInputView,
             // especially in browsers
             setCapFlags(flags)
+            // for hardware keyboard, focus to allow switching input methods before onStartInputView
+            if (!isNullType) {
+                focus(true)
+            }
         }
     }
 
@@ -983,12 +993,16 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         resetComposingState()
         postFcitxJob {
             focus(false)
+            focus(true)
         }
         showingDialog?.dismiss()
     }
 
     override fun onFinishInput() {
         Timber.d("onFinishInput")
+        postFcitxJob {
+            focus(false)
+        }
         capabilityFlags = CapabilityFlags.DefaultFlags
     }
 

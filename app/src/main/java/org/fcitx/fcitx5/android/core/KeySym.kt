@@ -18,7 +18,7 @@ value class KeySym(val sym: Int) {
         fun fromKeyEvent(event: KeyEvent): KeySym? {
             val charCode = event.unicodeChar
             // try charCode first, allow upper and lower case characters generating different KeySym
-            if (charCode > 0 &&
+            if (charCode != 0 &&
                 // skip \t, because it's charCode is different from KeySym
                 charCode != '\t'.code &&
                 // skip \n, because fcitx wants \r for return
