@@ -52,6 +52,7 @@ import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.gravityEndBottom
 import splitties.views.imageDrawable
 import splitties.views.recyclerview.verticalLayoutManager
+import kotlin.math.min
 
 abstract class BaseDynamicListUi<T>(
     override val ctx: Context,
@@ -320,10 +321,15 @@ abstract class BaseDynamicListUi<T>(
                     child: FloatingActionButton,
                     dependency: View
                 ): Boolean {
-                    scrollInOffset = dependency.translationY - dependency.height
+                    // make sure FAB is above snackbar and doesn't go below bottom inset (eg. navbar)
+                    scrollInOffset = min(0f, dependency.translationY - dependency.height)
                     // [^1]: snackbar is invisible when it attached to parent
                     // update FAB position only when snackbar is visible
                     if (isScrolledIn && dependency.isVisible) {
+                        // cancel pending animation to prevent translationY got overridden
+                        // eg. when a new snackbar cancels previous snackbar, the canceled one would start
+                        // an animation (as onDependentViewRemoved below) to update translationY constantly
+                        child.animate().cancel()
                         child.translationY = scrollInOffset
                         return true
                     }
