@@ -240,6 +240,21 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     // KeyEvent from physical keyboard (or input method engine forwardKey)
                     // use cached event if available
                     cachedKeyEvents.remove(it.timestamp)?.let { keyEvent ->
+                        /**
+                         * intercept the KeyEvent which would cause the default [android.text.method.QwertyKeyListener]
+                         * to show a Gingerbread-style CharacterPickerDialog
+                         */
+                        if (keyEvent.unicodeChar == KeyCharacterMap.PICKER_DIALOG_INPUT.code) {
+                            currentInputConnection?.sendKeyEvent(
+                                KeyEvent(
+                                    keyEvent.downTime, keyEvent.eventTime,
+                                    keyEvent.action, keyEvent.keyCode,
+                                    keyEvent.repeatCount, keyEvent.metaState, -1,
+                                    keyEvent.scanCode, keyEvent.flags, keyEvent.source
+                                )
+                            )
+                            return@event
+                        }
                         currentInputConnection?.sendKeyEvent(keyEvent)
                         if (KeyEvent.isModifierKey(keyEvent.keyCode)) {
                             when (keyEvent.action) {
