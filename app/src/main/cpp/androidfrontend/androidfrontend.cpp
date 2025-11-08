@@ -442,6 +442,11 @@ void AndroidFrontend::showToast(const std::string &s) {
 
 void AndroidFrontend::setCandidatePagingMode(const int mode) {
     pagingMode_ = mode;
+    if (mode == 0) {
+        activeIC_->updateCandidatesBulk();
+    } else {
+        activeIC_->updateCandidatesPaged();
+    }
 }
 
 void AndroidFrontend::updatePagedCandidate(const PagedCandidateEntity &paged) {

@@ -37,6 +37,19 @@ abstract class BaseInputView(
         }
     }
 
+    open fun refreshWithCachedEvents() {
+        val inputPanelData = fcitx.runImmediately { inputPanelCached }
+        val inputMethodEntry = fcitx.runImmediately { inputMethodEntryCached }
+        val statusAreaActions = fcitx.runImmediately { statusAreaActionsCached }
+        arrayOf(
+            FcitxEvent.InputPanelEvent(inputPanelData),
+            FcitxEvent.IMChangeEvent(inputMethodEntry),
+            FcitxEvent.StatusAreaEvent(
+                FcitxEvent.StatusAreaEvent.Data(statusAreaActions, inputMethodEntry)
+            )
+        ).forEach { handleFcitxEvent(it) }
+    }
+
     var handleEvents = false
         set(value) {
             field = value
