@@ -843,8 +843,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             // `fcitx.reset()` here would commit preedit after new cursor position
             // since we have `ClientUnfocusCommit`, focus out and in would do the trick
             postFcitxJob {
-                focus(false)
-                focus(true)
+                focusOutIn()
             }
         }
     }
@@ -992,8 +991,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
         resetComposingState()
         postFcitxJob {
-            focus(false)
-            focus(true)
+            focusOutIn()
         }
         showingDialog?.dismiss()
     }

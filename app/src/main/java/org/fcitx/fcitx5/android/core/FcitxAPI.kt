@@ -91,6 +91,7 @@ interface FcitxAPI {
     suspend fun triggerUnicode()
 
     suspend fun focus(focus: Boolean = true)
+    suspend fun focusOutIn()
     suspend fun activate(uid: Int, pkgName: String)
     suspend fun deactivate(uid: Int)
     suspend fun setCapFlags(flags: CapabilityFlags)

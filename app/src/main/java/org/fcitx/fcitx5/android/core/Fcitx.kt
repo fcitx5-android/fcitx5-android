@@ -165,6 +165,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         withFcitxContext { setFcitxClipboard(string, password) }
 
     override suspend fun focus(focus: Boolean) = withFcitxContext { focusInputContext(focus) }
+    override suspend fun focusOutIn() = withFcitxContext { focusInputContextOutIn() }
     override suspend fun activate(uid: Int, pkgName: String) =
         withFcitxContext { activateInputContext(uid, pkgName) }
 
@@ -343,6 +344,9 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
 
         @JvmStatic
         external fun focusInputContext(focus: Boolean)
+
+        @JvmStatic
+        external fun focusInputContextOutIn()
 
         @JvmStatic
         external fun activateInputContext(uid: Int, pkgName: String)
