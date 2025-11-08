@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 
 package org.fcitx.fcitx5.android.input.candidates.expanded.window
@@ -143,9 +143,14 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
             fcitx.launchOnReady { it.select(holder.idx) }
         }
         holder.itemView.setOnLongClickListener {
-            horizontalCandidate.showCandidateActionMenu(holder.idx, holder.text, holder.ui)
+            horizontalCandidate.showCandidateActionMenu(holder)
             true
         }
+    }
+
+    fun recycleCandidateViewHolder(holder: CandidateViewHolder) {
+        holder.itemView.setOnClickListener(null)
+        holder.itemView.setOnLongClickListener(null)
     }
 
     override fun onDetached() {

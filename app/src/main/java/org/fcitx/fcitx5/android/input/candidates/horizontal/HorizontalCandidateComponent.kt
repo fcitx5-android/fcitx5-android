@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 
 package org.fcitx.fcitx5.android.input.candidates.horizontal
@@ -29,7 +29,6 @@ import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.BooleanKey.Ex
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesUpdated
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
-import org.fcitx.fcitx5.android.input.candidates.CandidateItemUi
 import org.fcitx.fcitx5.android.input.candidates.CandidateViewHolder
 import org.fcitx.fcitx5.android.input.candidates.expanded.decoration.FlexboxVerticalDecoration
 import org.fcitx.fcitx5.android.input.candidates.horizontal.HorizontalCandidateMode.AlwaysFillWidth
@@ -106,9 +105,15 @@ class HorizontalCandidateComponent :
                     fcitx.launchOnReady { it.select(holder.idx) }
                 }
                 holder.itemView.setOnLongClickListener {
-                    showCandidateActionMenu(holder.idx, candidates[position], holder.ui)
+                    showCandidateActionMenu(holder)
                     true
                 }
+            }
+
+            override fun onViewRecycled(holder: CandidateViewHolder) {
+                holder.itemView.setOnClickListener(null)
+                holder.itemView.setOnLongClickListener(null)
+                super.onViewRecycled(holder)
             }
         }
     }
@@ -206,14 +211,17 @@ class HorizontalCandidateComponent :
 
     private var candidateActionMenu: PopupMenu? = null
 
-    fun showCandidateActionMenu(idx: Int, text: String, ui: CandidateItemUi) {
+    fun showCandidateActionMenu(holder: CandidateViewHolder) {
+        val idx = holder.idx
+        val text = holder.text
+        val view = holder.ui.root
         candidateActionMenu?.dismiss()
         candidateActionMenu = null
         service.lifecycleScope.launch {
             val actions = fcitx.runOnReady { getCandidateActions(idx) }
             if (actions.isEmpty()) return@launch
-            InputFeedbacks.hapticFeedback(ui.root, longPress = true)
-            candidateActionMenu = PopupMenu(context, ui.root).apply {
+            InputFeedbacks.hapticFeedback(view, longPress = true)
+            candidateActionMenu = PopupMenu(context, view).apply {
                 menu.add(buildSpannedString {
                     bold {
                         color(context.styledColor(android.R.attr.colorAccent)) {

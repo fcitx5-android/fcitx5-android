@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 
 package org.fcitx.fcitx5.android.input.candidates.expanded.window
@@ -39,6 +39,11 @@ class FlexboxExpandedCandidateWindow :
             override fun onBindViewHolder(holder: CandidateViewHolder, position: Int) {
                 super.onBindViewHolder(holder, position)
                 bindCandidateUiViewHolder(holder)
+            }
+
+            override fun onViewRecycled(holder: CandidateViewHolder) {
+                recycleCandidateViewHolder(holder)
+                super.onViewRecycled(holder)
             }
         }
     }

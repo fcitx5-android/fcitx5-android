@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2025 Fcitx5 for Android Contributors
  */
 
 package org.fcitx.fcitx5.android.input.candidates.floating
@@ -93,6 +93,13 @@ class PagedCandidatesUi(
                     }
                 }
             }
+        }
+
+        override fun onViewRecycled(holder: UiHolder) {
+            if (holder is UiHolder.Candidate) {
+                holder.ui.root.setOnClickListener(null)
+            }
+            super.onViewRecycled(holder)
         }
     }
 
