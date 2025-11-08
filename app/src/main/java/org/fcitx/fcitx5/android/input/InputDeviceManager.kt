@@ -24,9 +24,9 @@ class InputDeviceManager(private val onChange: (Boolean) -> Unit) {
         iv.handleEvents = isVirtual
         if (isVirtual) {
             iv.visibility = View.VISIBLE
+            iv.refreshWithCachedEvents()
         } else {
             iv.visibility = View.GONE
-            iv.refreshWithCachedEvents()
         }
     }
 
