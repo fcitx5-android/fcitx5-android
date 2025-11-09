@@ -133,8 +133,8 @@ sealed class FcitxEvent<T>(open val data: T) {
 
         override val eventType = EventType.PagedCandidate
 
-        enum class LayoutHint(value: Int) {
-            NotSet(0), Vertical(1), Horizontal(2);
+        enum class LayoutHint {
+            NotSet, Vertical, Horizontal;
 
             companion object {
                 private val Types = entries.toTypedArray()
@@ -180,6 +180,30 @@ sealed class FcitxEvent<T>(open val data: T) {
         }
     }
 
+    data class SwitchInputMethodEvent(override val data: Data) :
+        FcitxEvent<SwitchInputMethodEvent.Data>(data) {
+
+        override val eventType: EventType
+            get() = EventType.SwitchInputMethod
+
+        /**
+         * The reason why input method is switched to another.
+         *
+         * translated from
+         * [fcitx/event.h](https://github.com/fcitx/fcitx5/blob/5.1.16/src/lib/fcitx/event.h#L41)
+         */
+        enum class Reason {
+            Trigger, Deactivate, AltTrigger, Activate, Enumerate, GroupChange, CapabilityChanged, Other;
+
+            companion object {
+                private val Types = entries.toTypedArray()
+                fun of(value: Int) = Types[value]
+            }
+        }
+
+        data class Data(val reason: Reason, val oldInputMethod: String)
+    }
+
     data class UnknownEvent(override val data: Array<Any>) : FcitxEvent<Array<Any>>(data) {
 
         override val eventType = EventType.Unknown
@@ -211,6 +235,7 @@ sealed class FcitxEvent<T>(open val data: T) {
         StatusArea,
         DeleteSurrounding,
         PagedCandidate,
+        SwitchInputMethod,
         Unknown
     }
 
@@ -274,6 +299,12 @@ sealed class FcitxEvent<T>(open val data: T) {
                         )
                     )
                 }
+                EventType.SwitchInputMethod -> SwitchInputMethodEvent(
+                    SwitchInputMethodEvent.Data(
+                        SwitchInputMethodEvent.Reason.of(params[0] as Int),
+                        params[1] as String
+                    )
+                )
                 else -> UnknownEvent(params)
             }
     }

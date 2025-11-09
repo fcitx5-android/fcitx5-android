@@ -307,9 +307,16 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     // [^1]: notify system that input method subtype has changed
                     switchInputMethod(InputMethodUtil.componentName, subtype)
                 }
-                if (inputDeviceMgr.evaluateOnInputMethodChange()) {
-                    // show inputView for [CandidatesView] when it's likely changed by the user
-                    forceShowSelf()
+            }
+            is FcitxEvent.SwitchInputMethodEvent -> {
+                val (reason) = event.data
+                if (reason != FcitxEvent.SwitchInputMethodEvent.Reason.CapabilityChanged &&
+                    reason != FcitxEvent.SwitchInputMethodEvent.Reason.Other
+                ) {
+                    if (inputDeviceMgr.evaluateOnInputMethodChange()) {
+                        // show inputView for [CandidatesView] when input method switched by user
+                        forceShowSelf()
+                    }
                 }
             }
             else -> {}

@@ -17,11 +17,12 @@ typedef std::function<void(const std::string &, const int)> CommitStringCallback
 typedef std::function<void(const fcitx::Text &)> ClientPreeditCallback;
 typedef std::function<void(const fcitx::Text &, const fcitx::Text &, const fcitx::Text &)> InputPanelCallback;
 typedef std::function<void(const int, const uint32_t, const uint32_t, const bool, const int)> KeyEventCallback;
-typedef std::function<void()> InputMethodChangeCallback;
-typedef std::function<void()> StatusAreaUpdateCallback;
+typedef std::function<void(const InputMethodStatus &)> InputMethodChangeCallback;
+typedef std::function<void(const std::vector<ActionEntity> &, const InputMethodStatus &)> StatusAreaUpdateCallback;
 typedef std::function<void(const int, const int)> DeleteSurroundingCallback;
 typedef std::function<void(const std::string &)> ToastCallback;
 typedef std::function<void(const PagedCandidateEntity &)> PagedCandidateCallback;
+typedef std::function<void(const int, const std::string &)> SwitchInputMethodCallback;
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, keyEvent,
                              void(const fcitx::Key &, bool isRelease, const int timestamp))
@@ -100,5 +101,8 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setToastCallback,
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setPagedCandidateCallback,
                              void(const PagedCandidateCallback &))
+
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setSwitchInputMethodCallback,
+                             void(const SwitchInputMethodCallback &))
 
 #endif // FCITX5_ANDROID_ANDROIDFRONTEND_PUBLIC_H
