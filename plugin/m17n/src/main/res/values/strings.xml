@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name_debug">Fcitx5 (M17n Plugin | Debug)</string>
+    <string name="app_name_release">Fcitx5 (M17n Plugin)</string>
+    <string name="description">M17n (multilingualization) engine support for Fcitx5</string>
+</resources>

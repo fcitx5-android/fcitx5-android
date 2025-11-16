@@ -1,0 +1,11 @@
+{
+    "uniqueId": "GNU/glibc",
+    "artifactVersion": "2.42",
+    "description": "GNU C Library",
+    "name": "GNU/glibc",
+    "website": "https://sourceware.org/glibc/",
+    "tag": "native",
+    "licenses": [
+        "LGPL-2.1-or-later"
+    ]
+}

@@ -544,6 +544,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
             fcitx::stringutils::joinPath(usr_share, "lua", "5.4", "?.so"), ";",
             ";"
     );
+    const std::string m17n_dir = fcitx::stringutils::joinPath(usr_share, "m17n");
 
     // prevent StandardPath from resolving it's hardcoded installation path
     // setenv("SKIP_FCITX_PATH", "1", 1);
@@ -574,6 +575,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
     setenv("XDG_RUNTIME_DIR", extCache_, 1);
     setenv("LUA_PATH", lua_path.c_str(), 1);
     setenv("LUA_CPATH", lua_cpath.c_str(), 1);
+    setenv("M17NDIR", m17n_dir.c_str(), 1);
 
     const char *locale_dir_char = locale_dir.c_str();
     fcitx::registerDomain("fcitx5", locale_dir_char);

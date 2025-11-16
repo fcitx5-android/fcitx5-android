@@ -1,0 +1,11 @@
+{
+    "uniqueId": "fcitx/fcitx5-m17n",
+    "artifactVersion": "5.1.5",
+    "description": "M17n Wrapper for Fcitx",
+    "name": "fcitx/fcitx5-m17n",
+    "website": "https://github.com/fcitx/fcitx5-m17n",
+    "tag": "native",
+    "licenses": [
+        "LGPL-2.1-or-later"
+    ]
+}
