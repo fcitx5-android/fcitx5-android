@@ -229,8 +229,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     when (it.sym.sym) {
                         FcitxKeyMapping.FcitxKey_BackSpace -> handleBackspaceKey()
                         FcitxKeyMapping.FcitxKey_Return -> handleReturnKey()
-                        FcitxKeyMapping.FcitxKey_Left -> sendDownUpKeyEvents(KeyEvent.KEYCODE_DPAD_LEFT)
-                        FcitxKeyMapping.FcitxKey_Right -> sendDownUpKeyEvents(KeyEvent.KEYCODE_DPAD_RIGHT)
+                        FcitxKeyMapping.FcitxKey_Left -> handleArrowKey(KeyEvent.KEYCODE_DPAD_LEFT)
+                        FcitxKeyMapping.FcitxKey_Right -> handleArrowKey(KeyEvent.KEYCODE_DPAD_RIGHT)
                         else -> if (it.unicode > 0) {
                             commitText(Character.toString(it.unicode))
                         } else {
@@ -386,6 +386,19 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 else -> currentInputConnection.performEditorAction(action)
             }
         }
+    }
+
+    private fun handleArrowKey(keyCode: Int) {
+        if (currentInputEditorInfo.inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL) {
+            sendDownUpKeyEvents(keyCode)
+            return
+        }
+        val target = when (keyCode) {
+            KeyEvent.KEYCODE_DPAD_LEFT -> currentInputSelection.start - 1
+            KeyEvent.KEYCODE_DPAD_RIGHT -> currentInputSelection.end + 1
+            else -> return
+        }
+        currentInputConnection.setSelection(target, target)
     }
 
     fun commitText(text: String, cursor: Int = -1) {
