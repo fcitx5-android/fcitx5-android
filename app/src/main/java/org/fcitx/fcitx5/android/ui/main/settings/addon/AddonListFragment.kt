@@ -100,8 +100,6 @@ class AddonListFragment : ProgressFragment(), OnItemChangedListener<AddonInfo> {
                     .onEach { addonDisplayNames[it.uniqueName] = it.displayName }
             },
             initCheckBox = { entry ->
-                // remove old listener before change checked state
-                setOnCheckedChangeListener(null)
                 // our addon shouldn't be disabled
                 isEnabled = entry.uniqueName != "androidfrontend"
                 isChecked = entry.enabled

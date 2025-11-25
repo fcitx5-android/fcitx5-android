@@ -124,6 +124,21 @@ abstract class DynamicListAdapter<T>(
         }
     }
 
+    override fun onViewRecycled(holder: DynamicListAdapter<T>.ViewHolder) {
+        // reset view state and remove listeners once recycled
+        holder.apply {
+            multiselectCheckBox.isEnabled = true
+            multiselectCheckBox.isChecked = false
+            multiselectCheckBox.setOnCheckedChangeListener(null)
+            checkBox.isEnabled = true
+            checkBox.isChecked = false
+            checkBox.setOnCheckedChangeListener(null)
+            nameText.setOnClickListener(null)
+            settingsButton.setOnClickListener(null)
+            editButton.setOnClickListener(null)
+        }
+    }
+
     private fun select(item: T, shouldSelect: Boolean) {
         if (!enableAddAndDelete || !multiselect)
             return
