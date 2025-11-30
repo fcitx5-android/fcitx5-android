@@ -127,12 +127,12 @@ abstract class DynamicListAdapter<T>(
     override fun onViewRecycled(holder: DynamicListAdapter<T>.ViewHolder) {
         // reset view state and remove listeners once recycled
         holder.apply {
+            multiselectCheckBox.setOnCheckedChangeListener(null)
             multiselectCheckBox.isEnabled = true
             multiselectCheckBox.isChecked = false
-            multiselectCheckBox.setOnCheckedChangeListener(null)
+            checkBox.setOnCheckedChangeListener(null)
             checkBox.isEnabled = true
             checkBox.isChecked = false
-            checkBox.setOnCheckedChangeListener(null)
             nameText.setOnClickListener(null)
             settingsButton.setOnClickListener(null)
             editButton.setOnClickListener(null)
