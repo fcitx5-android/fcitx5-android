@@ -23,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
@@ -52,7 +53,7 @@ import splitties.views.topPadding
 import timber.log.Timber
 import java.io.File
 
-class CropImageActivity : AppCompatActivity(), CropImageView.OnCropImageCompleteListener {
+class CropImageActivity : AppCompatActivity() {
 
     companion object {
         const val CROP_OPTIONS = "crop_options"
@@ -143,8 +144,6 @@ class CropImageActivity : AppCompatActivity(), CropImageView.OnCropImageComplete
         }
     }
 
-    private lateinit var tempOutFile: File
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         cropOption = intent.parcelable<CropOption>(CROP_OPTIONS) ?: CropOption.New(1, 1)
@@ -169,7 +168,6 @@ class CropImageActivity : AppCompatActivity(), CropImageView.OnCropImageComplete
             setupToolbarMenu(menu)
         }
         cropView = CropImageView(this).apply {
-            setOnCropImageCompleteListener(this@CropImageActivity)
             setImageCropOptions(getDefaultCropImageOptions())
         }
         root = constraintLayout {
@@ -221,9 +219,10 @@ class CropImageActivity : AppCompatActivity(), CropImageView.OnCropImageComplete
                 launcher.launch("image/*")
             }
             is CropOption.Edit -> {
-                cropView.setOnSetImageUriCompleteListener { view, uri, e ->
+                cropView.setOnSetImageUriCompleteListener { view, _, _ ->
                     view.cropRect = option.initialRect
                     view.rotatedDegrees = option.initialRotation
+                    cropView.setOnSetImageUriCompleteListener(null)
                 }
                 cropView.setImageUriAsync(option.sourceUri)
             }
@@ -231,28 +230,24 @@ class CropImageActivity : AppCompatActivity(), CropImageView.OnCropImageComplete
     }
 
     private fun onCropImage() {
-        tempOutFile = File.createTempFile("cropped", ".png", cacheDir)
-        cropView.croppedImageAsync(
-            saveCompressFormat = Bitmap.CompressFormat.PNG,
-            reqWidth = cropOption.width,
-            reqHeight = cropOption.height,
-            options = CropImageView.RequestSizeOptions.RESIZE_INSIDE,
-            customOutputUri = Uri.fromFile(tempOutFile)
-        )
-    }
-
-    override fun onCropImageComplete(view: CropImageView, result: CropImageView.CropResult) {
+        val tempOutFile = File.createTempFile("cropped", ".png", cacheDir)
         try {
-            result
-            val success = CropResult.Success(
-                result.cropRect!!,
-                result.rotation,
-                tempOutFile,
-                (cropOption as? CropOption.Edit)?.sourceUri ?: selectedImageUri!!
+            val bitmap = cropView.getCroppedImage(
+                reqWidth = cropOption.width,
+                reqHeight = cropOption.height,
+                options = CropImageView.RequestSizeOptions.RESIZE_INSIDE,
             )
-            setResult(RESULT_OK, Intent().putExtra(CROP_RESULT, success))
+            tempOutFile.outputStream().use { bitmap!!.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            val success = CropResult.Success(
+                rect = cropView.cropRect!!,
+                rotation = cropView.rotatedDegrees,
+                file = tempOutFile,
+                srcUri = (cropOption as? CropOption.Edit)?.sourceUri ?: selectedImageUri!!
+            )
+            setResult(RESULT_OK, Intent().putExtras(bundleOf(CROP_RESULT to success)))
         } catch (e: Exception) {
-            Timber.e("Exception when cropping image: $e")
+            tempOutFile.delete()
+            Timber.e("Exception when cropping image: ${e.stackTraceToString()}")
             toast(e)
             setResult(RESULT_CANCELED)
         }
