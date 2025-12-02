@@ -12,6 +12,10 @@ value class CursorRange private constructor(val data: IntArray) {
     val start: Int get() = data[0]
     val end: Int get() = data[1]
 
+    // allow destructuring
+    operator fun component1() = data[0]
+    operator fun component2() = data[1]
+
     fun isEmpty() = data[0] == data[1]
     fun isNotEmpty() = data[0] != data[1]
 

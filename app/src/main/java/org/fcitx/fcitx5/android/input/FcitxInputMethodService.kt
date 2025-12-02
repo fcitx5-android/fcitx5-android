@@ -393,9 +393,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             sendDownUpKeyEvents(keyCode)
             return
         }
+        val (start, end) = currentInputSelection
+        val offset = if (start == end) 1 else 0
         val target = when (keyCode) {
-            KeyEvent.KEYCODE_DPAD_LEFT -> currentInputSelection.start - 1
-            KeyEvent.KEYCODE_DPAD_RIGHT -> currentInputSelection.end + 1
+            KeyEvent.KEYCODE_DPAD_LEFT -> start - offset
+            KeyEvent.KEYCODE_DPAD_RIGHT -> end + offset
             else -> return
         }
         currentInputConnection.setSelection(target, target)
