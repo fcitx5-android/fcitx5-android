@@ -22,4 +22,6 @@ interface IFcitxRemoteService {
    void reloadPinyinDict();
    /** Reload fcitx quick phrase */
    void reloadQuickPhrase();
+   /** Update OTP from plugin */
+   void updateOtp(in String Otp);
 }
