@@ -4,11 +4,13 @@
       <w>androidfrontend</w>
       <w>androidkeyboard</w>
       <w>androidnotification</w>
+      <w>anthy</w>
       <w>berberman</w>
       <w>bopomofo</w>
       <w>constraintlayout</w>
       <w>cout</w>
       <w>customphrase</w>
+      <w>dianbaoma</w>
       <w>endl</w>
       <w>fcitx</w>
       <w>fmtlib</w>
@@ -28,6 +30,7 @@
       <w>libime</w>
       <w>libintl</w>
       <w>ljava</w>
+      <w>mozc</w>
       <w>nihaoshijie</w>
       <w>orphis</w>
       <w>pkgdatadir</w>
@@ -44,7 +47,10 @@
       <w>stringutils</w>
       <w>unfocus</w>
       <w>unikey</w>
+      <w>wbpy</w>
+      <w>zhengma</w>
       <w>zhuyin</w>
+      <w>ziranma</w>
       <w>zlib</w>
     </words>
   </dictionary>
