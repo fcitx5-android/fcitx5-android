@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2024-2025 Fcitx5 for Android Contributors
  */
 
 package org.fcitx.fcitx5.android.ui.main
@@ -88,6 +88,7 @@ class CropImageActivity : AppCompatActivity() {
             val file: File,
             val srcUri: Uri
         ) : CropResult() {
+            // TODO: find some way to transfer large Bitmap without writing to file
             @IgnoredOnParcel
             private var _bitmap: Bitmap? = null
             val bitmap: Bitmap
@@ -121,25 +122,14 @@ class CropImageActivity : AppCompatActivity() {
     private lateinit var toolbar: Toolbar
     private lateinit var cropView: CropImageView
 
-    private fun getDefaultCropImageOptions() = CropImageOptions(
-        // CropImageView
-        snapRadius = 0f,
-        guidelines = CropImageView.Guidelines.ON_TOUCH,
-        showProgressBar = true,
-        progressBarColor = styledColor(android.R.attr.colorAccent),
-        // CropOverlayView
-        borderLineThickness = dp(1f),
-        borderCornerOffset = 0f,
-    )
-
-    private var selectedImageUri: Uri? = null
+    private lateinit var sourceImageUri: Uri
 
     private val launcher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri == null) {
             setResult(RESULT_CANCELED)
             finish()
         } else {
-            selectedImageUri = uri
+            sourceImageUri = uri
             cropView.setImageUriAsync(uri)
         }
     }
@@ -167,9 +157,7 @@ class CropImageActivity : AppCompatActivity() {
             navigationIcon = DrawerArrowDrawable(context).apply { progress = 1f }
             setupToolbarMenu(menu)
         }
-        cropView = CropImageView(this).apply {
-            setImageCropOptions(getDefaultCropImageOptions())
-        }
+        cropView = CropImageView(this)
         root = constraintLayout {
             add(toolbar, lParams(matchParent, wrapContent) {
                 topOfParent()
@@ -213,12 +201,27 @@ class CropImageActivity : AppCompatActivity() {
     }
 
     private fun setupCropView(option: CropOption) {
+        cropView.setImageCropOptions(
+            CropImageOptions(
+                // CropImageView
+                snapRadius = 0f,
+                guidelines = CropImageView.Guidelines.ON_TOUCH,
+                showProgressBar = true,
+                progressBarColor = styledColor(android.R.attr.colorAccent),
+                // CropOverlayView
+                borderLineThickness = dp(1f),
+                borderCornerOffset = 0f,
+            )
+        )
         cropView.setAspectRatio(option.width, option.height)
         when (option) {
             is CropOption.New -> {
                 launcher.launch("image/*")
             }
             is CropOption.Edit -> {
+                sourceImageUri = option.sourceUri
+                // TODO: set cropRect and rotatedDegrees at the same time may not work as expected
+                // maybe we need a better "CropView"
                 cropView.setOnSetImageUriCompleteListener { view, _, _ ->
                     view.cropRect = option.initialRect
                     view.rotatedDegrees = option.initialRotation
@@ -242,7 +245,7 @@ class CropImageActivity : AppCompatActivity() {
                 rect = cropView.cropRect!!,
                 rotation = cropView.rotatedDegrees,
                 file = tempOutFile,
-                srcUri = (cropOption as? CropOption.Edit)?.sourceUri ?: selectedImageUri!!
+                srcUri = sourceImageUri
             )
             setResult(RESULT_OK, Intent().putExtras(bundleOf(CROP_RESULT to success)))
         } catch (e: Exception) {
