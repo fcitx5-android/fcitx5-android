@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2024-2025 Fcitx5 for Android Contributors
  */
 
 package org.fcitx.fcitx5.android.input
@@ -13,6 +13,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.data.theme.ThemePrefs
@@ -24,6 +25,11 @@ abstract class BaseInputView(
     val fcitx: FcitxConnection,
     val theme: Theme
 ) : ConstraintLayout(service) {
+
+    /**
+     * Update UI (from cached events in FcitxAPI) to match fcitx's state, before ready to receive real events
+     */
+    protected abstract fun onStartHandleFcitxEvent()
 
     protected abstract fun handleFcitxEvent(it: FcitxEvent<*>)
 
@@ -37,23 +43,11 @@ abstract class BaseInputView(
         }
     }
 
-    open fun refreshWithCachedEvents() {
-        val inputPanelData = fcitx.runImmediately { inputPanelCached }
-        val inputMethodEntry = fcitx.runImmediately { inputMethodEntryCached }
-        val statusAreaActions = fcitx.runImmediately { statusAreaActionsCached }
-        arrayOf(
-            FcitxEvent.InputPanelEvent(inputPanelData),
-            FcitxEvent.IMChangeEvent(inputMethodEntry),
-            FcitxEvent.StatusAreaEvent(
-                FcitxEvent.StatusAreaEvent.Data(statusAreaActions, inputMethodEntry)
-            )
-        ).forEach { handleFcitxEvent(it) }
-    }
-
     var handleEvents = false
         set(value) {
             field = value
             if (field) {
+                onStartHandleFcitxEvent()
                 if (eventHandlerJob == null) {
                     setupFcitxEventHandler()
                 }
@@ -84,6 +78,20 @@ abstract class BaseInputView(
             }
         }
         return insetsBottom
+    }
+
+    private val ignoreSystemWindowInsets by AppPrefs.getInstance().advanced.ignoreSystemWindowInsets
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        if (ignoreSystemWindowInsets) {
+            // suppress view's own onApplyWindowInsets
+            setOnApplyWindowInsetsListener { _, insets -> insets }
+        } else {
+            // on API 35+, we must call requestApplyInsets() manually after replacing views,
+            // otherwise View#onApplyWindowInsets won't be called. ¯\_(ツ)_/¯
+            requestApplyInsets()
+        }
     }
 
     override fun onDetachedFromWindow() {

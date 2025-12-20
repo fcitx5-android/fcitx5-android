@@ -1,17 +1,15 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2024-2025 Fcitx5 for Android Contributors
  */
 
 package org.fcitx.fcitx5.android.input
 
 import android.graphics.Color
 import android.os.Build
-import android.view.View
 import android.view.Window
 import androidx.annotation.ColorInt
 import androidx.core.view.WindowCompat
-import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.data.theme.ThemePrefs.NavbarBackground
@@ -37,7 +35,7 @@ class NavigationBarManager {
          * Why on earth does it deprecated? It says
          * https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-15.0.0_r3/core/java/android/view/Window.java#2720
          * "If the app targets VANILLA_ICE_CREAM or above, the color will be transparent and cannot be changed"
-         * but it only takes effect on API 35+ devices. Older devices still needs this.
+         * but it's only true on 35+. Older versions still need this.
          */
         @Suppress("DEPRECATION")
         navigationBarColor = color
@@ -49,7 +47,7 @@ class NavigationBarManager {
         }
     }
 
-    fun evaluate(window: Window) {
+    private fun evaluateWithVirtualKeyboard(window: Window) {
         when (navbarBackground) {
             NavbarBackground.None -> {
                 shouldUpdateNavbarForeground = false
@@ -77,10 +75,11 @@ class NavigationBarManager {
         }
     }
 
-    fun evaluate(window: Window, useVirtualKeyboard: Boolean) {
-        if (useVirtualKeyboard) {
-            evaluate(window)
+    fun evaluate(window: Window, isVirtualKeyboard: Boolean) {
+        if (isVirtualKeyboard) {
+            evaluateWithVirtualKeyboard(window)
         } else {
+            // always color navbar to avoid CandidatesView being drawn behind it
             shouldUpdateNavbarForeground = true
             shouldUpdateNavbarBackground = true
             window.useSystemNavbarBackground(true)
@@ -89,7 +88,7 @@ class NavigationBarManager {
         update(window)
     }
 
-    fun update(window: Window) {
+    private fun update(window: Window) {
         val theme = ThemeManager.activeTheme
         if (shouldUpdateNavbarForeground) {
             WindowCompat.getInsetsController(window, window.decorView)
@@ -99,23 +98,6 @@ class NavigationBarManager {
             window.setNavbarBackgroundColor(
                 if (!keyBorder && theme is Theme.Builtin) theme.keyboardColor else theme.backgroundColor
             )
-        }
-    }
-
-    private val ignoreSystemWindowInsets by AppPrefs.getInstance().advanced.ignoreSystemWindowInsets
-
-    private val emptyOnApplyWindowInsetsListener = View.OnApplyWindowInsetsListener { _, insets ->
-        insets
-    }
-
-    fun setupInputView(v: BaseInputView) {
-        if (ignoreSystemWindowInsets) {
-            // suppress the view's own onApplyWindowInsets
-            v.setOnApplyWindowInsetsListener(emptyOnApplyWindowInsetsListener)
-        } else {
-            // on API 35+, we must call requestApplyInsets() manually after replacing views,
-            // otherwise View#onApplyWindowInsets won't be called. ¯\_(ツ)_/¯
-            v.requestApplyInsets()
         }
     }
 }

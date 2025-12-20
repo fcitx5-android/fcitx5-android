@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2024-2025 Fcitx5 for Android Contributors
  */
 
 package org.fcitx.fcitx5.android.input
@@ -12,7 +12,6 @@ import android.view.inputmethod.EditorInfo
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.candidates.floating.FloatingCandidatesMode
 import org.fcitx.fcitx5.android.utils.isTypeNull
-import org.fcitx.fcitx5.android.utils.monitorCursorAnchor
 
 class InputDeviceManager(private val onChange: (Boolean) -> Unit) {
 
@@ -22,12 +21,7 @@ class InputDeviceManager(private val onChange: (Boolean) -> Unit) {
     private fun setupInputViewEvents(isVirtual: Boolean) {
         val iv = inputView ?: return
         iv.handleEvents = isVirtual
-        if (isVirtual) {
-            iv.visibility = View.VISIBLE
-            iv.refreshWithCachedEvents()
-        } else {
-            iv.visibility = View.GONE
-        }
+        iv.visibility = if (isVirtual) View.VISIBLE else View.GONE
     }
 
     private fun setupCandidatesViewEvents(isVirtual: Boolean) {
@@ -37,8 +31,6 @@ class InputDeviceManager(private val onChange: (Boolean) -> Unit) {
         // but preserve the visibility when entering physical keyboard mode (in case it's empty)
         if (isVirtual) {
             cv.visibility = View.GONE
-        } else {
-            cv.refreshWithCachedEvents()
         }
     }
 
@@ -49,8 +41,14 @@ class InputDeviceManager(private val onChange: (Boolean) -> Unit) {
 
     var isVirtualKeyboard = true
         private set(value) {
+            if (field == value) {
+                return
+            }
             field = value
             setupViewEvents(value)
+            // fire change AFTER updating InputView(s),
+            // make the view(s) ready for incoming events during `onChange`
+            onChange(value)
         }
 
     fun setInputView(inputView: InputView) {
@@ -61,19 +59,6 @@ class InputDeviceManager(private val onChange: (Boolean) -> Unit) {
     fun setCandidatesView(candidatesView: CandidatesView) {
         this.candidatesView = candidatesView
         setupCandidatesViewEvents(this.isVirtualKeyboard)
-    }
-
-    private fun applyMode(service: FcitxInputMethodService, useVirtualKeyboard: Boolean) {
-        if (useVirtualKeyboard == isVirtualKeyboard) {
-            return
-        }
-        // monitor CursorAnchorInfo when switching to CandidatesView
-        service.currentInputConnection.monitorCursorAnchor(!useVirtualKeyboard)
-        service.postFcitxJob {
-            setCandidatePagingMode(if (useVirtualKeyboard) 0 else 1)
-        }
-        isVirtualKeyboard = useVirtualKeyboard
-        onChange(isVirtualKeyboard)
     }
 
     private var startedInputView = false
@@ -91,13 +76,12 @@ class InputDeviceManager(private val onChange: (Boolean) -> Unit) {
     fun evaluateOnStartInputView(info: EditorInfo, service: FcitxInputMethodService): Boolean {
         startedInputView = true
         isNullInputType = info.isTypeNull()
-        val useVirtualKeyboard = when (candidatesViewMode) {
+        isVirtualKeyboard = when (candidatesViewMode) {
             FloatingCandidatesMode.SystemDefault -> service.superEvaluateInputViewShown()
             FloatingCandidatesMode.InputDevice -> isVirtualKeyboard
             FloatingCandidatesMode.Disabled -> true
         }
-        applyMode(service, useVirtualKeyboard)
-        return useVirtualKeyboard
+        return isVirtualKeyboard
     }
 
     /**
@@ -124,39 +108,37 @@ class InputDeviceManager(private val onChange: (Boolean) -> Unit) {
     }
 
     private fun evaluateOnKeyDownInner(service: FcitxInputMethodService) {
-        val useVirtualKeyboard = when (candidatesViewMode) {
+        isVirtualKeyboard = when (candidatesViewMode) {
             FloatingCandidatesMode.SystemDefault -> service.superEvaluateInputViewShown()
             FloatingCandidatesMode.InputDevice -> false
             FloatingCandidatesMode.Disabled -> true
         }
-        applyMode(service, useVirtualKeyboard)
     }
 
     fun evaluateOnViewClicked(service: FcitxInputMethodService) {
         if (!startedInputView) return
-        val useVirtualKeyboard = when (candidatesViewMode) {
+        isVirtualKeyboard = when (candidatesViewMode) {
             FloatingCandidatesMode.SystemDefault -> service.superEvaluateInputViewShown()
             else -> true
         }
-        applyMode(service, useVirtualKeyboard)
     }
 
     fun evaluateOnUpdateEditorToolType(toolType: Int, service: FcitxInputMethodService) {
         if (!startedInputView) return
-        val useVirtualKeyboard = when (candidatesViewMode) {
+        isVirtualKeyboard = when (candidatesViewMode) {
             FloatingCandidatesMode.SystemDefault -> service.superEvaluateInputViewShown()
             FloatingCandidatesMode.InputDevice ->
                 // switch to virtual keyboard on touch screen events, otherwise preserve current mode
                 if (toolType == MotionEvent.TOOL_TYPE_FINGER || toolType == MotionEvent.TOOL_TYPE_STYLUS) true else isVirtualKeyboard
             FloatingCandidatesMode.Disabled -> true
         }
-        applyMode(service, useVirtualKeyboard)
     }
 
     /**
+     * Should be called when input method switched **by user**
      * @return should force show inputView for [CandidatesView] when input method switched by user
      */
-    fun evaluateOnInputMethodChange(): Boolean {
+    fun evaluateOnInputMethodSwitch(): Boolean {
         return !isVirtualKeyboard && !startedInputView
     }
 

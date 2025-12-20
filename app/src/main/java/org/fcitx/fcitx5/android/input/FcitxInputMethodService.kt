@@ -7,6 +7,7 @@ package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.content.pm.ActivityInfo
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Color
@@ -101,9 +102,14 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private var candidatesView: CandidatesView? = null
 
     private val navbarMgr = NavigationBarManager()
-    private val inputDeviceMgr = InputDeviceManager onChange@{
-        val w = window.window ?: return@onChange
-        navbarMgr.evaluate(w, useVirtualKeyboard = it)
+    private val inputDeviceMgr = InputDeviceManager { isVirtualKeyboard ->
+        postFcitxJob {
+            setCandidatePagingMode(if (isVirtualKeyboard) 0 else 1)
+        }
+        currentInputConnection?.monitorCursorAnchor(!isVirtualKeyboard)
+        window.window?.let {
+            navbarMgr.evaluate(it, isVirtualKeyboard)
+        }
     }
 
     private var capabilityFlags = CapabilityFlags.DefaultFlags
@@ -139,7 +145,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         val newInputView = InputView(this, fcitx, theme)
         setInputView(newInputView)
         inputDeviceMgr.setInputView(newInputView)
-        navbarMgr.setupInputView(newInputView)
         inputView = newInputView
         return newInputView
     }
@@ -151,13 +156,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // put CandidatesView directly under content view
         contentView.addView(newCandidatesView)
         inputDeviceMgr.setCandidatesView(newCandidatesView)
-        navbarMgr.setupInputView(newCandidatesView)
         candidatesView = newCandidatesView
         return newCandidatesView
     }
 
     private fun replaceInputViews(theme: Theme) {
-        navbarMgr.evaluate(window.window!!)
+        navbarMgr.evaluate(window.window!!, inputDeviceMgr.isVirtualKeyboard)
         replaceInputView(theme)
         replaceCandidateView(theme)
     }
@@ -216,6 +220,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         super.onCreate()
         decorView = window.window!!.decorView
         contentView = decorView.findViewById(android.R.id.content)
+        lastKnownConfig = resources.configuration
     }
 
     private fun handleFcitxEvent(event: FcitxEvent<*>) {
@@ -313,7 +318,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 if (reason != FcitxEvent.SwitchInputMethodEvent.Reason.CapabilityChanged &&
                     reason != FcitxEvent.SwitchInputMethodEvent.Reason.Other
                 ) {
-                    if (inputDeviceMgr.evaluateOnInputMethodChange()) {
+                    if (inputDeviceMgr.evaluateOnInputMethodSwitch()) {
                         // show inputView for [CandidatesView] when input method switched by user
                         forceShowSelf()
                     }
@@ -515,9 +520,21 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         currentInputConnection?.setSelection(end, end)
     }
 
+    private lateinit var lastKnownConfig: Configuration
+
     override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
         postFcitxJob { reset() }
+        /**
+         * skip uiMode (system light/dark mode) changes, because we have [onThemeChangeListener]
+         * to replace InputView(s) when needed
+         * [android.inputmethodservice.InputMethodService.onConfigurationChanged] would call
+         * resetStateForNewConfiguration() which calls initViews() causes InputView(s) to be replaced again
+         * https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-15.0.0_r36/core/java/android/inputmethodservice/InputMethodService.java#1984
+         */
+        if (lastKnownConfig.diff(newConfig) != ActivityInfo.CONFIG_UI_MODE) {
+            super.onConfigurationChanged(newConfig)
+        }
+        lastKnownConfig = newConfig
     }
 
     override fun onWindowShown() {
@@ -528,8 +545,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             Timber.w("Device does not support android.R.attr.colorAccent which it should have.")
         }
         InputFeedbacks.syncSystemPrefs()
-        // navbar foreground/background color would reset every time window shows
-        navbarMgr.update(window.window!!)
     }
 
     override fun onCreateInputView(): View? {

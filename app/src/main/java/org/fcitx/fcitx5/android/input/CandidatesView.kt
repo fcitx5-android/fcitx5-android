@@ -104,7 +104,10 @@ class CandidatesView(
         onNextPage = { fcitx.launchOnReady { it.offsetCandidatePage(1) } }
     )
 
-    private var bottomInsets = 0
+    override fun onStartHandleFcitxEvent() {
+        val inputPanelData = fcitx.runImmediately { inputPanelCached }
+        handleFcitxEvent(FcitxEvent.InputPanelEvent(inputPanelData))
+    }
 
     override fun handleFcitxEvent(it: FcitxEvent<*>) {
         when (it) {
@@ -136,9 +139,10 @@ class CandidatesView(
         } else {
             // RecyclerView won't update its items when ancestor view is GONE
             visibility = INVISIBLE
-            touchEventReceiverWindow.dismiss()
         }
     }
+
+    private var bottomInsets = 0
 
     private fun updatePosition() {
         if (visibility != VISIBLE) {
@@ -227,6 +231,13 @@ class CandidatesView(
         super.onAttachedToWindow()
         viewTreeObserver.addOnGlobalLayoutListener(layoutListener)
         viewTreeObserver.addOnPreDrawListener(preDrawListener)
+    }
+
+    override fun setVisibility(visibility: Int) {
+        if (visibility != VISIBLE) {
+            touchEventReceiverWindow.dismiss()
+        }
+        super.setVisibility(visibility)
     }
 
     override fun onDetachedFromWindow() {
