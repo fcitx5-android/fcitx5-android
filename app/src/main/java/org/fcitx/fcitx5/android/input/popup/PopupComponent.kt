@@ -1,11 +1,13 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.input.popup
 
 import android.graphics.Rect
 import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -92,12 +94,19 @@ class PopupComponent :
             lastShowTime = System.currentTimeMillis()
             setText(content)
         }
-        root.apply {
-            add(popup.root, lParams(popupWidth, popupHeight) {
-                // align popup bottom with key border bottom [^1]
-                topMargin = bounds.bottom - popupHeight - keyBottomMargin
-                leftMargin = (bounds.left + bounds.right - popupWidth) / 2
-            })
+        popup.root.layoutParams = FrameLayout.LayoutParams(popupWidth, popupHeight).apply {
+            // align popup bottom with key border bottom [^1]
+            topMargin = bounds.bottom - popupHeight - keyBottomMargin
+            leftMargin = (bounds.left + bounds.right - popupWidth) / 2
+        }
+        // make sure that popup.root does not have parent view before adding it under root container
+        // it's wired that on some devices it would have a parent view despite it was newly created
+        // or just polled from freeEntryUi
+        if (popup.root.parent == null) {
+            root.addView(popup.root)
+        } else if (popup.root.parent !== root) {
+            (popup.root.parent as? ViewGroup)?.removeView(popup.root)
+            root.addView(popup.root)
         }
         showingEntryUi[viewId] = popup
     }
