@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.ui.main.settings
 
@@ -66,7 +66,31 @@ abstract class FcitxPreferenceFragment : PaddingPreferenceFragment() {
             })
     }
 
+    /**
+     * **TLDR:**
+     * Intentionally empty, since we need to create PreferenceScreen during onStart,
+     * or it will crash when MainActivity relaunches.
+     *
+     * **Long version:**
+     * It crashes when derived class of FcitxPreferenceFragment
+     *
+     * When `MainActivity` relaunches, its `onCreate` get called, and somewhere in `super.onCreate`
+     * decided to `restoreChildFragmentState` of `NavHostFragment`, thus recreate the child fragment.
+     * If that fragment was derived from `FcitxPreferenceFragment`, it needs to call `obtainConfig`
+     * which would need the route params, and in turn needs `NavGraph`.
+     * But at this time it's still in `MainActivity`'s `super.onCreate`, the Activity did not have
+     * chance to setup `NavGraph` on `navController`, so accessing `lazyRoute` would crash.
+     *
+     * That is to say, if we declare `app:navGraph` on `<FragmentContainerView />` in `activity_main.xml`,
+     * the graph would have been initialized when `NavHostFragment` got inflated, and does not suffer
+     * from this problem? But maintain navigation destinations in xml is too tedious ...
+     */
     final override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+    }
+
+    override fun onStart() {
+        super.onStart()
+        viewModel.setToolbarTitle(getPageTitle())
         val context = requireContext()
         lifecycleScope.withLoadingDialog(context) {
             raw = fcitx.runOnReady { obtainConfig(this) }
@@ -87,10 +111,4 @@ abstract class FcitxPreferenceFragment : PaddingPreferenceFragment() {
             viewModel.disableAboutButton()
         }
     }
-
-    override fun onStart() {
-        super.onStart()
-        viewModel.setToolbarTitle(getPageTitle())
-    }
-
 }
