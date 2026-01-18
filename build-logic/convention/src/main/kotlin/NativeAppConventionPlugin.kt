@@ -2,9 +2,9 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later
  * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.api.variant.FilterConfiguration.FilterType
-import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 
@@ -16,7 +16,7 @@ class NativeAppConventionPlugin : NativeBaseConventionPlugin() {
 
         target.pluginManager.apply(target.libs.plugins.android.application.get().pluginId)
 
-        target.extensions.configure<BaseAppModuleExtension> {
+        target.extensions.configure<ApplicationExtension> {
             packaging {
                 jniLibs {
                     useLegacyPackaging = true

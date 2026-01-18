@@ -33,6 +33,11 @@ android {
         }
     }
 
+    buildFeatures {
+        viewBinding = true
+        resValues = true
+    }
+
     buildTypes {
         release {
             proguardFiles(
@@ -51,19 +56,9 @@ android {
         }
     }
 
-    buildFeatures {
-        viewBinding = true
-    }
-
     androidResources {
         @Suppress("UnstableApiUsage")
         generateLocaleConfig = true
-    }
-}
-
-kotlin {
-    sourceSets.configureEach {
-        kotlin.srcDir(layout.buildDirectory.dir("generated/ksp/$name/kotlin"))
     }
 }
 

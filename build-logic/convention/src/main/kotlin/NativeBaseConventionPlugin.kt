@@ -7,6 +7,7 @@ import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Delete
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.register
 
 open class NativeBaseConventionPlugin : Plugin<Project> {
@@ -16,9 +17,9 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
         val isBuildingBundle = target.rootProject.gradle.startParameter.taskNames.any {
             it.startsWith("${target.path}:bundle")
         }
-        target.extensions.configure(CommonExtension::class.java) {
+        target.extensions.configure<CommonExtension> {
             ndkVersion = target.ndkVersion
-            defaultConfig {
+            defaultConfig.apply {
                 minSdk = Versions.minSdk
                 @Suppress("UnstableApiUsage")
                 externalNativeBuild {
@@ -31,7 +32,7 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
                     }
                 }
             }
-            externalNativeBuild {
+            externalNativeBuild.apply {
                 cmake {
                     version = target.cmakeVersion
                     path("src/main/cpp/CMakeLists.txt")

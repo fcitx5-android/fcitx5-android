@@ -16,6 +16,10 @@ android {
         applicationId = "org.fcitx.fcitx5.android.plugin.clipboard_filter"
     }
 
+    buildFeatures {
+        resValues = true
+    }
+
     buildTypes {
         release {
             resValue("string", "app_name", "@string/app_name_release")
