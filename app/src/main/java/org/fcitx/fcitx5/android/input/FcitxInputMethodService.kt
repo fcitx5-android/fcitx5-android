@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Fcitx5 for Android Contributors
  */
 
 package org.fcitx.fcitx5.android.input
@@ -373,12 +373,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     private fun handleReturnKey() {
         currentInputEditorInfo.run {
-            if (inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL) {
+            if (inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL ||
+                imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION)
+            ) {
                 sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
-                return
-            }
-            if (imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION)) {
-                commitText("\n")
                 return
             }
             if (actionLabel?.isNotEmpty() == true && actionId != EditorInfo.IME_ACTION_UNSPECIFIED) {
@@ -387,7 +385,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             }
             when (val action = imeOptions and EditorInfo.IME_MASK_ACTION) {
                 EditorInfo.IME_ACTION_UNSPECIFIED,
-                EditorInfo.IME_ACTION_NONE -> commitText("\n")
+                EditorInfo.IME_ACTION_NONE -> sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
                 else -> currentInputConnection.performEditorAction(action)
             }
         }

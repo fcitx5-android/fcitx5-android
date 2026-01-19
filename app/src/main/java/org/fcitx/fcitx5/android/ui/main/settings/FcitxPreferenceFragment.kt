@@ -72,8 +72,6 @@ abstract class FcitxPreferenceFragment : PaddingPreferenceFragment() {
      * or it will crash when MainActivity relaunches.
      *
      * **Long version:**
-     * It crashes when derived class of FcitxPreferenceFragment
-     *
      * When `MainActivity` relaunches, its `onCreate` get called, and somewhere in `super.onCreate`
      * decided to `restoreChildFragmentState` of `NavHostFragment`, thus recreate the child fragment.
      * If that fragment was derived from `FcitxPreferenceFragment`, it needs to call `obtainConfig`
