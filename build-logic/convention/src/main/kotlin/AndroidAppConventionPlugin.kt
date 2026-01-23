@@ -40,18 +40,19 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
                 versionName = target.buildVersionName
             }
             buildTypes {
-                release {
-                    isMinifyEnabled = true
-                    isShrinkResources = true
-                    signingConfig = signingConfigs.fromProjectEnv(target)
-                }
-                debug {
-                    applicationIdSuffix = ".debug"
-                }
                 all {
                     // remove META-INF/version-control-info.textproto
                     @Suppress("UnstableApiUsage")
                     vcsInfo.include = false
+                }
+                debug {
+                    applicationIdSuffix = ".debug"
+                }
+                release {
+                    isMinifyEnabled = true
+                    isShrinkResources = true
+                    signingConfig = signingConfigs.fromProjectEnv(target)
+                    proguardFile(getDefaultProguardFile("proguard-android-optimize.txt"))
                 }
             }
             compileOptions {

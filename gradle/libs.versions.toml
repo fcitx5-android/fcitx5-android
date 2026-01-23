@@ -7,7 +7,7 @@ navigation = "2.9.6"
 room = "2.8.4"
 test = "1.7.0"
 splitties = "3.0.0"
-aboutlibraries = "14.0.0-b01"
+aboutlibraries = "14.0.0-b02"
 arrow = "2.2.1.1"
 
 [libraries]
