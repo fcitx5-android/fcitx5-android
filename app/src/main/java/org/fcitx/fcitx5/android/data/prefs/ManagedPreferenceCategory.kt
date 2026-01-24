@@ -92,6 +92,25 @@ abstract class ManagedPreferenceCategory(
         return pref
     }
 
+    protected fun float(
+        @StringRes
+        title: Int,
+        key: String,
+        defaultValue: Float,
+        min: Float = -Float.MAX_VALUE,
+        max: Float = Float.MAX_VALUE,
+        unit: String = "",
+        enableUiOn: (() -> Boolean)? = null
+    ): ManagedPreference.PFloat {
+        val pref = ManagedPreference.PFloat(sharedPreferences, key, defaultValue)
+        val ui = ManagedPreferenceUi.EditTextFloat(
+            title, key, defaultValue, min, max, unit, enableUiOn
+        )
+        pref.register()
+        ui.registerUi()
+        return pref
+    }
+
     protected fun twinInt(
         @StringRes
         title: Int,
