@@ -80,6 +80,9 @@ abstract class BaseKeyboard(
     private val splitThresholdListener = ManagedPreference.OnChangeListener<Float> { _, _ ->
         rebuildKeyboardRows(splitKeyboard.getValue())
     }
+    private val splitBlankRatioListener = ManagedPreference.OnChangeListener<Int> { _, _ ->
+        rebuildKeyboardRows(splitKeyboard.getValue())
+    }
 
     private val vivoKeypressWorkaround by prefs.advanced.vivoKeypressWorkaround
 
@@ -115,6 +118,8 @@ abstract class BaseKeyboard(
         spaceSwipeMoveCursor.registerOnChangeListener(spaceSwipeChangeListener)
         splitKeyboard.registerOnChangeListener(splitKeyboardListener)
         prefs.keyboard.splitKeyboardThreshold.registerOnChangeListener(splitThresholdListener)
+        prefs.keyboard.splitKeyboardBlankRatio.registerOnChangeListener(splitBlankRatioListener)
+        prefs.keyboard.splitKeyboardBlankRatioLandscape.registerOnChangeListener(splitBlankRatioListener)
     }
 
     private fun rebuildKeyboardRows(split: Boolean) {
