@@ -91,4 +91,7 @@
     <string name="quickphrase_phrase">구문</string>
     <string name="reload_config">구성 새로고침</string>
     <string name="input_method_options">입력기 옵션</string>
-    </resources>
+    <string name="split_keyboard">분할 키보드</string>
+    <string name="split_keyboard_blank_ratio">분할 키보드 공백 비율</string>
+    <string name="split_keyboard_threshold">분할 키보드 임계값 (너비/높이)</string>
+</resources>
