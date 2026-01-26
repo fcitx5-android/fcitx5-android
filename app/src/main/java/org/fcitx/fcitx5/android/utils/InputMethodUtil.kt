@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
+import android.view.inputmethod.InputMethodInfo
 import android.view.inputmethod.InputMethodSubtype
 import org.fcitx.fcitx5.android.BuildConfig
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
@@ -45,13 +46,23 @@ object InputMethodUtil {
 
     fun showPicker() = appContext.inputMethodManager.showInputMethodPicker()
 
-    fun firstVoiceInput(): Pair<String, InputMethodSubtype>? =
+    fun voiceInputMethods(): List<Pair<InputMethodInfo, InputMethodSubtype>> =
         appContext.inputMethodManager
-            .shortcutInputMethodsAndSubtypes
-            .firstNotNullOfOrNull {
-                it.value.find { subType -> subType.mode.lowercase() == "voice" }
-                    ?.let { subType -> it.key.id to subType }
+            .enabledInputMethodList
+            .mapNotNull { info ->
+                for (i in 0 until info.subtypeCount) {
+                    val subType = info.getSubtypeAt(i)
+                    if (subType.mode.lowercase() == "voice") {
+                        return@mapNotNull info to subType
+                    }
+                }
+                return@mapNotNull null
             }
+
+    fun firstVoiceInput(): Pair<String, InputMethodSubtype>? =
+        voiceInputMethods().firstNotNullOfOrNull { (info, subType) ->
+            info.id to subType
+        }
 
     fun switchInputMethod(
         service: FcitxInputMethodService,
