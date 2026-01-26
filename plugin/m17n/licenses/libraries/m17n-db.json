@@ -1,0 +1,11 @@
+{
+    "uniqueId": "NonGNU/m17n-db",
+    "artifactVersion": "1.8.10",
+    "description": "Multilingual text processing library (database)",
+    "name": "NonGNU/m17n-db",
+    "website": "https://www.nongnu.org/m17n/",
+    "tag": "native",
+    "licenses": [
+        "LGPL-2.1-or-later"
+    ]
+}

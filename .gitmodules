@@ -56,3 +56,6 @@
 [submodule "plugin/thai/src/main/cpp/fcitx5-libthai"]
 	path = plugin/thai/src/main/cpp/fcitx5-libthai
 	url = https://github.com/fcitx/fcitx5-libthai
+[submodule "plugin/m17n/src/main/cpp/fcitx5-m17n"]
+	path = plugin/m17n/src/main/cpp/fcitx5-m17n
+	url = https://github.com/fcitx/fcitx5-m17n
