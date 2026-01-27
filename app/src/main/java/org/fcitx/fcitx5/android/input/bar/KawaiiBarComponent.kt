@@ -421,6 +421,8 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         val suggestions = response.inlineSuggestions
         if (suggestions.isEmpty()) {
             isInlineSuggestionPresent = false
+            evalIdleUiState()
+            idleUi.inlineSuggestionsBar.clear()
             return true
         }
         var pinned: InlineSuggestion? = null
