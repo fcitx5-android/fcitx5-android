@@ -4,7 +4,6 @@
  */
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
-import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import com.android.build.gradle.internal.tasks.CompileArtProfileTask
 import com.android.build.gradle.internal.tasks.ExpandArtProfileWildcardsTask
 import com.android.build.gradle.internal.tasks.MergeArtProfileTask
@@ -34,25 +33,26 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
 
         super.apply(target)
 
-        target.extensions.configure<BaseAppModuleExtension> {
+        target.extensions.configure<ApplicationExtension> {
             defaultConfig {
                 targetSdk = Versions.targetSdk
                 versionCode = Versions.calculateVersionCode()
                 versionName = target.buildVersionName
             }
             buildTypes {
-                release {
-                    isMinifyEnabled = true
-                    isShrinkResources = true
-                    signingConfig = signingConfigs.fromProjectEnv(target)
-                }
-                debug {
-                    applicationIdSuffix = ".debug"
-                }
                 all {
                     // remove META-INF/version-control-info.textproto
                     @Suppress("UnstableApiUsage")
                     vcsInfo.include = false
+                }
+                debug {
+                    applicationIdSuffix = ".debug"
+                }
+                release {
+                    isMinifyEnabled = true
+                    isShrinkResources = true
+                    signingConfig = signingConfigs.fromProjectEnv(target)
+                    proguardFile(getDefaultProguardFile("proguard-android-optimize.txt"))
                 }
             }
             compileOptions {
@@ -143,6 +143,7 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
             }
         }
 
+        // seems that AboutLibraries does not support AGP 9 yet
         target.pluginManager.apply(target.libs.plugins.aboutlibraries.get().pluginId)
 
         target.configure<AboutLibrariesExtension> {

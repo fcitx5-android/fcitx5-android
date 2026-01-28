@@ -33,37 +33,29 @@ android {
         }
     }
 
-    buildTypes {
-        release {
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+    buildFeatures {
+        viewBinding = true
+        resValues = true
+    }
 
-            resValue("mipmap", "app_icon", "@mipmap/ic_launcher")
-            resValue("mipmap", "app_icon_round", "@mipmap/ic_launcher_round")
-            resValue("string", "app_name", "@string/app_name_release")
-        }
+    buildTypes {
         debug {
             resValue("mipmap", "app_icon", "@mipmap/ic_launcher_debug")
             resValue("mipmap", "app_icon_round", "@mipmap/ic_launcher_round_debug")
             resValue("string", "app_name", "@string/app_name_debug")
         }
-    }
+        release {
+            resValue("mipmap", "app_icon", "@mipmap/ic_launcher")
+            resValue("mipmap", "app_icon_round", "@mipmap/ic_launcher_round")
+            resValue("string", "app_name", "@string/app_name_release")
 
-    buildFeatures {
-        viewBinding = true
+            proguardFile("proguard-rules.pro")
+        }
     }
 
     androidResources {
         @Suppress("UnstableApiUsage")
         generateLocaleConfig = true
-    }
-}
-
-kotlin {
-    sourceSets.configureEach {
-        kotlin.srcDir(layout.buildDirectory.dir("generated/ksp/$name/kotlin"))
     }
 }
 

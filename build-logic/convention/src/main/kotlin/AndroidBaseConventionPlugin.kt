@@ -8,25 +8,23 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 open class AndroidBaseConventionPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
-        target.pluginManager.apply(target.libs.plugins.kotlin.android.get().pluginId)
-
-        target.extensions.configure(CommonExtension::class.java) {
+        target.extensions.configure<CommonExtension> {
             compileSdk = Versions.compileSdk
             buildToolsVersion = target.buildToolsVersion
-            defaultConfig {
+            defaultConfig.apply {
                 minSdk = Versions.minSdk
             }
-            compileOptions {
+            compileOptions.apply {
                 sourceCompatibility = Versions.java
                 targetCompatibility = Versions.java
             }
-            lint {
+            lint.apply {
                 disable += setOf("UseKtx")
             }
         }
@@ -40,9 +38,9 @@ open class AndroidBaseConventionPlugin : Plugin<Project> {
             }
         }
 
-        target.extensions.configure<KotlinProjectExtension> {
-            sourceSets.all {
-                languageSettings.optIn("kotlin.RequiresOptIn")
+        target.extensions.configure<KotlinAndroidProjectExtension> {
+            compilerOptions {
+                optIn.add("kotlin.RequiresOptIn")
             }
         }
     }

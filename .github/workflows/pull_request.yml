@@ -21,7 +21,7 @@ jobs:
           - windows-2025
     steps:
       - name: Fetch source code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           submodules: recursive
@@ -66,7 +66,7 @@ jobs:
           ./gradlew :assembleReleasePlugins
 
       - name: Upload app
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: app-${{ matrix.os }}
           path: app/build/outputs/apk/release/
@@ -84,7 +84,7 @@ jobs:
           done
 
       - name: Upload plugins
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: plugins-${{ matrix.os }}
           path: plugins-to-upload
