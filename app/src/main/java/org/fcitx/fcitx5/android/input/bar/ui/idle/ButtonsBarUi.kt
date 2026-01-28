@@ -5,6 +5,7 @@
 package org.fcitx.fcitx5.android.input.bar.ui.idle
 
 import android.content.Context
+import android.view.View
 import androidx.annotation.DrawableRes
 import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexboxLayout
@@ -44,8 +45,22 @@ class ButtonsBarUi(override val ctx: Context, private val theme: Theme) : Ui {
         contentDescription = ctx.getString(R.string.clipboard)
     }
 
+    val splitKeyboardButton = toolButton(R.drawable.ic_baseline_keyboard_24).apply {
+        contentDescription = ctx.getString(R.string.split_keyboard)
+    }
+
     val moreButton = toolButton(R.drawable.ic_baseline_more_horiz_24).apply {
         contentDescription = ctx.getString(R.string.status_area)
+    }
+
+    fun setSplitKeyboardEnabled(enabled: Boolean) {
+        splitKeyboardButton.setIcon(
+            if (enabled) R.drawable.ic_baseline_keyboard_24 else R.drawable.ic_split_keyboard
+        )
+    }
+
+    fun setSplitKeyboardVisible(visible: Boolean) {
+        splitKeyboardButton.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
 }

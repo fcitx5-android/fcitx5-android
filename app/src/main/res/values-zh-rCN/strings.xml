@@ -111,6 +111,9 @@
     <string name="clipboard_entry_radius">剪贴板条目圆角半径</string>
     <string name="key_horizontal_margin">按键横向边距</string>
     <string name="key_vertical_margin">按键纵向边距</string>
+    <string name="split_keyboard">分离式键盘</string>
+    <string name="split_keyboard_blank_ratio">分离式键盘空白比例</string>
+    <string name="split_keyboard_threshold">分离式键盘阈值 (宽/高)</string>
     <string name="configure">配置</string>
     <string name="choose_image">选择图片…</string>
     <string name="dark_keys">暗色按键</string>
