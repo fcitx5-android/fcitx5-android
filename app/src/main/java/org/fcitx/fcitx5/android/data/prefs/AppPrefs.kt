@@ -4,11 +4,14 @@
  */
 package org.fcitx.fcitx5.android.data.prefs
 
+import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
+import androidx.annotation.StringRes
 import androidx.core.content.edit
+import androidx.preference.ListPreference
 import androidx.preference.PreferenceManager
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.InputFeedbacks.InputFeedbackMode
@@ -22,6 +25,7 @@ import org.fcitx.fcitx5.android.input.keyboard.SwipeSymbolDirection
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
 import org.fcitx.fcitx5.android.input.popup.EmojiModifier
 import org.fcitx.fcitx5.android.utils.DeviceUtil
+import org.fcitx.fcitx5.android.utils.InputMethodUtil
 import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.vibrator
 
@@ -143,6 +147,49 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
         )
         val showVoiceInputButton =
             switch(R.string.show_voice_input_button, "show_voice_input_button", false)
+
+        val preferredVoiceInput: ManagedPreference.PString
+
+        init {
+            fun voiceInputPreference(
+                @StringRes
+                title: Int,
+                key: String,
+                defaultValue: String,
+                enableUiOn: (() -> Boolean)? = null
+            ): ManagedPreference.PString {
+                val pref = ManagedPreference.PString(sharedPreferences, key, defaultValue)
+                val ui = object : ManagedPreferenceUi<ListPreference>(key, enableUiOn) {
+                    override fun createUi(context: Context): ListPreference {
+                        val ui = ListPreference(context)
+                        ui.key = key
+                        val voiceInputMethods = InputMethodUtil.voiceInputMethods()
+                        val values = voiceInputMethods.map { it.first.packageName }
+                        val labels = voiceInputMethods.map { it.first.loadLabel(context.packageManager) }
+                        return ui.apply {
+                            isIconSpaceReserved = false
+                            isSingleLineTitle = false
+                            entryValues = values.toTypedArray()
+                            summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
+                            setDefaultValue(defaultValue)
+                            setTitle(title)
+                            entries = labels.toTypedArray()
+                            setDialogTitle(title)
+                        }
+                    }
+                }
+                pref.register()
+                ui.registerUi()
+                return pref
+            }
+
+            preferredVoiceInput = voiceInputPreference(
+                R.string.preferred_voice_input,
+                "preferred_voice_input",
+                ""
+            ) { showVoiceInputButton.getValue() }
+        }
+
         val expandKeypressArea =
             switch(R.string.expand_keypress_area, "expand_keypress_area", false)
         val swipeSymbolDirection = enumList(
