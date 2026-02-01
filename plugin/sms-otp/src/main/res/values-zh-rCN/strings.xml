@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name_debug">小企鹅输入法 (短信验证码插件 | 调试)</string>
+    <string name="app_name_release">小企鹅输入法 (短信验证码插件)</string>
+    <string name="description">自动获取短信验证码</string>
+</resources>
