@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Fcitx5 for Android Contributors
  */
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
@@ -143,7 +143,6 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
             }
         }
 
-        // seems that AboutLibraries does not support AGP 9 yet
         target.pluginManager.apply(target.libs.plugins.aboutlibraries.get().pluginId)
 
         target.configure<AboutLibrariesExtension> {
