@@ -5,6 +5,7 @@
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.gradle.tasks.PackageAndroidArtifact
+import kotlinx.serialization.Serializable
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -56,17 +57,22 @@ class BuildMetadataPlugin : Plugin<Project> {
     }
 
     abstract class BuildMetadataTask : DefaultTask() {
+        @Serializable
+        data class BuildMetadata(
+            val versionName: String,
+            val commitHash: String,
+            val timestamp: String
+        )
+
         @get:OutputFile
         abstract val outputFile: RegularFileProperty
 
         @TaskAction
         fun execute() {
-            val jsonString = json.encodeToString(mapOf(
-                "versionName" to project.buildVersionName,
-                "commitHash" to project.buildCommitHash,
-                "timestamp" to project.buildTimestamp
-            ))
-            outputFile.get().asFile.writeText(jsonString)
+            with(project) {
+                val metadata = BuildMetadata(buildVersionName, buildCommitHash, buildTimestamp)
+                outputFile.get().asFile.writeText(json.encodeToString(metadata))
+            }
         }
     }
 }
