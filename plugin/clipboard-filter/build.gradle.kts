@@ -21,13 +21,12 @@ android {
     }
 
     buildTypes {
-        debug {
-            resValue("string", "app_name", "@string/app_name_debug")
-        }
         release {
             resValue("string", "app_name", "@string/app_name_release")
-
             proguardFile("proguard-rules.pro")
+        }
+        debug {
+            resValue("string", "app_name", "@string/app_name_debug")
         }
     }
 }

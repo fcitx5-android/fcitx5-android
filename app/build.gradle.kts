@@ -39,17 +39,16 @@ android {
     }
 
     buildTypes {
-        debug {
-            resValue("mipmap", "app_icon", "@mipmap/ic_launcher_debug")
-            resValue("mipmap", "app_icon_round", "@mipmap/ic_launcher_round_debug")
-            resValue("string", "app_name", "@string/app_name_debug")
-        }
         release {
             resValue("mipmap", "app_icon", "@mipmap/ic_launcher")
             resValue("mipmap", "app_icon_round", "@mipmap/ic_launcher_round")
             resValue("string", "app_name", "@string/app_name_release")
-
             proguardFile("proguard-rules.pro")
+        }
+        debug {
+            resValue("mipmap", "app_icon", "@mipmap/ic_launcher_debug")
+            resValue("mipmap", "app_icon_round", "@mipmap/ic_launcher_round_debug")
+            resValue("string", "app_name", "@string/app_name_debug")
         }
     }
 
