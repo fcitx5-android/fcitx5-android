@@ -140,7 +140,7 @@ class TwinSeekBarPreference @JvmOverloads constructor(
         val dialogContent = context.constraintLayout {
             if (dialogMessage != null) {
                 messageText = textView { text = dialogMessage }
-                add(messageText!!, lParams {
+                add(messageText, lParams {
                     verticalMargin = dp(8)
                     horizontalMargin = dp(24)
                 })

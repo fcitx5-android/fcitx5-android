@@ -61,11 +61,10 @@ class InputWindowManager : UniqueViewComponent<InputWindowManager, FrameLayout>(
      * If [createView] is `true`, the view will be created immediately.
      * Otherwise, it will be created on first attach
      */
-    @Suppress("BOUNDS_NOT_ALLOWED_IF_BOUNDED_BY_TYPE_PARAMETER")
-    fun <W : InputWindow, E : EssentialWindow, R> addEssentialWindow(
+    fun <R> addEssentialWindow(
         window: R,
         createView: Boolean = false
-    ) where R : W, R : E {
+    ) where R : InputWindow, R : EssentialWindow {
         if (window.key in essentialWindows) {
             if (essentialWindows[window.key]!!.first === window)
                 Timber.d("Skip adding essential window $window")

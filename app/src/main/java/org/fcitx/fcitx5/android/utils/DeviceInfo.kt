@@ -24,7 +24,7 @@ object DeviceInfo {
         @Suppress("DEPRECATION") // we really want the physical display size
         val size = Point().also {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                context.display!!
+                context.display
             } else {
                 context.windowManager.defaultDisplay
             }.getRealSize(it)

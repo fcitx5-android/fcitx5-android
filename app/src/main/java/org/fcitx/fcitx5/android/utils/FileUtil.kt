@@ -20,7 +20,7 @@ object FileUtil {
      */
     fun removeFile(file: File) = runCatching {
         if (!file.exists())
-            return Result.success(Unit)
+            return@runCatching
         val result = if (file.isSymlink()) {
             file.delete()
         } else if (file.isDirectory) {

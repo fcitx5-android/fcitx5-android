@@ -33,16 +33,17 @@ android {
         }
     }
 
+    buildFeatures {
+        viewBinding = true
+        resValues = true
+    }
+
     buildTypes {
         release {
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-
             resValue("mipmap", "app_icon", "@mipmap/ic_launcher")
             resValue("mipmap", "app_icon_round", "@mipmap/ic_launcher_round")
             resValue("string", "app_name", "@string/app_name_release")
+            proguardFile("proguard-rules.pro")
         }
         debug {
             resValue("mipmap", "app_icon", "@mipmap/ic_launcher_debug")
@@ -51,19 +52,9 @@ android {
         }
     }
 
-    buildFeatures {
-        viewBinding = true
-    }
-
     androidResources {
         @Suppress("UnstableApiUsage")
         generateLocaleConfig = true
-    }
-}
-
-kotlin {
-    sourceSets.configureEach {
-        kotlin.srcDir(layout.buildDirectory.dir("generated/ksp/$name/kotlin"))
     }
 }
 

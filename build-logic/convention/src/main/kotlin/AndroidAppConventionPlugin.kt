@@ -1,10 +1,9 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Fcitx5 for Android Contributors
  */
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
-import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import com.android.build.gradle.internal.tasks.CompileArtProfileTask
 import com.android.build.gradle.internal.tasks.ExpandArtProfileWildcardsTask
 import com.android.build.gradle.internal.tasks.MergeArtProfileTask
@@ -34,7 +33,7 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
 
         super.apply(target)
 
-        target.extensions.configure<BaseAppModuleExtension> {
+        target.extensions.configure<ApplicationExtension> {
             defaultConfig {
                 targetSdk = Versions.targetSdk
                 versionCode = Versions.calculateVersionCode()
@@ -45,6 +44,7 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
                     isMinifyEnabled = true
                     isShrinkResources = true
                     signingConfig = signingConfigs.fromProjectEnv(target)
+                    proguardFile(getDefaultProguardFile("proguard-android-optimize.txt"))
                 }
                 debug {
                     applicationIdSuffix = ".debug"

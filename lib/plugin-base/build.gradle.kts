@@ -7,12 +7,6 @@ plugins {
 android {
     namespace = "org.fcitx.fcitx5.android.lib.plugin_base"
 
-    buildTypes {
-        release {
-            // disable obfuscation for plugins depend on plugin-base
-            consumerProguardFiles("proguard-rules.pro")
-        }
-    }
     publishing {
         // :lib:plugin_base contains different AndroidManifest.xml for debug and release variant
         multipleVariants { allVariants() }
