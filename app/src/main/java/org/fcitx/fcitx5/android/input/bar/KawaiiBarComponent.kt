@@ -334,12 +334,6 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                 }
             }
             numberRow.apply {
-                shouldCollapse = { start, current ->
-                    val dir = if (context.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR) 1 else -1
-                    val sx = start.x * dir
-                    val cx = current.x * dir
-                    cx > sx && abs(cx - sx) > dp(HEIGHT.toFloat())
-                }
                 onCollapseListener = {
                     numberRowState = NumberRowState.ForceHide
                     evalIdleUiState(fromUser = true)
