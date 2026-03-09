@@ -11,6 +11,7 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import org.fcitx.fcitx5.android.ui.main.modified.MySwitchPreference
 import org.fcitx.fcitx5.android.ui.main.settings.DialogSeekBarPreference
+import org.fcitx.fcitx5.android.ui.main.settings.EditTextFloatPreference
 import org.fcitx.fcitx5.android.ui.main.settings.EditTextIntPreference
 import org.fcitx.fcitx5.android.ui.main.settings.TwinSeekBarPreference
 
@@ -88,6 +89,30 @@ abstract class ManagedPreferenceUi<T : Preference>(
             min = this@EditTextInt.min
             max = this@EditTextInt.max
             unit = this@EditTextInt.unit
+        }
+    }
+
+    class EditTextFloat(
+        @StringRes
+        val title: Int,
+        key: String,
+        val defaultValue: Float,
+        val min: Float,
+        val max: Float,
+        val unit: String = "",
+        enableUiOn: (() -> Boolean)? = null
+    ) : ManagedPreferenceUi<EditTextPreference>(key, enableUiOn) {
+        override fun createUi(context: Context) = EditTextFloatPreference(context).apply {
+            key = this@EditTextFloat.key
+            isIconSpaceReserved = false
+            isSingleLineTitle = false
+            summaryProvider = EditTextFloatPreference.SimpleSummaryProvider
+            setDefaultValue(this@EditTextFloat.defaultValue)
+            setTitle(this@EditTextFloat.title)
+            setDialogTitle(this@EditTextFloat.title)
+            min = this@EditTextFloat.min
+            max = this@EditTextFloat.max
+            unit = this@EditTextFloat.unit
         }
     }
 

@@ -7,6 +7,7 @@ package org.fcitx.fcitx5.android.input.keyboard
 import android.text.InputType
 import android.view.Gravity
 import android.view.View
+import android.view.View.OnLayoutChangeListener
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
@@ -76,6 +77,10 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
 
     private val currentKeyboard: BaseKeyboard? get() = keyboards[currentKeyboardName]
 
+    private val keyboardLayoutListener = OnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
+        bar.onKeyboardSizeChanged(v.width, v.height)
+    }
+
     private val keyActionListener = KeyActionListener { it, source ->
         if (it is KeyAction.LayoutSwitchAction) {
             switchLayout(it.act)
@@ -98,6 +103,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
     private fun detachCurrentLayout() {
         currentKeyboard?.also {
             it.onDetach()
+            it.removeOnLayoutChangeListener(keyboardLayoutListener)
             keyboardView.removeView(it)
             it.keyActionListener = null
             it.popupActionListener = null
@@ -110,9 +116,12 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
             it.keyActionListener = keyActionListener
             it.popupActionListener = popupActionListener
             keyboardView.apply { add(it, lParams(matchParent, matchParent)) }
+            it.addOnLayoutChangeListener(keyboardLayoutListener)
             it.onAttach()
+            it.refreshLayoutForPrefs()
             it.onReturnDrawableUpdate(returnKeyDrawable.resourceId)
             it.onInputMethodUpdate(fcitx.runImmediately { inputMethodEntryCached })
+            bar.onKeyboardSizeChanged(it.width, it.height)
         }
     }
 
@@ -145,6 +154,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
             else -> TextKeyboard.Name
         }
         switchLayout(targetLayout, remember = false)
+        currentKeyboard?.refreshLayoutForPrefs()
     }
 
     override fun onImeUpdate(ime: InputMethodEntry) {
@@ -164,6 +174,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
             it.keyActionListener = keyActionListener
             it.popupActionListener = popupActionListener
             it.onAttach()
+            it.refreshLayoutForPrefs()
         }
         notifyBarLayoutChanged()
     }

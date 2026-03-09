@@ -111,6 +111,9 @@
     <string name="clipboard_entry_radius">Радиус входа в буфер обмена</string>
     <string name="key_horizontal_margin">Горизонтальное поле клавиш</string>
     <string name="key_vertical_margin">Вертикальное поле клавиш</string>
+    <string name="split_keyboard">Разделенная клавиатура</string>
+    <string name="split_keyboard_blank_ratio">Доля пустого пространства разделенной клавиатуры</string>
+    <string name="split_keyboard_threshold">Порог разделенной клавиатуры (Ш/В)</string>
     <string name="configure">Настроить</string>
     <string name="choose_image">Выбрать изображение…</string>
     <string name="dark_keys">Темные клавиши</string>

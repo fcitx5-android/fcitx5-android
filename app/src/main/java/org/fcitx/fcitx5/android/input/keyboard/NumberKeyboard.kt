@@ -18,6 +18,8 @@ class NumberKeyboard(
     theme: Theme,
 ) : BaseKeyboard(context, theme, Layout) {
 
+    override val supportsSplitLayout: Boolean = false
+
     companion object {
         const val Name = "Number"
 

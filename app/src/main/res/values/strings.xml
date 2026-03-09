@@ -111,6 +111,9 @@
     <string name="clipboard_entry_radius">Clipboard entry radius</string>
     <string name="key_horizontal_margin">Key horizontal margin</string>
     <string name="key_vertical_margin">Key vertical margin</string>
+    <string name="split_keyboard">Split keyboard</string>
+    <string name="split_keyboard_blank_ratio">Split keyboard blank ratio</string>
+    <string name="split_keyboard_threshold">Split keyboard threshold (W/H)</string>
     <string name="configure">Configure</string>
     <string name="choose_image">Choose Image…</string>
     <string name="dark_keys">Dark Keys</string>
