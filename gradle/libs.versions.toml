@@ -1,14 +1,14 @@
 [versions]
-androidGradlePlugin = "9.0.1"
+androidGradlePlugin = "9.1.0"
 kotlin = "2.3.10"
-ksp = "2.3.5"
+ksp = "2.3.6"
 lifecycle = "2.10.0"
 navigation = "2.9.7"
 room = "2.8.4"
 test = "1.7.0"
 splitties = "3.0.0"
 aboutlibraries = "14.0.0-b02"
-arrow = "2.2.1.1"
+arrow = "2.2.2"
 
 [libraries]
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
@@ -71,4 +71,4 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutlibraries" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
-gitVersion = { id = "com.palantir.git-version", version = "4.3.0" }
+gitVersion = { id = "com.palantir.git-version", version = "5.0.0" }
