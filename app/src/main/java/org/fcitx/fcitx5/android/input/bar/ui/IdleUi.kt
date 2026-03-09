@@ -5,7 +5,11 @@
 package org.fcitx.fcitx5.android.input.bar.ui
 
 import android.content.Context
+import android.transition.Slide
+import android.transition.TransitionManager
+import android.transition.TransitionSet
 import android.view.View
+import android.view.Gravity
 import android.view.animation.AlphaAnimation
 import android.view.animation.AnimationSet
 import android.view.animation.TranslateAnimation
@@ -33,6 +37,7 @@ import splitties.views.dsl.constraintlayout.startOfParent
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.matchParent
 import splitties.views.imageResource
 import timber.log.Timber
@@ -108,7 +113,7 @@ class IdleUi(
         }
     }
 
-    override val root = constraintLayout {
+    private val idleBody = constraintLayout {
         val size = dp(KawaiiBarComponent.HEIGHT)
         add(menuButton, lParams(size, size) {
             startOfParent()
@@ -123,6 +128,10 @@ class IdleUi(
             before(hideKeyboardButton)
             centerVertically()
         })
+    }
+
+    override val root = frameLayout {
+        add(idleBody, lParams(matchParent, matchParent))
         add(numberRow, lParams(matchParent, matchParent))
     }
 
@@ -182,12 +191,26 @@ class IdleUi(
         animator.outAnimation = outAnimation
     }
 
+    private fun enableSlideTransition(inTarget: View, outTarget: View, inGravity: Int, outGravity: Int) {
+        val slideIn = Slide(inGravity).apply { duration = 200L }
+        val slideOut = Slide(outGravity).apply { duration = 200L }
+        slideIn.addTarget(inTarget)
+        slideOut.addTarget(outTarget)
+        val set = TransitionSet().apply {
+            ordering = TransitionSet.ORDERING_TOGETHER
+            addTransition(slideIn)
+            addTransition(slideOut)
+        }
+        TransitionManager.beginDelayedTransition(root, set)
+    }
+
     fun updateState(state: State, fromUser: Boolean = false) {
         Timber.d("Switch idle ui to $state")
         if (
             !fromUser ||
             disableAnimation ||
-            (state == State.InlineSuggestion || currentState == State.InlineSuggestion)
+            (state == State.InlineSuggestion || currentState == State.InlineSuggestion) ||
+            (state == State.NumberRow || currentState == State.NumberRow)
         ) {
             clearAnimation()
         } else {
@@ -201,16 +224,18 @@ class IdleUi(
             State.InlineSuggestion -> animator.displayedChild = 3
         }
         if (state == State.NumberRow) {
-            menuButton.visibility = View.GONE
-            hideKeyboardButton.visibility = View.GONE
-            animator.visibility = View.GONE
-            numberRow.visibility = View.VISIBLE
             numberRow.keyActionListener = commonKeyActionListener.listener
             numberRow.popupActionListener = popup.listener
-        } else {
-            menuButton.visibility = View.VISIBLE
-            hideKeyboardButton.visibility = View.VISIBLE
-            animator.visibility = View.VISIBLE
+            if (fromUser && !disableAnimation) {
+                enableSlideTransition(numberRow, idleBody, Gravity.END, Gravity.START)
+            }
+            numberRow.visibility = View.VISIBLE
+            idleBody.visibility = View.GONE
+        } else if (currentState == State.NumberRow) {
+            if (fromUser && !disableAnimation) {
+                enableSlideTransition(idleBody, numberRow, Gravity.START, Gravity.END)
+            }
+            idleBody.visibility = View.VISIBLE
             numberRow.visibility = View.GONE
             numberRow.keyActionListener = null
             numberRow.popupActionListener = null
