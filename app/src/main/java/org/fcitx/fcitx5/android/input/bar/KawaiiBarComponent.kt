@@ -373,15 +373,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             idleUi.inlineSuggestionsBar.clear()
         }
-        voiceInputSubtype = if (preferredVoiceInput.isNotEmpty()) {
-            InputMethodUtil.voiceInputMethods().find {
-                it.first.packageName == preferredVoiceInput
-            }?.let { (info, subType) ->
-                info.id to subType
-            } ?: InputMethodUtil.firstVoiceInput()
-        } else {
-            InputMethodUtil.firstVoiceInput()
-        }
+        voiceInputSubtype = InputMethodUtil.findVoiceSubtype(preferredVoiceInput)
         val shouldShowVoiceInput =
             showVoiceInputButton && voiceInputSubtype != null && !capFlags.has(CapabilityFlag.Password)
         idleUi.setHideKeyboardIsVoiceInput(

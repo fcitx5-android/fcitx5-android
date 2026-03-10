@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.utils
 
@@ -46,23 +46,36 @@ object InputMethodUtil {
 
     fun showPicker() = appContext.inputMethodManager.showInputMethodPicker()
 
-    fun voiceInputMethods(): List<Pair<InputMethodInfo, InputMethodSubtype>> =
-        appContext.inputMethodManager
-            .enabledInputMethodList
+    fun listVoiceInputMethods(): List<Pair<InputMethodInfo, InputMethodSubtype>> {
+        return appContext.inputMethodManager.enabledInputMethodList
             .mapNotNull { info ->
-                for (i in 0 until info.subtypeCount) {
-                    val subType = info.getSubtypeAt(i)
-                    if (subType.mode.lowercase() == "voice") {
-                        return@mapNotNull info to subType
-                    }
-                }
-                return@mapNotNull null
+                info.firstVoiceSubtype()?.let { info to it }
             }
+    }
 
-    fun firstVoiceInput(): Pair<String, InputMethodSubtype>? =
-        voiceInputMethods().firstNotNullOfOrNull { (info, subType) ->
-            info.id to subType
+    /**
+     * Find input method with `"voice"` subtype, preferring one with [id]
+     */
+    fun findVoiceSubtype(id: String): Pair<String, InputMethodSubtype>? {
+        val inputMethods = appContext.inputMethodManager.enabledInputMethodList
+        if (inputMethods.isEmpty()) return null
+        var firstId: String? = null
+        var firstSubtype: InputMethodSubtype? = null
+        inputMethods.forEach {
+            val voiceSubtype = it.firstVoiceSubtype() ?: return@forEach
+            if (it.id == id) {
+                return id to voiceSubtype
+            }
+            if (firstId == null) {
+                firstId = it.id
+                firstSubtype = voiceSubtype
+            }
         }
+        if (firstId != null && firstSubtype != null) {
+            return firstId to firstSubtype
+        }
+        return null
+    }
 
     fun switchInputMethod(
         service: FcitxInputMethodService,
