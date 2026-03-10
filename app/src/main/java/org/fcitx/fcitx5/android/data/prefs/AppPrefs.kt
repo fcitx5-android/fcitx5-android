@@ -141,8 +141,13 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             "keep_keyboard_letters_uppercase",
             false
         )
+
         val showVoiceInputButton =
             switch(R.string.show_voice_input_button, "show_voice_input_button", false)
+        val preferredVoiceInput = voiceInputPreference(
+            R.string.preferred_voice_input, "preferred_voice_input", ""
+        ) { showVoiceInputButton.getValue() }
+
         val expandKeypressArea =
             switch(R.string.expand_keypress_area, "expand_keypress_area", false)
         val swipeSymbolDirection = enumList(

@@ -64,6 +64,20 @@ abstract class ManagedPreferenceCategory(
         return list(title, key, defaultValue, codec, entryValues, entryLabels, enableUiOn)
     }
 
+    protected fun voiceInputPreference(
+        @StringRes
+        title: Int,
+        key: String,
+        defaultValue: String,
+        enableUiOn: (() -> Boolean)? = null
+    ): ManagedPreference.PString {
+        val pref = ManagedPreference.PString(sharedPreferences, key, defaultValue)
+        val ui = ManagedPreferenceUi.VoiceInputList(title, key, defaultValue, enableUiOn)
+        pref.register()
+        ui.registerUi()
+        return pref
+    }
+
     protected fun int(
         @StringRes
         title: Int,
