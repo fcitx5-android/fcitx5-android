@@ -1,6 +1,6 @@
 {
     "uniqueId": "fcitx/libime-jyutping",
-    "artifactVersion": "1.0.15",
+    "artifactVersion": "1.0.16",
     "description": "Jyutping (Cantonese Input Method) engine support for libime",
     "name": "fcitx/libime-jyutping",
     "website": "https://github.com/fcitx/libime-jyutping",
