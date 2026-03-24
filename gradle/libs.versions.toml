@@ -1,26 +1,27 @@
 [versions]
-androidGradlePlugin = "8.10.0"
-kotlin = "2.1.20"
-ksp = "2.1.20-2.0.1"
-lifecycle = "2.9.0"
-navigation = "2.9.0"
-room = "2.7.1"
+androidGradlePlugin = "9.1.0"
+kotlin = "2.3.10"
+ksp = "2.3.6"
+lifecycle = "2.10.0"
+navigation = "2.9.7"
+room = "2.8.4"
+test = "1.7.0"
 splitties = "3.0.0"
-aboutlibraries = "12.1.2"
-arrow = "2.1.1"
+aboutlibraries = "14.0.0-b02"
+arrow = "2.2.2"
 
 [libraries]
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 android-desugarJDKLibs = { group = "com.android.tools", name = "desugar_jdk_libs", version = "2.1.5" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version = "1.10.2" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.8.1" }
-androidx-activity = { module = "androidx.activity:activity-ktx", version = "1.10.1" }
-androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.0" }
-androidx-autofill = { module = "androidx.autofill:autofill", version = "1.1.0" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.10.0" }
+androidx-activity = { module = "androidx.activity:activity-ktx", version = "1.12.4" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.1" }
+androidx-autofill = { module = "androidx.autofill:autofill", version = "1.3.0" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.2.1" }
 androidx-coordinatorlayout = { module = "androidx.coordinatorlayout:coordinatorlayout", version = "1.3.0" }
-androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.16.0" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.17.0" }
 androidx-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-livedata = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
@@ -28,7 +29,7 @@ androidx-lifecycle-common = { module = "androidx.lifecycle:lifecycle-common-java
 androidx-lifecycle-service = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycle" }
 androidx-navigation-fragment = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigation" }
 androidx-navigation-ui = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigation" }
-androidx-paging = { module = "androidx.paging:paging-runtime-ktx", version = "3.3.6" }
+androidx-paging = { module = "androidx.paging:paging-runtime-ktx", version = "3.4.1" }
 androidx-preference = { module = "androidx.preference:preference-ktx", version = "1.2.1" }
 androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version = "1.4.0" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
@@ -37,10 +38,10 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
 androidx-startup = { module = "androidx.startup:startup-runtime", version = "1.2.0" }
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version = "1.1.0" }
-material = { module = "com.google.android.material:material", version = "1.12.0" }
+material = { module = "com.google.android.material:material", version = "1.13.0" }
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 arrow-functions = { module = "io.arrow-kt:arrow-functions", version.ref = "arrow" }
-imagecropper = { module = "com.vanniktech:android-image-cropper", version = "4.6.0" }
+imagecropper = { module = "com.vanniktech:android-image-cropper", version = "4.7.0" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version = "3.0.0" }
 dependency = { module = "org.mechdancer:dependency", version = "0.1.2" }
 timber = { module = "com.jakewharton.timber:timber", version = "5.0.1" }
@@ -56,10 +57,10 @@ splitties-views-recyclerview = { module = "com.louiscad.splitties:splitties-view
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutlibraries" }
 aboutlibraries-plugin = { module = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin", version.ref = "aboutlibraries" }
 junit = { module = "junit:junit", version = "4.13.2" }
-androidx-test-runner = { module = "androidx.test:runner", version = "1.6.2" }
-androidx-test-rules = { module = "androidx.test:rules", version = "1.6.1" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "test" }
+androidx-test-rules = { module = "androidx.test:rules", version.ref = "test" }
 androidx-lifecycle-testing = { module = "androidx.lifecycle:lifecycle-runtime-testing", version.ref = "lifecycle" }
-kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version = "2.1.0" }
+kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version = "2.2.0" }
 ksp = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 
 [plugins]
@@ -68,7 +69,6 @@ android-library = { id = "com.android.library", version.ref = "androidGradlePlug
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibraries" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutlibraries" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
-gitVersion = { id = "com.palantir.git-version", version = "3.2.0" }
+gitVersion = { id = "com.palantir.git-version", version = "5.0.0" }

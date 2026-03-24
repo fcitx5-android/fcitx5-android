@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 
 package org.fcitx.fcitx5.android.input
@@ -9,7 +9,6 @@ import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Build
 import android.view.View
-import android.view.View.OnClickListener
 import android.view.WindowInsets
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InlineSuggestionsResponse
@@ -315,6 +314,19 @@ class InputView(
         if (focusChangeResetKeyboard || !restarting) {
             windowManager.attachWindow(KeyboardWindow)
         }
+    }
+
+    override fun onStartHandleFcitxEvent() {
+        val inputPanelData = fcitx.runImmediately { inputPanelCached }
+        val inputMethodEntry = fcitx.runImmediately { inputMethodEntryCached }
+        val statusAreaActions = fcitx.runImmediately { statusAreaActionsCached }
+        arrayOf(
+            FcitxEvent.InputPanelEvent(inputPanelData),
+            FcitxEvent.IMChangeEvent(inputMethodEntry),
+            FcitxEvent.StatusAreaEvent(
+                FcitxEvent.StatusAreaEvent.Data(statusAreaActions, inputMethodEntry)
+            )
+        ).forEach { handleFcitxEvent(it) }
     }
 
     override fun handleFcitxEvent(it: FcitxEvent<*>) {

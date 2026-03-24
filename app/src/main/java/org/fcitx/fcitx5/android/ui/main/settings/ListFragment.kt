@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.ui.main.settings
 
@@ -19,15 +19,18 @@ import org.fcitx.fcitx5.android.ui.common.DynamicListUi
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor
 import org.fcitx.fcitx5.android.utils.config.ConfigType
-import org.fcitx.fcitx5.android.utils.parcelable
+import org.fcitx.fcitx5.android.utils.lazyRoute
 
 class ListFragment : Fragment() {
 
-    private val descriptor: ConfigDescriptor<*, out List<*>> by lazy {
-        requireArguments().parcelable(ARG_DESC)!!
+    val args by lazyRoute<SettingsRoute.ListConfig>()
+
+    private val descriptor: ConfigDescriptor<*, *> by lazy {
+        args.desc
     }
+
     private val cfg: RawConfig by lazy {
-        requireArguments().parcelable(ARG_CFG)!!
+        args.cfg
     }
 
     private val viewModel: MainViewModel by activityViewModels()
@@ -50,7 +53,7 @@ class ListFragment : Fragment() {
                 )
             }
             is ConfigDescriptor.ConfigList -> {
-                val ty = descriptor.type as ConfigType.TyList
+                val ty = descriptor.ty as ConfigType.TyList
                 when (ty.subtype) {
                     // does a list of booleans make sense?
                     ConfigType.TyBool -> {
@@ -158,8 +161,6 @@ class ListFragment : Fragment() {
     }
 
     companion object {
-        const val ARG_DESC = "desc"
-        const val ARG_CFG = "cfg"
         val supportedSubtypes = listOf(
             ConfigType.TyEnum,
             ConfigType.TyString,

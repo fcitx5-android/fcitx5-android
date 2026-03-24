@@ -4,7 +4,6 @@
  */
 package org.fcitx.fcitx5.android.input.picker
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
@@ -30,6 +29,7 @@ import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Border
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Variant
 import org.fcitx.fcitx5.android.input.keyboard.KeyView
 import org.fcitx.fcitx5.android.input.keyboard.TextKeyView
+import org.fcitx.fcitx5.android.input.popup.EmojiModifier
 import org.fcitx.fcitx5.android.input.popup.PopupAction
 import org.fcitx.fcitx5.android.input.popup.PopupActionListener
 import splitties.views.dsl.constraintlayout.below
@@ -179,12 +179,11 @@ class PickerPageUi(
         keyActionListener?.onKeyAction(CommitAction(str), Source.Keyboard)
     }
 
-    fun setItems(items: Array<String>) {
+    fun setItems(items: List<String>, withSkinTone: Boolean = false) {
         keyViews.forEachIndexed { i, keyView ->
             keyView.apply {
                 if (i >= items.size) {
                     isEnabled = false
-                    @SuppressLint("SetTextI18n")
                     mainText.text = ""
                     setOnClickListener(null)
                     setOnLongClickListener(null)
@@ -192,10 +191,12 @@ class PickerPageUi(
                     onGestureListener = null
                 } else {
                     isEnabled = true
-                    val text = items[i]
-                    mainText.text = text
+                    val label = items[i]
+                    val commitString =
+                        if (withSkinTone) EmojiModifier.getPreferredTone(label) else label
+                    mainText.text = commitString
                     setOnClickListener {
-                        onSymbolClick(text)
+                        onSymbolClick(commitString)
                     }
                     setOnLongClickListener { view ->
                         view as KeyView
@@ -208,7 +209,7 @@ class PickerPageUi(
                         onPopupAction(
                             PopupAction.ShowKeyboardAction(
                                 view.id,
-                                KeyDef.Popup.Keyboard(text),
+                                KeyDef.Popup.Keyboard(label),
                                 bounds
                             )
                         )
@@ -226,7 +227,7 @@ class PickerPageUi(
                                     // so update bounds when it's pressed
                                     view.updateBounds()
                                     onPopupAction(
-                                        PopupAction.PreviewAction(view.id, text, view.bounds)
+                                        PopupAction.PreviewAction(view.id, label, view.bounds)
                                     )
                                 }
                                 false

@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2025 Fcitx5 for Android Contributors
  */
 
 package org.fcitx.fcitx5.android.input.candidates.floating
@@ -43,6 +43,13 @@ class PagedCandidatesUi(
     }
 
     private val candidatesAdapter = object : RecyclerView.Adapter<UiHolder>() {
+        init {
+            setHasStableIds(true)
+        }
+
+        override fun getItemId(position: Int): Long =
+            data.candidates.getOrNull(position).hashCode().toLong()
+
         override fun getItemCount() =
             data.candidates.size + (if (data.hasPrev || data.hasNext) 1 else 0)
 
@@ -87,6 +94,13 @@ class PagedCandidatesUi(
                 }
             }
         }
+
+        override fun onViewRecycled(holder: UiHolder) {
+            if (holder is UiHolder.Candidate) {
+                holder.ui.root.setOnClickListener(null)
+            }
+            super.onViewRecycled(holder)
+        }
     }
 
     private val candidatesLayoutManager = FlexboxLayoutManager(ctx).apply {
@@ -98,6 +112,7 @@ class PagedCandidatesUi(
         adapter = candidatesAdapter
         layoutManager = candidatesLayoutManager
         overScrollMode = View.OVER_SCROLL_NEVER
+        itemAnimator = null
     }
 
     @SuppressLint("NotifyDataSetChanged")

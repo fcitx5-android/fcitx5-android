@@ -1,14 +1,16 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
+import com.android.build.gradle.tasks.ExternalNativeBuildJsonTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.Delete
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByName
-import org.gradle.kotlin.dsl.task
+import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.withType
 import java.io.File
 import kotlin.io.path.isSymbolicLink
 
@@ -31,8 +33,8 @@ class FcitxComponentPlugin : Plugin<Project> {
     }
 
     override fun apply(target: Project) {
-        val installTask = target.task(INSTALL_TASK)
-        val deleteTask = target.task(DELETE_TASK)
+        val installTask = target.tasks.register(INSTALL_TASK)
+        val deleteTask = target.tasks.register(DELETE_TASK)
         registerCMakeTask(target, "generate-desktop-file", "config")
         registerCMakeTask(target, "translation-file", "translation")
         registerCleanTask(target)
@@ -45,7 +47,7 @@ class FcitxComponentPlugin : Plugin<Project> {
                 registerCMakeTask(target, "translation-file", "translation", project)
             }
             if (ext.excludeFiles.isNotEmpty()) {
-                deleteTask.apply {
+                deleteTask.get().apply {
                     dependsOn(installTask)
                     doLast {
                         ext.excludeFiles.forEach {
@@ -75,21 +77,15 @@ class FcitxComponentPlugin : Plugin<Project> {
         } else {
             "installLibrary$componentName[${sourceProject.name}]"
         }
-        val task = project.task(taskName) {
-            runAfterNativeConfigure(sourceProject) { abiModel ->
-                val cmake = abiModel.variant.module.cmake!!.cmakeExe!!
-                if (target.isNotEmpty()) {
-                    sourceProject.exec {
-                        workingDir = abiModel.cxxBuildFolder
-                        commandLine(cmake, "--build", ".", "--target", target)
-                    }
-                }
-                sourceProject.exec {
-                    workingDir = abiModel.cxxBuildFolder
-                    environment("DESTDIR", project.assetsDir.absolutePath)
-                    commandLine(cmake, "--install", ".", "--component", component)
-                }
-                val ext = project.extensions.getByName<FcitxComponentExtension>("fcitxComponent")
+        val abiModel = sourceProject.getCxxAbiModelProperty()
+        val task = project.tasks.register<CMakeBuildInstallTask>(taskName) {
+            cxxAbiModel.set(abiModel)
+            buildTarget.set(target)
+            installComponent.set(component)
+            destDir.set(project.assetsDir)
+            mustRunAfter(sourceProject.tasks.withType<ExternalNativeBuildJsonTask>())
+            doLast {
+                val ext = project.extensions.getByName<FcitxComponentExtension>(EXTENSION)
                 ext.modifyFiles.forEach { (path, function) ->
                     val file = project.assetsDir.resolve(path)
                     if (file.exists()) {
@@ -102,7 +98,7 @@ class FcitxComponentPlugin : Plugin<Project> {
     }
 
     private fun registerCleanTask(project: Project) {
-        project.task<Delete>(CLEAN_TASK) {
+        project.tasks.register<Delete>(CLEAN_TASK) {
             delete(project.assetsDir.resolve("usr/share/locale"))
             // delete all non symlink files
             // true -> delete

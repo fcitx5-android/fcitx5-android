@@ -21,6 +21,10 @@ import splitties.views.setPaddingDp
 open class HorizontalCandidateViewAdapter(val theme: Theme) :
     RecyclerView.Adapter<CandidateViewHolder>() {
 
+    init {
+        setHasStableIds(true)
+    }
+
     var candidates: Array<String> = arrayOf()
         private set
 
@@ -35,6 +39,8 @@ open class HorizontalCandidateViewAdapter(val theme: Theme) :
     }
 
     override fun getItemCount() = candidates.size
+
+    override fun getItemId(position: Int) = candidates.getOrNull(position).hashCode().toLong()
 
     @CallSuper
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CandidateViewHolder {

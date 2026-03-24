@@ -34,6 +34,8 @@ interface FcitxAPI {
 
     val inputPanelCached: FcitxEvent.InputPanelEvent.Data
 
+    fun setLogRule(verbose: Boolean)
+
     fun getAddonReverseDependencies(addon: String): List<Pair<String, AddonDep>>
 
     fun translate(str: String, domain: String = "fcitx5"): String
@@ -89,6 +91,7 @@ interface FcitxAPI {
     suspend fun triggerUnicode()
 
     suspend fun focus(focus: Boolean = true)
+    suspend fun focusOutIn()
     suspend fun activate(uid: Int, pkgName: String)
     suspend fun deactivate(uid: Int)
     suspend fun setCapFlags(flags: CapabilityFlags)

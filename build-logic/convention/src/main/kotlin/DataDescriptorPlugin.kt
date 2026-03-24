@@ -1,9 +1,8 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -20,7 +19,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.task
+import org.gradle.kotlin.dsl.register
 import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
@@ -28,7 +27,6 @@ import org.jetbrains.kotlin.com.google.common.hash.Hashing
 import org.jetbrains.kotlin.com.google.common.io.ByteSource
 import java.io.File
 import java.nio.charset.Charset
-import kotlin.collections.set
 
 interface DataDescriptorPluginExtension {
     /**
@@ -58,13 +56,13 @@ class DataDescriptorPlugin : Plugin<Project> {
         val extension = target.extensions.create<DataDescriptorPluginExtension>(TASK)
         extension.excludes.convention(listOf())
         extension.symlinks.convention(mapOf())
-        target.task<DataDescriptorTask>(TASK) {
+        target.tasks.register<DataDescriptorTask>(TASK) {
             inputDir.set(target.assetsDir)
             outputFile.set(target.assetsDir.resolve(FILE_NAME))
             excludes.set(extension.excludes)
             symlinks.set(extension.symlinks)
         }
-        target.task<Delete>(CLEAN_TASK) {
+        target.tasks.register<Delete>(CLEAN_TASK) {
             delete(target.assetsDir.resolve(FILE_NAME))
         }.also {
             target.cleanTask.dependsOn(it)

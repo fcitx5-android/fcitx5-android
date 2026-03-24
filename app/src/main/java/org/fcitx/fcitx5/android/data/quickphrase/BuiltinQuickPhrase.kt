@@ -4,29 +4,30 @@
  */
 package org.fcitx.fcitx5.android.data.quickphrase
 
+import kotlinx.parcelize.Parcelize
 import java.io.File
 
+@Parcelize
 class BuiltinQuickPhrase(
     override val file: File,
     // always be .mb (not disabled)
-    private val overrideFile: File
+    private val overrideFile: File,
+    private var _override: CustomQuickPhrase? = null
 ) : QuickPhrase() {
 
     init {
         ensureFileExists()
+        evaluateOverride()
     }
 
-    var override: CustomQuickPhrase? =
-        if (overrideFile.exists())
-            CustomQuickPhrase(overrideFile)
-        else {
-            val disabledOverride = File(overrideFile.path + ".$DISABLE")
-            if (disabledOverride.exists())
-                CustomQuickPhrase(disabledOverride)
-            else
-                null
+    val overrideFilePath: String
+        get() = overrideFile.absolutePath
+
+    var override: CustomQuickPhrase?
+        get() = _override
+        private set(value) {
+            _override = value
         }
-        private set
 
     override val isEnabled: Boolean
         get() = override?.isEnabled ?: true
@@ -35,6 +36,7 @@ class BuiltinQuickPhrase(
         if (override != null)
             return
         file.copyTo(overrideFile, overwrite = true)
+        // Update override
         override = CustomQuickPhrase(overrideFile)
     }
 
@@ -64,6 +66,21 @@ class BuiltinQuickPhrase(
     fun deleteOverride() {
         overrideFile.delete()
         override = null
+    }
+
+    /**
+     * Make sure [override] is set correctly.
+     */
+    fun evaluateOverride() {
+        override = if (overrideFile.exists())
+            CustomQuickPhrase(overrideFile)
+        else {
+            val disabledOverride = File(overrideFile.path + ".$DISABLE")
+            if (disabledOverride.exists())
+                CustomQuickPhrase(disabledOverride)
+            else
+                null
+        }
     }
 
     override fun toString(): String {

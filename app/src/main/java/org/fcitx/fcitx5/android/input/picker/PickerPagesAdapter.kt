@@ -4,9 +4,11 @@
  */
 package org.fcitx.fcitx5.android.input.picker
 
+import android.text.TextPaint
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.data.RecentlyUsed
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.KeyActionListener
 import org.fcitx.fcitx5.android.input.popup.PopupActionListener
@@ -15,99 +17,83 @@ class PickerPagesAdapter(
     val theme: Theme,
     private val keyActionListener: KeyActionListener,
     private val popupActionListener: PopupActionListener,
-    data: List<Pair<PickerData.Category, Array<String>>>,
+    private val rawData: List<Pair<PickerData.Category, Array<String>>>,
     private val density: PickerPageUi.Density,
     recentlyUsedFileName: String,
-    private val bordered: Boolean = false
+    private val bordered: Boolean = false,
+    private val isEmoji: Boolean = false
 ) : RecyclerView.Adapter<PickerPagesAdapter.ViewHolder>() {
 
     class ViewHolder(val ui: PickerPageUi) : RecyclerView.ViewHolder(ui.root)
 
     /**
-     * calculated layout of data in the form of
-     * [(start page of the category, # of pages)]
-     * Note: unlike [ranges], [pages], and [categories],
-     * this does not include recently used category.
+     * list<`Category` to `[start, end]`>, starting with empty "RecentlyUsed" category
      */
-    private val cats: Array<Pair<Int, Int>>
-
-    private val ranges: List<IntRange>
-
-    private val pages: ArrayList<Array<String>>
+    private val categories: MutableList<Pair<PickerData.Category, IntRange>> = mutableListOf(
+        PickerData.RecentlyUsedCategory to IntRange(0, 0)
+    )
 
     /**
-     * INVARIANT: The recently used category only takes one page
-     * It does not interleave the layout calculation for data.
-     * See the note on [cats] for details
+     * list<page of symbols>, starting with empty "RecentlyUsed" page
      */
-    private val recentlyUsed = RecentlyUsed(recentlyUsedFileName, density.pageSize)
+    private val pages: MutableList<List<String>> = mutableListOf(listOf())
 
-    @Suppress("JoinDeclarationAndAssignment")
-    val categories: List<PickerData.Category>
+    private fun buildCategories(
+        data: List<Pair<PickerData.Category, Array<String>>>,
+        knowGraphOnly: Boolean = false
+    ) {
+        val textPaint = if (knowGraphOnly) TextPaint() else null
+        data.forEach { (cat, arr) ->
+            val list = if (textPaint != null) {
+                arr.filter { textPaint.hasGlyph(it) }
+            } else {
+                arr.toList()
+            }
+            val chunks = list.chunked(density.pageSize)
+            categories.add(cat to IntRange(pages.size, pages.size + chunks.size - 1))
+            pages.addAll(chunks)
+        }
+    }
 
     init {
-        // Add recently used category
-        categories = listOf(PickerData.RecentlyUsedCategory) + data.map { it.first }
-        val concat = data.flatMap { it.second.toList() }
-        // shift the start page of each category in data by one
-        var start = 1
-        var p = 0
-        pages = ArrayList()
-        // Add a placeholder for the recently used page
-        // We will update it in [updateRecent]
-        pages.add(arrayOf())
-        cats = Array(data.size) { i ->
-            val v = data[i].second
-            val filled = v.size / density.pageSize
-            val rest = v.size % density.pageSize
-            val pageNum = filled + if (rest != 0) 1 else 0
-            for (j in start until start + filled) {
-                pages.add(j, (p until p + density.pageSize).map {
-                    concat[it]
-                }.toTypedArray())
-                p += density.pageSize
-            }
-            if (rest != 0) {
-                pages.add(start + pageNum - 1, (p until p + rest).map {
-                    concat[it]
-                }.toTypedArray())
-                p += rest
-            }
-            (start to pageNum).also { start += pageNum }
-        }
-        // Add recently used page
-        ranges = listOf(0..0) + cats.map { (start, pageNum) ->
-            start until start + pageNum
-        }
-        recentlyUsed.load()
+        buildCategories(
+            rawData,
+            isEmoji && AppPrefs.getInstance().symbols.hideUnsupportedEmojis.getValue()
+        )
     }
+
+    fun rebuildCategories(knowGraphOnly: Boolean = false) {
+        categories.clear()
+        // empty "RecentlyUsed" category
+        categories.add(PickerData.RecentlyUsedCategory to IntRange(0, 0))
+        pages.clear()
+        // empty "RecentlyUsed" page
+        pages.add(emptyList())
+        buildCategories(rawData, knowGraphOnly)
+    }
+
+    private val recentlyUsed = RecentlyUsed(recentlyUsedFileName, density.pageSize)
 
     fun insertRecent(text: String) {
         if (text.length == 1 && text[0].code.let { it in Digit || it in FullWidthDigit }) return
         recentlyUsed.insert(text)
     }
 
-    private fun updateRecent() {
-        pages[0] = recentlyUsed.toOrderedList().toTypedArray()
+    fun getCategoryList(): List<PickerData.Category> {
+        return categories.map { it.first }
     }
 
-    fun saveRecent() {
-        recentlyUsed.save()
+    fun getCategoryIndexOfPage(page: Int): Int {
+        return categories.indexOfFirst { page in it.second }
     }
 
-    fun getCategoryOfPage(page: Int) =
-        ranges.indexOfFirst { page in it }
+    fun getCategoryRangeOfPage(page: Int): IntRange {
+        return categories.find { page in it.second }?.second ?: IntRange(0, 0)
+    }
 
-    fun getCategoryRangeOfPage(page: Int) =
-        ranges.find { page in it } ?: (0..0)
-
-    fun getStartPageOfCategory(cat: Int) =
-        // Recently used category only has one page which must be the first page
-        if (cat == 0)
-            0
-        // Otherwise, we need offset it by one
-        else
-            cats[cat - 1].first
+    fun getRangeOfCategoryIndex(cat: Int): IntRange {
+        return categories[cat].second
+    }
 
     override fun getItemCount() = pages.size
 
@@ -116,7 +102,7 @@ class PickerPagesAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.ui.setItems(pages[position])
+        holder.ui.setItems(pages[position], isEmoji)
     }
 
     override fun onViewAttachedToWindow(holder: ViewHolder) {
@@ -124,9 +110,8 @@ class PickerPagesAdapter(
         if (holder.bindingAdapterPosition == 0) {
             // prevent popup on RecentlyUsed page
             holder.ui.popupActionListener = null
-            // update RecentlyUsed when it's page attached
-            updateRecent()
-            holder.ui.setItems(pages[0])
+            // RecentlyUsed content are already modified with skin tones
+            holder.ui.setItems(recentlyUsed.items, withSkinTone = false)
         } else {
             holder.ui.popupActionListener = popupActionListener
         }

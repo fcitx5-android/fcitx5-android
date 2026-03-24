@@ -5,10 +5,12 @@
 #include <fcitx/addonfactory.h>
 #include <fcitx/addonmanager.h>
 #include <fcitx/candidatelist.h>
+#include <fcitx/focusgroup.h>
 #include <fcitx/inputcontextmanager.h>
 #include <fcitx/inputmethodengine.h>
-#include <fcitx/focusgroup.h>
+#include <fcitx/inputmethodmanager.h>
 #include <fcitx/inputpanel.h>
+#include <fcitx/statusarea.h>
 #include <fcitx-utils/event.h>
 
 #include "androidfrontend.h"
@@ -286,8 +288,20 @@ AndroidFrontend::AndroidFrontend(Instance *instance)
             EventType::InputContextInputMethodActivated,
             EventWatcherPhase::Default,
             [this](Event &event) {
-                FCITX_UNUSED(event);
-                imChangeCallback();
+                auto &e = static_cast<InputMethodActivatedEvent &>(event);
+                if (e.inputContext() != activeIC_) return;
+                imChangeCallback(makeInputMethodStatus(activeIC_));
+            }
+    ));
+    eventHandlers_.emplace_back(instance_->watchEvent(
+            EventType::InputContextSwitchInputMethod,
+            EventWatcherPhase::Default,
+            [this](Event &event) {
+                auto &e = static_cast<InputContextSwitchInputMethodEvent &>(event);
+                if (e.inputContext() != activeIC_) return;
+                const auto &reason = static_cast<std::underlying_type<InputMethodSwitchedReason>::type>(e.reason());
+                const std::string &oldIM = e.oldInputMethod();
+                switchInputMethodCallback(reason, oldIM);
             }
     ));
     eventHandlers_.emplace_back(instance_->watchEvent(
@@ -295,20 +309,19 @@ AndroidFrontend::AndroidFrontend(Instance *instance)
             EventWatcherPhase::Default,
             [this](Event &event) {
                 auto &e = static_cast<InputContextFlushUIEvent &>(event);
+                if (e.inputContext() != activeIC_) return;
                 switch (e.component()) {
                     case UserInterfaceComponent::InputPanel: {
-                        if (activeIC_) {
-                            activeIC_->updateInputPanel();
-                            if (pagingMode_ == 0) {
-                                activeIC_->updateCandidatesBulk();
-                            } else {
-                                activeIC_->updateCandidatesPaged();
-                            }
+                        activeIC_->updateInputPanel();
+                        if (pagingMode_ == 0) {
+                            activeIC_->updateCandidatesBulk();
+                        } else {
+                            activeIC_->updateCandidatesPaged();
                         }
                         break;
                     }
                     case UserInterfaceComponent::StatusArea: {
-                        statusAreaUpdateCallback();
+                        statusAreaUpdateCallback(makeStatusAreaActions(activeIC_), makeInputMethodStatus(activeIC_));
                         break;
                     }
                 }
@@ -442,6 +455,11 @@ void AndroidFrontend::showToast(const std::string &s) {
 
 void AndroidFrontend::setCandidatePagingMode(const int mode) {
     pagingMode_ = mode;
+    if (mode == 0) {
+        activeIC_->updateCandidatesBulk();
+    } else {
+        activeIC_->updateCandidatesPaged();
+    }
 }
 
 void AndroidFrontend::updatePagedCandidate(const PagedCandidateEntity &paged) {
@@ -487,6 +505,28 @@ void AndroidFrontend::setToastCallback(const ToastCallback &callback) {
 
 void AndroidFrontend::setPagedCandidateCallback(const PagedCandidateCallback &callback) {
     pagedCandidateCallback = callback;
+}
+
+void AndroidFrontend::setSwitchInputMethodCallback(const SwitchInputMethodCallback &callback) {
+    switchInputMethodCallback = callback;
+}
+
+InputMethodStatus AndroidFrontend::makeInputMethodStatus(InputContext *ic) {
+    auto *entry = instance_->inputMethodEntry(ic);
+    auto *engine = instance_->inputMethodEngine(ic);
+    return {entry, engine, ic};
+}
+
+std::vector<ActionEntity> AndroidFrontend::makeStatusAreaActions(fcitx::InputContext *ic) {
+    auto actions = std::vector<ActionEntity>();
+    for (auto group: {fcitx::StatusGroup::BeforeInputMethod,
+                      fcitx::StatusGroup::InputMethod,
+                      fcitx::StatusGroup::AfterInputMethod}) {
+        for (auto act: ic->statusArea().actions(group)) {
+            actions.emplace_back(act, ic);
+        }
+    }
+    return actions;
 }
 
 class AndroidFrontendFactory : public AddonFactory {

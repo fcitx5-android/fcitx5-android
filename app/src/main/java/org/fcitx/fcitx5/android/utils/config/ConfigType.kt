@@ -8,30 +8,40 @@ import android.os.Parcelable
 import arrow.core.Either
 import arrow.core.raise.either
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
+@Serializable
 sealed class ConfigType<T> : Parcelable {
     @Parcelize
+    @Serializable
     data object TyInt : ConfigType<TyInt>()
 
     @Parcelize
+    @Serializable
     data object TyString : ConfigType<TyString>()
 
     @Parcelize
+    @Serializable
     data object TyBool : ConfigType<TyBool>()
 
     @Parcelize
+    @Serializable
     data object TyKey : ConfigType<TyKey>()
 
     @Parcelize
+    @Serializable
     data object TyEnum : ConfigType<TyEnum>()
 
     @Parcelize
+    @Serializable
     data object TyExternal : ConfigType<TyExternal>()
 
     @Parcelize
+    @Serializable
     data class TyCustom(val typeName: String) : ConfigType<TyCustom>()
 
     @Parcelize
+    @Serializable
     data class TyList(val subtype: ConfigType<*>) : ConfigType<TyList>()
 
     companion object : ConfigParser<String, ConfigType<*>, Companion.UnknownConfigTypeException> {

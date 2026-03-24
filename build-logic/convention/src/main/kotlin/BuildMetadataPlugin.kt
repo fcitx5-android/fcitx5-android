@@ -1,10 +1,11 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Fcitx5 for Android Contributors
  */
-import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
+import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+import com.android.build.gradle.tasks.PackageAndroidArtifact
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -12,15 +13,16 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.task
+import org.gradle.kotlin.dsl.register
 
 /**
  * Add task `generateBuildMetadata${Variant}`
  */
+@Suppress("unused")
 class BuildMetadataPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
-        target.extensions.configure<BaseAppModuleExtension> {
+        target.extensions.configure<ApplicationExtension> {
             buildFeatures {
                 buildConfig = true
             }
@@ -29,11 +31,14 @@ class BuildMetadataPlugin : Plugin<Project> {
                 buildConfigField("long", "BUILD_TIME", target.buildTimestamp)
                 buildConfigField("String", "DATA_DESCRIPTOR_NAME", "\"${DataDescriptorPlugin.FILE_NAME}\"")
             }
-            applicationVariants.all {
-                val variantName = name.capitalized()
+        }
+        target.extensions.configure<ApplicationAndroidComponentsExtension> {
+            onVariants { variant ->
+                val variantName = variant.name.capitalized()
                 target.afterEvaluate {
-                    target.task<BuildMetadataTask>("generateBuildMetadata${variantName}") {
-                        val packageTask = packageApplicationProvider.get() // package${Variant} task
+                    target.tasks.register<BuildMetadataTask>("generateBuildMetadata${variantName}") {
+                        val packageTask =
+                            target.tasks.getByName("package${variantName}") as PackageAndroidArtifact
                         // create metadata file after package, because it's outputDirectory would
                         // be cleared at some time before package
                         mustRunAfter(packageTask)
@@ -44,7 +49,7 @@ class BuildMetadataPlugin : Plugin<Project> {
                         }
                         outputFile.set(packageTask.outputDirectory.file(fileName))
                     }.also {
-                        assembleProvider.get().dependsOn(it) // assemble${Variant} task
+                        target.tasks.getByName("assemble${variantName}").dependsOn(it)
                     }
                 }
             }
@@ -62,13 +67,11 @@ class BuildMetadataPlugin : Plugin<Project> {
         @get:OutputFile
         abstract val outputFile: RegularFileProperty
 
-        private val file by lazy { outputFile.get().asFile }
-
         @TaskAction
         fun execute() {
             with(project) {
                 val metadata = BuildMetadata(buildVersionName, buildCommitHash, buildTimestamp)
-                file.writeText(json.encodeToString(metadata))
+                outputFile.get().asFile.writeText(json.encodeToString(metadata))
             }
         }
     }

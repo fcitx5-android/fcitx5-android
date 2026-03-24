@@ -30,15 +30,25 @@ object PinyinDictManager {
 
     private val scel2org5 by lazy { File(nativeDir, scel2org5Name) }
 
-    fun listDictionaries(): List<PinyinDictionary> =
-        (builtinPinyinDictDir.listFiles()?.mapNotNull {
-            it.takeIf { it.extension == PinyinDictionary.Type.LibIME.ext }
-                ?.let(::BuiltinDictionary)
-        } ?: listOf()) +
-                (pinyinDicDir
-                    .listFiles()
-                    ?.mapNotNull { PinyinDictionary.new(it)?.takeIf { it is LibIMEDictionary } }
-                    ?.toList() ?: listOf())
+    fun listDictionaries(): List<PinyinDictionary> {
+        val builtin = mutableListOf<PinyinDictionary>()
+        builtinPinyinDictDir.listFiles()?.forEach {
+            if (it.extension == PinyinDictionary.Type.LibIME.ext) {
+                builtin.add(BuiltinDictionary(it))
+            }
+        }
+        builtin.sortBy { it.name }
+        val user = mutableListOf<PinyinDictionary>()
+        pinyinDicDir.listFiles()?.forEach {
+            PinyinDictionary.new(it)?.let { dict ->
+                if (dict is LibIMEDictionary) {
+                    user.add(dict)
+                }
+            }
+        }
+        user.sortBy { it.name }
+        return builtin + user
+    }
 
     fun importFromFile(file: File): Result<LibIMEDictionary> = runCatching {
         val raw =

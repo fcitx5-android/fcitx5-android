@@ -306,4 +306,15 @@
     <string name="open_input_method_settings">Open input method settings</string>
     <string name="delete_all">Delete all</string>
     <string name="share">Share</string>
+    <string name="emoji_and_symbols">Emoji &amp; Symbols</string>
+    <string name="default_emoji_skin_tone">Default emoji skin tone modifier</string>
+    <string name="emoji_skin_tone_none">No modifier</string>
+    <string name="emoji_skin_tone_type_1_2">🏻 Type-1-2</string>
+    <string name="emoji_skin_tone_type_3">🏼 Type-3</string>
+    <string name="emoji_skin_tone_type_4">🏽 Type-4</string>
+    <string name="emoji_skin_tone_type_5">🏾 Type-5</string>
+    <string name="emoji_skin_tone_type_6">🏿 Type-6</string>
+    <string name="hide_unsupported_emojis">Hide unsupported Emojis</string>
+    <string name="key_border_stroke">Enable stroke for key border</string>
+    <string name="preferred_voice_input">Preferred voice input</string>
 </resources>

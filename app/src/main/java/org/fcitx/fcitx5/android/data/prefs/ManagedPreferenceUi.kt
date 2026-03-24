@@ -9,10 +9,13 @@ import androidx.annotation.StringRes
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.ui.main.modified.MySwitchPreference
 import org.fcitx.fcitx5.android.ui.main.settings.DialogSeekBarPreference
 import org.fcitx.fcitx5.android.ui.main.settings.EditTextIntPreference
 import org.fcitx.fcitx5.android.ui.main.settings.TwinSeekBarPreference
+import org.fcitx.fcitx5.android.utils.InputMethodUtil
+import org.fcitx.fcitx5.android.utils.includes
 
 abstract class ManagedPreferenceUi<T : Preference>(
     val key: String,
@@ -64,6 +67,38 @@ abstract class ManagedPreferenceUi<T : Preference>(
             setTitle(this@StringList.title)
             entries = this@StringList.entryLabels.map { context.getString(it) }.toTypedArray()
             setDialogTitle(this@StringList.title)
+        }
+    }
+
+    class VoiceInputList(
+        @StringRes
+        val title: Int,
+        key: String,
+        val defaultValue: String,
+        enableUiOn: (() -> Boolean)? = null
+    ) : ManagedPreferenceUi<ListPreference>(key, enableUiOn) {
+        override fun createUi(context: Context) = ListPreference(context).apply {
+            key = this@VoiceInputList.key
+            isIconSpaceReserved = false
+            isSingleLineTitle = false
+            summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
+            setDefaultValue(defaultValue)
+            setTitle(this@VoiceInputList.title)
+            setDialogTitle(this@VoiceInputList.title)
+            val voiceInputMethods = InputMethodUtil.listVoiceInputMethods()
+            entryValues = arrayOf("", *voiceInputMethods.map { it.first.id }.toTypedArray())
+            entries = arrayOf(
+                context.getString(R.string.system_default),
+                *voiceInputMethods.map { it.first.loadLabel(context.packageManager) }.toTypedArray()
+            )
+            // shows "(Not Available)" if selected id is not present
+            summaryProvider = Preference.SummaryProvider<ListPreference> { preference ->
+                if (preference.entryValues.includes(preference.value)) {
+                    preference.entry
+                } else {
+                    context.getString(R.string._not_available_)
+                }
+            }
         }
     }
 

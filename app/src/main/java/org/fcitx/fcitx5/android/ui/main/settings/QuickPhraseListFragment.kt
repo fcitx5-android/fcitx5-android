@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.ui.main.settings
 
@@ -17,11 +17,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.app.NotificationCompat
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -39,8 +37,10 @@ import org.fcitx.fcitx5.android.utils.NaiveDustman
 import org.fcitx.fcitx5.android.utils.importErrorDialog
 import org.fcitx.fcitx5.android.utils.item
 import org.fcitx.fcitx5.android.utils.materialTextInput
+import org.fcitx.fcitx5.android.utils.navigateWithAnim
 import org.fcitx.fcitx5.android.utils.notificationManager
 import org.fcitx.fcitx5.android.utils.onPositiveButtonClick
+import org.fcitx.fcitx5.android.utils.parcelable
 import org.fcitx.fcitx5.android.utils.queryFileName
 import org.fcitx.fcitx5.android.utils.str
 import splitties.resources.drawable
@@ -71,7 +71,6 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
             Mode.Custom(),
             QuickPhraseManager.listQuickPhrase(),
             initCheckBox = { entry ->
-                setOnCheckedChangeListener(null)
                 isEnabled = true
                 isChecked = entry.isEnabled
                 setOnCheckedChangeListener { _, isChecked ->
@@ -82,15 +81,13 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
             initSettingsButton = { entry ->
                 visibility = if (!entry.isEnabled) View.GONE else View.VISIBLE
                 fun edit() {
-                    findNavController().navigate(
-                        R.id.action_quickPhraseListFragment_to_quickPhraseEditFragment,
-                        bundleOf(QuickPhraseEditFragment.ARG to entry)
-                    )
+                    navigateWithAnim(SettingsRoute.QuickPhraseEdit(entry))
                     parentFragmentManager.setFragmentResultListener(
                         QuickPhraseEditFragment.RESULT,
                         this@QuickPhraseListFragment
-                    ) { _, _ ->
-                        ui.updateItem(ui.indexItem(entry), entry)
+                    ) listener@{ requestKey, result ->
+                        val newItem = result.parcelable<QuickPhrase>(requestKey) ?: return@listener
+                        ui.updateItem(ui.indexItem(entry), newItem)
                         // editor changed file content
                         dustman.forceDirty()
                     }
@@ -119,7 +116,6 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                                 edit()
                             }
                         }
-
                     }
                     is CustomQuickPhrase -> {
                         icon = R.drawable.ic_baseline_edit_24

@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.ui.main.settings
 
@@ -15,6 +15,7 @@ import org.fcitx.fcitx5.android.data.punctuation.PunctuationMapEntry
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.utils.NaiveDustman
+import org.fcitx.fcitx5.android.utils.lazyRoute
 import org.fcitx.fcitx5.android.utils.materialTextInput
 import org.fcitx.fcitx5.android.utils.onPositiveButtonClick
 import org.fcitx.fcitx5.android.utils.str
@@ -25,6 +26,8 @@ import splitties.views.dsl.core.verticalLayout
 import splitties.views.setPaddingDp
 
 class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<PunctuationMapEntry> {
+
+    private val args by lazyRoute<SettingsRoute.Punctuation>()
 
     private lateinit var lang: String
     private lateinit var keyDesc: String
@@ -60,7 +63,7 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
     }
 
     override suspend fun initialize(): View {
-        lang = requireArguments().getString(LANG, DEFAULT_LANG)
+        lang = args.lang ?: DEFAULT_LANG
         val raw = fcitx.runOnReady { getPunctuationConfig(lang) }
         findDesc(raw)
         val initialEntries = PunctuationManager.parseRawConfig(raw)
@@ -163,7 +166,7 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
 
     override fun onStart() {
         super.onStart()
-        viewModel.setToolbarTitle(requireArguments().getString(TITLE)!!)
+        viewModel.setToolbarTitle(args.title)
         if (isInitialized) {
             viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
                 ui.enterMultiSelect(requireActivity().onBackPressedDispatcher)
@@ -188,8 +191,6 @@ class PunctuationEditorFragment : ProgressFragment(), OnItemChangedListener<Punc
     }
 
     companion object {
-        const val TITLE = "title"
-        const val LANG = "lang"
         const val DEFAULT_LANG = "zh_CN"
     }
 }

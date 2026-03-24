@@ -1,21 +1,20 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.ui.main.settings.im
 
 import android.os.Build
 import android.view.View
-import androidx.core.os.bundleOf
-import androidx.navigation.findNavController
-import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.InputMethodEntry
-import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.core.SubtypeManager
+import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.DynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.ui.main.settings.ProgressFragment
+import org.fcitx.fcitx5.android.ui.main.settings.SettingsRoute
+import org.fcitx.fcitx5.android.utils.navigateWithAnim
 
 class InputMethodListFragment : ProgressFragment(), OnItemChangedListener<InputMethodEntry> {
 
@@ -43,12 +42,8 @@ class InputMethodListFragment : ProgressFragment(), OnItemChangedListener<InputM
             enableOrder = true,
             initSettingsButton = { entry ->
                 setOnClickListener {
-                    it.findNavController().navigate(
-                        R.id.action_imListFragment_to_imConfigFragment,
-                        bundleOf(
-                            InputMethodConfigFragment.ARG_UNIQUE_NAME to entry.uniqueName,
-                            InputMethodConfigFragment.ARG_NAME to entry.displayName
-                        )
+                    navigateWithAnim(
+                        SettingsRoute.InputMethodConfig(entry.displayName, entry.uniqueName),
                     )
                 }
             },

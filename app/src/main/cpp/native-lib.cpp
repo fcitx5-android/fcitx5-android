@@ -40,6 +40,7 @@
 #include <boost/iostreams/stream_buffer.hpp>
 #include "customphrase.h"
 
+#include "androidaddonloader/androidaddonloader.h"
 #include "androidfrontend/androidfrontend_public.h"
 #include "jni-utils.h"
 #include "nativestreambuf.h"
@@ -82,7 +83,7 @@ public:
 
     void startup(const std::function<void(fcitx::AddonInstance *)> &setupCallback) {
         p_instance = std::make_unique<fcitx::Instance>(0, nullptr);
-        p_instance->addonManager().registerDefaultLoader(nullptr);
+        p_instance->addonManager().registerLoader(std::make_unique<fcitx::AndroidSharedLibraryLoader>());
         p_dispatcher = std::make_unique<fcitx::EventDispatcher>();
         p_dispatcher->attach(&p_instance->eventLoop());
         p_instance->initialize();
@@ -153,7 +154,7 @@ public:
         auto *ic = p_frontend->call<fcitx::IAndroidFrontend::activeInputContext>();
         if (!ic) return nullptr;
         auto *entry = p_instance->inputMethodEntry(ic);
-        auto *engine = static_cast<fcitx::InputMethodEngine *>(p_instance->addonManager().addon(entry->addon(), true));
+        auto *engine = p_instance->inputMethodEngine(ic);
         return std::make_unique<InputMethodStatus>(entry, engine, ic);
     }
 
@@ -527,7 +528,10 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
     const std::string data_home = fcitx::stringutils::joinPath(*extData_, "data");
     const std::string usr_share = fcitx::stringutils::joinPath(*appData_, "usr", "share");
     const std::string locale_dir = fcitx::stringutils::joinPath(usr_share, "locale");
-    const std::string libime_data = fcitx::stringutils::joinPath(usr_share, "libime");
+    const std::string libime_data = fcitx::stringutils::concat(
+            fcitx::stringutils::joinPath(*extData_, "data", "libime"), ":",
+            fcitx::stringutils::joinPath(usr_share, "libime")
+    );
     const std::string lua_path = fcitx::stringutils::concat(
             fcitx::stringutils::joinPath(data_home, "lua", "?.lua"), ";",
             fcitx::stringutils::joinPath(data_home, "lua", "?", "init.lua"), ";",
@@ -542,7 +546,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
     );
 
     // prevent StandardPath from resolving it's hardcoded installation path
-    setenv("SKIP_FCITX_PATH", "1", 1);
+    // setenv("SKIP_FCITX_PATH", "1", 1);
     // for fcitx default profile [DefaultInputMethod]
     setenv("LANG", lang_.c_str(), 1);
     // for libintl-lite loading gettext .mo translations
@@ -633,21 +637,16 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
         env->SetObjectArrayElement(vararg, 4, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, timestamp));
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 5, *vararg);
     };
-    auto imChangeCallback = []() {
-        std::unique_ptr<InputMethodStatus> status = Fcitx::Instance().inputMethodStatus();
-        if (!status) return;
+    auto imChangeCallback = [](const InputMethodStatus &status) {
         auto env = GlobalRef->AttachEnv();
-        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(1, GlobalRef->Object, nullptr));
-        auto obj = JRef(env, fcitxInputMethodStatusToJObject(env, *status));
+        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(2, GlobalRef->Object, nullptr));
+        auto obj = JRef(env, fcitxInputMethodStatusToJObject(env, status));
         env->SetObjectArrayElement(vararg, 0, obj);
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 6, *vararg);
     };
-    auto statusAreaUpdateCallback = []() {
-        std::unique_ptr<InputMethodStatus> status = Fcitx::Instance().inputMethodStatus();
-        if (!status) return;
+    auto statusAreaUpdateCallback = [](const std::vector<ActionEntity> &actions, const InputMethodStatus &status) {
         auto env = GlobalRef->AttachEnv();
-        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(static_cast<int>(2), GlobalRef->Object, nullptr));
-        const auto actions = Fcitx::Instance().statusAreaActions();
+        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(2, GlobalRef->Object, nullptr));
         auto actionArray = JRef<jobjectArray>(env, env->NewObjectArray(static_cast<int>(actions.size()), GlobalRef->Action, nullptr));
         int i = 0;
         for (const auto &a: actions) {
@@ -655,7 +654,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
             env->SetObjectArrayElement(actionArray, i++, obj);
         }
         env->SetObjectArrayElement(vararg, 0, actionArray);
-        auto statusObj = JRef(env, fcitxInputMethodStatusToJObject(env, *status));
+        auto statusObj = JRef(env, fcitxInputMethodStatusToJObject(env, status));
         env->SetObjectArrayElement(vararg, 1, statusObj);
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 7, *vararg);
     };
@@ -692,6 +691,14 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
         env->SetObjectArrayElement(vararg, 4, hasNext);
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 9, *vararg);
     };
+    auto switchInputMethodCallback = [](const int reason, const std::string &oldIM) {
+        auto env = GlobalRef->AttachEnv();
+        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(2, GlobalRef->Object, nullptr));
+        auto reasonInteger = JRef(env, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, reason));
+        env->SetObjectArrayElement(vararg, 0, reasonInteger);
+        env->SetObjectArrayElement(vararg, 1, JString(env, oldIM));
+        env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 10, *vararg);
+    };
     auto toastCallback = [](const std::string &s) {
         auto env = GlobalRef->AttachEnv();
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->ShowToast, *JString(env, s));
@@ -712,6 +719,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
         androidfrontend->template call<fcitx::IAndroidFrontend::setStatusAreaUpdateCallback>(statusAreaUpdateCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setDeleteSurroundingCallback>(deleteSurroundingCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setPagedCandidateCallback>(pagedCandidateCallback);
+        androidfrontend->template call<fcitx::IAndroidFrontend::setSwitchInputMethodCallback>(switchInputMethodCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setToastCallback>(toastCallback);
     });
     FCITX_INFO() << "Finishing startup";
@@ -986,6 +994,15 @@ JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_focusInputContext(JNIEnv *env, jclass clazz, jboolean focus) {
     RETURN_IF_NOT_RUNNING
     Fcitx::Instance().focusInputContext(focus);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_focusInputContextOutIn(JNIEnv *env, jclass clazz) {
+    RETURN_IF_NOT_RUNNING
+    auto &instance = Fcitx::Instance();
+    instance.focusInputContext(false);
+    instance.focusInputContext(true);
 }
 
 extern "C"

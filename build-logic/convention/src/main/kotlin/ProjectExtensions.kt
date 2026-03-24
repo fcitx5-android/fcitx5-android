@@ -1,28 +1,27 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2024-2026 Fcitx5 for Android Contributors
  */
 
-import com.android.build.gradle.internal.dsl.SigningConfig
+import com.android.build.api.dsl.ApkSigningConfig
 import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.kotlin.dsl.the
-import java.io.ByteArrayOutputStream
 import java.io.File
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 fun Project.runCmd(cmd: String, defaultValue: String = ""): String {
-    val stdout = ByteArrayOutputStream()
-    val result = stdout.use {
-        project.exec {
-            commandLine = cmd.split(" ")
-            standardOutput = stdout
-        }
+    val output = providers.exec {
+        commandLine = cmd.split(" ")
     }
-    return if (result.exitValue == 0) stdout.toString().trim() else defaultValue
+    return if (output.result.get().exitValue == 0) {
+        output.standardOutput.asText.get().trim()
+    } else {
+        defaultValue
+    }
 }
 
 val Project.libs get() = the<LibrariesForLibs>()
@@ -101,7 +100,7 @@ val Project.signKeyPwd: String?
 val Project.signKeyAlias: String?
     get() = epn("SIGN_KEY_ALIAS", "signKeyAlias")
 
-fun NamedDomainObjectContainer<SigningConfig>.fromProjectEnv(project: Project): SigningConfig? {
+fun NamedDomainObjectContainer<out ApkSigningConfig>.fromProjectEnv(project: Project): ApkSigningConfig? {
     val keyFile = project.signKey ?: return null
     val name = "release"
     return findByName(name) ?: create(name) {

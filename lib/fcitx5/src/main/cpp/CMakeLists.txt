@@ -30,6 +30,9 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Fcitx5AndroidInstallDirs.cmake")
 # LIBDATADIR is not a standard CMake install dir, defined in fcitx5/CMakeLists.txt#L169
 set(CMAKE_INSTALL_LIBDATADIR "/usr/lib")
 
+# hook add_custom_command before configuring fcitx5
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/HookAddCustomCommand.cmake")
+
 option(ENABLE_TEST "" OFF)
 option(ENABLE_COVERAGE "" OFF)
 option(ENABLE_ENCHANT "" OFF)
@@ -44,3 +47,5 @@ option(ENABLE_XDGAUTOSTART "" OFF)
 option(ENABLE_EMOJI "" OFF)
 option(ENABLE_LIBUUID "" OFF)
 add_subdirectory(fcitx5)
+# for std::osyncstream
+target_compile_options(Fcitx5Utils PRIVATE "-fexperimental-library")

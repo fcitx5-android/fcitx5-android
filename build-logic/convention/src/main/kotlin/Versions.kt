@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Fcitx5 for Android Contributors
  */
 
 import org.gradle.api.JavaVersion
@@ -8,17 +8,17 @@ import org.gradle.api.JavaVersion
 object Versions {
 
     val java = JavaVersion.VERSION_11
-    const val compileSdk = 35
+    const val compileSdk = 36
     const val minSdk = 23
-    const val targetSdk = 35
+    const val targetSdk = 36
 
     const val defaultCMake = "3.31.6"
     const val defaultNDK = "28.0.13004108"
-    const val defaultBuildTools = "35.0.1"
+    const val defaultBuildTools = "36.1.0"
 
     // NOTE: increase this value to bump version code
-    const val baseVersionCode = 9
-    const val baseVersionName = "0.1.1"
+    const val baseVersionCode = 10
+    const val baseVersionName = "0.1.2"
 
     val supportedABIs = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
     const val fallbackABI = "arm64-v8a"

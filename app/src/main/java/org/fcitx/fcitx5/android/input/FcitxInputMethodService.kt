@@ -1,12 +1,13 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Fcitx5 for Android Contributors
  */
 
 package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.content.pm.ActivityInfo
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Color
@@ -68,6 +69,7 @@ import org.fcitx.fcitx5.android.utils.InputMethodUtil
 import org.fcitx.fcitx5.android.utils.alpha
 import org.fcitx.fcitx5.android.utils.forceShowSelf
 import org.fcitx.fcitx5.android.utils.inputMethodManager
+import org.fcitx.fcitx5.android.utils.isTypeNull
 import org.fcitx.fcitx5.android.utils.monitorCursorAnchor
 import org.fcitx.fcitx5.android.utils.styledFloat
 import org.fcitx.fcitx5.android.utils.withBatchEdit
@@ -86,6 +88,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private val cachedKeyEvents = LruCache<Int, KeyEvent>(78)
     private var cachedKeyEventIndex = 0
 
+    /**
+     * Saves MetaState produced by hardware keyboard with "sticky" modifier keys, to clear them in order.
+     * See also [InputConnection#clearMetaKeyStates(int)](https://developer.android.com/reference/android/view/inputmethod/InputConnection#clearMetaKeyStates(int))
+     */
+    private var lastMetaState: Int = 0
+
     private lateinit var pkgNameCache: PackageNameCache
 
     private lateinit var decorView: View
@@ -94,9 +102,14 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     private var candidatesView: CandidatesView? = null
 
     private val navbarMgr = NavigationBarManager()
-    private val inputDeviceMgr = InputDeviceManager onChange@{
-        val w = window.window ?: return@onChange
-        navbarMgr.evaluate(w, useVirtualKeyboard = it)
+    private val inputDeviceMgr = InputDeviceManager { isVirtualKeyboard ->
+        postFcitxJob {
+            setCandidatePagingMode(if (isVirtualKeyboard) 0 else 1)
+        }
+        currentInputConnection?.monitorCursorAnchor(!isVirtualKeyboard)
+        window.window?.let {
+            navbarMgr.evaluate(it, isVirtualKeyboard)
+        }
     }
 
     private var capabilityFlags = CapabilityFlags.DefaultFlags
@@ -132,7 +145,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         val newInputView = InputView(this, fcitx, theme)
         setInputView(newInputView)
         inputDeviceMgr.setInputView(newInputView)
-        navbarMgr.setupInputView(newInputView)
         inputView = newInputView
         return newInputView
     }
@@ -144,13 +156,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // put CandidatesView directly under content view
         contentView.addView(newCandidatesView)
         inputDeviceMgr.setCandidatesView(newCandidatesView)
-        navbarMgr.setupInputView(newCandidatesView)
         candidatesView = newCandidatesView
         return newCandidatesView
     }
 
     private fun replaceInputViews(theme: Theme) {
-        navbarMgr.evaluate(window.window!!)
+        navbarMgr.evaluate(window.window!!, inputDeviceMgr.isVirtualKeyboard)
         replaceInputView(theme)
         replaceCandidateView(theme)
     }
@@ -209,6 +220,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         super.onCreate()
         decorView = window.window!!.decorView
         contentView = decorView.findViewById(android.R.id.content)
+        lastKnownConfig = resources.configuration
     }
 
     private fun handleFcitxEvent(event: FcitxEvent<*>) {
@@ -222,8 +234,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     when (it.sym.sym) {
                         FcitxKeyMapping.FcitxKey_BackSpace -> handleBackspaceKey()
                         FcitxKeyMapping.FcitxKey_Return -> handleReturnKey()
-                        FcitxKeyMapping.FcitxKey_Left -> sendDownUpKeyEvents(KeyEvent.KEYCODE_DPAD_LEFT)
-                        FcitxKeyMapping.FcitxKey_Right -> sendDownUpKeyEvents(KeyEvent.KEYCODE_DPAD_RIGHT)
+                        FcitxKeyMapping.FcitxKey_Left -> handleArrowKey(KeyEvent.KEYCODE_DPAD_LEFT)
+                        FcitxKeyMapping.FcitxKey_Right -> handleArrowKey(KeyEvent.KEYCODE_DPAD_RIGHT)
                         else -> if (it.unicode > 0) {
                             commitText(Character.toString(it.unicode))
                         } else {
@@ -234,7 +246,35 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     // KeyEvent from physical keyboard (or input method engine forwardKey)
                     // use cached event if available
                     cachedKeyEvents.remove(it.timestamp)?.let { keyEvent ->
+                        /**
+                         * intercept the KeyEvent which would cause the default [android.text.method.QwertyKeyListener]
+                         * to show a Gingerbread-style CharacterPickerDialog
+                         */
+                        if (keyEvent.unicodeChar == KeyCharacterMap.PICKER_DIALOG_INPUT.code) {
+                            currentInputConnection?.sendKeyEvent(
+                                KeyEvent(
+                                    keyEvent.downTime, keyEvent.eventTime,
+                                    keyEvent.action, keyEvent.keyCode,
+                                    keyEvent.repeatCount, keyEvent.metaState, -1,
+                                    keyEvent.scanCode, keyEvent.flags, keyEvent.source
+                                )
+                            )
+                            return@event
+                        }
                         currentInputConnection?.sendKeyEvent(keyEvent)
+                        if (KeyEvent.isModifierKey(keyEvent.keyCode)) {
+                            when (keyEvent.action) {
+                                KeyEvent.ACTION_DOWN -> {
+                                    // save current metaState when modifier key down
+                                    lastMetaState = keyEvent.metaState
+                                }
+                                KeyEvent.ACTION_UP -> {
+                                    // only clear metaState that would be missing when this modifier key up
+                                    currentInputConnection?.clearMetaKeyStates(lastMetaState xor keyEvent.metaState)
+                                    lastMetaState = keyEvent.metaState
+                                }
+                            }
+                        }
                         return@event
                     }
                     // simulate key event
@@ -271,6 +311,17 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     skipNextSubtypeChange = im
                     // [^1]: notify system that input method subtype has changed
                     switchInputMethod(InputMethodUtil.componentName, subtype)
+                }
+            }
+            is FcitxEvent.SwitchInputMethodEvent -> {
+                val (reason) = event.data
+                if (reason != FcitxEvent.SwitchInputMethodEvent.Reason.CapabilityChanged &&
+                    reason != FcitxEvent.SwitchInputMethodEvent.Reason.Other
+                ) {
+                    if (inputDeviceMgr.evaluateOnInputMethodSwitch()) {
+                        // show inputView for [CandidatesView] when input method switched by user
+                        forceShowSelf()
+                    }
                 }
             }
             else -> {}
@@ -322,12 +373,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     private fun handleReturnKey() {
         currentInputEditorInfo.run {
-            if (inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL) {
+            if (inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL ||
+                imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION)
+            ) {
                 sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
-                return
-            }
-            if (imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION)) {
-                commitText("\n")
                 return
             }
             if (actionLabel?.isNotEmpty() == true && actionId != EditorInfo.IME_ACTION_UNSPECIFIED) {
@@ -336,10 +385,25 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             }
             when (val action = imeOptions and EditorInfo.IME_MASK_ACTION) {
                 EditorInfo.IME_ACTION_UNSPECIFIED,
-                EditorInfo.IME_ACTION_NONE -> commitText("\n")
+                EditorInfo.IME_ACTION_NONE -> sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
                 else -> currentInputConnection.performEditorAction(action)
             }
         }
+    }
+
+    private fun handleArrowKey(keyCode: Int) {
+        if (currentInputEditorInfo.inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL) {
+            sendDownUpKeyEvents(keyCode)
+            return
+        }
+        val (start, end) = currentInputSelection
+        val offset = if (start == end) 1 else 0
+        val target = when (keyCode) {
+            KeyEvent.KEYCODE_DPAD_LEFT -> start - offset
+            KeyEvent.KEYCODE_DPAD_RIGHT -> end + offset
+            else -> return
+        }
+        currentInputConnection.setSelection(target, target)
     }
 
     fun commitText(text: String, cursor: Int = -1) {
@@ -454,9 +518,32 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         currentInputConnection?.setSelection(end, end)
     }
 
+    private lateinit var lastKnownConfig: Configuration
+
     override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
         postFcitxJob { reset() }
+        /**
+         * skip keyboard|keyboardHidden changes, because we have [inputDeviceMgr]
+         * skip uiMode (system light/dark mode) changes, because we have [onThemeChangeListener]
+         * to replace InputView(s) when needed
+         * [android.inputmethodservice.InputMethodService.onConfigurationChanged] would call
+         * resetStateForNewConfiguration() which calls initViews() causes InputView(s) to be replaced again
+         * https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-15.0.0_r36/core/java/android/inputmethodservice/InputMethodService.java#1984
+         */
+        val f = ActivityInfo.CONFIG_KEYBOARD or
+                ActivityInfo.CONFIG_KEYBOARD_HIDDEN or
+                ActivityInfo.CONFIG_UI_MODE
+        val diff = lastKnownConfig.diff(newConfig)
+        Timber.d("onConfigurationChanged diff=$diff")
+        /**
+         * perform `super.onConfigurationChanged` only when `newConfig` diff fall outside "skipped" flags
+         * we have to calculate the mask ourselves because nobody knows how `handledConfigChanges` works
+         * https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-15.0.0_r36/core/java/android/inputmethodservice/InputMethodService.java#1876
+         */
+        if (diff and f != diff) {
+            super.onConfigurationChanged(newConfig)
+        }
+        lastKnownConfig = newConfig
     }
 
     override fun onWindowShown() {
@@ -467,8 +554,6 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             Timber.w("Device does not support android.R.attr.colorAccent which it should have.")
         }
         InputFeedbacks.syncSystemPrefs()
-        // navbar foreground/background color would reset every time window shows
-        navbarMgr.update(window.window!!)
     }
 
     override fun onCreateInputView(): View? {
@@ -533,22 +618,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         // KeyUp and KeyDown events actually can happen on the same time
         val timestamp = cachedKeyEventIndex++
         cachedKeyEvents.put(timestamp, event)
-        val up = event.action == KeyEvent.ACTION_UP
-        val states = KeyStates.fromKeyEvent(event)
-        val charCode = event.unicodeChar
-        // try send charCode first, allow upper case and lower case character generating different KeySym
-        // skip \t, because it's charCode is different from KeySym
-        // skip \n, because fcitx wants \r for return
-        if (charCode > 0 && charCode != '\t'.code && charCode != '\n'.code) {
+        val sym = KeySym.fromKeyEvent(event)
+        if (sym != null) {
+            val states = KeyStates.fromKeyEvent(event)
+            val up = event.action == KeyEvent.ACTION_UP
             postFcitxJob {
-                sendKey(charCode, states.states, event.scanCode, up, timestamp)
-            }
-            return true
-        }
-        val keySym = KeySym.fromKeyEvent(event)
-        if (keySym != null) {
-            postFcitxJob {
-                sendKey(keySym, states, event.scanCode, up, timestamp)
+                sendKey(sym, states, event.scanCode, up, timestamp)
             }
             return true
         }
@@ -572,12 +647,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     // Added in API level 14, deprecated in 29
+    // it's needed because editors still use it even on API 36
     @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
     override fun onViewClicked(focusChanged: Boolean) {
         super.onViewClicked(focusChanged)
-        if (Build.VERSION.SDK_INT < 34) {
-            inputDeviceMgr.evaluateOnViewClicked(this)
-        }
+        inputDeviceMgr.evaluateOnViewClicked(this)
     }
 
     @RequiresApi(34)
@@ -648,7 +722,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         resetComposingState()
         val flags = CapabilityFlags.fromEditorInfo(attribute)
         capabilityFlags = flags
+        // EditorInfo may change between onStartInput and onStartInputView
+        inputDeviceMgr.notifyOnStartInput(attribute)
         Timber.d("onStartInput: initialSel=${selection.current}, restarting=$restarting")
+        val isNullType = attribute.isTypeNull()
         // wait until InputContext created/activated
         postFcitxJob {
             if (restarting) {
@@ -660,6 +737,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             // EditorInfo can be different in onStartInput and onStartInputView,
             // especially in browsers
             setCapFlags(flags)
+            // for hardware keyboard, focus to allow switching input methods before onStartInputView
+            if (!isNullType) {
+                focus(true)
+            }
         }
     }
 
@@ -807,8 +888,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             // `fcitx.reset()` here would commit preedit after new cursor position
             // since we have `ClientUnfocusCommit`, focus out and in would do the trick
             postFcitxJob {
-                focus(false)
-                focus(true)
+                focusOutIn()
             }
         }
     }
@@ -956,13 +1036,16 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
         resetComposingState()
         postFcitxJob {
-            focus(false)
+            focusOutIn()
         }
         showingDialog?.dismiss()
     }
 
     override fun onFinishInput() {
         Timber.d("onFinishInput")
+        postFcitxJob {
+            focus(false)
+        }
         capabilityFlags = CapabilityFlags.DefaultFlags
     }
 

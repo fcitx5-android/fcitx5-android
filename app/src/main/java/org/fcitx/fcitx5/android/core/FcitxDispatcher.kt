@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.core
 
@@ -21,23 +21,18 @@ import kotlin.coroutines.CoroutineContext
 
 class FcitxDispatcher(private val controller: FcitxController) : CoroutineDispatcher() {
 
-    class WrappedRunnable(private val runnable: Runnable, private val name: String? = null) :
-        Runnable by runnable {
+    class WrappedRunnable(private val runnable: Runnable) : Runnable by runnable {
         private val time = System.currentTimeMillis()
-        var started = false
-            private set
-
-        private val delta
-            get() = System.currentTimeMillis() - time
 
         override fun run() {
-            if (delta > JOB_WAITING_LIMIT)
-                Timber.w("${toString()} has waited $delta ms to get run since created!")
-            started = true
+            val delta = System.currentTimeMillis() - time
+            if (delta > JOB_WAITING_LIMIT) {
+                Timber.w("$this has waited $delta ms to get run since created!")
+            }
             runnable.run()
         }
 
-        override fun toString(): String = "WrappedRunnable[${name ?: hashCode()}]"
+        override fun toString(): String = "WrappedRunnable[${hashCode()}]"
     }
 
     // this is fcitx main thread

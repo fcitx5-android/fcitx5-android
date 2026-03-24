@@ -11,7 +11,10 @@ get_target_property(FCITX5_CMAKE_MODULES fcitx5::cmake INTERFACE_INCLUDE_DIRECTO
 set(CMAKE_MODULE_PATH ${FCITX5_CMAKE_MODULES} ${CMAKE_MODULE_PATH})
 
 find_package(ECM MODULE)
-find_package(Fcitx5Utils MODULE)
+
+# libime finds Fcitx5Utils in CONFIG mode: https://github.com/fcitx/libime/commit/16bd90df7daa94aee92e5106a513c4aeb5c4ced5
+set(Fcitx5Utils_DIR ${FCITX5_CMAKE_MODULES})
+find_package(Fcitx5Utils CONFIG)
 
 # dummy target to export src/main/cpp/cmake
 add_custom_target(cmake)

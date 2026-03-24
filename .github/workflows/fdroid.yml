@@ -21,7 +21,7 @@ defaults:
 jobs:
   fdroid-build:
     runs-on: ubuntu-24.04
-    container: registry.gitlab.com/fdroid/fdroidserver:buildserver-bookworm
+    container: registry.gitlab.com/fdroid/fdroidserver:buildserver-trixie
     strategy:
       matrix:
         abi:
@@ -32,12 +32,12 @@ jobs:
       fail-fast: false
     steps:
       - name: Fetch fdroiddata
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: f-droid/fdroiddata
 
       - name: Fetch fdroidserver
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: f-droid/fdroidserver
           path: fdroidserver
@@ -50,6 +50,7 @@ jobs:
 
           rm -rf $ANDROID_HOME/tools
           sdkmanager "tools" "platform-tools"
+          git -C $home_vagrant/gradlew-fdroid pull
           for d in logs tmp unsigned $home_vagrant/metadata $home_vagrant/.android $home_vagrant/.gradle $ANDROID_HOME; do
               test -d $d || mkdir $d;
               chown -R vagrant $d;
@@ -90,11 +91,6 @@ jobs:
               (.versionCode = $versionCode) |=
               (.commit = \"$commitHash\")
           " $metadata
-          # TODO: remove this afterwards
-          # https://github.com/orgs/community/discussions/26676
-          yq -i ".Builds[0] |=
-              (.commit = \"${{ github.event.pull_request.head.sha }}\")
-          " $metadata
           prebuiltTreeURL=$(curl -L \
               -H "Accept: application/vnd.github+json" \
               -H "Authorization: Bearer ${{ github.token }}" \
@@ -122,7 +118,7 @@ jobs:
           $fdroid build --verbose --test --scan-binary --on-server --no-tarball $build
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: ${{ success() || failure() }}
         with:
           name: fdroid-${{ matrix.abi }}

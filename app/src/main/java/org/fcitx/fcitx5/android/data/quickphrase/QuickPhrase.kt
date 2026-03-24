@@ -4,10 +4,25 @@
  */
 package org.fcitx.fcitx5.android.data.quickphrase
 
+import android.os.Parcel
+import android.os.Parcelable
+import kotlinx.serialization.Serializable
 import java.io.File
-import java.io.Serializable
 
-abstract class QuickPhrase : Serializable {
+@Serializable(QuickPhraseSerializer::class)
+abstract class QuickPhrase : Parcelable {
+
+    override fun describeContents(): Int = 0
+
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeString(file.absolutePath)
+        dest.writeByte(if (this is BuiltinQuickPhrase) 1 else 0)
+        if (this is BuiltinQuickPhrase) {
+            dest.writeString(overrideFilePath)
+        } else {
+            dest.writeString(null)
+        }
+    }
 
     abstract val file: File
 

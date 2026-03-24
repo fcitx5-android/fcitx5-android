@@ -1,20 +1,17 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.input.picker
 
-import android.view.Gravity
+import android.annotation.SuppressLint
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
-import androidx.transition.Slide
 import androidx.transition.Transition
 import androidx.viewpager2.widget.ViewPager2
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.broadcast.ReturnKeyDrawableComponent
-import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction
@@ -44,7 +41,6 @@ class PickerWindow(
         Emoticon
     }
 
-    private val service by manager.inputMethodService()
     private val theme by manager.theme()
     private val windowManager: InputWindowManager by manager.must()
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
@@ -56,19 +52,9 @@ class PickerWindow(
     private lateinit var pickerLayout: PickerLayout
     private lateinit var pickerPagesAdapter: PickerPagesAdapter
 
-    override fun enterAnimation(lastWindow: InputWindow): Transition? {
-        // disable animation switching between keyboard
-        return if (lastWindow !is KeyboardWindow && lastWindow !is PickerWindow)
-            Slide().apply { slideEdge = Gravity.BOTTOM }
-        else null
-    }
+    override fun enterAnimation(lastWindow: InputWindow): Transition? = null
 
-    override fun exitAnimation(nextWindow: InputWindow): Transition? {
-        // disable animation switching between keyboard
-        return if (nextWindow !is KeyboardWindow && nextWindow !is PickerWindow)
-            super.exitAnimation(nextWindow)
-        else null
-    }
+    override fun exitAnimation(nextWindow: InputWindow): Transition? = null
 
     private val keyActionListener = KeyActionListener { it, source ->
         when (it) {
@@ -118,29 +104,30 @@ class PickerWindow(
         }
     }
 
+    private val isEmoji = key === Key.Emoji
+
     override fun onCreateView() = PickerLayout(context, theme, switchKey).apply {
         pickerLayout = this
         val bordered = followKeyBorder && keyBorder
         pickerPagesAdapter = PickerPagesAdapter(
-            theme, keyActionListener, popupActionListener, data, density, key.name, bordered
+            theme, keyActionListener, popupActionListener, data,
+            density, key.name, bordered, isEmoji
         )
         tabsUi.apply {
-            setTabs(pickerPagesAdapter.categories)
+            setTabs(pickerPagesAdapter.getCategoryList())
             setOnTabClickListener { i ->
-                pager.setCurrentItem(pickerPagesAdapter.getStartPageOfCategory(i), false)
+                pager.setCurrentItem(pickerPagesAdapter.getRangeOfCategoryIndex(i).first, false)
             }
         }
         pager.apply {
             adapter = pickerPagesAdapter
             // show first symbol category by default, rather than recently used
-            val initialPage = pickerPagesAdapter.getStartPageOfCategory(1)
-            setCurrentItem(initialPage, false)
+            val range = pickerPagesAdapter.getRangeOfCategoryIndex(1)
+            setCurrentItem(range.first, false)
             // update initial tab and page manually to avoid
             // "Adding or removing callbacks during dispatch to callbacks"
             tabsUi.activateTab(1)
-            paginationUi.updatePageCount(
-                pickerPagesAdapter.getCategoryRangeOfPage(initialPage).run { last - first + 1 }
-            )
+            paginationUi.updatePageCount(range.run { last - first + 1 })
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageScrolled(
                     position: Int,
@@ -148,15 +135,12 @@ class PickerWindow(
                     positionOffsetPixels: Int
                 ) {
                     val range = pickerPagesAdapter.getCategoryRangeOfPage(position)
-                    val start = range.first
-                    val total = range.last - start + 1
-                    val current = position - start
-                    paginationUi.updatePageCount(total)
-                    paginationUi.updateScrollProgress(current, positionOffset)
+                    paginationUi.updatePageCount(range.run { last - first + 1 })
+                    paginationUi.updateScrollProgress(position - range.first, positionOffset)
                 }
 
                 override fun onPageSelected(position: Int) {
-                    tabsUi.activateTab(pickerPagesAdapter.getCategoryOfPage(position))
+                    tabsUi.activateTab(pickerPagesAdapter.getCategoryIndexOfPage(position))
                     popup.dismissAll()
                 }
             })
@@ -165,18 +149,38 @@ class PickerWindow(
 
     override fun onCreateBarExtension() = pickerLayout.tabsUi.root
 
+    val symbolPrefs = AppPrefs.getInstance().symbols
+    private val hideUnsupportedEmojisPrefs = symbolPrefs.hideUnsupportedEmojis
+    private val defaultEmojiSkinTonePrefs = symbolPrefs.defaultEmojiSkinTone
+
+    @SuppressLint("NotifyDataSetChanged")
+    private val initDataListener = ManagedPreference.OnChangeListener<Any> { _, _ ->
+        pickerPagesAdapter.rebuildCategories(hideUnsupportedEmojisPrefs.getValue())
+        pickerPagesAdapter.notifyDataSetChanged()
+    }.takeIf { isEmoji }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private val refreshPagesListener = ManagedPreference.OnChangeListener<Any> { _, _ ->
+        pickerPagesAdapter.notifyDataSetChanged()
+    }
+
     override fun onAttached() {
         pickerLayout.embeddedKeyboard.also {
             it.onReturnDrawableUpdate(returnKeyDrawable.resourceId)
             it.keyActionListener = keyActionListener
+        }
+        if (isEmoji) {
+            hideUnsupportedEmojisPrefs.registerOnChangeListener(initDataListener!!)
+            defaultEmojiSkinTonePrefs.registerOnChangeListener(refreshPagesListener)
         }
     }
 
     override fun onDetached() {
         popup.dismissAll()
         pickerLayout.embeddedKeyboard.keyActionListener = null
-        service.lifecycleScope.launch(Dispatchers.IO) {
-            pickerPagesAdapter.saveRecent()
+        if (isEmoji) {
+            hideUnsupportedEmojisPrefs.unregisterOnChangeListener(initDataListener!!)
+            defaultEmojiSkinTonePrefs.unregisterOnChangeListener(refreshPagesListener)
         }
     }
 

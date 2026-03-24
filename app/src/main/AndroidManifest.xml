@@ -87,6 +87,10 @@
                 <data android:scheme="content" />
                 <data android:mimeType="*/*" />
                 <data android:host="*" />
+                <!--
+                  there has to be so many segments:
+                  https://stackoverflow.com/questions/3400072/pathpattern-to-match-file-extension/8599921#8599921
+                -->
                 <data android:pathPattern=".*\\.dict" />
                 <data android:pathPattern=".*\\..*\\.dict" />
                 <data android:pathPattern=".*\\..*\\..*\\.dict" />
@@ -99,6 +103,10 @@
                 <data android:pathPattern=".*\\..*\\.txt" />
                 <data android:pathPattern=".*\\..*\\..*\\.txt" />
                 <data android:pathPattern=".*\\..*\\..*\\..*\\.txt" />
+                <!-- pathSuffix works on API 31+ -->
+                <data android:pathSuffix=".dict" />
+                <data android:pathSuffix=".scel" />
+                <data android:pathSuffix=".txt" />
             </intent-filter>
         </activity>
 
@@ -149,12 +157,22 @@
             </intent-filter>
         </provider>
 
+        <!-- remove unneeded components from com.canhub.cropper -->
+        <!--suppress DeprecatedClassUsageInspection -->
+        <activity
+            android:name="com.canhub.cropper.CropImageActivity"
+            tools:node="remove" />
+
+        <provider
+            android:name="com.canhub.cropper.CropFileProvider"
+            android:authorities="${applicationId}.cropper.fileprovider"
+            tools:node="remove" />
+
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
             android:directBootAware="true"
             android:exported="false"
-            tools:ignore="MissingClass"
             tools:node="merge">
             <!-- do not inject splitties AppCompat -->
             <meta-data

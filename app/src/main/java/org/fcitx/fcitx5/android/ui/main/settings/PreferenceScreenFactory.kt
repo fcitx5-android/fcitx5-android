@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.ui.main.settings
 
@@ -8,9 +8,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.os.Build
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
-import androidx.navigation.fragment.findNavController
 import androidx.preference.DialogPreference
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
@@ -26,9 +24,6 @@ import org.fcitx.fcitx5.android.core.Key
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.ui.main.modified.MySwitchPreference
-import org.fcitx.fcitx5.android.ui.main.settings.addon.AddonConfigFragment
-import org.fcitx.fcitx5.android.ui.main.settings.global.GlobalConfigFragment
-import org.fcitx.fcitx5.android.ui.main.settings.im.InputMethodConfigFragment
 import org.fcitx.fcitx5.android.utils.LongClickPreference
 import org.fcitx.fcitx5.android.utils.buildDocumentsProviderIntent
 import org.fcitx.fcitx5.android.utils.buildPrimaryStorageIntent
@@ -43,8 +38,10 @@ import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.ConfigKey
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.ConfigList
 import org.fcitx.fcitx5.android.utils.config.ConfigDescriptor.ConfigString
 import org.fcitx.fcitx5.android.utils.config.ConfigType
+import org.fcitx.fcitx5.android.utils.navigateWithAnim
 import org.fcitx.fcitx5.android.utils.parcelableArray
 import org.fcitx.fcitx5.android.utils.toast
+import timber.log.Timber
 
 object PreferenceScreenFactory {
 
@@ -61,24 +58,19 @@ object PreferenceScreenFactory {
         val cfg = raw["cfg"]
         val desc = raw["desc"]
         val store = FcitxRawConfigStore(cfg)
-
-        ConfigDescriptor
-            .parseTopLevel(desc)
-            .getOrElse { throw it }
-            .let {
-                screen.title = it.name
-                it.values.forEach { d ->
-                    general(context, fragmentManager, cfg, screen, d, store, save)
-                }
-            }
-
+        // TODO: needs some error handling
+        val topLevelDesc = ConfigDescriptor.parseTopLevel(desc).getOrElse { throw it }
+        screen.title = topLevelDesc.name
+        topLevelDesc.values.forEach {
+            general(context, fragmentManager, cfg.findByName(it.name), screen, it, store, save)
+        }
         return screen
     }
 
     private fun general(
         context: Context,
         fragmentManager: FragmentManager,
-        cfg: RawConfig,
+        cfg: RawConfig?,
         screen: PreferenceScreen,
         descriptor: ConfigDescriptor<*, *>,
         store: PreferenceDataStore,
@@ -86,8 +78,9 @@ object PreferenceScreenFactory {
     ) {
 
         // Hide key related configs
-        if (hideKeyConfig && ConfigType.pretty(descriptor.type).contains("Key"))
+        if (hideKeyConfig && ConfigType.pretty(descriptor.ty).contains("Key")) {
             return
+        }
 
         if (descriptor is ConfigCustom) {
             custom(context, fragmentManager, cfg, screen, descriptor, save)
@@ -96,73 +89,46 @@ object PreferenceScreenFactory {
 
         fun stubPreference() = Preference(context).apply {
             summary =
-                "${context.getString(R.string.unimplemented_type)} '${ConfigType.pretty(descriptor.type)}'"
+                "${context.getString(R.string.unimplemented_type)} '${ConfigType.pretty(descriptor.ty)}'"
+        }
+
+        fun <T : Any> navigate(route: T): Boolean {
+            return try {
+                fragmentManager.primaryNavigationFragment!!.navigateWithAnim(route)
+                true
+            } catch (e: Exception) {
+                Timber.w("Unable to navigate(route=$route): $e")
+                false
+            }
         }
 
         fun pinyinDictionary() = Preference(context).apply {
             setOnPreferenceClickListener {
-                val currentFragment = fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
-                val action = when (currentFragment) {
-                    is AddonConfigFragment -> R.id.action_addonConfigFragment_to_pinyinDictionaryFragment
-                    is InputMethodConfigFragment -> R.id.action_imConfigFragment_to_pinyinDictionaryFragment
-                    else -> throw IllegalStateException("Can not navigate to pinyin dictionary from current fragment")
-                }
-                currentFragment.findNavController().navigate(action)
-                true
+                navigate(SettingsRoute.PinyinDict(""))
             }
         }
 
         fun punctuationEditor(title: String, lang: String?) = Preference(context).apply {
             setOnPreferenceClickListener {
-                val currentFragment = fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
-                val action = when (currentFragment) {
-                    is AddonConfigFragment -> R.id.action_addonConfigFragment_to_punctuationEditorFragment
-                    is InputMethodConfigFragment -> R.id.action_imConfigFragment_to_punctuationEditorFragment
-                    else -> throw IllegalStateException("Can not navigate to punctuation editor from current fragment")
-                }
-                currentFragment.findNavController().navigate(
-                    action,
-                    bundleOf(
-                        PunctuationEditorFragment.TITLE to title,
-                        PunctuationEditorFragment.LANG to lang
-                    )
-                )
-                true
+                navigate(SettingsRoute.Punctuation(title, lang))
             }
         }
 
         fun quickPhraseEditor() = Preference(context).apply {
             setOnPreferenceClickListener {
-                val currentFragment = fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
-                val action = when (currentFragment) {
-                    is AddonConfigFragment -> R.id.action_addonConfigFragment_to_quickPhraseListFragment
-                    is InputMethodConfigFragment -> R.id.action_imConfigFragment_to_quickPhraseListFragment
-                    else -> throw IllegalStateException("Can not navigate to quick phrase editor from current fragment")
-                }
-                currentFragment.findNavController().navigate(action)
-                true
+                navigate(SettingsRoute.QuickPhraseList)
             }
         }
 
         fun tableInputMethod() = Preference(context).apply {
             setOnPreferenceClickListener {
-                val currentFragment = fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
-                currentFragment.findNavController()
-                    .navigate(R.id.action_addonConfigFragment_to_tableInputMethodFragment)
-                true
+                navigate(SettingsRoute.TableInputMethods)
             }
         }
 
         fun pinyinCustomPhrase() = Preference(context).apply {
             setOnPreferenceClickListener {
-                val currentFragment = fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
-                val action = when (currentFragment) {
-                    is AddonConfigFragment -> R.id.action_addonConfigFragment_to_pinyinCustomPhraseFragment
-                    is InputMethodConfigFragment -> R.id.action_imConfigFragment_to_pinyinCustomPhraseFragment
-                    else -> throw IllegalStateException("Can not navigate to custom phrase editor from current fragment")
-                }
-                currentFragment.findNavController().navigate(action)
-                true
+                navigate(SettingsRoute.PinyinCustomPhrase)
             }
         }
 
@@ -197,25 +163,12 @@ object PreferenceScreenFactory {
 
         fun listPreference(subtype: ConfigType<*>): Preference = object : Preference(context) {
             override fun onClick() {
-                val currentFragment = fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
-                val action = when (currentFragment) {
-                    is GlobalConfigFragment -> R.id.action_globalConfigFragment_to_listFragment
-                    is InputMethodConfigFragment -> R.id.action_imConfigFragment_to_listFragment
-                    is AddonConfigFragment -> R.id.action_addonConfigFragment_to_listFragment
-                    else -> throw IllegalStateException("Can not navigate to listFragment from current fragment")
-                }
-                currentFragment.findNavController().navigate(
-                    action,
-                    bundleOf(
-                        ListFragment.ARG_CFG to cfg[descriptor.name],
-                        ListFragment.ARG_DESC to descriptor,
-                    )
-                )
+                navigate(SettingsRoute.ListConfig(cfg ?: RawConfig(), descriptor))
                 fragmentManager.setFragmentResultListener(
                     descriptor.name,
-                    currentFragment
+                    fragmentManager.primaryNavigationFragment!!
                 ) { _, v ->
-                    cfg[descriptor.name].subItems = v.parcelableArray(descriptor.name)
+                    cfg?.subItems = v.parcelableArray(descriptor.name)
                     if (callChangeListener(null)) {
                         notifyChanged()
                     }
@@ -224,30 +177,19 @@ object PreferenceScreenFactory {
         }.apply {
             if (subtype == ConfigType.TyKey) {
                 summaryProvider = SummaryProvider<Preference> {
-                    val str = cfg[descriptor.name].subItems?.joinToString("\n") {
+                    val keys = cfg?.subItems?.joinToString("\n") {
                         Key.parse(it.value).localizedString
-                    } ?: ""
-                    str.ifEmpty { context.getString(R.string.none) }
+                    }
+                    if (keys.isNullOrEmpty()) context.getString(R.string.none) else keys
                 }
             }
         }
 
         fun addonConfigPreference(addon: String) = Preference(context).apply {
             setOnPreferenceClickListener {
-                val currentFragment = fragmentManager.findFragmentById(R.id.nav_host_fragment)!!
-                val action = when (currentFragment) {
-                    is AddonConfigFragment -> R.id.action_addonConfigFragment_self
-                    is InputMethodConfigFragment -> R.id.action_imConfigFragment_to_addonConfigFragment
-                    else -> throw IllegalStateException("Can not navigate to addonConfigFragment from current fragment")
-                }
-                currentFragment.findNavController().navigate(
-                    action,
-                    bundleOf(
-                        AddonConfigFragment.ARG_UNIQUE_NAME to addon,
-                        AddonConfigFragment.ARG_NAME to (descriptor.description ?: descriptor.name)
-                    )
+                navigate(
+                    SettingsRoute.AddonConfig(descriptor.description ?: descriptor.name, addon)
                 )
-                true
             }
         }
 
@@ -303,8 +245,8 @@ object PreferenceScreenFactory {
                 summaryProvider = FcitxKeyPreference.SimpleSummaryProvider
                 descriptor.defaultValue?.let { setDefaultValue(it) }
             }
-            is ConfigList -> if (descriptor.type.subtype in ListFragment.supportedSubtypes)
-                listPreference(descriptor.type.subtype)
+            is ConfigList -> if (descriptor.ty.subtype in ListFragment.supportedSubtypes)
+                listPreference(descriptor.ty.subtype)
             else
                 stubPreference()
             is ConfigString -> EditTextPreference(context).apply {
@@ -337,12 +279,12 @@ object PreferenceScreenFactory {
     private fun custom(
         context: Context,
         fragmentManager: FragmentManager,
-        cfg: RawConfig,
+        cfg: RawConfig?,
         screen: PreferenceScreen,
         descriptor: ConfigCustom,
         save: () -> Unit
     ) {
-        val subStore = FcitxRawConfigStore(cfg[descriptor.name])
+        val subStore = FcitxRawConfigStore(cfg ?: RawConfig())
         val subPref = PreferenceCategory(context).apply {
             key = descriptor.name
             title = descriptor.description ?: descriptor.name
@@ -350,16 +292,8 @@ object PreferenceScreenFactory {
             isIconSpaceReserved = false
         }
         screen.addPreference(subPref)
-        descriptor.customTypeDef!!.values.forEach {
-            general(
-                context,
-                fragmentManager,
-                cfg[descriptor.name],
-                screen,
-                it,
-                subStore,
-                save
-            )
+        descriptor.customTypeDef?.values?.forEach {
+            general(context, fragmentManager, cfg?.findByName(it.name), screen, it, subStore, save)
         }
     }
 

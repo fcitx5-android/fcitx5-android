@@ -24,6 +24,7 @@ import org.fcitx.fcitx5.android.utils.Locales
 import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.toast
 import timber.log.Timber
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Do not use this class directly, accessing fcitx via daemon instead
@@ -49,6 +50,11 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
 
     override var inputPanelCached = FcitxEvent.InputPanelEvent.Data()
         private set
+
+    // TODO: custom log rule
+    override fun setLogRule(verbose: Boolean) {
+        setupLogStream(verbose)
+    }
 
     // the computation is delayed to the first call of [getAddonReverseDependencies]
     private var addonGraph: ImmutableGraph<String, FcitxAPI.AddonDep>? = null
@@ -159,6 +165,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         withFcitxContext { setFcitxClipboard(string, password) }
 
     override suspend fun focus(focus: Boolean) = withFcitxContext { focusInputContext(focus) }
+    override suspend fun focusOutIn() = withFcitxContext { focusInputContextOutIn() }
     override suspend fun activate(uid: Int, pkgName: String) =
         withFcitxContext { activateInputContext(uid, pkgName) }
 
@@ -215,11 +222,12 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
                 onBufferOverflow = BufferOverflow.DROP_OLDEST
             )
 
-        private val fcitxEventHandlers = ArrayList<(FcitxEvent<*>) -> Unit>()
+        // we may need to modify the list during iteration
+        // eg. remove the "first run" listener after first ReadyEvent
+        private val fcitxEventHandlers = CopyOnWriteArrayList<(FcitxEvent<*>) -> Unit>()
 
         init {
             System.loadLibrary("native-lib")
-            setupLogStream(AppPrefs.getInstance().internal.verboseLog.getValue())
         }
 
         @JvmStatic
@@ -338,6 +346,9 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         external fun focusInputContext(focus: Boolean)
 
         @JvmStatic
+        external fun focusInputContextOutIn()
+
+        @JvmStatic
         external fun activateInputContext(uid: Int, pkgName: String)
 
         @JvmStatic
@@ -373,8 +384,6 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         @JvmStatic
         external fun scheduleEmpty()
 
-        private var firstRun by AppPrefs.getInstance().internal.firstRun
-
         /**
          * Called from native-lib
          */
@@ -383,13 +392,6 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         fun handleFcitxEvent(type: Int, params: Array<Any>) {
             val event = FcitxEvent.create(type, params)
             Timber.d("Handling $event")
-            if (event is FcitxEvent.ReadyEvent) {
-                if (firstRun) {
-                    // this method runs in same thread with `startupFcitx`
-                    // block it will also block fcitx
-                    onFirstRun()
-                }
-            }
             fcitxEventHandlers.forEach { it.invoke(event) }
             eventFlow_.tryEmit(event)
         }
@@ -397,7 +399,6 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         // will be called in fcitx main thread
         private fun onFirstRun() {
             Timber.i("onFirstRun")
-            firstRun = false
         }
 
         /**
@@ -491,6 +492,18 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         }.let { ImmutableGraph(it) }
     }
 
+    private var firstRun by AppPrefs.getInstance().internal.firstRun
+
+    private fun handleFirstRunReadyEvent(event: FcitxEvent<*>) {
+        if (event is FcitxEvent.ReadyEvent && firstRun) {
+            firstRun = false
+            // this method runs in same thread with `startupFcitx`
+            // block it will also block fcitx
+            onFirstRun()
+            unregisterFcitxEventHandler(::handleFcitxEvent)
+        }
+    }
+
     private fun handleFcitxEvent(event: FcitxEvent<*>) {
         when (event) {
             is FcitxEvent.ReadyEvent -> lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_READY)
@@ -516,12 +529,16 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
             Timber.w("Skip starting fcitx: not at stopped state!")
             return
         }
+        if (firstRun) {
+            registerFcitxEventHandler(::handleFirstRunReadyEvent)
+        }
         registerFcitxEventHandler(::handleFcitxEvent)
         lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_START)
         ClipboardManager.addOnUpdateListener(onClipboardUpdate)
         DataManager.addOnNextSyncedCallback {
             FcitxPluginServices.connectAll()
         }
+        setupLogStream(AppPrefs.getInstance().internal.verboseLog.getValue())
         dispatcher.start()
     }
 

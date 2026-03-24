@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.data.prefs
 
@@ -20,6 +20,7 @@ import org.fcitx.fcitx5.android.input.keyboard.LangSwitchBehavior
 import org.fcitx.fcitx5.android.input.keyboard.SpaceLongPressBehavior
 import org.fcitx.fcitx5.android.input.keyboard.SwipeSymbolDirection
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
+import org.fcitx.fcitx5.android.input.popup.EmojiModifier
 import org.fcitx.fcitx5.android.utils.DeviceUtil
 import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.vibrator
@@ -43,7 +44,8 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
         val vivoKeypressWorkaround = switch(
             R.string.vivo_keypress_workaround,
             "vivo_keypress_workaround",
-            DeviceUtil.isVivoOriginOS
+            // there's some feedback that this workaround is no longer necessary on Origin OS 4, which based on Android 14
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE && DeviceUtil.isVivoOriginOS
         )
         val ignoreSystemWindowInsets = switch(
             R.string.ignore_system_window_insets, "ignore_system_window_insets", false
@@ -139,8 +141,13 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             "keep_keyboard_letters_uppercase",
             false
         )
+
         val showVoiceInputButton =
             switch(R.string.show_voice_input_button, "show_voice_input_button", false)
+        val preferredVoiceInput = voiceInputPreference(
+            R.string.preferred_voice_input, "preferred_voice_input", ""
+        ) { showVoiceInputButton.getValue() }
+
         val expandKeypressArea =
             switch(R.string.expand_keypress_area, "expand_keypress_area", false)
         val swipeSymbolDirection = enumList(
@@ -344,6 +351,20 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
         ) { clipboardListening.getValue() }
     }
 
+    inner class Symbols : ManagedPreferenceCategory(R.string.emoji_and_symbols, sharedPreferences) {
+        val hideUnsupportedEmojis = switch(
+            R.string.hide_unsupported_emojis,
+            "hide_unsupported_emojis",
+            true
+        )
+
+        val defaultEmojiSkinTone = enumList(
+            R.string.default_emoji_skin_tone,
+            "default_emoji_skin_tone",
+            EmojiModifier.SkinTone.Default,
+        )
+    }
+
     private val providers = mutableListOf<ManagedPreferenceProvider>()
 
     fun <T : ManagedPreferenceProvider> registerProvider(
@@ -362,6 +383,7 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
     val keyboard = Keyboard().register()
     val candidates = Candidates().register()
     val clipboard = Clipboard().register()
+    val symbols = Symbols().register()
     val advanced = Advanced().register()
 
     @Keep

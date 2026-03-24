@@ -70,7 +70,6 @@ class PinyinCustomPhraseFragment : Fragment(), OnItemChangedListener<PinyinCusto
             initialItems.toList(),
             enableOrder = true,
             initCheckBox = { entry ->
-                setOnCheckedChangeListener(null)
                 isChecked = entry.enabled
                 setOnCheckedChangeListener { _, checked ->
                     ui.updateItem(ui.indexItem(entry), entry.copyEnabled(checked))
@@ -84,7 +83,7 @@ class PinyinCustomPhraseFragment : Fragment(), OnItemChangedListener<PinyinCusto
                 return if (endIndex == s.length) {
                     s
                 } else {
-                    s.substring(0, endIndex) + "…"
+                    s.take(endIndex) + "…"
                 }
             }
 

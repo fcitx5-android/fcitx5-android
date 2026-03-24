@@ -1,10 +1,9 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -13,7 +12,6 @@ import android.content.IntentFilter
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Process
-import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
@@ -27,7 +25,7 @@ import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.ui.main.LogActivity
 import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.Locales
-import org.fcitx.fcitx5.android.utils.isDarkMode
+import org.fcitx.fcitx5.android.utils.setupForest
 import org.fcitx.fcitx5.android.utils.startActivity
 import org.fcitx.fcitx5.android.utils.userManager
 import timber.log.Timber
@@ -76,8 +74,11 @@ class FcitxApplication : Application() {
         private set
 
     val directBootAwareContext: Context
-        @SuppressLint("NewApi")
-        get() = if (isDirectBootMode) createDeviceProtectedStorageContext() else applicationContext
+        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isDirectBootMode) {
+            createDeviceProtectedStorageContext()
+        } else {
+            applicationContext
+        }
 
     override fun onCreate() {
         super.onCreate()
@@ -120,20 +121,7 @@ class FcitxApplication : Application() {
         instance = this
         // we don't have AppPrefs available yet
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx)
-        if (BuildConfig.DEBUG || sharedPrefs.getBoolean("verbose_log", false)) {
-            Timber.plant(object : Timber.DebugTree() {
-                override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-                    super.log(priority, "[${Thread.currentThread().name}] $tag", message, t)
-                }
-            })
-        } else {
-            Timber.plant(object : Timber.Tree() {
-                override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-                    if (priority < Log.INFO) return
-                    Log.println(priority, "[${Thread.currentThread().name}]", message)
-                }
-            })
-        }
+        Timber.setupForest(verbose = sharedPrefs.getBoolean("verbose_log", false))
 
         Timber.d("isDirectBootMode=$isDirectBootMode")
 

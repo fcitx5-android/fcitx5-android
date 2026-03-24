@@ -1,10 +1,9 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Fcitx5 for Android Contributors
  */
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
-import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import com.android.build.gradle.internal.tasks.CompileArtProfileTask
 import com.android.build.gradle.internal.tasks.ExpandArtProfileWildcardsTask
 import com.android.build.gradle.internal.tasks.MergeArtProfileTask
@@ -14,10 +13,10 @@ import org.gradle.api.Project
 import org.gradle.api.file.RegularFile
 import org.gradle.api.internal.provider.AbstractProperty
 import org.gradle.api.internal.provider.Providers
+import org.gradle.api.plugins.BasePluginExtension
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.io.File
 
 /**
  * The prototype of an Android Application
@@ -26,6 +25,7 @@ import java.io.File
  * - Provide default configuration for `android {...}`
  * - Add desugar JDK libs
  */
+@Suppress("unused")
 class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
 
     override fun apply(target: Project) {
@@ -33,7 +33,7 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
 
         super.apply(target)
 
-        target.extensions.configure<BaseAppModuleExtension> {
+        target.extensions.configure<ApplicationExtension> {
             defaultConfig {
                 targetSdk = Versions.targetSdk
                 versionCode = Versions.calculateVersionCode()
@@ -44,6 +44,7 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
                     isMinifyEnabled = true
                     isShrinkResources = true
                     signingConfig = signingConfigs.fromProjectEnv(target)
+                    proguardFile(getDefaultProguardFile("proguard-android-optimize.txt"))
                 }
                 debug {
                     applicationIdSuffix = ".debug"
@@ -134,7 +135,10 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
                 }
                 // applicationId is not set upon apply
                 it.defaultConfig {
-                    target.setProperty("archivesBaseName", "$applicationId-$versionName")
+                    // https://www.norio.be/blog/archivesBaseName-removed-from-gradle9.html
+                    target.extensions.configure<BasePluginExtension> {
+                        archivesName.set("$applicationId-$versionName")
+                    }
                 }
             }
         }
@@ -143,7 +147,7 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
 
         target.configure<AboutLibrariesExtension> {
             collect {
-                configPath.set(File("licenses"))
+                configPath.set(target.file("licenses").takeIf { it.exists() })
                 fetchRemoteLicense.set(false)
                 fetchRemoteFunding.set(false)
                 includePlatform.set(false)

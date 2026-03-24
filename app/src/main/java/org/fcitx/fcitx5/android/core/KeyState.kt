@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.core
 
@@ -97,6 +97,18 @@ value class KeyStates(val states: UInt) {
         fun of(v: Int) = KeyStates(v.toUInt())
 
         fun fromKeyEvent(event: KeyEvent): KeyStates {
+            // drop modifier state when using combination keys to input number/symbol on some phones
+            // because fcitx doesn't recognize selection key with modifiers (eg. Alt+Q for 1)
+            // in which case event.getNumber().toInt() == event.getUnicodeChar()
+            // ... but some keys can have event.getNumber() return 0, need to check displayLabel as well
+            val unicode = event.unicodeChar
+            // skip ' ', because it would produce same unicodeChar regardless of the modifier
+            if (unicode != 0 && unicode != ' '.code) {
+                val char = unicode.toChar()
+                if (char == event.number || event.displayLabel.uppercaseChar() != char.uppercaseChar()) {
+                    return Empty
+                }
+            }
             var states = KeyState.NoState.state
             event.apply {
                 if (isAltPressed) states += KeyState.Alt

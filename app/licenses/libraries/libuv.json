@@ -1,6 +1,6 @@
 {
     "uniqueId": "libuv/libuv",
-    "artifactVersion": "1.49.2",
+    "artifactVersion": "1.50.0",
     "description": "Cross-platform asynchronous I/O",
     "name": "libuv/libuv",
     "website": "https://libuv.org/",

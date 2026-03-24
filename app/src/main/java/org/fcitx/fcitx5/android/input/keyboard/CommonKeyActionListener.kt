@@ -64,19 +64,19 @@ class CommonKeyActionListener :
 
     private var backspaceSwipeState = Stopped
 
-    private val keepComposingIMs = arrayOf("keyboard-us", "unikey")
-
+    // there should be a new fcitx API for this
     private suspend fun FcitxAPI.commitAndReset() {
-        if (clientPreeditCached.isEmpty() && inputPanelCached.preedit.isEmpty()) {
-            // preedit is empty, there can be prediction candidates
-            reset()
-        } else if (inputMethodEntryCached.uniqueName in keepComposingIMs) {
-            // androidkeyboard clears composing on reset, but we want to commit it as-is
-            service.finishComposing()
-            reset()
+        if (inputMethodEntryCached.languageCode.startsWith("zh")) {
+            // Chinese: select 1st candidate, except prediction candidates
+            if (clientPreeditCached.isNotEmpty() || inputPanelCached.preedit.isNotEmpty()) {
+                // preedit not empty, maybe there are candidates to select ...
+                select(0)
+            }
         } else {
-            if (!select(0)) reset()
+            // Other languages: commit preedit as-is
+            service.finishComposing()
         }
+        reset()
     }
 
     private fun showInputMethodPicker() {

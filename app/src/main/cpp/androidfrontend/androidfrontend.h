@@ -23,30 +23,30 @@ public:
 
     Instance *instance() { return instance_; }
 
-    void updateCandidateList(const std::vector<std::string> &candidates, const int size);
-    void commitString(const std::string &str, const int cursor);
+    void updateCandidateList(const std::vector<std::string> &candidates, int size);
+    void commitString(const std::string &str, int cursor);
     void updateClientPreedit(const Text &clientPreedit);
     void updateInputPanel(const Text &preedit, const Text &auxUp, const Text &auxDown);
-    void releaseInputContext(const int uid);
+    void releaseInputContext(int uid);
     void updatePagedCandidate(const PagedCandidateEntity &paged);
 
-    void keyEvent(const Key &key, bool isRelease, const int timestamp);
+    void keyEvent(const Key &key, bool isRelease, int timestamp);
     void forwardKey(const Key &key, bool isRelease);
     bool selectCandidate(int idx);
     bool isInputPanelEmpty();
     void resetInputContext();
     void repositionCursor(int idx);
     void focusInputContext(bool focus);
-    void activateInputContext(const int uid, const std::string &pkgName);
-    void deactivateInputContext(const int uid);
+    void activateInputContext(int uid, const std::string &pkgName);
+    void deactivateInputContext(int uid);
     [[nodiscard]] InputContext *activeInputContext() const;
     void setCapabilityFlags(uint64_t flag);
-    std::vector<std::string> getCandidates(const int offset, const int limit);
-    std::vector<CandidateAction> getCandidateActions(const int idx);
-    void triggerCandidateAction(const int idx, const int actionIdx);
-    void deleteSurrounding(const int before, const int after);
+    std::vector<std::string> getCandidates(int offset, int limit);
+    std::vector<CandidateAction> getCandidateActions(int idx);
+    void triggerCandidateAction(int idx, int actionIdx);
+    void deleteSurrounding(int before, int after);
     void showToast(const std::string &s);
-    void setCandidatePagingMode(const int mode);
+    void setCandidatePagingMode(int mode);
     void offsetCandidatePage(int delta);
     void setCandidateListCallback(const CandidateListCallback &callback);
     void setCommitStringCallback(const CommitStringCallback &callback);
@@ -58,6 +58,7 @@ public:
     void setDeleteSurroundingCallback(const DeleteSurroundingCallback &callback);
     void setToastCallback(const ToastCallback &callback);
     void setPagedCandidateCallback(const PagedCandidateCallback &callback);
+    void setSwitchInputMethodCallback(const SwitchInputMethodCallback &callback);
 
 private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, keyEvent);
@@ -86,6 +87,7 @@ private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setDeleteSurroundingCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setToastCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setPagedCandidateCallback);
+    FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setSwitchInputMethodCallback);
 
     Instance *instance_;
     FocusGroup focusGroup_;
@@ -99,11 +101,15 @@ private:
     ClientPreeditCallback preeditCallback = [](const Text &) {};
     InputPanelCallback inputPanelCallback = [](const fcitx::Text &, const fcitx::Text &, const Text &) {};
     KeyEventCallback keyEventCallback = [](const int, const uint32_t, const uint32_t, const bool, const int) {};
-    InputMethodChangeCallback imChangeCallback = [] {};
-    StatusAreaUpdateCallback statusAreaUpdateCallback = [] {};
+    InputMethodChangeCallback imChangeCallback = [](const InputMethodStatus &) {};
+    StatusAreaUpdateCallback statusAreaUpdateCallback = [](const std::vector<ActionEntity> &, const InputMethodStatus &) {};
     DeleteSurroundingCallback deleteSurroundingCallback = [](const int, const int) {};
     ToastCallback toastCallback = [](const std::string &) {};
     PagedCandidateCallback pagedCandidateCallback = [](const PagedCandidateEntity &) {};
+    SwitchInputMethodCallback switchInputMethodCallback = [](const int, const std::string &) {};
+
+    InputMethodStatus makeInputMethodStatus(InputContext* ic);
+    std::vector<ActionEntity> makeStatusAreaActions(InputContext* ic);
 };
 } // namespace fcitx
 
