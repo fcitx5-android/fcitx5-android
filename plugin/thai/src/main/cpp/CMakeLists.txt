@@ -23,5 +23,7 @@ set_target_properties(Thai_static PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${PREBUILT_DIR}/libthai/${ANDROID_ABI}/include"
         )
 
+option(ENABLE_TEST "" OFF)
+option(ENABLE_COVERAGE "" OFF)
 set(THAI_TARGET Thai_static)
 add_subdirectory(fcitx5-libthai)
