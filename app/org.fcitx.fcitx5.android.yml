@@ -41,6 +41,7 @@ Builds:
       - lib/fcitx5/src/main/cpp/fcitx5/src/modules/unicode/charselectdata
     scandelete:
       - build-logic/convention/build
+      - lib/fcitx5/src/main/cpp/fcitx5/third_party/yoga
     build:
       - pushd $$fcitx5-android-prebuilder$$
       - ABI=%abi ANDROID_NDK_ROOT=$$NDK$$ CMAKE_VERSION=3.31.6 ANDROID_PLATFORM=23
