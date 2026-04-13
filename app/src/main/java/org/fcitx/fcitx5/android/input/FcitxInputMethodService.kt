@@ -392,11 +392,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     private fun handleArrowKey(keyCode: Int) {
-        if (currentInputEditorInfo.inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL ||
-            (
-                currentInputEditorInfo.inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_CLASS_TEXT &&
-                    currentInputEditorInfo.inputType and InputType.TYPE_MASK_VARIATION == InputType.TYPE_TEXT_VARIATION_URI
-            )
+        val type = currentInputEditorInfo.inputType and InputType.TYPE_MASK_CLASS
+        val variation = currentInputEditorInfo.inputType and InputType.TYPE_MASK_VARIATION
+        if (type == InputType.TYPE_NULL ||
+            // confirm URL suggestion in browser location bar, see also https://bugzilla.mozilla.org/show_bug.cgi?id=1999915
+            type == InputType.TYPE_CLASS_TEXT && variation == InputType.TYPE_TEXT_VARIATION_URI
         ) {
             sendDownUpKeyEvents(keyCode)
             return
