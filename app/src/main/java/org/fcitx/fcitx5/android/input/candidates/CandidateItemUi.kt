@@ -32,7 +32,7 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
         background = pressHighlightDrawable(theme.keyPressHighlightColor)
 
         /**
-         * candidate long press feedback is handled by [org.fcitx.fcitx5.android.input.candidates.horizontal.HorizontalCandidateComponent.showCandidateActionMenu]
+         * candidate long press feedback is handled by [org.fcitx.fcitx5.android.input.BaseInputView.showCandidateActionMenu]
          */
         longPressFeedbackEnabled = false
 

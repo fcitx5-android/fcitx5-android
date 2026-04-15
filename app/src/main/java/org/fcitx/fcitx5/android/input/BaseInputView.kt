@@ -5,19 +5,27 @@
 
 package org.fcitx.fcitx5.android.input
 
+import android.view.View
 import android.view.WindowInsets
+import android.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.text.bold
+import androidx.core.text.buildSpannedString
+import androidx.core.text.color
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
+import org.fcitx.fcitx5.android.data.InputFeedbacks
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.data.theme.ThemePrefs
+import org.fcitx.fcitx5.android.utils.item
 import org.fcitx.fcitx5.android.utils.navbarFrameHeight
+import splitties.resources.styledColor
 import kotlin.math.max
 
 abstract class BaseInputView(
@@ -56,6 +64,42 @@ abstract class BaseInputView(
                 eventHandlerJob = null
             }
         }
+
+    private fun triggerCandidateAction(idx: Int, actionIdx: Int) {
+        fcitx.runIfReady { triggerCandidateAction(idx, actionIdx) }
+    }
+
+    private var candidateActionMenu: PopupMenu? = null
+
+    fun showCandidateActionMenu(idx: Int, text: String, view: View) {
+        candidateActionMenu?.dismiss()
+        candidateActionMenu = null
+        service.lifecycleScope.launch {
+            val actions = fcitx.runOnReady { getCandidateActions(idx) }
+            if (actions.isEmpty()) return@launch
+            InputFeedbacks.hapticFeedback(view, longPress = true)
+            candidateActionMenu = PopupMenu(context, view).apply {
+                menu.add(buildSpannedString {
+                    bold {
+                        color(context.styledColor(android.R.attr.colorAccent)) {
+                            append(text)
+                        }
+                    }
+                }).apply {
+                    isEnabled = false
+                }
+                actions.forEach { action ->
+                    menu.item(action.text) {
+                        triggerCandidateAction(idx, action.id)
+                    }
+                }
+                setOnDismissListener {
+                    candidateActionMenu = null
+                }
+                show()
+            }
+        }
+    }
 
     private val navbarBackground by ThemeManager.prefs.navbarBackground
 

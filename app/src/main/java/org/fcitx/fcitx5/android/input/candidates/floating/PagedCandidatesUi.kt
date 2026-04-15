@@ -29,6 +29,7 @@ class PagedCandidatesUi(
     val theme: Theme,
     private val setupTextView: TextView.() -> Unit,
     private val onCandidateClick: (Int) -> Unit,
+    private val onCandidateAction: (Int, String, View) -> Unit,
     private val onPrevPage: () -> Unit,
     private val onNextPage: () -> Unit
 ) : Ui {
@@ -79,6 +80,10 @@ class PagedCandidatesUi(
                     holder.ui.update(candidate, active = position == data.cursorIndex)
                     holder.ui.root.setOnClickListener {
                         onCandidateClick.invoke(position)
+                    }
+                    holder.ui.root.setOnLongClickListener { v ->
+                        onCandidateAction.invoke(position, candidate.text, v)
+                        true
                     }
                     holder.ui.root.updateLayoutParams<FlexboxLayoutManager.LayoutParams> {
                         width = if (isVertical) MATCH_PARENT else WRAP_CONTENT
