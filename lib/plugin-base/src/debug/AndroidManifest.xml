@@ -11,6 +11,13 @@
     </queries>
 
     <application>
+        <meta-data
+            android:name="org.fcitx.fcitx5.android.plugin.METADATA"
+            tools:node="remove" />
+        <meta-data
+            android:name="org.fcitx.fcitx5.android.debug.plugin.METADATA"
+            android:resource="@xml/plugin" />
+
         <activity
             android:name=".AboutActivity"
             android:directBootAware="true"

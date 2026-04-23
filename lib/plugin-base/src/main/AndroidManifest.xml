@@ -13,6 +13,10 @@
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
 
     <application>
+        <!-- prevent res/xml/plugin.xml from being removed by AGP resource optimization -->
+        <meta-data
+            android:name="org.fcitx.fcitx5.android.plugin.METADATA"
+            android:resource="@xml/plugin" />
         <activity
             android:name=".AboutActivity"
             android:exported="true"
