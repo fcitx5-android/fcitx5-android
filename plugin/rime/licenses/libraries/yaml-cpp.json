@@ -1,6 +1,6 @@
 {
     "uniqueId": "jbeder/yaml-cpp",
-    "artifactVersion": "0.8.0",
+    "artifactVersion": "0.9.0",
     "description": "A YAML parser and emitter in C++",
     "name": "jbeder/yaml-cpp",
     "website": "https://github.com/jbeder/yaml-cpp",

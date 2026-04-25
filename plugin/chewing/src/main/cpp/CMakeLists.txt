@@ -16,7 +16,7 @@ find_package(Fcitx5Module MODULE)
 
 add_library(Chewing_static STATIC IMPORTED)
 set_target_properties(Chewing_static PROPERTIES
-        IMPORTED_LOCATION "${PREBUILT_DIR}/libchewing/${ANDROID_ABI}/lib/libchewing.a"
+        IMPORTED_LOCATION "${PREBUILT_DIR}/libchewing/${ANDROID_ABI}/lib/libchewing_capi.a"
         INTERFACE_INCLUDE_DIRECTORIES "${PREBUILT_DIR}/libchewing/${ANDROID_ABI}/include/chewing"
         )
 

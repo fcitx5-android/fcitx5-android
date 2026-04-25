@@ -1,6 +1,6 @@
 {
     "uniqueId": "tlwg/libthai",
-    "artifactVersion": "0.1.29",
+    "artifactVersion": "0.1.30",
     "description": "Thai language support routines",
     "name": "tlwg/libthai",
     "website": "https://github.com/tlwg/libthai",
