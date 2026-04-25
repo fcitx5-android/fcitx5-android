@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools" tools:keep="@string/description">
+<resources>
     <string name="app_name_debug">Fcitx5 (Unikey Plugin | Debug)</string>
     <string name="app_name_release">Fcitx5 (Unikey Plugin)</string>
     <string name="description">Unikey (Vietnamese input method) engine support for Fcitx5</string>
