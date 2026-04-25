@@ -17,6 +17,10 @@
         <meta-data
             android:name="org.fcitx.fcitx5.android.plugin.METADATA"
             android:resource="@xml/plugin" />
+        <!-- prevent res/raw/aboutlibraries.json from being removed -->
+        <meta-data
+            android:name="org.fcitx.fcitx5.android.plugin.ABOUT_LIBRARIES"
+            android:resource="@raw/aboutlibraries" />
         <activity
             android:name=".AboutActivity"
             android:exported="true"

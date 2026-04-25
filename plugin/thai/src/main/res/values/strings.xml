@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:keep="@string/description">
     <string name="app_name_debug">Fcitx5 (Thai Plugin | Debug)</string>
     <string name="app_name_release">Fcitx5 (Thai Plugin)</string>
     <string name="description">Thai input method for Fcitx5</string>
