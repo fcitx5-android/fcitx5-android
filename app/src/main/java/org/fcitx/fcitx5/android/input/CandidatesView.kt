@@ -192,6 +192,21 @@ class CandidatesView(
         updatePosition()
     }
 
+    /**
+     * Anchor candidates view to bottom-left corner, takes navbar bottom insets into consideration.
+     * Should only be used when [CursorAnchorInfo][android.view.inputmethod.CursorAnchorInfo] is invalid
+     */
+    fun updateCursorAnchor(@Size(2) parent: FloatArray) {
+        val (parentWidth, parentHeight) = parent
+        val bottom = parentHeight - bottomInsets
+        anchorPosition[0] = 0f
+        anchorPosition[1] = bottom
+        anchorPosition[2] = bottom
+        parentSize[0] = parentWidth
+        parentSize[1] = parentHeight
+        updatePosition()
+    }
+
     init {
         // invisible by default
         visibility = INVISIBLE
