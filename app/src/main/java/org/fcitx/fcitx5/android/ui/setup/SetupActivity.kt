@@ -15,7 +15,6 @@ import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.core.app.NotificationCompat
-import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -54,12 +53,12 @@ class SetupActivity : FragmentActivity() {
         }
         prevButton = binding.prevButton.apply {
             text = getString(R.string.prev)
-            setOnClickListener { viewPager.currentItem = viewPager.currentItem - 1 }
+            setOnClickListener { viewPager.currentItem -= 1 }
         }
         nextButton = binding.nextButton.apply {
             setOnClickListener {
                 if (viewPager.currentItem != SetupPage.entries.size - 1)
-                    viewPager.currentItem = viewPager.currentItem + 1
+                    viewPager.currentItem += 1
                 else finish()
             }
         }
@@ -143,7 +142,9 @@ class SetupActivity : FragmentActivity() {
 
         override fun createFragment(position: Int): Fragment =
             SetupFragment().apply {
-                arguments = bundleOf(SetupFragment.PAGE to SetupPage.valueOf(position))
+                arguments = Bundle().apply {
+                    putSerializable(SetupFragment.PAGE, SetupPage.valueOf(position))
+                }
             }
     }
 

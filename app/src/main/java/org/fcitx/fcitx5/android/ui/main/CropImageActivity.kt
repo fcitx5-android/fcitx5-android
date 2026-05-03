@@ -23,7 +23,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
@@ -60,7 +59,7 @@ class CropImageActivity : AppCompatActivity() {
         const val CROP_RESULT = "crop_result"
     }
 
-    sealed class CropOption() : Parcelable {
+    sealed class CropOption : Parcelable {
         abstract val width: Int
         abstract val height: Int
 
@@ -247,7 +246,7 @@ class CropImageActivity : AppCompatActivity() {
                 file = tempOutFile,
                 srcUri = sourceImageUri
             )
-            setResult(RESULT_OK, Intent().putExtras(bundleOf(CROP_RESULT to success)))
+            setResult(RESULT_OK, Intent().putExtra(CROP_RESULT, success))
         } catch (e: Exception) {
             tempOutFile.delete()
             Timber.e("Exception when cropping image: ${e.stackTraceToString()}")

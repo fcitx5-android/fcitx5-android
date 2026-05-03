@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import org.fcitx.fcitx5.android.core.Key
@@ -156,7 +155,10 @@ class ListFragment : Fragment() {
 
     override fun onDestroy() {
         val items = Array(ui.entries.size) { RawConfig("$it", ui.entries[it]!!.toString()) }
-        parentFragmentManager.setFragmentResult(descriptor.name, bundleOf(descriptor.name to items))
+        parentFragmentManager.setFragmentResult(
+            descriptor.name,
+            Bundle().apply { putParcelableArray(descriptor.name, items) }
+        )
         super.onDestroy()
     }
 

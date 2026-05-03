@@ -5,9 +5,9 @@
 package org.fcitx.fcitx5.android.ui.main.settings
 
 import android.app.AlertDialog
+import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -151,7 +151,9 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
             quickPhrase.saveData(QuickPhraseData(ui.entries))
             launch(Dispatchers.Main) {
                 // tell parent that we need to reload
-                parentFragmentManager.setFragmentResult(RESULT, bundleOf(RESULT to quickPhrase))
+                parentFragmentManager.setFragmentResult(
+                    RESULT,
+                    Bundle().apply { putParcelable(RESULT, quickPhrase) })
             }
         }
     }
