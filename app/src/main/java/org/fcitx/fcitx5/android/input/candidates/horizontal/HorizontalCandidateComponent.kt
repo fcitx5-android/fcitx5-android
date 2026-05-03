@@ -8,22 +8,15 @@ package org.fcitx.fcitx5.android.input.candidates.horizontal
 import android.content.res.Configuration
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RectShape
-import android.widget.PopupMenu
-import androidx.core.text.bold
-import androidx.core.text.buildSpannedString
-import androidx.core.text.color
 import androidx.core.view.updateLayoutParams
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexboxLayoutManager
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.daemon.launchOnReady
-import org.fcitx.fcitx5.android.data.InputFeedbacks
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.BooleanKey.ExpandedCandidatesEmpty
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesUpdated
@@ -38,11 +31,10 @@ import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
+import org.fcitx.fcitx5.android.input.dependency.inputView
 import org.fcitx.fcitx5.android.input.dependency.theme
-import org.fcitx.fcitx5.android.utils.item
 import org.mechdancer.dependency.manager.must
 import splitties.dimensions.dp
-import splitties.resources.styledColor
 import kotlin.math.max
 
 class HorizontalCandidateComponent :
@@ -52,6 +44,7 @@ class HorizontalCandidateComponent :
     private val context by manager.context()
     private val fcitx by manager.fcitx()
     private val theme by manager.theme()
+    private val inputView by manager.inputView()
     private val bar: KawaiiBarComponent by manager.must()
 
     private val fillStyle by AppPrefs.getInstance().keyboard.horizontalCandidateStyle
@@ -105,7 +98,7 @@ class HorizontalCandidateComponent :
                     fcitx.launchOnReady { it.select(holder.idx) }
                 }
                 holder.itemView.setOnLongClickListener {
-                    showCandidateActionMenu(holder)
+                    inputView.showCandidateActionMenu(holder.idx, holder.text, holder.ui.root)
                     true
                 }
             }
@@ -202,45 +195,6 @@ class HorizontalCandidateComponent :
         // not sure why empty candidates won't trigger `FlexboxLayoutManager#onLayoutCompleted()`
         if (candidates.isEmpty()) {
             refreshExpanded(0)
-        }
-    }
-
-    private fun triggerCandidateAction(idx: Int, actionIdx: Int) {
-        fcitx.runIfReady { triggerCandidateAction(idx, actionIdx) }
-    }
-
-    private var candidateActionMenu: PopupMenu? = null
-
-    fun showCandidateActionMenu(holder: CandidateViewHolder) {
-        val idx = holder.idx
-        val text = holder.text
-        val view = holder.ui.root
-        candidateActionMenu?.dismiss()
-        candidateActionMenu = null
-        service.lifecycleScope.launch {
-            val actions = fcitx.runOnReady { getCandidateActions(idx) }
-            if (actions.isEmpty()) return@launch
-            InputFeedbacks.hapticFeedback(view, longPress = true)
-            candidateActionMenu = PopupMenu(context, view).apply {
-                menu.add(buildSpannedString {
-                    bold {
-                        color(context.styledColor(android.R.attr.colorAccent)) {
-                            append(text)
-                        }
-                    }
-                }).apply {
-                    isEnabled = false
-                }
-                actions.forEach { action ->
-                    menu.item(action.text) {
-                        triggerCandidateAction(idx, action.id)
-                    }
-                }
-                setOnDismissListener {
-                    candidateActionMenu = null
-                }
-                show()
-            }
         }
     }
 }
