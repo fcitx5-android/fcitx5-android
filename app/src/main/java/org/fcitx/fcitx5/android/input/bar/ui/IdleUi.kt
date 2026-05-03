@@ -50,7 +50,7 @@ class IdleUi(
 ) : Ui {
 
     enum class State {
-        Empty, Toolbar, Clipboard, NumberRow, InlineSuggestion
+        Empty, Toolbar, Clipboard, NumberRow, InlineSuggestion, Otp
     }
 
     var currentState = State.Empty
@@ -81,7 +81,7 @@ class IdleUi(
 
     val buttonsUi = ButtonsBarUi(ctx, theme)
 
-    val clipboardUi = ClipboardSuggestionUi(ctx, theme)
+    val clipboardUi = ClipboardSuggestionUi(ctx, theme, false)
 
     val numberRow = NumberRow(ctx, theme).apply {
         visibility = View.GONE
@@ -89,11 +89,14 @@ class IdleUi(
 
     val inlineSuggestionsBar = InlineSuggestionsUi(ctx)
 
+    val otpUi = ClipboardSuggestionUi(ctx, theme, true)
+
     private val animator = ViewAnimator(ctx).apply {
         add(emptyBar, lParams(matchParent, matchParent))
         add(buttonsUi.root, lParams(matchParent, matchParent))
         add(clipboardUi.root, lParams(matchParent, matchParent))
         add(inlineSuggestionsBar.root, lParams(matchParent, matchParent))
+        add(otpUi.root, lParams(matchParent, matchParent))
     }
 
     private val inAnimation by lazy {
@@ -222,6 +225,7 @@ class IdleUi(
             State.Clipboard -> animator.displayedChild = 2
             State.NumberRow -> {}
             State.InlineSuggestion -> animator.displayedChild = 3
+            State.Otp -> animator.displayedChild = 4
         }
         if (state == State.NumberRow) {
             numberRow.keyActionListener = commonKeyActionListener.listener

@@ -82,11 +82,14 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.min
+import org.fcitx.fcitx5.android.data.otp.OtpManager
 import kotlin.math.PI
 import kotlin.math.sin
 
 class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(),
     InputBroadcastReceiver {
+
+    private var otpCode: String? = null
 
     private val context by manager.context()
     private val theme by manager.theme()
@@ -108,12 +111,14 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     private val preferredVoiceInput by prefs.keyboard.preferredVoiceInput
 
     private var clipboardTimeoutJob: Job? = null
+    private var otpCodeTimeoutJob: Job? = null
 
     private var isClipboardFresh: Boolean = false
     private var isInlineSuggestionPresent: Boolean = false
     private var isCapabilityFlagsPassword: Boolean = false
     private var isKeyboardLayoutNumber: Boolean = false
     private var isToolbarManuallyToggled: Boolean = false
+    private var isOtpCodeFresh: Boolean = false
 
     private enum class NumberRowState { Auto, ForceShow, ForceHide }
 
@@ -174,8 +179,33 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         }
     }
 
+    private val otpListener = OtpManager.OnOtpReceivedListener { otp ->
+        if (idleUi.otpUi.text.text == null) return@OnOtpReceivedListener
+        service.lifecycleScope.launch {
+            idleUi.otpUi.text.text = otp
+            otpCode = otp
+            isOtpCodeFresh = true
+            launchOtpCodeTimeoutJob()
+            evalIdleUiState()
+        }
+    }
+
+    private fun launchOtpCodeTimeoutJob() {
+        otpCodeTimeoutJob?.cancel()
+        val timeout = clipboardItemTimeout.getValue() * 1000L
+        // never transition to ClipboardTimedOut state when timeout < 0
+        if (timeout < 0L) return
+        otpCodeTimeoutJob = service.lifecycleScope.launch {
+            delay(timeout)
+            otpCode = null
+            isOtpCodeFresh = false
+            otpCodeTimeoutJob = null
+        }
+    }
+
     private fun evalIdleUiState(fromUser: Boolean = false) {
         val newState = when {
+            isOtpCodeFresh -> IdleUi.State.Otp
             numberRowState == NumberRowState.ForceShow -> IdleUi.State.NumberRow
             isClipboardFresh -> IdleUi.State.Clipboard
             isInlineSuggestionPresent -> IdleUi.State.InlineSuggestion
@@ -334,6 +364,11 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                     true
                 }
             }
+            otpUi.suggestionView.setOnClickListener {
+                otpCode?.let(service::commitText)
+                otpCode = null
+                isOtpCodeFresh = false
+                evalIdleUiState()
             numberRow.apply {
                 onCollapseListener = {
                     numberRowState = NumberRowState.ForceHide
@@ -439,6 +474,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         ClipboardManager.addOnUpdateListener(onClipboardUpdateListener)
         clipboardSuggestion.registerOnChangeListener(onClipboardSuggestionUpdateListener)
         clipboardItemTimeout.registerOnChangeListener(onClipboardTimeoutUpdateListener)
+        OtpManager.addOnOtpReceivedListener(otpListener)
     }
 
     override fun onStartInput(info: EditorInfo, capFlags: CapabilityFlags) {
