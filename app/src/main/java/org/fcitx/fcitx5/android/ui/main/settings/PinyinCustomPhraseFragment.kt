@@ -16,8 +16,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.reloadPinyinCustomPhrase
 import org.fcitx.fcitx5.android.data.pinyin.CustomPhraseManager
@@ -193,8 +193,10 @@ class PinyinCustomPhraseFragment : Fragment(), OnItemChangedListener<PinyinCusto
     private fun saveConfig() {
         if (!dustman.dirty) return
         resetDustman()
-        lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
-            CustomPhraseManager.save(ui.entries.toTypedArray())
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                CustomPhraseManager.save(ui.entries.toTypedArray())
+            }
             viewModel.fcitx.runOnReady {
                 reloadPinyinCustomPhrase()
             }

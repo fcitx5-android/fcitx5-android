@@ -13,7 +13,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceScreen
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -52,31 +51,30 @@ class AdvancedSettingsFragment : ManagedPreferenceFragment(AppPrefs.getInstance(
                 val ctx = requireContext()
                 val cr = ctx.contentResolver
                 lifecycleScope.withLoadingDialog(ctx) {
-                    withContext(NonCancellable + Dispatchers.IO) {
-                        val name = cr.queryFileName(uri) ?: return@withContext
-                        if (!name.endsWith(".zip")) {
-                            ctx.importErrorDialog(R.string.exception_user_data_filename, name)
-                            return@withContext
-                        }
-                        try {
-                            // stop fcitx before overwriting files
-                            FcitxDaemon.stopFcitx()
+                    val name = cr.queryFileName(uri) ?: return@withLoadingDialog
+                    if (!name.endsWith(".zip")) {
+                        ctx.importErrorDialog(R.string.exception_user_data_filename, name)
+                        return@withLoadingDialog
+                    }
+                    try {
+                        // stop fcitx before overwriting files
+                        FcitxDaemon.stopFcitx()
+                        val metadata = withContext(Dispatchers.IO) {
                             val inputStream = cr.openInputStream(uri)!!
-                            val metadata = UserDataManager.import(inputStream).getOrThrow()
-                            lifecycleScope.launch(NonCancellable + Dispatchers.Main) {
-                                delay(400L)
-                                AppUtil.exit()
-                            }
-                            withContext(Dispatchers.Main) {
-                                AppUtil.showRestartNotification(ctx)
-                                val exportTime = formatDateTime(metadata.exportTime)
-                                ctx.toast(getString(R.string.user_data_imported, exportTime))
-                            }
-                        } catch (e: Exception) {
-                            // re-start fcitx in case importing failed
-                            FcitxDaemon.startFcitx()
-                            ctx.importErrorDialog(e)
+                            UserDataManager.import(inputStream).getOrThrow()
                         }
+                        AppUtil.showRestartNotification(ctx)
+                        val exportTime = formatDateTime(metadata.exportTime)
+                        ctx.toast(getString(R.string.user_data_imported, exportTime))
+                        // delay exit to ensure Notification and Toast has been created
+                        lifecycleScope.launch {
+                            delay(400L)
+                            AppUtil.exit()
+                        }
+                    } catch (e: Exception) {
+                        // restart fcitx in case importing failed
+                        FcitxDaemon.startFcitx()
+                        ctx.importErrorDialog(e)
                     }
                 }
             }
@@ -84,17 +82,15 @@ class AdvancedSettingsFragment : ManagedPreferenceFragment(AppPrefs.getInstance(
             registerForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
                 if (uri == null) return@registerForActivityResult
                 val ctx = requireContext()
-                lifecycleScope.withLoadingDialog(requireContext()) {
-                    withContext(NonCancellable + Dispatchers.IO) {
-                        try {
+                lifecycleScope.withLoadingDialog(ctx) {
+                    try {
+                        withContext(Dispatchers.IO) {
                             val outputStream = ctx.contentResolver.openOutputStream(uri)!!
                             UserDataManager.export(outputStream, exportTimestamp).getOrThrow()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            withContext(Dispatchers.Main) {
-                                ctx.toast(e)
-                            }
                         }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        ctx.toast(e)
                     }
                 }
             }
@@ -120,11 +116,9 @@ class AdvancedSettingsFragment : ManagedPreferenceFragment(AppPrefs.getInstance(
             }) else null
         )
         screen.addPreference(R.string.export_user_data) {
-            lifecycleScope.launch {
-                lifecycleScope.withLoadingDialog(ctx) {
-                    viewModel.fcitx.runOnReady {
-                        save()
-                    }
+            lifecycleScope.withLoadingDialog(ctx) {
+                viewModel.fcitx.runOnReady {
+                    save()
                 }
                 exportTimestamp = System.currentTimeMillis()
                 exportLauncher.launch("fcitx5-android_${iso8601UTCDateTime(exportTimestamp)}.zip")

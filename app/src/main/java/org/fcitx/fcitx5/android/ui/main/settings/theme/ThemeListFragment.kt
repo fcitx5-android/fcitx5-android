@@ -15,7 +15,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
@@ -83,31 +82,28 @@ class ThemeListFragment : Fragment() {
                 val ctx = requireContext()
                 val cr = ctx.contentResolver
                 lifecycleScope.withLoadingDialog(ctx) {
-                    withContext(NonCancellable + Dispatchers.IO) {
-                        val name = cr.queryFileName(uri) ?: return@withContext
-                        val ext = name.substringAfterLast('.')
-                        if (ext != "zip") {
-                            ctx.importErrorDialog(R.string.exception_theme_filename, ext)
-                            return@withContext
-                        }
-                        try {
+                    val name = cr.queryFileName(uri) ?: return@withLoadingDialog
+                    val ext = name.substringAfterLast('.')
+                    if (ext != "zip") {
+                        ctx.importErrorDialog(R.string.exception_theme_filename, ext)
+                        return@withLoadingDialog
+                    }
+                    try {
+                        val (newCreated, theme, migrated) = withContext(Dispatchers.IO) {
                             val inputStream = cr.openInputStream(uri)!!
-                            val (newCreated, theme, migrated) =
-                                ThemeFilesManager.importTheme(inputStream).getOrThrow()
-                            ThemeManager.refreshThemes()
-                            withContext(Dispatchers.Main) {
-                                if (newCreated) {
-                                    themeListAdapter.prependTheme(theme)
-                                } else {
-                                    themeListAdapter.replaceTheme(theme)
-                                }
-                                if (migrated) {
-                                    ctx.toast(R.string.theme_migrated)
-                                }
-                            }
-                        } catch (e: Exception) {
-                            ctx.importErrorDialog(e)
+                            ThemeFilesManager.importTheme(inputStream).getOrThrow()
                         }
+                        ThemeManager.refreshThemes()
+                        if (newCreated) {
+                            themeListAdapter.prependTheme(theme)
+                        } else {
+                            themeListAdapter.replaceTheme(theme)
+                        }
+                        if (migrated) {
+                            ctx.toast(R.string.theme_migrated)
+                        }
+                    } catch (e: Exception) {
+                        ctx.importErrorDialog(e)
                     }
                 }
             }
@@ -118,15 +114,13 @@ class ThemeListFragment : Fragment() {
                 val exported = beingExported ?: return@registerForActivityResult
                 beingExported = null
                 lifecycleScope.withLoadingDialog(requireContext()) {
-                    withContext(NonCancellable + Dispatchers.IO) {
-                        try {
+                    try {
+                        withContext(Dispatchers.IO) {
                             val outputStream = ctx.contentResolver.openOutputStream(uri)!!
                             ThemeFilesManager.exportTheme(exported, outputStream).getOrThrow()
-                        } catch (e: Exception) {
-                            withContext(Dispatchers.Main) {
-                                ctx.toast(e)
-                            }
                         }
+                    } catch (e: Exception) {
+                        ctx.toast(e)
                     }
                 }
             }

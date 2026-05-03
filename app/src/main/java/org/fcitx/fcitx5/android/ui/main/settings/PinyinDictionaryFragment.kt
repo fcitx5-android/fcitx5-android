@@ -19,7 +19,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
@@ -132,7 +131,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDiction
         val ctx = requireContext()
         val cr = ctx.contentResolver
         val nm = ctx.notificationManager
-        lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
+        lifecycleScope.launch {
             val id = IMPORT_ID++
             val fileName = cr.queryFileName(uri) ?: return@launch
             if (PinyinDictionary.Type.fromFileName(fileName) == null) {
@@ -153,12 +152,11 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDiction
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .build().let { nm.notify(id, it) }
             try {
-                val inputStream = cr.openInputStream(uri)!!
-                val imported = PinyinDictManager.importFromInputStream(inputStream, fileName)
-                    .getOrThrow()
-                withContext(Dispatchers.Main) {
-                    ui.addItem(item = imported)
+                val imported = withContext(Dispatchers.IO) {
+                    val inputStream = cr.openInputStream(uri)!!
+                    PinyinDictManager.importFromInputStream(inputStream, fileName).getOrThrow()
                 }
+                ui.addItem(item = imported)
             } catch (e: Exception) {
                 ctx.importErrorDialog(e)
             }
@@ -173,7 +171,7 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDiction
         // right before the Fragment detached from Activity, and at the time reload completes,
         // Fragment is no longer attached to a Context, thus unable to cancel the notification.
         val nm = requireContext().notificationManager
-        lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
+        lifecycleScope.launch {
             if (busy.compareAndSet(false, true)) {
                 val id = RELOAD_ID++
                 NotificationCompat.Builder(requireContext(), CHANNEL_ID)

@@ -42,13 +42,22 @@ class DeveloperFragment : PaddingPreferenceFragment() {
                 return@registerForActivityResult
             }
             val ctx = requireContext()
-            lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
-                runCatching {
-                    ctx.contentResolver.openOutputStream(uri)!!.use { o ->
-                        hprofFile.inputStream().use { i -> i.copyTo(o) }
+            lifecycleScope.launch {
+                try {
+                    withContext(Dispatchers.IO) {
+                        ctx.contentResolver.openOutputStream(uri)!!.use { o ->
+                            hprofFile.inputStream().use { i -> i.copyTo(o) }
+                        }
                     }
-                }.let { ctx.toast(it) }
-                hprofFile.delete()
+                } catch (e: Exception) {
+                    ctx.toast(e)
+                } finally {
+                    withContext(NonCancellable) {
+                        withContext(Dispatchers.IO) {
+                            hprofFile.delete()
+                        }
+                    }
+                }
             }
         }
     }
@@ -87,12 +96,8 @@ class DeveloperFragment : PaddingPreferenceFragment() {
                     .setNegativeButton(android.R.string.cancel, null)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
                         lifecycleScope.launch {
-                            withContext(NonCancellable + Dispatchers.IO) {
-                                FcitxDaemon.restartFcitx()
-                                withContext(Dispatchers.Main) {
-                                    context.toast(R.string.done)
-                                }
-                            }
+                            FcitxDaemon.restartFcitx()
+                            context.toast(R.string.done)
                         }
                     }
                     .show()
@@ -102,11 +107,11 @@ class DeveloperFragment : PaddingPreferenceFragment() {
                     .setTitle(R.string.delete_and_sync_data)
                     .setMessage(R.string.delete_and_sync_data_message)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
-                        lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
-                            DataManager.deleteAndSync()
-                            withContext(Dispatchers.Main) {
-                                context.toast(R.string.synced)
+                        lifecycleScope.launch {
+                            withContext(Dispatchers.IO) {
+                                DataManager.deleteAndSync()
                             }
+                            context.toast(R.string.synced)
                         }
                     }
                     .setNegativeButton(android.R.string.cancel, null)
@@ -117,11 +122,11 @@ class DeveloperFragment : PaddingPreferenceFragment() {
                     .setTitle(R.string.clear_clb_db)
                     .setMessage(R.string.clear_clp_db_confirm)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
-                        lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
-                            ClipboardManager.nukeTable()
-                            withContext(Dispatchers.Main) {
-                                context.toast(R.string.done)
+                        lifecycleScope.launch {
+                            withContext(Dispatchers.IO) {
+                                ClipboardManager.nukeTable()
                             }
+                            context.toast(R.string.done)
                         }
                     }
                     .setNegativeButton(android.R.string.cancel, null)

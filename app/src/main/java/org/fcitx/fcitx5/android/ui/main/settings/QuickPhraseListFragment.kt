@@ -21,7 +21,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
@@ -222,7 +221,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
         val ctx = requireContext()
         val cr = ctx.contentResolver
         val nm = ctx.notificationManager
-        lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
+        lifecycleScope.launch {
             val id = IMPORT_ID++
             val fileName = cr.queryFileName(uri) ?: return@launch
             val extName = fileName.substringAfterLast('.')
@@ -244,12 +243,11 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .build().let { nm.notify(id, it) }
             try {
-                val inputStream = cr.openInputStream(uri)!!
-                val imported = QuickPhraseManager.importFromInputStream(inputStream, fileName)
-                    .getOrThrow()
-                withContext(Dispatchers.Main) {
-                    ui.addItem(item = imported)
+                val imported = withContext(Dispatchers.IO) {
+                    val inputStream = cr.openInputStream(uri)!!
+                    QuickPhraseManager.importFromInputStream(inputStream, fileName).getOrThrow()
                 }
+                ui.addItem(item = imported)
             } catch (e: Exception) {
                 ctx.importErrorDialog(e)
             }
@@ -263,7 +261,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
         // save the reference to NotificationManager, in case we need to cancel notification
         // after Fragment detached
         val nm = requireContext().notificationManager
-        lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
+        lifecycleScope.launch {
             if (busy.compareAndSet(false, true)) {
                 val id = RELOAD_ID++
                 NotificationCompat.Builder(requireContext(), CHANNEL_ID)

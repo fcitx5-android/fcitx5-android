@@ -20,7 +20,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
@@ -211,7 +210,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
         val ctx = requireContext()
         val cr = ctx.contentResolver
         val nm = ctx.notificationManager
-        lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
+        lifecycleScope.launch {
             val importId = IMPORT_ID++
             val fileName = cr.queryFileName(uri) ?: return@launch
             if (!fileName.endsWith(".zip")) {
@@ -227,11 +226,11 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .build().let { nm.notify(importId, it) }
             try {
-                val inputStream = cr.openInputStream(uri)!!
-                val imported = TableManager.importFromZip(inputStream).getOrThrow()
-                withContext(Dispatchers.Main) {
-                    ui.addItem(item = imported)
+                val imported = withContext(Dispatchers.IO) {
+                    val inputStream = cr.openInputStream(uri)!!
+                    TableManager.importFromZip(inputStream).getOrThrow()
                 }
+                ui.addItem(item = imported)
             } catch (e: Exception) {
                 ctx.importErrorDialog(e)
             }
@@ -279,7 +278,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
             }
             return
         }
-        lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
+        lifecycleScope.launch {
             val importId = IMPORT_ID++
             val confName = cr.queryFileName(confUri) ?: return@launch
             val dictName = cr.queryFileName(dictUri) ?: return@launch
@@ -292,25 +291,21 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .build().let { nm.notify(importId, it) }
             try {
-                val confStream = cr.openInputStream(confUri)!!
-                val dictStream = cr.openInputStream(dictUri)!!
-                withContext(Dispatchers.Main) {
-                    updateFilesSelectionDialogButton(importing = true)
-                }
-                val imported =
+                updateFilesSelectionDialogButton(importing = true)
+                val imported = withContext(Dispatchers.IO) {
+                    val confStream = cr.openInputStream(confUri)!!
+                    val dictStream = cr.openInputStream(dictUri)!!
                     TableManager.importFromConfAndDict(confName, confStream, dictName, dictStream)
                         .getOrThrow()
-                withContext(Dispatchers.Main) {
-                    dismissFilesSelectionDialog()
-                    ui.addItem(item = imported)
                 }
+                dismissFilesSelectionDialog()
+                ui.addItem(item = imported)
             } catch (e: Exception) {
                 ctx.importErrorDialog(e)
-            }
-            nm.cancel(importId)
-            withContext(Dispatchers.Main) {
+            } finally {
                 updateFilesSelectionDialogButton(importing = false)
             }
+            nm.cancel(importId)
         }
     }
 
@@ -320,7 +315,7 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
         val nm = ctx.notificationManager
         val im = tableToReplace ?: return
         tableToReplace = null
-        lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
+        lifecycleScope.launch {
             val importId = IMPORT_ID++
             val dictName = cr.queryFileName(uri) ?: return@launch
             if (Dictionary.Type.fromFileName(dictName) == null) {
@@ -336,11 +331,12 @@ class TableInputMethodFragment : Fragment(), OnItemChangedListener<TableBasedInp
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .build().let { nm.notify(importId, it) }
             try {
-                val dictStream = cr.openInputStream(uri)!!
-                im.table = TableManager.replaceTableDict(im, dictName, dictStream).getOrThrow()
-                withContext(Dispatchers.Main) {
-                    ui.updateItem(ui.indexItem(im), im)
+                val imported = withContext(Dispatchers.IO) {
+                    val dictStream = cr.openInputStream(uri)!!
+                    TableManager.replaceTableDict(im, dictName, dictStream).getOrThrow()
                 }
+                im.table = imported
+                ui.updateItem(ui.indexItem(im), im)
                 dustman.forceDirty()
             } catch (e: Exception) {
                 ctx.importErrorDialog(e)

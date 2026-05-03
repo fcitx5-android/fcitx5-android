@@ -13,7 +13,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
@@ -47,7 +46,7 @@ class ClipboardEditActivity : Activity() {
 
     private fun finishEditing(copy: Boolean = false) {
         val str = editText.str
-        scope.launch(NonCancellable) {
+        scope.launch {
             ClipboardManager.updateText(entryId, str)
             if (copy) {
                 clipboardManager.setPrimaryClip(ClipData.newPlainText("", str))
