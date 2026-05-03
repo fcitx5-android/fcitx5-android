@@ -135,14 +135,14 @@ abstract class BaseDynamicListUi<T>(
         addOnItemChangedListener(object : OnItemChangedListener<T> {
             override fun onItemAdded(idx: Int, item: T) {
                 updateFAB()
-                showUndoSnackbar(ctx.getString(R.string.added_x, showEntry(item))) {
+                showSnackbar(ctx.getString(R.string.added_x, showEntry(item))) {
                     removeItem(idx)
                 }
             }
 
             override fun onItemRemoved(idx: Int, item: T) {
                 updateFAB()
-                showUndoSnackbar(ctx.getString(R.string.removed_x, showEntry(item))) {
+                showSnackbar(ctx.getString(R.string.removed_x, showEntry(item))) {
                     addItem(idx, item)
                 }
             }
@@ -150,14 +150,14 @@ abstract class BaseDynamicListUi<T>(
             override fun onItemUpdated(idx: Int, old: T, new: T) {
                 updateFAB()
                 if (mode is Mode.Immutable) return
-                showUndoSnackbar(ctx.getString(R.string.edited_x, showEntry(new))) {
+                showSnackbar(ctx.getString(R.string.edited_x, showEntry(new))) {
                     updateItem(idx, old)
                 }
             }
 
             override fun onItemRemovedBatch(indexed: List<Pair<Int, T>>) {
                 updateFAB()
-                showUndoSnackbar(ctx.getString(R.string.removed_n_items, indexed.size)) {
+                showSnackbar(ctx.getString(R.string.removed_n_items, indexed.size)) {
                     indexed.sortedBy { it.first }.forEach {
                         addItem(it.first, it.second)
                     }
@@ -166,15 +166,17 @@ abstract class BaseDynamicListUi<T>(
         })
     }
 
-    private fun showUndoSnackbar(text: String, action: () -> Unit) {
-        if (!enableUndo || suspendUndo) return
-        Snackbar.make(root, text, Snackbar.LENGTH_SHORT)
-            .setAction(R.string.undo) {
+    private fun showSnackbar(text: String, action: () -> Unit) {
+        if (suspendUndo) return
+        val snackbar = Snackbar.make(root, text, Snackbar.LENGTH_SHORT)
+        if (enableUndo) {
+            snackbar.setAction(R.string.undo) {
                 suspendUndo = true
                 action.invoke()
                 suspendUndo = false
             }
-            .show()
+        }
+        snackbar.show()
     }
 
     open fun updateFAB() {
