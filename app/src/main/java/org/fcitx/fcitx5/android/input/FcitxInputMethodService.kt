@@ -107,6 +107,11 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             setCandidatePagingMode(if (isVirtualKeyboard) 0 else 1)
         }
         currentInputConnection?.monitorCursorAnchor(!isVirtualKeyboard)
+        if (isVirtualKeyboard) {
+            hideStatusIcon()
+        } else {
+            showStatusIcon(StatusIconMapping.fromEntry(fcitx.runImmediately { inputMethodEntryCached }))
+        }
         window.window?.let {
             navbarMgr.evaluate(it, isVirtualKeyboard)
         }
@@ -311,6 +316,9 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     skipNextSubtypeChange = im
                     // [^1]: notify system that input method subtype has changed
                     switchInputMethod(InputMethodUtil.componentName, subtype)
+                }
+                if (inputDeviceMgr.evaluateOnInputMethodActivate()) {
+                    showStatusIcon(StatusIconMapping.fromEntry(event.data))
                 }
             }
             is FcitxEvent.SwitchInputMethodEvent -> {
@@ -767,6 +775,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 // support monitoring CursorAnchorInfo
                 candidatesView?.updateCursorAnchor(contentSize)
             }
+            showStatusIcon(StatusIconMapping.fromEntry(fcitx.runImmediately { inputMethodEntryCached }))
         }
     }
 
@@ -1032,6 +1041,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         postFcitxJob {
             focusOutIn()
         }
+        hideStatusIcon()
         showingDialog?.dismiss()
     }
 
