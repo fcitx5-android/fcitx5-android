@@ -317,4 +317,5 @@
     <string name="hide_unsupported_emojis">Hide unsupported Emojis</string>
     <string name="key_border_stroke">Enable stroke for key border</string>
     <string name="preferred_voice_input">Preferred voice input</string>
+    <string name="edit_text_playground">EditText Playground</string>
 </resources>

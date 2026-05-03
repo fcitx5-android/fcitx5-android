@@ -40,12 +40,18 @@ object StatusIconMapping {
             "fcitx-dianbaoma" -> return R.drawable.ic_status_dianbaoma
             "fcitx-zhengma", "fcitx_zhengma" -> return R.drawable.ic_status_zhengma
             "fcitx-jyutping", "fcitx_jyutping_table" -> return R.drawable.ic_status_jyutping
+            "fcitx-chewing" -> return R.drawable.ic_status_chewing
+            "fcitx-rime" -> return R.drawable.ic_status_rime
+            "fcitx_rime_latin" -> R.drawable.ic_status_latin_direct
+            "fcitx_rime_disable" -> R.drawable.ic_status_disabled
         }
         when (entry.languageCode) {
             "en", "en_US" -> return R.drawable.ic_status_en
             "zh", "zh_CN", "zh_TW", "zh_HK" -> return R.drawable.ic_status_zh
             "ja" -> return R.drawable.ic_status_hiragana
             "ko" -> return R.drawable.ic_status_hangul
+            "si" -> return R.drawable.ic_status_sayura
+            "th" -> return R.drawable.ic_status_thai
             "vi" -> return R.drawable.ic_status_vi
         }
         return R.drawable.ic_baseline_keyboard_24
