@@ -21,8 +21,10 @@ import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.ui.common.PaddingPreferenceFragment
 import org.fcitx.fcitx5.android.ui.main.modified.MySwitchPreference
+import org.fcitx.fcitx5.android.ui.main.settings.SettingsRoute
 import org.fcitx.fcitx5.android.utils.addPreference
 import org.fcitx.fcitx5.android.utils.iso8601UTCDateTime
+import org.fcitx.fcitx5.android.utils.navigateWithAnim
 import org.fcitx.fcitx5.android.utils.setupForest
 import org.fcitx.fcitx5.android.utils.startActivity
 import org.fcitx.fcitx5.android.utils.toast
@@ -138,6 +140,9 @@ class DeveloperFragment : PaddingPreferenceFragment() {
                 System.gc()
                 Debug.dumpHprofData(hprofFile.absolutePath)
                 launcher.launch(fileName)
+            }
+            addPreference(R.string.edit_text_playground) {
+                navigateWithAnim(SettingsRoute.EditTextPlayground)
             }
         }
     }
