@@ -8,11 +8,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class FcitxLifecycleRegistry : FcitxLifecycle {
 
@@ -138,9 +138,8 @@ private class AtStateHelper(val lifecycle: FcitxLifecycle, val state: FcitxLifec
     private var continuation: Continuation<Unit>? = null
 
     suspend fun <T> run(block: suspend CoroutineScope.() -> T): T {
-        suspendCoroutine { continuation = it }
+        suspendCancellableCoroutine { continuation = it }
         lifecycle.removeObserver(observer)
         return block(lifecycle.lifecycleScope)
     }
 }
-
