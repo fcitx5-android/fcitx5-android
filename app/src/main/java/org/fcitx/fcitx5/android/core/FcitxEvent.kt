@@ -61,9 +61,37 @@ sealed class FcitxEvent<T>(open val data: T) {
         data class Data(
             val preedit: FormattedText,
             val auxUp: FormattedText,
-            val auxDown: FormattedText
+            val auxDown: FormattedText,
+            val tabs: Array<CandidateAction>
         ) {
-            constructor() : this(FormattedText.Empty, FormattedText.Empty, FormattedText.Empty)
+            constructor() : this(
+                FormattedText.Empty,
+                FormattedText.Empty,
+                FormattedText.Empty,
+                emptyArray()
+            )
+
+            override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (javaClass != other?.javaClass) return false
+
+                other as Data
+
+                if (preedit != other.preedit) return false
+                if (auxUp != other.auxUp) return false
+                if (auxDown != other.auxDown) return false
+                if (!tabs.contentEquals(other.tabs)) return false
+
+                return true
+            }
+
+            override fun hashCode(): Int {
+                var result = preedit.hashCode()
+                result = 31 * result + auxUp.hashCode()
+                result = 31 * result + auxDown.hashCode()
+                result = 31 * result + tabs.contentHashCode()
+                return result
+            }
         }
     }
 
@@ -261,7 +289,8 @@ sealed class FcitxEvent<T>(open val data: T) {
                     InputPanelEvent.Data(
                         params[0] as FormattedText,
                         params[1] as FormattedText,
-                        params[2] as FormattedText
+                        params[2] as FormattedText,
+                        params[3] as Array<CandidateAction>
                     )
                 )
                 EventType.Ready -> ReadyEvent()

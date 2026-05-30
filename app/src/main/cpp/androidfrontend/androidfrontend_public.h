@@ -15,7 +15,7 @@
 typedef std::function<void(const std::vector<CandidateEntity> &, const int)> CandidateListCallback;
 typedef std::function<void(const std::string &, const int)> CommitStringCallback;
 typedef std::function<void(const fcitx::Text &)> ClientPreeditCallback;
-typedef std::function<void(const fcitx::Text &, const fcitx::Text &, const fcitx::Text &)> InputPanelCallback;
+typedef std::function<void(const fcitx::Text &, const fcitx::Text &, const fcitx::Text &, const std::vector<CandidateActionEntity> &)> InputPanelCallback;
 typedef std::function<void(const int, const uint32_t, const uint32_t, const bool, const int)> KeyEventCallback;
 typedef std::function<void(const InputMethodStatus &)> InputMethodChangeCallback;
 typedef std::function<void(const std::vector<ActionEntity> &, const InputMethodStatus &)> StatusAreaUpdateCallback;
@@ -63,6 +63,9 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, getCandidateActions,
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, triggerCandidateAction,
                              void(const int, const int))
 
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, triggerTabAction,
+                             void(const int))
+
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, showToast,
                              void(const std::string &))
 
@@ -70,6 +73,9 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setCandidatePagingMode,
                              void(const int))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, offsetCandidatePage,
+                             void(int))
+
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, triggerCandidateListTabAction,
                              void(int))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setCandidateListCallback,
@@ -81,7 +87,7 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setCommitStringCallback,
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setPreeditCallback,
                              void(const ClientPreeditCallback &))
 
-FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setInputPanelAuxCallback,
+FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setInputPanelCallback,
                              void(const InputPanelCallback &))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setKeyEventCallback,

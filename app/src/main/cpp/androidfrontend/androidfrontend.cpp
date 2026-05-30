@@ -65,10 +65,22 @@ public:
 
     void updateInputPanel() {
         const InputPanel &ip = inputPanel();
+        std::vector<CandidateActionEntity> tabs;
+        auto list = ip.candidateList();
+        if (list) {
+            auto tabbed = ip.candidateList()->toTabbed();
+            if (tabbed) {
+                auto tabActions = tabbed->tabActions();
+                for (const auto &a: tabActions) {
+                    tabs.emplace_back(a);
+                }
+            }
+        }
         frontend_->updateInputPanel(
                 filterText(ip.preedit()),
                 filterText(ip.auxUp()),
-                filterText(ip.auxDown())
+                filterText(ip.auxDown()),
+                tabs
         );
     }
 
@@ -237,6 +249,18 @@ public:
         }
     }
 
+    void triggerTabAction(const int idx) {
+        const auto &list = inputPanel().candidateList();
+        if (!list) return;
+        const auto &tabbed = list->toTabbed();
+        if (!tabbed) return;
+        try {
+            tabbed->triggerTabAction(idx);
+        } catch (const std::exception &e) {
+            FCITX_WARN() << "triggerTabAction(" << idx << ") failed:" << e.what();
+        }
+    }
+
     void offsetCandidatePage(int delta) {
         if (delta == 0) {
             return;
@@ -360,8 +384,8 @@ void AndroidFrontend::updateClientPreedit(const Text &clientPreedit) {
     preeditCallback(clientPreedit);
 }
 
-void AndroidFrontend::updateInputPanel(const Text &preedit, const Text &auxUp, const Text &auxDown) {
-    inputPanelCallback(preedit, auxUp, auxDown);
+void AndroidFrontend::updateInputPanel(const Text &preedit, const Text &auxUp, const Text &auxDown, const std::vector<CandidateActionEntity> &tabs) {
+    inputPanelCallback(preedit, auxUp, auxDown, tabs);
 }
 
 void AndroidFrontend::releaseInputContext(const int uid) {
@@ -385,6 +409,11 @@ std::vector<CandidateActionEntity> AndroidFrontend::getCandidateActions(const in
 void AndroidFrontend::triggerCandidateAction(const int idx, const int actionIdx) {
     if (!activeIC_) return;
     activeIC_->triggerCandidateAction(idx, actionIdx);
+}
+
+void AndroidFrontend::triggerTabAction(const int idx) {
+    if (!activeIC_) return;
+    activeIC_->triggerTabAction(idx);
 }
 
 bool AndroidFrontend::isInputPanelEmpty() {
@@ -475,6 +504,11 @@ void AndroidFrontend::offsetCandidatePage(int delta) {
     activeIC_->offsetCandidatePage(delta);
 }
 
+void AndroidFrontend::triggerCandidateListTabAction(int id) {
+    if (!activeIC_) return;
+    activeIC_->triggerTabAction(id);
+}
+
 void AndroidFrontend::setCommitStringCallback(const CommitStringCallback &callback) {
     commitStringCallback = callback;
 }
@@ -483,7 +517,7 @@ void AndroidFrontend::setPreeditCallback(const ClientPreeditCallback &callback) 
     preeditCallback = callback;
 }
 
-void AndroidFrontend::setInputPanelAuxCallback(const InputPanelCallback &callback) {
+void AndroidFrontend::setInputPanelCallback(const InputPanelCallback &callback) {
     inputPanelCallback = callback;
 }
 

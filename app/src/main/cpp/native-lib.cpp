@@ -434,6 +434,10 @@ public:
         return p_frontend->call<fcitx::IAndroidFrontend::offsetCandidatePage>(delta);
     }
 
+    void triggerCandidateListTabAction(int id) {
+        return p_frontend->call<fcitx::IAndroidFrontend::triggerCandidateListTabAction>(id);
+    }
+
     void save() {
         p_instance->save();
     }
@@ -614,12 +618,18 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
         env->SetObjectArrayElement(vararg, 0, fcitxTextToJObject(env, clientPreedit));
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 2, *vararg);
     };
-    auto inputPanelAuxCallback = [](const fcitx::Text &preedit, const fcitx::Text &auxUp, const fcitx::Text &auxDown) {
+    auto inputPanelCallback = [](const fcitx::Text &preedit, const fcitx::Text &auxUp, const fcitx::Text &auxDown, const std::vector<CandidateActionEntity> &tabs) {
         auto env = GlobalRef->AttachEnv();
-        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(3, GlobalRef->FormattedText, nullptr));
+        auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(4, GlobalRef->Object, nullptr));
         env->SetObjectArrayElement(vararg, 0, fcitxTextToJObject(env, preedit));
         env->SetObjectArrayElement(vararg, 1, fcitxTextToJObject(env, auxUp));
         env->SetObjectArrayElement(vararg, 2, fcitxTextToJObject(env, auxDown));
+        auto tabsArray = JRef<jobjectArray>(env, env->NewObjectArray(static_cast<int>(tabs.size()), GlobalRef->CandidateAction, nullptr));
+        int i = 0;
+        for (const auto &tab: tabs) {
+            env->SetObjectArrayElement(tabsArray, i++, fcitxCandidateActionToObject(env, tab));
+        }
+        env->SetObjectArrayElement(vararg, 3, *tabsArray);
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 3, *vararg);
     };
     auto readyCallback = []() {
@@ -713,7 +723,7 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
         androidfrontend->template call<fcitx::IAndroidFrontend::setCandidateListCallback>(candidateListCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setCommitStringCallback>(commitStringCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setPreeditCallback>(preeditCallback);
-        androidfrontend->template call<fcitx::IAndroidFrontend::setInputPanelAuxCallback>(inputPanelAuxCallback);
+        androidfrontend->template call<fcitx::IAndroidFrontend::setInputPanelCallback>(inputPanelCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setKeyEventCallback>(keyEventCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setInputMethodChangeCallback>(imChangeCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setStatusAreaUpdateCallback>(statusAreaUpdateCallback);
@@ -1094,6 +1104,13 @@ JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_offsetFcitxCandidatePage(JNIEnv *env, jclass clazz, jint delta) {
     RETURN_IF_NOT_RUNNING
     Fcitx::Instance().offsetCandidatePage(delta);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_triggerFcitxCandidateListTabAction(JNIEnv *env, jclass clazz, jint id) {
+    RETURN_IF_NOT_RUNNING
+    Fcitx::Instance().triggerCandidateListTabAction(id);
 }
 
 extern "C"

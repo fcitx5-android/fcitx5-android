@@ -194,6 +194,9 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
     override suspend fun offsetCandidatePage(delta: Int) =
         withFcitxContext { offsetFcitxCandidatePage(delta) }
 
+    override suspend fun triggerCandidateListTabAction(id: Int) =
+        withFcitxContext { triggerFcitxCandidateListTabAction(id) }
+
     init {
         if (lifecycle.currentState != FcitxLifecycle.State.STOPPED)
             throw IllegalAccessException("Fcitx5 has already been created!")
@@ -377,6 +380,9 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
 
         @JvmStatic
         external fun offsetFcitxCandidatePage(delta: Int)
+
+        @JvmStatic
+        external fun triggerFcitxCandidateListTabAction(id: Int)
 
         @JvmStatic
         external fun loopOnce()
