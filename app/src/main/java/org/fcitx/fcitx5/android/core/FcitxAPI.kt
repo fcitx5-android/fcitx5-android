@@ -100,7 +100,7 @@ interface FcitxAPI {
 
     suspend fun activateAction(id: Int)
 
-    suspend fun getCandidates(offset: Int, limit: Int): Array<String>
+    suspend fun getCandidates(offset: Int, limit: Int): Array<CandidateWord>
 
     suspend fun getCandidateActions(idx: Int): Array<CandidateAction>
     suspend fun triggerCandidateAction(idx: Int, actionIdx: Int)

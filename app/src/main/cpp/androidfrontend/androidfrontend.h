@@ -23,7 +23,7 @@ public:
 
     Instance *instance() { return instance_; }
 
-    void updateCandidateList(const std::vector<std::string> &candidates, int size);
+    void updateCandidateList(const std::vector<CandidateEntity> &candidates, int total);
     void commitString(const std::string &str, int cursor);
     void updateClientPreedit(const Text &clientPreedit);
     void updateInputPanel(const Text &preedit, const Text &auxUp, const Text &auxDown);
@@ -41,8 +41,8 @@ public:
     void deactivateInputContext(int uid);
     [[nodiscard]] InputContext *activeInputContext() const;
     void setCapabilityFlags(uint64_t flag);
-    std::vector<std::string> getCandidates(int offset, int limit);
-    std::vector<CandidateAction> getCandidateActions(int idx);
+    std::vector<CandidateEntity> getCandidates(int offset, int limit);
+    std::vector<CandidateActionEntity> getCandidateActions(int idx);
     void triggerCandidateAction(int idx, int actionIdx);
     void deleteSurrounding(int before, int after);
     void showToast(const std::string &s);
@@ -96,7 +96,7 @@ private:
     std::vector<std::unique_ptr<HandlerTableEntry<EventHandler>>> eventHandlers_;
     int pagingMode_;
 
-    CandidateListCallback candidateListCallback = [](const std::vector<std::string> &, const int) {};
+    CandidateListCallback candidateListCallback = [](const std::vector<CandidateEntity> &, const int) {};
     CommitStringCallback commitStringCallback = [](const std::string &, const int) {};
     ClientPreeditCallback preeditCallback = [](const Text &) {};
     InputPanelCallback inputPanelCallback = [](const fcitx::Text &, const fcitx::Text &, const Text &) {};

@@ -177,7 +177,8 @@ jobject candidateEntityToObject(JNIEnv *env, const CandidateEntity &c) {
     auto obj = env->NewObject(GlobalRef->Candidate, GlobalRef->CandidateInit,
                               *JString(env, c.label),
                               *JString(env, c.text),
-                              *JString(env, c.comment)
+                              *JString(env, c.comment),
+                              c.spaceBetweenComment
     );
     return obj;
 }

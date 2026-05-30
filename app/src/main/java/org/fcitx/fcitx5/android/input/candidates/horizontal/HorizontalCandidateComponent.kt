@@ -30,7 +30,6 @@ import org.fcitx.fcitx5.android.input.candidates.horizontal.HorizontalCandidateM
 import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.fcitx
-import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.inputView
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.mechdancer.dependency.manager.must
@@ -40,7 +39,6 @@ import kotlin.math.max
 class HorizontalCandidateComponent :
     UniqueViewComponent<HorizontalCandidateComponent, RecyclerView>(), InputBroadcastReceiver {
 
-    private val service by manager.inputMethodService()
     private val context by manager.context()
     private val fcitx by manager.fcitx()
     private val theme by manager.theme()
@@ -98,7 +96,7 @@ class HorizontalCandidateComponent :
                     fcitx.launchOnReady { it.select(holder.idx) }
                 }
                 holder.itemView.setOnLongClickListener {
-                    inputView.showCandidateActionMenu(holder.idx, holder.text, holder.ui.root)
+                    inputView.showCandidateActionMenu(holder.idx, holder.candidate.text, holder.ui.root)
                     true
                 }
             }

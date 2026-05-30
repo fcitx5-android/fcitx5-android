@@ -179,7 +179,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
     override suspend fun activateAction(id: Int) =
         withFcitxContext { activateUserInterfaceAction(id) }
 
-    override suspend fun getCandidates(offset: Int, limit: Int): Array<String> =
+    override suspend fun getCandidates(offset: Int, limit: Int): Array<CandidateWord> =
         withFcitxContext { getFcitxCandidates(offset, limit) ?: emptyArray() }
 
     override suspend fun getCandidateActions(idx: Int): Array<CandidateAction> =
@@ -364,7 +364,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         external fun activateUserInterfaceAction(id: Int)
 
         @JvmStatic
-        external fun getFcitxCandidates(offset: Int, limit: Int): Array<String>?
+        external fun getFcitxCandidates(offset: Int, limit: Int): Array<CandidateWord>?
 
         @JvmStatic
         external fun getFcitxCandidateActions(idx: Int): Array<CandidateAction>?

@@ -6,13 +6,14 @@ package org.fcitx.fcitx5.android.input.candidates.expanded
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import org.fcitx.fcitx5.android.core.CandidateWord
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import timber.log.Timber
 
 class CandidatesPagingSource(val fcitx: FcitxConnection, val total: Int, val offset: Int) :
-    PagingSource<Int, String>() {
+    PagingSource<Int, CandidateWord>() {
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, String> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, CandidateWord> {
         // use candidate index for key, null means load from beginning (with offset)
         val startIndex = params.key ?: offset
         val pageSize = params.loadSize
@@ -30,6 +31,6 @@ class CandidatesPagingSource(val fcitx: FcitxConnection, val total: Int, val off
     }
 
     // always reload from beginning
-    override fun getRefreshKey(state: PagingState<Int, String>) = null
+    override fun getRefreshKey(state: PagingState<Int, CandidateWord>) = null
 
 }

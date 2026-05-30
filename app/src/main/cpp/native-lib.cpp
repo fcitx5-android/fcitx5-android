@@ -410,7 +410,7 @@ public:
         action->activate(ic);
     }
 
-    std::vector<std::string> getCandidates(int offset, int limit) {
+    std::vector<CandidateEntity> getCandidates(int offset, int limit) {
         return p_frontend->call<fcitx::IAndroidFrontend::getCandidates>(offset, limit);
     }
 
@@ -587,15 +587,15 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
         fcitx::registerDomain(CString(env, domain), locale_dir_char);
     }
 
-    auto candidateListCallback = [](const std::vector<std::string> &candidates, const int size) {
+    auto candidateListCallback = [](const std::vector<CandidateEntity> &candidates, const int total) {
         auto env = GlobalRef->AttachEnv();
-        auto candidatesArray = JRef<jobjectArray>(env, env->NewObjectArray(static_cast<int>(candidates.size()), GlobalRef->String, nullptr));
+        auto candidatesArray = JRef<jobjectArray>(env, env->NewObjectArray(static_cast<int>(candidates.size()), GlobalRef->Candidate, nullptr));
         int i = 0;
-        for (const auto &s: candidates) {
-            env->SetObjectArrayElement(candidatesArray, i++, JString(env, s));
+        for (const auto &candidate: candidates) {
+            env->SetObjectArrayElement(candidatesArray, i++, candidateEntityToObject(env, candidate));
         }
         auto vararg = JRef<jobjectArray>(env, env->NewObjectArray(2, GlobalRef->Object, nullptr));
-        auto candidatesCount = JRef(env, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, size));
+        auto candidatesCount = JRef(env, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, total));
         env->SetObjectArrayElement(vararg, 0, *candidatesCount);
         env->SetObjectArrayElement(vararg, 1, *candidatesArray);
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 0, *vararg);
@@ -1053,10 +1053,10 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_getFcitxCandidates(JNIEnv *env, jclass 
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     auto candidates = Fcitx::Instance().getCandidates(static_cast<int>(offset), static_cast<int>(limit));
     int size = static_cast<int>(candidates.size());
-    jobjectArray array = env->NewObjectArray(size, GlobalRef->String, nullptr);
+    jobjectArray array = env->NewObjectArray(size, GlobalRef->Candidate, nullptr);
     for (int i = 0; i < size; i++) {
-        auto str = JString(env, candidates[i]);
-        env->SetObjectArrayElement(array, i, str);
+        auto obj = JRef(env, candidateEntityToObject(env, candidates[i]));
+        env->SetObjectArrayElement(array, i, obj);
     }
     return array;
 }

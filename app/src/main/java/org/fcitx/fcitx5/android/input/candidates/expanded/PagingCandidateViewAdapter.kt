@@ -8,21 +8,22 @@ package org.fcitx.fcitx5.android.input.candidates.expanded
 import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
+import org.fcitx.fcitx5.android.core.CandidateWord
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.candidates.CandidateItemUi
 import org.fcitx.fcitx5.android.input.candidates.CandidateViewHolder
 
 open class PagingCandidateViewAdapter(val theme: Theme) :
-    PagingDataAdapter<String, CandidateViewHolder>(diffCallback) {
+    PagingDataAdapter<CandidateWord, CandidateViewHolder>(diffCallback) {
 
     companion object {
-        private val diffCallback = object : DiffUtil.ItemCallback<String>() {
-            override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
-                return oldItem === newItem
+        private val diffCallback = object : DiffUtil.ItemCallback<CandidateWord>() {
+            override fun areItemsTheSame(oldItem: CandidateWord, newItem: CandidateWord): Boolean {
+                return oldItem.text == newItem.text && oldItem.comment == newItem.comment
             }
 
-            override fun areContentsTheSame(oldItem: String, newItem: String): Boolean {
-                return oldItem.contentEquals(newItem)
+            override fun areContentsTheSame(oldItem: CandidateWord, newItem: CandidateWord): Boolean {
+                return oldItem == newItem
             }
         }
     }
@@ -40,9 +41,7 @@ open class PagingCandidateViewAdapter(val theme: Theme) :
     }
 
     override fun onBindViewHolder(holder: CandidateViewHolder, position: Int) {
-        val text = getItem(position)!!
-        holder.ui.text.text = text
-        holder.text = text
-        holder.idx = position + offset
+        val candidate = getItem(position) ?: CandidateWord.Empty
+        holder.update(position + offset, candidate)
     }
 }

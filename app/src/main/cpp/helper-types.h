@@ -112,11 +112,20 @@ public:
     std::string label;
     std::string text;
     std::string comment;
+    bool spaceBetweenComment;
 
     explicit CandidateEntity(std::string label, std::string text, std::string comment) :
             label(std::move(label)),
             text(std::move(text)),
-            comment(std::move(comment)) {}
+            comment(std::move(comment)),
+            spaceBetweenComment(true) {}
+
+    explicit CandidateEntity(std::string label, std::string text, std::string comment, bool spaceBetweenComment)
+            :
+            label(std::move(label)),
+            text(std::move(text)),
+            comment(std::move(comment)),
+            spaceBetweenComment(spaceBetweenComment) {}
 };
 
 class PagedCandidateEntity {

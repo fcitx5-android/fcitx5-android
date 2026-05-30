@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.annotation.CallSuper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexboxLayoutManager
+import org.fcitx.fcitx5.android.core.CandidateWord
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.candidates.CandidateItemUi
 import org.fcitx.fcitx5.android.input.candidates.CandidateViewHolder
@@ -25,14 +26,14 @@ open class HorizontalCandidateViewAdapter(val theme: Theme) :
         setHasStableIds(true)
     }
 
-    var candidates: Array<String> = arrayOf()
+    var candidates: Array<CandidateWord> = arrayOf()
         private set
 
     var total = -1
         private set
 
     @SuppressLint("NotifyDataSetChanged")
-    fun updateCandidates(data: Array<String>, total: Int) {
+    fun updateCandidates(data: Array<CandidateWord>, total: Int) {
         this.candidates = data
         this.total = total
         notifyDataSetChanged()
@@ -55,10 +56,12 @@ open class HorizontalCandidateViewAdapter(val theme: Theme) :
 
     @CallSuper
     override fun onBindViewHolder(holder: CandidateViewHolder, position: Int) {
-        val text = candidates[position]
-        holder.ui.text.text = text
-        holder.text = text
-        holder.idx = position
+        holder.update(position, candidates[position])
+    }
+
+    @CallSuper
+    override fun onViewRecycled(holder: CandidateViewHolder) {
+        holder.clear()
     }
 
 }

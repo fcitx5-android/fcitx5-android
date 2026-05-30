@@ -194,8 +194,8 @@ public:
         CandidateAction = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("org/fcitx/fcitx5/android/core/CandidateAction")));
         CandidateActionInit = env->GetMethodID(CandidateAction, "<init>", "(ILjava/lang/String;ZLjava/lang/String;ZZ)V");
 
-        Candidate = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("org/fcitx/fcitx5/android/core/FcitxEvent$Candidate")));
-        CandidateInit = env->GetMethodID(Candidate, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+        Candidate = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("org/fcitx/fcitx5/android/core/CandidateWord")));
+        CandidateInit = env->GetMethodID(Candidate, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
     }
 
     [[nodiscard]] JEnv AttachEnv() const { return JEnv(jvm); }

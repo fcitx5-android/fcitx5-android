@@ -145,7 +145,7 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
             fcitx.launchOnReady { it.select(holder.idx) }
         }
         holder.itemView.setOnLongClickListener {
-            inputView.showCandidateActionMenu(holder.idx, holder.text, holder.ui.root)
+            inputView.showCandidateActionMenu(holder.idx, holder.candidate.text, holder.ui.root)
             true
         }
     }
