@@ -11,6 +11,7 @@ import android.content.pm.ActivityInfo
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Color
+import android.graphics.Rect
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Bundle
@@ -598,14 +599,28 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     private var inputViewLocation = intArrayOf(0, 0)
+    private val floatingKeyboardTouchableRect = Rect()
 
     override fun onComputeInsets(outInsets: Insets) {
         if (inputDeviceMgr.isVirtualKeyboard) {
-            inputView?.keyboardView?.getLocationInWindow(inputViewLocation)
-            outInsets.apply {
-                contentTopInsets = inputViewLocation[1]
-                visibleTopInsets = inputViewLocation[1]
-                touchableInsets = Insets.TOUCHABLE_INSETS_VISIBLE
+            if (
+                inputView?.getFloatingKeyboardTouchableRect(floatingKeyboardTouchableRect) == true
+            ) {
+                val n = decorView.findViewById<View>(android.R.id.navigationBarBackground)?.height ?: 0
+                val h = decorView.height - n
+                outInsets.apply {
+                    contentTopInsets = h
+                    visibleTopInsets = floatingKeyboardTouchableRect.top
+                    touchableInsets = Insets.TOUCHABLE_INSETS_REGION
+                    touchableRegion.set(floatingKeyboardTouchableRect)
+                }
+            } else {
+                inputView?.keyboardView?.getLocationInWindow(inputViewLocation)
+                outInsets.apply {
+                    contentTopInsets = inputViewLocation[1]
+                    visibleTopInsets = inputViewLocation[1]
+                    touchableInsets = Insets.TOUCHABLE_INSETS_VISIBLE
+                }
             }
         } else {
             val n = decorView.findViewById<View>(android.R.id.navigationBarBackground)?.height ?: 0

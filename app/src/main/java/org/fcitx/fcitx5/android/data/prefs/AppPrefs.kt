@@ -35,6 +35,10 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
         val pid = int("pid", 0)
         val editorInfoInspector = bool("editor_info_inspector", false)
         val needNotifications = bool("need_notifications", true)
+        val floatingKeyboardXRatio = float("floating_keyboard_x_ratio", 0.5f)
+        val floatingKeyboardYRatio = float("floating_keyboard_y_ratio", 1f)
+        val floatingKeyboardXRatioLandscape = float("floating_keyboard_x_ratio_landscape", 0.5f)
+        val floatingKeyboardYRatioLandscape = float("floating_keyboard_y_ratio_landscape", 1f)
     }
 
     inner class Advanced : ManagedPreferenceCategory(R.string.advanced, sharedPreferences) {
@@ -133,6 +137,8 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
         val expandToolbarByDefault =
             switch(R.string.expand_toolbar_by_default, "expand_toolbar_by_default", false)
         val inlineSuggestions = switch(R.string.inline_suggestions, "inline_suggestions", true)
+        val floatingKeyboardEnabled =
+            switch(R.string.floating_keyboard, "floating_keyboard_enabled", false)
         val toolbarNumRowOnPassword =
             switch(R.string.toolbar_num_row_on_password, "toolbar_num_row_on_password", true)
         val popupOnKeyPress = switch(R.string.popup_on_key_press, "popup_on_key_press", true)
@@ -237,6 +243,26 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             )
             keyboardBottomPadding = primary
             keyboardBottomPaddingLandscape = secondary
+        }
+
+        val floatingKeyboardWidthPercent: ManagedPreference.PInt
+        val floatingKeyboardWidthPercentLandscape: ManagedPreference.PInt
+
+        init {
+            val (primary, secondary) = twinInt(
+                R.string.floating_keyboard_width,
+                R.string.portrait,
+                "floating_keyboard_width_percent",
+                80,
+                R.string.landscape,
+                "floating_keyboard_width_percent_landscape",
+                80,
+                55,
+                100,
+                "%"
+            ) { floatingKeyboardEnabled.getValue() }
+            floatingKeyboardWidthPercent = primary
+            floatingKeyboardWidthPercentLandscape = secondary
         }
 
         val horizontalCandidateStyle = enumList(

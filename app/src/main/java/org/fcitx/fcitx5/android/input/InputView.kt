@@ -7,7 +7,9 @@ package org.fcitx.fcitx5.android.input
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import android.graphics.Rect
 import android.os.Build
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowInsets
 import android.view.inputmethod.EditorInfo
@@ -15,6 +17,7 @@ import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.ImageView
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
+import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
 import androidx.core.view.updateLayoutParams
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.CapabilityFlags
@@ -63,6 +66,10 @@ import splitties.views.dsl.core.view
 import splitties.views.dsl.core.withTheme
 import splitties.views.dsl.core.wrapContent
 import splitties.views.imageDrawable
+import splitties.views.imageResource
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.roundToInt
 
 @SuppressLint("ViewConstructor")
 class InputView(
@@ -70,6 +77,13 @@ class InputView(
     fcitx: FcitxConnection,
     theme: Theme
 ) : BaseInputView(service, fcitx, theme) {
+
+    companion object {
+        private const val MIN_FLOATING_KEYBOARD_WIDTH_PERCENT = 55
+        private const val MAX_FLOATING_KEYBOARD_WIDTH_PERCENT = 100
+        private const val FLOATING_DRAG_HANDLE_HEIGHT_DP = 24
+        private const val FLOATING_RESIZE_HANDLE_SIZE_DP = 40
+    }
 
     private val keyBorder by ThemeManager.prefs.keyBorder
 
@@ -90,6 +104,12 @@ class InputView(
         // height as keyboardBottomPadding
         // bottomMargin as WindowInsets (Navigation Bar) offset
         setOnClickListener(placeholderOnClickListener)
+    }
+    private val resizeHandle = imageView {
+        imageResource = R.drawable.ic_baseline_drag_handle_24
+        scaleType = ImageView.ScaleType.CENTER
+        alpha = 0.72f
+        contentDescription = context.getString(R.string.resize_floating_keyboard)
     }
 
     private val scope = DynamicScope()
@@ -129,23 +149,30 @@ class InputView(
     }
 
     private val keyboardPrefs = AppPrefs.getInstance().keyboard
+    private val internalPrefs = AppPrefs.getInstance().internal
 
     private val focusChangeResetKeyboard by keyboardPrefs.focusChangeResetKeyboard
 
+    private var floatingKeyboardEnabled by keyboardPrefs.floatingKeyboardEnabled
     private val keyboardHeightPercent = keyboardPrefs.keyboardHeightPercent
     private val keyboardHeightPercentLandscape = keyboardPrefs.keyboardHeightPercentLandscape
     private val keyboardSidePadding = keyboardPrefs.keyboardSidePadding
     private val keyboardSidePaddingLandscape = keyboardPrefs.keyboardSidePaddingLandscape
     private val keyboardBottomPadding = keyboardPrefs.keyboardBottomPadding
     private val keyboardBottomPaddingLandscape = keyboardPrefs.keyboardBottomPaddingLandscape
+    private val floatingKeyboardWidthPercent = keyboardPrefs.floatingKeyboardWidthPercent
+    private val floatingKeyboardWidthPercentLandscape = keyboardPrefs.floatingKeyboardWidthPercentLandscape
 
     private val keyboardSizePrefs = listOf(
+        keyboardPrefs.floatingKeyboardEnabled,
         keyboardHeightPercent,
         keyboardHeightPercentLandscape,
         keyboardSidePadding,
         keyboardSidePaddingLandscape,
         keyboardBottomPadding,
         keyboardBottomPaddingLandscape,
+        floatingKeyboardWidthPercent,
+        floatingKeyboardWidthPercentLandscape,
     )
 
     private val keyboardHeightPx: Int
@@ -154,7 +181,11 @@ class InputView(
                 Configuration.ORIENTATION_LANDSCAPE -> keyboardHeightPercentLandscape
                 else -> keyboardHeightPercent
             }.getValue()
-            return resources.displayMetrics.heightPixels * percent / 100
+            return (if (floatingKeyboardEnabled) {
+                height.takeIf { it > 0 } ?: resources.displayMetrics.heightPixels
+            } else {
+                resources.displayMetrics.heightPixels
+            }) * percent / 100
         }
 
     private val keyboardSidePaddingPx: Int
@@ -175,14 +206,108 @@ class InputView(
             return dp(value)
         }
 
+    private val floatingKeyboardWidthPx: Int
+        get() {
+            val parentWidth = width.takeIf { it > 0 } ?: resources.displayMetrics.widthPixels
+            return parentWidth * activeFloatingKeyboardWidthPercent.getValue() / 100
+        }
+
+    private val floatingDragHandleHeightPx: Int
+        get() = dp(FLOATING_DRAG_HANDLE_HEIGHT_DP)
+
+    private val activeFloatingKeyboardWidthPercent
+        get() = when (resources.configuration.orientation) {
+            Configuration.ORIENTATION_LANDSCAPE -> floatingKeyboardWidthPercentLandscape
+            else -> floatingKeyboardWidthPercent
+        }
+
+    private val activeFloatingKeyboardXRatio
+        get() = when (resources.configuration.orientation) {
+            Configuration.ORIENTATION_LANDSCAPE -> internalPrefs.floatingKeyboardXRatioLandscape
+            else -> internalPrefs.floatingKeyboardXRatio
+        }
+
+    private val activeFloatingKeyboardYRatio
+        get() = when (resources.configuration.orientation) {
+            Configuration.ORIENTATION_LANDSCAPE -> internalPrefs.floatingKeyboardYRatioLandscape
+            else -> internalPrefs.floatingKeyboardYRatio
+        }
+
+    private var navBarBottomInset = 0
+    private var floatingKeyboardX = 0f
+    private var floatingKeyboardY = 0f
+    private var floatingDragStartRawX = 0f
+    private var floatingDragStartRawY = 0f
+    private var floatingDragStartKeyboardX = 0f
+    private var floatingDragStartKeyboardY = 0f
+    private var floatingResizeStartWidth = 0
+    private val inputViewLocation = intArrayOf(0, 0)
+
     @Keep
     private val onKeyboardSizeChangeListener = ManagedPreferenceProvider.OnChangeListener { key ->
-        if (keyboardSizePrefs.any { it.key == key }) {
+        if (keyboardPrefs.floatingKeyboardEnabled.key == key) {
+            applyKeyboardMode()
+        } else if (keyboardSizePrefs.any { it.key == key }) {
             updateKeyboardSize()
         }
     }
 
     val keyboardView: View
+
+    private val floatingKeyboardDragListener = OnTouchListener { _, event ->
+        if (!floatingKeyboardEnabled) return@OnTouchListener false
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                floatingDragStartRawX = event.rawX
+                floatingDragStartRawY = event.rawY
+                floatingDragStartKeyboardX = floatingKeyboardX
+                floatingDragStartKeyboardY = floatingKeyboardY
+                true
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                updateFloatingKeyboardPosition(
+                    floatingDragStartKeyboardX + event.rawX - floatingDragStartRawX,
+                    floatingDragStartKeyboardY + event.rawY - floatingDragStartRawY,
+                    persist = true
+                )
+                true
+            }
+
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> true
+            else -> false
+        }
+    }
+
+    private val floatingKeyboardResizeListener = OnTouchListener { _, event ->
+        if (!floatingKeyboardEnabled) return@OnTouchListener false
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                floatingDragStartRawX = event.rawX
+                floatingResizeStartWidth = keyboardView.width
+                true
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                val parentWidth = width.takeIf { it > 0 } ?: return@OnTouchListener true
+                val delta = if (layoutDirection == LAYOUT_DIRECTION_RTL) {
+                    floatingDragStartRawX - event.rawX
+                } else {
+                    event.rawX - floatingDragStartRawX
+                }
+                val newWidth = (floatingResizeStartWidth + delta).roundToInt()
+                val percent = (newWidth * 100f / parentWidth)
+                    .roundToInt()
+                    .coerceIn(MIN_FLOATING_KEYBOARD_WIDTH_PERCENT, MAX_FLOATING_KEYBOARD_WIDTH_PERCENT)
+                activeFloatingKeyboardWidthPercent.setValue(percent)
+                updateKeyboardSize()
+                true
+            }
+
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> true
+            else -> false
+        }
+    }
 
     init {
         // MUST call before any operation
@@ -240,7 +365,14 @@ class InputView(
                 endToStartOf(rightPaddingSpace)
                 bottomOfParent()
             })
+            add(resizeHandle, lParams(dp(FLOATING_RESIZE_HANDLE_SIZE_DP), dp(FLOATING_RESIZE_HANDLE_SIZE_DP)) {
+                endOfParent()
+                bottomOfParent()
+            })
         }
+
+        bottomPaddingSpace.setOnTouchListener(floatingKeyboardDragListener)
+        resizeHandle.setOnTouchListener(floatingKeyboardResizeListener)
 
         updateKeyboardSize()
 
@@ -248,10 +380,18 @@ class InputView(
             above(keyboardView)
             centerHorizontally()
         })
-        add(keyboardView, lParams(matchParent, wrapContent) {
-            centerHorizontally()
-            bottomOfParent()
-        })
+        if (floatingKeyboardEnabled) {
+            add(keyboardView, lParams(floatingKeyboardWidthPx, wrapContent) {
+                startOfParent()
+                topOfParent()
+            })
+        } else {
+            add(keyboardView, lParams(matchParent, wrapContent) {
+                centerHorizontally()
+                bottomOfParent()
+            })
+        }
+        post { applyKeyboardMode() }
         add(popup.root, lParams(matchParent, matchParent) {
             centerVertically()
             centerHorizontally()
@@ -265,13 +405,34 @@ class InputView(
             height = keyboardHeightPx
         }
         bottomPaddingSpace.updateLayoutParams {
-            height = keyboardBottomPaddingPx
+            height = if (floatingKeyboardEnabled) {
+                max(keyboardBottomPaddingPx, floatingDragHandleHeightPx)
+            } else {
+                keyboardBottomPaddingPx
+            }
         }
         val sidePadding = keyboardSidePaddingPx
-        if (sidePadding == 0) {
+        if (floatingKeyboardEnabled) {
+            leftPaddingSpace.visibility = GONE
+            rightPaddingSpace.visibility = GONE
+            resizeHandle.visibility = VISIBLE
+            windowManager.view.updateLayoutParams<LayoutParams> {
+                startToEnd = unset
+                endToStart = unset
+                startOfParent()
+                endOfParent()
+            }
+            bottomPaddingSpace.updateLayoutParams<LayoutParams> {
+                startToEnd = unset
+                endToStart = unset
+                startOfParent()
+                endOfParent()
+            }
+        } else if (sidePadding == 0) {
             // hide side padding space views when unnecessary
             leftPaddingSpace.visibility = GONE
             rightPaddingSpace.visibility = GONE
+            resizeHandle.visibility = GONE
             windowManager.view.updateLayoutParams<LayoutParams> {
                 startToEnd = unset
                 endToStart = unset
@@ -281,6 +442,7 @@ class InputView(
         } else {
             leftPaddingSpace.visibility = VISIBLE
             rightPaddingSpace.visibility = VISIBLE
+            resizeHandle.visibility = GONE
             leftPaddingSpace.updateLayoutParams {
                 width = sidePadding
             }
@@ -294,16 +456,116 @@ class InputView(
                 endToStartOf(rightPaddingSpace)
             }
         }
-        preedit.ui.root.setPadding(sidePadding, 0, sidePadding, 0)
-        kawaiiBar.view.setPadding(sidePadding, 0, sidePadding, 0)
+        val inputSidePadding = if (floatingKeyboardEnabled) 0 else sidePadding
+        preedit.ui.root.setPadding(inputSidePadding, 0, inputSidePadding, 0)
+        kawaiiBar.view.setPadding(inputSidePadding, 0, inputSidePadding, 0)
+        if (floatingKeyboardEnabled) {
+            if (keyboardView.parent != null) {
+                keyboardView.updateLayoutParams<LayoutParams> {
+                    width = floatingKeyboardWidthPx
+                }
+            }
+            keyboardView.post {
+                restoreFloatingKeyboardPosition()
+            }
+        }
+        service.window.window?.decorView?.requestLayout()
     }
 
     override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {
+        navBarBottomInset = getNavBarBottomInset(insets)
         bottomPaddingSpace.updateLayoutParams<LayoutParams> {
-            bottomMargin = getNavBarBottomInset(insets)
+            bottomMargin = navBarBottomInset
+        }
+        if (floatingKeyboardEnabled) {
+            keyboardView.post {
+                restoreFloatingKeyboardPosition()
+            }
         }
         return insets
     }
+
+    private fun applyKeyboardMode() {
+        keyboardView.updateLayoutParams<LayoutParams> {
+            if (floatingKeyboardEnabled) {
+                width = floatingKeyboardWidthPx
+                height = wrapContent
+                startToStart = PARENT_ID
+                topToTop = PARENT_ID
+                endToEnd = unset
+                bottomToBottom = unset
+            } else {
+                width = matchParent
+                height = wrapContent
+                startToStart = unset
+                topToTop = unset
+                endToEnd = unset
+                bottomToBottom = PARENT_ID
+                centerHorizontally()
+            }
+        }
+        keyboardView.translationX = 0f
+        keyboardView.translationY = 0f
+        updateKeyboardSize()
+        kawaiiBar.updateFloatingKeyboardButton()
+        if (floatingKeyboardEnabled) {
+            keyboardView.post { restoreFloatingKeyboardPosition() }
+        }
+    }
+
+    private fun restoreFloatingKeyboardPosition() {
+        if (!floatingKeyboardEnabled || width <= 0 || keyboardView.width <= 0) return
+        val maxX = max(0, width - keyboardView.width).toFloat()
+        val maxY = max(0, height - navBarBottomInset - keyboardView.height).toFloat()
+        val x = maxX * activeFloatingKeyboardXRatio.getValue().coerceIn(0f, 1f)
+        val y = maxY * activeFloatingKeyboardYRatio.getValue().coerceIn(0f, 1f)
+        updateFloatingKeyboardPosition(x, y)
+    }
+
+    private fun updateFloatingKeyboardPosition(x: Float, y: Float, persist: Boolean = false) {
+        if (!floatingKeyboardEnabled) return
+        val maxX = max(0, width - keyboardView.width).toFloat()
+        val maxY = max(0, height - navBarBottomInset - keyboardView.height).toFloat()
+        floatingKeyboardX = min(max(x, 0f), maxX)
+        floatingKeyboardY = min(max(y, 0f), maxY)
+        keyboardView.translationX = floatingKeyboardX
+        keyboardView.translationY = floatingKeyboardY
+        if (persist) {
+            activeFloatingKeyboardXRatio.setValue(if (maxX > 0f) floatingKeyboardX / maxX else 0.5f)
+            activeFloatingKeyboardYRatio.setValue(if (maxY > 0f) floatingKeyboardY / maxY else 1f)
+        }
+        service.window.window?.decorView?.requestLayout()
+    }
+
+    fun getFloatingKeyboardTouchableRect(outRect: Rect): Boolean {
+        if (!floatingKeyboardEnabled || keyboardView.width <= 0 || keyboardView.height <= 0) {
+            return false
+        }
+        keyboardView.getLocationInWindow(inputViewLocation)
+        outRect.set(
+            inputViewLocation[0],
+            inputViewLocation[1],
+            inputViewLocation[0] + keyboardView.width,
+            inputViewLocation[1] + keyboardView.height
+        )
+        return true
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (floatingKeyboardEnabled) {
+            keyboardView.post {
+                restoreFloatingKeyboardPosition()
+            }
+        }
+    }
+
+    fun toggleFloatingKeyboard() {
+        floatingKeyboardEnabled = !floatingKeyboardEnabled
+        applyKeyboardMode()
+    }
+
+    fun isFloatingKeyboardEnabled() = floatingKeyboardEnabled
 
     /**
      * called when [InputView] is about to show, or restart

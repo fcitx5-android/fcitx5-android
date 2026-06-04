@@ -55,6 +55,7 @@ import org.fcitx.fcitx5.android.input.candidates.horizontal.HorizontalCandidateC
 import org.fcitx.fcitx5.android.input.clipboard.ClipboardWindow
 import org.fcitx.fcitx5.android.input.dependency.UniqueViewComponent
 import org.fcitx.fcitx5.android.input.dependency.context
+import org.fcitx.fcitx5.android.input.dependency.inputView
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.editing.TextEditingWindow
@@ -92,6 +93,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     private val theme by manager.theme()
     private val service by manager.inputMethodService()
     private val windowManager: InputWindowManager by manager.must()
+    private val inputView by manager.inputView()
     private val horizontalCandidate: HorizontalCandidateComponent by manager.must()
     private val commonKeyActionListener: CommonKeyActionListener by manager.must()
     private val popup: PopupComponent by manager.must()
@@ -313,6 +315,10 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                 clipboardButton.setOnClickListener {
                     windowManager.attachWindow(ClipboardWindow())
                 }
+                floatingKeyboardButton.setOnClickListener {
+                    inputView.toggleFloatingKeyboard()
+                    updateFloatingKeyboardButton()
+                }
                 moreButton.setOnClickListener {
                     windowManager.attachWindow(StatusAreaWindow())
                 }
@@ -339,6 +345,18 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                     numberRowState = NumberRowState.ForceHide
                     evalIdleUiState(fromUser = true)
                 }
+            }
+        }
+    }
+
+    fun updateFloatingKeyboardButton() {
+        idleUi.buttonsUi.floatingKeyboardButton.apply {
+            if (inputView.isFloatingKeyboardEnabled()) {
+                setIcon(R.drawable.ic_baseline_keyboard_24)
+                contentDescription = context.getString(R.string.dock_keyboard)
+            } else {
+                setIcon(R.drawable.ic_baseline_open_in_full_24)
+                contentDescription = context.getString(R.string.float_keyboard)
             }
         }
     }
@@ -458,6 +476,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             shouldShowVoiceInput,
             if (shouldShowVoiceInput) switchToVoiceInputCallback else hideKeyboardCallback
         )
+        updateFloatingKeyboardButton()
         evalIdleUiState()
     }
 
