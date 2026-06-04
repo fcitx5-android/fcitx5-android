@@ -220,6 +220,8 @@
     <string name="main_program">メインプログラム</string>
     <string name="edit_theme">テーマを編集</string>
     <string name="show_voice_input_button">音声入力ボタンを表示する</string>
+    <string name="calculator_candidates">計算機の候補</string>
+    <string name="calculator_candidates_summary">数字キーボードで式を入力すると計算結果が候補として表示されます</string>
     <string name="fcitx_daemon">Fcitxデーモン</string>
     <string name="restarting_fcitx">Fcitxを再起動中</string>
     <string name="plugin_needs_reload">プラグインの変更を除去しました。ここをクリックして再読み込みします</string>

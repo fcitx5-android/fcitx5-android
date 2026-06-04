@@ -84,6 +84,16 @@ class HorizontalCandidateComponent :
         )
     }
 
+    var calculatorMode: Boolean = false
+        set(value) {
+            field = value
+            if (!value) {
+                onCalculatorCandidateClick = null
+            }
+        }
+
+    var onCalculatorCandidateClick: ((String) -> Unit)? = null
+
     val adapter: HorizontalCandidateViewAdapter by lazy {
         object : HorizontalCandidateViewAdapter(theme) {
             override fun onBindViewHolder(holder: CandidateViewHolder, position: Int) {
@@ -92,12 +102,19 @@ class HorizontalCandidateComponent :
                     minWidth = layoutMinWidth
                     flexGrow = layoutFlexGrow
                 }
-                holder.itemView.setOnClickListener {
-                    fcitx.launchOnReady { it.select(holder.idx) }
-                }
-                holder.itemView.setOnLongClickListener {
-                    inputView.showCandidateActionMenu(holder.idx, holder.candidate.text, holder.ui.root)
-                    true
+                if (calculatorMode) {
+                    holder.itemView.setOnClickListener {
+                        onCalculatorCandidateClick?.invoke(holder.candidate.text)
+                    }
+                    holder.itemView.setOnLongClickListener(null)
+                } else {
+                    holder.itemView.setOnClickListener {
+                        fcitx.launchOnReady { it.select(holder.idx) }
+                    }
+                    holder.itemView.setOnLongClickListener {
+                        inputView.showCandidateActionMenu(holder.idx, holder.candidate.text, holder.ui.root)
+                        true
+                    }
                 }
             }
 
@@ -167,6 +184,7 @@ class HorizontalCandidateComponent :
     }
 
     override fun onCandidateUpdate(data: FcitxEvent.CandidateListEvent.Data) {
+        if (calculatorMode) return
         val candidates = data.candidates
         val total = data.total
         val maxSpanCount = maxSpanCountPref.getValue()

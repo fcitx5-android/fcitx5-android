@@ -110,6 +110,8 @@
     <string name="main_program">programa principal</string>
     <string name="edit_theme">Editar tema</string>
     <string name="show_voice_input_button">Mostrar botón de entrada por voz</string>
+    <string name="calculator_candidates">Candidatos de calculadora</string>
+    <string name="calculator_candidates_summary">Mostrar resultados de cálculos como candidatos en el teclado numérico</string>
     <string name="no_plugins">No hay ningún complemento disponible</string>
     <string name="whether_reset_switch_preference">¿Quiere restablecer la preferencia a su valor predeterminado?</string>
     <string name="enabled">Activado</string>

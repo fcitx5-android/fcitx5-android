@@ -64,6 +64,12 @@ class CommonKeyActionListener :
 
     private var backspaceSwipeState = Stopped
 
+    /**
+     * Called when a [SymAction] is received before forwarding to fcitx.
+     * Return true to consume the action (prevents forwarding).
+     */
+    var onSymAction: ((sym: Int) -> Boolean)? = null
+
     // there should be a new fcitx API for this
     private suspend fun FcitxAPI.commitAndReset() {
         if (inputMethodEntryCached.languageCode.startsWith("zh")) {
@@ -93,8 +99,14 @@ class CommonKeyActionListener :
                 is FcitxKeyAction -> service.postFcitxJob {
                     sendKey(action.act, action.states.states, action.code)
                 }
-                is SymAction -> service.postFcitxJob {
-                    sendKey(action.sym, action.states)
+                is SymAction -> {
+                    if (onSymAction?.invoke(action.sym.sym) == true) {
+                        // consumed by calculator engine, do nothing
+                    } else {
+                        service.postFcitxJob {
+                            sendKey(action.sym, action.states)
+                        }
+                    }
                 }
                 is CommitAction -> service.postFcitxJob {
                     commitAndReset()

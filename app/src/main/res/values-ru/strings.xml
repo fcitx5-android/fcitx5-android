@@ -225,6 +225,8 @@
     <string name="main_program">основная программа</string>
     <string name="edit_theme">Изменить тему</string>
     <string name="show_voice_input_button">Показывать кнопку голосового ввода</string>
+    <string name="calculator_candidates">Кандидаты калькулятора</string>
+    <string name="calculator_candidates_summary">Показывать результаты вычислений в виде кандидатов на цифровой клавиатуре</string>
     <string name="fcitx_daemon">Демон Fcitx</string>
     <string name="restarting_fcitx">Перезапуск Fcitx</string>
     <string name="plugin_needs_reload">Обнаружены изменения плагина, нажмите здесь, чтобы перезагрузить</string>

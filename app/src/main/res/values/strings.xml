@@ -225,6 +225,8 @@
     <string name="main_program">main program</string>
     <string name="edit_theme">Edit Theme</string>
     <string name="show_voice_input_button">Show voice input button</string>
+    <string name="calculator_candidates">Calculator candidates</string>
+    <string name="calculator_candidates_summary">Show calculation results as candidates on the number keyboard</string>
     <string name="fcitx_daemon">Fcitx Daemon</string>
     <string name="restarting_fcitx">Restarting Fcitx</string>
     <string name="plugin_needs_reload">Plugin changes detected, click here to reload</string>

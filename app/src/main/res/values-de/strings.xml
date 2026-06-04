@@ -154,6 +154,8 @@
     <string name="num_items_deleted">%1$d Element(e) gelöscht</string>
     <string name="plugins">Plugins</string>
     <string name="show_voice_input_button">Taste Spracheingabe zeigen</string>
+    <string name="calculator_candidates">Taschenrechner-Kandidaten</string>
+    <string name="calculator_candidates_summary">Ergebnisse als Kandidaten auf der Nummerntastatur anzeigen</string>
     <string name="fcitx_daemon">Fcitx Daemon</string>
     <string name="removed_n_items"> %1$d Element(e) entfernt</string>
     <string name="whether_reset_switch_preference">Wollen Sie diese Einstellung auf den Standard zurücksetzen?</string>

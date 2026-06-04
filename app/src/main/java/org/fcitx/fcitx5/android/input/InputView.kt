@@ -17,17 +17,21 @@ import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.core.view.updateLayoutParams
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.CandidateWord
 import org.fcitx.fcitx5.android.core.CapabilityFlags
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceProvider
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcaster
+import org.fcitx.fcitx5.android.input.calculator.CalculatorEngine
 import org.fcitx.fcitx5.android.input.broadcast.PreeditEmptyStateComponent
+import timber.log.Timber
 import org.fcitx.fcitx5.android.input.broadcast.PunctuationComponent
 import org.fcitx.fcitx5.android.input.broadcast.ReturnKeyDrawableComponent
 import org.fcitx.fcitx5.android.input.candidates.horizontal.HorizontalCandidateComponent
@@ -105,6 +109,7 @@ class InputView(
     private val kawaiiBar = KawaiiBarComponent()
     private val horizontalCandidate = HorizontalCandidateComponent()
     private val keyboardWindow = KeyboardWindow()
+    private val calculatorEngine = CalculatorEngine()
     private val symbolPicker = symbolPicker()
     private val emojiPicker = emojiPicker()
     private val emoticonPicker = emoticonPicker()
@@ -131,6 +136,21 @@ class InputView(
     private val keyboardPrefs = AppPrefs.getInstance().keyboard
 
     private val focusChangeResetKeyboard by keyboardPrefs.focusChangeResetKeyboard
+    private var calculatorCandidates by keyboardPrefs.calculatorCandidates
+
+    @Keep
+    private val onCalculatorCandidatesChangeListener =
+        ManagedPreference.OnChangeListener<Boolean> { _, value ->
+            if (!value && calculatorEngine.hasExpression) {
+                calculatorEngine.reset()
+                horizontalCandidate.calculatorMode = false
+                horizontalCandidate.adapter.updateCandidates(emptyArray(), 0)
+                broadcaster.onPreeditEmptyStateUpdate(true)
+                broadcaster.onCandidateUpdate(
+                    FcitxEvent.CandidateListEvent.Data(0, emptyArray())
+                )
+            }
+        }
 
     private val keyboardHeightPercent = keyboardPrefs.keyboardHeightPercent
     private val keyboardHeightPercentLandscape = keyboardPrefs.keyboardHeightPercentLandscape
@@ -187,6 +207,62 @@ class InputView(
     init {
         // MUST call before any operation
         setupScope()
+
+        commonKeyActionListener.onSymAction = fun(sym: Int): Boolean {
+            if (!calculatorCandidates) return false
+            Timber.d("Calculator: onSymAction called sym=0x%04x, isNumberKeyboard=%s, hasExpression=%s",
+                sym, keyboardWindow.isNumberKeyboardActive, calculatorEngine.hasExpression)
+            if (!keyboardWindow.isNumberKeyboardActive) {
+                if (calculatorEngine.hasExpression) {
+                    Timber.d("Calculator: resetting stale expression")
+                    calculatorEngine.reset()
+                }
+                return false
+            }
+            val canHandle = calculatorEngine.canHandleSym(sym)
+            val result = canHandle && calculatorEngine.handleSym(sym)
+            Timber.d("Calculator: canHandle=%s, handleSym result=%s, expression=%s",
+                canHandle, result, calculatorEngine.currentExpression)
+            return result
+        }
+
+        calculatorEngine.onCandidatesChanged = { candidates, expression ->
+            Timber.d("Calculator: onCandidatesChanged candidates=%d expression=%s mode=%s",
+                candidates.size, expression, horizontalCandidate.calculatorMode)
+            if (expression.isNotEmpty()) {
+                service.currentInputConnection?.setComposingText(expression, 1)
+            } else {
+                service.currentInputConnection?.finishComposingText()
+            }
+            if (candidates.isNotEmpty()) {
+                horizontalCandidate.calculatorMode = true
+                horizontalCandidate.onCalculatorCandidateClick = { text ->
+                    Timber.d("Calculator: candidate clicked text=%s", text)
+                    service.currentInputConnection?.commitText(text, 1)
+                    calculatorEngine.reset()
+                }
+                horizontalCandidate.adapter.updateCandidates(candidates.toTypedArray(), candidates.size)
+            } else {
+                if (horizontalCandidate.calculatorMode) {
+                    horizontalCandidate.calculatorMode = false
+                    horizontalCandidate.adapter.updateCandidates(emptyArray(), 0)
+                }
+            }
+            // trigger bar state machine transition to show/hide candidate view
+            broadcaster.onPreeditEmptyStateUpdate(expression.isEmpty())
+            broadcaster.onCandidateUpdate(
+                FcitxEvent.CandidateListEvent.Data(candidates.size, candidates.toTypedArray())
+            )
+        }
+
+        calculatorEngine.onCommitResult = { result ->
+            Timber.d("Calculator: onCommitResult result=%s", result)
+            service.currentInputConnection?.commitText(result, 1)
+            horizontalCandidate.calculatorMode = false
+            horizontalCandidate.adapter.updateCandidates(emptyArray(), 0)
+            broadcaster.onPreeditEmptyStateUpdate(true)
+            broadcaster.onCandidateUpdate(FcitxEvent.CandidateListEvent.Data(0, emptyArray()))
+        }
 
         // restore punctuation mapping in case of InputView recreation
         fcitx.launchOnReady {
@@ -258,6 +334,7 @@ class InputView(
         })
 
         keyboardPrefs.registerOnChangeListener(onKeyboardSizeChangeListener)
+        keyboardPrefs.calculatorCandidates.registerOnChangeListener(onCalculatorCandidatesChangeListener)
     }
 
     private fun updateKeyboardSize() {
@@ -309,6 +386,11 @@ class InputView(
      * called when [InputView] is about to show, or restart
      */
     fun startInput(info: EditorInfo, capFlags: CapabilityFlags, restarting: Boolean = false) {
+        Timber.d("Calculator: startInput inputType=0x%08x", info.inputType)
+        calculatorEngine.reset()
+        horizontalCandidate.calculatorMode = false
+        broadcaster.onPreeditEmptyStateUpdate(true)
+        broadcaster.onCandidateUpdate(FcitxEvent.CandidateListEvent.Data(0, emptyArray()))
         broadcaster.onStartInput(info, capFlags)
         returnKeyDrawable.updateDrawableOnEditorInfo(info)
         if (focusChangeResetKeyboard || !restarting) {
@@ -330,6 +412,12 @@ class InputView(
     }
 
     override fun handleFcitxEvent(it: FcitxEvent<*>) {
+        if (calculatorEngine.hasExpression && !keyboardWindow.isNumberKeyboardActive) {
+            Timber.d("Calculator: stale expression reset on fcitx event")
+            calculatorEngine.reset()
+            broadcaster.onPreeditEmptyStateUpdate(true)
+            broadcaster.onCandidateUpdate(FcitxEvent.CandidateListEvent.Data(0, emptyArray()))
+        }
         when (it) {
             is FcitxEvent.CandidateListEvent -> {
                 broadcaster.onCandidateUpdate(it.data)
@@ -364,6 +452,7 @@ class InputView(
 
     override fun onDetachedFromWindow() {
         keyboardPrefs.unregisterOnChangeListener(onKeyboardSizeChangeListener)
+        keyboardPrefs.calculatorCandidates.unregisterOnChangeListener(onCalculatorCandidatesChangeListener)
         // clear DynamicScope, implies that InputView should not be attached again after detached.
         scope.clear()
         super.onDetachedFromWindow()

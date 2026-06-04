@@ -91,4 +91,6 @@
     <string name="quickphrase_phrase">구문</string>
     <string name="reload_config">구성 새로고침</string>
     <string name="input_method_options">입력기 옵션</string>
+    <string name="calculator_candidates">계산기 후보</string>
+    <string name="calculator_candidates_summary">숫자 키보드에서 표현식을 입력할 때 계산 결과를 후보로 표시</string>
     </resources>
