@@ -11,7 +11,6 @@ import androidx.core.content.ContextCompat
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.FcitxApplication
@@ -485,7 +484,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
 
     @Keep
     private val onClipboardUpdate = ClipboardManager.OnClipboardUpdateListener {
-        lifecycle.lifecycleScope.launch { setClipboard(it.text, it.sensitive) }
+        lifecycle.launchWhenReady { setClipboard(it.text, it.sensitive) }
     }
 
     private fun computeAddonGraph() = runBlocking {
@@ -506,7 +505,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
             // this method runs in same thread with `startupFcitx`
             // block it will also block fcitx
             onFirstRun()
-            unregisterFcitxEventHandler(::handleFcitxEvent)
+            unregisterFcitxEventHandler(::handleFirstRunReadyEvent)
         }
     }
 
