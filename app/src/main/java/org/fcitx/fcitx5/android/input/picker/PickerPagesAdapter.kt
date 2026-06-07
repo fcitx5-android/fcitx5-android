@@ -47,7 +47,7 @@ class PickerPagesAdapter(
             val list = if (textPaint != null) {
                 arr.filter { textPaint.hasGlyph(it) }
             } else {
-                arr.toList()
+                arr.asList()
             }
             val chunks = list.chunked(density.pageSize)
             categories.add(cat to IntRange(pages.size, pages.size + chunks.size - 1))
