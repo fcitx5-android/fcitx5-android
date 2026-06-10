@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.data.InputFeedbacks
@@ -26,6 +27,7 @@ import org.fcitx.fcitx5.android.data.theme.ThemePrefs
 import org.fcitx.fcitx5.android.utils.item
 import org.fcitx.fcitx5.android.utils.navbarFrameHeight
 import splitties.resources.styledColor
+import splitties.views.dsl.core.withTheme
 import kotlin.math.max
 
 abstract class BaseInputView(
@@ -71,6 +73,8 @@ abstract class BaseInputView(
 
     private var candidateActionMenu: PopupMenu? = null
 
+    val themedContext = context.withTheme(R.style.Theme_InputViewTheme)
+
     fun showCandidateActionMenu(idx: Int, text: String, view: View) {
         candidateActionMenu?.dismiss()
         candidateActionMenu = null
@@ -78,7 +82,7 @@ abstract class BaseInputView(
             val actions = fcitx.runOnReady { getCandidateActions(idx) }
             if (actions.isEmpty()) return@launch
             InputFeedbacks.hapticFeedback(view, longPress = true)
-            candidateActionMenu = PopupMenu(context, view).apply {
+            candidateActionMenu = PopupMenu(themedContext, view).apply {
                 menu.add(buildSpannedString {
                     bold {
                         color(context.styledColor(android.R.attr.colorAccent)) {
