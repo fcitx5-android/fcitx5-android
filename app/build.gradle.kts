@@ -113,6 +113,7 @@ dependencies {
     implementation(libs.imagecropper)
     implementation(libs.flexbox)
     implementation(libs.dependency)
+    implementation(libs.soundwavelib)
     implementation(libs.timber)
     implementation(libs.splitties.bitflags)
     implementation(libs.splitties.dimensions)

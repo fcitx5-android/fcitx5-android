@@ -901,7 +901,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     // those events need to be filtered.
     // because of https://android.googlesource.com/platform/frameworks/base.git/+/refs/tags/android-11.0.0_r45/core/java/android/view/inputmethod/BaseInputConnection.java#851
     // it's not possible to set cursor inside composing text
-    private fun updateComposingText(text: FormattedText) {
+    fun updateComposingText(text: FormattedText) {
         val ic = currentInputConnection ?: return
         val lastSelection = selection.latest
         ic.beginBatchEdit()

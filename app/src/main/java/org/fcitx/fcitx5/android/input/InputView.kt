@@ -37,6 +37,7 @@ import org.fcitx.fcitx5.android.input.picker.emoticonPicker
 import org.fcitx.fcitx5.android.input.picker.symbolPicker
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
+import org.fcitx.fcitx5.android.input.voice.VoiceInputComponent
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.unset
 import org.mechdancer.dependency.DynamicScope
@@ -105,6 +106,7 @@ class InputView(
     private val symbolPicker = symbolPicker()
     private val emojiPicker = emojiPicker()
     private val emoticonPicker = emoticonPicker()
+    private val voiceInput = VoiceInputComponent()
 
     private fun setupScope() {
         scope += this@InputView.wrapToUniqueComponent()
@@ -122,6 +124,7 @@ class InputView(
         scope += windowManager
         scope += kawaiiBar
         scope += horizontalCandidate
+        scope += voiceInput
         broadcaster.onScopeSetupFinished(scope)
     }
 
