@@ -1,0 +1,11 @@
+{
+    "uniqueId": "fcitx/mozc",
+    "artifactVersion": "2.30.5618.101",
+    "description": "Mozc for Fcitx",
+    "name": "fcitx/mozc",
+    "website": "https://github.com/fcitx/mozc",
+    "tag": "native",
+    "licenses": [
+        "BSD-3-Clause"
+    ]
+}
