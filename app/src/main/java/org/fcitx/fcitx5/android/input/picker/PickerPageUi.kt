@@ -204,9 +204,10 @@ class PickerPageUi(
                 } else {
                     isEnabled = true
                     val item = items[i]
-                    mainText.text = item
+                    val transformed = policy.transform(item)
+                    mainText.text = transformed
                     setOnClickListener {
-                        onItemClick(item)
+                        onItemClick(transformed)
                     }
                     setOnLongClickListener longClick@{ view ->
                         if (view !is KeyView) return@longClick false

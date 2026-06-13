@@ -39,7 +39,7 @@ class PickerPagesAdapter(
 
     private fun buildCategories(data: List<Pair<PickerData.Category, Array<String>>>) {
         data.forEach { (cat, arr) ->
-            val list = arr.filter(policy::filter).map(policy::transform)
+            val list = arr.filter(policy::filter)
             val chunks = list.chunked(density.pageSize)
             categories.add(cat to IntRange(pages.size, pages.size + chunks.size - 1))
             pages.addAll(chunks)
