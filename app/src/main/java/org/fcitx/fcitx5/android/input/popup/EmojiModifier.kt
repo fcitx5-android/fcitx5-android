@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2025 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2025-2026 Fcitx5 for Android Contributors
  */
 
 package org.fcitx.fcitx5.android.input.popup
@@ -13,7 +13,6 @@ import android.os.Build
 import android.text.TextPaint
 import androidx.annotation.RequiresApi
 import org.fcitx.fcitx5.android.R
-import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceEnum
 
 object EmojiModifier {
@@ -44,8 +43,6 @@ object EmojiModifier {
     private val SpecialCase2 = intArrayOf(
         0x1F9D1, 0x200D, 0x1F91D, 0x200D, 0x1F9D1,
     )
-
-    private val defaultSkinTone by AppPrefs.getInstance().symbols.defaultEmojiSkinTone
 
     fun isSupported(): Boolean {
         // UProperty.EMOJI_MODIFIER_BASE requires API 28
@@ -107,22 +104,20 @@ object EmojiModifier {
         return DefaultTextPaint.hasGlyph(emoji)
     }
 
-    fun getPreferredTone(emoji: String): String {
+    fun getPreferredTone(emoji: String, tone: SkinTone): String {
         if (!isSupported()) return emoji
         val (codePoints, modifiable) = getCodePoints(emoji)
-        val tone = defaultSkinTone
         if (tone == SkinTone.Default || !isModifiable(modifiable)) return emoji
         val candidate = buildEmoji(codePoints, modifiable, tone)
         return if (isValidEmoji(candidate)) candidate else emoji
     }
 
-    fun produceSkinTones(emoji: String): Array<String>? {
+    fun produceSkinTones(emoji: String, excludeTone: SkinTone): Array<String>? {
         if (!isSupported()) return null
         val (codePoints, modifiable) = getCodePoints(emoji)
-        val tone = defaultSkinTone
         if (!isModifiable(modifiable)) return null
         val candidates = SkinTone.entries
-            .filter { it != tone }
+            .filter { it != excludeTone }
             .map { buildEmoji(codePoints, modifiable, it) }
             .filter { isValidEmoji(it) }
         return if (candidates.isEmpty()) null else candidates.toTypedArray()

@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.input.picker
 
@@ -29,7 +29,6 @@ import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Border
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Variant
 import org.fcitx.fcitx5.android.input.keyboard.KeyView
 import org.fcitx.fcitx5.android.input.keyboard.TextKeyView
-import org.fcitx.fcitx5.android.input.popup.EmojiModifier
 import org.fcitx.fcitx5.android.input.popup.PopupAction
 import org.fcitx.fcitx5.android.input.popup.PopupActionListener
 import splitties.views.dsl.constraintlayout.below
@@ -72,10 +71,7 @@ class PickerPageUi(
         Low(12, 4, 3, 19f, true, false)
     }
 
-    companion object {
-        val BackspaceAction = SymAction(KeySym(FcitxKeyMapping.FcitxKey_BackSpace))
-        private var popupOnKeyPress by AppPrefs.getInstance().keyboard.popupOnKeyPress
-    }
+    private val popupOnKeyPress by AppPrefs.getInstance().keyboard.popupOnKeyPress
 
     var keyActionListener: KeyActionListener? = null
     var popupActionListener: PopupActionListener? = null
@@ -106,8 +102,9 @@ class PickerPageUi(
     )
 
     private val backspaceKey by lazy {
+        val backspaceAction = SymAction(KeySym(FcitxKeyMapping.FcitxKey_BackSpace))
         val action: (View) -> Unit = {
-            keyActionListener?.onKeyAction(BackspaceAction, Source.Keyboard)
+            keyActionListener?.onKeyAction(backspaceAction, Source.Keyboard)
         }
         val listener = View.OnClickListener { action.invoke(it) }
         ImageKeyView(ctx, theme, backspaceAppearance).apply {
@@ -175,11 +172,26 @@ class PickerPageUi(
         layoutParams = ViewGroup.LayoutParams(matchParent, matchParent)
     }
 
-    private fun onSymbolClick(str: String) {
-        keyActionListener?.onKeyAction(CommitAction(str), Source.Keyboard)
+    fun setItems(items: List<String>) {
+        keyViews.forEachIndexed { i, keyView ->
+            keyView.apply {
+                if (i >= items.size) {
+                    isEnabled = false
+                    mainText.text = ""
+                    setOnClickListener(null)
+                } else {
+                    isEnabled = true
+                    mainText.text = items[i]
+                    setOnClickListener { onItemClick(items[i]) }
+                }
+                swipeEnabled = false
+                onGestureListener = null
+                setOnLongClickListener(null)
+            }
+        }
     }
 
-    fun setItems(items: List<String>, withSkinTone: Boolean = false) {
+    fun setItems(items: List<String>, policy: PickerPolicy) {
         keyViews.forEachIndexed { i, keyView ->
             keyView.apply {
                 if (i >= items.size) {
@@ -191,28 +203,15 @@ class PickerPageUi(
                     onGestureListener = null
                 } else {
                     isEnabled = true
-                    val label = items[i]
-                    val commitString =
-                        if (withSkinTone) EmojiModifier.getPreferredTone(label) else label
-                    mainText.text = commitString
+                    val item = items[i]
+                    mainText.text = item
                     setOnClickListener {
-                        onSymbolClick(commitString)
+                        onItemClick(item)
                     }
-                    setOnLongClickListener { view ->
-                        view as KeyView
-                        if (!popupOnKeyPress) {
-                            // in case "popup on keypress" is disabled, popup keyboard need to know
-                            // the actual bounds on press. see [^1] as well
-                            view.updateBounds()
-                        }
-                        // TODO: maybe popup keyboard should just accept String as label?
-                        onPopupAction(
-                            PopupAction.ShowKeyboardAction(
-                                view.id,
-                                KeyDef.Popup.Keyboard(label),
-                                bounds
-                            )
-                        )
+                    setOnLongClickListener longClick@{ view ->
+                        if (view !is KeyView) return@longClick false
+                        val popup = policy.popup(item) ?: return@longClick false
+                        onItemLongClick(view, popup)
                         false
                     }
                     swipeEnabled = true
@@ -220,23 +219,13 @@ class PickerPageUi(
                         view as KeyView
                         when (event.type) {
                             CustomGestureView.GestureType.Down -> {
-                                if (popupOnKeyPress) {
-                                    // [^1]: bounds is first calculated in KeyView's onLayout(), it
-                                    // not in screen viewport at the time of layout.
-                                    // eg. it's inside the next page of ViewPager
-                                    // so update bounds when it's pressed
-                                    view.updateBounds()
-                                    onPopupAction(
-                                        PopupAction.PreviewAction(view.id, label, view.bounds)
-                                    )
-                                }
+                                onPopupShow(view, item)
+                                // never "consume" the gesture on touch down
                                 false
                             }
-
                             CustomGestureView.GestureType.Move -> {
                                 onPopupChangeFocus(view.id, event.x, event.y)
                             }
-
                             CustomGestureView.GestureType.Up -> {
                                 onPopupTrigger(view.id).also {
                                     onPopupAction(PopupAction.DismissAction(view.id))
@@ -249,22 +238,45 @@ class PickerPageUi(
         }
     }
 
+    private fun onItemClick(item: String) {
+        keyActionListener?.onKeyAction(CommitAction(item), Source.Keyboard)
+    }
+
     private fun onPopupAction(action: PopupAction) {
         popupActionListener?.onPopupAction(action)
     }
 
+    private fun onItemLongClick(view: KeyView, popup: KeyDef.Popup.Keyboard) {
+        if (!popupOnKeyPress) {
+            // in case "popup on keypress" is disabled, popup keyboard need to know
+            // the actual bounds on press. see [^1] as well
+            view.updateBounds()
+        }
+        onPopupAction(PopupAction.ShowKeyboardAction(view.id, popup, view.bounds))
+    }
+
+    private fun onPopupShow(view: KeyView, item: String) {
+        if (!popupOnKeyPress) return
+        // [^1]: bounds is first calculated in KeyView's onLayout(), it
+        // not in screen viewport at the time of layout.
+        // e.g. it's inside the next page of ViewPager
+        // so update bounds when it's pressed
+        view.updateBounds()
+        onPopupAction(PopupAction.PreviewAction(view.id, item, view.bounds))
+        return
+    }
+
     private fun onPopupChangeFocus(viewId: Int, x: Float, y: Float): Boolean {
         val changeFocusAction = PopupAction.ChangeFocusAction(viewId, x, y)
-        popupActionListener?.onPopupAction(changeFocusAction)
+        onPopupAction(changeFocusAction)
         return changeFocusAction.outResult
     }
 
     private fun onPopupTrigger(viewId: Int): Boolean {
         val triggerAction = PopupAction.TriggerAction(viewId)
-        // TODO: maybe popup keyboard should just yield String value?
         onPopupAction(triggerAction)
         val action = triggerAction.outAction as? FcitxKeyAction ?: return false
-        onSymbolClick(action.act)
+        onItemClick(action.act)
         onPopupAction(PopupAction.DismissAction(viewId))
         return true
     }

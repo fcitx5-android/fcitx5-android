@@ -1,14 +1,13 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.input.picker
 
-import android.text.TextPaint
+import android.annotation.SuppressLint
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.data.RecentlyUsed
-import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.keyboard.KeyActionListener
 import org.fcitx.fcitx5.android.input.popup.PopupActionListener
@@ -20,8 +19,8 @@ class PickerPagesAdapter(
     private val rawData: List<Pair<PickerData.Category, Array<String>>>,
     private val density: PickerPageUi.Density,
     recentlyUsedFileName: String,
-    private val bordered: Boolean = false,
-    private val isEmoji: Boolean = false
+    private val bordered: Boolean,
+    private val policy: PickerPolicy
 ) : RecyclerView.Adapter<PickerPagesAdapter.ViewHolder>() {
 
     class ViewHolder(val ui: PickerPageUi) : RecyclerView.ViewHolder(ui.root)
@@ -38,17 +37,9 @@ class PickerPagesAdapter(
      */
     private val pages: MutableList<List<String>> = mutableListOf(listOf())
 
-    private fun buildCategories(
-        data: List<Pair<PickerData.Category, Array<String>>>,
-        knowGraphOnly: Boolean = false
-    ) {
-        val textPaint = if (knowGraphOnly) TextPaint() else null
+    private fun buildCategories(data: List<Pair<PickerData.Category, Array<String>>>) {
         data.forEach { (cat, arr) ->
-            val list = if (textPaint != null) {
-                arr.filter { textPaint.hasGlyph(it) }
-            } else {
-                arr.asList()
-            }
+            val list = arr.filter(policy::filter).map(policy::transform)
             val chunks = list.chunked(density.pageSize)
             categories.add(cat to IntRange(pages.size, pages.size + chunks.size - 1))
             pages.addAll(chunks)
@@ -56,20 +47,29 @@ class PickerPagesAdapter(
     }
 
     init {
-        buildCategories(
-            rawData,
-            isEmoji && AppPrefs.getInstance().symbols.hideUnsupportedEmojis.getValue()
-        )
+        buildCategories(rawData)
     }
 
-    fun rebuildCategories(knowGraphOnly: Boolean = false) {
+    private fun rebuildCategories() {
         categories.clear()
         // empty "RecentlyUsed" category
         categories.add(PickerData.RecentlyUsedCategory to IntRange(0, 0))
         pages.clear()
         // empty "RecentlyUsed" page
         pages.add(emptyList())
-        buildCategories(rawData, knowGraphOnly)
+        buildCategories(rawData)
+    }
+
+    private var lastInvalidateKey = policy.invalidateKey()
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun refreshIfNeeded() {
+        val newKey = policy.invalidateKey()
+        if (lastInvalidateKey != newKey) {
+            lastInvalidateKey = newKey
+            rebuildCategories()
+            notifyDataSetChanged()
+        }
     }
 
     private val recentlyUsed = RecentlyUsed(recentlyUsedFileName, density.pageSize)
@@ -102,18 +102,21 @@ class PickerPagesAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.ui.setItems(pages[position], isEmoji)
+        if (position == 0) {
+            // RecentlyUsed content should be displayed as-is, without popups
+            holder.ui.setItems(recentlyUsed.items)
+        } else {
+            holder.ui.setItems(pages[position], policy)
+        }
     }
 
     override fun onViewAttachedToWindow(holder: ViewHolder) {
         holder.ui.keyActionListener = keyActionListener
-        if (holder.bindingAdapterPosition == 0) {
+        holder.ui.popupActionListener = if (holder.bindingAdapterPosition == 0) {
             // prevent popup on RecentlyUsed page
-            holder.ui.popupActionListener = null
-            // RecentlyUsed content are already modified with skin tones
-            holder.ui.setItems(recentlyUsed.items, withSkinTone = false)
+            null
         } else {
-            holder.ui.popupActionListener = popupActionListener
+            popupActionListener
         }
     }
 

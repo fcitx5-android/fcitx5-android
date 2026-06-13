@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.input.keyboard
 
@@ -35,7 +35,7 @@ class SymbolKey(
     ),
     popup ?: arrayOf(
         Popup.Preview(symbol),
-        Popup.Keyboard(symbol)
+        Popup.Keyboard.Preset(symbol)
     )
 )
 
@@ -57,7 +57,7 @@ class AlphabetKey(
     ),
     popup ?: arrayOf(
         Popup.AltPreview(character, punctuation),
-        Popup.Keyboard(character)
+        Popup.Keyboard.Preset(character)
     )
 )
 
@@ -78,7 +78,7 @@ class AlphabetDigitKey(
     ),
     popup ?: arrayOf(
         Popup.AltPreview(character, altText),
-        Popup.Keyboard(character)
+        Popup.Keyboard.Preset(character)
     )
 ) {
     constructor(

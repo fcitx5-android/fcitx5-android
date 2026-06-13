@@ -116,18 +116,23 @@ class PopupComponent :
     }
 
     private fun showKeyboard(viewId: Int, keyboard: KeyDef.Popup.Keyboard, bounds: Rect) {
-        val keys = PopupPreset[keyboard.label]
-            ?: EmojiModifier.produceSkinTones(keyboard.label)
-            ?: return
+        var keys: Array<String>
+        var labels: Array<String>
+        when (keyboard) {
+            is KeyDef.Popup.Keyboard.Preset -> {
+                val preset = PopupPreset[keyboard.label] ?: return
+                keys = preset
+                labels = if (keyboard.transformPunctuation && punctuation.enabled) {
+                    Array(keys.size) { punctuation.transform(keys[it]) }
+                } else keys
+            }
+            is KeyDef.Popup.Keyboard.Explicit -> {
+                keys = keyboard.items
+                labels = keyboard.items
+            }
+        }
         // clear popup preview text         OR create empty popup preview
         showingEntryUi[viewId]?.setText("") ?: showPopup(viewId, "", bounds)
-        reallyShowKeyboard(viewId, keys, bounds)
-    }
-
-    private fun reallyShowKeyboard(viewId: Int, keys: Array<String>, bounds: Rect) {
-        val labels = if (punctuation.enabled) {
-            Array(keys.size) { punctuation.transform(keys[it]) }
-        } else keys
         val keyboardUi = PopupKeyboardUi(
             context,
             theme,

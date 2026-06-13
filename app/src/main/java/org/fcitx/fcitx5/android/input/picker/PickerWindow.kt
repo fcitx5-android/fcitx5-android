@@ -1,15 +1,12 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.input.picker
 
-import android.annotation.SuppressLint
 import androidx.core.content.ContextCompat
 import androidx.transition.Transition
 import androidx.viewpager2.widget.ViewPager2
-import org.fcitx.fcitx5.android.data.prefs.AppPrefs
-import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.broadcast.ReturnKeyDrawableComponent
 import org.fcitx.fcitx5.android.input.dependency.theme
@@ -32,7 +29,8 @@ class PickerWindow(
     private val density: PickerPageUi.Density,
     private val switchKey: KeyDef,
     private val popupPreview: Boolean = true,
-    private val followKeyBorder: Boolean = true
+    private val followKeyBorder: Boolean = true,
+    private val policy: PickerPolicy = DefaultPickerPolicy()
 ) : InputWindow.ExtendedInputWindow<PickerWindow>(), EssentialWindow {
 
     enum class Key : EssentialWindow.Key {
@@ -104,14 +102,12 @@ class PickerWindow(
         }
     }
 
-    private val isEmoji = key === Key.Emoji
-
     override fun onCreateView() = PickerLayout(context, theme, switchKey).apply {
         pickerLayout = this
         val bordered = followKeyBorder && keyBorder
         pickerPagesAdapter = PickerPagesAdapter(
             theme, keyActionListener, popupActionListener, data,
-            density, key.name, bordered, isEmoji
+            density, key.name, bordered, policy
         )
         tabsUi.apply {
             setTabs(pickerPagesAdapter.getCategoryList())
@@ -149,39 +145,17 @@ class PickerWindow(
 
     override fun onCreateBarExtension() = pickerLayout.tabsUi.root
 
-    val symbolPrefs = AppPrefs.getInstance().symbols
-    private val hideUnsupportedEmojisPrefs = symbolPrefs.hideUnsupportedEmojis
-    private val defaultEmojiSkinTonePrefs = symbolPrefs.defaultEmojiSkinTone
-
-    @SuppressLint("NotifyDataSetChanged")
-    private val initDataListener = ManagedPreference.OnChangeListener<Any> { _, _ ->
-        pickerPagesAdapter.rebuildCategories(hideUnsupportedEmojisPrefs.getValue())
-        pickerPagesAdapter.notifyDataSetChanged()
-    }.takeIf { isEmoji }
-
-    @SuppressLint("NotifyDataSetChanged")
-    private val refreshPagesListener = ManagedPreference.OnChangeListener<Any> { _, _ ->
-        pickerPagesAdapter.notifyDataSetChanged()
-    }
-
     override fun onAttached() {
         pickerLayout.embeddedKeyboard.also {
+            pickerPagesAdapter.refreshIfNeeded()
             it.onReturnDrawableUpdate(returnKeyDrawable.resourceId)
             it.keyActionListener = keyActionListener
-        }
-        if (isEmoji) {
-            hideUnsupportedEmojisPrefs.registerOnChangeListener(initDataListener!!)
-            defaultEmojiSkinTonePrefs.registerOnChangeListener(refreshPagesListener)
         }
     }
 
     override fun onDetached() {
         popup.dismissAll()
         pickerLayout.embeddedKeyboard.keyActionListener = null
-        if (isEmoji) {
-            hideUnsupportedEmojisPrefs.unregisterOnChangeListener(initDataListener!!)
-            defaultEmojiSkinTonePrefs.unregisterOnChangeListener(refreshPagesListener)
-        }
     }
 
     override val showTitle = false

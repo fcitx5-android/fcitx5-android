@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.input.keyboard
 
@@ -185,10 +185,17 @@ class TextKeyboard(
             is PopupAction.PreviewAction -> action.copy(content = transformPopupPreview(action.content))
             is PopupAction.PreviewUpdateAction -> action.copy(content = transformPopupPreview(action.content))
             is PopupAction.ShowKeyboardAction -> {
-                val label = action.keyboard.label
-                if (label.length == 1 && label[0].isLetter())
-                    action.copy(keyboard = KeyDef.Popup.Keyboard(transformAlphabet(label)))
-                else action
+                when (action.keyboard) {
+                    is KeyDef.Popup.Keyboard.Preset -> {
+                        val label = action.keyboard.label
+                        if (label.length == 1 && label[0].isLetter())
+                            action.copy(
+                                keyboard = action.keyboard.copy(label = transformAlphabet(label))
+                            )
+                        else action
+                    }
+                    is KeyDef.Popup.Keyboard.Explicit -> action
+                }
             }
             else -> action
         }
