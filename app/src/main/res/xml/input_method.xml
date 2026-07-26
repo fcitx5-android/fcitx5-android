@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- ref: https://developer.android.com/reference/android/view/inputmethod/InputMethodInfo#xml-attributes_1 -->
 <input-method xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:configChanges="uiMode"
     android:settingsActivity="org.fcitx.fcitx5.android.ui.main.MainActivity"
     android:supportsInlineSuggestions="true"
     android:supportsSwitchingToNextInputMethod="true"
