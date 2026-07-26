@@ -316,4 +316,6 @@
     <string name="emoji_skin_tone_type_6">🏿 Type-6</string>
     <string name="hide_unsupported_emojis">Скрыть неподдерживаемые эмодзи</string>
     <string name="key_border_stroke">Включить обводку для границы клавиши</string>
-</resources>
+    <string name="preferred_voice_input">Предпочтительный голосовой ввод</string>
+    <string name="edit_text_playground">Тестовое поле EditText</string>
+    </resources>
