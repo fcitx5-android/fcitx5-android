@@ -32,12 +32,12 @@ jobs:
       fail-fast: false
     steps:
       - name: Fetch fdroiddata
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: f-droid/fdroiddata
 
       - name: Fetch fdroidserver
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: f-droid/fdroidserver
           path: fdroidserver
@@ -118,7 +118,7 @@ jobs:
           $fdroid build --verbose --test --scan-binary --on-server --no-tarball $build
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: ${{ success() || failure() }}
         with:
           name: fdroid-${{ matrix.abi }}

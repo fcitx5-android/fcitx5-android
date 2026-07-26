@@ -10,14 +10,14 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Fetch source code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           submodules: recursive
       - uses: cachix/install-nix-action@v31
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: cachix/cachix-action@v16
+      - uses: cachix/cachix-action@v17
         with:
           name: fcitx5-android
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
