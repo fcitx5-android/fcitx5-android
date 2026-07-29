@@ -9,33 +9,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import org.fcitx.fcitx5.android.databinding.FragmentSetupBinding
-import org.fcitx.fcitx5.android.ui.setup.SetupPage.Companion.isLastPage
 import org.fcitx.fcitx5.android.utils.serializable
 
 class SetupFragment : Fragment() {
 
-    private val viewModel: SetupViewModel by activityViewModels()
-
     private lateinit var binding: FragmentSetupBinding
 
     private val page: SetupPage by lazy { requireArguments().serializable(PAGE)!! }
-
-    private var isDone: Boolean = false
-        set(value) {
-            if (value && page.isLastPage()) {
-                viewModel.isAllDone.value = true
-            }
-            with(binding) {
-                hintText.text = page.getHintText(requireContext())
-                actionButton.visibility = if (value) View.GONE else View.VISIBLE
-                actionButton.text = page.getButtonText(requireContext())
-                actionButton.setOnClickListener { page.getButtonAction(requireContext()) }
-                doneText.visibility = if (value) View.VISIBLE else View.GONE
-            }
-            field = value
-        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,12 +30,14 @@ class SetupFragment : Fragment() {
 
     // called on window focus changed
     fun sync() {
-        isDone = page.isDone()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        sync()
+        val done = page.isDone()
+        with(binding) {
+            hintText.text = page.getHintText(requireContext())
+            actionButton.visibility = if (done) View.GONE else View.VISIBLE
+            actionButton.text = page.getButtonText(requireContext())
+            actionButton.setOnClickListener { page.getButtonAction(requireContext()) }
+            doneText.visibility = if (done) View.VISIBLE else View.GONE
+        }
     }
 
     companion object {
