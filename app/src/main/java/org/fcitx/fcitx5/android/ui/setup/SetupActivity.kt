@@ -13,7 +13,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.core.app.NotificationCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -30,8 +29,6 @@ import org.fcitx.fcitx5.android.utils.notificationManager
 class SetupActivity : FragmentActivity() {
 
     private lateinit var viewPager: ViewPager2
-
-    private val viewModel: SetupViewModel by viewModels()
 
     private lateinit var skipButton: Button
     private lateinit var prevButton: Button
@@ -65,39 +62,34 @@ class SetupActivity : FragmentActivity() {
         viewPager = binding.viewpager.apply {
             adapter = Adapter()
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                override fun onPageSelected(position: Int) {
-                    // manually call following observer when page changed
-                    // intentionally before changing the text of nextButton
-                    viewModel.isAllDone.value = viewModel.isAllDone.value
-                    // hide prev button for the first page
-                    prevButton.visibility = if (position != 0) View.VISIBLE else View.GONE
-                    nextButton.text =
-                        getString(if (position.isLastPage()) R.string.done else R.string.next)
-                }
+                override fun onPageSelected(position: Int) = updateButtons()
             })
-        }
-        viewModel.isAllDone.observe(this) { allDone ->
-            skipButton.apply {
-                visibility = if (allDone) View.GONE else View.VISIBLE
-            }
-            nextButton.apply {
-                // hide next button for the last page when allDone == false
-                (allDone || !viewPager.currentItem.isLastPage()).let {
-                    visibility = if (it) View.VISIBLE else View.GONE
-                }
-            }
         }
         // skip to undone page
         firstUndonePage()?.let { viewPager.currentItem = it.ordinal }
+        updateButtons()
         shown = true
         createNotificationChannel()
     }
 
+    private fun updateButtons() {
+        val allDone = !SetupPage.hasUndonePage()
+        val isFirstPage = viewPager.currentItem == 0
+        val isLastPage = viewPager.currentItem.isLastPage()
+
+        prevButton.visibility = if (isFirstPage) View.GONE else View.VISIBLE
+        skipButton.visibility = if (allDone) View.GONE else View.VISIBLE
+        nextButton.text = getString(if (isLastPage) R.string.done else R.string.next)
+        nextButton.visibility = if (isLastPage && !allDone) View.GONE else View.VISIBLE
+    }
+
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
+        if (!hasFocus) return
         supportFragmentManager.fragments.forEach {
             if (it.isVisible) (it as SetupFragment).sync()
         }
+        updateButtons()
     }
 
     private fun createNotificationChannel() {
