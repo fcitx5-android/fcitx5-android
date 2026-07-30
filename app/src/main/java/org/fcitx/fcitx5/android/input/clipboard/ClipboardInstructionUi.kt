@@ -80,4 +80,31 @@ sealed class ClipboardInstructionUi(override val ctx: Context, protected val the
             })
         }
     }
+
+    class FavoritesEmpty(ctx: Context, theme: Theme) : ClipboardInstructionUi(ctx, theme) {
+
+        private val icon = imageView {
+            imageDrawable = drawable(R.drawable.ic_outline_star_24)!!.apply {
+                setTint(theme.altKeyTextColor)
+            }
+        }
+
+        private val instructionText = textView {
+            setText(R.string.instruction_favorite)
+            setTextColor(theme.keyTextColor)
+        }
+
+        override val root = constraintLayout {
+            add(icon, lParams(dp(90), dp(90)) {
+                topOfParent(dp(24))
+                startOfParent()
+                endOfParent()
+            })
+            add(instructionText, lParams(wrapContent, wrapContent) {
+                below(icon, dp(16))
+                startOfParent()
+                endOfParent()
+            })
+        }
+    }
 }
