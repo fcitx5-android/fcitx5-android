@@ -93,6 +93,11 @@
     <string name="clipboard_category_otp">验证码</string>
     <string name="clipboard_category_tracking_token">口令</string>
     <string name="clipboard_category_other">其他</string>
+    <string name="clipboard_otp_auto_delete">自动删除验证码</string>
+    <string name="clipboard_otp_auto_delete_minutes">验证码保留时间</string>
+    <string name="clipboard_tracking_token_auto_delete">自动删除追踪口令</string>
+    <string name="clipboard_tracking_token_auto_delete_hours">追踪口令保留时间</string>
+    <string name="clipboard_auto_delete_summary">置顶或收藏的条目始终保留</string>
     <string name="clear">清空</string>
     <string name="export">导出</string>
     <string name="app_crash">应用崩溃</string>

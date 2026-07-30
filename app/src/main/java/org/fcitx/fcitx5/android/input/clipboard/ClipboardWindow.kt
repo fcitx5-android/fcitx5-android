@@ -326,6 +326,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     }
 
     override fun onAttached() {
+        service.lifecycleScope.launch { ClipboardManager.cleanupExpired() }
         selectedSection = ClipboardPanelSection.Clipboard
         selectedCategory = null
         visibleEntriesEmpty = ClipboardManager.itemCount == 0

@@ -93,6 +93,11 @@
     <string name="clipboard_category_otp" tools:ignore="MissingTranslation">Codes</string>
     <string name="clipboard_category_tracking_token" tools:ignore="MissingTranslation">Tokens</string>
     <string name="clipboard_category_other" tools:ignore="MissingTranslation">Other</string>
+    <string name="clipboard_otp_auto_delete" tools:ignore="MissingTranslation">Automatically delete verification codes</string>
+    <string name="clipboard_otp_auto_delete_minutes" tools:ignore="MissingTranslation">Verification code retention</string>
+    <string name="clipboard_tracking_token_auto_delete" tools:ignore="MissingTranslation">Automatically delete tracking tokens</string>
+    <string name="clipboard_tracking_token_auto_delete_hours" tools:ignore="MissingTranslation">Tracking token retention</string>
+    <string name="clipboard_auto_delete_summary" tools:ignore="MissingTranslation">Pinned and favorite items are always kept</string>
     <string name="clear">Clear</string>
     <string name="export">Export</string>
     <string name="app_crash">Application crashed</string>

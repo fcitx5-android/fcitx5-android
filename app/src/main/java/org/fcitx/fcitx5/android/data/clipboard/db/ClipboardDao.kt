@@ -15,26 +15,28 @@ interface ClipboardDao {
     @Insert
     suspend fun insert(clipboardEntry: ClipboardEntry): Long
 
-    @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET pinned=:pinned WHERE id=:id")
+    @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET pinned=:pinned, expiresAt=CASE WHEN :pinned THEN NULL ELSE expiresAt END WHERE id=:id")
     suspend fun updatePinStatus(id: Int, pinned: Boolean)
 
-    @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET favorite=:favorite WHERE id=:id")
+    @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET favorite=:favorite, expiresAt=CASE WHEN :favorite THEN NULL ELSE expiresAt END WHERE id=:id")
     suspend fun updateFavoriteStatus(id: Int, favorite: Boolean)
 
-    @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET text=:text, category=:category, classificationVersion=:classificationVersion WHERE id=:id")
+    @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET text=:text, category=:category, classificationVersion=:classificationVersion, expiresAt=CASE WHEN pinned=1 OR favorite=1 THEN NULL ELSE :expiresAt END WHERE id=:id")
     suspend fun updateTextAndClassification(
         id: Int,
         text: String,
         category: ClipboardCategory,
-        classificationVersion: Int
+        classificationVersion: Int,
+        expiresAt: Long?
     )
 
-    @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET timestamp=:timestamp, category=:category, classificationVersion=:classificationVersion WHERE id=:id")
+    @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET timestamp=:timestamp, category=:category, classificationVersion=:classificationVersion, expiresAt=CASE WHEN pinned=1 OR favorite=1 THEN NULL ELSE :expiresAt END WHERE id=:id")
     suspend fun updateTimeAndClassification(
         id: Int,
         timestamp: Long,
         category: ClipboardCategory,
-        classificationVersion: Int
+        classificationVersion: Int,
+        expiresAt: Long?
     )
 
     @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET category=:category, classificationVersion=:classificationVersion WHERE id=:id")
@@ -76,6 +78,18 @@ interface ClipboardDao {
 
     @Query("SELECT id FROM ${ClipboardEntry.TABLE_NAME} WHERE pinned=0 AND favorite=0 AND deleted=0")
     suspend fun findDeletableIds(): IntArray
+
+    @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET expiresAt=:expiresAt WHERE category=:category AND pinned=0 AND favorite=0 AND deleted=0")
+    suspend fun resetExpiry(category: ClipboardCategory, expiresAt: Long)
+
+    @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET expiresAt=NULL WHERE category=:category")
+    suspend fun clearExpiry(category: ClipboardCategory)
+
+    @Query("SELECT MIN(expiresAt) FROM ${ClipboardEntry.TABLE_NAME} WHERE category IN (:categories) AND pinned=0 AND favorite=0 AND deleted=0 AND expiresAt IS NOT NULL")
+    suspend fun nearestExpiry(categories: List<ClipboardCategory>): Long?
+
+    @Query("DELETE FROM ${ClipboardEntry.TABLE_NAME} WHERE category IN (:categories) AND pinned=0 AND favorite=0 AND deleted=0 AND expiresAt IS NOT NULL AND expiresAt<=:now")
+    suspend fun deleteExpired(categories: List<ClipboardCategory>, now: Long): Int
 
     @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET deleted=1 WHERE id in (:ids)")
     suspend fun markAsDeleted(vararg ids: Int)

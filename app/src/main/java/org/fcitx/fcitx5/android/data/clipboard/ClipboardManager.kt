@@ -12,7 +12,9 @@ import androidx.room.Room
 import androidx.room.withTransaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -39,6 +41,8 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     private val clipboardManager = appContext.clipboardManager
 
     private val mutex = Mutex()
+    private val expiryMutex = Mutex()
+    private var expiryTimer: Job? = null
 
     var itemCount: Int = 0
         private set
@@ -59,7 +63,8 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
         onUpdateListeners.remove(listener)
     }
 
-    private val enabledPref = AppPrefs.getInstance().clipboard.clipboardListening
+    private val prefs = AppPrefs.getInstance().clipboard
+    private val enabledPref = prefs.clipboardListening
 
     @Keep
     private val enabledListener = ManagedPreference.OnChangeListener<Boolean> { _, value ->
@@ -70,12 +75,36 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
         }
     }
 
-    private val limitPref = AppPrefs.getInstance().clipboard.clipboardHistoryLimit
+    private val limitPref = prefs.clipboardHistoryLimit
 
     @Keep
     private val limitListener = ManagedPreference.OnChangeListener<Int> { _, _ ->
         launch { removeOutdated() }
     }
+
+    @Keep
+    private val otpExpiryEnabledListener =
+        ManagedPreference.OnChangeListener<Boolean> { _, _ ->
+            launch { refreshExpiryPolicy(ClipboardCategory.Otp) }
+        }
+
+    @Keep
+    private val otpExpiryDurationListener =
+        ManagedPreference.OnChangeListener<Int> { _, _ ->
+            launch { refreshExpiryPolicy(ClipboardCategory.Otp) }
+        }
+
+    @Keep
+    private val trackingTokenExpiryEnabledListener =
+        ManagedPreference.OnChangeListener<Boolean> { _, _ ->
+            launch { refreshExpiryPolicy(ClipboardCategory.TrackingToken) }
+        }
+
+    @Keep
+    private val trackingTokenExpiryDurationListener =
+        ManagedPreference.OnChangeListener<Int> { _, _ ->
+            launch { refreshExpiryPolicy(ClipboardCategory.TrackingToken) }
+        }
 
     var lastEntry: ClipboardEntry? = null
 
@@ -95,9 +124,18 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
         enabledPref.registerOnChangeListener(enabledListener)
         limitListener.onChange(limitPref.key, limitPref.getValue())
         limitPref.registerOnChangeListener(limitListener)
+        prefs.clipboardOtpAutoDelete.registerOnChangeListener(otpExpiryEnabledListener)
+        prefs.clipboardOtpAutoDeleteMinutes.registerOnChangeListener(otpExpiryDurationListener)
+        prefs.clipboardTrackingTokenAutoDelete.registerOnChangeListener(
+            trackingTokenExpiryEnabledListener
+        )
+        prefs.clipboardTrackingTokenAutoDeleteHours.registerOnChangeListener(
+            trackingTokenExpiryDurationListener
+        )
         launch {
             updateItemCount()
             reclassifyOutdatedEntries()
+            initializeExpiryMaintenance()
         }
     }
 
@@ -110,11 +148,17 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
         ClipboardEntryFilter.Scope.Favorites -> clbDao.favoriteEntries(filter.category)
     }
 
-    suspend fun pin(id: Int) = clbDao.updatePinStatus(id, true)
+    suspend fun pin(id: Int) = expiryMutex.withLock {
+        clbDao.updatePinStatus(id, true)
+        scheduleNextExpiryLocked()
+    }
 
     suspend fun unpin(id: Int) = clbDao.updatePinStatus(id, false)
 
-    suspend fun favorite(id: Int) = clbDao.updateFavoriteStatus(id, true)
+    suspend fun favorite(id: Int) = expiryMutex.withLock {
+        clbDao.updateFavoriteStatus(id, true)
+        scheduleNextExpiryLocked()
+    }
 
     suspend fun unfavorite(id: Int) = clbDao.updateFavoriteStatus(id, false)
 
@@ -124,32 +168,43 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
         val updated = entry.copy(
             text = text,
             category = analysis.category,
-            classificationVersion = ClipboardContentAnalyzer.VERSION
+            classificationVersion = ClipboardContentAnalyzer.VERSION,
+            expiresAt = expiryFor(
+                analysis.category,
+                System.currentTimeMillis(),
+                entry.pinned,
+                entry.favorite
+            )
         )
         if (lastEntry?.id == id) updateLastEntry(updated)
         clbDao.updateTextAndClassification(
             id,
             text,
             analysis.category,
-            ClipboardContentAnalyzer.VERSION
+            ClipboardContentAnalyzer.VERSION,
+            updated.expiresAt
         )
+        refreshExpiryTimer()
     }
 
     suspend fun delete(id: Int) {
         clbDao.markAsDeleted(id)
         updateItemCount()
+        refreshExpiryTimer()
     }
 
     suspend fun deleteAll(): IntArray {
         val ids = clbDao.findDeletableIds()
         clbDao.markAsDeleted(*ids)
         updateItemCount()
+        refreshExpiryTimer()
         return ids
     }
 
     suspend fun undoDelete(vararg ids: Int) {
         clbDao.undoDelete(*ids)
         updateItemCount()
+        refreshExpiryTimer()
     }
 
     suspend fun realDelete() {
@@ -161,6 +216,7 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
             clbDb.clearAllTables()
             updateItemCount()
         }
+        refreshExpiryTimer()
     }
 
     private var lastClipTimestamp = -1L
@@ -190,21 +246,36 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
                 val analysis = ClipboardContentAnalyzer.analyze(rawEntry.text)
                 val entry = rawEntry.copy(
                     category = analysis.category,
-                    classificationVersion = ClipboardContentAnalyzer.VERSION
+                    classificationVersion = ClipboardContentAnalyzer.VERSION,
+                    expiresAt = expiryFor(
+                        analysis.category,
+                        rawEntry.timestamp,
+                        rawEntry.pinned,
+                        rawEntry.favorite
+                    )
                 )
                 try {
                     clbDao.find(entry.text, entry.sensitive)?.let {
-                        updateLastEntry(it.copy(
+                        val updated = it.copy(
                             timestamp = entry.timestamp,
                             category = entry.category,
-                            classificationVersion = ClipboardContentAnalyzer.VERSION
-                        ))
+                            classificationVersion = ClipboardContentAnalyzer.VERSION,
+                            expiresAt = expiryFor(
+                                entry.category,
+                                entry.timestamp,
+                                it.pinned,
+                                it.favorite
+                            )
+                        )
+                        updateLastEntry(updated)
                         clbDao.updateTimeAndClassification(
                             it.id,
                             entry.timestamp,
                             entry.category,
-                            ClipboardContentAnalyzer.VERSION
+                            ClipboardContentAnalyzer.VERSION,
+                            updated.expiresAt
                         )
+                        refreshExpiryTimer()
                         return@withLock
                     }
                     val insertedEntry = clbDb.withTransaction {
@@ -215,6 +286,7 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
                     }
                     updateLastEntry(insertedEntry)
                     updateItemCount()
+                    refreshExpiryTimer()
                 } catch (exception: Exception) {
                     Timber.w("Failed to update clipboard database: $exception")
                     updateLastEntry(entry)
@@ -249,6 +321,107 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
                         ClipboardContentAnalyzer.VERSION
                     )
                 }
+            }
+        }
+    }
+
+    suspend fun cleanupExpired() {
+        expiryMutex.withLock {
+            deleteExpiredLocked()
+            scheduleNextExpiryLocked()
+        }
+    }
+
+    private fun expirySettings() = ClipboardExpiryPolicy.Settings(
+        otpEnabled = prefs.clipboardOtpAutoDelete.getValue(),
+        otpMinutes = prefs.clipboardOtpAutoDeleteMinutes.getValue(),
+        trackingTokenEnabled = prefs.clipboardTrackingTokenAutoDelete.getValue(),
+        trackingTokenHours = prefs.clipboardTrackingTokenAutoDeleteHours.getValue()
+    )
+
+    private fun expiryFor(
+        category: ClipboardCategory,
+        copiedAt: Long,
+        pinned: Boolean,
+        favorite: Boolean
+    ) = ClipboardExpiryPolicy.expiresAt(
+        category,
+        copiedAt,
+        pinned,
+        favorite,
+        expirySettings()
+    )
+
+    private fun enabledExpiryCategories(
+        settings: ClipboardExpiryPolicy.Settings = expirySettings()
+    ) = buildList {
+        if (settings.otpEnabled) add(ClipboardCategory.Otp)
+        if (settings.trackingTokenEnabled) add(ClipboardCategory.TrackingToken)
+    }
+
+    private suspend fun initializeExpiryMaintenance() {
+        expiryMutex.withLock {
+            val settings = expirySettings()
+            if (!settings.otpEnabled) clbDao.clearExpiry(ClipboardCategory.Otp)
+            if (!settings.trackingTokenEnabled) {
+                clbDao.clearExpiry(ClipboardCategory.TrackingToken)
+            }
+            deleteExpiredLocked(settings)
+            scheduleNextExpiryLocked(settings)
+        }
+    }
+
+    private suspend fun refreshExpiryPolicy(category: ClipboardCategory) {
+        expiryMutex.withLock {
+            val settings = expirySettings()
+            val expiresAt = ClipboardExpiryPolicy.expiresAt(
+                category,
+                System.currentTimeMillis(),
+                pinned = false,
+                favorite = false,
+                settings
+            )
+            if (expiresAt == null) {
+                clbDao.clearExpiry(category)
+            } else {
+                clbDao.resetExpiry(category, expiresAt)
+            }
+            deleteExpiredLocked(settings)
+            scheduleNextExpiryLocked(settings)
+        }
+    }
+
+    private suspend fun refreshExpiryTimer() {
+        expiryMutex.withLock {
+            scheduleNextExpiryLocked()
+        }
+    }
+
+    private suspend fun deleteExpiredLocked(
+        settings: ClipboardExpiryPolicy.Settings = expirySettings()
+    ) {
+        val categories = enabledExpiryCategories(settings)
+        if (categories.isEmpty()) return
+        if (clbDao.deleteExpired(categories, System.currentTimeMillis()) > 0) {
+            updateItemCount()
+        }
+    }
+
+    private suspend fun scheduleNextExpiryLocked(
+        settings: ClipboardExpiryPolicy.Settings = expirySettings()
+    ) {
+        expiryTimer?.cancel()
+        expiryTimer = null
+        val categories = enabledExpiryCategories(settings)
+        if (categories.isEmpty()) return
+        val expiresAt = clbDao.nearestExpiry(categories) ?: return
+        val waitMillis = (expiresAt - System.currentTimeMillis()).coerceAtLeast(0)
+        expiryTimer = launch {
+            delay(waitMillis)
+            expiryMutex.withLock {
+                expiryTimer = null
+                deleteExpiredLocked()
+                scheduleNextExpiryLocked()
             }
         }
     }

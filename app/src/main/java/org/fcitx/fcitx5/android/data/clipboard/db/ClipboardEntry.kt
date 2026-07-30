@@ -32,7 +32,9 @@ data class ClipboardEntry(
     @ColumnInfo(defaultValue = "'Other'")
     val category: ClipboardCategory = ClipboardCategory.Other,
     @ColumnInfo(defaultValue = "0")
-    val classificationVersion: Int = 0
+    val classificationVersion: Int = 0,
+    @ColumnInfo(defaultValue = "NULL")
+    val expiresAt: Long? = null
 ) {
     companion object {
         const val BULLET = "•"

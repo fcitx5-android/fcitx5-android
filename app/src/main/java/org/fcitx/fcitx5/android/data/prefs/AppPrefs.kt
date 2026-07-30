@@ -355,6 +355,34 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
         val clipboardMaskSensitive = switch(
             R.string.clipboard_mask_sensitive, "clipboard_mask_sensitive", true
         ) { clipboardListening.getValue() }
+        val clipboardOtpAutoDelete = switch(
+            R.string.clipboard_otp_auto_delete,
+            "clipboard_otp_auto_delete",
+            false,
+            R.string.clipboard_auto_delete_summary
+        ) { clipboardListening.getValue() }
+        val clipboardOtpAutoDeleteMinutes = int(
+            R.string.clipboard_otp_auto_delete_minutes,
+            "clipboard_otp_auto_delete_minutes",
+            10,
+            1,
+            1440,
+            "min"
+        ) { clipboardListening.getValue() && clipboardOtpAutoDelete.getValue() }
+        val clipboardTrackingTokenAutoDelete = switch(
+            R.string.clipboard_tracking_token_auto_delete,
+            "clipboard_tracking_token_auto_delete",
+            false,
+            R.string.clipboard_auto_delete_summary
+        ) { clipboardListening.getValue() }
+        val clipboardTrackingTokenAutoDeleteHours = int(
+            R.string.clipboard_tracking_token_auto_delete_hours,
+            "clipboard_tracking_token_auto_delete_hours",
+            24,
+            1,
+            720,
+            "h"
+        ) { clipboardListening.getValue() && clipboardTrackingTokenAutoDelete.getValue() }
     }
 
     inner class Symbols : ManagedPreferenceCategory(R.string.emoji_and_symbols, sharedPreferences) {

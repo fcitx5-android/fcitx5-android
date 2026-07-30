@@ -96,6 +96,29 @@ class ClipboardDatabaseTest {
     }
 
     @Test
+    fun migration6To7PreservesEntriesAndDefaultsExpiryToNull() {
+        val name = "clipboard-expiry-migration-test"
+        migrationHelper.createDatabase(name, 6).apply {
+            execSQL(
+                "INSERT INTO clipboard " +
+                    "(id, text, pinned, timestamp, type, deleted, sensitive, favorite, category, classificationVersion) " +
+                    "VALUES (1, '123456', 0, 123, 'text/plain', 0, 0, 0, 'Otp', 1)"
+            )
+            close()
+        }
+
+        migrationHelper.runMigrationsAndValidate(name, 7, true).apply {
+            query("SELECT * FROM clipboard WHERE id=1").use { cursor ->
+                assertTrue(cursor.moveToFirst())
+                assertEquals("123456", cursor.getString(cursor.getColumnIndexOrThrow("text")))
+                assertEquals("Otp", cursor.getString(cursor.getColumnIndexOrThrow("category")))
+                assertTrue(cursor.isNull(cursor.getColumnIndexOrThrow("expiresAt")))
+            }
+            close()
+        }
+    }
+
+    @Test
     fun favoritesAreFilteredAndKeepPinnedThenTimestampOrdering() = runBlocking {
         insert(text = "old favorite", timestamp = 10, favorite = true)
         insert(text = "new favorite", timestamp = 30, favorite = true)
@@ -209,15 +232,92 @@ class ClipboardDatabaseTest {
             id,
             99,
             ClipboardCategory.Otp,
-            ClipboardContentAnalyzer.VERSION
+            ClipboardContentAnalyzer.VERSION,
+            expiresAt = 999
         )
 
         val updated = dao.get(id)!!
         assertEquals(99, updated.timestamp)
         assertEquals(ClipboardCategory.Otp, updated.category)
         assertEquals(ClipboardContentAnalyzer.VERSION, updated.classificationVersion)
+        assertNull(updated.expiresAt)
         assertTrue(updated.pinned)
         assertTrue(updated.favorite)
+    }
+
+    @Test
+    fun expiryResetAndDeletionOnlyAffectEligibleEntries() = runBlocking {
+        val expiredOtp = insert(
+            text = "1234",
+            timestamp = 1,
+            category = ClipboardCategory.Otp,
+            expiresAt = 50
+        )
+        val futureOtp = insert(
+            text = "123456",
+            timestamp = 2,
+            category = ClipboardCategory.Otp,
+            expiresAt = 500
+        )
+        val expiredToken = insert(
+            text = "￥token￥",
+            timestamp = 3,
+            category = ClipboardCategory.TrackingToken,
+            expiresAt = 50
+        )
+        insert(
+            text = "pinned code",
+            timestamp = 4,
+            pinned = true,
+            category = ClipboardCategory.Otp,
+            expiresAt = 50
+        )
+        insert(
+            text = "favorite code",
+            timestamp = 5,
+            favorite = true,
+            category = ClipboardCategory.Otp,
+            expiresAt = 50
+        )
+
+        assertEquals(
+            1,
+            dao.deleteExpired(listOf(ClipboardCategory.Otp), now = 100)
+        )
+        assertNull(dao.get(expiredOtp))
+        assertTrue(dao.get(futureOtp) != null)
+        assertTrue(dao.get(expiredToken) != null)
+        assertEquals(50L, dao.nearestExpiry(listOf(ClipboardCategory.TrackingToken)))
+
+        dao.resetExpiry(ClipboardCategory.Otp, expiresAt = 900)
+        assertEquals(900L, dao.get(futureOtp)?.expiresAt)
+        dao.clearExpiry(ClipboardCategory.Otp)
+        assertNull(dao.get(futureOtp)?.expiresAt)
+    }
+
+    @Test
+    fun protectingEntryClearsExpiryAndUnprotectingDoesNotRestoreIt() = runBlocking {
+        val pinnedId = insert(
+            text = "1234",
+            timestamp = 1,
+            category = ClipboardCategory.Otp,
+            expiresAt = 100
+        )
+        dao.updatePinStatus(pinnedId, true)
+        assertNull(dao.get(pinnedId)?.expiresAt)
+        dao.updatePinStatus(pinnedId, false)
+        assertNull(dao.get(pinnedId)?.expiresAt)
+
+        val favoriteId = insert(
+            text = "123456",
+            timestamp = 2,
+            category = ClipboardCategory.Otp,
+            expiresAt = 100
+        )
+        dao.updateFavoriteStatus(favoriteId, true)
+        assertNull(dao.get(favoriteId)?.expiresAt)
+        dao.updateFavoriteStatus(favoriteId, false)
+        assertNull(dao.get(favoriteId)?.expiresAt)
     }
 
     private suspend fun insert(
@@ -226,7 +326,8 @@ class ClipboardDatabaseTest {
         pinned: Boolean = false,
         favorite: Boolean = false,
         category: ClipboardCategory = ClipboardCategory.Other,
-        classificationVersion: Int = ClipboardContentAnalyzer.VERSION
+        classificationVersion: Int = ClipboardContentAnalyzer.VERSION,
+        expiresAt: Long? = null
     ): Int = dao.insert(
         ClipboardEntry(
             text = text,
@@ -234,7 +335,8 @@ class ClipboardDatabaseTest {
             timestamp = timestamp,
             favorite = favorite,
             category = category,
-            classificationVersion = classificationVersion
+            classificationVersion = classificationVersion,
+            expiresAt = expiresAt
         )
     ).toInt()
 }
