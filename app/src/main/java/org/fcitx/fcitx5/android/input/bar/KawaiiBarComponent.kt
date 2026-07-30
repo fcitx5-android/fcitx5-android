@@ -34,6 +34,9 @@ import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
+import org.fcitx.fcitx5.android.data.quickphrase.CommonWordMatcher
+import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseEntry
+import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseManager
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.ClickToAttachWindow
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.State.ClickToDetachWindow
@@ -109,6 +112,9 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     private var clipboardTimeoutJob: Job? = null
 
     private var isClipboardFresh: Boolean = false
+    private var commonWords: List<QuickPhraseEntry> = emptyList()
+    private var commonWordMatch: CommonWordMatcher.Match? = null
+    private var commonWordSuggestionsAllowed: Boolean = true
     private var isInlineSuggestionPresent: Boolean = false
     private var isCapabilityFlagsPassword: Boolean = false
     private var isKeyboardLayoutNumber: Boolean = false
@@ -117,6 +123,15 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     private enum class NumberRowState { Auto, ForceShow, ForceHide }
 
     private var numberRowState = NumberRowState.Auto
+
+    @Keep
+    private val onCommonWordsChangedListener =
+        QuickPhraseManager.OnCommonWordsChangedListener {
+            service.lifecycleScope.launch {
+                commonWords = it
+                refreshCommonWordSuggestion()
+            }
+        }
 
     @Keep
     private val onClipboardUpdateListener =
@@ -176,6 +191,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     private fun evalIdleUiState(fromUser: Boolean = false) {
         val newState = when {
             numberRowState == NumberRowState.ForceShow -> IdleUi.State.NumberRow
+            commonWordMatch != null -> IdleUi.State.CommonWord
             isClipboardFresh -> IdleUi.State.Clipboard
             isInlineSuggestionPresent -> IdleUi.State.InlineSuggestion
             isCapabilityFlagsPassword && !isKeyboardLayoutNumber && numberRowState != NumberRowState.ForceHide -> IdleUi.State.NumberRow
@@ -324,6 +340,17 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                     true
                 }
             }
+            commonWordUi.suggestionView.apply {
+                setOnClickListener {
+                    commonWordMatch?.completion?.let { service.commitText(it) }
+                    commonWordMatch = null
+                    evalIdleUiState()
+                }
+                setOnLongClickListener {
+                    AppUtil.launchMainToCommonWords(context)
+                    true
+                }
+            }
             numberRow.apply {
                 onCollapseListener = {
                     numberRowState = NumberRowState.ForceHide
@@ -427,14 +454,21 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             }
         }
         ClipboardManager.addOnUpdateListener(onClipboardUpdateListener)
+        commonWords = QuickPhraseManager.loadCommonWords()
+        QuickPhraseManager.addOnCommonWordsChangedListener(onCommonWordsChangedListener)
         clipboardSuggestion.registerOnChangeListener(onClipboardSuggestionUpdateListener)
         clipboardItemTimeout.registerOnChangeListener(onClipboardTimeoutUpdateListener)
     }
 
     override fun onStartInput(info: EditorInfo, capFlags: CapabilityFlags) {
+        val privateMode = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+            info.imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            idleUi.privateMode(info.imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING))
+            idleUi.privateMode(privateMode)
         }
+        commonWords = QuickPhraseManager.loadCommonWords()
+        commonWordSuggestionsAllowed = !privateMode && !capFlags.has(CapabilityFlag.Password)
+        commonWordMatch = null
         isCapabilityFlagsPassword = toolbarNumRowOnPassword && capFlags.has(CapabilityFlag.Password)
         isInlineSuggestionPresent = false
         numberRowState = NumberRowState.Auto
@@ -448,6 +482,31 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
             shouldShowVoiceInput,
             if (shouldShowVoiceInput) switchToVoiceInputCallback else hideKeyboardCallback
         )
+        evalIdleUiState()
+        refreshCommonWordSuggestion()
+    }
+
+    override fun onSelectionUpdate(start: Int, end: Int) {
+        if (start != end) {
+            commonWordMatch = null
+            evalIdleUiState()
+            return
+        }
+        refreshCommonWordSuggestion()
+    }
+
+    private fun refreshCommonWordSuggestion() {
+        commonWordMatch = if (commonWordSuggestionsAllowed) {
+            val textBeforeCursor = runCatching {
+                service.currentInputConnection
+                    ?.getTextBeforeCursor(COMMON_WORD_LOOKBEHIND, 0)
+                    ?.toString()
+            }.getOrNull().orEmpty()
+            CommonWordMatcher.bestMatch(textBeforeCursor, commonWords)
+        } else {
+            null
+        }
+        commonWordMatch?.let { idleUi.commonWordUi.text.text = it.entry.phrase }
         evalIdleUiState()
     }
 
@@ -540,6 +599,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     companion object {
         const val HEIGHT = 40
+        private const val COMMON_WORD_LOOKBEHIND = 256
     }
 
     fun onKeyboardLayoutSwitched(isNumber: Boolean) {

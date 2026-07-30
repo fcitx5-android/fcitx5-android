@@ -6,5 +6,6 @@ package org.fcitx.fcitx5.android.input.clipboard
 
 enum class ClipboardPanelSection {
     Clipboard,
-    Favorites
+    Favorites,
+    CommonWords
 }

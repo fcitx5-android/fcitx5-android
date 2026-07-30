@@ -62,6 +62,8 @@
     <string name="favorite" tools:ignore="MissingTranslation">Add to favorites</string>
     <string name="unfavorite" tools:ignore="MissingTranslation">Remove from favorites</string>
     <string name="favorites" tools:ignore="MissingTranslation">Favorites</string>
+    <string name="common_words" tools:ignore="MissingTranslation">Common words</string>
+    <string name="add_common_word" tools:ignore="MissingTranslation">Add common word</string>
     <string name="delete">Delete</string>
     <string name="clipboard">Clipboard</string>
     <string name="keyboard_height">Keyboard height</string>
@@ -84,6 +86,7 @@
     <string name="instruction_enable_clipboard_listening">To use clipboard management, please enable clipboard listening in settings</string>
     <string name="instruction_copy">Try copying something</string>
     <string name="instruction_favorite" tools:ignore="MissingTranslation">Long press a clipboard item to add it to favorites</string>
+    <string name="instruction_common_words" tools:ignore="MissingTranslation">Tap + to add frequently used text</string>
     <string name="instruction_no_category" tools:ignore="MissingTranslation">No %1$s items</string>
     <string name="instruction_no_favorite_category" tools:ignore="MissingTranslation">No favorite %1$s items</string>
     <string name="clipboard_category_all" tools:ignore="MissingTranslation">All</string>

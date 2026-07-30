@@ -66,9 +66,15 @@ class ClipboardTopBarUi(override val ctx: Context, private val theme: Theme) : U
 
     private val clipboardTab = Tab(ClipboardPanelSection.Clipboard, R.string.clipboard)
     private val favoritesTab = Tab(ClipboardPanelSection.Favorites, R.string.favorites)
+    private val commonWordsTab = Tab(ClipboardPanelSection.CommonWords, R.string.common_words)
 
     val deleteAllButton = ToolButton(ctx, R.drawable.ic_baseline_delete_sweep_24, theme).apply {
         contentDescription = ctx.getString(R.string.delete_all)
+    }
+
+    val addCommonWordButton = ToolButton(ctx, R.drawable.ic_baseline_add_24, theme).apply {
+        contentDescription = ctx.getString(R.string.add_common_word)
+        visibility = View.INVISIBLE
     }
 
     private var onSectionSelected: ((ClipboardPanelSection) -> Unit)? = null
@@ -84,9 +90,19 @@ class ClipboardTopBarUi(override val ctx: Context, private val theme: Theme) : U
             topOfParent()
             after(clipboardTab.root)
             bottomOfParent()
+            before(commonWordsTab.root)
+        })
+        add(commonWordsTab.root, lParams {
+            topOfParent()
+            after(favoritesTab.root)
+            bottomOfParent()
             before(deleteAllButton)
         })
         add(deleteAllButton, lParams(dp(40), dp(40)) {
+            centerVertically()
+            endOfParent()
+        })
+        add(addCommonWordButton, lParams(dp(40), dp(40)) {
             centerVertically()
             endOfParent()
         })
@@ -103,9 +119,14 @@ class ClipboardTopBarUi(override val ctx: Context, private val theme: Theme) : U
     fun setActiveSection(section: ClipboardPanelSection) {
         clipboardTab.setActive(section == ClipboardPanelSection.Clipboard)
         favoritesTab.setActive(section == ClipboardPanelSection.Favorites)
+        commonWordsTab.setActive(section == ClipboardPanelSection.CommonWords)
     }
 
     fun setDeleteButtonShown(shown: Boolean) {
         deleteAllButton.visibility = if (shown) View.VISIBLE else View.INVISIBLE
+    }
+
+    fun setCommonWordButtonShown(shown: Boolean) {
+        addCommonWordButton.visibility = if (shown) View.VISIBLE else View.INVISIBLE
     }
 }

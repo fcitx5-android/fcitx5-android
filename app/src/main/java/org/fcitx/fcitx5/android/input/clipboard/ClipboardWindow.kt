@@ -27,15 +27,20 @@ import com.google.android.material.snackbar.BaseTransientBottomBar.BaseCallback
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.SnackbarContentLayout
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.reloadQuickPhrase
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardCategory
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardEntryFilter
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
+import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseEntry
+import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseManager
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
@@ -75,11 +80,23 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     private val clipboardEntryRadius by ThemeManager.prefs.clipboardEntryRadius
 
     private var adapterSubmitJob: Job? = null
+    private var commonWordsLoadJob: Job? = null
 
     private var selectedSection = ClipboardPanelSection.Clipboard
     private var selectedCategory: ClipboardCategory? = null
     private var visibleEntriesEmpty = true
     private var deleteAvailable = false
+    private var commonWordsEmpty = true
+
+    @Keep
+    private val commonWordsChangedListener =
+        QuickPhraseManager.OnCommonWordsChangedListener { entries ->
+            service.lifecycleScope.launch {
+                commonWordsAdapter.updateEntries(entries)
+                commonWordsEmpty = entries.isEmpty()
+                if (selectedSection == ClipboardPanelSection.CommonWords) renderUi()
+            }
+        }
 
     private val adapter: ClipboardAdapter by lazy {
         object : ClipboardAdapter(
@@ -132,11 +149,46 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         }
     }
 
+    private val commonWordsAdapter: CommonWordsAdapter by lazy {
+        object : CommonWordsAdapter(
+            theme,
+            context.dp(clipboardEntryRadius.toFloat())
+        ) {
+            override fun onPaste(entry: QuickPhraseEntry) {
+                service.commitText(entry.phrase)
+                if (clipboardReturnAfterPaste) windowManager.attachWindow(KeyboardWindow)
+            }
+
+            override fun onEdit() {
+                AppUtil.launchMainToCommonWords(context)
+            }
+
+            override fun onDelete(entry: QuickPhraseEntry) {
+                service.lifecycleScope.launch {
+                    val entries = withContext(Dispatchers.IO) {
+                        QuickPhraseManager.deleteCommonWord(entry)
+                    }
+                    updateEntries(entries)
+                    commonWordsEmpty = entries.isEmpty()
+                    renderUi()
+                    service.postFcitxJob { reloadQuickPhrase() }
+                }
+            }
+        }
+    }
+
     private val ui by lazy {
         ClipboardUi(context, theme).apply {
             recyclerView.apply {
                 layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
                 adapter = this@ClipboardWindow.adapter
+            }
+            commonWordsRecyclerView.apply {
+                layoutManager = StaggeredGridLayoutManager(
+                    2,
+                    StaggeredGridLayoutManager.VERTICAL
+                )
+                adapter = commonWordsAdapter
             }
             ItemTouchHelper(object : ItemTouchHelper.Callback() {
                 override fun getMovementFlags(
@@ -173,6 +225,9 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
             }
             topBar.deleteAllButton.setOnClickListener {
                 promptDeleteAll()
+            }
+            topBar.addCommonWordButton.setOnClickListener {
+                AppUtil.launchMainToCommonWords(context)
             }
         }
     }
@@ -281,6 +336,13 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     private fun submitEntries() {
         visibleEntriesEmpty = false
         deleteAvailable = false
+        if (selectedSection == ClipboardPanelSection.CommonWords) {
+            adapterSubmitJob?.cancel()
+            adapterSubmitJob = null
+            renderUi()
+            loadCommonWords()
+            return
+        }
         renderUi()
         adapterSubmitJob?.cancel()
         adapterSubmitJob = service.lifecycleScope.launch {
@@ -288,6 +350,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
                 scope = when (selectedSection) {
                     ClipboardPanelSection.Clipboard -> ClipboardEntryFilter.Scope.All
                     ClipboardPanelSection.Favorites -> ClipboardEntryFilter.Scope.Favorites
+                    ClipboardPanelSection.CommonWords -> ClipboardEntryFilter.Scope.All
                 },
                 category = selectedCategory
             )
@@ -297,8 +360,21 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         }
     }
 
+    private fun loadCommonWords() {
+        commonWordsLoadJob?.cancel()
+        commonWordsLoadJob = service.lifecycleScope.launch {
+            val entries = withContext(Dispatchers.IO) {
+                QuickPhraseManager.loadCommonWords()
+            }
+            commonWordsAdapter.updateEntries(entries)
+            commonWordsEmpty = entries.isEmpty()
+            renderUi()
+        }
+    }
+
     private fun refreshDeleteAvailability() {
         val section = selectedSection
+        if (section == ClipboardPanelSection.CommonWords) return
         service.lifecycleScope.launch {
             val available = ClipboardManager.haveDeletable()
             if (selectedSection == section) {
@@ -309,6 +385,10 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     }
 
     private fun renderUi() {
+        if (selectedSection == ClipboardPanelSection.CommonWords) {
+            ui.showCommonWords(commonWordsEmpty)
+            return
+        }
         selectedCategory?.let { ui.filteredEmptyUi.setFilter(selectedSection, it) }
         val state = ClipboardStateMachine.resolve(
             clipboardEnabledPref.getValue(),
@@ -334,6 +414,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         ui.topBar.setActiveSection(selectedSection)
         ui.categoryBar.setActiveCategory(selectedCategory)
         adapter.addLoadStateListener(adapterLoadStateListener)
+        QuickPhraseManager.addOnCommonWordsChangedListener(commonWordsChangedListener)
         renderUi()
         showSection(selectedSection)
         clipboardEnabledPref.registerOnChangeListener(clipboardEnabledListener)
@@ -341,10 +422,14 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
 
     override fun onDetached() {
         clipboardEnabledPref.unregisterOnChangeListener(clipboardEnabledListener)
+        QuickPhraseManager.removeOnCommonWordsChangedListener(commonWordsChangedListener)
         adapter.removeLoadStateListener(adapterLoadStateListener)
         adapter.onDetached()
+        commonWordsAdapter.onDetached()
         adapterSubmitJob?.cancel()
         adapterSubmitJob = null
+        commonWordsLoadJob?.cancel()
+        commonWordsLoadJob = null
         promptMenu?.dismiss()
         snackbarInstance?.dismiss()
     }

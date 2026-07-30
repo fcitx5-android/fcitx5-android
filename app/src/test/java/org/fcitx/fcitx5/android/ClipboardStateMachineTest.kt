@@ -10,10 +10,14 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ClipboardStateMachineTest {
+    private val clipboardSections = listOf(
+        ClipboardPanelSection.Clipboard,
+        ClipboardPanelSection.Favorites
+    )
 
     @Test
     fun listeningDisabledAlwaysShowsEnableInstruction() {
-        ClipboardPanelSection.entries.forEach { section ->
+        clipboardSections.forEach { section ->
             listOf(true, false).forEach { empty ->
                 assertEquals(
                     ClipboardStateMachine.State.EnableListening,
@@ -25,7 +29,7 @@ class ClipboardStateMachineTest {
 
     @Test
     fun nonEmptySectionShowsEntries() {
-        ClipboardPanelSection.entries.forEach { section ->
+        clipboardSections.forEach { section ->
             assertEquals(
                 ClipboardStateMachine.State.Normal,
                 ClipboardStateMachine.resolve(true, section, false, false)
@@ -47,7 +51,7 @@ class ClipboardStateMachineTest {
 
     @Test
     fun emptyCategoryShowsFilteredInstructionInBothSections() {
-        ClipboardPanelSection.entries.forEach { section ->
+        clipboardSections.forEach { section ->
             assertEquals(
                 ClipboardStateMachine.State.NoFilteredEntries,
                 ClipboardStateMachine.resolve(true, section, true, true)

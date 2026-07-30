@@ -62,6 +62,8 @@
     <string name="favorite">收藏</string>
     <string name="unfavorite">取消收藏</string>
     <string name="favorites">收藏</string>
+    <string name="common_words">常用词</string>
+    <string name="add_common_word">添加常用词</string>
     <string name="delete">删除</string>
     <string name="clipboard">剪贴板</string>
     <string name="keyboard_height">键盘高度</string>
@@ -84,6 +86,7 @@
     <string name="instruction_enable_clipboard_listening">要启用剪贴板管理，请在设置中开启“记录剪贴板历史”。</string>
     <string name="instruction_copy">试着复制些东西</string>
     <string name="instruction_favorite">长按剪贴板条目即可收藏</string>
+    <string name="instruction_common_words">点击 + 添加常用文本</string>
     <string name="instruction_no_category">没有%1$s条目</string>
     <string name="instruction_no_favorite_category">没有已收藏的%1$s条目</string>
     <string name="clipboard_category_all">全部</string>

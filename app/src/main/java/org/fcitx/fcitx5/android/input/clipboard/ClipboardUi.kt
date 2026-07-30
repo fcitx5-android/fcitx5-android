@@ -40,6 +40,12 @@ class ClipboardUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     val filteredEmptyUi = ClipboardInstructionUi.FilteredEmpty(ctx, theme)
 
+    val commonWordsRecyclerView = recyclerView {
+        addItemDecoration(SpacesItemDecoration(dp(4)))
+    }
+
+    val commonWordsEmptyUi = ClipboardInstructionUi.CommonWordsEmpty(ctx, theme)
+
     val categoryBar = ClipboardCategoryBarUi(ctx, theme)
 
     val viewAnimator =  view(::ViewAnimator) {
@@ -48,6 +54,8 @@ class ClipboardUi(override val ctx: Context, private val theme: Theme) : Ui {
         add(enableUi.root, lParams(matchParent, matchParent))
         add(favoritesEmptyUi.root, lParams(matchParent, matchParent))
         add(filteredEmptyUi.root, lParams(matchParent, matchParent))
+        add(commonWordsRecyclerView, lParams(matchParent, matchParent))
+        add(commonWordsEmptyUi.root, lParams(matchParent, matchParent))
     }
 
     private val keyBorder by ThemeManager.prefs.keyBorder
@@ -91,5 +99,13 @@ class ClipboardUi(override val ctx: Context, private val theme: Theme) : Ui {
         categoryBar.root.visibility =
             if (state == ClipboardStateMachine.State.EnableListening) View.GONE else View.VISIBLE
         topBar.setDeleteButtonShown(showDeleteButton)
+        topBar.setCommonWordButtonShown(false)
+    }
+
+    fun showCommonWords(empty: Boolean) {
+        viewAnimator.displayedChild = if (empty) 6 else 5
+        categoryBar.root.visibility = View.GONE
+        topBar.setDeleteButtonShown(false)
+        topBar.setCommonWordButtonShown(true)
     }
 }

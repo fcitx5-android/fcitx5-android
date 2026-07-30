@@ -14,9 +14,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.reloadQuickPhrase
 import org.fcitx.fcitx5.android.data.quickphrase.QuickPhrase
 import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseData
 import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseEntry
+import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseManager
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
 import org.fcitx.fcitx5.android.ui.main.EditDeleteMenuProvider
@@ -37,6 +39,10 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
 
     private val quickPhrase: QuickPhrase by lazy {
         args.param.quickPhrase
+    }
+
+    private val isCommonWords by lazy {
+        QuickPhraseManager.isCommonWords(quickPhrase)
     }
 
     private lateinit var ui: BaseDynamicListUi<QuickPhraseEntry>
@@ -87,8 +93,13 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
                     .onPositiveButtonClick onClick@{
-                        val keyword = keywordField.str.trim()
-                        // "keyword" cannot contain any black characters
+                        var keyword = keywordField.str.trim()
+                        val phrase = phraseField.str
+                        if (keyword.isBlank() && isCommonWords && phrase.isNotEmpty()) {
+                            val count = phrase.codePointCount(0, phrase.length).coerceAtMost(3)
+                            keyword = phrase.substring(0, phrase.offsetByCodePoints(0, count))
+                        }
+                        // "keyword" cannot contain any blank characters
                         if (keyword.isBlank()) {
                             keywordField.error = getString(
                                 R.string._cannot_be_empty,
@@ -100,7 +111,6 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
                             keywordField.error = null
                         }
                         // "phrase" may contain blank characters
-                        val phrase = phraseField.str
                         if (phrase.isEmpty()) {
                             phraseField.error = getString(
                                 R.string._cannot_be_empty,
@@ -161,7 +171,14 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
         resetDustman()
         lifecycleScope.launch {
             withContext(Dispatchers.IO) {
-                quickPhrase.saveData(QuickPhraseData(ui.entries))
+                if (isCommonWords) {
+                    QuickPhraseManager.saveCommonWords(ui.entries)
+                } else {
+                    quickPhrase.saveData(QuickPhraseData(ui.entries))
+                }
+            }
+            if (isCommonWords) {
+                viewModel.fcitx.runIfReady { reloadQuickPhrase() }
             }
             // tell parent that we need to reload
             parentFragmentManager.setFragmentResult(
@@ -177,7 +194,9 @@ class QuickPhraseEditFragment : ProgressFragment(), OnItemChangedListener<QuickP
 
     override fun onStart() {
         super.onStart()
-        viewModel.setToolbarTitle(quickPhrase.name)
+        viewModel.setToolbarTitle(
+            if (isCommonWords) getString(R.string.common_words) else quickPhrase.name
+        )
     }
 
     override fun onStop() {
