@@ -10,16 +10,19 @@ object ClipboardStateMachine {
         Normal,
         AddMore,
         NoFavorites,
+        NoFilteredEntries,
         EnableListening
     }
 
     fun resolve(
         listening: Boolean,
         section: ClipboardPanelSection,
+        categorySelected: Boolean,
         visibleEntriesEmpty: Boolean
     ): State = when {
         !listening -> State.EnableListening
         !visibleEntriesEmpty -> State.Normal
+        categorySelected -> State.NoFilteredEntries
         section == ClipboardPanelSection.Favorites -> State.NoFavorites
         else -> State.AddMore
     }

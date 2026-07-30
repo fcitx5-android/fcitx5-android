@@ -84,6 +84,15 @@
     <string name="instruction_enable_clipboard_listening">To use clipboard management, please enable clipboard listening in settings</string>
     <string name="instruction_copy">Try copying something</string>
     <string name="instruction_favorite" tools:ignore="MissingTranslation">Long press a clipboard item to add it to favorites</string>
+    <string name="instruction_no_category" tools:ignore="MissingTranslation">No %1$s items</string>
+    <string name="instruction_no_favorite_category" tools:ignore="MissingTranslation">No favorite %1$s items</string>
+    <string name="clipboard_category_all" tools:ignore="MissingTranslation">All</string>
+    <string name="clipboard_category_phone" tools:ignore="MissingTranslation">Phone</string>
+    <string name="clipboard_category_email" tools:ignore="MissingTranslation">Email</string>
+    <string name="clipboard_category_url" tools:ignore="MissingTranslation">URL</string>
+    <string name="clipboard_category_otp" tools:ignore="MissingTranslation">Codes</string>
+    <string name="clipboard_category_tracking_token" tools:ignore="MissingTranslation">Tokens</string>
+    <string name="clipboard_category_other" tools:ignore="MissingTranslation">Other</string>
     <string name="clear">Clear</string>
     <string name="export">Export</string>
     <string name="app_crash">Application crashed</string>

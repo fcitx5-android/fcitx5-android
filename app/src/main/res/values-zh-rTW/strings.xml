@@ -84,6 +84,15 @@
     <string name="instruction_enable_clipboard_listening">要使用剪貼簿管理，請在設定中啟用監聽剪貼簿</string>
     <string name="instruction_copy">嘗試複製一些東西</string>
     <string name="instruction_favorite">長按剪貼簿項目即可收藏</string>
+    <string name="instruction_no_category">沒有%1$s項目</string>
+    <string name="instruction_no_favorite_category">沒有已收藏的%1$s項目</string>
+    <string name="clipboard_category_all">全部</string>
+    <string name="clipboard_category_phone">電話</string>
+    <string name="clipboard_category_email">電子郵件</string>
+    <string name="clipboard_category_url">網址</string>
+    <string name="clipboard_category_otp">驗證碼</string>
+    <string name="clipboard_category_tracking_token">口令</string>
+    <string name="clipboard_category_other">其他</string>
     <string name="clear">清除</string>
     <string name="export">匯出</string>
     <string name="app_crash">應用程式當機</string>

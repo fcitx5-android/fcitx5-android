@@ -6,6 +6,7 @@ package org.fcitx.fcitx5.android.input.clipboard
 
 import android.content.Context
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.data.clipboard.ClipboardCategory
 import org.fcitx.fcitx5.android.data.theme.Theme
 import splitties.dimensions.dp
 import splitties.resources.drawable
@@ -105,6 +106,40 @@ sealed class ClipboardInstructionUi(override val ctx: Context, protected val the
                 startOfParent()
                 endOfParent()
             })
+        }
+    }
+
+    class FilteredEmpty(ctx: Context, theme: Theme) : ClipboardInstructionUi(ctx, theme) {
+
+        private val icon = imageView {
+            imageDrawable = drawable(R.drawable.ic_baseline_content_paste_24)!!.apply {
+                setTint(theme.altKeyTextColor)
+            }
+        }
+
+        private val instructionText = textView {
+            setTextColor(theme.keyTextColor)
+        }
+
+        override val root = constraintLayout {
+            add(icon, lParams(dp(90), dp(90)) {
+                topOfParent(dp(24))
+                startOfParent()
+                endOfParent()
+            })
+            add(instructionText, lParams(wrapContent, wrapContent) {
+                below(icon, dp(16))
+                startOfParent()
+                endOfParent()
+            })
+        }
+
+        fun setFilter(section: ClipboardPanelSection, category: ClipboardCategory) {
+            val format = when (section) {
+                ClipboardPanelSection.Clipboard -> R.string.instruction_no_category
+                ClipboardPanelSection.Favorites -> R.string.instruction_no_favorite_category
+            }
+            instructionText.text = ctx.getString(format, ctx.getString(category.stringRes))
         }
     }
 }

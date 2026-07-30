@@ -17,7 +17,7 @@ class ClipboardStateMachineTest {
             listOf(true, false).forEach { empty ->
                 assertEquals(
                     ClipboardStateMachine.State.EnableListening,
-                    ClipboardStateMachine.resolve(false, section, empty)
+                    ClipboardStateMachine.resolve(false, section, false, empty)
                 )
             }
         }
@@ -28,7 +28,7 @@ class ClipboardStateMachineTest {
         ClipboardPanelSection.entries.forEach { section ->
             assertEquals(
                 ClipboardStateMachine.State.Normal,
-                ClipboardStateMachine.resolve(true, section, false)
+                ClipboardStateMachine.resolve(true, section, false, false)
             )
         }
     }
@@ -37,11 +37,21 @@ class ClipboardStateMachineTest {
     fun emptySectionShowsSectionSpecificInstruction() {
         assertEquals(
             ClipboardStateMachine.State.AddMore,
-            ClipboardStateMachine.resolve(true, ClipboardPanelSection.Clipboard, true)
+            ClipboardStateMachine.resolve(true, ClipboardPanelSection.Clipboard, false, true)
         )
         assertEquals(
             ClipboardStateMachine.State.NoFavorites,
-            ClipboardStateMachine.resolve(true, ClipboardPanelSection.Favorites, true)
+            ClipboardStateMachine.resolve(true, ClipboardPanelSection.Favorites, false, true)
         )
+    }
+
+    @Test
+    fun emptyCategoryShowsFilteredInstructionInBothSections() {
+        ClipboardPanelSection.entries.forEach { section ->
+            assertEquals(
+                ClipboardStateMachine.State.NoFilteredEntries,
+                ClipboardStateMachine.resolve(true, section, true, true)
+            )
+        }
     }
 }

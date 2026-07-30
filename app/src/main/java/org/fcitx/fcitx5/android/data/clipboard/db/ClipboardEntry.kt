@@ -10,6 +10,7 @@ import android.os.Build
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import org.fcitx.fcitx5.android.data.clipboard.ClipboardCategory
 import org.fcitx.fcitx5.android.utils.timestamp
 
 @Entity(tableName = ClipboardEntry.TABLE_NAME)
@@ -27,7 +28,11 @@ data class ClipboardEntry(
     @ColumnInfo(defaultValue = "0")
     val sensitive: Boolean = false,
     @ColumnInfo(defaultValue = "0")
-    val favorite: Boolean = false
+    val favorite: Boolean = false,
+    @ColumnInfo(defaultValue = "'Other'")
+    val category: ClipboardCategory = ClipboardCategory.Other,
+    @ColumnInfo(defaultValue = "0")
+    val classificationVersion: Int = 0
 ) {
     companion object {
         const val BULLET = "•"

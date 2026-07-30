@@ -30,6 +30,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.data.clipboard.ClipboardCategory
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardEntryFilter
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardEntry
@@ -76,6 +77,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     private var adapterSubmitJob: Job? = null
 
     private var selectedSection = ClipboardPanelSection.Clipboard
+    private var selectedCategory: ClipboardCategory? = null
     private var visibleEntriesEmpty = true
     private var deleteAvailable = false
 
@@ -165,6 +167,9 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
             }
             topBar.setOnSectionSelectedListener {
                 showSection(it)
+            }
+            categoryBar.setOnCategorySelectedListener {
+                showCategory(it)
             }
             topBar.deleteAllButton.setOnClickListener {
                 promptDeleteAll()
@@ -262,18 +267,30 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     }
 
     private fun showSection(section: ClipboardPanelSection) {
-        if (selectedSection == section && adapterSubmitJob?.isActive == true) return
         selectedSection = section
+        ui.topBar.setActiveSection(section)
+        submitEntries()
+    }
+
+    private fun showCategory(category: ClipboardCategory?) {
+        selectedCategory = category
+        ui.categoryBar.setActiveCategory(category)
+        submitEntries()
+    }
+
+    private fun submitEntries() {
         visibleEntriesEmpty = false
         deleteAvailable = false
-        ui.topBar.setActiveSection(section)
         renderUi()
         adapterSubmitJob?.cancel()
         adapterSubmitJob = service.lifecycleScope.launch {
-            val filter = when (section) {
-                ClipboardPanelSection.Clipboard -> ClipboardEntryFilter.All
-                ClipboardPanelSection.Favorites -> ClipboardEntryFilter.Favorites
-            }
+            val filter = ClipboardEntryFilter(
+                scope = when (selectedSection) {
+                    ClipboardPanelSection.Clipboard -> ClipboardEntryFilter.Scope.All
+                    ClipboardPanelSection.Favorites -> ClipboardEntryFilter.Scope.Favorites
+                },
+                category = selectedCategory
+            )
             Pager(PagingConfig(pageSize = 16)) { ClipboardManager.entries(filter) }
                 .flow
                 .collectLatest { adapter.submitData(it) }
@@ -292,24 +309,29 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     }
 
     private fun renderUi() {
+        selectedCategory?.let { ui.filteredEmptyUi.setFilter(selectedSection, it) }
         val state = ClipboardStateMachine.resolve(
             clipboardEnabledPref.getValue(),
             selectedSection,
+            selectedCategory != null,
             visibleEntriesEmpty
         )
         ui.switchUiByState(
             state,
             state == ClipboardStateMachine.State.Normal &&
                 selectedSection == ClipboardPanelSection.Clipboard &&
+                selectedCategory == null &&
                 deleteAvailable
         )
     }
 
     override fun onAttached() {
         selectedSection = ClipboardPanelSection.Clipboard
+        selectedCategory = null
         visibleEntriesEmpty = ClipboardManager.itemCount == 0
         deleteAvailable = false
         ui.topBar.setActiveSection(selectedSection)
+        ui.categoryBar.setActiveCategory(selectedCategory)
         adapter.addLoadStateListener(adapterLoadStateListener)
         renderUi()
         showSection(selectedSection)

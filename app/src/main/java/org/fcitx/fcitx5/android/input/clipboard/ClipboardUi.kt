@@ -5,6 +5,7 @@
 package org.fcitx.fcitx5.android.input.clipboard
 
 import android.content.Context
+import android.view.View
 import android.widget.ViewAnimator
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
@@ -21,6 +22,7 @@ import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.view
+import splitties.views.dsl.core.verticalLayout
 import splitties.views.dsl.recyclerview.recyclerView
 import timber.log.Timber
 
@@ -36,11 +38,16 @@ class ClipboardUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     val favoritesEmptyUi = ClipboardInstructionUi.FavoritesEmpty(ctx, theme)
 
+    val filteredEmptyUi = ClipboardInstructionUi.FilteredEmpty(ctx, theme)
+
+    val categoryBar = ClipboardCategoryBarUi(ctx, theme)
+
     val viewAnimator =  view(::ViewAnimator) {
         add(recyclerView, lParams(matchParent, matchParent))
         add(emptyUi.root, lParams(matchParent, matchParent))
         add(enableUi.root, lParams(matchParent, matchParent))
         add(favoritesEmptyUi.root, lParams(matchParent, matchParent))
+        add(filteredEmptyUi.root, lParams(matchParent, matchParent))
     }
 
     private val keyBorder by ThemeManager.prefs.keyBorder
@@ -50,7 +57,10 @@ class ClipboardUi(override val ctx: Context, private val theme: Theme) : Ui {
         if (!keyBorder) {
             backgroundColor = theme.barColor
         }
-        add(viewAnimator, defaultLParams(matchParent, matchParent))
+        add(verticalLayout {
+            add(viewAnimator, lParams(matchParent, 0, weight = 1f))
+            add(categoryBar.root, lParams(matchParent, dp(40)))
+        }, defaultLParams(matchParent, matchParent))
     }
 
     val topBar = ClipboardTopBarUi(ctx, theme)
@@ -74,7 +84,12 @@ class ClipboardUi(override val ctx: Context, private val theme: Theme) : Ui {
             ClipboardStateMachine.State.NoFavorites -> {
                 viewAnimator.displayedChild = 3
             }
+            ClipboardStateMachine.State.NoFilteredEntries -> {
+                viewAnimator.displayedChild = 4
+            }
         }
+        categoryBar.root.visibility =
+            if (state == ClipboardStateMachine.State.EnableListening) View.GONE else View.VISIBLE
         topBar.setDeleteButtonShown(showDeleteButton)
     }
 }

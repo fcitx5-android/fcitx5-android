@@ -95,16 +95,19 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
         enabledPref.registerOnChangeListener(enabledListener)
         limitListener.onChange(limitPref.key, limitPref.getValue())
         limitPref.registerOnChangeListener(limitListener)
-        launch { updateItemCount() }
+        launch {
+            updateItemCount()
+            reclassifyOutdatedEntries()
+        }
     }
 
     suspend fun get(id: Int) = clbDao.get(id)
 
     suspend fun haveDeletable() = clbDao.haveDeletable()
 
-    fun entries(filter: ClipboardEntryFilter) = when (filter) {
-        ClipboardEntryFilter.All -> clbDao.allEntries()
-        ClipboardEntryFilter.Favorites -> clbDao.favoriteEntries()
+    fun entries(filter: ClipboardEntryFilter) = when (filter.scope) {
+        ClipboardEntryFilter.Scope.All -> clbDao.allEntries(filter.category)
+        ClipboardEntryFilter.Scope.Favorites -> clbDao.favoriteEntries(filter.category)
     }
 
     suspend fun pin(id: Int) = clbDao.updatePinStatus(id, true)
@@ -116,10 +119,20 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     suspend fun unfavorite(id: Int) = clbDao.updateFavoriteStatus(id, false)
 
     suspend fun updateText(id: Int, text: String) {
-        lastEntry?.let {
-            if (id == it.id) updateLastEntry(it.copy(text = text))
-        }
-        clbDao.updateText(id, text)
+        val entry = clbDao.get(id) ?: return
+        val analysis = ClipboardContentAnalyzer.analyze(text)
+        val updated = entry.copy(
+            text = text,
+            category = analysis.category,
+            classificationVersion = ClipboardContentAnalyzer.VERSION
+        )
+        if (lastEntry?.id == id) updateLastEntry(updated)
+        clbDao.updateTextAndClassification(
+            id,
+            text,
+            analysis.category,
+            ClipboardContentAnalyzer.VERSION
+        )
     }
 
     suspend fun delete(id: Int) {
@@ -172,12 +185,26 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
         }
         launch {
             mutex.withLock {
-                val entry = ClipboardEntry.fromClipData(clip, transformer) ?: return@withLock
-                if (entry.text.isBlank()) return@withLock
+                val rawEntry = ClipboardEntry.fromClipData(clip, transformer) ?: return@withLock
+                if (rawEntry.text.isBlank()) return@withLock
+                val analysis = ClipboardContentAnalyzer.analyze(rawEntry.text)
+                val entry = rawEntry.copy(
+                    category = analysis.category,
+                    classificationVersion = ClipboardContentAnalyzer.VERSION
+                )
                 try {
                     clbDao.find(entry.text, entry.sensitive)?.let {
-                        updateLastEntry(it.copy(timestamp = entry.timestamp))
-                        clbDao.updateTime(it.id, entry.timestamp)
+                        updateLastEntry(it.copy(
+                            timestamp = entry.timestamp,
+                            category = entry.category,
+                            classificationVersion = ClipboardContentAnalyzer.VERSION
+                        ))
+                        clbDao.updateTimeAndClassification(
+                            it.id,
+                            entry.timestamp,
+                            entry.category,
+                            ClipboardContentAnalyzer.VERSION
+                        )
                         return@withLock
                     }
                     val insertedEntry = clbDb.withTransaction {
@@ -206,6 +233,23 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
                 .getOrNull(unprotected.size - limit)
             // delete all unprotected before that, or delete all when limit <= 0
             clbDao.markUnprotectedAsDeletedEarlierThan(last?.timestamp ?: System.currentTimeMillis())
+        }
+    }
+
+    private suspend fun reclassifyOutdatedEntries() {
+        while (true) {
+            val entries = clbDao.entriesToClassify(ClipboardContentAnalyzer.VERSION, 100)
+            if (entries.isEmpty()) return
+            clbDb.withTransaction {
+                entries.forEach { entry ->
+                    val analysis = ClipboardContentAnalyzer.analyze(entry.text)
+                    clbDao.updateClassification(
+                        entry.id,
+                        analysis.category,
+                        ClipboardContentAnalyzer.VERSION
+                    )
+                }
+            }
         }
     }
 

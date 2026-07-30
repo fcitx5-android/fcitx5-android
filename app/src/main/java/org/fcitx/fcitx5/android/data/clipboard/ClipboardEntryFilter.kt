@@ -4,7 +4,17 @@
  */
 package org.fcitx.fcitx5.android.data.clipboard
 
-enum class ClipboardEntryFilter {
-    All,
-    Favorites
+data class ClipboardEntryFilter(
+    val scope: Scope = Scope.All,
+    val category: ClipboardCategory? = null
+) {
+    enum class Scope {
+        All,
+        Favorites
+    }
+
+    companion object {
+        val All = ClipboardEntryFilter()
+        val Favorites = ClipboardEntryFilter(Scope.Favorites)
+    }
 }

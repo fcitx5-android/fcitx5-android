@@ -8,6 +8,7 @@ import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import org.fcitx.fcitx5.android.data.clipboard.ClipboardCategory
 
 @Dao
 interface ClipboardDao {
@@ -20,11 +21,28 @@ interface ClipboardDao {
     @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET favorite=:favorite WHERE id=:id")
     suspend fun updateFavoriteStatus(id: Int, favorite: Boolean)
 
-    @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET text=:text WHERE id=:id")
-    suspend fun updateText(id: Int, text: String)
+    @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET text=:text, category=:category, classificationVersion=:classificationVersion WHERE id=:id")
+    suspend fun updateTextAndClassification(
+        id: Int,
+        text: String,
+        category: ClipboardCategory,
+        classificationVersion: Int
+    )
 
-    @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET timestamp=:timestamp WHERE id=:id")
-    suspend fun updateTime(id: Int, timestamp: Long)
+    @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET timestamp=:timestamp, category=:category, classificationVersion=:classificationVersion WHERE id=:id")
+    suspend fun updateTimeAndClassification(
+        id: Int,
+        timestamp: Long,
+        category: ClipboardCategory,
+        classificationVersion: Int
+    )
+
+    @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET category=:category, classificationVersion=:classificationVersion WHERE id=:id")
+    suspend fun updateClassification(
+        id: Int,
+        category: ClipboardCategory,
+        classificationVersion: Int
+    )
 
     @Query("SELECT COUNT(*) FROM ${ClipboardEntry.TABLE_NAME} WHERE deleted=0")
     suspend fun itemCount(): Int
@@ -41,11 +59,17 @@ interface ClipboardDao {
     @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME} WHERE pinned=0 AND favorite=0 AND deleted=0")
     suspend fun getAllUnprotected(): List<ClipboardEntry>
 
-    @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME} WHERE deleted=0 ORDER BY pinned DESC, timestamp DESC")
-    fun allEntries(): PagingSource<Int, ClipboardEntry>
+    @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME} WHERE deleted=0 AND (:category IS NULL OR category=:category) ORDER BY pinned DESC, timestamp DESC")
+    fun allEntries(category: ClipboardCategory? = null): PagingSource<Int, ClipboardEntry>
 
-    @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME} WHERE favorite=1 AND deleted=0 ORDER BY pinned DESC, timestamp DESC")
-    fun favoriteEntries(): PagingSource<Int, ClipboardEntry>
+    @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME} WHERE favorite=1 AND deleted=0 AND (:category IS NULL OR category=:category) ORDER BY pinned DESC, timestamp DESC")
+    fun favoriteEntries(category: ClipboardCategory? = null): PagingSource<Int, ClipboardEntry>
+
+    @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME} WHERE deleted=0 AND classificationVersion<:classificationVersion LIMIT :limit")
+    suspend fun entriesToClassify(
+        classificationVersion: Int,
+        limit: Int
+    ): List<ClipboardEntry>
 
     @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME} WHERE text=:text AND sensitive=:sensitive AND deleted=0 LIMIT 1")
     suspend fun find(text: String, sensitive: Boolean = false): ClipboardEntry?
