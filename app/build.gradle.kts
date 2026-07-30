@@ -143,9 +143,3 @@ configurations {
         exclude(group = "com.louiscad.splitties", module = "splitties-systemservices")
     }
 }
-
-// descriptor.json is generated inside the main assets directory. Gradle 9 requires
-// consumers of that directory to declare the producing task explicitly.
-tasks.matching { it.name.startsWith("lint") || it.name.endsWith("LintReportModel") }.configureEach {
-    dependsOn("generateDataDescriptor")
-}
