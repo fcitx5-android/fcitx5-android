@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Debug build type aliases are also generated for the instrumentation APK. -->
+    <string name="app_name_debug" translatable="false">Fcitx5 (Debug Test)</string>
+</resources>

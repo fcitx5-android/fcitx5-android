@@ -100,13 +100,20 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
 
     suspend fun get(id: Int) = clbDao.get(id)
 
-    suspend fun haveUnpinned() = clbDao.haveUnpinned()
+    suspend fun haveDeletable() = clbDao.haveDeletable()
 
-    fun allEntries() = clbDao.allEntries()
+    fun entries(filter: ClipboardEntryFilter) = when (filter) {
+        ClipboardEntryFilter.All -> clbDao.allEntries()
+        ClipboardEntryFilter.Favorites -> clbDao.favoriteEntries()
+    }
 
     suspend fun pin(id: Int) = clbDao.updatePinStatus(id, true)
 
     suspend fun unpin(id: Int) = clbDao.updatePinStatus(id, false)
+
+    suspend fun favorite(id: Int) = clbDao.updateFavoriteStatus(id, true)
+
+    suspend fun unfavorite(id: Int) = clbDao.updateFavoriteStatus(id, false)
 
     suspend fun updateText(id: Int, text: String) {
         lastEntry?.let {
@@ -120,12 +127,8 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
         updateItemCount()
     }
 
-    suspend fun deleteAll(skipPinned: Boolean = true): IntArray {
-        val ids = if (skipPinned) {
-            clbDao.findUnpinnedIds()
-        } else {
-            clbDao.findAllIds()
-        }
+    suspend fun deleteAll(): IntArray {
+        val ids = clbDao.findDeletableIds()
         clbDao.markAsDeleted(*ids)
         updateItemCount()
         return ids
@@ -195,14 +198,14 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
 
     private suspend fun removeOutdated() {
         val limit = limitPref.getValue()
-        val unpinned = clbDao.getAllUnpinned()
-        if (unpinned.size > limit) {
+        val unprotected = clbDao.getAllUnprotected()
+        if (unprotected.size > limit) {
             // the last one we will keep
-            val last = unpinned
-                .sortedBy { it.id }
-                .getOrNull(unpinned.size - limit)
-            // delete all unpinned before that, or delete all when limit <= 0
-            clbDao.markUnpinnedAsDeletedEarlierThan(last?.timestamp ?: System.currentTimeMillis())
+            val last = unprotected
+                .sortedBy { it.timestamp }
+                .getOrNull(unprotected.size - limit)
+            // delete all unprotected before that, or delete all when limit <= 0
+            clbDao.markUnprotectedAsDeletedEarlierThan(last?.timestamp ?: System.currentTimeMillis())
         }
     }
 

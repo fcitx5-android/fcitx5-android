@@ -91,7 +91,11 @@ abstract class ClipboardAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val entry = getItem(position) ?: return
         with(holder.entryUi) {
-            setEntry(excerptText(entry.text, entry.sensitive && maskSensitive), entry.pinned)
+            setEntry(
+                excerptText(entry.text, entry.sensitive && maskSensitive),
+                entry.pinned,
+                entry.favorite
+            )
             root.setOnClickListener {
                 onPaste(entry)
             }
@@ -106,6 +110,15 @@ abstract class ClipboardAdapter(
                 } else {
                     menu.item(R.string.pin, R.drawable.ic_baseline_push_pin_24, iconTint) {
                         onPin(entry.id)
+                    }
+                }
+                if (entry.favorite) {
+                    menu.item(R.string.unfavorite, R.drawable.ic_outline_star_24, iconTint) {
+                        onUnfavorite(entry.id)
+                    }
+                } else {
+                    menu.item(R.string.favorite, R.drawable.ic_baseline_star_24, iconTint) {
+                        onFavorite(entry.id)
                     }
                 }
                 menu.item(R.string.edit, R.drawable.ic_baseline_edit_24, iconTint) {
@@ -143,6 +156,10 @@ abstract class ClipboardAdapter(
     abstract fun onPin(id: Int)
 
     abstract fun onUnpin(id: Int)
+
+    abstract fun onFavorite(id: Int)
+
+    abstract fun onUnfavorite(id: Int)
 
     abstract fun onEdit(id: Int)
 

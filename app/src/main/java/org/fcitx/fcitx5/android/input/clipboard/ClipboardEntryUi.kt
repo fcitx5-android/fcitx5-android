@@ -17,6 +17,7 @@ import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
 import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.views.dsl.constraintlayout.bottomOfParent
+import splitties.views.dsl.constraintlayout.before
 import splitties.views.dsl.constraintlayout.centerVertically
 import splitties.views.dsl.constraintlayout.constraintLayout
 import splitties.views.dsl.constraintlayout.endOfParent
@@ -49,11 +50,17 @@ class ClipboardEntryUi(override val ctx: Context, private val theme: Theme, radi
         }
     }
 
+    val favorite = imageView()
+
     val layout = constraintLayout {
         add(textView, lParams(matchParent, wrapContent) {
             centerVertically()
         })
         add(pin, lParams(dp(12), dp(12)) {
+            bottomOfParent(dp(2))
+            before(favorite, dp(2))
+        })
+        add(favorite, lParams(dp(12), dp(12)) {
             bottomOfParent(dp(2))
             endOfParent(dp(2))
         })
@@ -76,8 +83,14 @@ class ClipboardEntryUi(override val ctx: Context, private val theme: Theme, radi
         add(layout, lParams(matchParent, matchParent))
     }
 
-    fun setEntry(text: String, pinned: Boolean) {
+    fun setEntry(text: String, pinned: Boolean, isFavorite: Boolean) {
         textView.text = text
         pin.visibility = if (pinned) View.VISIBLE else View.GONE
+        favorite.imageDrawable = ctx.drawable(
+            if (isFavorite) R.drawable.ic_baseline_star_24 else R.drawable.ic_outline_star_24
+        )!!.apply {
+            setTint(if (isFavorite) theme.accentKeyBackgroundColor else theme.altKeyTextColor)
+            alpha = if (isFavorite) 0xff else 0x4d
+        }
     }
 }

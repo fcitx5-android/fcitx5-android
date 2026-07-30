@@ -17,6 +17,9 @@ interface ClipboardDao {
     @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET pinned=:pinned WHERE id=:id")
     suspend fun updatePinStatus(id: Int, pinned: Boolean)
 
+    @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET favorite=:favorite WHERE id=:id")
+    suspend fun updateFavoriteStatus(id: Int, favorite: Boolean)
+
     @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET text=:text WHERE id=:id")
     suspend fun updateText(id: Int, text: String)
 
@@ -32,29 +35,29 @@ interface ClipboardDao {
     @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME} WHERE rowId=:rowId AND deleted=0 LIMIT 1")
     suspend fun get(rowId: Long): ClipboardEntry?
 
-    @Query("SELECT EXISTS(SELECT 1 FROM ${ClipboardEntry.TABLE_NAME} WHERE pinned=0 AND deleted=0)")
-    suspend fun haveUnpinned(): Boolean
+    @Query("SELECT EXISTS(SELECT 1 FROM ${ClipboardEntry.TABLE_NAME} WHERE pinned=0 AND favorite=0 AND deleted=0)")
+    suspend fun haveDeletable(): Boolean
 
-    @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME} WHERE pinned=0 AND deleted=0")
-    suspend fun getAllUnpinned(): List<ClipboardEntry>
+    @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME} WHERE pinned=0 AND favorite=0 AND deleted=0")
+    suspend fun getAllUnprotected(): List<ClipboardEntry>
 
     @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME} WHERE deleted=0 ORDER BY pinned DESC, timestamp DESC")
     fun allEntries(): PagingSource<Int, ClipboardEntry>
 
+    @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME} WHERE favorite=1 AND deleted=0 ORDER BY pinned DESC, timestamp DESC")
+    fun favoriteEntries(): PagingSource<Int, ClipboardEntry>
+
     @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME} WHERE text=:text AND sensitive=:sensitive AND deleted=0 LIMIT 1")
     suspend fun find(text: String, sensitive: Boolean = false): ClipboardEntry?
 
-    @Query("SELECT id FROM ${ClipboardEntry.TABLE_NAME} WHERE deleted=0")
-    suspend fun findAllIds(): IntArray
-
-    @Query("SELECT id FROM ${ClipboardEntry.TABLE_NAME} WHERE pinned=0 AND deleted=0")
-    suspend fun findUnpinnedIds(): IntArray
+    @Query("SELECT id FROM ${ClipboardEntry.TABLE_NAME} WHERE pinned=0 AND favorite=0 AND deleted=0")
+    suspend fun findDeletableIds(): IntArray
 
     @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET deleted=1 WHERE id in (:ids)")
     suspend fun markAsDeleted(vararg ids: Int)
 
-    @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET DELETED=1 WHERE timestamp<:timestamp AND pinned=0 AND deleted=0")
-    suspend fun markUnpinnedAsDeletedEarlierThan(timestamp: Long)
+    @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET deleted=1 WHERE timestamp<:timestamp AND pinned=0 AND favorite=0 AND deleted=0")
+    suspend fun markUnprotectedAsDeletedEarlierThan(timestamp: Long)
 
     @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET deleted=0 WHERE id in (:ids) AND deleted=1")
     suspend fun undoDelete(vararg ids: Int)
