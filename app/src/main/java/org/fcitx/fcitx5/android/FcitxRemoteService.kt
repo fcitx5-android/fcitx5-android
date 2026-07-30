@@ -17,7 +17,9 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.fcitx.fcitx5.android.common.ipc.IClipboardEntryTransformer
+import org.fcitx.fcitx5.android.common.ipc.ICloudPinyinProvider
 import org.fcitx.fcitx5.android.common.ipc.IFcitxRemoteService
+import org.fcitx.fcitx5.android.core.CloudPinyinIpc
 import org.fcitx.fcitx5.android.core.data.DataManager
 import org.fcitx.fcitx5.android.core.reloadPinyinDict
 import org.fcitx.fcitx5.android.core.reloadQuickPhrase
@@ -36,6 +38,7 @@ class FcitxRemoteService : Service() {
     private val scope = MainScope() + CoroutineName("FcitxRemoteService")
 
     private val clipboardTransformers = CopyOnWriteArrayList<IClipboardEntryTransformer>()
+    private var cloudPinyinProvider: ICloudPinyinProvider? = null
 
     private fun transformClipboard(source: String): String {
         var result = source
@@ -100,6 +103,32 @@ class FcitxRemoteService : Service() {
             }
         }
 
+        override fun registerCloudPinyinProvider(provider: ICloudPinyinProvider) {
+            synchronized(this@FcitxRemoteService) {
+                if (cloudPinyinProvider != null) {
+                    Timber.w("Cloud pinyin provider has already been registered")
+                    return
+                }
+                cloudPinyinProvider = provider
+                provider.asBinder().linkToDeath({
+                    unregisterCloudPinyinProvider(provider)
+                }, 0)
+                CloudPinyinIpc.register(provider)
+            }
+            Timber.d("Cloud pinyin provider registered")
+        }
+
+        override fun unregisterCloudPinyinProvider(provider: ICloudPinyinProvider) {
+            synchronized(this@FcitxRemoteService) {
+                if (cloudPinyinProvider?.asBinder() != provider.asBinder()) {
+                    return
+                }
+                cloudPinyinProvider = null
+                CloudPinyinIpc.unregister(provider)
+            }
+            Timber.d("Cloud pinyin provider unregistered")
+        }
+
         override fun reloadPinyinDict() {
             FcitxDaemon.getFirstConnectionOrNull()?.runIfReady { reloadPinyinDict() }
         }
@@ -128,6 +157,8 @@ class FcitxRemoteService : Service() {
         Timber.d("FcitxRemoteService onDestroy")
         scope.cancel()
         clipboardTransformers.clear()
+        cloudPinyinProvider?.let { CloudPinyinIpc.unregister(it) }
+        cloudPinyinProvider = null
         runBlocking { updateClipboardManager() }
     }
 }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<plugin xmlns="../../../../../pluginSchema.xsd">
+    <apiVersion>0.1</apiVersion>
+    <domain>fcitx5-chinese-addons</domain>
+    <description>@string/description</description>
+    <hasService>true</hasService>
+</plugin>
