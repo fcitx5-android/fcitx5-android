@@ -120,6 +120,7 @@ object DataManager {
             var apiVersion: String? = null
             var description: String? = null
             var hasService = false
+            var hasInteractivePanel = false
             var text: String? = null
             while ((eventType != XmlPullParser.END_DOCUMENT)) {
                 when (eventType) {
@@ -129,6 +130,7 @@ object DataManager {
                         "domain" -> domain = text
                         "description" -> description = text
                         "hasService" -> hasService = text?.lowercase() == "true"
+                        "hasInteractivePanel" -> hasInteractivePanel = text?.lowercase() == "true"
                     }
                 }
                 eventType = parser.next()
@@ -162,6 +164,7 @@ object DataManager {
                             domain,
                             description,
                             hasService,
+                            hasInteractivePanel,
                             info.versionName ?: "",
                             info.applicationInfo?.nativeLibraryDir ?: ""
                         )

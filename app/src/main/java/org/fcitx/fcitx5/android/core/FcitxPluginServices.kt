@@ -21,6 +21,13 @@ object FcitxPluginServices {
 
     const val PLUGIN_SERVICE_ACTION = "${BuildConfig.APPLICATION_ID}.plugin.SERVICE"
 
+    /**
+     * Action of the interactive input panel service, implemented by plugins
+     * that declare `<hasInteractivePanel>true</hasInteractivePanel>` in plugin.xml.
+     * The bound binder must implement {@link org.fcitx.fcitx5.android.common.ipc.IInteractiveInputPanel}.
+     */
+    const val PLUGIN_PANEL_ACTION = "${BuildConfig.APPLICATION_ID}.plugin.INTERACTIVE_PANEL"
+
     class PluginServiceConnection(
         private val pluginId: String,
         private val onDied: () -> Unit

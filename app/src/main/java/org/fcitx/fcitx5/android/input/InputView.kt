@@ -40,6 +40,7 @@ import org.fcitx.fcitx5.android.input.picker.emoticonPicker
 import org.fcitx.fcitx5.android.input.picker.symbolPicker
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
+import org.fcitx.fcitx5.android.input.panel.InteractivePanelManager
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.unset
 import org.fcitx.fcitx5.android.utils.windowManager
@@ -110,6 +111,7 @@ class InputView(
     private val symbolPicker = symbolPicker()
     private val emojiPicker = emojiPicker()
     private val emoticonPicker = emoticonPicker()
+    private val interactivePanelManager = InteractivePanelManager()
 
     private fun setupScope() {
         scope += this@InputView.wrapToUniqueComponent()
@@ -127,6 +129,7 @@ class InputView(
         scope += windowManager
         scope += kawaiiBar
         scope += horizontalCandidate
+        scope += interactivePanelManager
         broadcaster.onScopeSetupFinished(scope)
     }
 
@@ -219,6 +222,16 @@ class InputView(
         windowManager.addEssentialWindow(emoticonPicker)
         // show KeyboardWindow by default
         windowManager.attachWindow(KeyboardWindow)
+
+        // plugin-provided interactive input panel
+        if (interactivePanelManager.hasPanelPlugin) {
+            kawaiiBar.setPanelButtonVisible(true)
+            // the panel is only connected while its window is attached,
+            // so falling back to the keyboard window is always safe here
+            interactivePanelManager.onPanelDied = {
+                windowManager.attachWindow(KeyboardWindow)
+            }
+        }
 
         broadcaster.onImeUpdate(fcitx.runImmediately { inputMethodEntryCached })
 
@@ -334,6 +347,14 @@ class InputView(
         if (focusChangeResetKeyboard || !restarting) {
             windowManager.attachWindow(KeyboardWindow)
         }
+        interactivePanelManager.onStartInput()
+    }
+
+    /**
+     * Called when the input session ends, see [org.fcitx.fcitx5.android.input.FcitxInputMethodService.onFinishInputView]
+     */
+    fun onFinishInputView() {
+        interactivePanelManager.onFinishInput()
     }
 
     override fun onStartHandleFcitxEvent() {

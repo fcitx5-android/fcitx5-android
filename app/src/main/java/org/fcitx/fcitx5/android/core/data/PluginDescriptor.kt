@@ -31,6 +31,11 @@ data class PluginDescriptor(
      * Contains IPC service with action `${mainApplicationId}.plugin.SERVICE`. Default to `false`.
      */
     val hasService: Boolean,
+    /**
+     * Provides an interactive input panel (e.g. handwriting) with IPC service
+     * action `${mainApplicationId}.plugin.INTERACTIVE_PANEL`. Default to `false`.
+     */
+    val hasInteractivePanel: Boolean,
     val versionName: String,
     val nativeLibraryDir: String
 ) {

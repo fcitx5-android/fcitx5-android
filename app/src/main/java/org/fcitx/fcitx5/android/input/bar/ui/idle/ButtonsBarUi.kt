@@ -6,6 +6,7 @@ package org.fcitx.fcitx5.android.input.bar.ui.idle
 
 import android.content.Context
 import androidx.annotation.DrawableRes
+import androidx.core.view.isVisible
 import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexboxLayout
 import com.google.android.flexbox.JustifyContent
@@ -46,6 +47,15 @@ class ButtonsBarUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     val moreButton = toolButton(R.drawable.ic_baseline_more_horiz_24).apply {
         contentDescription = ctx.getString(R.string.status_area)
+    }
+
+    /**
+     * Opens the interactive input panel (e.g. handwriting) provided by a plugin.
+     * Only visible when such a plugin is loaded.
+     */
+    val handwritingButton = toolButton(R.drawable.ic_baseline_edit_24).apply {
+        contentDescription = ctx.getString(R.string.plugin_panel)
+        isVisible = false
     }
 
 }

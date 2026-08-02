@@ -1053,6 +1053,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         Timber.d("onFinishInputView: finishingInput=$finishingInput")
         decorLocationUpdated = false
         inputDeviceMgr.onFinishInputView()
+        inputView?.onFinishInputView()
         currentInputConnection?.apply {
             finishComposingText()
             monitorCursorAnchor(false)
