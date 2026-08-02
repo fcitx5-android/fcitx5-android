@@ -5,29 +5,26 @@
 package org.fcitx.fcitx5.android.input.panel
 
 import android.annotation.SuppressLint
-import android.view.Gravity
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
-import android.view.ViewGroup
-import android.widget.FrameLayout
-import android.widget.HorizontalScrollView
-import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.flexbox.FlexboxLayoutManager
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.CandidateWord
 import org.fcitx.fcitx5.android.data.theme.Theme
+import org.fcitx.fcitx5.android.input.candidates.CandidateSource
+import org.fcitx.fcitx5.android.input.candidates.CandidateViewHolder
+import org.fcitx.fcitx5.android.input.candidates.horizontal.HorizontalCandidateViewAdapter
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.mechdancer.dependency.manager.must
-import splitties.dimensions.dp
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.frameLayout
-import splitties.views.dsl.core.horizontalLayout
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
-import splitties.views.dsl.core.textView
-import splitties.views.dsl.core.wrapContent
 
 /**
  * Host-side window hosting an interactive input panel plugin.
@@ -79,24 +76,54 @@ class PluginPanelWindow : InputWindow.ExtendedInputWindow<PluginPanelWindow>() {
         }
     }
 
-    private val candidateBar by lazy {
-        HorizontalScrollView(context).apply {
-            isHorizontalScrollBarEnabled = false
-            addView(
-                candidateContainer,
-                FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-            )
+    /**
+     * Candidates published by the plugin, rendered with the shared
+     * [HorizontalCandidateViewAdapter] in the title bar.
+     */
+    private val pluginCandidates = mutableListOf<CandidateWord>()
+
+    private val candidateSource = object : CandidateSource {
+        override val candidates: List<CandidateWord>
+            get() = pluginCandidates
+
+        override val total: Int
+            get() = pluginCandidates.size
+
+        override fun onCandidateClick(idx: Int) {
+            pluginCandidates.getOrNull(idx)?.let {
+                panelManager.commitText(it.text)
+            }
+        }
+
+        override fun onCandidateLongClick(idx: Int, view: View): Boolean = false
+    }
+
+    private val candidateAdapter by lazy {
+        object : HorizontalCandidateViewAdapter(theme) {
+            override fun onBindViewHolder(holder: CandidateViewHolder, position: Int) {
+                super.onBindViewHolder(holder, position)
+                holder.itemView.setOnClickListener {
+                    candidateSource.onCandidateClick(holder.idx)
+                }
+                holder.itemView.setOnLongClickListener {
+                    candidateSource.onCandidateLongClick(holder.idx, holder.ui.root)
+                }
+            }
+
+            override fun onViewRecycled(holder: CandidateViewHolder) {
+                holder.itemView.setOnClickListener(null)
+                holder.itemView.setOnLongClickListener(null)
+                super.onViewRecycled(holder)
+            }
         }
     }
 
-    private val candidateContainer by lazy {
-        context.horizontalLayout {
-            // vertical center
-            gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(8), 0, dp(8), 0)
+    private val candidateBar by lazy {
+        RecyclerView(context).apply {
+            isHorizontalScrollBarEnabled = false
+            itemAnimator = null
+            adapter = candidateAdapter
+            layoutManager = FlexboxLayoutManager(context)
         }
     }
 
@@ -114,7 +141,6 @@ class PluginPanelWindow : InputWindow.ExtendedInputWindow<PluginPanelWindow>() {
     override fun onCreateBarExtension(): View? = candidateBar
 
     override fun onAttached() {
-        candidateContainer.removeAllViews()
         surfaceView.holder.addCallback(holderCallback)
         panelManager.candidatesListener = InteractivePanelManager.OnCandidatesListener { candidates ->
             updateCandidates(candidates)
@@ -129,33 +155,10 @@ class PluginPanelWindow : InputWindow.ExtendedInputWindow<PluginPanelWindow>() {
     }
 
     private fun updateCandidates(candidates: List<String>) {
-        candidateContainer.removeAllViews()
-        candidates.forEach { candidate ->
-            candidateContainer.addView(
-                newCandidateChip(candidate),
-                FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    marginEnd = context.dp(8)
-                }
-            )
-        }
-        candidateBar.fullScroll(HorizontalScrollView.FOCUS_LEFT)
-    }
-
-    private fun newCandidateChip(text: String): TextView {
-        return context.textView {
-            this.text = text
-            setTextColor(theme.candidateTextColor)
-            textSize = 16f
-            gravity = Gravity.CENTER
-            backgroundColor = theme.keyBackgroundColor
-            setPadding(dp(12), dp(4), dp(12), dp(4))
-            setOnClickListener {
-                panelManager.commitText(text)
-            }
-        }
+        pluginCandidates.clear()
+        pluginCandidates.addAll(candidates.map { CandidateWord("", it, "") })
+        candidateAdapter.updateCandidates(pluginCandidates.toTypedArray(), pluginCandidates.size)
+        candidateBar.scrollToPosition(0)
     }
 
     private fun handleTouch(event: MotionEvent): Boolean {
