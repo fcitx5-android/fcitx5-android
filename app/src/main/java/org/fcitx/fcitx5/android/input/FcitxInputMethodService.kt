@@ -245,6 +245,18 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
     }
 
+    /**
+     * Called before switching to the given fcitx input method entry.
+     *
+     * If the target entry is a panel plugin, the panel window is attached
+     * immediately so that it replaces the keyboard without flashing the
+     * keyboard window in between (the IMChange event that normally drives
+     * the switch arrives asynchronously after the picker dialog closes).
+     */
+    fun prepareInputMethodSwitch(imeUniqueName: String) {
+        inputView?.interactivePanelManager?.onInputMethodChanged(imeUniqueName)
+    }
+
     override fun onCreate() {
         fcitx = FcitxDaemon.connect(javaClass.name)
         lifecycleScope.launch {

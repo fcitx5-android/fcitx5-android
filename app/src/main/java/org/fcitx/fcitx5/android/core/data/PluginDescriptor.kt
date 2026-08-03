@@ -43,6 +43,12 @@ data class PluginDescriptor(
      * in [Companion.requiredPanelComponents]. Empty when not declared.
      */
     val panelComponents: Set<String> = emptySet(),
+    /**
+     * Language of the panel (as declared in `<panelLanguage>` of `plugin.xml`),
+     * e.g. `zh` for a handwriting panel. The panel is registered as an input
+     * method entry of this language. Empty when not declared.
+     */
+    val panelLanguage: String = "",
     val versionName: String,
     val nativeLibraryDir: String
 ) {

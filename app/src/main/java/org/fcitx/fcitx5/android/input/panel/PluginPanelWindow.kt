@@ -38,7 +38,12 @@ import splitties.views.dsl.core.matchParent
  * handle strokes / gestures without the host knowing their meaning.
  */
 @SuppressLint("ClickableViewAccessibility")
-class PluginPanelWindow : InputWindow.ExtendedInputWindow<PluginPanelWindow>() {
+class PluginPanelWindow(
+    /**
+     * Plugin whose panel to show; `null` to pick the first valid panel plugin.
+     */
+    private val pluginPackageName: String? = null
+) : InputWindow.ExtendedInputWindow<PluginPanelWindow>() {
 
     private val panelManager: InteractivePanelManager by manager.must()
     private val theme: Theme by manager.theme()
@@ -119,7 +124,7 @@ class PluginPanelWindow : InputWindow.ExtendedInputWindow<PluginPanelWindow>() {
         panelManager.candidatesListener = InteractivePanelManager.OnCandidatesListener { candidates ->
             updateCandidates(candidates)
         }
-        panelManager.attachPanelWindow()
+        panelManager.attachPanelWindow(pluginPackageName)
     }
 
     override fun onDetached() {

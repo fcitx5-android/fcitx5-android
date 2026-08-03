@@ -44,7 +44,14 @@ object InputMethodPickerDialog {
                 adapter = InputMethodListAdapter(entries, enabledIndex) {
                     val (uniqueName, _, ime) = it
                     if (ime) service.switchInputMethod(uniqueName)
-                    else service.lifecycleScope.launch { fcitx.activateIme(uniqueName) }
+                    else {
+                        // attach the panel window immediately if this entry is a
+                        // panel plugin, so that the panel replaces the keyboard
+                        // without flashing it while the dialog closes and the
+                        // IMChange event arrives asynchronously
+                        service.prepareInputMethodSwitch(uniqueName)
+                        service.lifecycleScope.launch { fcitx.activateIme(uniqueName) }
+                    }
                     dialog.dismiss()
                 }
                 styledDrawable(android.R.attr.dividerHorizontal)?.let {

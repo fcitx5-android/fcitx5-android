@@ -141,11 +141,37 @@ class InteractivePanelManager : IUniqueComponent<InteractivePanelManager>, Depen
             ok
         }
 
-    /** Whether any loaded plugin provides a valid interactive input panel */
-    val hasPanelPlugin: Boolean
-        get() = panelPlugins.isNotEmpty()
+    /**
+     * Whether the given fcitx input method entry is provided by a panel plugin
+     * (i.e. its uniqueName is a plugin package name).
+     */
+    fun isPanelPluginEntry(imeUniqueName: String): Boolean =
+        panelPlugins.any { it.packageName == imeUniqueName }
+
+    /**
+     * The input method (fcitx entry) was switched. Called on the main thread.
+     *
+     * A panel plugin registers itself as an input method entry whose
+     * uniqueName is the plugin package name (see
+     * [org.fcitx.fcitx5.android.core.Fcitx.syncPluginPanelEntries]); when such
+     * an entry is selected, attach the corresponding panel window; otherwise
+     * fall back to the keyboard window.
+     */
+    fun onInputMethodChanged(imeUniqueName: String) {
+        val plugin = panelPlugins.firstOrNull { it.packageName == imeUniqueName }
+        if (plugin != null) {
+            if (!panelWindowAttached) {
+                Timber.d("Input method switched to panel plugin ${plugin.name}, attaching panel")
+                windowManager.attachWindow(PluginPanelWindow(plugin.packageName))
+            }
+        } else if (panelWindowAttached) {
+            Timber.d("Input method switched to $imeUniqueName, no panel, showing keyboard")
+            windowManager.attachWindow(KeyboardWindow)
+        }
+    }
 
     private var panel: IInteractiveInputPanel? = null
+
     private var connection: ServiceConnection? = null
 
     /** Whether the panel window is currently attached (visible) */
@@ -209,15 +235,18 @@ class InteractivePanelManager : IUniqueComponent<InteractivePanelManager>, Depen
 
     /**
      * The panel window is attached. Must be called on the main thread.
+     *
+     * @param packageName the plugin whose panel to show; `null` to pick the
+     * first valid panel plugin
      */
-    fun attachPanelWindow() {
+    fun attachPanelWindow(packageName: String? = null) {
         Timber.d("Interactive panel window attached")
         panelWindowAttached = true
-        if (panel != null) {
+        if (panel != null && (packageName == null || currentPlugin?.packageName == packageName)) {
             notifyAttach()
             notifySurfaceCreated()
         } else {
-            connect()
+            connect(packageName)
         }
     }
 
@@ -324,13 +353,18 @@ class InteractivePanelManager : IUniqueComponent<InteractivePanelManager>, Depen
         service.commitText(text)
     }
 
-    private fun connect() {
-        val plugin = panelPlugins.firstOrNull()
+    private var currentPlugin: PluginDescriptor? = null
+
+    private fun connect(packageName: String?) {
+        val plugin = panelPlugins.firstOrNull { it.packageName == packageName }
+            ?: panelPlugins.firstOrNull()
         if (plugin == null) {
             Timber.w("No interactive panel plugin found")
+            currentPlugin = null
             onPanelDied?.invoke()
             return
         }
+        currentPlugin = plugin
         val conn = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName, binder: IBinder) {
                 Timber.d("Interactive panel connected: $name")
@@ -385,6 +419,7 @@ class InteractivePanelManager : IUniqueComponent<InteractivePanelManager>, Depen
         }
         connection = null
         panel = null
+        currentPlugin = null
     }
 
     final override fun handle(scopeEvent: ScopeEvent) = manager.handle(scopeEvent)

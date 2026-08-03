@@ -316,14 +316,6 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                 moreButton.setOnClickListener {
                     windowManager.attachWindow(StatusAreaWindow())
                 }
-                handwritingButton.setOnClickListener {
-                    Timber.d("handwriting button clicked, pluginPanelActive=$pluginPanelActive")
-                    if (pluginPanelActive) {
-                        windowManager.attachWindow(KeyboardWindow)
-                    } else {
-                        windowManager.attachWindow(PluginPanelWindow())
-                    }
-                }
             }
             clipboardUi.suggestionView.apply {
                 setOnClickListener {
@@ -615,8 +607,5 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     /**
      * Show/hide the interactive panel button in the toolbar.
      */
-    fun setPanelButtonVisible(visible: Boolean) {
-        idleUi.buttonsUi.handwritingButton.isVisible = visible
-    }
 
 }

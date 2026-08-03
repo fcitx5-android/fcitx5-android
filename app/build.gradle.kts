@@ -27,7 +27,8 @@ android {
                     // android specific modules
                     "androidfrontend",
                     "androidkeyboard",
-                    "androidnotification"
+                    "androidnotification",
+                    "pluginpanel"
                 )
             }
         }

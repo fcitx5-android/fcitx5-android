@@ -111,7 +111,7 @@ class InputView(
     private val symbolPicker = symbolPicker()
     private val emojiPicker = emojiPicker()
     private val emoticonPicker = emoticonPicker()
-    private val interactivePanelManager = InteractivePanelManager()
+    val interactivePanelManager = InteractivePanelManager()
 
     private fun setupScope() {
         scope += this@InputView.wrapToUniqueComponent()
@@ -220,17 +220,13 @@ class InputView(
         windowManager.addEssentialWindow(symbolPicker)
         windowManager.addEssentialWindow(emojiPicker)
         windowManager.addEssentialWindow(emoticonPicker)
-        // show KeyboardWindow by default
-        windowManager.attachWindow(KeyboardWindow)
+        // show the window for the current input method by default
+        attachWindowForCurrentInputMethod()
 
-        // plugin-provided interactive input panel
-        if (interactivePanelManager.hasPanelPlugin) {
-            kawaiiBar.setPanelButtonVisible(true)
-            // the panel is only connected while its window is attached,
-            // so falling back to the keyboard window is always safe here
-            interactivePanelManager.onPanelDied = {
-                windowManager.attachWindow(KeyboardWindow)
-            }
+        // plugin-provided interactive input panel: if the plugin binding dies
+        // unexpectedly, fall back to the keyboard window
+        interactivePanelManager.onPanelDied = {
+            windowManager.attachWindow(KeyboardWindow)
         }
 
         broadcaster.onImeUpdate(fcitx.runImmediately { inputMethodEntryCached })
@@ -339,13 +335,27 @@ class InputView(
     }
 
     /**
+     * Attach the input window matching the current fcitx input method:
+     * the plugin panel when the current entry is a panel plugin, the
+     * keyboard otherwise.
+     */
+    private fun attachWindowForCurrentInputMethod() {
+        val ime = fcitx.runImmediately { inputMethodEntryCached }
+        if (interactivePanelManager.isPanelPluginEntry(ime.uniqueName)) {
+            interactivePanelManager.onInputMethodChanged(ime.uniqueName)
+        } else {
+            windowManager.attachWindow(KeyboardWindow)
+        }
+    }
+
+    /**
      * called when [InputView] is about to show, or restart
      */
     fun startInput(info: EditorInfo, capFlags: CapabilityFlags, restarting: Boolean = false) {
         broadcaster.onStartInput(info, capFlags)
         returnKeyDrawable.updateDrawableOnEditorInfo(info)
         if (focusChangeResetKeyboard || !restarting) {
-            windowManager.attachWindow(KeyboardWindow)
+            attachWindowForCurrentInputMethod()
         }
         interactivePanelManager.onStartInput()
     }
@@ -385,6 +395,7 @@ class InputView(
             }
             is FcitxEvent.IMChangeEvent -> {
                 broadcaster.onImeUpdate(it.data)
+                interactivePanelManager.onInputMethodChanged(it.data.uniqueName)
             }
             is FcitxEvent.StatusAreaEvent -> {
                 punctuation.updatePunctuationMapping(it.data.actions)

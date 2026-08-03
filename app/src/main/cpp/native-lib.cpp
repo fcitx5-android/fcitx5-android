@@ -14,6 +14,11 @@
 
 #include <uv.h>
 
+#include <algorithm>
+#include <map>
+#include <mutex>
+#include <string>
+
 #include <fcitx/instance.h>
 #include <fcitx/addonmanager.h>
 #include <fcitx/inputmethodentry.h>
@@ -41,6 +46,7 @@
 #include "customphrase.h"
 
 #include "androidaddonloader/androidaddonloader.h"
+#include "pluginpanel/pluginpanel.h"
 #include "androidfrontend/androidfrontend_public.h"
 #include "jni-utils.h"
 #include "nativestreambuf.h"
@@ -1287,6 +1293,60 @@ Java_org_fcitx_fcitx5_android_utils_Ini_writeAsIni(JNIEnv *env, jclass clazz, js
     auto config = jobjectToRawConfig(env, value);
     fcitx::writeAsIni(config, fp);
     std::fclose(fp);
+}
+
+namespace fcitx::pluginpanel {
+
+namespace {
+struct EntryData {
+    std::string name;
+    std::string languageCode;
+};
+
+std::mutex gMutex;
+std::map<std::string, EntryData> gEntries; // uniqueName -> data
+} // namespace
+
+void registerEntry(const std::string &uniqueName, const std::string &name,
+                   const std::string &languageCode) {
+    std::lock_guard<std::mutex> lock(gMutex);
+    gEntries[uniqueName] = EntryData{name, languageCode};
+}
+
+void unregisterEntry(const std::string &uniqueName) {
+    std::lock_guard<std::mutex> lock(gMutex);
+    gEntries.erase(uniqueName);
+}
+
+std::vector<InputMethodEntry> listEntries() {
+    std::lock_guard<std::mutex> lock(gMutex);
+    std::vector<InputMethodEntry> result;
+    result.reserve(gEntries.size());
+    for (const auto &[uniqueName, data] : gEntries) {
+        auto label = data.name.substr(0, std::min<size_t>(2, data.name.size()));
+        result.emplace_back(std::move(InputMethodEntry(
+                uniqueName, data.name, data.languageCode, "pluginpanel")
+                                     .setLabel(label)));
+    }
+    return result;
+}
+
+} // namespace fcitx::pluginpanel
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_pluginPanelRegisterEntry(
+        JNIEnv *env, jclass clazz, jstring uniqueName, jstring name, jstring languageCode) {
+    fcitx::pluginpanel::registerEntry(std::string(CString(env, uniqueName)),
+                                      std::string(CString(env, name)),
+                                      std::string(CString(env, languageCode)));
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_pluginPanelUnregisterEntry(
+        JNIEnv *env, jclass clazz, jstring uniqueName) {
+    fcitx::pluginpanel::unregisterEntry(std::string(CString(env, uniqueName)));
 }
 
 #pragma GCC diagnostic pop
