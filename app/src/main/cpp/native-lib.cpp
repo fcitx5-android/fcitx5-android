@@ -1318,15 +1318,44 @@ void unregisterEntry(const std::string &uniqueName) {
     gEntries.erase(uniqueName);
 }
 
+namespace {
+
+/**
+ * Short label shown in the input method list. Language codes are ASCII and
+ * at most two characters in practice ("zh", "en", ...), so prefer them;
+ * fall back to the first complete UTF-8 character of the display name for
+ * plugins that do not declare a language (truncating raw bytes there would
+ * cut multi-byte characters in half).
+ */
+std::string entryLabel(const EntryData &data) {
+    if (data.languageCode.size() >= 2) {
+        return data.languageCode.substr(0, 2);
+    }
+    if (data.name.empty()) {
+        return {};
+    }
+    const auto &name = data.name;
+    const unsigned char c = static_cast<unsigned char>(name[0]);
+    size_t len = 1;
+    if ((c & 0xE0) == 0xC0)
+        len = 2;
+    else if ((c & 0xF0) == 0xE0)
+        len = 3;
+    else if ((c & 0xF8) == 0xF0)
+        len = 4;
+    return name.substr(0, std::min(len, name.size()));
+}
+
+} // namespace
+
 std::vector<InputMethodEntry> listEntries() {
     std::lock_guard<std::mutex> lock(gMutex);
     std::vector<InputMethodEntry> result;
     result.reserve(gEntries.size());
     for (const auto &[uniqueName, data] : gEntries) {
-        auto label = data.name.substr(0, std::min<size_t>(2, data.name.size()));
         result.emplace_back(std::move(InputMethodEntry(
                 uniqueName, data.name, data.languageCode, "pluginpanel")
-                                     .setLabel(label)));
+                                     .setLabel(entryLabel(data))));
     }
     return result;
 }

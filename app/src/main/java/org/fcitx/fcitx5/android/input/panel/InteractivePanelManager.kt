@@ -131,13 +131,33 @@ class InteractivePanelManager : IUniqueComponent<InteractivePanelManager>, Depen
         }
     }
 
+    /**
+     * Panel plugins whose binding failed or died unexpectedly.
+     *
+     * While a plugin is marked dead, automatic panel attach attempts (e.g. on
+     * every input focus change) are skipped so the keyboard does not flash;
+     * the plugin is retried only when the user explicitly selects its entry in
+     * the input method picker. Marked entries are per [InputView] lifetime, so
+     * an IME service restart resets them.
+     */
+    private val deadPanelPlugins = mutableSetOf<String>()
+
+    private fun markPanelDead(plugin: PluginDescriptor?) {
+        if (plugin != null) {
+            Timber.w("Mark interactive panel plugin dead: ${plugin.name}")
+            deadPanelPlugins += plugin.packageName
+        }
+    }
+
     /** Loaded plugins that declare an interactive input panel with all required components */
     private val panelPlugins: List<PluginDescriptor>
         get() = DataManager.getLoadedPlugins().filter {
             val ok = it.hasInteractivePanel &&
-                it.panelComponents.containsAll(PluginDescriptor.requiredPanelComponents)
+                it.panelComponents.containsAll(PluginDescriptor.requiredPanelComponents) &&
+                it.packageName !in deadPanelPlugins
             Timber.d("panel plugin ${it.name}: hasInteractivePanel=${it.hasInteractivePanel}, " +
-                "panelComponents=${it.panelComponents}, required=${PluginDescriptor.requiredPanelComponents}, ok=$ok")
+                "panelComponents=${it.panelComponents}, required=${PluginDescriptor.requiredPanelComponents}, " +
+                "dead=${it.packageName in deadPanelPlugins}, ok=$ok")
             ok
         }
 
@@ -156,11 +176,24 @@ class InteractivePanelManager : IUniqueComponent<InteractivePanelManager>, Depen
      * [org.fcitx.fcitx5.android.core.Fcitx.syncPluginPanelEntries]); when such
      * an entry is selected, attach the corresponding panel window; otherwise
      * fall back to the keyboard window.
+     *
+     * @param explicit whether the user explicitly selected the entry in the
+     * input method picker (as opposed to an automatic switch such as an
+     * IMChange event or input focus change). Explicit selection always retries
+     * a panel plugin that was previously marked dead.
      */
-    fun onInputMethodChanged(imeUniqueName: String) {
+    fun onInputMethodChanged(imeUniqueName: String, explicit: Boolean = false) {
+        if (explicit) {
+            // the user explicitly asked for this entry: give it another try
+            deadPanelPlugins -= imeUniqueName
+        }
         val plugin = panelPlugins.firstOrNull { it.packageName == imeUniqueName }
         if (plugin != null) {
-            if (!panelWindowAttached) {
+            // re-attach when switching between two different panel plugins:
+            // attachWindow detaches the current panel window (and its binding)
+            val alreadyOnPanel = panelWindowAttached &&
+                currentPlugin?.packageName == plugin.packageName
+            if (!alreadyOnPanel) {
                 Timber.d("Input method switched to panel plugin ${plugin.name}, attaching panel")
                 windowManager.attachWindow(PluginPanelWindow(plugin.packageName))
             }
@@ -368,6 +401,13 @@ class InteractivePanelManager : IUniqueComponent<InteractivePanelManager>, Depen
         val conn = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName, binder: IBinder) {
                 Timber.d("Interactive panel connected: $name")
+                // stale connection: a newer connect() (e.g. switching to
+                // another panel plugin) may have replaced this one meanwhile
+                if (currentPlugin?.packageName != plugin.packageName) {
+                    Timber.d("Ignore stale interactive panel connection: $name")
+                    runCatching { context.unbindService(this) }
+                    return
+                }
                 panel = IInteractiveInputPanel.Stub.asInterface(binder)
                 if (panelWindowAttached) {
                     notifyAttach()
@@ -378,14 +418,23 @@ class InteractivePanelManager : IUniqueComponent<InteractivePanelManager>, Depen
             // may re-connect in the future
             override fun onServiceDisconnected(name: ComponentName) {
                 Timber.d("Interactive panel disconnected: $name")
+                if (currentPlugin?.packageName != plugin.packageName) {
+                    Timber.d("Ignore stale interactive panel disconnection: $name")
+                    return
+                }
                 panel = null
             }
 
             // will never receive another connection
             override fun onBindingDied(name: ComponentName?) {
                 Timber.d("Interactive panel binding died: $name")
+                if (currentPlugin?.packageName != name?.packageName) {
+                    Timber.d("Ignore stale interactive panel binding death: $name")
+                    return
+                }
                 panel = null
                 connection = null
+                markPanelDead(currentPlugin)
                 mainHandler.post {
                     onPanelDied?.invoke()
                 }
@@ -405,6 +454,7 @@ class InteractivePanelManager : IUniqueComponent<InteractivePanelManager>, Depen
         } catch (e: Exception) {
             runCatching { context.unbindService(conn) }
             connection = null
+            markPanelDead(plugin)
             Timber.w("Cannot bind to interactive panel: ${plugin.name}")
             Timber.w(e)
             mainHandler.post {

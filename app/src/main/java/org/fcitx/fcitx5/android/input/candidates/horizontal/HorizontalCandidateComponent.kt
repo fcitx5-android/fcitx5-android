@@ -234,7 +234,7 @@ class HorizontalCandidateComponent :
         customSource = null
         val candidates = fcitxSource.candidates
         if (candidates.isNotEmpty()) {
-            updateCandidates(candidates.toList(), candidates.size)
+            updateCandidates(candidates.toList(), fcitxSource.total)
         }
     }
 

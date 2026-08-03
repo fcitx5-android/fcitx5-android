@@ -254,7 +254,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
      * the switch arrives asynchronously after the picker dialog closes).
      */
     fun prepareInputMethodSwitch(imeUniqueName: String) {
-        inputView?.interactivePanelManager?.onInputMethodChanged(imeUniqueName)
+        inputView?.interactivePanelManager?.onInputMethodChanged(imeUniqueName, explicit = true)
     }
 
     override fun onCreate() {
