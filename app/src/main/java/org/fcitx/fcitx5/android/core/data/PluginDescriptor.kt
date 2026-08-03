@@ -36,6 +36,13 @@ data class PluginDescriptor(
      * action `${mainApplicationId}.plugin.INTERACTIVE_PANEL`. Default to `false`.
      */
     val hasInteractivePanel: Boolean,
+    /**
+     * Panel components (as declared in `<panelComponents>` of `plugin.xml`)
+     * the plugin provides. An interactive input panel is a keyboard-like
+     * surface, so a panel plugin is expected to provide the components listed
+     * in [Companion.requiredPanelComponents]. Empty when not declared.
+     */
+    val panelComponents: Set<String> = emptySet(),
     val versionName: String,
     val nativeLibraryDir: String
 ) {
@@ -45,5 +52,15 @@ data class PluginDescriptor(
         const val pluginPackagePrefix = "org.fcitx.fcitx5.android.plugin."
         const val pluginPackageSuffix = ".${BuildConfig.BUILD_TYPE}"
         const val pluginAPI = "0.1"
+
+        /**
+         * Components an interactive input panel plugin must provide in its UI:
+         * - `layout_switch`: the "?123" key, calling [org.fcitx.fcitx5.android.common.ipc.IInteractiveInputPanelHost.switchToSymbolLayout]
+         * - `input_method_switch`: the language key, calling
+         *   [org.fcitx.fcitx5.android.common.ipc.IInteractiveInputPanelHost.switchInputMethod]
+         *   (and [org.fcitx.fcitx5.android.common.ipc.IInteractiveInputPanelHost.showInputMethodPicker]
+         *   on long press)
+         */
+        val requiredPanelComponents = setOf("layout_switch", "input_method_switch")
     }
 }

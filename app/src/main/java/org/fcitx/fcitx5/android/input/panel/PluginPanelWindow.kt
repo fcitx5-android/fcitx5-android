@@ -9,14 +9,10 @@ import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.flexbox.FlexboxLayoutManager
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.CandidateWord
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.input.candidates.CandidateSource
-import org.fcitx.fcitx5.android.input.candidates.CandidateViewHolder
-import org.fcitx.fcitx5.android.input.candidates.horizontal.HorizontalCandidateViewAdapter
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.mechdancer.dependency.manager.must
@@ -29,12 +25,14 @@ import splitties.views.dsl.core.matchParent
 /**
  * Host-side window hosting an interactive input panel plugin.
  *
- * The window consists of:
- * - a [SurfaceView] whose [Surface][android.view.Surface] is handed over to the
- *   plugin, so that the plugin can render its own UI (e.g. a handwriting canvas)
- *   from its own process;
- * - a host-side candidate bar showing candidates published by the plugin via
- *   [InteractivePanelManager]; tapping a candidate commits its text.
+ * The window consists of a [SurfaceView] whose [Surface][android.view.Surface]
+ * is handed over to the plugin, so that the plugin can render its own UI
+ * (e.g. a handwriting canvas) from its own process.
+ *
+ * Candidates published by the plugin are displayed by the host in the shared
+ * candidate bar of the Kawaii bar (via [candidateSource] and
+ * [onCandidatesPublished]), so the Kawaii bar itself is not replaced by a
+ * plugin-specific title bar.
  *
  * Touch events on the surface are forwarded to the plugin, so the plugin can
  * handle strokes / gestures without the host knowing their meaning.
@@ -77,12 +75,16 @@ class PluginPanelWindow : InputWindow.ExtendedInputWindow<PluginPanelWindow>() {
     }
 
     /**
-     * Candidates published by the plugin, rendered with the shared
-     * [HorizontalCandidateViewAdapter] in the title bar.
+     * Candidates published by the plugin, rendered by the host in the shared
+     * candidate bar of the Kawaii bar.
      */
     private val pluginCandidates = mutableListOf<CandidateWord>()
 
-    private val candidateSource = object : CandidateSource {
+    /**
+     * Candidate source handed to the host candidate bar while this window is
+     * attached; tapping a candidate commits its text.
+     */
+    val candidateSource = object : CandidateSource {
         override val candidates: List<CandidateWord>
             get() = pluginCandidates
 
@@ -98,34 +100,12 @@ class PluginPanelWindow : InputWindow.ExtendedInputWindow<PluginPanelWindow>() {
         override fun onCandidateLongClick(idx: Int, view: View): Boolean = false
     }
 
-    private val candidateAdapter by lazy {
-        object : HorizontalCandidateViewAdapter(theme) {
-            override fun onBindViewHolder(holder: CandidateViewHolder, position: Int) {
-                super.onBindViewHolder(holder, position)
-                holder.itemView.setOnClickListener {
-                    candidateSource.onCandidateClick(holder.idx)
-                }
-                holder.itemView.setOnLongClickListener {
-                    candidateSource.onCandidateLongClick(holder.idx, holder.ui.root)
-                }
-            }
-
-            override fun onViewRecycled(holder: CandidateViewHolder) {
-                holder.itemView.setOnClickListener(null)
-                holder.itemView.setOnLongClickListener(null)
-                super.onViewRecycled(holder)
-            }
-        }
-    }
-
-    private val candidateBar by lazy {
-        RecyclerView(context).apply {
-            isHorizontalScrollBarEnabled = false
-            itemAnimator = null
-            adapter = candidateAdapter
-            layoutManager = FlexboxLayoutManager(context)
-        }
-    }
+    /**
+     * Invoked by the host when candidates are published, so the host can
+     * refresh the shared candidate bar. Set by [KawaiiBarComponent] when this
+     * window is attached.
+     */
+    var onCandidatesPublished: ((List<CandidateWord>) -> Unit)? = null
 
     override fun onCreateView(): View {
         return context.frameLayout {
@@ -133,12 +113,6 @@ class PluginPanelWindow : InputWindow.ExtendedInputWindow<PluginPanelWindow>() {
             add(surfaceView, lParams(matchParent, matchParent))
         }
     }
-
-    /**
-     * The candidate bar is hosted in the title bar (next to the "Plugin panel" title),
-     * so that the whole window below is left to the plugin's canvas.
-     */
-    override fun onCreateBarExtension(): View? = candidateBar
 
     override fun onAttached() {
         surfaceView.holder.addCallback(holderCallback)
@@ -157,8 +131,7 @@ class PluginPanelWindow : InputWindow.ExtendedInputWindow<PluginPanelWindow>() {
     private fun updateCandidates(candidates: List<String>) {
         pluginCandidates.clear()
         pluginCandidates.addAll(candidates.map { CandidateWord("", it, "") })
-        candidateAdapter.updateCandidates(pluginCandidates.toTypedArray(), pluginCandidates.size)
-        candidateBar.scrollToPosition(0)
+        onCandidatesPublished?.invoke(pluginCandidates.toList())
     }
 
     private fun handleTouch(event: MotionEvent): Boolean {

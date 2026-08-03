@@ -7,6 +7,7 @@
             <xs:element name="description" type="xs:string" />
             <xs:element name="hasService" type="xs:boolean" minOccurs="0" />
             <xs:element name="hasInteractivePanel" type="xs:boolean" minOccurs="0" />
+            <xs:element name="panelComponents" type="xs:string" minOccurs="0" />
         </xs:sequence>
     </xs:complexType>
     <xs:element name="plugin" type="pluginType" />

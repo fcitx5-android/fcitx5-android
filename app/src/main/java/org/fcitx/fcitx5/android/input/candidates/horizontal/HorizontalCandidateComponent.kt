@@ -214,8 +214,41 @@ class HorizontalCandidateComponent :
         }
     }
 
+    /**
+     * Switch the candidate bar to a plugin-provided source (e.g. an
+     * interactive input panel window). While the plugin source is active,
+     * fcitx engine candidate events are still tracked by [FcitxCandidateSource]
+     * but are not displayed; use [restoreFcitxSource] to show them again.
+     */
+    fun usePluginSource(source: CandidateSource) {
+        customSource = source
+        updateCandidates(source.candidates.toList(), source.total)
+    }
+
+    /**
+     * Restore the fcitx engine candidate source. If the engine currently has
+     * candidates (tracked while the plugin source was active), they are shown
+     * again immediately.
+     */
+    fun restoreFcitxSource() {
+        customSource = null
+        val candidates = fcitxSource.candidates
+        if (candidates.isNotEmpty()) {
+            updateCandidates(candidates.toList(), candidates.size)
+        }
+    }
+
+    /**
+     * Whether the fcitx engine currently has candidates (even while a plugin
+     * source is active).
+     */
+    val hasFcitxCandidates: Boolean
+        get() = fcitxSource.candidates.isNotEmpty()
+
     override fun onCandidateUpdate(data: FcitxEvent.CandidateListEvent.Data) {
         fcitxSource.update(data)
-        updateCandidates(data.candidates.toList(), data.total)
+        if (customSource == null) {
+            updateCandidates(data.candidates.toList(), data.total)
+        }
     }
 }

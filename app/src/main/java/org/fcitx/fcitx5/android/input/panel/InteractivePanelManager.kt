@@ -17,12 +17,18 @@ import org.fcitx.fcitx5.android.common.ipc.IInteractiveInputPanelHost
 import org.fcitx.fcitx5.android.core.FcitxPluginServices
 import org.fcitx.fcitx5.android.core.data.DataManager
 import org.fcitx.fcitx5.android.core.data.PluginDescriptor
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
+import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
+import org.fcitx.fcitx5.android.input.keyboard.NumberKeyboard
+import org.fcitx.fcitx5.android.input.picker.PickerWindow
+import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.IUniqueComponent
 import org.mechdancer.dependency.ScopeEvent
 import org.mechdancer.dependency.manager.DependencyManager
+import org.mechdancer.dependency.manager.must
 import timber.log.Timber
 import kotlin.reflect.KClass
 
@@ -37,6 +43,7 @@ class InteractivePanelManager : IUniqueComponent<InteractivePanelManager>, Depen
 
     private val context by manager.context()
     private val service by manager.inputMethodService()
+    private val windowManager: InputWindowManager by manager.must()
 
     private val mainHandler = Handler(Looper.getMainLooper())
 
@@ -89,13 +96,52 @@ class InteractivePanelManager : IUniqueComponent<InteractivePanelManager>, Depen
                 service.requestHideSelf(0)
             }
         }
+
+        override fun showKeyboard() {
+            mainHandler.post {
+                windowManager.attachWindow(KeyboardWindow)
+            }
+        }
+
+        override fun switchToSymbolLayout() {
+            mainHandler.post {
+                // same behavior as pressing the "?123" key: switch to the
+                // last-used symbol layout, or the symbol picker by default
+                val target = AppPrefs.getInstance().internal.lastSymbolLayout.getValue()
+                if (target == NumberKeyboard.Name) {
+                    windowManager.attachWindow(KeyboardWindow)
+                    (windowManager.getEssentialWindow(KeyboardWindow) as KeyboardWindow)
+                        .switchLayout(target, remember = false)
+                } else {
+                    windowManager.attachWindow(PickerWindow.Key.Symbol)
+                }
+            }
+        }
+
+        override fun switchInputMethod() {
+            mainHandler.post {
+                service.performLangSwitch()
+            }
+        }
+
+        override fun showInputMethodPicker() {
+            mainHandler.post {
+                service.showInputMethodPicker()
+            }
+        }
     }
 
-    /** Loaded plugins that declare an interactive input panel */
+    /** Loaded plugins that declare an interactive input panel with all required components */
     private val panelPlugins: List<PluginDescriptor>
-        get() = DataManager.getLoadedPlugins().filter { it.hasInteractivePanel }
+        get() = DataManager.getLoadedPlugins().filter {
+            val ok = it.hasInteractivePanel &&
+                it.panelComponents.containsAll(PluginDescriptor.requiredPanelComponents)
+            Timber.d("panel plugin ${it.name}: hasInteractivePanel=${it.hasInteractivePanel}, " +
+                "panelComponents=${it.panelComponents}, required=${PluginDescriptor.requiredPanelComponents}, ok=$ok")
+            ok
+        }
 
-    /** Whether any loaded plugin provides an interactive input panel */
+    /** Whether any loaded plugin provides a valid interactive input panel */
     val hasPanelPlugin: Boolean
         get() = panelPlugins.isNotEmpty()
 

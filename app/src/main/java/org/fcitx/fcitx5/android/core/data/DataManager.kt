@@ -121,6 +121,7 @@ object DataManager {
             var description: String? = null
             var hasService = false
             var hasInteractivePanel = false
+            var panelComponents = emptySet<String>()
             var text: String? = null
             while ((eventType != XmlPullParser.END_DOCUMENT)) {
                 when (eventType) {
@@ -131,6 +132,12 @@ object DataManager {
                         "description" -> description = text
                         "hasService" -> hasService = text?.lowercase() == "true"
                         "hasInteractivePanel" -> hasInteractivePanel = text?.lowercase() == "true"
+                        "panelComponents" -> panelComponents = text
+                            ?.split(',')
+                            ?.map { it.trim() }
+                            ?.filter { it.isNotEmpty() }
+                            ?.toSet()
+                            ?: emptySet()
                     }
                 }
                 eventType = parser.next()
@@ -165,6 +172,7 @@ object DataManager {
                             description,
                             hasService,
                             hasInteractivePanel,
+                            panelComponents,
                             info.versionName ?: "",
                             info.applicationInfo?.nativeLibraryDir ?: ""
                         )
