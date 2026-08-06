@@ -65,7 +65,7 @@ public:
 
     void updateInputPanel() {
         const InputPanel &ip = inputPanel();
-        if (inputPanel().empty()) {
+        if (ip.empty()) {
           frontend_->updateInputPanel(/*preedit=*/{},
                                       /*auxUp=*/ip.overlayMessage(),
                                       /*auxDown=*/{},
