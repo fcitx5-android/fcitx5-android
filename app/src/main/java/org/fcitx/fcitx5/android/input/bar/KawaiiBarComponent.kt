@@ -19,6 +19,7 @@ import android.widget.ViewAnimator
 import android.widget.inline.InlineContentView
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -63,6 +64,7 @@ import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView
 import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
+import org.fcitx.fcitx5.android.input.panel.PluginPanelWindow
 import org.fcitx.fcitx5.android.input.status.StatusAreaWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
@@ -78,6 +80,7 @@ import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import java.util.concurrent.Executor
 import kotlin.coroutines.resume
+import timber.log.Timber
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -113,6 +116,13 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     private var isCapabilityFlagsPassword: Boolean = false
     private var isKeyboardLayoutNumber: Boolean = false
     private var isToolbarManuallyToggled: Boolean = false
+
+    /**
+     * Whether the interactive input panel window is currently attached.
+     * While active, the Kawaii bar is not replaced by a title bar; plugin
+     * candidates are shown in the shared candidate bar instead.
+     */
+    private var pluginPanelActive = false
 
     private enum class NumberRowState { Auto, ForceShow, ForceHide }
 
@@ -452,15 +462,45 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     }
 
     override fun onPreeditEmptyStateUpdate(empty: Boolean) {
+        if (pluginPanelActive) return
         barStateMachine.push(PreeditUpdated, PreeditEmpty to empty)
     }
 
     override fun onCandidateUpdate(data: CandidateListEvent.Data) {
+        if (pluginPanelActive) return
         barStateMachine.push(CandidatesUpdated, CandidateEmpty to data.candidates.isEmpty())
     }
 
     override fun onWindowAttached(window: InputWindow) {
         when (window) {
+            is PluginPanelWindow -> {
+                pluginPanelActive = true
+                Timber.d("plugin panel attached, pluginPanelActive=true")
+                horizontalCandidate.usePluginSource(window.candidateSource)
+                window.onCandidatesPublished = { candidates ->
+                    horizontalCandidate.updateCandidates(candidates, candidates.size)
+                    if (candidates.isEmpty()) {
+                        // plugin published no candidates: fall back to the toolbar
+                        barStateMachine.push(PreeditUpdated, PreeditEmpty to true)
+                        barStateMachine.push(CandidatesUpdated, CandidateEmpty to true)
+                    } else {
+                        barStateMachine.push(CandidatesUpdated, CandidateEmpty to false)
+                    }
+                }
+                // while the panel is active, the expand button closes the panel
+                candidateUi.expandButton.apply {
+                    isVisible = true
+                    setIcon(R.drawable.ic_baseline_arrow_back_24)
+                    contentDescription = context.getString(R.string.back_to_keyboard)
+                    setOnClickListener {
+                        windowManager.attachWindow(KeyboardWindow)
+                    }
+                }
+                barStateMachine.push(
+                    CandidatesUpdated,
+                    CandidateEmpty to window.candidateSource.candidates.isEmpty()
+                )
+            }
             is InputWindow.ExtendedInputWindow<*> -> {
                 titleUi.setTitle(window.title)
                 window.onCreateBarExtension()?.let { titleUi.addExtension(it, window.showTitle) }
@@ -474,6 +514,25 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     }
 
     override fun onWindowDetached(window: InputWindow) {
+        if (window is PluginPanelWindow) {
+            pluginPanelActive = false
+            Timber.d("plugin panel detached, pluginPanelActive=false")
+            window.onCandidatesPublished = null
+            horizontalCandidate.restoreFcitxSource()
+            // restore the expand button to its normal (state-machine driven) behavior
+            candidateUi.expandButton.apply {
+                setOnClickListener(null)
+                when (expandButtonStateMachine.currentState) {
+                    ClickToAttachWindow -> setExpandButtonToAttach()
+                    ClickToDetachWindow -> setExpandButtonToDetach()
+                    Hidden -> setExpandButtonEnabled(false)
+                }
+            }
+            barStateMachine.push(
+                CandidatesUpdated,
+                CandidateEmpty to !horizontalCandidate.hasFcitxCandidates
+            )
+        }
         barStateMachine.push(WindowDetached)
     }
 
@@ -544,5 +603,9 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
         isKeyboardLayoutNumber = isNumber
         evalIdleUiState()
     }
+
+    /**
+     * Show/hide the interactive panel button in the toolbar.
+     */
 
 }

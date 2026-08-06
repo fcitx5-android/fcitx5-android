@@ -6,6 +6,7 @@ package org.fcitx.fcitx5.android.input.bar.ui.idle
 
 import android.content.Context
 import androidx.annotation.DrawableRes
+import androidx.core.view.isVisible
 import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexboxLayout
 import com.google.android.flexbox.JustifyContent

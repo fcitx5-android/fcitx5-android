@@ -15,14 +15,16 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.CandidateWord
 import org.fcitx.fcitx5.android.core.FcitxEvent
-import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.BooleanKey.ExpandedCandidatesEmpty
 import org.fcitx.fcitx5.android.input.bar.ExpandButtonStateMachine.TransitionEvent.ExpandedCandidatesUpdated
 import org.fcitx.fcitx5.android.input.bar.KawaiiBarComponent
 import org.fcitx.fcitx5.android.input.broadcast.InputBroadcastReceiver
+import org.fcitx.fcitx5.android.input.candidates.CandidateSource
 import org.fcitx.fcitx5.android.input.candidates.CandidateViewHolder
+import org.fcitx.fcitx5.android.input.candidates.FcitxCandidateSource
 import org.fcitx.fcitx5.android.input.candidates.expanded.decoration.FlexboxVerticalDecoration
 import org.fcitx.fcitx5.android.input.candidates.horizontal.HorizontalCandidateMode.AlwaysFillWidth
 import org.fcitx.fcitx5.android.input.candidates.horizontal.HorizontalCandidateMode.AutoFillWidth
@@ -57,6 +59,53 @@ class HorizontalCandidateComponent :
 
     private var layoutMinWidth = 0
     private var layoutFlexGrow = 1f
+
+    private val fcitxSource by lazy { FcitxCandidateSource(fcitx, inputView) }
+
+    private var customSource: CandidateSource? = null
+
+    /**
+     * The candidate source driving this candidate bar.
+     * Defaults to the fcitx engine candidate list; other components (e.g.
+     * interactive input panel windows) may swap in their own source.
+     */
+    var source: CandidateSource
+        get() = customSource ?: fcitxSource
+        set(value) {
+            customSource = value
+        }
+
+    /**
+     * Update the candidates shown in this bar (without touching [source]).
+     * The fcitx engine candidate events are handled by [onCandidateUpdate].
+     */
+    fun updateCandidates(candidates: List<CandidateWord>, total: Int) {
+        val maxSpanCount = maxSpanCountPref.getValue()
+        when (fillStyle) {
+            NeverFillWidth -> {
+                layoutMinWidth = 0
+                layoutFlexGrow = 0f
+                secondLayoutPassNeeded = false
+            }
+            AutoFillWidth -> {
+                layoutMinWidth = view.width / maxSpanCount - dividerDrawable.intrinsicWidth
+                layoutFlexGrow = if (candidates.size < maxSpanCount) 0f else 1f
+                // [^1] total candidates count < maxSpanCount
+                secondLayoutPassNeeded = candidates.size < maxSpanCount
+                secondLayoutPassDone = false
+            }
+            AlwaysFillWidth -> {
+                layoutMinWidth = 0
+                layoutFlexGrow = 1f
+                secondLayoutPassNeeded = false
+            }
+        }
+        adapter.updateCandidates(candidates.toTypedArray(), total)
+        // not sure why empty candidates won't trigger `FlexboxLayoutManager#onLayoutCompleted()`
+        if (candidates.isEmpty()) {
+            refreshExpanded(0)
+        }
+    }
 
     /**
      * (for [HorizontalCandidateMode.AutoFillWidth] only)
@@ -93,11 +142,10 @@ class HorizontalCandidateComponent :
                     flexGrow = layoutFlexGrow
                 }
                 holder.itemView.setOnClickListener {
-                    fcitx.launchOnReady { it.select(holder.idx) }
+                    source.onCandidateClick(holder.idx)
                 }
                 holder.itemView.setOnLongClickListener {
-                    inputView.showCandidateActionMenu(holder.idx, holder.candidate.text, holder.ui.root)
-                    true
+                    source.onCandidateLongClick(holder.idx, holder.ui.root)
                 }
             }
 
@@ -166,33 +214,41 @@ class HorizontalCandidateComponent :
         }
     }
 
-    override fun onCandidateUpdate(data: FcitxEvent.CandidateListEvent.Data) {
-        val candidates = data.candidates
-        val total = data.total
-        val maxSpanCount = maxSpanCountPref.getValue()
-        when (fillStyle) {
-            NeverFillWidth -> {
-                layoutMinWidth = 0
-                layoutFlexGrow = 0f
-                secondLayoutPassNeeded = false
-            }
-            AutoFillWidth -> {
-                layoutMinWidth = view.width / maxSpanCount - dividerDrawable.intrinsicWidth
-                layoutFlexGrow = if (candidates.size < maxSpanCount) 0f else 1f
-                // [^1] total candidates count < maxSpanCount
-                secondLayoutPassNeeded = candidates.size < maxSpanCount
-                secondLayoutPassDone = false
-            }
-            AlwaysFillWidth -> {
-                layoutMinWidth = 0
-                layoutFlexGrow = 1f
-                secondLayoutPassNeeded = false
-            }
+    /**
+     * Switch the candidate bar to a plugin-provided source (e.g. an
+     * interactive input panel window). While the plugin source is active,
+     * fcitx engine candidate events are still tracked by [FcitxCandidateSource]
+     * but are not displayed; use [restoreFcitxSource] to show them again.
+     */
+    fun usePluginSource(source: CandidateSource) {
+        customSource = source
+        updateCandidates(source.candidates.toList(), source.total)
+    }
+
+    /**
+     * Restore the fcitx engine candidate source. If the engine currently has
+     * candidates (tracked while the plugin source was active), they are shown
+     * again immediately.
+     */
+    fun restoreFcitxSource() {
+        customSource = null
+        val candidates = fcitxSource.candidates
+        if (candidates.isNotEmpty()) {
+            updateCandidates(candidates.toList(), fcitxSource.total)
         }
-        adapter.updateCandidates(candidates, total)
-        // not sure why empty candidates won't trigger `FlexboxLayoutManager#onLayoutCompleted()`
-        if (candidates.isEmpty()) {
-            refreshExpanded(0)
+    }
+
+    /**
+     * Whether the fcitx engine currently has candidates (even while a plugin
+     * source is active).
+     */
+    val hasFcitxCandidates: Boolean
+        get() = fcitxSource.candidates.isNotEmpty()
+
+    override fun onCandidateUpdate(data: FcitxEvent.CandidateListEvent.Data) {
+        fcitxSource.update(data)
+        if (customSource == null) {
+            updateCandidates(data.candidates.toList(), data.total)
         }
     }
 }
