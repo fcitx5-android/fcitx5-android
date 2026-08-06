@@ -65,6 +65,13 @@ public:
 
     void updateInputPanel() {
         const InputPanel &ip = inputPanel();
+        if (ip.empty()) {
+          frontend_->updateInputPanel(/*preedit=*/{},
+                                      /*auxUp=*/ip.overlayMessage(),
+                                      /*auxDown=*/{},
+                                      /*tabs=*/{});
+          return;
+        }
         std::vector<CandidateActionEntity> tabs;
         auto list = ip.candidateList();
         if (list) {
