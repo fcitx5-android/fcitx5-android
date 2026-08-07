@@ -12,6 +12,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseManager
 import org.fcitx.fcitx5.android.ui.main.ClipboardEditActivity
 import org.fcitx.fcitx5.android.ui.main.MainActivity
 import org.fcitx.fcitx5.android.ui.main.settings.SettingsRoute
@@ -41,6 +42,9 @@ object AppUtil {
 
     fun launchMainToThemeList(context: Context) =
         launchMainToDest(context, SettingsRoute.Theme)
+
+    fun launchMainToCommonWords(context: Context) =
+        launchMainToDest(context, SettingsRoute.QuickPhraseEdit(QuickPhraseManager.commonWords))
 
     fun launchMainToInputMethodConfig(context: Context, uniqueName: String, displayName: String) =
         launchMainToDest(context, SettingsRoute.InputMethodConfig(displayName, uniqueName))

@@ -68,6 +68,8 @@ sealed class InputWindow : Dependent {
 
         open val showTitle: Boolean = true
 
+        open val showReturnButton: Boolean = showTitle
+
         open val title: String = ""
 
         open fun onCreateBarExtension(): View? {

@@ -13,17 +13,16 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
-import org.fcitx.fcitx5.android.input.bar.ui.ToolButton
 import splitties.dimensions.dp
 import splitties.views.backgroundColor
 import splitties.views.dsl.coordinatorlayout.coordinatorLayout
 import splitties.views.dsl.coordinatorlayout.defaultLParams
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
-import splitties.views.dsl.core.horizontalLayout
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.view
+import splitties.views.dsl.core.verticalLayout
 import splitties.views.dsl.recyclerview.recyclerView
 import timber.log.Timber
 
@@ -37,10 +36,26 @@ class ClipboardUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     val emptyUi = ClipboardInstructionUi.Empty(ctx, theme)
 
+    val favoritesEmptyUi = ClipboardInstructionUi.FavoritesEmpty(ctx, theme)
+
+    val filteredEmptyUi = ClipboardInstructionUi.FilteredEmpty(ctx, theme)
+
+    val commonWordsRecyclerView = recyclerView {
+        addItemDecoration(SpacesItemDecoration(dp(4)))
+    }
+
+    val commonWordsEmptyUi = ClipboardInstructionUi.CommonWordsEmpty(ctx, theme)
+
+    val categoryBar = ClipboardCategoryBarUi(ctx, theme)
+
     val viewAnimator =  view(::ViewAnimator) {
         add(recyclerView, lParams(matchParent, matchParent))
         add(emptyUi.root, lParams(matchParent, matchParent))
         add(enableUi.root, lParams(matchParent, matchParent))
+        add(favoritesEmptyUi.root, lParams(matchParent, matchParent))
+        add(filteredEmptyUi.root, lParams(matchParent, matchParent))
+        add(commonWordsRecyclerView, lParams(matchParent, matchParent))
+        add(commonWordsEmptyUi.root, lParams(matchParent, matchParent))
     }
 
     private val keyBorder by ThemeManager.prefs.keyBorder
@@ -50,38 +65,47 @@ class ClipboardUi(override val ctx: Context, private val theme: Theme) : Ui {
         if (!keyBorder) {
             backgroundColor = theme.barColor
         }
-        add(viewAnimator, defaultLParams(matchParent, matchParent))
+        add(verticalLayout {
+            add(viewAnimator, lParams(matchParent, 0, weight = 1f))
+            add(categoryBar.root, lParams(matchParent, dp(40)))
+        }, defaultLParams(matchParent, matchParent))
     }
 
-    val deleteAllButton = ToolButton(ctx, R.drawable.ic_baseline_delete_sweep_24, theme).apply {
-        contentDescription = ctx.getString(R.string.delete_all)
-    }
+    val topBar = ClipboardTopBarUi(ctx, theme)
 
-    val extension = horizontalLayout {
-        add(deleteAllButton, lParams(dp(40), dp(40)))
-    }
+    val extension = topBar.root
 
-    private fun setDeleteButtonShown(enabled: Boolean) {
-        deleteAllButton.visibility = if (enabled) View.VISIBLE else View.INVISIBLE
-    }
-
-    fun switchUiByState(state: ClipboardStateMachine.State) {
+    fun switchUiByState(state: ClipboardStateMachine.State, showDeleteButton: Boolean) {
         Timber.d("Switch clipboard to $state")
         if (!disableAnimation)
             TransitionManager.beginDelayedTransition(root, Fade().apply { duration = 100L })
         when (state) {
             ClipboardStateMachine.State.Normal -> {
                 viewAnimator.displayedChild = 0
-                setDeleteButtonShown(true)
             }
             ClipboardStateMachine.State.AddMore -> {
                 viewAnimator.displayedChild = 1
-                setDeleteButtonShown(false)
             }
             ClipboardStateMachine.State.EnableListening -> {
                 viewAnimator.displayedChild = 2
-                setDeleteButtonShown(false)
+            }
+            ClipboardStateMachine.State.NoFavorites -> {
+                viewAnimator.displayedChild = 3
+            }
+            ClipboardStateMachine.State.NoFilteredEntries -> {
+                viewAnimator.displayedChild = 4
             }
         }
+        categoryBar.root.visibility =
+            if (state == ClipboardStateMachine.State.EnableListening) View.GONE else View.VISIBLE
+        topBar.setDeleteButtonShown(showDeleteButton)
+        topBar.setCommonWordButtonShown(false)
+    }
+
+    fun showCommonWords(empty: Boolean) {
+        viewAnimator.displayedChild = if (empty) 6 else 5
+        categoryBar.root.visibility = View.GONE
+        topBar.setDeleteButtonShown(false)
+        topBar.setCommonWordButtonShown(true)
     }
 }

@@ -16,6 +16,8 @@ import androidx.core.text.buildSpannedString
 import androidx.core.text.color
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
+import androidx.paging.CombinedLoadStates
+import androidx.paging.LoadState
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -25,28 +27,28 @@ import com.google.android.material.snackbar.BaseTransientBottomBar.BaseCallback
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.SnackbarContentLayout
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.reloadQuickPhrase
+import org.fcitx.fcitx5.android.data.clipboard.ClipboardCategory
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
+import org.fcitx.fcitx5.android.data.clipboard.ClipboardEntryFilter
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardEntry
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
+import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseEntry
+import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseManager
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.FcitxInputMethodService
-import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.BooleanKey.ClipboardDbEmpty
-import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.BooleanKey.ClipboardListeningEnabled
-import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.State.AddMore
-import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.State.EnableListening
-import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.State.Normal
-import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.TransitionEvent.ClipboardDbUpdated
-import org.fcitx.fcitx5.android.input.clipboard.ClipboardStateMachine.TransitionEvent.ClipboardListeningUpdated
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
 import org.fcitx.fcitx5.android.input.dependency.theme
 import org.fcitx.fcitx5.android.input.keyboard.KeyboardWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.AppUtil
-import org.fcitx.fcitx5.android.utils.EventStateMachine
 import org.fcitx.fcitx5.android.utils.item
 import org.mechdancer.dependency.manager.must
 import splitties.dimensions.dp
@@ -64,13 +66,9 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     }
     private var snackbarInstance: Snackbar? = null
 
-    private lateinit var stateMachine: EventStateMachine<ClipboardStateMachine.State, ClipboardStateMachine.TransitionEvent, ClipboardStateMachine.BooleanKey>
-
     @Keep
-    private val clipboardEnabledListener = ManagedPreference.OnChangeListener<Boolean> { _, it ->
-        stateMachine.push(
-            ClipboardListeningUpdated, ClipboardListeningEnabled to it
-        )
+    private val clipboardEnabledListener = ManagedPreference.OnChangeListener<Boolean> { _, _ ->
+        renderUi()
     }
 
     private val prefs = AppPrefs.getInstance().clipboard
@@ -81,10 +79,24 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
 
     private val clipboardEntryRadius by ThemeManager.prefs.clipboardEntryRadius
 
-    private val clipboardEntriesPager by lazy {
-        Pager(PagingConfig(pageSize = 16)) { ClipboardManager.allEntries() }
-    }
     private var adapterSubmitJob: Job? = null
+    private var commonWordsLoadJob: Job? = null
+
+    private var selectedSection = ClipboardPanelSection.Clipboard
+    private var selectedCategory: ClipboardCategory? = null
+    private var visibleEntriesEmpty = true
+    private var deleteAvailable = false
+    private var commonWordsEmpty = true
+
+    @Keep
+    private val commonWordsChangedListener =
+        QuickPhraseManager.OnCommonWordsChangedListener { entries ->
+            service.lifecycleScope.launch {
+                commonWordsAdapter.updateEntries(entries)
+                commonWordsEmpty = entries.isEmpty()
+                if (selectedSection == ClipboardPanelSection.CommonWords) renderUi()
+            }
+        }
 
     private val adapter: ClipboardAdapter by lazy {
         object : ClipboardAdapter(
@@ -98,6 +110,14 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
 
             override fun onUnpin(id: Int) {
                 service.lifecycleScope.launch { ClipboardManager.unpin(id) }
+            }
+
+            override fun onFavorite(id: Int) {
+                service.lifecycleScope.launch { ClipboardManager.favorite(id) }
+            }
+
+            override fun onUnfavorite(id: Int) {
+                service.lifecycleScope.launch { ClipboardManager.unfavorite(id) }
             }
 
             override fun onEdit(id: Int) {
@@ -129,11 +149,46 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
         }
     }
 
+    private val commonWordsAdapter: CommonWordsAdapter by lazy {
+        object : CommonWordsAdapter(
+            theme,
+            context.dp(clipboardEntryRadius.toFloat())
+        ) {
+            override fun onPaste(entry: QuickPhraseEntry) {
+                service.commitText(entry.phrase)
+                if (clipboardReturnAfterPaste) windowManager.attachWindow(KeyboardWindow)
+            }
+
+            override fun onEdit() {
+                AppUtil.launchMainToCommonWords(context)
+            }
+
+            override fun onDelete(entry: QuickPhraseEntry) {
+                service.lifecycleScope.launch {
+                    val entries = withContext(Dispatchers.IO) {
+                        QuickPhraseManager.deleteCommonWord(entry)
+                    }
+                    updateEntries(entries)
+                    commonWordsEmpty = entries.isEmpty()
+                    renderUi()
+                    service.postFcitxJob { reloadQuickPhrase() }
+                }
+            }
+        }
+    }
+
     private val ui by lazy {
         ClipboardUi(context, theme).apply {
             recyclerView.apply {
                 layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
                 adapter = this@ClipboardWindow.adapter
+            }
+            commonWordsRecyclerView.apply {
+                layoutManager = StaggeredGridLayoutManager(
+                    2,
+                    StaggeredGridLayoutManager.VERTICAL
+                )
+                adapter = commonWordsAdapter
             }
             ItemTouchHelper(object : ItemTouchHelper.Callback() {
                 override fun getMovementFlags(
@@ -162,10 +217,17 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
             enableUi.enableButton.setOnClickListener {
                 clipboardEnabledPref.setValue(true)
             }
-            deleteAllButton.setOnClickListener {
-                service.lifecycleScope.launch {
-                    promptDeleteAll(ClipboardManager.haveUnpinned())
-                }
+            topBar.setOnSectionSelectedListener {
+                showSection(it)
+            }
+            categoryBar.setOnCategorySelectedListener {
+                showCategory(it)
+            }
+            topBar.deleteAllButton.setOnClickListener {
+                promptDeleteAll()
+            }
+            topBar.addCommonWordButton.setOnClickListener {
+                AppUtil.launchMainToCommonWords(context)
             }
         }
     }
@@ -174,20 +236,20 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
 
     private var promptMenu: PopupMenu? = null
 
-    private fun promptDeleteAll(skipPinned: Boolean) {
+    private fun promptDeleteAll() {
         promptMenu?.dismiss()
-        promptMenu = PopupMenu(context, ui.deleteAllButton).apply {
+        promptMenu = PopupMenu(context, ui.topBar.deleteAllButton).apply {
             menu.add(buildSpannedString {
                 bold {
                     color(context.styledColor(android.R.attr.colorAccent)) {
-                        append(context.getString(if (skipPinned) R.string.delete_all_except_pinned else R.string.delete_all_pinned_items))
+                        append(context.getString(R.string.delete_all_except_pinned_and_favorites))
                     }
                 }
             }).isEnabled = false
             menu.add(android.R.string.cancel)
             menu.item(android.R.string.ok) {
                 service.lifecycleScope.launch {
-                    val ids = ClipboardManager.deleteAll(skipPinned)
+                    val ids = ClipboardManager.deleteAll()
                     showUndoSnackbar(*ids)
                 }
             }
@@ -202,6 +264,7 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
 
     @SuppressLint("RestrictedApi")
     private fun showUndoSnackbar(vararg id: Int) {
+        if (id.isEmpty()) return
         id.forEach { pendingDeleteIds.add(it) }
         val str = context.resources.getString(R.string.num_items_deleted, pendingDeleteIds.size)
         snackbarInstance = Snackbar.make(snackbarCtx, ui.root, str, Snackbar.LENGTH_LONG)
@@ -250,35 +313,123 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
             }
     }
 
-    override fun onAttached() {
-        val isEmpty = ClipboardManager.itemCount == 0
-        val isListening = clipboardEnabledPref.getValue()
-        val initialState = when {
-            !isListening -> EnableListening
-            isEmpty -> AddMore
-            else -> Normal
+    private val adapterLoadStateListener: (CombinedLoadStates) -> Unit = {
+        if (it.refresh is LoadState.NotLoading) {
+            visibleEntriesEmpty = it.append.endOfPaginationReached && adapter.itemCount < 1
+            refreshDeleteAvailability()
+            renderUi()
         }
-        stateMachine = ClipboardStateMachine.new(initialState, isEmpty, isListening) {
-            ui.switchUiByState(it)
+    }
+
+    private fun showSection(section: ClipboardPanelSection) {
+        selectedSection = section
+        ui.topBar.setActiveSection(section)
+        submitEntries()
+    }
+
+    private fun showCategory(category: ClipboardCategory?) {
+        selectedCategory = category
+        ui.categoryBar.setActiveCategory(category)
+        submitEntries()
+    }
+
+    private fun submitEntries() {
+        visibleEntriesEmpty = false
+        deleteAvailable = false
+        if (selectedSection == ClipboardPanelSection.CommonWords) {
+            adapterSubmitJob?.cancel()
+            adapterSubmitJob = null
+            renderUi()
+            loadCommonWords()
+            return
         }
-        // manually switch to initial ui
-        ui.switchUiByState(initialState)
-        adapter.addLoadStateListener {
-            val empty = it.append.endOfPaginationReached && adapter.itemCount < 1
-            stateMachine.push(ClipboardDbUpdated, ClipboardDbEmpty to empty)
-        }
+        renderUi()
+        adapterSubmitJob?.cancel()
         adapterSubmitJob = service.lifecycleScope.launch {
-            clipboardEntriesPager.flow.collect {
-                adapter.submitData(it)
+            val filter = ClipboardEntryFilter(
+                scope = when (selectedSection) {
+                    ClipboardPanelSection.Clipboard -> ClipboardEntryFilter.Scope.All
+                    ClipboardPanelSection.Favorites -> ClipboardEntryFilter.Scope.Favorites
+                    ClipboardPanelSection.CommonWords -> ClipboardEntryFilter.Scope.All
+                },
+                category = selectedCategory
+            )
+            Pager(PagingConfig(pageSize = 16)) { ClipboardManager.entries(filter) }
+                .flow
+                .collectLatest { adapter.submitData(it) }
+        }
+    }
+
+    private fun loadCommonWords() {
+        commonWordsLoadJob?.cancel()
+        commonWordsLoadJob = service.lifecycleScope.launch {
+            val entries = withContext(Dispatchers.IO) {
+                QuickPhraseManager.loadCommonWords()
+            }
+            commonWordsAdapter.updateEntries(entries)
+            commonWordsEmpty = entries.isEmpty()
+            renderUi()
+        }
+    }
+
+    private fun refreshDeleteAvailability() {
+        val section = selectedSection
+        if (section == ClipboardPanelSection.CommonWords) return
+        service.lifecycleScope.launch {
+            val available = ClipboardManager.haveDeletable()
+            if (selectedSection == section) {
+                deleteAvailable = available
+                renderUi()
             }
         }
+    }
+
+    private fun renderUi() {
+        if (selectedSection == ClipboardPanelSection.CommonWords) {
+            ui.showCommonWords(commonWordsEmpty)
+            return
+        }
+        selectedCategory?.let { ui.filteredEmptyUi.setFilter(selectedSection, it) }
+        val state = ClipboardStateMachine.resolve(
+            clipboardEnabledPref.getValue(),
+            selectedSection,
+            selectedCategory != null,
+            visibleEntriesEmpty
+        )
+        ui.switchUiByState(
+            state,
+            state == ClipboardStateMachine.State.Normal &&
+                selectedSection == ClipboardPanelSection.Clipboard &&
+                selectedCategory == null &&
+                deleteAvailable
+        )
+    }
+
+    override fun onAttached() {
+        service.lifecycleScope.launch { ClipboardManager.cleanupExpired() }
+        selectedSection = ClipboardPanelSection.Clipboard
+        selectedCategory = null
+        visibleEntriesEmpty = ClipboardManager.itemCount == 0
+        deleteAvailable = false
+        ui.topBar.setActiveSection(selectedSection)
+        ui.categoryBar.setActiveCategory(selectedCategory)
+        adapter.addLoadStateListener(adapterLoadStateListener)
+        QuickPhraseManager.addOnCommonWordsChangedListener(commonWordsChangedListener)
+        renderUi()
+        showSection(selectedSection)
         clipboardEnabledPref.registerOnChangeListener(clipboardEnabledListener)
     }
 
     override fun onDetached() {
         clipboardEnabledPref.unregisterOnChangeListener(clipboardEnabledListener)
+        QuickPhraseManager.removeOnCommonWordsChangedListener(commonWordsChangedListener)
+        adapter.removeLoadStateListener(adapterLoadStateListener)
         adapter.onDetached()
+        commonWordsAdapter.onDetached()
         adapterSubmitJob?.cancel()
+        adapterSubmitJob = null
+        commonWordsLoadJob?.cancel()
+        commonWordsLoadJob = null
         promptMenu?.dismiss()
         snackbarInstance?.dismiss()
     }
@@ -286,6 +437,10 @@ class ClipboardWindow : InputWindow.ExtendedInputWindow<ClipboardWindow>() {
     override val title: String by lazy {
         context.getString(R.string.clipboard)
     }
+
+    override val showTitle = false
+
+    override val showReturnButton = true
 
     override fun onCreateBarExtension(): View = ui.extension
 }

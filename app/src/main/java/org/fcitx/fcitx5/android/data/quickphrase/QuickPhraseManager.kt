@@ -8,6 +8,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.data.DataManager
 import org.fcitx.fcitx5.android.utils.appContext
 import org.fcitx.fcitx5.android.utils.errorRuntime
+import org.fcitx.fcitx5.android.utils.WeakHashSet
 import org.fcitx.fcitx5.android.utils.withTempDir
 import java.io.File
 import java.io.InputStream
@@ -19,8 +20,50 @@ object QuickPhraseManager {
     )
 
     private val customQuickPhraseDir = File(
-        appContext.getExternalFilesDir(null)!!, "data/data/quickphrase.d"
+        appContext.getExternalFilesDir(null) ?: appContext.filesDir,
+        "data/data/quickphrase.d"
     ).also { it.mkdirs() }
+
+    val commonWords: CustomQuickPhrase by lazy {
+        val file = File(customQuickPhraseDir, "$COMMON_WORDS_FILE_NAME.${QuickPhrase.EXT}")
+        if (!file.exists()) file.createNewFile()
+        CustomQuickPhrase(file)
+    }
+
+    fun isCommonWords(quickPhrase: QuickPhrase): Boolean =
+        quickPhrase.file.absolutePath == commonWords.file.absolutePath
+
+    fun interface OnCommonWordsChangedListener {
+        fun onChanged(entries: List<QuickPhraseEntry>)
+    }
+
+    private val commonWordsListeners = WeakHashSet<OnCommonWordsChangedListener>()
+
+    fun addOnCommonWordsChangedListener(listener: OnCommonWordsChangedListener) {
+        commonWordsListeners.add(listener)
+    }
+
+    fun removeOnCommonWordsChangedListener(listener: OnCommonWordsChangedListener) {
+        commonWordsListeners.remove(listener)
+    }
+
+    @Synchronized
+    fun loadCommonWords(): List<QuickPhraseEntry> = commonWords.loadData().toList()
+
+    @Synchronized
+    fun saveCommonWords(entries: List<QuickPhraseEntry>) {
+        commonWords.saveData(QuickPhraseData(entries))
+        val snapshot = entries.toList()
+        commonWordsListeners.forEach { it.onChanged(snapshot) }
+    }
+
+    @Synchronized
+    fun deleteCommonWord(entry: QuickPhraseEntry): List<QuickPhraseEntry> {
+        val entries = loadCommonWords().toMutableList()
+        entries.remove(entry)
+        saveCommonWords(entries)
+        return entries
+    }
 
     fun listQuickPhrase(): List<QuickPhrase> {
         val builtin = listDir(builtinQuickPhraseDir) { file ->
@@ -74,5 +117,5 @@ object QuickPhraseManager {
                     ?.let { block(file) }
             } ?: listOf()
 
-
+    private const val COMMON_WORDS_FILE_NAME = "f5clipboard-common-words"
 }

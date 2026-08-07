@@ -65,17 +65,20 @@ class TitleUi(override val ctx: Context, theme: Theme) : Ui {
         titleText.text = title
     }
 
-    fun addExtension(view: View, showTitle: Boolean) {
+    fun addExtension(view: View, showTitle: Boolean, showReturnButton: Boolean = showTitle) {
         if (extension != null) {
             throw IllegalStateException("TitleBar extension is already present")
         }
-        backButton.isVisible = showTitle
+        backButton.isVisible = showReturnButton
         titleText.isVisible = showTitle
         extension = view
         root.run {
             add(view, lParams(matchConstraints, dp(40)) {
                 centerVertically()
                 if (showTitle) {
+                    endOfParent(dp(5))
+                } else if (showReturnButton) {
+                    after(backButton)
                     endOfParent(dp(5))
                 } else {
                     centerHorizontally()
