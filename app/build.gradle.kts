@@ -56,6 +56,8 @@ android {
         @Suppress("UnstableApiUsage")
         generateLocaleConfig = true
     }
+
+    sourceSets.getByName("androidTest").assets.directories.add("$projectDir/schemas")
 }
 
 fcitxComponent {
@@ -127,6 +129,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.androidx.lifecycle.testing)
     androidTestImplementation(libs.junit)
 }
@@ -139,4 +142,10 @@ configurations {
         exclude(group = "com.louiscad.splitties", module = "splitties-appctx")
         exclude(group = "com.louiscad.splitties", module = "splitties-systemservices")
     }
+}
+
+// descriptor.json is generated inside the main assets directory. Gradle 9 requires
+// consumers of that directory to declare the producing task explicitly.
+tasks.matching { it.name.startsWith("lint") || it.name.endsWith("LintReportModel") }.configureEach {
+    dependsOn("generateDataDescriptor")
 }

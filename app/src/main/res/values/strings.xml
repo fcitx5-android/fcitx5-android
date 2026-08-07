@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name_release">Fcitx5</string>
     <string name="app_name_debug">Fcitx5 (Debug)</string>
     <string name="save">Save</string>
@@ -59,6 +59,9 @@
     <string name="clear_clb_db">Clear clipboard database</string>
     <string name="pin">Pin</string>
     <string name="unpin">Unpin</string>
+    <string name="favorite" tools:ignore="MissingTranslation">Add to favorites</string>
+    <string name="unfavorite" tools:ignore="MissingTranslation">Remove from favorites</string>
+    <string name="favorites" tools:ignore="MissingTranslation">Favorites</string>
     <string name="delete">Delete</string>
     <string name="clipboard">Clipboard</string>
     <string name="keyboard_height">Keyboard height</string>
@@ -80,6 +83,7 @@
     <string name="text_editing">Text Editing</string>
     <string name="instruction_enable_clipboard_listening">To use clipboard management, please enable clipboard listening in settings</string>
     <string name="instruction_copy">Try copying something</string>
+    <string name="instruction_favorite" tools:ignore="MissingTranslation">Long press a clipboard item to add it to favorites</string>
     <string name="clear">Clear</string>
     <string name="export">Export</string>
     <string name="app_crash">Application crashed</string>
@@ -209,6 +213,7 @@
     <string name="horizontal_candidate_always_fill">Always fill width</string>
     <string name="inline_suggestions">Show inline autofill suggestions</string>
     <string name="delete_all_except_pinned">Delete all items except pinned ones?</string>
+    <string name="delete_all_except_pinned_and_favorites" tools:ignore="MissingTranslation">Delete all items except pinned and favorite ones?</string>
     <string name="num_items_deleted">%1$d item(s) deleted</string>
     <string name="delete_theme">Delete Theme</string>
     <string name="delete_theme_msg">Do you really want to delete theme \"%1$s\"?</string>

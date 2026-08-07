@@ -59,6 +59,9 @@
     <string name="clear_clb_db">清除剪貼簿資料庫</string>
     <string name="pin">釘選</string>
     <string name="unpin">取消釘選</string>
+    <string name="favorite">收藏</string>
+    <string name="unfavorite">取消收藏</string>
+    <string name="favorites">收藏</string>
     <string name="delete">刪除</string>
     <string name="clipboard">剪貼簿</string>
     <string name="keyboard_height">鍵盤高度</string>
@@ -80,6 +83,7 @@
     <string name="text_editing">文字編輯</string>
     <string name="instruction_enable_clipboard_listening">要使用剪貼簿管理，請在設定中啟用監聽剪貼簿</string>
     <string name="instruction_copy">嘗試複製一些東西</string>
+    <string name="instruction_favorite">長按剪貼簿項目即可收藏</string>
     <string name="clear">清除</string>
     <string name="export">匯出</string>
     <string name="app_crash">應用程式當機</string>
@@ -209,6 +213,7 @@
     <string name="horizontal_candidate_always_fill">總是填充寬度</string>
     <string name="inline_suggestions">顯示內嵌自動填充建議</string>
     <string name="delete_all_except_pinned">要刪除所有未置頂條目嗎？</string>
+    <string name="delete_all_except_pinned_and_favorites">要刪除所有未釘選且未收藏的項目嗎？</string>
     <string name="num_items_deleted">已刪除 %1$d 項</string>
     <string name="delete_theme">刪除主題</string>
     <string name="delete_theme_msg">確定要刪除主題 “%1$s” 嗎？</string>

@@ -59,6 +59,9 @@
     <string name="clear_clb_db">清空剪贴板数据库</string>
     <string name="pin">置顶</string>
     <string name="unpin">取消置顶</string>
+    <string name="favorite">收藏</string>
+    <string name="unfavorite">取消收藏</string>
+    <string name="favorites">收藏</string>
     <string name="delete">删除</string>
     <string name="clipboard">剪贴板</string>
     <string name="keyboard_height">键盘高度</string>
@@ -80,6 +83,7 @@
     <string name="text_editing">文本编辑</string>
     <string name="instruction_enable_clipboard_listening">要启用剪贴板管理，请在设置中开启“记录剪贴板历史”。</string>
     <string name="instruction_copy">试着复制些东西</string>
+    <string name="instruction_favorite">长按剪贴板条目即可收藏</string>
     <string name="clear">清空</string>
     <string name="export">导出</string>
     <string name="app_crash">应用崩溃</string>
@@ -209,6 +213,7 @@
     <string name="horizontal_candidate_always_fill">总是填充宽度</string>
     <string name="inline_suggestions">显示内嵌自动填充建议</string>
     <string name="delete_all_except_pinned">要删除所有未置顶条目吗？</string>
+    <string name="delete_all_except_pinned_and_favorites">要删除所有未置顶且未收藏的条目吗？</string>
     <string name="num_items_deleted">已删除 %1$d 项</string>
     <string name="delete_theme">删除主题</string>
     <string name="delete_theme_msg">确定要删除主题“%1$s”吗？</string>

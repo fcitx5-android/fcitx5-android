@@ -25,7 +25,9 @@ data class ClipboardEntry(
     @ColumnInfo(defaultValue = "0")
     val deleted: Boolean = false,
     @ColumnInfo(defaultValue = "0")
-    val sensitive: Boolean = false
+    val sensitive: Boolean = false,
+    @ColumnInfo(defaultValue = "0")
+    val favorite: Boolean = false
 ) {
     companion object {
         const val BULLET = "•"
