@@ -85,6 +85,9 @@ abstract class BaseKeyboard(
      */
     private val touchTarget = hashMapOf<Int, View>()
 
+    private data class KeyActionState(val viewId: Int, val action: KeyAction)
+    private var keyActionStateBuffer: KeyActionState? = null
+
     init {
         isMotionEventSplittingEnabled = true
         keyRows = keyLayout.map { row ->
@@ -208,8 +211,27 @@ abstract class BaseKeyboard(
             def.behaviors.forEach {
                 when (it) {
                     is KeyDef.Behavior.Press -> {
-                        setOnClickListener { _ ->
-                            onAction(it.action)
+                        keyPressListener = object : CustomGestureView.KeyPressListener {
+                            override fun onKeyDown(view: CustomGestureView) {
+                                keyActionStateBuffer?.let { state ->
+                                    onAction(state.action)
+                                    keyActionStateBuffer = null
+                                }
+                                keyActionStateBuffer = KeyActionState(view.id, it.action)
+                            }
+                            override fun onKeyUp(view: CustomGestureView) {
+                                keyActionStateBuffer?.let { state ->
+                                    if (view.id == state.viewId) {
+                                        onAction(state.action)
+                                        keyActionStateBuffer = null
+                                    }
+                                }
+                            }
+                            override fun onLongPress(view: CustomGestureView) {
+                                if (view.id == keyActionStateBuffer?.viewId) {
+                                    keyActionStateBuffer = null
+                                }
+                            }
                         }
                     }
                     is KeyDef.Behavior.LongPress -> {
@@ -280,7 +302,10 @@ abstract class BaseKeyboard(
                     is KeyDef.Popup.Keyboard -> {
                         setOnLongClickListener { view ->
                             view as KeyView
-                            onPopupAction(PopupAction.ShowKeyboardAction(view.id, it, view.bounds))
+                            // only last key pressed will show the popup
+                            if (view.id == keyActionStateBuffer?.viewId) {
+                                onPopupAction(PopupAction.ShowKeyboardAction(view.id, it, view.bounds))
+                            }
                             // do not consume this LongClick gesture
                             false
                         }

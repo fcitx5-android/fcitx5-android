@@ -23,6 +23,14 @@ import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListen
 
 open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
 
+    interface KeyPressListener {
+        fun onKeyDown(view: CustomGestureView)
+        fun onKeyUp(view: CustomGestureView)
+        fun onLongPress(view: CustomGestureView)
+    }
+
+    var keyPressListener: KeyPressListener? = null
+
     enum class SwipeAxis { X, Y }
 
     enum class GestureType { Down, Move, Up }
@@ -177,6 +185,7 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                     swipeLastX = x
                     swipeLastY = y
                 }
+                keyPressListener?.onKeyDown(this)
             }
             MotionEvent.ACTION_UP -> {
                 isPressed = false
@@ -202,6 +211,10 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                     } else {
                         performClick()
                     }
+                    keyPressListener?.onKeyUp(this)
+                }
+                if (longPressEnabled) {
+                    keyPressListener?.onLongPress(this)
                 }
                 return true
             }
