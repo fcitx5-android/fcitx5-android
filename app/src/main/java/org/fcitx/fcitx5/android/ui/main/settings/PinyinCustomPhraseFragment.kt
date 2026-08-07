@@ -6,12 +6,13 @@ package org.fcitx.fcitx5.android.ui.main.settings
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.text.InputFilter
 import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.EditText
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -100,14 +101,15 @@ class PinyinCustomPhraseFragment : Fragment(), OnItemChangedListener<PinyinCusto
                 }
                 keyField.apply {
                     isSingleLine = true
-                    filters = arrayOf(
-                        InputFilter { source, _, _, _, _, _ ->
-                            source.filter { it.code in 'A'.code..'Z'.code || it.code in 'a'.code..'z'.code }
-                        }
-                    )
                     imeOptions = EditorInfo.IME_ACTION_NEXT
                     inputType =
                         InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_NORMAL or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+                    // clear error while editing
+                    addTextChangedListener { error = null }
+                    // validate on blur, since realtime filtering conflicts with IME composition
+                    setOnFocusChangeListener { _, hasFocus ->
+                        if (!hasFocus) validateKeyField(keyField)
+                    }
                 }
                 val (orderLayout, orderField) = materialTextInput {
                     hint = orderLabel
@@ -148,9 +150,13 @@ class PinyinCustomPhraseFragment : Fragment(), OnItemChangedListener<PinyinCusto
                             keyField.error = getString(R.string._cannot_be_empty, keyLabel)
                             keyField.requestFocus()
                             return@onClick false
-                        } else {
-                            keyField.error = null
                         }
+                        if (!isValidKey(key)) {
+                            keyField.error = getString(R.string.invalid_value)
+                            keyField.requestFocus()
+                            return@onClick false
+                        }
+                        keyField.error = null
                         val order = orderField.str.toIntOrNull() ?: 1
                         val phrase = phraseField.str
                         if (phrase.isEmpty()) {
@@ -188,6 +194,16 @@ class PinyinCustomPhraseFragment : Fragment(), OnItemChangedListener<PinyinCusto
             viewLifecycleOwner,
             Lifecycle.State.STARTED
         )
+    }
+
+    private fun isValidKey(key: String) =
+        key.isNotEmpty() && key.all { it in 'a'..'z' || it in 'A'..'Z' }
+
+    private fun validateKeyField(field: EditText) {
+        val key = field.str
+        if (key.isNotEmpty() && !isValidKey(key)) {
+            field.error = getString(R.string.invalid_value)
+        }
     }
 
     override fun onItemAdded(idx: Int, item: PinyinCustomPhrase) {
