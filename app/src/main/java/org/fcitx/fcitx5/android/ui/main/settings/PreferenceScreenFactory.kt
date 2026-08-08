@@ -214,6 +214,7 @@ object PreferenceScreenFactory {
                 )
                 ConfigExternal.ETy.QuickPhrase -> quickPhraseEditor()
                 ConfigExternal.ETy.Chttrans -> addonConfigPreference("chttrans")
+                ConfigExternal.ETy.CloudPinyin -> addonConfigPreference("cloudpinyin")
                 ConfigExternal.ETy.TableGlobal -> addonConfigPreference("table")
                 ConfigExternal.ETy.AndroidTable -> tableInputMethod()
                 ConfigExternal.ETy.PinyinCustomPhrase -> pinyinCustomPhrase()

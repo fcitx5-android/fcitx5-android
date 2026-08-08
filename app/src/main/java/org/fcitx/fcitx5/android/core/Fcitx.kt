@@ -437,6 +437,9 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
                     extDomains.add(d)
                 }
             }
+            plugins.firstOrNull { it.name == "cloud_pinyin" }?.let {
+                CloudPinyinIpc.loadNativeLibrary(it.nativeLibraryDir)
+            }
             Timber.d(
                 """
                Starting fcitx with:

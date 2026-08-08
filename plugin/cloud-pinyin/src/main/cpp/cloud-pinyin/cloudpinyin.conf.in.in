@@ -1,0 +1,11 @@
+[Addon]
+Name=Cloud Pinyin
+Category=Module
+Version=@PROJECT_VERSION@
+Library=libcloudpinyin
+Type=@FCITX_ADDON_TYPE@
+OnDemand=True
+Configurable=True
+
+[Addon/Dependencies]
+0=core:@REQUIRED_FCITX_VERSION@
