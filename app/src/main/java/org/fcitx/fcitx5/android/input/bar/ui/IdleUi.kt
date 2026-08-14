@@ -8,6 +8,7 @@ import android.content.Context
 import android.transition.Slide
 import android.transition.TransitionManager
 import android.transition.TransitionSet
+import android.util.AttributeSet
 import android.view.View
 import android.view.Gravity
 import android.view.animation.AlphaAnimation
@@ -15,6 +16,7 @@ import android.view.animation.AnimationSet
 import android.view.animation.TranslateAnimation
 import android.widget.Space
 import android.widget.ViewAnimator
+import com.soundwave.lib.SoundWaveView
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.theme.Theme
@@ -25,6 +27,7 @@ import org.fcitx.fcitx5.android.input.bar.ui.idle.InlineSuggestionsUi
 import org.fcitx.fcitx5.android.input.bar.ui.idle.NumberRow
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
+import org.fcitx.fcitx5.android.input.voice.VoiceInputComponent
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.after
 import splitties.views.dsl.constraintlayout.before
@@ -39,8 +42,10 @@ import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.view
 import splitties.views.imageResource
 import timber.log.Timber
+import kotlin.math.roundToInt
 
 class IdleUi(
     override val ctx: Context,
@@ -77,7 +82,30 @@ class IdleUi(
 
     val hideKeyboardButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_drop_down_24, theme)
 
-    val emptyBar = Space(ctx)
+//    val emptyBar = Space(ctx)
+
+    // TODO: dedicated UI for active voice input
+    val emptyBar = SoundWaveView(ctx).apply {
+        enableIdle(true)
+        setColor(theme.altKeyTextColor)
+//        volumeCount = 20
+//        volumeIdleCount = 8
+        maxVolume = 12
+        minVolume = 2
+        minVolumeBarHeight = dp(3)
+        maxVolumeBarHeight = dp(KawaiiBarComponent.HEIGHT - 6)
+//        volumeBarMargin = dp(4)
+//        volumeBarHalfWidth = dp(2)
+        maxIdleHeight = maxVolumeBarHeight / 2
+    }
+
+    val audioVolumeListener = VoiceInputComponent.AudioVolumeListener { listening, dB ->
+        if (listening) {
+            emptyBar.handleVolume(dB.roundToInt())
+        } else {
+            emptyBar.stopDance()
+        }
+    }
 
     val buttonsUi = ButtonsBarUi(ctx, theme)
 
