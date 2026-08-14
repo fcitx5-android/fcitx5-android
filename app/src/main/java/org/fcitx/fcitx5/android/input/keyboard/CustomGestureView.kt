@@ -19,7 +19,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.data.InputFeedbacks
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
-import org.fcitx.fcitx5.android.input.keyboard.CustomGestureView.OnGestureListener
 
 open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
 
@@ -137,6 +136,16 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
         // double tap state should be preserved on touch up
     }
 
+    fun cancelGestures() {
+        isPressed = false
+        resetState()
+        // reset double tap state on cancel
+        if (doubleTapEnabled) {
+            maybeDoubleTap = false
+            lastClickTime = 0
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val x = event.x
@@ -231,14 +240,8 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                 return true
             }
             MotionEvent.ACTION_CANCEL -> {
-                isPressed = false
                 dispatchGestureEvent(GestureType.Up, event.x, event.y)
-                resetState()
-                // reset double tap state on cancel
-                if (doubleTapEnabled) {
-                    maybeDoubleTap = false
-                    lastClickTime = 0
-                }
+                cancelGestures()
                 return true
             }
         }
