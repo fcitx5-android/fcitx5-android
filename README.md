@@ -38,7 +38,7 @@ In case you want Fcitx5 on other platforms: [macOS](https://github.com/fcitx-con
   - Zhuyin/Bopomofo (via [Chewing Plugin](./plugin/chewing))
   - Jyutping (via [Jyutping Plugin](./plugin/jyutping/), powered by [libime-jyutping](https://github.com/fcitx/libime-jyutping))
 - Vietnamese (via [UniKey Plugin](./plugin/unikey), supports Telex, VNI and VIQR)
-- Japanese (via [Anthy Plugin](./plugin/anthy))
+- Japanese (via [Mozc Plugin](./plugin/mozc) and [Anthy Plugin](./plugin/anthy))
 - Korean (via [Hangul Plugin](./plugin/hangul))
 - Sinhala (via [Sayura Plugin](./plugin/sayura))
 - Thai (via [Thai Plugin](./plugin/thai))
@@ -108,6 +108,12 @@ First, clone this repository and fetch all submodules:
 ```shell
 git clone git@github.com:fcitx5-android/fcitx5-android.git
 git submodule update --init --recursive
+```
+
+Sources of the [Mozc Plugin](./plugin/mozc) are big and not fetched by default. If you want to build it, additionally run:
+
+```shell
+git submodule update --init --recursive --checkout plugin/mozc/src/main/cpp/fcitx5-mozc
 ```
 
 Install `extra-cmake-modules` and `gettext` with your system package manager:

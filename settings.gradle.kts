@@ -35,3 +35,7 @@ include(":plugin:chewing")
 include(":plugin:sayura")
 include(":plugin:jyutping")
 include(":plugin:thai")
+// mozc sources are big and not fetched by default; see plugin/mozc/README.md
+if (settingsDir.resolve("plugin/mozc/src/main/cpp/fcitx5-mozc/CMakeLists.txt").exists()) {
+    include(":plugin:mozc")
+}

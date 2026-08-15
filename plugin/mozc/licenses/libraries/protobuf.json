@@ -1,0 +1,11 @@
+{
+    "uniqueId": "protocolbuffers/protobuf",
+    "artifactVersion": "34.1",
+    "description": "Protocol Buffers",
+    "name": "protocolbuffers/protobuf",
+    "website": "https://github.com/protocolbuffers/protobuf",
+    "tag": "native",
+    "licenses": [
+        "BSD-3-Clause"
+    ]
+}

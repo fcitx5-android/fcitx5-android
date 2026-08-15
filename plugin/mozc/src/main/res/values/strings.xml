@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name_debug">Fcitx5 (Mozc Plugin | Debug)</string>
+    <string name="app_name_release">Fcitx5 (Mozc Plugin)</string>
+    <string name="description">Mozc (Japanese input method) engine support for Fcitx5</string>
+</resources>

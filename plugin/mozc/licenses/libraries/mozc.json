@@ -1,0 +1,11 @@
+{
+    "uniqueId": "google/mozc",
+    "artifactVersion": "3.34.6239.100",
+    "description": "Mozc Japanese input method",
+    "name": "google/mozc",
+    "website": "https://github.com/google/mozc",
+    "tag": "native",
+    "licenses": [
+        "BSD-3-Clause"
+    ]
+}

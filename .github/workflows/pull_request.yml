@@ -26,6 +26,13 @@ jobs:
           fetch-depth: 0
           submodules: recursive
 
+      # Mozc's large source tree is opt-in. Build it on one runner so the
+      # plugin is covered without multiplying the cost across the OS matrix.
+      - name: Fetch Mozc sources
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          git submodule update --init --recursive --checkout plugin/mozc/src/main/cpp/fcitx5-mozc
+
       - name: Setup Java
         uses: actions/setup-java@v5
         with:

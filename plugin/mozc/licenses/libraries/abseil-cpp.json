@@ -1,0 +1,11 @@
+{
+    "uniqueId": "abseil/abseil-cpp",
+    "artifactVersion": "20260107.1",
+    "description": "Abseil Common Libraries (C++)",
+    "name": "abseil/abseil-cpp",
+    "website": "https://github.com/abseil/abseil-cpp",
+    "tag": "native",
+    "licenses": [
+        "Apache-2.0"
+    ]
+}
