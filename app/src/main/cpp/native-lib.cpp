@@ -38,7 +38,9 @@
 
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream_buffer.hpp>
+
 #include "customphrase.h"
+#include "androidipcbridge_public.h"
 
 #include "androidaddonloader/androidaddonloader.h"
 #include "androidfrontend/androidfrontend_public.h"
@@ -81,7 +83,7 @@ public:
         return uv_run(get_event_base(), UV_RUN_ONCE);
     }
 
-    void startup(const std::function<void(fcitx::AddonInstance *)> &setupCallback) {
+    void startup() {
         p_instance = std::make_unique<fcitx::Instance>(0, nullptr);
         p_instance->addonManager().registerLoader(std::make_unique<fcitx::AndroidSharedLibraryLoader>());
         p_dispatcher = std::make_unique<fcitx::EventDispatcher>();
@@ -92,7 +94,15 @@ public:
         p_quickphrase = addonMgr.addon("quickphrase");
         p_unicode = addonMgr.addon("unicode");
         p_clipboard = addonMgr.addon("clipboard", true);
+        p_bridge = addonMgr.addon("androidipcbridge", true);
+    }
+
+    void setupFrontendCallback(const std::function<void(fcitx::AddonInstance *)> &setupCallback) {
         setupCallback(p_frontend);
+    }
+
+    void setupBridgeCallback(const std::function<void(fcitx::AddonInstance *)> &setupCallback) {
+        setupCallback(p_bridge);
     }
 
     void reloadConfig() {
@@ -438,6 +448,10 @@ public:
         return p_frontend->call<fcitx::IAndroidFrontend::triggerCandidateListTabAction>(id);
     }
 
+    void handleAndroidIPCBridgeResponse(int id, int status, const std::string &msg, const std::optional<std::vector<std::byte>> &payload) {
+        return p_bridge->call<fcitx::IAndroidIPCBridge::handleResponse>(id, status, msg, payload);
+    }
+
     void save() {
         p_instance->save();
     }
@@ -466,6 +480,7 @@ private:
     fcitx::AddonInstance *p_quickphrase = nullptr;
     fcitx::AddonInstance *p_unicode = nullptr;
     fcitx::AddonInstance *p_clipboard = nullptr;
+    fcitx::AddonInstance *p_bridge = nullptr;
 
     void resetGlobalPointers() {
         p_instance.reset();
@@ -474,6 +489,7 @@ private:
         p_quickphrase = nullptr;
         p_unicode = nullptr;
         p_clipboard = nullptr;
+        p_bridge = nullptr;
     }
 };
 
@@ -709,17 +725,27 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
         env->SetObjectArrayElement(vararg, 1, JString(env, oldIM));
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 10, *vararg);
     };
-    auto toastCallback = [](const std::string &s) {
+    auto androidIPCRequestCallback = [](int id, const std::string &plugin, const std::string &method, const std::optional<std::vector<std::byte>> &params) {
         auto env = GlobalRef->AttachEnv();
-        env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->ShowToast, *JString(env, s));
+        jbyteArray byteArray = nullptr;
+        if (params.has_value()) {
+            auto size = params->size();
+            byteArray = env->NewByteArray(size);
+            env->SetByteArrayRegion(byteArray, 0, size, reinterpret_cast<const jbyte *>(params->data()));
+        }
+        env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleAndroidIPCRequest, id, *JString(env, plugin), *JString(env, method), byteArray);
+        if (byteArray != nullptr) {
+            env->DeleteLocalRef(byteArray);
+        }
     };
 
     umask(007);
     fcitx::StandardPaths::global().syncUmask();
 
-    Fcitx::Instance().startup([&](auto *androidfrontend) {
-        FCITX_INFO() << "Setting up callback";
-        readyCallback();
+    Fcitx::Instance().startup();
+    FCITX_INFO() << "Setting up callback";
+    readyCallback();
+    Fcitx::Instance().setupFrontendCallback([&](auto *androidfrontend) {
         androidfrontend->template call<fcitx::IAndroidFrontend::setCandidateListCallback>(candidateListCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setCommitStringCallback>(commitStringCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setPreeditCallback>(preeditCallback);
@@ -730,7 +756,9 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
         androidfrontend->template call<fcitx::IAndroidFrontend::setDeleteSurroundingCallback>(deleteSurroundingCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setPagedCandidateCallback>(pagedCandidateCallback);
         androidfrontend->template call<fcitx::IAndroidFrontend::setSwitchInputMethodCallback>(switchInputMethodCallback);
-        androidfrontend->template call<fcitx::IAndroidFrontend::setToastCallback>(toastCallback);
+    });
+    Fcitx::Instance().setupBridgeCallback([&](auto *androidipcbridge) {
+        androidipcbridge->template call<fcitx::IAndroidIPCBridge::setRequestHandler>(androidIPCRequestCallback);
     });
     FCITX_INFO() << "Finishing startup";
 }
@@ -1111,6 +1139,21 @@ JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_triggerFcitxCandidateListTabAction(JNIEnv *env, jclass clazz, jint id) {
     RETURN_IF_NOT_RUNNING
     Fcitx::Instance().triggerCandidateListTabAction(id);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_handleAndroidIPCBridgeResponse(JNIEnv *env, jclass clazz, jint id, jint status, jstring msg, jbyteArray payload) {
+    RETURN_IF_NOT_RUNNING
+    std::optional<std::vector<std::byte>> opt;
+    if (payload != nullptr) {
+        jsize length = env->GetArrayLength(payload);
+        jbyte *bytes = env->GetByteArrayElements(payload, JNI_FALSE);
+        opt.emplace(reinterpret_cast<std::byte *>(bytes),
+                    reinterpret_cast<std::byte *>(bytes) + length);
+        env->ReleaseByteArrayElements(payload, bytes, JNI_ABORT);
+    }
+    Fcitx::Instance().handleAndroidIPCBridgeResponse(id, status, CString(env, msg), opt);
 }
 
 extern "C"

@@ -62,6 +62,7 @@ target_link_libraries(native-lib
         LibIME::Pinyin
         LibIME::Table
         pinyin-customphrase
+        common::android-ipc-bridge
         )
 
 # copy module libraries from dependency lib

@@ -110,4 +110,5 @@ interface FcitxAPI {
 
     suspend fun triggerCandidateListTabAction(id: Int)
 
+    suspend fun respondIpcRequest(id: Int, status: Int, msg: String, payload: ByteArray?)
 }

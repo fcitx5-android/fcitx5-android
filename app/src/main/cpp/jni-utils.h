@@ -106,8 +106,8 @@ public:
     jmethodID BooleanInit;
 
     jclass Fcitx;
-    jmethodID ShowToast;
     jmethodID HandleFcitxEvent;
+    jmethodID HandleAndroidIPCRequest;
 
     jclass InputMethodEntry;
     jmethodID InputMethodEntryInit;
@@ -159,8 +159,8 @@ public:
         BooleanInit = env->GetMethodID(Boolean, "<init>", "(Z)V");
 
         Fcitx = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("org/fcitx/fcitx5/android/core/Fcitx")));
-        ShowToast = env->GetStaticMethodID(Fcitx, "showToast", "(Ljava/lang/String;)V");
         HandleFcitxEvent = env->GetStaticMethodID(Fcitx, "handleFcitxEvent", "(I[Ljava/lang/Object;)V");
+        HandleAndroidIPCRequest = env->GetStaticMethodID(Fcitx, "handleAndroidIPCBridgeRequest", "(ILjava/lang/String;Ljava/lang/String;[B)V");
 
         InputMethodEntry = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("org/fcitx/fcitx5/android/core/InputMethodEntry")));
         InputMethodEntryInit = env->GetMethodID(InputMethodEntry, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");

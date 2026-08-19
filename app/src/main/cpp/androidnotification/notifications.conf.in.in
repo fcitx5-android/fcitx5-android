@@ -8,4 +8,4 @@ OnDemand=True
 Configurable=True
 
 [Addon/Dependencies]
-0=androidfrontend:@PROJECT_VERSION@
+0=androidipcbridge:@PROJECT_VERSION@
