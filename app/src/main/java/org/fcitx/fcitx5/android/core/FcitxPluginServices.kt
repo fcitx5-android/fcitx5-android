@@ -9,11 +9,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
-import android.os.Message
-import android.os.Messenger
 import org.fcitx.fcitx5.android.BuildConfig
+import org.fcitx.fcitx5.android.common.ipc.IFcitxPluginIpcCallback
+import org.fcitx.fcitx5.android.common.ipc.IFcitxPluginService
 import org.fcitx.fcitx5.android.core.data.DataManager
 import org.fcitx.fcitx5.android.core.data.PluginDescriptor
+import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.utils.appContext
 import timber.log.Timber
 
@@ -22,43 +23,60 @@ object FcitxPluginServices {
     const val PLUGIN_SERVICE_ACTION = "${BuildConfig.APPLICATION_ID}.plugin.SERVICE"
 
     class PluginServiceConnection(
-        private val pluginId: String,
-        private val onDied: () -> Unit
+        val packageName: String,
+        private val onDied: PluginServiceConnection.() -> Unit
     ) : ServiceConnection {
-        private var messenger: Messenger? = null
+        private var service: IFcitxPluginService? = null
+
+        var pluginId: String? = null
+            private set
+
+        var clipboardTransformerPriority = -1
+            private set
+
+        var canHandleIpc = false
+            private set
 
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            messenger = Messenger(service)
-            Timber.d("Plugin connected: $pluginId")
+            Timber.d("Plugin connected: $packageName")
+            val pluginService = IFcitxPluginService.Stub.asInterface(service)
+            try {
+                this.pluginId = pluginService.pluginId
+                this.clipboardTransformerPriority = pluginService.clipboardEntryTransformerPriority
+                this.canHandleIpc = pluginService.canHandleIpc
+                this.service = pluginService
+            } catch (e: Exception) {
+                Timber.w("Unable to bind plugin service $name: ${e.message}")
+            }
         }
 
         // may re-connect in the future
         override fun onServiceDisconnected(name: ComponentName) {
-            messenger = null
-            Timber.d("Plugin disconnected: $pluginId")
+            Timber.d("Plugin disconnected: $packageName")
         }
 
         // will never receive another connection
         override fun onBindingDied(name: ComponentName?) {
-            onDied.invoke()
-            Timber.d("Plugin binding died: $pluginId")
+            onDied.invoke(this)
+            Timber.d("Plugin binding died: $packageName")
         }
 
-        fun sendMessage(message: Message) {
-            try {
-                messenger?.send(message)
-            } catch (e: Throwable) {
-                Timber.w("Cannot send message to plugin: $pluginId")
-                Timber.w(e)
+        fun handleIpc(method: String, params: ByteArray?, cb: IFcitxPluginIpcCallback?): Boolean {
+            val s = service ?: return false
+            if (cb == null) {
+                s.onIpcNotify(method, params)
+            } else {
+                s.onIpcRequest(method, params, cb)
             }
+            return true
         }
     }
 
     private val connections = mutableMapOf<String, PluginServiceConnection>()
 
     private fun connectPlugin(descriptor: PluginDescriptor) {
-        val connection = PluginServiceConnection(descriptor.name) {
-            disconnectPlugin(descriptor.name)
+        val connection = PluginServiceConnection(descriptor.packageName) {
+            disconnectPlugin(packageName)
         }
         try {
             val result = appContext.bindService(
@@ -99,9 +117,19 @@ object FcitxPluginServices {
         connections.clear()
     }
 
-    fun sendMessage(message: Message) {
-        connections.forEach { (_, conn) ->
-            conn.sendMessage(message)
+    fun transformClipboardEntry(clipboardText: String): String {
+        TODO("Move ClipboardManager.transformer here")
+    }
+
+    fun handlePluginIpc(id: Int, plugin: String, method: String, params: ByteArray?): Boolean {
+        val target = connections.values.find { it.pluginId == plugin } ?: return false
+        val cb = if (id < 0) null else object : IFcitxPluginIpcCallback.Stub() {
+            override fun respond(status: Int, msg: String, payload: ByteArray?) {
+                FcitxDaemon.getFirstConnectionOrNull()?.runIfReady {
+                    respondIpcRequest(id, status, msg, payload)
+                }
+            }
         }
+        return target.handleIpc(method, params, cb)
     }
 }

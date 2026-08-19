@@ -7,8 +7,6 @@
 #include <fcitx/addonfactory.h>
 #include <fcitx/addonmanager.h>
 
-#include "../androidfrontend/androidfrontend_public.h"
-
 #include "androidnotification.h"
 
 namespace fcitx {
@@ -18,7 +16,7 @@ Notifications::Notifications(Instance *instance) : instance_(instance) {
 }
 
 void Notifications::reloadConfig() {
-    readAsIni(config_, ConfPath);
+    readAsIni(config_, configPath_);
     updateHiddenNotifications();
 }
 
@@ -29,12 +27,12 @@ void Notifications::save() {
         values_.push_back(id);
     }
     config_.hiddenNotifications.setValue(std::move(values_));
-    safeSaveAsIni(config_, ConfPath);
+    safeSaveAsIni(config_, configPath_);
 }
 
 void Notifications::setConfig(const fcitx::RawConfig &config) {
     config_.load(config, true);
-    safeSaveAsIni(config_, ConfPath);
+    safeSaveAsIni(config_, configPath_);
     updateHiddenNotifications();
 }
 
@@ -81,20 +79,14 @@ void Notifications::showTip(
     if (hiddenNotifications_.count(tipId)) {
         return;
     }
-    std::string const s = summary + ": " + body;
-    androidfrontend()->call<IAndroidFrontend::showToast>(s);
+    const std::string s = summary + ": " + body;
+    std::vector<std::byte> v(s.size());
+    std::memcpy(v.data(), s.data(), s.size());
+    androidipcbridge()->call<IAndroidIPCBridge::notify>("", "toast", v);
 }
 
 void Notifications::closeNotification(uint64_t internalId) {
     FCITX_UNUSED(internalId);
 }
 
-class NotificationsModuleFactory : public AddonFactory {
-    AddonInstance *create(AddonManager *manager) override {
-        return new Notifications(manager->instance());
-    }
-};
-
 }
-
-FCITX_ADDON_FACTORY(fcitx::NotificationsModuleFactory)
