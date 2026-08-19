@@ -26,10 +26,13 @@ find_package(fcitx5-chinese-addons REQUIRED CONFIG)
 
 include("${FCITX_INSTALL_CMAKECONFIG_DIR}/Fcitx5Utils/Fcitx5CompilerSettings.cmake")
 
+find_package(common)
+
 add_subdirectory(po)
 add_subdirectory(androidfrontend)
 add_subdirectory(androidkeyboard)
 add_subdirectory(androidnotification)
+add_subdirectory(androidipcbridge)
 
 # prebuilt libuv
 set(libuv_DIR "${PREBUILT_DIR}/libuv/${ANDROID_ABI}/lib/cmake/libuv")
@@ -40,7 +43,7 @@ list(APPEND CMAKE_FIND_ROOT_PATH "${PREBUILT_DIR}/boost/${ANDROID_ABI}/lib/cmake
 find_package(Boost 1.86.0 REQUIRED COMPONENTS headers iostreams CONFIG)
 
 set(CHINESE_ADDONS_PINYIN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../lib/fcitx5-chinese-addons/src/main/cpp/fcitx5-chinese-addons/im/pinyin")
-add_library(pinyin-customphrase STATIC "${CHINESE_ADDONS_PINYIN_DIR}/customphrase.cpp")
+add_library(pinyin-customphrase OBJECT "${CHINESE_ADDONS_PINYIN_DIR}/customphrase.cpp")
 target_include_directories(pinyin-customphrase INTERFACE "${CHINESE_ADDONS_PINYIN_DIR}")
 target_link_libraries(pinyin-customphrase PRIVATE Fcitx5::Utils LibIME::Core)
 
