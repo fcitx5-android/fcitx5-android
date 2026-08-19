@@ -15,6 +15,8 @@
 #include <fcitx/addoninstance.h>
 #include <fcitx/instance.h>
 
+#include <androidipcbridge_public.h>
+
 #include <notifications_public.h>
 
 namespace fcitx {
@@ -38,7 +40,7 @@ public:
 
     void setConfig(const RawConfig &config) override;
 
-    FCITX_ADDON_DEPENDENCY_LOADER(androidfrontend, instance_->addonManager());
+    FCITX_ADDON_DEPENDENCY_LOADER(androidipcbridge, instance_->addonManager());
 
     uint32_t sendNotification(const std::string &appName, uint32_t replaceId,
                               const std::string &appIcon,
@@ -60,7 +62,7 @@ private:
     FCITX_ADDON_EXPORT_FUNCTION(Notifications, showTip);
     FCITX_ADDON_EXPORT_FUNCTION(Notifications, closeNotification);
 
-    static const inline char* ConfPath = "conf/androidnotification.conf";
+    static const inline char* configPath_ = "conf/androidnotification.conf";
 
     NotificationsConfig config_;
     Instance *instance_;
@@ -70,6 +72,14 @@ private:
     void updateHiddenNotifications();
 
 }; // class Notifications
+
+class NotificationsModuleFactory : public AddonFactory {
+    AddonInstance *create(AddonManager *manager) override {
+        return new Notifications(manager->instance());
+    }
+};
+
+FCITX_ADDON_FACTORY_V2(notifications, fcitx::NotificationsModuleFactory)
 
 } // namespace fcitx
 

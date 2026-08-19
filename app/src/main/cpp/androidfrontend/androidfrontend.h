@@ -46,7 +46,6 @@ public:
     void triggerCandidateAction(int idx, int actionIdx);
     void triggerTabAction(int idx);
     void deleteSurrounding(int before, int after);
-    void showToast(const std::string &s);
     void setCandidatePagingMode(int mode);
     void offsetCandidatePage(int delta);
     void triggerCandidateListTabAction(int id);
@@ -58,7 +57,6 @@ public:
     void setInputMethodChangeCallback(const InputMethodChangeCallback &callback);
     void setStatusAreaUpdateCallback(const StatusAreaUpdateCallback &callback);
     void setDeleteSurroundingCallback(const DeleteSurroundingCallback &callback);
-    void setToastCallback(const ToastCallback &callback);
     void setPagedCandidateCallback(const PagedCandidateCallback &callback);
     void setSwitchInputMethodCallback(const SwitchInputMethodCallback &callback);
 
@@ -77,7 +75,6 @@ private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, getCandidateActions);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, triggerCandidateAction);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, triggerTabAction);
-    FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, showToast);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setCandidatePagingMode);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, offsetCandidatePage);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, triggerCandidateListTabAction);
@@ -89,7 +86,6 @@ private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setInputMethodChangeCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setStatusAreaUpdateCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setDeleteSurroundingCallback);
-    FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setToastCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setPagedCandidateCallback);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidFrontend, setSwitchInputMethodCallback);
 
@@ -108,7 +104,6 @@ private:
     InputMethodChangeCallback imChangeCallback = [](const InputMethodStatus &) {};
     StatusAreaUpdateCallback statusAreaUpdateCallback = [](const std::vector<ActionEntity> &, const InputMethodStatus &) {};
     DeleteSurroundingCallback deleteSurroundingCallback = [](const int, const int) {};
-    ToastCallback toastCallback = [](const std::string &) {};
     PagedCandidateCallback pagedCandidateCallback = [](const PagedCandidateEntity &) {};
     SwitchInputMethodCallback switchInputMethodCallback = [](const int, const std::string &) {};
 

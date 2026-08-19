@@ -489,10 +489,6 @@ void AndroidFrontend::deleteSurrounding(const int before, const int after) {
     deleteSurroundingCallback(before, after);
 }
 
-void AndroidFrontend::showToast(const std::string &s) {
-    toastCallback(s);
-}
-
 void AndroidFrontend::setCandidatePagingMode(const int mode) {
     pagingMode_ = mode;
     if (mode == 0) {
@@ -542,10 +538,6 @@ void AndroidFrontend::setStatusAreaUpdateCallback(const StatusAreaUpdateCallback
 
 void AndroidFrontend::setDeleteSurroundingCallback(const DeleteSurroundingCallback &callback) {
     deleteSurroundingCallback = callback;
-}
-
-void AndroidFrontend::setToastCallback(const ToastCallback &callback) {
-    toastCallback = callback;
 }
 
 void AndroidFrontend::setPagedCandidateCallback(const PagedCandidateCallback &callback) {
