@@ -20,12 +20,12 @@ CloudPinyin::CloudPinyin(fcitx::AddonManager *manager)
         : instance_(manager->instance()),
           eventLoop_(manager->eventLoop()),
           dispatcher_(instance_->eventDispatcher()) {
-    resetError_ =
-            eventLoop_->addTimeEvent(CLOCK_MONOTONIC, fcitx::now(CLOCK_MONOTONIC), minInUs,
-                                     [this](fcitx::EventSourceTime *, uint64_t) {
-                                         resetError();
-                                         return true;
-                                     });
+    resetError_ = eventLoop_->addTimeEvent(
+            CLOCK_MONOTONIC, fcitx::now(CLOCK_MONOTONIC), minInUs,
+            [this](fcitx::EventSourceTime *, uint64_t) {
+                resetError();
+                return true;
+            });
     if (resetError_) {
         resetError_->setEnabled(false);
     }
@@ -50,12 +50,11 @@ void CloudPinyin::setConfig(const fcitx::RawConfig &config) {
 }
 
 void CloudPinyin::syncConfig() {
-    std::vector<std::byte> backend {static_cast<const std::byte>(config_.backend.value())};
-    androidipcbridge()->call<fcitx::IAndroidIPCBridge::notify>("cloud_pinyin", "set_backend", backend);
-    const std::string &proxyString = config_.proxy.value();
-    std::vector<std::byte> proxy(proxyString.size());
-    std::memcpy(proxy.data(), proxyString.data(), proxyString.size());
-    androidipcbridge()->call<fcitx::IAndroidIPCBridge::notify>("cloud_pinyin", "set_proxy", proxy);
+    std::vector<std::byte> backend{static_cast<const std::byte>(config_.backend.value())};
+    androidipcbridge()->call<fcitx::IAndroidIPCBridge::notify>(
+            "cloud_pinyin", "set_backend", backend);
+    androidipcbridge()->call<fcitx::IAndroidIPCBridge::notify>(
+            "cloud_pinyin", "set_proxy", std::as_bytes(std::span{config_.proxy.value()}));
 }
 
 void CloudPinyin::request(const std::string &pinyin, CloudPinyinCallback callback) {
@@ -65,11 +64,10 @@ void CloudPinyin::request(const std::string &pinyin, CloudPinyinCallback callbac
     }
     if (auto *value = cache_.find(pinyin)) {
         callback(pinyin, *value);
+        return;
     }
-    std::vector<std::byte> vec(pinyin.size());
-    std::memcpy(vec.data(), pinyin.data(), pinyin.size());
     androidipcbridge()->call<fcitx::IAndroidIPCBridge::request>(
-            "cloud_pinyin", "request", vec,
+            "cloud_pinyin", "request", std::as_bytes(std::span{pinyin}),
             [&, pinyin, callback = std::move(callback)](auto &response) {
                 if (response.status != 200) {
                     errorCount_ += 1;
