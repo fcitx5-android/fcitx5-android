@@ -1,5 +1,6 @@
 plugins {
     id("org.fcitx.fcitx5.android.lib-convention")
+    id("org.fcitx.fcitx5.android.native-lib-convention")
     `maven-publish`
     alias(libs.plugins.gitVersion)
 }
@@ -12,6 +13,24 @@ android {
     }
     publishing {
         singleVariant("release")
+    }
+
+    defaultConfig {
+        @Suppress("UnstableApiUsage")
+        externalNativeBuild {
+            cmake {
+                targets(
+                    "android-ipc-bridge"
+                )
+            }
+        }
+    }
+
+    prefab {
+        create("android-ipc-bridge") {
+            headerOnly = true
+            headers = "src/main/cpp/headers"
+        }
     }
 }
 

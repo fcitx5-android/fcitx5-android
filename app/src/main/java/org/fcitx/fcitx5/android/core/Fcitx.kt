@@ -29,6 +29,8 @@ import java.util.concurrent.CopyOnWriteArrayList
  * Do not use this class directly, accessing fcitx via daemon instead
  */
 class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
+    typealias FcitxEventHandler = (FcitxEvent<*>) -> Unit
+    typealias PluginIpcHandler = (id: Int, plugin: String, method: String, params: ByteArray?) -> Boolean
 
     private val lifecycleRegistry = FcitxLifecycleRegistry()
 
@@ -196,6 +198,9 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
     override suspend fun triggerCandidateListTabAction(id: Int) =
         withFcitxContext { triggerFcitxCandidateListTabAction(id) }
 
+    override suspend fun respondIpcRequest(id: Int, status: Int, msg: String, payload: ByteArray?) =
+        withFcitxContext { handleAndroidIPCBridgeResponse(id, status, msg, payload) }
+
     init {
         if (lifecycle.currentState != FcitxLifecycle.State.STOPPED)
             throw IllegalAccessException("Fcitx5 has already been created!")
@@ -207,17 +212,6 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
 
     private companion object JNI {
 
-        /**
-         * called from native-lib
-         */
-        @Suppress("unused")
-        @JvmStatic
-        fun showToast(s: String) {
-            ContextCompat.getMainExecutor(appContext).execute {
-                appContext.toast(s)
-            }
-        }
-
         private val eventFlow_ =
             MutableSharedFlow<FcitxEvent<*>>(
                 extraBufferCapacity = 15,
@@ -226,7 +220,9 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
 
         // we may need to modify the list during iteration
         // eg. remove the "first run" listener after first ReadyEvent
-        private val fcitxEventHandlers = CopyOnWriteArrayList<(FcitxEvent<*>) -> Unit>()
+        private val fcitxEventHandlers = CopyOnWriteArrayList<FcitxEventHandler>()
+
+        private val pluginIpcHandlers = CopyOnWriteArrayList<PluginIpcHandler>()
 
         init {
             System.loadLibrary("native-lib")
@@ -384,6 +380,14 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         external fun triggerFcitxCandidateListTabAction(id: Int)
 
         @JvmStatic
+        external fun handleAndroidIPCBridgeResponse(
+            id: Int,
+            status: Int,
+            msg: String,
+            payload: ByteArray?
+        )
+
+        @JvmStatic
         external fun loopOnce()
 
         @JvmStatic
@@ -409,20 +413,47 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         /**
          * register a [FcitxEvent] handler that will fire before events go into [eventFlow_]
          */
-        private fun registerFcitxEventHandler(handler: (FcitxEvent<*>) -> Unit) {
+        private fun registerFcitxEventHandler(handler: FcitxEventHandler) {
             if (fcitxEventHandlers.contains(handler)) return
             fcitxEventHandlers.add(handler)
         }
 
-        private fun unregisterFcitxEventHandler(handler: (FcitxEvent<*>) -> Unit) {
+        private fun unregisterFcitxEventHandler(handler: FcitxEventHandler) {
             fcitxEventHandlers.remove(handler)
         }
 
+        private fun registerPluginIpcHandler(handler: PluginIpcHandler) {
+            if (pluginIpcHandlers.contains(handler)) return
+            pluginIpcHandlers.add(handler)
+        }
+
+        private fun unregisterPluginIpcHandler(handler: PluginIpcHandler) {
+            pluginIpcHandlers.remove(handler)
+        }
+
+        /**
+         * Called from native-lib
+         */
+        @Suppress("unused")
+        @JvmStatic
+        fun handleAndroidIPCBridgeRequest(
+            id: Int,
+            plugin: String,
+            method: String,
+            params: ByteArray?
+        ) {
+            pluginIpcHandlers.forEach {
+                if (it(id, plugin, method, params)) return
+            }
+            if (id >= 0) {
+                Timber.w("Invalid plugin ipc: id=$id, plugin=$plugin, method=$method")
+                handleAndroidIPCBridgeResponse(id, -1, "INVALID", null)
+            }
+        }
     }
 
     private val dispatcher = FcitxDispatcher(object : FcitxDispatcher.FcitxController {
         override fun nativeStartup() {
-            DataManager.sync()
             val locale = Locales.fcitxLocale
             val dataDir = DataManager.dataDir.absolutePath
             val plugins = DataManager.getLoadedPlugins()
@@ -529,6 +560,14 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         }
     }
 
+    private fun handleToastRequest(id: Int, plugin: String, method: String, params: ByteArray?) : Boolean {
+        if (id >= 0 || plugin != "" || method != "toast" || params == null) return false
+        ContextCompat.getMainExecutor(appContext).execute {
+            appContext.toast(String(params))
+        }
+        return true
+    }
+
     fun start() {
         if (lifecycle.currentState != FcitxLifecycle.State.STOPPED) {
             Timber.w("Skip starting fcitx: not at stopped state!")
@@ -540,9 +579,12 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         registerFcitxEventHandler(::handleFcitxEvent)
         lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_START)
         ClipboardManager.addOnUpdateListener(onClipboardUpdate)
+        registerPluginIpcHandler(FcitxPluginServices::handlePluginIpc)
+        registerPluginIpcHandler(::handleToastRequest)
         DataManager.addOnNextSyncedCallback {
             FcitxPluginServices.connectAll()
         }
+        DataManager.sync()
         setupLogStream(AppPrefs.getInstance().internal.verboseLog.getValue())
         dispatcher.start()
     }
@@ -554,6 +596,8 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
         }
         lifecycleRegistry.postEvent(FcitxLifecycle.Event.ON_STOP)
         Timber.i("Fcitx stop()")
+        unregisterPluginIpcHandler(::handleToastRequest)
+        unregisterPluginIpcHandler(FcitxPluginServices::handlePluginIpc)
         ClipboardManager.removeOnUpdateListener(onClipboardUpdate)
         FcitxPluginServices.disconnectAll()
         dispatcher.stop().let {
