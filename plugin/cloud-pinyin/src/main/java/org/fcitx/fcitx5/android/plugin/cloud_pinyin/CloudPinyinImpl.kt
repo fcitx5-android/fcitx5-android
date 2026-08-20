@@ -21,26 +21,25 @@ class CloudPinyinImpl {
     private var proxyValue: String = ""
     private var activeProxy: Proxy = Proxy.NO_PROXY
 
-    fun setProxy(str: String) {
-        proxyValue = str
-        if (str.isBlank()) {
-            activeProxy = Proxy.NO_PROXY
-            return
-        }
+    private fun parseProxy(str: String): Proxy {
+        if (str.isBlank()) return Proxy.NO_PROXY
         val uri = Uri.parse(str)
         val type = when (uri.scheme) {
-            "socks", "sock5", "socks4" -> Proxy.Type.SOCKS
+            "socks", "socks5", "socks4" -> Proxy.Type.SOCKS
             "http", "https" -> Proxy.Type.HTTP
-            else -> Proxy.Type.DIRECT
+            else -> return Proxy.NO_PROXY
         }
         val host = uri.host
         val port = uri.port
-        if (type == Proxy.Type.DIRECT || host.isNullOrBlank() || port <= 0) {
-            Log.w("CloudPinyinImpl", "Invalid proxy: $str")
-            activeProxy = Proxy.NO_PROXY
-            return
+        if (host.isNullOrBlank() || port <= 0) {
+            return Proxy.NO_PROXY
         }
-        activeProxy = Proxy(type, InetSocketAddress(host, port))
+        return Proxy(type, InetSocketAddress.createUnresolved(host, port))
+    }
+
+    fun setProxy(str: String) {
+        proxyValue = str
+        activeProxy = parseProxy(str)
     }
 
     sealed interface Backend {
@@ -139,13 +138,10 @@ class CloudPinyinImpl {
 
     private suspend fun httpGet(url: String): String = withContext(Dispatchers.IO) {
         val conn = URL(url).openConnection(activeProxy) as HttpURLConnection
-        conn.connectTimeout = 30_000
-        conn.readTimeout = 30_000
-        try {
-            conn.getInputStream().bufferedReader().use { it.readText() }
-        } finally {
-            conn.disconnect()
-        }
+        conn.connectTimeout = 5_000
+        conn.readTimeout = 5_000
+        val stream = if (conn.responseCode in 200..299) conn.getInputStream() else conn.errorStream
+        stream.bufferedReader().use { it.readText() }
     }
 
     suspend fun request(pinyin: String): String {

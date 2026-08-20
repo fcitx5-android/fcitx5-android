@@ -16,7 +16,7 @@ import org.fcitx.fcitx5.android.common.ipc.IFcitxPluginService
 
 class MainService : FcitxPluginService() {
 
-    private val scope = MainScope() + CoroutineName("cloud_pinyin.MainService")
+    private val scope = MainScope() + CoroutineName("cloud_pinyin")
 
     private lateinit var impl: CloudPinyinImpl
     private lateinit var pluginService: IFcitxPluginService
@@ -48,11 +48,17 @@ class MainService : FcitxPluginService() {
                 params: ByteArray?,
                 cb: IFcitxPluginIpcCallback
             ) {
-                if (params == null) return
                 when (method) {
                     "request" -> scope.launch {
-                        val result = impl.request(String(params))
-                        cb.respond(200, result, null)
+                        if (params != null) {
+                            val result = impl.request(String(params))
+                            cb.respond(0, result, null)
+                        } else {
+                            cb.respond(2, "null params", null)
+                        }
+                    }
+                    else -> {
+                        cb.respond(1, "unsupported", null)
                     }
                 }
             }
