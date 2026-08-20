@@ -63,12 +63,17 @@ object FcitxPluginServices {
 
         fun handleIpc(method: String, params: ByteArray?, cb: IFcitxPluginIpcCallback?): Boolean {
             val s = service ?: return false
-            if (cb == null) {
-                s.onIpcNotify(method, params)
-            } else {
-                s.onIpcRequest(method, params, cb)
+            try {
+                if (cb == null) {
+                    s.onIpcNotify(method, params)
+                } else {
+                    s.onIpcRequest(method, params, cb)
+                }
+                return true
+            } catch (e: Exception) {
+                Timber.w("Exception when calling plugin $pluginId: ${e.message}")
+                return false
             }
-            return true
         }
     }
 
