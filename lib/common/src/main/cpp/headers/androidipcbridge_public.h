@@ -5,28 +5,28 @@
 #ifndef FCITX5_ANDROID_ANDROIDIPCBRIDGE_PUBLIC_H
 #define FCITX5_ANDROID_ANDROIDIPCBRIDGE_PUBLIC_H
 
-using AndroidIPCPayload = std::vector<std::byte>;
+using AndroidIPCPayload = std::span<const std::byte>;
 
 struct AndroidIPCResponse {
     int status;
     std::string msg;
-    std::optional<AndroidIPCPayload> payload;
+    AndroidIPCPayload payload;
 };
 
 typedef std::function<void(const AndroidIPCResponse &response)> AndroidIPCCallback;
 
-typedef std::function<void(int id, const std::string &plugin, const std::string &method, const std::optional<AndroidIPCPayload> &params)> AndroidIPCRequestHandler;
+typedef std::function<void(int id, const std::string &plugin, const std::string &method, const AndroidIPCPayload &params)> AndroidIPCRequestHandler;
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidIPCBridge, notify,
-                             void(const std::string &plugin, const std::string &method, const std::optional<AndroidIPCPayload> &params))
+                             void(const std::string &plugin, const std::string &method, const AndroidIPCPayload &params))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidIPCBridge, request,
-                             void(const std::string &plugin, const std::string &method, const std::optional<AndroidIPCPayload> &params, AndroidIPCCallback callback))
+                             void(const std::string &plugin, const std::string &method, const AndroidIPCPayload &params, AndroidIPCCallback callback))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidIPCBridge, setRequestHandler,
                              void(const AndroidIPCRequestHandler &handler))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidIPCBridge, handleResponse,
-                             void(int id, int status, const std::string &msg, const std::optional<AndroidIPCPayload> &payload))
+                             void(int id, int status, const std::string &msg, const const AndroidIPCPayload &payload))
 
 #endif // FCITX5_ANDROID_ANDROIDIPCBRIDGE_PUBLIC_H
