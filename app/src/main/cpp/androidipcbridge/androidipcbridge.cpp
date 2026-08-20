@@ -30,11 +30,11 @@ void AndroidIPCBridge::setConfig(const fcitx::RawConfig &config) {
     safeSaveAsIni(config_, configPath_);
 }
 
-void AndroidIPCBridge::notify(const std::string &plugin, const std::string &method, const std::optional<std::vector<std::byte>> &params) {
+void AndroidIPCBridge::notify(const std::string &plugin, const std::string &method, const AndroidIPCPayload &params) {
     androidRequestHandler_(-1, plugin, method, params);
 }
 
-void AndroidIPCBridge::request(const std::string &plugin, const std::string &method, const std::optional<std::vector<std::byte>> &payload, AndroidIPCCallback callback) {
+void AndroidIPCBridge::request(const std::string &plugin, const std::string &method, const AndroidIPCPayload &payload, AndroidIPCCallback callback) {
     const int id = requestId_++;
     pendingRequests_[id] = std::move(callback);
     androidRequestHandler_(id, plugin, method, payload);
@@ -44,7 +44,7 @@ void AndroidIPCBridge::setRequestHandler(const AndroidIPCRequestHandler &handler
     androidRequestHandler_ = handler;
 }
 
-void AndroidIPCBridge::handleResponse(const int id, const int status, const std::string &msg, const std::optional<std::vector<std::byte>> &payload) {
+void AndroidIPCBridge::handleResponse(const int id, const int status, const std::string &msg, const AndroidIPCPayload &payload) {
     auto node = pendingRequests_.extract(id);
     if (node.empty()) {
         FCITX_WARN() << "No matching AndroidIPCBridge request #" << id;

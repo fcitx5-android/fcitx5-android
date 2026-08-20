@@ -448,7 +448,7 @@ public:
         return p_frontend->call<fcitx::IAndroidFrontend::triggerCandidateListTabAction>(id);
     }
 
-    void handleAndroidIPCBridgeResponse(int id, int status, const std::string &msg, const std::optional<std::vector<std::byte>> &payload) {
+    void handleAndroidIPCBridgeResponse(int id, int status, const std::string &msg, const std::span<const std::byte> &payload) {
         return p_bridge->call<fcitx::IAndroidIPCBridge::handleResponse>(id, status, msg, payload);
     }
 
@@ -725,13 +725,13 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_startupFcitx(
         env->SetObjectArrayElement(vararg, 1, JString(env, oldIM));
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleFcitxEvent, 10, *vararg);
     };
-    auto androidIPCRequestCallback = [](int id, const std::string &plugin, const std::string &method, const std::optional<std::vector<std::byte>> &params) {
+    auto androidIPCRequestCallback = [](int id, const std::string &plugin, const std::string &method, const std::span<const std::byte> &params) {
         auto env = GlobalRef->AttachEnv();
         jbyteArray byteArray = nullptr;
-        if (params.has_value()) {
-            auto size = params->size();
+        if (!params.empty()) {
+            auto size = static_cast<int>(params.size());
             byteArray = env->NewByteArray(size);
-            env->SetByteArrayRegion(byteArray, 0, size, reinterpret_cast<const jbyte *>(params->data()));
+            env->SetByteArrayRegion(byteArray, 0, size, reinterpret_cast<const jbyte *>(params.data()));
         }
         env->CallStaticVoidMethod(GlobalRef->Fcitx, GlobalRef->HandleAndroidIPCRequest, id, *JString(env, plugin), *JString(env, method), byteArray);
         if (byteArray != nullptr) {
@@ -1145,15 +1145,17 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_org_fcitx_fcitx5_android_core_Fcitx_handleAndroidIPCBridgeResponse(JNIEnv *env, jclass clazz, jint id, jint status, jstring msg, jbyteArray payload) {
     RETURN_IF_NOT_RUNNING
-    std::optional<std::vector<std::byte>> opt;
+    jbyte *bytes = nullptr;
+    std::span<const std::byte> span;
     if (payload != nullptr) {
         jsize length = env->GetArrayLength(payload);
-        jbyte *bytes = env->GetByteArrayElements(payload, JNI_FALSE);
-        opt.emplace(reinterpret_cast<std::byte *>(bytes),
-                    reinterpret_cast<std::byte *>(bytes) + length);
+        bytes = env->GetByteArrayElements(payload, JNI_FALSE);
+        span = std::span<const std::byte>(reinterpret_cast<std::byte *>(bytes), length);
+    }
+    Fcitx::Instance().handleAndroidIPCBridgeResponse(id, status, CString(env, msg), span);
+    if (payload != nullptr) {
         env->ReleaseByteArrayElements(payload, bytes, JNI_ABORT);
     }
-    Fcitx::Instance().handleAndroidIPCBridgeResponse(id, status, CString(env, msg), opt);
 }
 
 extern "C"

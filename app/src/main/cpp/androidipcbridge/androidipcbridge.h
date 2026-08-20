@@ -38,13 +38,13 @@ public:
 
     void setConfig(const RawConfig &config) override;
 
-    void notify(const std::string &plugin, const std::string &method, const std::optional<std::vector<std::byte>> &params);
+    void notify(const std::string &plugin, const std::string &method, const AndroidIPCPayload &params);
 
-    void request(const std::string &plugin, const std::string &method, const std::optional<std::vector<std::byte>> &params, AndroidIPCCallback callback);
+    void request(const std::string &plugin, const std::string &method, const AndroidIPCPayload &params, AndroidIPCCallback callback);
 
     void setRequestHandler(const AndroidIPCRequestHandler &handler);
 
-    void handleResponse(int id, int status, const std::string &msg, const std::optional<std::vector<std::byte>> &payload);
+    void handleResponse(int id, int status, const std::string &msg, const AndroidIPCPayload &payload);
 
 private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidIPCBridge, notify);
@@ -58,11 +58,10 @@ private:
     Instance *instance_;
     EventDispatcher &dispatcher_;
 
-    AndroidIPCRequestHandler androidRequestHandler_ = [](int, const std::string &, const std::string &, const std::optional<std::vector<std::byte>> &) {};
+    AndroidIPCRequestHandler androidRequestHandler_ = [](int, const std::string &, const std::string &, const AndroidIPCPayload &) {};
 
     int requestId_ = 0;
     std::unordered_map<int, AndroidIPCCallback> pendingRequests_;
-    std::unordered_map<int, std::promise<AndroidIPCResponse>> pendingPromises_;
 
 }; // class Notifications
 
