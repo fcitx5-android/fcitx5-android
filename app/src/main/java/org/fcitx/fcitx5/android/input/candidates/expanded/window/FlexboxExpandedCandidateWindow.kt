@@ -63,17 +63,20 @@ class FlexboxExpandedCandidateWindow :
                 addItemDecoration(FlexboxHorizontalDecoration(dividerDrawable))
                 addOnScrollListener(object : RecyclerView.OnScrollListener() {
                     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                        this@FlexboxExpandedCandidateWindow.layoutManager.apply {
-                            pageUpBtn.isEnabled = findFirstCompletelyVisibleItemPosition() > 0
-                            pageDnBtn.isEnabled =
-                                findLastCompletelyVisibleItemPosition() < itemCount - 1
-                        }
+                        this@FlexboxExpandedCandidateWindow.updatePaginationButtons()
                     }
                 })
             }
         }
 
-    override fun prevPage() {
+    override fun updateScrollPaginationButtons() {
+        layoutManager.apply {
+            candidateLayout.pageUpBtn.isEnabled = findFirstCompletelyVisibleItemPosition() > 0
+            candidateLayout.pageDnBtn.isEnabled = findLastCompletelyVisibleItemPosition() < itemCount - 1
+        }
+    }
+
+    override fun scrollPrevPage() {
         layoutManager.apply {
             var prev = findFirstCompletelyVisibleItemPosition() - 1
             if (prev < 0) prev = 0
@@ -85,7 +88,7 @@ class FlexboxExpandedCandidateWindow :
         }
     }
 
-    override fun nextPage() {
+    override fun scrollNextPage() {
         layoutManager.apply {
             var next = findLastCompletelyVisibleItemPosition() + 1
             if (next >= itemCount) next = itemCount - 1
