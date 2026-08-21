@@ -351,7 +351,9 @@ abstract class BaseKeyboard(
 
     private fun releaseAllTouchTargets() {
         touchTargets.forEach {
-            it.value.view.cancelGestures()
+            val keyView = it.value.view
+            keyView.cancelGestures()
+            onPopupAction(PopupAction.DismissAction(keyView.id))
         }
         touchTargets.clear()
     }
