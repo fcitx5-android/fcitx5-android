@@ -57,6 +57,7 @@ import org.fcitx.fcitx5.android.core.ScancodeMapping
 import org.fcitx.fcitx5.android.core.SubtypeManager
 import org.fcitx.fcitx5.android.daemon.FcitxConnection
 import org.fcitx.fcitx5.android.daemon.FcitxDaemon
+import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.InputFeedbacks
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
@@ -65,6 +66,9 @@ import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.cursor.CursorRange
 import org.fcitx.fcitx5.android.input.cursor.CursorTracker
+import org.fcitx.fcitx5.android.input.dialog.AddMoreInputMethodsPrompt
+import org.fcitx.fcitx5.android.input.dialog.InputMethodPickerDialog
+import org.fcitx.fcitx5.android.input.keyboard.LangSwitchBehavior
 import org.fcitx.fcitx5.android.utils.InputMethodUtil
 import org.fcitx.fcitx5.android.utils.alpha
 import org.fcitx.fcitx5.android.utils.forceShowSelf
@@ -73,6 +77,7 @@ import org.fcitx.fcitx5.android.utils.isTypeNull
 import org.fcitx.fcitx5.android.utils.monitorCursorAnchor
 import org.fcitx.fcitx5.android.utils.styledColorOrDefault
 import org.fcitx.fcitx5.android.utils.styledFloat
+import org.fcitx.fcitx5.android.utils.switchToNextIME
 import org.fcitx.fcitx5.android.utils.withBatchEdit
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
@@ -200,6 +205,57 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         }
         jobs.trySend(job)
         return job
+    }
+
+    /**
+     * Switch the input method according to the user's language-key preference
+     * (see [LangSwitchBehavior]). Shared by the keyboard language key and
+     * interactive input panel plugins.
+     */
+    fun performLangSwitch() {
+        val behavior = AppPrefs.getInstance().keyboard.langSwitchKeyBehavior.getValue()
+        Timber.d("performLangSwitch: behavior=$behavior")
+        when (behavior) {
+            LangSwitchBehavior.Enumerate -> postFcitxJob {
+                val size = enabledIme().size
+                Timber.d("performLangSwitch: enabledIme size=$size")
+                if (size < 2) {
+                    lifecycleScope.launch {
+                        showDialog(AddMoreInputMethodsPrompt.build(this@FcitxInputMethodService))
+                    }
+                } else {
+                    enumerateIme()
+                }
+            }
+            LangSwitchBehavior.ToggleActivate -> postFcitxJob {
+                toggleIme()
+            }
+            LangSwitchBehavior.NextInputMethodApp -> switchToNextIME()
+        }
+    }
+
+    /**
+     * Show the input method picker dialog. Shared by the keyboard language key
+     * (long press) and interactive input panel plugins.
+     */
+    fun showInputMethodPicker() {
+        fcitx.launchOnReady {
+            lifecycleScope.launch {
+                showDialog(InputMethodPickerDialog.build(it, this@FcitxInputMethodService, this@FcitxInputMethodService))
+            }
+        }
+    }
+
+    /**
+     * Called before switching to the given fcitx input method entry.
+     *
+     * If the target entry is a panel plugin, the panel window is attached
+     * immediately so that it replaces the keyboard without flashing the
+     * keyboard window in between (the IMChange event that normally drives
+     * the switch arrives asynchronously after the picker dialog closes).
+     */
+    fun prepareInputMethodSwitch(imeUniqueName: String) {
+        inputView?.interactivePanelManager?.onInputMethodChanged(imeUniqueName, explicit = true)
     }
 
     override fun onCreate() {
@@ -1051,6 +1107,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         Timber.d("onFinishInputView: finishingInput=$finishingInput")
         decorLocationUpdated = false
         inputDeviceMgr.onFinishInputView()
+        inputView?.onFinishInputView()
         currentInputConnection?.apply {
             finishComposingText()
             monitorCursorAnchor(false)

@@ -30,6 +30,7 @@ add_subdirectory(po)
 add_subdirectory(androidfrontend)
 add_subdirectory(androidkeyboard)
 add_subdirectory(androidnotification)
+add_subdirectory(pluginpanel)
 
 # prebuilt libuv
 set(libuv_DIR "${PREBUILT_DIR}/libuv/${ANDROID_ABI}/lib/cmake/libuv")

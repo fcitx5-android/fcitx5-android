@@ -14,6 +14,11 @@
 
 #include <uv.h>
 
+#include <algorithm>
+#include <map>
+#include <mutex>
+#include <string>
+
 #include <fcitx/instance.h>
 #include <fcitx/addonmanager.h>
 #include <fcitx/inputmethodentry.h>
@@ -41,6 +46,7 @@
 #include "customphrase.h"
 
 #include "androidaddonloader/androidaddonloader.h"
+#include "pluginpanel/pluginpanel.h"
 #include "androidfrontend/androidfrontend_public.h"
 #include "jni-utils.h"
 #include "nativestreambuf.h"
@@ -1287,6 +1293,89 @@ Java_org_fcitx_fcitx5_android_utils_Ini_writeAsIni(JNIEnv *env, jclass clazz, js
     auto config = jobjectToRawConfig(env, value);
     fcitx::writeAsIni(config, fp);
     std::fclose(fp);
+}
+
+namespace fcitx::pluginpanel {
+
+namespace {
+struct EntryData {
+    std::string name;
+    std::string languageCode;
+};
+
+std::mutex gMutex;
+std::map<std::string, EntryData> gEntries; // uniqueName -> data
+} // namespace
+
+void registerEntry(const std::string &uniqueName, const std::string &name,
+                   const std::string &languageCode) {
+    std::lock_guard<std::mutex> lock(gMutex);
+    gEntries[uniqueName] = EntryData{name, languageCode};
+}
+
+void unregisterEntry(const std::string &uniqueName) {
+    std::lock_guard<std::mutex> lock(gMutex);
+    gEntries.erase(uniqueName);
+}
+
+namespace {
+
+/**
+ * Short label shown in the input method list. Language codes are ASCII and
+ * at most two characters in practice ("zh", "en", ...), so prefer them;
+ * fall back to the first complete UTF-8 character of the display name for
+ * plugins that do not declare a language (truncating raw bytes there would
+ * cut multi-byte characters in half).
+ */
+std::string entryLabel(const EntryData &data) {
+    if (data.languageCode.size() >= 2) {
+        return data.languageCode.substr(0, 2);
+    }
+    if (data.name.empty()) {
+        return {};
+    }
+    const auto &name = data.name;
+    const unsigned char c = static_cast<unsigned char>(name[0]);
+    size_t len = 1;
+    if ((c & 0xE0) == 0xC0)
+        len = 2;
+    else if ((c & 0xF0) == 0xE0)
+        len = 3;
+    else if ((c & 0xF8) == 0xF0)
+        len = 4;
+    return name.substr(0, std::min(len, name.size()));
+}
+
+} // namespace
+
+std::vector<InputMethodEntry> listEntries() {
+    std::lock_guard<std::mutex> lock(gMutex);
+    std::vector<InputMethodEntry> result;
+    result.reserve(gEntries.size());
+    for (const auto &[uniqueName, data] : gEntries) {
+        result.emplace_back(std::move(InputMethodEntry(
+                uniqueName, data.name, data.languageCode, "pluginpanel")
+                                     .setLabel(entryLabel(data))));
+    }
+    return result;
+}
+
+} // namespace fcitx::pluginpanel
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_pluginPanelRegisterEntry(
+        JNIEnv *env, jclass clazz, jstring uniqueName, jstring name, jstring languageCode) {
+    fcitx::pluginpanel::registerEntry(std::string(CString(env, uniqueName)),
+                                      std::string(CString(env, name)),
+                                      std::string(CString(env, languageCode)));
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_pluginPanelUnregisterEntry(
+        JNIEnv *env, jclass clazz, jstring uniqueName) {
+    fcitx::pluginpanel::unregisterEntry(std::string(CString(env, uniqueName)));
 }
 
 #pragma GCC diagnostic pop

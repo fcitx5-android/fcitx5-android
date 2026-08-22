@@ -16,6 +16,7 @@ import kotlinx.coroutines.withContext
 import org.fcitx.fcitx5.android.FcitxApplication
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.data.DataManager
+import org.fcitx.fcitx5.android.core.data.PluginDescriptor
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.utils.ImmutableGraph
@@ -77,6 +78,44 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
 
     override suspend fun save() = withFcitxContext { saveFcitxState() }
     override suspend fun reloadConfig() = withFcitxContext { reloadFcitxConfig() }
+
+    /**
+     * Register an input method entry backed by the `pluginpanel` addon.
+     * The entry shows up in fcitx's input method list after the next fcitx
+     * refresh (e.g. [org.fcitx.fcitx5.android.input.FcitxDaemon.restartFcitx]).
+     * The `uniqueName` must be stable across refreshes, use the plugin
+     * package name.
+     */
+    fun registerPluginPanelEntry(uniqueName: String, name: String, languageCode: String) =
+        JNI.pluginPanelRegisterEntry(uniqueName, name, languageCode)
+
+    /**
+     * Remove a previously registered panel entry. Call before refreshing fcitx
+     * when the plugin is unloaded.
+     */
+    fun unregisterPluginPanelEntry(uniqueName: String) =
+        JNI.pluginPanelUnregisterEntry(uniqueName)
+
+    /** Set of plugin package names currently registered as panel entries */
+    private var registeredPluginPanelEntries = emptySet<String>()
+
+    /**
+     * Reconcile the pluginpanel entry registry with the currently loaded
+     * plugins. Called right before every fcitx startup, so the input method
+     * list always matches the loaded plugin set.
+     */
+    private fun syncPluginPanelEntries() {
+        val valid = DataManager.getLoadedPlugins().filter {
+            it.hasInteractivePanel &&
+                it.panelComponents.containsAll(PluginDescriptor.requiredPanelComponents)
+        }
+        val current = valid.map { it.packageName }.toSet()
+        (registeredPluginPanelEntries - current).forEach { unregisterPluginPanelEntry(it) }
+        valid.forEach { plugin ->
+            registerPluginPanelEntry(plugin.packageName, plugin.name, plugin.panelLanguage)
+        }
+        registeredPluginPanelEntries = current
+    }
 
     override suspend fun sendKey(
         key: String,
@@ -234,6 +273,12 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
 
         @JvmStatic
         external fun setupLogStream(verbose: Boolean)
+
+        @JvmStatic
+        external fun pluginPanelRegisterEntry(uniqueName: String, name: String, languageCode: String)
+
+        @JvmStatic
+        external fun pluginPanelUnregisterEntry(uniqueName: String)
 
         @JvmStatic
         external fun startupFcitx(
@@ -423,6 +468,7 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
     private val dispatcher = FcitxDispatcher(object : FcitxDispatcher.FcitxController {
         override fun nativeStartup() {
             DataManager.sync()
+            syncPluginPanelEntries()
             val locale = Locales.fcitxLocale
             val dataDir = DataManager.dataDir.absolutePath
             val plugins = DataManager.getLoadedPlugins()

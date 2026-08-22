@@ -9,15 +9,12 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import org.fcitx.fcitx5.android.core.FcitxAPI
-import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.broadcast.PreeditEmptyStateComponent
 import org.fcitx.fcitx5.android.input.candidates.horizontal.HorizontalCandidateComponent
 import org.fcitx.fcitx5.android.input.dependency.context
 import org.fcitx.fcitx5.android.input.dependency.fcitx
 import org.fcitx.fcitx5.android.input.dependency.inputMethodService
-import org.fcitx.fcitx5.android.input.dialog.AddMoreInputMethodsPrompt
-import org.fcitx.fcitx5.android.input.dialog.InputMethodPickerDialog
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener.BackspaceSwipeState.Reset
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener.BackspaceSwipeState.Selection
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener.BackspaceSwipeState.Stopped
@@ -34,7 +31,6 @@ import org.fcitx.fcitx5.android.input.keyboard.KeyAction.SymAction
 import org.fcitx.fcitx5.android.input.keyboard.KeyAction.UnicodeAction
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
-import org.fcitx.fcitx5.android.utils.switchToNextIME
 import org.mechdancer.dependency.Dependent
 import org.mechdancer.dependency.UniqueComponent
 import org.mechdancer.dependency.manager.ManagedHandler
@@ -60,7 +56,6 @@ class CommonKeyActionListener :
     private val kbdPrefs = AppPrefs.getInstance().keyboard
 
     private val spaceKeyLongPressBehavior by kbdPrefs.spaceKeyLongPressBehavior
-    private val langSwitchKeyBehavior by kbdPrefs.langSwitchKeyBehavior
 
     private var backspaceSwipeState = Stopped
 
@@ -80,11 +75,7 @@ class CommonKeyActionListener :
     }
 
     private fun showInputMethodPicker() {
-        fcitx.launchOnReady {
-            service.lifecycleScope.launch {
-                service.showDialog(InputMethodPickerDialog.build(it, service, context))
-            }
-        }
+        service.showInputMethodPicker()
     }
 
     val listener by lazy {
@@ -108,29 +99,7 @@ class CommonKeyActionListener :
                     commitAndReset()
                     triggerUnicode()
                 }
-                is LangSwitchAction -> {
-                    when (langSwitchKeyBehavior) {
-                        LangSwitchBehavior.Enumerate -> {
-                            service.postFcitxJob {
-                                if (enabledIme().size < 2) {
-                                    service.lifecycleScope.launch {
-                                        service.showDialog(AddMoreInputMethodsPrompt.build(context))
-                                    }
-                                } else {
-                                    enumerateIme()
-                                }
-                            }
-                        }
-                        LangSwitchBehavior.ToggleActivate -> {
-                            service.postFcitxJob {
-                                toggleIme()
-                            }
-                        }
-                        LangSwitchBehavior.NextInputMethodApp -> {
-                            service.switchToNextIME()
-                        }
-                    }
-                }
+                is LangSwitchAction -> service.performLangSwitch()
                 is ShowInputMethodPickerAction -> showInputMethodPicker()
                 is MoveSelectionAction -> {
                     when (backspaceSwipeState) {

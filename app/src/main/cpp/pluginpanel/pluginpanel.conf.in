@@ -1,0 +1,6 @@
+[Addon]
+Name=Plugin Panel
+Type=SharedLibrary
+Library=libpluginpanel
+Category=InputMethod
+Version=@PROJECT_VERSION@
