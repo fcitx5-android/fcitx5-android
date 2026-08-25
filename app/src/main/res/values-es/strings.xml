@@ -58,6 +58,7 @@
     <string name="verbose_log">Registro a detalle</string>
     <string name="verbose_log_summary">Requiere reinicio</string>
     <string name="invalid_value">Valor no válido</string>
+    <string name="invalid_regular_expression">Expresión regular no válida</string>
     <string name="quickphrase_editor">Editor de frases rápidas</string>
     <string name="quickphrase_already_exists">La frase rápida ya existe</string>
     <string name="create_new">Crear</string>

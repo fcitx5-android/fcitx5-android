@@ -20,10 +20,12 @@ import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceScreen
 import arrow.core.getOrElse
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.FcitxUtils
 import org.fcitx.fcitx5.android.core.Key
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.ui.main.modified.MySwitchPreference
+import org.fcitx.fcitx5.android.ui.main.modified.ValidatedEditTextPreference
 import org.fcitx.fcitx5.android.utils.LongClickPreference
 import org.fcitx.fcitx5.android.utils.buildDocumentsProviderIntent
 import org.fcitx.fcitx5.android.utils.buildPrimaryStorageIntent
@@ -249,9 +251,13 @@ object PreferenceScreenFactory {
                 listPreference(descriptor.ty.subtype)
             else
                 stubPreference()
-            is ConfigString -> EditTextPreference(context).apply {
+            is ConfigString -> ValidatedEditTextPreference(context).apply {
                 summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
                 setDefaultValue(descriptor.defaultValue)
+                if (descriptor.isRegex) {
+                    validator = FcitxUtils::isRegexValid
+                    validationError = R.string.invalid_regular_expression
+                }
             }
             is ConfigCustom -> throw IllegalAccessException("Impossible!")
         }.apply {

@@ -59,6 +59,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
         override val description: String? = null,
         override val defaultValue: String? = null,
         override val tooltip: String? = null,
+        val isRegex: Boolean = false,
     ) : ConfigDescriptor<ConfigType.TyString, String>() {
         override val ty: ConfigType<ConfigType.TyString>
             get() = ConfigType.TyString
@@ -130,6 +131,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
          * [ConfigListValue] is used for a union type. See [parse] for details.
          */
         override val defaultValue: List<ConfigListValue>? = null,
+        val isRegex: Boolean = false,
     ) : ConfigDescriptor<ConfigType.TyList, List<ConfigListValue>>() {
         @Serializable
         @Parcelize
@@ -220,6 +222,10 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
             get() = findByName("IntMax")?.value?.toInt()
         private val RawConfig.tooltip
             get() = findByName("Tooltip")?.value
+        private val RawConfig.isRegex
+            get() = findByName("IsRegex")?.value == "True"
+        private val RawConfig.listIsRegex
+            get() = findByName("ListConstrain")?.isRegex == true
 
         sealed class ParseException : Exception() {
             data class NoTypeExist(val config: RawConfig) : ParseException()
@@ -305,12 +311,14 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                                             ConfigType.TyEnum -> error("Impossible!")
                                             else -> raise(ParseException.BadFormList(it))
                                         }
-                                    }
+                                    },
+                                    isRegex = raw.listIsRegex
                                 )
                         ConfigType.TyString -> ConfigString(
                             raw.name,
                             raw.description,
-                            raw.defaultValue
+                            raw.defaultValue,
+                            isRegex = raw.isRegex
                         )
                         ConfigType.TyExternal -> ConfigExternal(
                             raw.name,
