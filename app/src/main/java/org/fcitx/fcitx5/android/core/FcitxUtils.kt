@@ -7,6 +7,9 @@ package org.fcitx.fcitx5.android.core
 
 object FcitxUtils {
 
+    @JvmStatic
+    external fun isRegexValid(pattern: String): Boolean
+
     // https://github.com/fcitx/fcitx5/blob/5.1.21/src/lib/fcitx-utils/stringutils.cpp#L100
     // https://en.cppreference.com/cpp/language/escape
     private val unescapeMap = mapOf(

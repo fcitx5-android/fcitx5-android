@@ -91,6 +91,7 @@
     <string name="added_x">已添加 %1$s</string>
     <string name="edited_x">已编辑 %1$s</string>
     <string name="invalid_value">无效的值</string>
+    <string name="invalid_regular_expression">无效的正则表达式</string>
     <string name="keyboard_long_press_delay">长按延迟</string>
     <string name="quickphrase_editor">快速输入编辑器</string>
     <string name="quickphrase_already_exists">快速输入已存在</string>

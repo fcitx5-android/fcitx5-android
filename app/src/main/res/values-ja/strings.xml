@@ -90,6 +90,7 @@
     <string name="added_x">%1$s を追加しました</string>
     <string name="edited_x">%1$s を編集しました</string>
     <string name="invalid_value">無効な値</string>
+    <string name="invalid_regular_expression">正規表現が無効です</string>
     <string name="keyboard_long_press_delay">キーの長押しの期間</string>
     <string name="quickphrase_editor">クイックフレーズエディター</string>
     <string name="quickphrase_already_exists">クイックフレーズはすでに存在します</string>
