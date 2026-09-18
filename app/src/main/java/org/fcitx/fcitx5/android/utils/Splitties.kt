@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2024-2026 Fcitx5 for Android Contributors
  */
 
 @file:OptIn(InternalSplittiesApi::class)
@@ -14,7 +14,7 @@ import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.constraintlayout.widget.ConstraintLayout
 import splitties.experimental.InternalSplittiesApi
-import splitties.resources.color
+import splitties.resources.styledColor
 import splitties.resources.withResolvedThemeAttribute
 import splitties.views.dsl.core.Ui
 
@@ -36,13 +36,7 @@ inline val ConstraintLayout.LayoutParams.unset
 
 @ColorInt
 fun Context.styledColorOrDefault(@AttrRes attrRes: Int, @ColorInt defaultValue: Int) =
-    withResolvedThemeAttribute(attrRes) {
-        when (type) {
-            in TypedValue.TYPE_FIRST_COLOR_INT..TypedValue.TYPE_LAST_COLOR_INT -> data
-            TypedValue.TYPE_STRING if string.startsWith("res/color/") -> color(resourceId)
-            else -> defaultValue
-        }
-    }
+    runCatching { styledColor(attrRes) }.getOrDefault(defaultValue)
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun View.styledColorOrDefault(@AttrRes attrRes: Int, @ColorInt defaultValue: Int) =
