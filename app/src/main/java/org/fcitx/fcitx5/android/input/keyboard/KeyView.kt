@@ -297,9 +297,25 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
         )
     }
 
+    val doublePinyinHint = view(::AutoScaleTextView) {
+        isClickable = false
+        isFocusable = false
+        setTextSize(TypedValue.COMPLEX_UNIT_DIP, 9f)
+        setTypeface(typeface, Typeface.NORMAL)
+        text = def.doublePinyinHint ?: ""
+        textDirection = View.TEXT_DIRECTION_FIRST_STRONG_LTR
+        setTextColor(
+            when (def.variant) {
+                Variant.Normal, Variant.AltForeground, Variant.Alternative -> theme.altKeyTextColor
+                Variant.Accent -> theme.accentKeyTextColor
+            }
+        )
+    }
+
     init {
         appearanceView.apply {
             add(altText, lParams(wrapContent, wrapContent))
+            add(doublePinyinHint, lParams(wrapContent, wrapContent))
         }
         applyLayout(resources.configuration.orientation)
     }
@@ -322,25 +338,43 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
             leftToLeft = unset
             rightToRight = parentId; rightMargin = hMargin + dp(4)
         }
+        doublePinyinHint.visibility =
+            if (def.doublePinyinHint != null) View.VISIBLE else View.GONE
+
+        doublePinyinHint.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            leftToLeft = parentId
+            rightToRight = parentId
+            bottomToBottom = parentId
+            bottomMargin = vMargin + dp(1)
+        }
     }
 
     private fun applyBottomAltTextPosition() {
         mainText.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            // reset
             bottomToBottom = unset
-            // set
-            topToTop = parentId; topMargin = vMargin
-            bottomToTop = altText.existingOrNewId
+            topToTop = parentId
+            topMargin = vMargin
+            bottomToTop = doublePinyinHint.existingOrNewId
         }
-        altText.visibility = View.VISIBLE
-        altText.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            // reset
-            topToTop = unset; topMargin = 0
-            rightMargin = 0
-            // set
+
+        doublePinyinHint.visibility =
+            if (def.doublePinyinHint != null) View.VISIBLE else View.GONE
+
+        doublePinyinHint.updateLayoutParams<ConstraintLayout.LayoutParams> {
             leftToLeft = parentId
             rightToRight = parentId
-            bottomToBottom = parentId; bottomMargin = vMargin + dp(2)
+            bottomToBottom = parentId
+            bottomMargin = vMargin + dp(1)
+        }
+
+        altText.visibility = View.VISIBLE
+        altText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            topToTop = parentId
+            topMargin = vMargin
+            leftToLeft = unset
+            rightToRight = parentId
+            rightMargin = hMargin + dp(4)
+            bottomToBottom = unset
         }
     }
 
@@ -354,6 +388,7 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
             bottomToBottom = parentId
         }
         altText.visibility = View.GONE
+        doublePinyinHint.visibility = View.GONE
     }
 
     private fun applyLayout(orientation: Int) {
