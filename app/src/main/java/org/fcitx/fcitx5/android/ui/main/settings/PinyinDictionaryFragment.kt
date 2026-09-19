@@ -17,6 +17,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.NotificationCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,7 +30,9 @@ import org.fcitx.fcitx5.android.data.pinyin.dict.LibIMEDictionary
 import org.fcitx.fcitx5.android.data.pinyin.dict.PinyinDictionary
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
+import org.fcitx.fcitx5.android.ui.main.EditDeleteMenuProvider
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
+import org.fcitx.fcitx5.android.ui.main.MainViewModel.ButtonMode
 import org.fcitx.fcitx5.android.utils.NaiveDustman
 import org.fcitx.fcitx5.android.utils.importErrorDialog
 import org.fcitx.fcitx5.android.utils.lazyRoute
@@ -107,6 +110,19 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDiction
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         args.uri?.let { importFromUri(Uri.parse(it)) }
         super.onViewCreated(view, savedInstanceState)
+        viewModel.toolbarButton.value =
+            if (ui.entries.isNotEmpty()) ButtonMode.EDIT else ButtonMode.NONE
+        requireActivity().addMenuProvider(
+            EditDeleteMenuProvider(
+                buttonMode = viewModel.toolbarButton,
+                editButtonAction = { ui.enterMultiSelect(requireActivity().onBackPressedDispatcher) },
+                deleteButtonAction = { ui.deleteSelected(); ui.exitMultiSelect() },
+                menuHost = requireActivity(),
+                lifecycleOwner = viewLifecycleOwner,
+            ),
+            viewLifecycleOwner,
+            Lifecycle.State.STARTED
+        )
     }
 
     private fun createNotificationChannel() {
@@ -216,18 +232,8 @@ class PinyinDictionaryFragment : Fragment(), OnItemChangedListener<PinyinDiction
         dustman.addOrUpdate(new.name, new.isEnabled)
     }
 
-    override fun onStart() {
-        super.onStart()
-        if (uiInitialized) {
-            viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
-                ui.enterMultiSelect(requireActivity().onBackPressedDispatcher)
-            }
-        }
-    }
-
     override fun onStop() {
         reloadDict()
-        viewModel.disableToolbarEditButton()
         if (uiInitialized) {
             ui.exitMultiSelect()
         }

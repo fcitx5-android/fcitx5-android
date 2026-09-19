@@ -72,7 +72,7 @@ class IdleUi(
         }
 
     val menuButton = ToolButton(ctx, R.drawable.ic_baseline_expand_more_24, theme).apply {
-        rotation = menuButtonRotation
+        iconRotation = menuButtonRotation
     }
 
     val hideKeyboardButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_drop_down_24, theme)
@@ -144,9 +144,10 @@ class IdleUi(
     }
 
     private fun updateMenuButtonIcon() {
-        menuButton.image.imageResource =
+        menuButton.setIcon(
             if (inPrivate) R.drawable.ic_view_private
             else R.drawable.ic_baseline_expand_more_24
+        )
     }
 
     private fun updateMenuButtonContentDescription() {
@@ -160,12 +161,12 @@ class IdleUi(
     private fun updateMenuButtonRotation(instant: Boolean = false) {
         val targetRotation = menuButtonRotation
         menuButton.apply {
-            if (targetRotation == rotation) return
-            animate().cancel()
+            if (targetRotation == iconRotation) return
+            iconAnimate().cancel()
             if (!instant && !disableAnimation) {
-                animate().setDuration(200L).rotation(targetRotation)
+                iconAnimate().setDuration(200L).rotation(targetRotation)
             } else {
-                rotation = targetRotation
+                iconRotation = targetRotation
             }
         }
     }

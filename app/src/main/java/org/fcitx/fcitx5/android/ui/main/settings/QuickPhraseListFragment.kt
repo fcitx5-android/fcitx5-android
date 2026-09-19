@@ -19,6 +19,7 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.core.app.NotificationCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,7 +32,9 @@ import org.fcitx.fcitx5.android.data.quickphrase.QuickPhrase
 import org.fcitx.fcitx5.android.data.quickphrase.QuickPhraseManager
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
 import org.fcitx.fcitx5.android.ui.common.OnItemChangedListener
+import org.fcitx.fcitx5.android.ui.main.EditDeleteMenuProvider
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
+import org.fcitx.fcitx5.android.ui.main.MainViewModel.ButtonMode
 import org.fcitx.fcitx5.android.utils.NaiveDustman
 import org.fcitx.fcitx5.android.utils.importErrorDialog
 import org.fcitx.fcitx5.android.utils.item
@@ -297,6 +300,23 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
         return ui.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewModel.toolbarButton.value =
+            if (ui.entries.isNotEmpty()) ButtonMode.EDIT else ButtonMode.NONE
+        requireActivity().addMenuProvider(
+            EditDeleteMenuProvider(
+                buttonMode = viewModel.toolbarButton,
+                editButtonAction = { ui.enterMultiSelect(requireActivity().onBackPressedDispatcher) },
+                deleteButtonAction = { ui.deleteSelected(); ui.exitMultiSelect() },
+                menuHost = requireActivity(),
+                lifecycleOwner = viewLifecycleOwner,
+            ),
+            viewLifecycleOwner,
+            Lifecycle.State.STARTED
+        )
+    }
+
     override fun onItemAdded(idx: Int, item: QuickPhrase) {
         dustman.addOrUpdate(item.name, item.isEnabled)
     }
@@ -314,18 +334,8 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
         dustman.addOrUpdate(new.name, new.isEnabled)
     }
 
-    override fun onStart() {
-        super.onStart()
-        if (uiInitialized) {
-            viewModel.enableToolbarEditButton(ui.entries.isNotEmpty()) {
-                ui.enterMultiSelect(requireActivity().onBackPressedDispatcher)
-            }
-        }
-    }
-
     override fun onStop() {
         reloadQuickPhrase()
-        viewModel.disableToolbarEditButton()
         if (uiInitialized) {
             ui.exitMultiSelect()
         }

@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2024-2026 Fcitx5 for Android Contributors
  */
 
 package org.fcitx.fcitx5.android.input.candidates
@@ -17,13 +17,13 @@ class CandidateViewHolder(val ui: CandidateItemUi) : RecyclerView.ViewHolder(ui.
 
     fun update(newIndex: Int, newCandidate: CandidateWord) {
         idx = newIndex
-        candidate = newCandidate
-        ui.updateCandidate(newCandidate)
+        if (candidate != newCandidate) {
+            candidate = newCandidate
+            ui.updateCandidate(newCandidate)
+        }
     }
 
     fun clear() {
-        idx = -1
-        candidate = CandidateWord.Empty
-        ui.updateCandidate(CandidateWord.Empty)
+        update(-1, CandidateWord.Empty)
     }
 }

@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2024-2026 Fcitx5 for Android Contributors
  */
 
 package org.fcitx.fcitx5.android
@@ -11,13 +11,15 @@ import org.junit.Test
 
 class StringEscapeTest {
 
-    // https://github.com/fcitx/fcitx5/blob/5.1.8/test/teststringutils.cpp#L118
+    // https://github.com/fcitx/fcitx5/blob/5.1.21/test/teststringutils.cpp#L142
     private val data = listOf(
         "\"" to """"\""""",
         "\"\"\n" to """"\"\"\n"""",
         "abc" to """abc""",
         "ab\"c" to """"ab\"c"""",
-        "a c" to """"a c""""
+        "a c" to """"a c"""",
+        "工 " to """"工 """",
+        "\r\u000b\u000c\n\t\\\" " to """"\r\v\f\n\t\\\" """",
     )
 
     @Test

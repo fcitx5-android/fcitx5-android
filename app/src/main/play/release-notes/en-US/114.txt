@@ -1,0 +1,46 @@
+# 0.1.3 - Physical Keyboard Improvements and Candidate Tab Actions
+
+## Highlights
+
+- On some phones with physical keyboards, the input method can select candidates or input digits/punctuations with combination keys properly.
+- CandidatesView for physical keyboards now supports long-press actions too. It would also pop up automatically when switching input method by keyboard shortcuts, and show an icon on system status bar to indicate the activate input method.
+- In password inputs, the toolbar number row can be dismissed by swiping right. Swipe left on the right-most button on toolbar to bring it back.
+- Expanded candidate list in virtual keyboard could display tabs for filtering candidates when supported by the engine. Pinyin correction/single-character/stroke filtering are supported by the built-in pinyin engine.
+
+### Notable changes
+
+- Added a new option "Advanced - Keyboard height percent base", with 2 available values: DisplayMetrics (old behavior) and RealSize (new behavior). If you encounter an issue that the virtual keyboard height would change after switching theme/rotating screen, the new behavior maybe able to solve that. We are planing to deprecate the old behavior since it's unstable on some devices.
+
+## New features
+
+- Improve FAB animation in list fragments
+- Restore InputView state when switching between virtual/physical keyboard
+- Show CandidatesView when input method switched by user
+- Use InputConnection#setSelection to move cursor when supported
+- Improve cursor move when selection is not empty
+- Swipe to collapse/expand NumberRow (#856)
+- Make voice input selectable
+- Show status icon when using hardware keyboard (#830)
+- Make CandidatesView support candidate action menu (#875)
+- Tab actions UI in expanded candidate window
+- Try restore composing range when selection matches
+- Add copy button for EditorInfoWindow
+- Add option for keyboard height percent base
+
+## Bug fixes
+
+- Fix CandidatesView popup without focusing input
+- Fixes typing on hardware keyboard with "sticky" modifier keys
+- Avoid showing CharacterPickerDialog with keyboard shortcut
+- Reset view state when DynamicListAdapter recycles them
+- Make item order in PinyinDictionaryFragment consistent
+- Disable vivo_keypress_workaround on Origin OS 4+
+- Make sure popup entry do not have parent view before adding it
+- Fix crash when MainActivity relaunches under FcitxPreferenceFragment route
+- Send KEYCODE_ENTER instead of commit "\n" when pressing enter on virtual keyboard
+- Don't recreate InputView on keyboard Configuration changes
+- Reduce contrast of InlineSuggestion Chip ripple
+- Send arrow key in browser location bar on space swipe (#872)
+- Fix CandidatesView position when CursorAnchorInfo is invalid on API 35+
+- Always show Snackbar in BaseDynamicListUi when item changes
+- Add missing characters in PopupPreset and sort items (#887)

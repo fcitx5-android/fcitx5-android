@@ -15,6 +15,7 @@ import androidx.annotation.CallSuper
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
+import org.fcitx.fcitx5.android.ui.main.MainViewModel.ButtonMode
 import java.util.Collections
 
 abstract class DynamicListAdapter<T>(
@@ -161,18 +162,14 @@ abstract class DynamicListAdapter<T>(
                 }
             }
             onBackPressedDispatcher.addCallback(onBackPressedCallback!!)
-            it.enableToolbarDeleteButton {
-                deleteSelected()
-                exitMultiSelect()
-            }
-            it.hideToolbarEditButton()
+            it.toolbarButton.value = ButtonMode.DELETE
             multiselect = true
             notifyDataSetChanged()
         }
     }
 
 
-    private fun deleteSelected() {
+    internal fun deleteSelected() {
         if (!multiselect || selected.isEmpty())
             return
         val indexed = selected.mapNotNull { entry ->
@@ -192,12 +189,10 @@ abstract class DynamicListAdapter<T>(
             if (!multiselect)
                 return
             onBackPressedCallback?.remove()
-            it.disableToolbarDeleteButton()
             multiselect = false
             selected.clear()
             notifyDataSetChanged()
-            if (entries.isNotEmpty())
-                it.showToolbarEditButton()
+            it.toolbarButton.value = if (entries.isNotEmpty()) ButtonMode.EDIT else ButtonMode.NONE
         }
     }
 
@@ -208,7 +203,7 @@ abstract class DynamicListAdapter<T>(
         _entries.add(idx, item)
         notifyItemInserted(idx)
         listener?.onItemAdded(idx, item)
-        mainViewModel?.showToolbarEditButton()
+        mainViewModel?.toolbarButton?.value = ButtonMode.EDIT
     }
 
     @CallSuper
@@ -217,7 +212,7 @@ abstract class DynamicListAdapter<T>(
         notifyItemRemoved(idx)
         listener?.onItemRemoved(idx, item)
         if (entries.isEmpty())
-            mainViewModel?.hideToolbarEditButton()
+            mainViewModel?.toolbarButton?.value = ButtonMode.NONE
         return item
     }
 

@@ -1,20 +1,20 @@
 [versions]
-androidGradlePlugin = "9.2.0"
-kotlin = "2.3.21"
-ksp = "2.3.7"
-lifecycle = "2.10.0"
+androidGradlePlugin = "9.3.1"
+kotlin = "2.4.10"
+ksp = "2.3.10"
+lifecycle = "2.11.0"
 navigation = "2.9.8"
 room = "2.8.4"
 test = "1.7.0"
 splitties = "3.0.0"
-aboutlibraries = "14.0.1"
-arrow = "2.2.2.1"
+aboutlibraries = "14.2.1"
+arrow = "2.2.3"
 
 [libraries]
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 android-desugarJDKLibs = { group = "com.android.tools", name = "desugar_jdk_libs", version = "2.1.5" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
-kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version = "1.10.2" }
+kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version = "1.11.0" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.11.0" }
 androidx-activity = { module = "androidx.activity:activity-ktx", version = "1.13.0" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.1" }
@@ -29,7 +29,7 @@ androidx-lifecycle-common = { module = "androidx.lifecycle:lifecycle-common-java
 androidx-lifecycle-service = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycle" }
 androidx-navigation-fragment = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigation" }
 androidx-navigation-ui = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigation" }
-androidx-paging = { module = "androidx.paging:paging-runtime-ktx", version = "3.4.2" }
+androidx-paging = { module = "androidx.paging:paging-runtime-ktx", version = "3.5.0" }
 androidx-preference = { module = "androidx.preference:preference-ktx", version = "1.2.1" }
 androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version = "1.4.0" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
@@ -38,7 +38,7 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
 androidx-startup = { module = "androidx.startup:startup-runtime", version = "1.2.0" }
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version = "1.1.0" }
-material = { module = "com.google.android.material:material", version = "1.13.0" }
+material = { module = "com.google.android.material:material", version = "1.14.0" }
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 arrow-functions = { module = "io.arrow-kt:arrow-functions", version.ref = "arrow" }
 imagecropper = { module = "com.vanniktech:android-image-cropper", version = "4.7.0" }

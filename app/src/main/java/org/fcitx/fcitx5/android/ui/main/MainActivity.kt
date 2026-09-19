@@ -7,10 +7,8 @@ package org.fcitx.fcitx5.android.ui.main
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.view.Menu
 import android.view.ViewGroup
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -19,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.forEach
 import androidx.core.view.updateLayoutParams
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -30,13 +27,10 @@ import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.databinding.ActivityMainBinding
 import org.fcitx.fcitx5.android.ui.main.settings.SettingsRoute
 import org.fcitx.fcitx5.android.ui.setup.SetupActivity
-import org.fcitx.fcitx5.android.utils.Const
-import org.fcitx.fcitx5.android.utils.item
 import org.fcitx.fcitx5.android.utils.navigateWithAnim
 import org.fcitx.fcitx5.android.utils.parcelable
 import org.fcitx.fcitx5.android.utils.startActivity
 import splitties.dimensions.dp
-import splitties.resources.styledColor
 import splitties.views.topPadding
 
 class MainActivity : AppCompatActivity() {
@@ -60,26 +54,13 @@ class MainActivity : AppCompatActivity() {
             windowInsets
         }
         setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
         // always show toolbar back arrow icon
-        // https://android.googlesource.com/platform/frameworks/support/+/32e643112d0217619237a0d7101b50919c6caf51/navigation/navigation-ui/src/main/java/androidx/navigation/ui/AbstractAppBarOnDestinationChangedListener.kt#80
-        binding.toolbar.navigationIcon = DrawerArrowDrawable(this).apply { progress = 1f }
-        // show menu icon and other action icons on toolbar
-        // don't use `setSupportActionBar(binding.toolbar)` here,
-        // because navController would change toolbar title, we need to control it by ourselves
-        setupToolbarMenu(binding.toolbar.menu)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         navController = binding.navHostFragment.getFragment<NavHostFragment>().navController
         navController.graph = SettingsRoute.createGraph(navController)
-        binding.toolbar.setNavigationOnClickListener {
-            // prevent navigate up when child fragment has enabled `OnBackPressedCallback`
-            if (onBackPressedDispatcher.hasEnabledCallbacks()) {
-                onBackPressedDispatcher.onBackPressed()
-                return@setNavigationOnClickListener
-            }
-            // "minimize" the activity if we can't go back
-            navController.navigateUp() || onSupportNavigateUp() || moveTaskToBack(false)
-        }
         viewModel.toolbarTitle.observe(this) {
-            binding.toolbar.title = it
+            supportActionBar!!.title = it
         }
         viewModel.toolbarShadow.observe(this) {
             binding.toolbar.elevation = dp(if (it) 4f else 0f)
@@ -99,6 +80,16 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         processIntent(intent)
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        // prevent navigate up when child fragment has enabled `OnBackPressedCallback`
+        if (onBackPressedDispatcher.hasEnabledCallbacks()) {
+            onBackPressedDispatcher.onBackPressed()
+            return true
+        }
+        // "minimize" the activity if we can't go back
+        return navController.navigateUp() || super.onSupportNavigateUp() || moveTaskToBack(false)
     }
 
     private fun processIntent(intent: Intent?) {
@@ -124,43 +115,6 @@ class MainActivity : AppCompatActivity() {
                 navController.navigateWithAnim(route)
             }
         }
-    }
-
-    private fun setupToolbarMenu(menu: Menu) {
-        val iconTint = styledColor(android.R.attr.colorControlNormal)
-        menu.item(R.string.save, R.drawable.ic_baseline_save_24, iconTint, true) {
-            viewModel.toolbarSaveButtonOnClickListener.value?.invoke()
-        }.apply {
-            viewModel.toolbarSaveButtonOnClickListener
-                .observe(this@MainActivity) { listener -> isVisible = listener != null }
-        }
-        val aboutMenuItems = listOf(
-            menu.item(R.string.faq) {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Const.faqUrl)))
-            },
-            menu.item(R.string.developer) {
-                navController.navigateWithAnim(SettingsRoute.Developer)
-            },
-            menu.item(R.string.about) {
-                navController.navigateWithAnim(SettingsRoute.About)
-            }
-        )
-        viewModel.aboutButton.observe(this@MainActivity) { enabled ->
-            aboutMenuItems.forEach { menu -> menu.isVisible = enabled }
-        }
-        menu.item(R.string.edit, R.drawable.ic_baseline_edit_24, iconTint, true) {
-            viewModel.toolbarEditButtonOnClickListener.value?.invoke()
-        }.apply {
-            viewModel.toolbarEditButtonVisible.observe(this@MainActivity) { isVisible = it }
-        }
-        menu.item(R.string.delete, R.drawable.ic_baseline_delete_24, iconTint, true) {
-            viewModel.toolbarDeleteButtonOnClickListener.value?.invoke()
-        }.apply {
-            viewModel.toolbarDeleteButtonOnClickListener
-                .observe(this@MainActivity) { listener -> isVisible = listener != null }
-        }
-        // all menus should be invisible and enabled on demand
-        menu.forEach { it.isVisible = false }
     }
 
     private var needNotifications by AppPrefs.getInstance().internal.needNotifications

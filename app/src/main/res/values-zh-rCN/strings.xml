@@ -317,4 +317,8 @@
     <string name="hide_unsupported_emojis">隐藏不支持的表情</string>
     <string name="key_border_stroke">启用按键边框描边</string>
     <string name="preferred_voice_input">首选语音输入</string>
+    <string name="edit_text_playground">文本输入框 (EditText) 演练场</string>
+    <string name="keyboard_height_percent_base">键盘高度百分比</string>
+    <string name="display_metrics">显示指标 (Resources.getDisplayMetrics)</string>
+    <string name="real_size">真实尺寸 (Display.getRealSize)</string>
 </resources>

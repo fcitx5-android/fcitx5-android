@@ -108,7 +108,6 @@ abstract class FcitxPreferenceFragment : PaddingPreferenceFragment() {
                     addPreference(R.string.config_addon_not_loaded)
                 }
             }
-            viewModel.disableAboutButton()
         }
     }
 
