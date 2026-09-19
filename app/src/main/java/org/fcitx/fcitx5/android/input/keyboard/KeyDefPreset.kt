@@ -49,6 +49,7 @@ class AlphabetKey(
         displayText = character,
         altText = punctuation,
         textSize = 23f,
+        doublePinyinHint = DoublePinyin.Xiaohe.getHint(character),
         variant = variant
     ),
     setOf(
