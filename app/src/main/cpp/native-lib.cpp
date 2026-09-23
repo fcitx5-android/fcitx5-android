@@ -972,9 +972,9 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_setFcitxAddonState(JNIEnv *env, jclass 
     const auto enabled = env->GetBooleanArrayElements(state, nullptr);
     for (int i = 0; i < nameLength; i++) {
         auto jName = JRef<jstring>(env, env->GetObjectArrayElement(name, i));
-        map.insert({CString(env, jName), enabled[i]});
+        map.emplace(CString(env, jName), enabled[i]);
     }
-    env->ReleaseBooleanArrayElements(state, enabled, 0);
+    env->ReleaseBooleanArrayElements(state, enabled, JNI_ABORT);
     Fcitx::Instance().setAddonState(map);
 }
 

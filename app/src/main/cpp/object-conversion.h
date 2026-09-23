@@ -26,11 +26,11 @@ jobject fcitxInputMethodEntryToJObject(JNIEnv *env, const fcitx::InputMethodEntr
 }
 
 jobjectArray fcitxInputMethodEntriesToJObjectArray(JNIEnv *env, const std::vector<const fcitx::InputMethodEntry *> &entries) {
-    jobjectArray array = env->NewObjectArray(static_cast<int>(entries.size()), GlobalRef->InputMethodEntry, nullptr);
-    int i = 0;
-    for (const auto &entry: entries) {
-        auto obj = JRef(env, fcitxInputMethodEntryToJObject(env, entry));
-        env->SetObjectArrayElement(array, i++, obj);
+    int size = static_cast<int>(entries.size());
+    jobjectArray array = env->NewObjectArray(size, GlobalRef->InputMethodEntry, nullptr);
+    for (int i = 0; i < size; i++) {
+        auto obj = JRef(env, fcitxInputMethodEntryToJObject(env, entries[i]));
+        env->SetObjectArrayElement(array, i, obj);
     }
     return array;
 }
@@ -60,11 +60,12 @@ jobject fcitxRawConfigToJObject(JNIEnv *env, const fcitx::RawConfig &cfg) {
     if (!cfg.hasSubItems()) {
         return obj;
     }
-    auto array = JRef<jobjectArray>(env, env->NewObjectArray(static_cast<int>(cfg.subItemsSize()), GlobalRef->RawConfig, nullptr));
-    int i = 0;
-    for (const auto &item: cfg.subItems()) {
-        auto jItem = JRef(env, fcitxRawConfigToJObject(env, *cfg.get(item)));
-        env->SetObjectArrayElement(array, i++, jItem);
+    int size = static_cast<int>(cfg.subItemsSize());
+    auto subItems = cfg.subItems();
+    auto array = JRef<jobjectArray>(env, env->NewObjectArray(size, GlobalRef->RawConfig, nullptr));
+    for (int i = 0; i < size; i++) {
+        auto item = JRef(env, fcitxRawConfigToJObject(env, *cfg.get(subItems[i])));
+        env->SetObjectArrayElement(array, i, item);
     }
     env->CallVoidMethod(obj, GlobalRef->RawConfigSetSubItems, *array);
     return obj;
@@ -93,10 +94,10 @@ fcitx::RawConfig jobjectToRawConfig(JNIEnv *env, jobject jConfig) {
 }
 
 jobjectArray stringVectorToJStringArray(JNIEnv *env, const std::vector<std::string> &strings) {
-    jobjectArray array = env->NewObjectArray(static_cast<int>(strings.size()), GlobalRef->String, nullptr);
-    int i = 0;
-    for (const auto &s: strings) {
-        env->SetObjectArrayElement(array, i++, JString(env, s));
+    int size = static_cast<int>(strings.size());
+    jobjectArray array = env->NewObjectArray(size, GlobalRef->String, nullptr);
+    for (int i = 0; i < size; i++) {
+        env->SetObjectArrayElement(array, i, JString(env, strings[i]));
     }
     return array;
 }
@@ -123,7 +124,8 @@ jobject fcitxActionToJObject(JNIEnv *env, const ActionEntity &act) {
         const int size = static_cast<int>(act.menu->size());
         menu = env->NewObjectArray(size, GlobalRef->Action, nullptr);
         for (int i = 0; i < size; i++) {
-            env->SetObjectArrayElement(menu, i, fcitxActionToJObject(env, act.menu->at(i)));
+            auto menuItem = JRef(env, fcitxActionToJObject(env, act.menu->at(i)));
+            env->SetObjectArrayElement(menu, i, menuItem);
         }
     }
     auto obj = env->NewObject(GlobalRef->Action, GlobalRef->ActionInit,
@@ -147,12 +149,12 @@ jobject fcitxTextToJObject(JNIEnv *env, const fcitx::Text &text) {
     const int size = static_cast<int>(text.size());
     auto str = JRef<jobjectArray>(env, env->NewObjectArray(size, GlobalRef->String, nullptr));
     auto fmt = JRef<jintArray>(env, env->NewIntArray(size));
-    int flag = static_cast<int>(fcitx::TextFormatFlag::NoFlag);
+    auto fmtArray = env->GetIntArrayElements(fmt, nullptr);
     for (int i = 0; i < size; i++) {
-        env->SetObjectArrayElement(str, i, *JString(env, text.stringAt(i)));
-        flag = text.formatAt(i).toInteger();
-        env->SetIntArrayRegion(fmt, i, 1, &flag);
+        env->SetObjectArrayElement(str, i, JString(env, text.stringAt(i)));
+        fmtArray[i] = text.formatAt(i).toInteger();
     }
+    env->ReleaseIntArrayElements(fmt, fmtArray, 0);
     auto obj = env->CallStaticObjectMethod(GlobalRef->FormattedText, GlobalRef->FormattedTextFromByteCursor,
                                            *str,
                                            *fmt,
