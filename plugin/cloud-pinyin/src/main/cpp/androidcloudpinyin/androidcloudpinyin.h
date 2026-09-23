@@ -67,8 +67,6 @@ private:
     CloudPinyinConfig config_;
     std::string configPath_ = "conf/cloudpinyin.conf";
 
-    void syncConfig();
-
     fcitx::Instance *instance_;
     fcitx::EventLoop *eventLoop_;
     fcitx::EventDispatcher &dispatcher_;

@@ -5,6 +5,7 @@ plugins {
     id("org.fcitx.fcitx5.android.build-metadata")
     id("org.fcitx.fcitx5.android.data-descriptor")
     id("org.fcitx.fcitx5.android.fcitx-component")
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -51,4 +52,5 @@ dependencies {
     implementation(project(":lib:fcitx5"))
     implementation(project(":lib:plugin-base"))
     implementation(libs.kotlinx.coroutines)
+    implementation(libs.kotlinx.serialization.cbor)
 }

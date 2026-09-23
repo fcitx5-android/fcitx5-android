@@ -16,4 +16,8 @@ include("${FCITX_INSTALL_CMAKECONFIG_DIR}/Fcitx5Utils/Fcitx5CompilerSettings.cma
 
 find_package(common)
 
+# prebuilt nlohmann_json
+set(nlohmann_json_DIR "${PREBUILT_DIR}/nlohmann_json/${ANDROID_ABI}/share/cmake/nlohmann_json")
+find_package(nlohmann_json)
+
 add_subdirectory(androidcloudpinyin)

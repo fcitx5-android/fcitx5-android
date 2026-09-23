@@ -17,12 +17,8 @@ import java.net.Proxy
 import java.net.URL
 
 class CloudPinyinImpl {
-
-    private var proxyValue: String = ""
-    private var activeProxy: Proxy = Proxy.NO_PROXY
-
-    private fun parseProxy(str: String): Proxy {
-        if (str.isBlank()) return Proxy.NO_PROXY
+    private fun parseProxy(str: String?): Proxy {
+        if (str.isNullOrBlank()) return Proxy.NO_PROXY
         val uri = Uri.parse(str)
         val type = when (uri.scheme) {
             "socks", "socks5", "socks4" -> Proxy.Type.SOCKS
@@ -35,11 +31,6 @@ class CloudPinyinImpl {
             return Proxy.NO_PROXY
         }
         return Proxy(type, InetSocketAddress.createUnresolved(host, port))
-    }
-
-    fun setProxy(str: String) {
-        proxyValue = str
-        activeProxy = parseProxy(str)
     }
 
     sealed interface Backend {
@@ -125,28 +116,23 @@ class CloudPinyinImpl {
         }
     }
 
-    private var activeBackend: Backend = Backend.GoogleCN
-
-    fun setBackend(idx: Int) {
-        activeBackend = when (idx) {
-            0 -> Backend.Google
-            1 -> Backend.GoogleCN
-            2 -> Backend.Baidu
-            else -> Backend.GoogleCN
-        }
-    }
-
-    private suspend fun httpGet(url: String): String = withContext(Dispatchers.IO) {
-        val conn = URL(url).openConnection(activeProxy) as HttpURLConnection
+    private suspend fun httpGet(url: String, proxy: Proxy): String = withContext(Dispatchers.IO) {
+        val conn = URL(url).openConnection(proxy) as HttpURLConnection
         conn.connectTimeout = 5_000
         conn.readTimeout = 5_000
         val stream = if (conn.responseCode in 200..299) conn.getInputStream() else conn.errorStream
         stream.bufferedReader().use { it.readText() }
     }
 
-    suspend fun request(pinyin: String): String {
-        return activeBackend.let {
-            it.parseBody(httpGet(it.buildURL(Uri.encode(pinyin))))
+    suspend fun request(payload: CloudPinyinPayload): String {
+        val backend = when (payload.backend) {
+            0 -> Backend.Google
+            1 -> Backend.GoogleCN
+            2 -> Backend.Baidu
+            else -> Backend.GoogleCN
         }
+        val proxy = parseProxy(payload.proxy)
+        val url = backend.buildURL(Uri.encode(payload.pinyin))
+        return backend.parseBody(httpGet(url, proxy))
     }
 }
