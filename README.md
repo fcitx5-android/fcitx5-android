@@ -34,9 +34,10 @@ In case you want Fcitx5 on other platforms: [macOS](https://github.com/fcitx-con
 
 - English (with spell check)
 - Chinese
-  - Pinyin, Shuangpin, Wubi, Cangjie and custom tables (built-in, powered by [fcitx5-chinese-addons](https://github.com/fcitx/fcitx5-chinese-addons))
+  - Pinyin, Shuangpin, Wubi and custom tables (built-in, powered by [fcitx5-chinese-addons](https://github.com/fcitx/fcitx5-chinese-addons))
   - Zhuyin/Bopomofo (via [Chewing Plugin](./plugin/chewing))
   - Jyutping (via [Jyutping Plugin](./plugin/jyutping/), powered by [libime-jyutping](https://github.com/fcitx/libime-jyutping))
+  - Cangjie (standalone [Cangjie plugin](https://f5a.torus.icu/fdroid/repo/), [prebuilt tables](https://github.com/fcitx5-android/tables/releases), [prebuilt binary tables](https://github.com/fcitx/fcitx5-table-extra))
 - Vietnamese (via [UniKey Plugin](./plugin/unikey), supports Telex, VNI and VIQR)
 - Japanese (via [Anthy Plugin](./plugin/anthy))
 - Korean (via [Hangul Plugin](./plugin/hangul))
