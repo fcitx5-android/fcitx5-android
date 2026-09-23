@@ -7,6 +7,8 @@
 #include <fcitx/addonmanager.h>
 #include <fcitx-utils/event.h>
 
+#include <nlohmann/json.hpp>
+
 #include "androidcloudpinyin.h"
 
 namespace {
@@ -36,7 +38,6 @@ CloudPinyin::~CloudPinyin() = default;
 
 void CloudPinyin::reloadConfig() {
     readAsIni(config_, configPath_);
-    syncConfig();
 }
 
 const fcitx::Configuration *CloudPinyin::getConfig() const {
@@ -46,15 +47,6 @@ const fcitx::Configuration *CloudPinyin::getConfig() const {
 void CloudPinyin::setConfig(const fcitx::RawConfig &config) {
     config_.load(config, true);
     fcitx::safeSaveAsIni(config_, configPath_);
-    syncConfig();
-}
-
-void CloudPinyin::syncConfig() {
-    std::vector<std::byte> backend{static_cast<const std::byte>(config_.backend.value())};
-    androidipcbridge()->call<fcitx::IAndroidIPCBridge::notify>(
-            "cloud_pinyin", "set_backend", backend);
-    androidipcbridge()->call<fcitx::IAndroidIPCBridge::notify>(
-            "cloud_pinyin", "set_proxy", std::as_bytes(std::span{config_.proxy.value()}));
 }
 
 void CloudPinyin::request(const std::string &pinyin, CloudPinyinCallback callback) {
@@ -66,8 +58,17 @@ void CloudPinyin::request(const std::string &pinyin, CloudPinyinCallback callbac
         callback(pinyin, *value);
         return;
     }
+    nlohmann::json json{
+            {"backend", config_.backend.value()},
+            {"pinyin",  pinyin}
+    };
+    if (!config_.proxy->empty()) {
+        json["proxy"] = config_.proxy.value();
+    }
+    const auto &cbor = nlohmann::json::to_cbor(json);
+    std::span<const std::byte> span{reinterpret_cast<const std::byte *>(cbor.data()), cbor.size()};
     androidipcbridge()->call<fcitx::IAndroidIPCBridge::request>(
-            "cloud_pinyin", "request", std::as_bytes(std::span{pinyin}),
+            "cloud_pinyin", "request", span,
             [&, pinyin, callback = std::move(callback)](auto &response) {
                 if (response.status != 200) {
                     errorCount_ += 1;

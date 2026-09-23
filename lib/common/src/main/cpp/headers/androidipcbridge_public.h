@@ -27,6 +27,6 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidIPCBridge, setRequestHandler,
                              void(const AndroidIPCRequestHandler &handler))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidIPCBridge, handleResponse,
-                             void(int id, int status, const std::string &msg, const const AndroidIPCPayload &payload))
+                             void(int id, int status, const std::string &msg, const AndroidIPCPayload &payload))
 
 #endif // FCITX5_ANDROID_ANDROIDIPCBRIDGE_PUBLIC_H
