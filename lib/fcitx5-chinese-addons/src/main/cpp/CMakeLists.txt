@@ -44,6 +44,10 @@ find_package(Marisa)
 set(OpenCC_DIR "${PREBUILT_DIR}/opencc/${ANDROID_ABI}/lib/cmake/opencc")
 find_package(OpenCC)
 
+# prebuilt nlohmann_json
+set(nlohmann_json_DIR "${PREBUILT_DIR}/nlohmann_json/${ANDROID_ABI}/share/cmake/nlohmann_json")
+find_package(nlohmann_json)
+
 option(ENABLE_TEST "" OFF)
 option(ENABLE_GUI "" OFF)
 option(ENABLE_BROWSER "" OFF)
