@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.core
 
@@ -21,6 +21,17 @@ import timber.log.Timber
 object FcitxPluginServices {
 
     const val PLUGIN_SERVICE_ACTION = "${BuildConfig.APPLICATION_ID}.plugin.SERVICE"
+
+    interface ClipboardTransformer {
+        val priority: Int
+        fun transform(text: String): String
+    }
+
+    private var legacyClipTransformers: List<ClipboardTransformer>? = null
+
+    fun updateLegacyClipTransformers(list: List<ClipboardTransformer>?) {
+        legacyClipTransformers = list
+    }
 
     class PluginServiceConnection(
         val packageName: String,
@@ -71,10 +82,25 @@ object FcitxPluginServices {
                 }
                 return true
             } catch (e: Exception) {
-                Timber.w("Exception when calling plugin $pluginId: ${e.message}")
+                Timber.w("Exception when calling plugin IPC $pluginId.$method: ${e.message}")
                 return false
             }
         }
+
+        val clipboardTransformer: ClipboardTransformer? =
+            if (clipboardTransformerPriority < 0) null
+            else object : ClipboardTransformer {
+                override val priority = clipboardTransformerPriority
+                override fun transform(text: String): String {
+                    val s = service ?: return text
+                    try {
+                        return s.transformClipboardEntry(text)
+                    } catch (e: Exception) {
+                        Timber.w("Exception when transformClipboardEntry with plugin $pluginId: ${e.message}")
+                        return text
+                    }
+                }
+            }
     }
 
     private val connections = mutableMapOf<String, PluginServiceConnection>()
@@ -123,7 +149,13 @@ object FcitxPluginServices {
     }
 
     fun transformClipboardEntry(clipboardText: String): String {
-        TODO("Move ClipboardManager.transformer here")
+        val transformers: List<ClipboardTransformer> = buildList {
+            connections.values.forEach { it.clipboardTransformer?.let(::add) }
+            legacyClipTransformers?.let(::addAll)
+        }
+        return transformers
+            .sortedByDescending { it.priority }
+            .fold(clipboardText) { text, it -> it.transform(text) }
     }
 
     fun handlePluginIpc(id: Int, plugin: String, method: String, params: ByteArray?): Boolean {

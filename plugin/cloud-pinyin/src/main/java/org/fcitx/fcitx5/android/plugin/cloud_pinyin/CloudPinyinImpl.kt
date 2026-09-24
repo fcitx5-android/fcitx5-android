@@ -6,7 +6,6 @@
 package org.fcitx.fcitx5.android.plugin.cloud_pinyin
 
 import android.net.Uri
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
