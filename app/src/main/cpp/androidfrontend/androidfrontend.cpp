@@ -91,43 +91,26 @@ public:
         );
     }
 
-    void updateCandidatesBulk() {
+    void updateCandidatesBulk(BulkCandidateList *bulk) {
         std::vector<CandidateEntity> candidates;
-        int total = 0;
-        const auto &list = inputPanel().candidateList();
-        if (list) {
-            const auto &bulk = list->toBulk();
-            if (bulk) {
-                total = bulk->totalSize();
-                // limit candidate count to 16 (for paging)
-                const int limit = total < 0 ? 16 : std::min(total, 16);
-                for (int i = 0; i < limit; i++) {
-                    try {
-                        // maybe unnecessary; I don't see anywhere using `CandidateWord::setPlaceHolder`
-                        // if (candidate.isPlaceHolder()) continue;
-                        candidates.emplace_back(candidateEntity(bulk->candidateFromAll(i)));
-                    } catch (const std::invalid_argument &e) {
-                        FCITX_WARN() << "updateCandidatesBulk(): " << e.what();
-                        total = static_cast<int>(candidates.size());
-                        break;
-                    }
-                }
-            } else {
-                total = list->size();
-                for (int i = 0; i < total; i++) {
-                    candidates.emplace_back(candidateEntity(list->candidate(i)));
-                }
+        int total = bulk->totalSize();
+        // limit candidate count to 16 (for paging)
+        const int limit = total < 0 ? 16 : std::min(total, 16);
+        for (int i = 0; i < limit; i++) {
+            try {
+                // maybe unnecessary; I don't see anywhere using `CandidateWord::setPlaceHolder`
+                // if (candidate.isPlaceHolder()) continue;
+                candidates.emplace_back(candidateEntity(bulk->candidateFromAll(i)));
+            } catch (const std::invalid_argument &e) {
+                FCITX_WARN() << "updateCandidatesBulk(): " << e.what();
+                total = static_cast<int>(candidates.size());
+                break;
             }
         }
         frontend_->updateCandidateList(candidates, total);
     }
 
-    void updateCandidatesPaged() {
-        const auto &list = inputPanel().candidateList();
-        if (!list) {
-            frontend_->updatePagedCandidate(PagedCandidateEntity::Empty);
-            return;
-        }
+    void updateCandidatesPaged(const std::shared_ptr<CandidateList> &list) {
         int cursorIndex = list->cursorIndex();
         CandidateLayoutHint layoutHint = list->layoutHint();
         bool hasPrev = false;
@@ -348,11 +331,7 @@ AndroidFrontend::AndroidFrontend(Instance *instance)
                 switch (e.component()) {
                     case UserInterfaceComponent::InputPanel: {
                         activeIC_->updateInputPanel();
-                        if (pagingMode_ == 0) {
-                            activeIC_->updateCandidatesBulk();
-                        } else {
-                            activeIC_->updateCandidatesPaged();
-                        }
+                        updateCandidates();
                         break;
                     }
                     case UserInterfaceComponent::StatusArea: {
@@ -495,10 +474,22 @@ void AndroidFrontend::showToast(const std::string &s) {
 
 void AndroidFrontend::setCandidatePagingMode(const int mode) {
     pagingMode_ = mode;
-    if (mode == 0) {
-        activeIC_->updateCandidatesBulk();
+    updateCandidates();
+}
+
+void AndroidFrontend::updateCandidates() {
+    const auto &list = activeIC_->inputPanel().candidateList();
+    if (!list) {
+        updatePagedCandidate(PagedCandidateEntity::Empty);
+        return;
+    }
+    // virtual keyboard (mode 0) uses the bulk list when available, falls back to paged otherwise;
+    // external keyboard (mode 1) always uses paged
+    auto *bulk = pagingMode_ == 0 ? list->toBulk() : nullptr;
+    if (bulk) {
+        activeIC_->updateCandidatesBulk(bulk);
     } else {
-        activeIC_->updateCandidatesPaged();
+        activeIC_->updateCandidatesPaged(list);
     }
 }
 

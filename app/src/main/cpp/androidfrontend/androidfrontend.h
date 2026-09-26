@@ -100,6 +100,8 @@ private:
     std::vector<std::unique_ptr<HandlerTableEntry<EventHandler>>> eventHandlers_;
     int pagingMode_;
 
+    void updateCandidates();
+
     CandidateListCallback candidateListCallback = [](const std::vector<CandidateEntity> &, const int) {};
     CommitStringCallback commitStringCallback = [](const std::string &, const int) {};
     ClientPreeditCallback preeditCallback = [](const Text &) {};

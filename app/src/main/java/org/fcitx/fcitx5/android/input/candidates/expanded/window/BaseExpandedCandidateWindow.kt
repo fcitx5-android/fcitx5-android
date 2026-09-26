@@ -61,7 +61,7 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
 
     protected val disableAnimation by AppPrefs.getInstance().advanced.disableAnimation
 
-    private lateinit var candidateLayout: ExpandedCandidateLayout
+    protected lateinit var candidateLayout: ExpandedCandidateLayout
 
     protected val dividerDrawable by lazy {
         ShapeDrawable(RectShape()).apply {
@@ -101,6 +101,52 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
 
     abstract val adapter: PagingCandidateViewAdapter
     abstract val layoutManager: RecyclerView.LayoutManager
+
+    /**
+     * Scroll to the previous/next page of the (bulk) candidate list.
+     */
+    abstract fun scrollPrevPage()
+
+    /**
+     * Scroll to the previous/next page of the (bulk) candidate list.
+     */
+    abstract fun scrollNextPage()
+
+    fun prevPage() {
+        if (horizontalCandidate.isBulk) {
+            scrollPrevPage()
+        } else {
+            fcitx.launchOnReady { it.offsetCandidatePage(-1) }
+        }
+    }
+
+    fun nextPage() {
+        if (horizontalCandidate.isBulk) {
+            scrollNextPage()
+        } else {
+            fcitx.launchOnReady { it.offsetCandidatePage(1) }
+        }
+    }
+
+    /**
+     * Update enabled state of the paging buttons based on the current scroll position.
+     * Only called when the candidate list is bulk.
+     */
+    abstract fun updateScrollPaginationButtons()
+
+    /**
+     * Update enabled state of the paging buttons.
+     * For bulk candidate lists it's based on the current scroll position,
+     * otherwise on whether there's a previous/next page in the engine.
+     */
+    protected fun updatePaginationButtons() {
+        if (horizontalCandidate.isBulk) {
+            updateScrollPaginationButtons()
+        } else {
+            candidateLayout.pageUpBtn.isEnabled = horizontalCandidate.hasPrev
+            candidateLayout.pageDnBtn.isEnabled = horizontalCandidate.hasNext
+        }
+    }
 
     val tabsAdapter by lazy {
         object : CandidateTabActionsAdapter(theme, false) {
@@ -149,10 +195,6 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
     }
     private var candidatesSubmitJob: Job? = null
 
-    abstract fun prevPage()
-
-    abstract fun nextPage()
-
     override fun onAttached() {
         bar.expandButtonStateMachine.push(ExpandedCandidatesAttached)
         candidateLayout.embeddedKeyboard.also {
@@ -160,6 +202,7 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
             it.keyActionListener = keyActionListener
         }
         updateTabs(fcitx.runImmediately { inputPanelCached.tabs })
+        updatePaginationButtons()
         offsetJob = service.lifecycleScope.launch {
             horizontalCandidate.expandedCandidateOffset.collect {
                 if (it <= 0) {
@@ -195,7 +238,9 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
     override fun onDetached() {
         bar.expandButtonStateMachine.push(
             ExpandedCandidatesDetached,
-            ExpandedCandidatesEmpty to (horizontalCandidate.adapter.total == adapter.offset)
+            ExpandedCandidatesEmpty to
+                    (horizontalCandidate.adapter.total == adapter.offset &&
+                            !horizontalCandidate.hasPrev && !horizontalCandidate.hasNext)
         )
         candidatesSubmitJob?.cancel()
         offsetJob?.cancel()
@@ -210,6 +255,16 @@ abstract class BaseExpandedCandidateWindow<T : BaseExpandedCandidateWindow<T>> :
 
     override fun onInputPanelUpdate(data: FcitxEvent.InputPanelEvent.Data) {
         updateTabs(data.tabs)
+    }
+
+    override fun onCandidateUpdate(data: FcitxEvent.CandidateListEvent.Data) {
+        if (!::candidateLayout.isInitialized) return
+        updatePaginationButtons()
+    }
+
+    override fun onPagedCandidateUpdate(data: FcitxEvent.PagedCandidateEvent.Data) {
+        if (!::candidateLayout.isInitialized) return
+        updatePaginationButtons()
     }
 
 }
