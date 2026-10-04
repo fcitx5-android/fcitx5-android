@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageButton
 import androidx.activity.OnBackPressedDispatcher
+import androidx.annotation.StringRes
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -92,7 +93,8 @@ abstract class BaseDynamicListUi<T>(
         data class FreeAdd<T>(
             val hint: String,
             val converter: (String) -> T,
-            val validator: (String) -> Boolean = { it.isNotBlank() }
+            val validator: (String) -> Boolean = { it.isNotBlank() },
+            @StringRes val validationError: Int = R.string.invalid_value,
         ) : Mode<T>()
 
         class Immutable<T> : Mode<T>()
@@ -104,7 +106,10 @@ abstract class BaseDynamicListUi<T>(
 
         @Suppress("FunctionName")
         companion object {
-            fun FreeAddString() = FreeAdd("", ::identity)
+            fun FreeAddString(
+                validator: (String) -> Boolean = { it.isNotBlank() },
+                @StringRes validationError: Int = R.string.invalid_value,
+            ) = FreeAdd("", ::identity, validator, validationError)
         }
     }
 
@@ -264,7 +269,7 @@ abstract class BaseDynamicListUi<T>(
                     block(mode.converter(str))
                     true
                 } else {
-                    editText.error = ctx.getString(R.string.invalid_value)
+                    editText.error = ctx.getString(mode.validationError)
                     false
                 }
             }

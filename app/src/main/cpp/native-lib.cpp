@@ -28,6 +28,7 @@
 #include <fcitx-utils/standardpath.h>
 #include <fcitx-utils/stringutils.h>
 #include <fcitx-config/iniparser.h>
+#include <fcitx-config/option.h>
 
 #include <quickphrase_public.h>
 #include <unicode_public.h>
@@ -503,6 +504,14 @@ Java_org_fcitx_fcitx5_android_core_Fcitx_setupLogStream(JNIEnv *env, jclass claz
     static native_streambuf log_streambuf;
     static std::ostream stream(&log_streambuf);
     Fcitx::setLogStream(stream, verbose);
+}
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_org_fcitx_fcitx5_android_core_FcitxUtils_isRegexValid(JNIEnv *env, jclass clazz,
+                                                           jstring pattern) {
+    auto pattern_ = CString(env, pattern);
+    return fcitx::RegexConstrain().check(*pattern_);
 }
 
 extern "C"
