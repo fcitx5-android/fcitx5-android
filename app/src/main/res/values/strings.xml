@@ -225,6 +225,7 @@
     <string name="main_program">main program</string>
     <string name="edit_theme">Edit Theme</string>
     <string name="show_voice_input_button">Show voice input button</string>
+    <string name="preferred_voice_input">Preferred voice input</string>
     <string name="fcitx_daemon">Fcitx Daemon</string>
     <string name="restarting_fcitx">Restarting Fcitx</string>
     <string name="plugin_needs_reload">Plugin changes detected, click here to reload</string>
@@ -291,6 +292,18 @@
     <string name="expand_candidates_list">Expand candidates list</string>
     <string name="hide_candidates_list">Hide candidates list</string>
     <string name="switch_to_voice_input">Switch to voice input</string>
+    <string name="stop_voice_input">Stop voice input</string>
+    <string name="voice_state_permission_required">Microphone permission required</string>
+    <string name="cancel">Cancel</string>
+    <string name="speech_error_no_speech">No speech detected</string>
+    <string name="speech_error_no_match">No match found for your speech</string>
+    <string name="speech_error_audio">Audio recording error</string>
+    <string name="speech_error_busy">Recognition service is busy</string>
+    <string name="speech_error_network">Network error during recognition</string>
+    <string name="speech_error_server">Recognition service error</string>
+    <string name="speech_error_language">Recognition is unavailable for this language</string>
+    <string name="speech_error_generic">Voice input failed</string>
+    <string name="speech_error_unresponsive">Speech service is not responding</string>
     <string name="hide_keyboard">Hide keyboard</string>
     <string name="private_mode">Private mode (tap to toggle toolbar)</string>
     <string name="hide_toolbar">Hide toolbar</string>
@@ -316,7 +329,6 @@
     <string name="emoji_skin_tone_type_6">🏿 Type-6</string>
     <string name="hide_unsupported_emojis">Hide unsupported Emojis</string>
     <string name="key_border_stroke">Enable stroke for key border</string>
-    <string name="preferred_voice_input">Preferred voice input</string>
     <string name="edit_text_playground">EditText Playground</string>
     <string name="keyboard_height_percent_base">Keyboard height percent base</string>
     <string name="display_metrics">Display metrics (Resources.getDisplayMetrics)</string>

@@ -50,6 +50,10 @@ class InputBroadcaster : UniqueComponent<InputBroadcaster>(), Dependent, InputBr
         receivers.forEach { it.onStartInput(info, capFlags) }
     }
 
+    override fun onFinishInputView(finishingInput: Boolean) {
+        receivers.forEach { it.onFinishInputView(finishingInput) }
+    }
+
     override fun onImeUpdate(ime: InputMethodEntry) {
         receivers.forEach { it.onImeUpdate(ime) }
     }
