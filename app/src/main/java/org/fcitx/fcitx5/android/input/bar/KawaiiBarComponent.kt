@@ -104,6 +104,7 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
     private val expandToolbarByDefault by prefs.keyboard.expandToolbarByDefault
     private val toolbarNumRowOnPassword by prefs.keyboard.toolbarNumRowOnPassword
     private val showVoiceInputButton by prefs.keyboard.showVoiceInputButton
+    private val holdToTalk by prefs.keyboard.holdToTalk
 
     private var clipboardTimeoutJob: Job? = null
 
@@ -255,6 +256,25 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
 
     private val switchToVoiceInputCallback = View.OnClickListener {
         speechVoiceInput.toggle()
+    }
+
+    /**
+     * Hold-to-talk: the session starts on press and stops on release, so the final
+     * text arrives as soon as the user lets go of the button. A too-short press
+     * aborts instead of recognizing empty audio.
+     */
+    private val voiceInputHoldHandler = object : IdleUi.VoiceInputHoldHandler {
+        override fun onHoldStart() {
+            speechVoiceInput.start(hold = true)
+        }
+
+        override fun onHoldStop() {
+            speechVoiceInput.stop()
+        }
+
+        override fun onHoldCancel() {
+            speechVoiceInput.cancel()
+        }
     }
 
     private val idleUi: IdleUi by lazy {
@@ -452,7 +472,8 @@ class KawaiiBarComponent : UniqueViewComponent<KawaiiBarComponent, FrameLayout>(
                 !capFlags.has(CapabilityFlag.Password)
         idleUi.setHideKeyboardIsVoiceInput(
             shouldShowVoiceInput,
-            if (shouldShowVoiceInput) switchToVoiceInputCallback else hideKeyboardCallback
+            if (shouldShowVoiceInput) switchToVoiceInputCallback else hideKeyboardCallback,
+            if (shouldShowVoiceInput && holdToTalk) voiceInputHoldHandler else null
         )
         evalIdleUiState()
     }

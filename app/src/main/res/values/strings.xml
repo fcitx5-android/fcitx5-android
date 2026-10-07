@@ -226,6 +226,7 @@
     <string name="edit_theme">Edit Theme</string>
     <string name="show_voice_input_button">Show voice input button</string>
     <string name="preferred_voice_input">Preferred voice input</string>
+    <string name="hold_to_talk">Hold to talk</string>
     <string name="fcitx_daemon">Fcitx Daemon</string>
     <string name="restarting_fcitx">Restarting Fcitx</string>
     <string name="plugin_needs_reload">Plugin changes detected, click here to reload</string>

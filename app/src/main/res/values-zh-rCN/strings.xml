@@ -226,6 +226,7 @@
     <string name="edit_theme">编辑主题</string>
     <string name="show_voice_input_button">显示语音输入按钮</string>
     <string name="preferred_voice_input">首选语音输入</string>
+    <string name="hold_to_talk">按住说话</string>
     <string name="fcitx_daemon">Fcitx 守护程序</string>
     <string name="restarting_fcitx">正在重新启动 Fcitx</string>
     <string name="plugin_needs_reload">检测到插件更改，点此重新加载</string>

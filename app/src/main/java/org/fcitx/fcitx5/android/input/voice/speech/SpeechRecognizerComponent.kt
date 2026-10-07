@@ -67,7 +67,8 @@ import timber.log.Timber
  *
  * Interaction:
  * - toolbar microphone button: tap to start, tap again to finish, tap once more
- *   to abort
+ *   to abort — or hold-to-talk (press to start, release to finish), selected in
+ *   keyboard settings
  * - partial results compose underlined; confirmed phrases commit, and the final
  *   result commits on arrival
  */
@@ -251,6 +252,49 @@ class SpeechRecognizerComponent :
     fun toggle() {
         if (!ensureMicrophonePermission()) return
         session.toggle()
+    }
+
+    /** True while the hold-to-talk button is held: an ongoing dictation intent. */
+    private var holdActive = false
+
+    /** Start a session (hold-to-talk press down). No-op if one is already running. */
+    fun start(hold: Boolean = false) {
+        if (!ensureMicrophonePermission()) return
+        holdActive = hold
+        session.start()
+    }
+
+    /** Stop the running session and wait for the final result (hold-to-talk release). */
+    fun stop() {
+        holdActive = false
+        session.stop()
+    }
+
+    /** Abort the running session and drop any partial result. */
+    fun cancel() {
+        holdActive = false
+        session.cancel()
+    }
+
+    /**
+     * Session chaining for hold-to-talk: one-shot services (e.g. Sayboard) deliver
+     * final results at their own phrase boundaries and stop — while the user is
+     * still holding the button, mid-dictation. The held finger is an explicit
+     * ongoing intent, so a SUCCESSFUL termination chains into a fresh session and
+     * dictation continues. Only productive sessions (non-blank final result) chain:
+     * empty results must not (some services emit them right after a restart, and
+     * chaining on those forms a tight restart loop that kills the service process);
+     * errors never chain (their toast must reach the user). The user's release
+     * always ends the chain.
+     */
+    private fun chainHeldSession() {
+        if (!holdActive || session.state != SpeechSessionState.IDLE) return
+        mainHandler.post {
+            if (holdActive && session.state == SpeechSessionState.IDLE) {
+                Timber.d("service ended the session mid-hold; restarting")
+                session.start()
+            }
+        }
     }
 
     /**
@@ -494,7 +538,14 @@ class SpeechRecognizerComponent :
 
         override fun onResults(results: Bundle) {
             Timber.i("onResults")
-            session.onResult(AndroidSpeechRecognizerEngine.resultsText(results))
+            val text = AndroidSpeechRecognizerEngine.resultsText(results)
+            session.onResult(text)
+            // a one-shot service ended the session; if the user is still holding
+            // AND this session actually produced text, keep dictating with a
+            // fresh session. Empty results must not chain: some services emit
+            // instant empty results right after a restart, and chaining on them
+            // forms a tight restart loop that kills the service process.
+            if (!text.isNullOrBlank()) chainHeldSession()
         }
 
         // segmented-session callbacks are interface-required but never used:
