@@ -445,9 +445,9 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
             pluginIpcHandlers.forEach {
                 if (it(id, plugin, method, params)) return
             }
+            Timber.w("Unhandled plugin ipc: id=$id, plugin=$plugin, method=$method")
             if (id >= 0) {
-                Timber.w("Invalid plugin ipc: id=$id, plugin=$plugin, method=$method")
-                handleAndroidIPCBridgeResponse(id, -1, "INVALID", null)
+                handleAndroidIPCBridgeResponse(id, -1, "unhandled", null)
             }
         }
     }

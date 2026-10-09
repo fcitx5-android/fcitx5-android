@@ -23,6 +23,9 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidIPCBridge, notify,
 FCITX_ADDON_DECLARE_FUNCTION(AndroidIPCBridge, request,
                              void(const std::string &plugin, const std::string &method, const AndroidIPCPayload &params, AndroidIPCCallback callback))
 
+FCITX_ADDON_DECLARE_FUNCTION(AndroidIPCBridge, requestWithTimeout,
+                             void(const std::string &plugin, const std::string &method, const AndroidIPCPayload &params, int timeout, AndroidIPCCallback callback))
+
 FCITX_ADDON_DECLARE_FUNCTION(AndroidIPCBridge, setRequestHandler,
                              void(const AndroidIPCRequestHandler &handler))
 

@@ -21,26 +21,17 @@
 
 namespace fcitx {
 
-FCITX_CONFIGURATION(AndroidIPCBridgeConfig
-)
-
 class AndroidIPCBridge final : public AddonInstance {
 public:
     explicit AndroidIPCBridge(Instance *instance);
 
     Instance *instance() { return instance_; }
 
-    void reloadConfig() override;
-
-    void save() override;
-
-    [[nodiscard]] const Configuration *getConfig() const override { return &config_; }
-
-    void setConfig(const RawConfig &config) override;
-
     void notify(const std::string &plugin, const std::string &method, const AndroidIPCPayload &params);
 
     void request(const std::string &plugin, const std::string &method, const AndroidIPCPayload &params, AndroidIPCCallback callback);
+
+    void requestWithTimeout(const std::string &plugin, const std::string &method, const AndroidIPCPayload &params, int timeout, AndroidIPCCallback callback);
 
     void setRequestHandler(const AndroidIPCRequestHandler &handler);
 
@@ -49,11 +40,9 @@ public:
 private:
     FCITX_ADDON_EXPORT_FUNCTION(AndroidIPCBridge, notify);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidIPCBridge, request);
+    FCITX_ADDON_EXPORT_FUNCTION(AndroidIPCBridge, requestWithTimeout);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidIPCBridge, setRequestHandler);
     FCITX_ADDON_EXPORT_FUNCTION(AndroidIPCBridge, handleResponse);
-
-    static const inline char *configPath_ = "conf/androidipcbridge.conf";
-    AndroidIPCBridgeConfig config_;
 
     Instance *instance_;
     EventDispatcher &dispatcher_;
@@ -62,6 +51,7 @@ private:
 
     int requestId_ = 0;
     std::unordered_map<int, AndroidIPCCallback> pendingRequests_;
+    std::unordered_map<int, std::unique_ptr<EventSourceTime>> pendingTimers_;
 
 }; // class Notifications
 

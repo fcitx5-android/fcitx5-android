@@ -7,6 +7,7 @@ package org.fcitx.fcitx5.android.plugin.cloud_pinyin
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -17,7 +18,6 @@ import kotlinx.serialization.decodeFromByteArray
 import org.fcitx.fcitx5.android.common.FcitxPluginService
 import org.fcitx.fcitx5.android.common.ipc.IFcitxPluginIpcCallback
 import org.fcitx.fcitx5.android.common.ipc.IFcitxPluginService
-import java.sql.Time
 
 class MainService : FcitxPluginService() {
     companion object {
@@ -48,25 +48,26 @@ class MainService : FcitxPluginService() {
                 params: ByteArray?,
                 cb: IFcitxPluginIpcCallback
             ) {
-                try {
-                    when (method) {
-                        "request" -> scope.launch {
-                            if (params != null) {
-                                val args = Cbor.decodeFromByteArray<CloudPinyinPayload>(params)
-                                val result = impl.request(args)
-                                cb.respond(0, result, null)
-                            } else {
-                                cb.respond(2, "null params", null)
-                            }
+                when (method) {
+                    "request" -> scope.launch {
+                        try {
+                            val args = Cbor.decodeFromByteArray<CloudPinyinPayload>(params!!)
+                            val result = impl.request(args)
+                            cb.respond(0, result, null)
+                        } catch (e: CancellationException) {
+                            // allow coroutine cancel
+                            throw e
+                        } catch(e: Exception) {
+                            // there will be no stack trace if it's an UnknownHostException because of network unavailable
+                            // https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-17.0.0_r1/core/java/android/util/Log.java#486
+                            Log.w(TAG, "Exception when requesting", e)
+                            cb.respond(1, "failed", null)
                         }
-                        else -> {
-                            cb.respond(1, "unsupported", null)
-                        }
+                    }.invokeOnCompletion {  }
+                    else -> {
+                        Log.w(TAG, "Unsupported request: $method")
+                        cb.respond(2, "unsupported", null)
                     }
-                } catch (e: Exception) {
-                    Log.w(TAG, "Exception when handing request: $method")
-                    Log.w(TAG, e)
-                    cb.respond(1, "failed", null)
                 }
             }
         }
