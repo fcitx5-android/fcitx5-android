@@ -64,26 +64,50 @@ object FcitxPluginServices {
         // may re-connect in the future
         override fun onServiceDisconnected(name: ComponentName) {
             Timber.d("Plugin disconnected: $packageName")
+            this.service = null
+            clearPendingRequests()
         }
 
         // will never receive another connection
         override fun onBindingDied(name: ComponentName?) {
-            onDied.invoke(this)
             Timber.d("Plugin binding died: $packageName")
+            this.service = null
+            clearPendingRequests()
+            onDied.invoke(this)
         }
 
-        fun handleIpc(method: String, params: ByteArray?, cb: IFcitxPluginIpcCallback?): Boolean {
+        val pendingRequestIds = mutableSetOf<Int>()
+
+        fun handleIpc(id: Int, method: String, params: ByteArray?): Boolean {
             val s = service ?: return false
             try {
-                if (cb == null) {
+                if (id < 0) {
                     s.onIpcNotify(method, params)
                 } else {
-                    s.onIpcRequest(method, params, cb)
+                    pendingRequestIds.add(id)
+                    s.onIpcRequest(method, params, object : IFcitxPluginIpcCallback.Stub() {
+                        override fun respond(status: Int, msg: String, payload: ByteArray?) {
+                            FcitxDaemon.getFirstConnectionOrNull()?.runIfReady {
+                                respondIpcRequest(id, status, msg, payload)
+                                pendingRequestIds.remove(id)
+                            }
+                        }
+                    })
                 }
                 return true
             } catch (e: Exception) {
                 Timber.w("Exception when calling plugin IPC $pluginId.$method: ${e.message}")
                 return false
+            }
+        }
+
+        fun clearPendingRequests() {
+            if (pendingRequestIds.isNotEmpty()) {
+                val ids = pendingRequestIds.toSet()
+                pendingRequestIds.clear()
+                FcitxDaemon.getFirstConnectionOrNull()?.runIfReady {
+                    ids.forEach { respondIpcRequest(it, -2, "died", null) }
+                }
             }
         }
 
@@ -160,13 +184,6 @@ object FcitxPluginServices {
 
     fun handlePluginIpc(id: Int, plugin: String, method: String, params: ByteArray?): Boolean {
         val target = connections.values.find { it.pluginId == plugin } ?: return false
-        val cb = if (id < 0) null else object : IFcitxPluginIpcCallback.Stub() {
-            override fun respond(status: Int, msg: String, payload: ByteArray?) {
-                FcitxDaemon.getFirstConnectionOrNull()?.runIfReady {
-                    respondIpcRequest(id, status, msg, payload)
-                }
-            }
-        }
-        return target.handleIpc(method, params, cb)
+        return target.handleIpc(id, method, params)
     }
 }

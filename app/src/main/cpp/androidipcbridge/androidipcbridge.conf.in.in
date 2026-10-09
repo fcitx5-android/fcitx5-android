@@ -5,4 +5,4 @@ Library=libandroidipcbridge
 Category=Module
 Version=@PROJECT_VERSION@
 OnDemand=True
-Configurable=True
+Configurable=False

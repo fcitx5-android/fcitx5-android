@@ -50,7 +50,8 @@ void CloudPinyin::setConfig(const fcitx::RawConfig &config) {
 }
 
 void CloudPinyin::request(const std::string &pinyin, CloudPinyinCallback callback) {
-    if (static_cast<int>(pinyin.size()) < config_.minimumLength.value()) {
+    if (errorCount_ >= MAX_ERROR ||
+        static_cast<int>(pinyin.size()) < config_.minimumLength.value()) {
         callback(pinyin, "");
         return;
     }
@@ -67,10 +68,10 @@ void CloudPinyin::request(const std::string &pinyin, CloudPinyinCallback callbac
     }
     const auto &cbor = nlohmann::json::to_cbor(json);
     std::span<const std::byte> span{reinterpret_cast<const std::byte *>(cbor.data()), cbor.size()};
-    androidipcbridge()->call<fcitx::IAndroidIPCBridge::request>(
-            "cloud_pinyin", "request", span,
+    androidipcbridge()->call<fcitx::IAndroidIPCBridge::requestWithTimeout>(
+            "cloud_pinyin", "request", span, 1000000 * 5, // timeout in 5 seconds
             [&, pinyin, callback = std::move(callback)](auto &response) {
-                if (response.status != 200) {
+                if (response.status != 0) {
                     errorCount_ += 1;
                     if (errorCount_ >= MAX_ERROR && resetError_) {
                         FCITX_ERROR() << "Cloud pinyin reaches max error. "
@@ -78,6 +79,8 @@ void CloudPinyin::request(const std::string &pinyin, CloudPinyinCallback callbac
                         resetError_->setNextInterval(minInUs * 5);
                         resetError_->setOneShot();
                     }
+                    callback(pinyin, "");
+                    return;
                 }
                 std::string hanzi = response.msg;
                 callback(pinyin, hanzi);
