@@ -13,9 +13,9 @@ RepoType: git
 Repo: https://github.com/fcitx5-android/fcitx5-android
 
 Builds:
-  - versionName: placeholder
-    versionCode: placeholder
-    commit: placeholder
+  - versionName: '%versionName'
+    versionCode: '%versionCode'
+    commit: '%commit'
     subdir: app
     submodules: true
     sudo:
@@ -28,11 +28,11 @@ Builds:
       - yes
     binary: https://jenkins.fcitx-im.org/job/android/job/fcitx5-android/lastSuccessfulBuild/artifact/out/org.fcitx.fcitx5.android-%v-%abi-release.apk
     srclibs:
-      - fcitx5-android-prebuilder@master
+      - fcitx5-android-prebuilder@%prebuilder
     rm:
       - lib/fcitx5/src/main/cpp/prebuilt
     prebuild:
-      - sdkmanager 'cmake;3.31.6'
+      - sdkmanager 'cmake;%cmake'
       - sed -i -e '/ImportQualifiedPost/d' $$fcitx5-android-prebuilder$$/src/Main.hs
       - sed -i -e 's/import \(.*\) qualified as/import qualified \1 as/g' $$fcitx5-android-prebuilder$$/src/*.hs
       - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' ../build-logic/convention/build.gradle.kts
@@ -43,11 +43,11 @@ Builds:
       - lib/fcitx5/src/main/cpp/fcitx5/third_party/yoga
     build:
       - pushd $$fcitx5-android-prebuilder$$
-      - ABI=%abi ANDROID_NDK_ROOT=$$NDK$$ CMAKE_VERSION=3.31.6 ANDROID_PLATFORM=23
+      - ABI=%abi ANDROID_NDK_ROOT=$$NDK$$ CMAKE_VERSION=%cmake ANDROID_PLATFORM=%platform RUST_VERSION=%rust
         ./build-cabal -j app
       - popd
       - mv $$fcitx5-android-prebuilder$$/build ../lib/fcitx5/src/main/cpp/prebuilt
-    ndk: 28.0.13004108
+    ndk: '%ndk'
     gradleprops:
       - buildABI=%abi
       - buildTimestamp=%ts
