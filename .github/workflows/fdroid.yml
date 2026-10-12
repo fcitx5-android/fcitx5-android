@@ -87,9 +87,9 @@ jobs:
           source /etc/profile.d/bsenv.sh
           metadata="$home_vagrant/metadata/org.fcitx.fcitx5.android.yml"
           curl -Lo $metadata "https://github.com/${{ github.repository }}/raw/${{ github.sha }}/app/org.fcitx.fcitx5.android.yml"
-          sed -i s/%ts/$timestamp/g; \
-                 s/%abi/${{ matrix.abi }}/g; \
-                 $metadata
+          sed -i "s/%ts/$timestamp/g;
+                  s/%abi/${{ matrix.abi }}/g;
+          " $metadata
           yq -i ".Builds[0] |=
               (.versionName = \"$versionName\") |=
               (.versionCode = $versionCode) |=
@@ -107,12 +107,12 @@ jobs:
           prebuilderPlatform=$(echo $prebuilt_toolchain | yq .platform)
           prebuilderSHA=$(echo $prebuilt_toolchain | yq ".prebuilder")
           prebuilderRust=$(echo $prebuilt_toolchain | yq .rust)
-          sed -i s/%cmake/$prebuilderCMake/g; \
-                 s/%ndk/$prebuilderNDK/g; \
-                 s/%platform/$prebuilderPlatform/g; \
-                 s/%prebuilder/$prebuilderSHA/g; \
-                 s/%rust/$prebuilderRust/g; \
-                 $metadata
+          sed -i "s/%cmake/$prebuilderCMake/g;
+                  s/%ndk/$prebuilderNDK/g;
+                  s/%platform/$prebuilderPlatform/g;
+                  s/%prebuilder/$prebuilderSHA/g;
+                  s/%rust/$prebuilderRust/g;
+          " $metadata
           # print the first node under 'Builds' for debugging
           yq ".Builds[0]" $metadata
           cp $metadata $GITHUB_WORKSPACE/metadata
