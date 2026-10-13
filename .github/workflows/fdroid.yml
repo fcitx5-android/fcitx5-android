@@ -42,6 +42,11 @@ jobs:
           repository: f-droid/fdroidserver
           path: fdroidserver
 
+      - name: Install system dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y yq-go
+
       - name: Setup fdroidserver
         run: |
           source /etc/profile.d/bsenv.sh
@@ -69,13 +74,11 @@ jobs:
           set -x
           # prevent prebuilder from writing to build summary file
           unset GITHUB_ACTIONS GITHUB_STEP_SUMMARY
-          curl -Lo /usr/bin/yq "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
-          chmod +x /usr/bin/yq
           build_metadata=$(curl "https://jenkins.fcitx-im.org/job/android/job/fcitx5-android/$BUILD_NUMBER/artifact/out/build-metadata.json")
-          versionName=$(echo $build_metadata | yq ".versionName")
-          commitHash=$(echo $build_metadata | yq ".commitHash")
-          timestamp=$(echo $build_metadata | yq ".timestamp")
-          baseVersionCode=$(curl -L "https://github.com/fcitx5-android/fcitx5-android/raw/$commitHash/build-logic/convention/src/main/kotlin/Versions.kt" | grep "baseVersionCode =" | sed 's/.*= //')
+          versionName=$(echo $build_metadata | yq-go -r ".versionName")
+          commitHash=$(echo $build_metadata | yq-go -r ".commitHash")
+          timestamp=$(echo $build_metadata | yq-go -r ".timestamp")
+          baseVersionCode=$(curl -L "https://github.com/${{ github.repository }}/raw/$commitHash/build-logic/convention/src/main/kotlin/Versions.kt" | grep "baseVersionCode =" | sed 's/.*= //')
           declare -A abi_list
           abi_list=([armeabi-v7a]=1 [arm64-v8a]=2 [x86]=3 [x86_64]=4)
           i=${abi_list[${{ matrix.abi }}]}
@@ -84,9 +87,10 @@ jobs:
           source /etc/profile.d/bsenv.sh
           metadata="$home_vagrant/metadata/org.fcitx.fcitx5.android.yml"
           curl -Lo $metadata "https://github.com/${{ github.repository }}/raw/${{ github.sha }}/app/org.fcitx.fcitx5.android.yml"
-          sed -i s/%ts/$timestamp/g $metadata
-          sed -i s/%abi/${{ matrix.abi }}/g $metadata
-          yq -i ".Builds[0] |=
+          sed -i "s/%ts/$timestamp/g;
+                  s/%abi/${{ matrix.abi }}/g;
+          " $metadata
+          yq-go -i ".Builds[0] |=
               (.versionName = \"$versionName\") |=
               (.versionCode = $versionCode) |=
               (.commit = \"$commitHash\")
@@ -96,12 +100,21 @@ jobs:
               -H "Authorization: Bearer ${{ github.token }}" \
               -H "X-GitHub-Api-Version: 2022-11-28" \
               "https://api.github.com/repos/${{ github.repository }}/contents/lib/fcitx5/src/main/cpp/prebuilt?ref=${{ github.sha }}" \
-              | yq .html_url)
-          prebuilderSHA=$(curl -L "${prebuiltTreeURL/\/tree\//\/raw\/}/toolchain-versions.json" | yq ".prebuilder")
-          yq -i ".Builds[0].srclibs[0] |=
-              \"fcitx5-android-prebuilder@${prebuilderSHA}\"
+              | yq-go .html_url)
+          prebuilt_toolchain=$(curl -L "${prebuiltTreeURL/\/tree\//\/raw\/}/toolchain-versions.json")
+          prebuilderCMake=$(echo $prebuilt_toolchain | yq-go -r ".cmake")
+          prebuilderNDK=$(echo $prebuilt_toolchain | yq-go -r ".ndk")
+          prebuilderPlatform=$(echo $prebuilt_toolchain | yq-go -r ".platform")
+          prebuilderSHA=$(echo $prebuilt_toolchain | yq-go -r ".prebuilder")
+          prebuilderRust=$(echo $prebuilt_toolchain | yq-go -r ".rust")
+          sed -i "s/%cmake/$prebuilderCMake/g;
+                  s/%ndk/$prebuilderNDK/g;
+                  s/%platform/$prebuilderPlatform/g;
+                  s/%prebuilder/$prebuilderSHA/g;
+                  s/%rust/$prebuilderRust/g;
           " $metadata
-          yq ".Builds[0]" $metadata
+          # print the first node under 'Builds' for debugging
+          yq-go ".Builds[0]" $metadata
           cp $metadata $GITHUB_WORKSPACE/metadata
 
           fdroid="sudo --preserve-env --user vagrant
