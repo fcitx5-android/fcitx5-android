@@ -44,6 +44,7 @@ arrow-functions = { module = "io.arrow-kt:arrow-functions", version.ref = "arrow
 imagecropper = { module = "com.vanniktech:android-image-cropper", version = "4.7.0" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version = "3.0.0" }
 dependency = { module = "org.mechdancer:dependency", version = "0.1.2" }
+soundwavelib = { module = "io.github.ultimatehandsomeboy666:soundwavelib", version = "1.0.1" }
 timber = { module = "com.jakewharton.timber:timber", version = "5.0.1" }
 splitties-bitflags = { module = "com.louiscad.splitties:splitties-bitflags", version.ref = "splitties" }
 splitties-dimensions = { module = "com.louiscad.splitties:splitties-dimensions", version.ref = "splitties" }
