@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.data.clipboard
 
@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.fcitx.fcitx5.android.core.FcitxPluginServices
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardDao
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardDatabase
 import org.fcitx.fcitx5.android.data.clipboard.db.ClipboardEntry
@@ -48,8 +49,6 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
     }
 
     private val onUpdateListeners = WeakHashSet<OnClipboardUpdateListener>()
-
-    var transformer: ((String) -> String)? = null
 
     fun addOnUpdateListener(listener: OnClipboardUpdateListener) {
         onUpdateListeners.add(listener)
@@ -169,7 +168,7 @@ object ClipboardManager : ClipboardManager.OnPrimaryClipChangedListener,
         }
         launch {
             mutex.withLock {
-                val entry = ClipboardEntry.fromClipData(clip, transformer) ?: return@withLock
+                val entry = ClipboardEntry.fromClipData(clip, FcitxPluginServices::transformClipboardEntry) ?: return@withLock
                 if (entry.text.isBlank()) return@withLock
                 try {
                     clbDao.find(entry.text, entry.sensitive)?.let {

@@ -20,7 +20,6 @@ typedef std::function<void(const int, const uint32_t, const uint32_t, const bool
 typedef std::function<void(const InputMethodStatus &)> InputMethodChangeCallback;
 typedef std::function<void(const std::vector<ActionEntity> &, const InputMethodStatus &)> StatusAreaUpdateCallback;
 typedef std::function<void(const int, const int)> DeleteSurroundingCallback;
-typedef std::function<void(const std::string &)> ToastCallback;
 typedef std::function<void(const PagedCandidateEntity &)> PagedCandidateCallback;
 typedef std::function<void(const int, const std::string &)> SwitchInputMethodCallback;
 
@@ -66,9 +65,6 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, triggerCandidateAction,
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, triggerTabAction,
                              void(const int))
 
-FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, showToast,
-                             void(const std::string &))
-
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setCandidatePagingMode,
                              void(const int))
 
@@ -101,9 +97,6 @@ FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setStatusAreaUpdateCallback,
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setDeleteSurroundingCallback,
                              void(const DeleteSurroundingCallback &))
-
-FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setToastCallback,
-                             void(const ToastCallback &))
 
 FCITX_ADDON_DECLARE_FUNCTION(AndroidFrontend, setPagedCandidateCallback,
                              void(const PagedCandidateCallback &))

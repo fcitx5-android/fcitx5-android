@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ This file is need to prevent the build system from stripping resources need by plugin.xml
+  ~ This file won't be included in APK
+  ~ See also:
+  ~ https://developer.android.com/studio/write/tool-attributes#resource_shrinking_attributes
+  ~ https://developer.android.com/topic/performance/app-optimization/customize-which-resources-to-keep
+  -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:discard=""
+    tools:keep="@string/description" />
