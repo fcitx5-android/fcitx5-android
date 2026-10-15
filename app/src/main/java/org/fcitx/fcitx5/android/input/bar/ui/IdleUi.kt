@@ -8,12 +8,12 @@ import android.content.Context
 import android.transition.Slide
 import android.transition.TransitionManager
 import android.transition.TransitionSet
+import android.view.MotionEvent
 import android.view.View
 import android.view.Gravity
 import android.view.animation.AlphaAnimation
 import android.view.animation.AnimationSet
 import android.view.animation.TranslateAnimation
-import android.widget.Space
 import android.widget.ViewAnimator
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
@@ -25,6 +25,9 @@ import org.fcitx.fcitx5.android.input.bar.ui.idle.InlineSuggestionsUi
 import org.fcitx.fcitx5.android.input.bar.ui.idle.NumberRow
 import org.fcitx.fcitx5.android.input.keyboard.CommonKeyActionListener
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
+import org.fcitx.fcitx5.android.input.voice.speech.SoundWaveView
+import org.fcitx.fcitx5.android.input.voice.speech.SpeechRecognizerComponent
+import kotlin.math.roundToInt
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.after
 import splitties.views.dsl.constraintlayout.before
@@ -77,7 +80,39 @@ class IdleUi(
 
     val hideKeyboardButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_drop_down_24, theme)
 
-    val emptyBar = Space(ctx)
+    // SpeechRecognizer sessions drive this sound wave while listening; it is only
+    // visible during an active voice input session, otherwise the bar stays empty.
+    val soundWave = SoundWaveView(ctx).apply {
+        enableIdle(true)
+        setColor(theme.altKeyTextColor)
+        maxVolume = 12
+        minVolume = 2
+        minVolumeBarHeight = dp(3)
+        maxVolumeBarHeight = dp(KawaiiBarComponent.HEIGHT - 6)
+        maxIdleHeight = maxVolumeBarHeight / 2
+        visibility = View.GONE
+    }
+
+    val emptyBar = android.widget.FrameLayout(ctx).apply {
+        add(soundWave, lParams(matchParent, matchParent))
+    }
+
+    val audioVolumeListener = SpeechRecognizerComponent.AudioVolumeListener { active, level ->
+        // The wave is visible ONLY while the service actually reports audio levels:
+        // services that never call rmsChanged (e.g. Sayboard) would otherwise show
+        // a dead wave. Visibility follows the volume events instead of the session
+        // state; the teardown path always reports active=false, hiding it again.
+        soundWave.visibility = if (active) View.VISIBLE else View.GONE
+        // below ~-50 dB the wave falls back to the idle animation, so silence and speech
+        // are visually distinct
+        if (active && level > 0.04f) {
+            soundWave.handleVolume(
+                (soundWave.minVolume + level * (soundWave.maxVolume - soundWave.minVolume)).roundToInt()
+            )
+        } else {
+            soundWave.stopDance()
+        }
+    }
 
     val buttonsUi = ButtonsBarUi(ctx, theme)
 
@@ -171,15 +206,113 @@ class IdleUi(
         }
     }
 
-    fun setHideKeyboardIsVoiceInput(isVoiceInput: Boolean, callback: View.OnClickListener) {
+    private var hideKeyboardIsVoiceInput = false
+    private var voiceInputActive = false
+
+    /** Wired when hold-to-talk is enabled; null restores normal tap handling. */
+    private var holdToTalkHandler: VoiceInputHoldHandler? = null
+    private var holdToTalkDown = false
+    private var holdToTalkDownTime = 0L
+
+    /**
+     * Hold-to-talk behavior of the toolbar microphone button: press starts a
+     * recognition session, release stops it (final text arrives on release).
+     */
+    interface VoiceInputHoldHandler {
+        fun onHoldStart()
+        fun onHoldStop()
+        fun onHoldCancel()
+    }
+
+    private val holdToTalkTouchListener = View.OnTouchListener { _, e ->
+        val handler = holdToTalkHandler ?: return@OnTouchListener false
+        when (e.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                holdToTalkDown = true
+                holdToTalkDownTime = e.downTime
+                handler.onHoldStart()
+                true
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                if (holdToTalkDown) {
+                    holdToTalkDown = false
+                    val action = HoldToTalkGesture.releaseAction(
+                        e.eventTime - holdToTalkDownTime,
+                        e.actionMasked == MotionEvent.ACTION_CANCEL
+                    )
+                    when (action) {
+                        HoldToTalkGesture.ReleaseAction.Stop -> handler.onHoldStop()
+                        HoldToTalkGesture.ReleaseAction.Cancel -> handler.onHoldCancel()
+                    }
+                }
+                true
+            }
+            else -> true
+        }
+    }
+
+    fun setHideKeyboardIsVoiceInput(
+        isVoiceInput: Boolean,
+        callback: View.OnClickListener,
+        holdHandler: VoiceInputHoldHandler? = null
+    ) {
+        hideKeyboardIsVoiceInput = isVoiceInput
+        holdToTalkHandler = if (isVoiceInput) holdHandler else null
+        holdToTalkDown = false
         if (isVoiceInput) {
             hideKeyboardButton.setIcon(R.drawable.ic_baseline_keyboard_voice_24)
-            hideKeyboardButton.contentDescription = ctx.getString(R.string.switch_to_voice_input)
+            applyVoiceInputActiveState()
+            if (holdHandler != null) {
+                // the touch listener consumes all events while it is active, so the
+                // tap callback would never run; detach it explicitly
+                hideKeyboardButton.setOnClickListener(null)
+                hideKeyboardButton.setOnTouchListener(holdToTalkTouchListener)
+            } else {
+                hideKeyboardButton.setOnTouchListener(null)
+                hideKeyboardButton.setOnClickListener(callback)
+            }
         } else {
+            hideKeyboardButton.setOnTouchListener(null)
+            stopRecordingIndicators()
             hideKeyboardButton.setIcon(R.drawable.ic_baseline_arrow_drop_down_24)
             hideKeyboardButton.contentDescription = ctx.getString(R.string.hide_keyboard)
+            hideKeyboardButton.setOnClickListener(callback)
         }
-        hideKeyboardButton.setOnClickListener(callback)
+    }
+
+    private fun stopRecordingIndicators() {
+        hideKeyboardButton.stopRecordingIndicator(
+            theme.altKeyTextColor,
+            theme.keyPressHighlightColor
+        )
+    }
+
+    /**
+     * Highlights the microphone button while a recognition session is running: the icon is
+     * tinted with the accent color and pulses, and the sound wave appears in the bar.
+     */
+    fun setVoiceInputActive(active: Boolean) {
+        if (voiceInputActive == active) return
+        voiceInputActive = active
+        if (hideKeyboardIsVoiceInput) {
+            applyVoiceInputActiveState()
+        }
+    }
+
+    private fun applyVoiceInputActiveState() {
+        if (voiceInputActive) {
+            hideKeyboardButton.startRecordingIndicator(
+                theme.accentKeyBackgroundColor,
+                theme.accentKeyTextColor
+            )
+            hideKeyboardButton.contentDescription = ctx.getString(R.string.stop_voice_input)
+        } else {
+            hideKeyboardButton.stopRecordingIndicator(
+                theme.altKeyTextColor,
+                theme.keyPressHighlightColor
+            )
+            hideKeyboardButton.contentDescription = ctx.getString(R.string.switch_to_voice_input)
+        }
     }
 
     private fun clearAnimation() {

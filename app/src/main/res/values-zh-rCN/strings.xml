@@ -225,6 +225,8 @@
     <string name="main_program">主程序</string>
     <string name="edit_theme">编辑主题</string>
     <string name="show_voice_input_button">显示语音输入按钮</string>
+    <string name="preferred_voice_input">首选语音输入</string>
+    <string name="hold_to_talk">按住说话</string>
     <string name="fcitx_daemon">Fcitx 守护程序</string>
     <string name="restarting_fcitx">正在重新启动 Fcitx</string>
     <string name="plugin_needs_reload">检测到插件更改，点此重新加载</string>
@@ -291,6 +293,18 @@
     <string name="expand_candidates_list">展开候选词列表</string>
     <string name="hide_candidates_list">隐藏</string>
     <string name="switch_to_voice_input">切换到语音输入</string>
+    <string name="stop_voice_input">停止语音输入</string>
+    <string name="voice_state_permission_required">需要麦克风权限</string>
+    <string name="cancel">取消</string>
+    <string name="speech_error_no_speech">未检测到语音</string>
+    <string name="speech_error_no_match">没有识别到匹配内容</string>
+    <string name="speech_error_audio">录音出错</string>
+    <string name="speech_error_busy">识别服务繁忙</string>
+    <string name="speech_error_network">识别时网络出错</string>
+    <string name="speech_error_server">识别服务出错</string>
+    <string name="speech_error_language">当前语言暂不支持识别</string>
+    <string name="speech_error_generic">语音输入失败</string>
+    <string name="speech_error_unresponsive">语音服务无响应</string>
     <string name="hide_keyboard">隐藏键盘</string>
     <string name="private_mode">隐私模式（点击以切换工具栏）</string>
     <string name="hide_toolbar">隐藏工具栏</string>
@@ -316,7 +330,6 @@
     <string name="emoji_skin_tone_type_6">🏿 深肤色 (Type-6)</string>
     <string name="hide_unsupported_emojis">隐藏不支持的表情</string>
     <string name="key_border_stroke">启用按键边框描边</string>
-    <string name="preferred_voice_input">首选语音输入</string>
     <string name="edit_text_playground">文本输入框 (EditText) 演练场</string>
     <string name="keyboard_height_percent_base">键盘高度百分比</string>
     <string name="display_metrics">显示指标 (Resources.getDisplayMetrics)</string>

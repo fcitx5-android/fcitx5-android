@@ -225,6 +225,8 @@
     <string name="main_program">主程式</string>
     <string name="edit_theme">編輯主題</string>
     <string name="show_voice_input_button">顯示語音輸入鍵</string>
+    <string name="preferred_voice_input">首選語音輸入</string>
+    <string name="hold_to_talk">長按說話</string>
     <string name="fcitx_daemon">Fcitx 常駐程式</string>
     <string name="restarting_fcitx">重新啟動 Fcitx</string>
     <string name="plugin_needs_reload">偵測到有外掛程式變化，點此重新載入</string>
@@ -315,5 +317,14 @@
     <string name="emoji_skin_tone_type_5">🏾 中等深膚色 (Type-5)</string>
     <string name="emoji_skin_tone_type_6">🏿 深膚色 (Type-6)</string>
     <string name="hide_unsupported_emojis">隱藏不支援的表情</string>
-    <string name="preferred_voice_input">首選語音輸入</string>
+    <string name="stop_voice_input">停止語音輸入</string>
+    <string name="speech_error_no_speech">未偵測到語音</string>
+    <string name="speech_error_no_match">沒有辨識到符合的內容</string>
+    <string name="speech_error_audio">錄音錯誤</string>
+    <string name="speech_error_busy">辨識服務忙碌中</string>
+    <string name="speech_error_network">辨識時網路錯誤</string>
+    <string name="speech_error_server">辨識服務錯誤</string>
+    <string name="speech_error_language">此語言暫不支援辨識</string>
+    <string name="speech_error_generic">語音輸入失敗</string>
+    <string name="voice_state_permission_required">需要麥克風權限</string>
 </resources>
