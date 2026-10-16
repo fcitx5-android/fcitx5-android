@@ -20,6 +20,7 @@ import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.data.quickphrase.QuickPhrase
 import org.fcitx.fcitx5.android.ui.main.AboutFragment
 import org.fcitx.fcitx5.android.ui.main.DeveloperFragment
+import org.fcitx.fcitx5.android.ui.main.playground.EditTextPlaygroundFragment
 import org.fcitx.fcitx5.android.ui.main.LicensesFragment
 import org.fcitx.fcitx5.android.ui.main.MainFragment
 import org.fcitx.fcitx5.android.ui.main.PluginFragment
@@ -88,6 +89,9 @@ sealed class SettingsRoute : Parcelable {
 
     @Serializable
     data object Developer : SettingsRoute()
+
+    @Serializable
+    data object EditTextPlayground: SettingsRoute()
 
     @Serializable
     data object License : SettingsRoute()
@@ -233,6 +237,9 @@ sealed class SettingsRoute : Parcelable {
             }
             fragment<AboutFragment, About> {
                 label = ctx.getString(R.string.about)
+            }
+            fragment<EditTextPlaygroundFragment, EditTextPlayground> {
+                label = ctx.getString(R.string.edit_text_playground)
             }
 
             /* ========== External ========== */
