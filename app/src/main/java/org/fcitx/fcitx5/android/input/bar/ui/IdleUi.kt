@@ -8,6 +8,7 @@ import android.content.Context
 import android.transition.Slide
 import android.transition.TransitionManager
 import android.transition.TransitionSet
+import android.view.MotionEvent
 import android.view.View
 import android.view.Gravity
 import android.view.animation.AlphaAnimation
@@ -209,20 +210,87 @@ class IdleUi(
     private var hideKeyboardIsVoiceInput = false
     private var voiceInputActive = false
 
-    fun setHideKeyboardIsVoiceInput(isVoiceInput: Boolean, callback: View.OnClickListener) {
+    private companion object {
+        const val MIN_HOLD_MS = 300L
+    }
+
+    /** Wired when hold-to-talk is enabled; null restores normal tap handling. */
+    private var holdToTalkHandler: VoiceInputHoldHandler? = null
+    private var holdToTalkDown = false
+    private var holdToTalkDownTime = 0L
+
+    /**
+     * Hold-to-talk behavior of the toolbar microphone button: press starts a
+     * recognition session, release stops it (final text arrives on release).
+     */
+    interface VoiceInputHoldHandler {
+        fun onHoldStart()
+        fun onHoldStop()
+        fun onHoldCancel()
+    }
+
+    private val holdToTalkTouchListener = View.OnTouchListener { _, e ->
+        val handler = holdToTalkHandler ?: return@OnTouchListener false
+        when (e.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                holdToTalkDown = true
+                holdToTalkDownTime = e.downTime
+                handler.onHoldStart()
+                true
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                if (holdToTalkDown) {
+                    holdToTalkDown = false
+                    // A press shorter than 300ms is treated as an accidental tap:
+                    // abort it instead of asking the recognizer for near-empty audio.
+                    val cancelled = e.actionMasked == MotionEvent.ACTION_CANCEL
+                    val shortHold = e.eventTime - holdToTalkDownTime < MIN_HOLD_MS
+                    if (cancelled || shortHold) {
+                        handler.onHoldCancel()
+                    } else {
+                        handler.onHoldStop()
+                    }
+                }
+                true
+            }
+            else -> true
+        }
+    }
+
+    fun setHideKeyboardIsVoiceInput(
+        isVoiceInput: Boolean,
+        callback: View.OnClickListener,
+        holdHandler: VoiceInputHoldHandler? = null
+    ) {
         hideKeyboardIsVoiceInput = isVoiceInput
+        holdToTalkHandler = if (isVoiceInput) holdHandler else null
+        holdToTalkDown = false
         if (isVoiceInput) {
             hideKeyboardButton.setIcon(R.drawable.ic_baseline_keyboard_voice_24)
             applyVoiceInputActiveState()
+            if (holdHandler != null) {
+                // the touch listener consumes all events while it is active, so the
+                // tap callback would never run; detach it explicitly
+                hideKeyboardButton.setOnClickListener(null)
+                hideKeyboardButton.setOnTouchListener(holdToTalkTouchListener)
+            } else {
+                hideKeyboardButton.setOnTouchListener(null)
+                hideKeyboardButton.setOnClickListener(callback)
+            }
         } else {
-            hideKeyboardButton.stopRecordingIndicator(
-                theme.altKeyTextColor,
-                theme.keyPressHighlightColor
-            )
+            hideKeyboardButton.setOnTouchListener(null)
+            stopRecordingIndicators()
             hideKeyboardButton.setIcon(R.drawable.ic_baseline_arrow_drop_down_24)
             hideKeyboardButton.contentDescription = ctx.getString(R.string.hide_keyboard)
+            hideKeyboardButton.setOnClickListener(callback)
         }
-        hideKeyboardButton.setOnClickListener(callback)
+    }
+
+    private fun stopRecordingIndicators() {
+        hideKeyboardButton.stopRecordingIndicator(
+            theme.altKeyTextColor,
+            theme.keyPressHighlightColor
+        )
     }
 
     /**
