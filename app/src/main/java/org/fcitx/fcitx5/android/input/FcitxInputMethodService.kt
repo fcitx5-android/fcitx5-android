@@ -133,6 +133,13 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         composingText = FormattedText.Empty
     }
 
+    /**
+     * Set while the composing region belongs to voice input (partial-result preview)
+     * rather than a fcitx preedit. Keyboard commits then accept the preview instead
+     * of replacing (and silently deleting) it.
+     */
+    private var voicePreviewComposing = false
+
     private var cursorUpdateIndex: Int = 0
 
     private var highlightColor: Int = DefaultHighlightColor
@@ -243,6 +250,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                         FcitxKeyMapping.FcitxKey_Left -> handleArrowKey(KeyEvent.KEYCODE_DPAD_LEFT)
                         FcitxKeyMapping.FcitxKey_Right -> handleArrowKey(KeyEvent.KEYCODE_DPAD_RIGHT)
                         else -> if (it.unicode > 0) {
+                            // a keyboard commit while a voice preview is composing
+                            // accepts the preview; without this the commit would
+                            // replace the composing region and delete the preview
+                            acceptVoicePreview()
                             commitText(Character.toString(it.unicode))
                         } else {
                             Timber.w("Unhandled Virtual KeyEvent: $it")
@@ -296,6 +307,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                     } else {
                         // no matching keyCode, commit character once on key down
                         if (!it.up && it.unicode > 0) {
+                            // a keyboard commit while a voice preview is composing
+                            // accepts the preview; without this the commit would
+                            // replace the composing region and delete the preview
+                            acceptVoicePreview()
                             commitText(Character.toString(it.unicode))
                         } else {
                             Timber.w("Unhandled Fcitx KeyEvent: $it")
@@ -304,6 +319,12 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
                 }
             }
             is FcitxEvent.ClientPreeditEvent -> {
+                // a fcitx preedit means the user is typing: accept any voice
+                // preview as permanent text and stop the recognition session —
+                // otherwise the preedit and later voice partials would keep
+                // replacing (deleting) each other in the composing region
+                acceptVoicePreview()
+                inputView?.onVoiceInputInterruptedByTyping()
                 updateComposingText(event.data)
             }
             is FcitxEvent.DeleteSurroundingEvent -> {
@@ -381,6 +402,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     }
 
     private fun handleReturnKey() {
+        // an enter/action gesture sends the message: any voice preview still
+        // composing must be accepted first, or the editor replaces it with the
+        // action and the dictated text is lost
+        acceptVoicePreview()
         currentInputEditorInfo.run {
             if (inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL ||
                 imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION)
@@ -418,6 +443,32 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
             else -> return
         }
         currentInputConnection.setSelection(target, target)
+    }
+
+    /**
+     * Accepts the voice-input preview as final text: the composing region is
+     * finished in place (its text stays) and the cursor lands after it. Called
+     * before keyboard character commits — pressing space while a voice preview is
+     * underlined accepts the preview instead of replacing (deleting) it. No-op
+     * without an active voice preview, so callers need not check.
+     */
+    fun acceptVoicePreview() {
+        val ic = currentInputConnection ?: return
+        if (!voicePreviewComposing || composing.isEmpty()) return
+        val end = composing.end
+        resetComposingState()
+        voicePreviewComposing = false
+        ic.withBatchEdit {
+            if (selection.current.start != end) {
+                selection.predict(end)
+                ic.setSelection(end, end)
+            }
+            ic.finishComposingText()
+        }
+        // let the active InputView advance its recognition session's committed
+        // prefix: the accepted preview is permanent in the editor now and must
+        // not be committed again
+        inputView?.onVoicePreviewAccepted()
     }
 
     fun commitText(text: String, cursor: Int = -1) {
@@ -919,7 +970,8 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
     // those events need to be filtered.
     // because of https://android.googlesource.com/platform/frameworks/base.git/+/refs/tags/android-11.0.0_r45/core/java/android/view/inputmethod/BaseInputConnection.java#851
     // it's not possible to set cursor inside composing text
-    private fun updateComposingText(text: FormattedText) {
+    fun updateComposingText(text: FormattedText, voicePreview: Boolean = false) {
+        voicePreviewComposing = voicePreview && !text.isEmpty()
         val ic = currentInputConnection ?: return
         val lastSelection = selection.latest
         ic.beginBatchEdit()
@@ -1049,6 +1101,7 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     override fun onFinishInputView(finishingInput: Boolean) {
         Timber.d("onFinishInputView: finishingInput=$finishingInput")
+        inputView?.finishInputView(finishingInput)
         decorLocationUpdated = false
         inputDeviceMgr.onFinishInputView()
         currentInputConnection?.apply {

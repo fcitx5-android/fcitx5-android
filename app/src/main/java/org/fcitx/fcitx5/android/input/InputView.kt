@@ -40,6 +40,7 @@ import org.fcitx.fcitx5.android.input.picker.emoticonPicker
 import org.fcitx.fcitx5.android.input.picker.symbolPicker
 import org.fcitx.fcitx5.android.input.popup.PopupComponent
 import org.fcitx.fcitx5.android.input.preedit.PreeditComponent
+import org.fcitx.fcitx5.android.input.voice.SpeechRecognizerComponent
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.unset
 import org.fcitx.fcitx5.android.utils.windowManager
@@ -105,6 +106,7 @@ class InputView(
     private val commonKeyActionListener = CommonKeyActionListener()
     private val windowManager = InputWindowManager()
     private val kawaiiBar = KawaiiBarComponent()
+    private val speechVoiceInput = SpeechRecognizerComponent()
     private val horizontalCandidate = HorizontalCandidateComponent()
     private val keyboardWindow = KeyboardWindow()
     private val symbolPicker = symbolPicker()
@@ -126,6 +128,7 @@ class InputView(
         scope += commonKeyActionListener
         scope += windowManager
         scope += kawaiiBar
+        scope += speechVoiceInput
         scope += horizontalCandidate
         broadcaster.onScopeSetupFinished(scope)
     }
@@ -316,6 +319,31 @@ class InputView(
         }
         preedit.ui.root.setPadding(sidePadding, 0, sidePadding, 0)
         kawaiiBar.view.setPadding(sidePadding, 0, sidePadding, 0)
+    }
+
+    /**
+     * called when [InputView] is about to hide; components holding user-facing
+     * state (e.g. an active recognition session) must stop here
+     */
+    fun finishInputView(finishingInput: Boolean) {
+        broadcaster.onFinishInputView(finishingInput)
+    }
+
+    /**
+     * Called after [FcitxInputMethodService] has accepted a voice preview in the
+     * editor, so an active recognition session can advance its committed prefix.
+     */
+    fun onVoicePreviewAccepted() {
+        speechVoiceInput.onPreviewAccepted()
+    }
+
+    /**
+     * Called when the user starts typing and a fcitx preedit takes over the
+     * composing region: an active recognition session must stop, or its partials
+     * and the preedit would keep replacing (deleting) each other's text.
+     */
+    fun onVoiceInputInterruptedByTyping() {
+        speechVoiceInput.cancel()
     }
 
     override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {

@@ -21,6 +21,8 @@ interface InputBroadcastReceiver {
 
     fun onStartInput(info: EditorInfo, capFlags: CapabilityFlags) {}
 
+    fun onFinishInputView(finishingInput: Boolean) {}
+
     fun onClientPreeditUpdate(data: FormattedText) {}
 
     fun onInputPanelUpdate(data: InputPanelEvent.Data) {}
