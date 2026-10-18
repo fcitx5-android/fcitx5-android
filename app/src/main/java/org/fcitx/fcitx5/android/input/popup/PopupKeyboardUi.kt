@@ -85,7 +85,7 @@ class PopupKeyboardUi(
     private val rowCount: Int
     private val columnCount: Int
 
-    // those 2 variables meas initial focus row/column during initialization
+    // those 2 variables mean initial focus row/column during initialization
     private val focusRow: Int
     private val focusColumn: Int
 
