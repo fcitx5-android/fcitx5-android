@@ -81,6 +81,7 @@
     <string name="added_x">%1$s hinzugefügt</string>
     <string name="edited_x">%1$s bearbeitet</string>
     <string name="invalid_value">Ungültiger Wert</string>
+    <string name="invalid_regular_expression">Ungültiger regulärer Ausdruck</string>
     <string name="keyboard_long_press_delay">Verzögerung bei langem Tastendruck</string>
     <string name="create_new">Neu erstellen</string>
     <string name="name">Name</string>

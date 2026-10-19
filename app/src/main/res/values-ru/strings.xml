@@ -91,6 +91,7 @@
     <string name="added_x">Добавлено %1$s</string>
     <string name="edited_x">Отредактировано %1$s</string>
     <string name="invalid_value">Неверное значение</string>
+    <string name="invalid_regular_expression">Недопустимое регулярное выражение</string>
     <string name="keyboard_long_press_delay">Задержка при длительном нажатии клавиши</string>
     <string name="quickphrase_editor">Редактор быстрых фраз</string>
     <string name="quickphrase_already_exists">Быстрая фраза уже существует</string>

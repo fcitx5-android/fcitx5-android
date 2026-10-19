@@ -12,6 +12,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
+import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.FcitxUtils
 import org.fcitx.fcitx5.android.core.Key
 import org.fcitx.fcitx5.android.core.RawConfig
 import org.fcitx.fcitx5.android.ui.common.BaseDynamicListUi
@@ -79,8 +81,18 @@ class ListFragment : Fragment() {
                         )
                     }
                     ConfigType.TyString -> {
+                        val d = descriptor as ConfigDescriptor.ConfigList
                         ctx.DynamicListUi(
-                            BaseDynamicListUi.Mode.FreeAddString(),
+                            if (d.isRegex) {
+                                BaseDynamicListUi.Mode.FreeAddString(
+                                    validator = {
+                                        it.isNotBlank() && FcitxUtils.isRegexValid(it)
+                                    },
+                                    validationError = R.string.invalid_regular_expression
+                                )
+                            } else {
+                                BaseDynamicListUi.Mode.FreeAddString()
+                            },
                             initialEntries = cfg.subItems?.map { it.value } ?: listOf(),
                             enableOrder = true,
                             show = { it }

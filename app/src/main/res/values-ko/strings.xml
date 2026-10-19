@@ -81,6 +81,7 @@
     <string name="added_x">%1$s 추가됨</string>
     <string name="edited_x">%1$s 편집됨</string>
     <string name="invalid_value">잘못된 값</string>
+    <string name="invalid_regular_expression">잘못된 정규식</string>
     <string name="keyboard_long_press_delay">키 길게 누름 지연</string>
     <string name="quickphrase_editor">상용구 편집기</string>
     <string name="quickphrase_already_exists">상용구가 이미 존재합니다</string>
