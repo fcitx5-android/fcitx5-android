@@ -354,6 +354,9 @@ class InputView(
             is FcitxEvent.CandidateListEvent -> {
                 broadcaster.onCandidateUpdate(it.data)
             }
+            is FcitxEvent.PagedCandidateEvent -> {
+                broadcaster.onPagedCandidateUpdate(it.data)
+            }
             is FcitxEvent.ClientPreeditEvent -> {
                 preeditEmptyState.updatePreeditEmptyState(clientPreedit = it.data)
                 broadcaster.onClientPreeditUpdate(it.data)

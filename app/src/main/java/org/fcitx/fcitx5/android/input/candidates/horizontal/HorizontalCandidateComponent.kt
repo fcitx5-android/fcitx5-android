@@ -15,6 +15,7 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import org.fcitx.fcitx5.android.R
+import org.fcitx.fcitx5.android.core.CandidateWord
 import org.fcitx.fcitx5.android.core.FcitxEvent
 import org.fcitx.fcitx5.android.daemon.launchOnReady
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
@@ -76,11 +77,25 @@ class HorizontalCandidateComponent :
 
     val expandedCandidateOffset = _expandedCandidateOffset.asSharedFlow()
 
+    /**
+     * Whether the latest candidate data received from the engine is a bulk candidate list.
+     * Bulk lists page within the expanded candidate window;
+     * otherwise the engine handles paging ([hasPrev] / [hasNext]).
+     */
+    var isBulk = true
+        private set
+
+    var hasPrev = false
+        private set
+
+    var hasNext = false
+        private set
+
     private fun refreshExpanded(childCount: Int) {
         _expandedCandidateOffset.tryEmit(childCount)
         bar.expandButtonStateMachine.push(
             ExpandedCandidatesUpdated,
-            ExpandedCandidatesEmpty to (adapter.total == childCount)
+            ExpandedCandidatesEmpty to (adapter.total == childCount && !hasPrev && !hasNext)
         )
     }
 
@@ -167,8 +182,20 @@ class HorizontalCandidateComponent :
     }
 
     override fun onCandidateUpdate(data: FcitxEvent.CandidateListEvent.Data) {
-        val candidates = data.candidates
-        val total = data.total
+        isBulk = true
+        hasPrev = false
+        hasNext = false
+        applyCandidates(data.candidates, data.total)
+    }
+
+    override fun onPagedCandidateUpdate(data: FcitxEvent.PagedCandidateEvent.Data) {
+        isBulk = false
+        hasPrev = data.hasPrev
+        hasNext = data.hasNext
+        applyCandidates(data.candidates, data.candidates.size)
+    }
+
+    private fun applyCandidates(candidates: Array<CandidateWord>, total: Int) {
         val maxSpanCount = maxSpanCountPref.getValue()
         when (fillStyle) {
             NeverFillWidth -> {

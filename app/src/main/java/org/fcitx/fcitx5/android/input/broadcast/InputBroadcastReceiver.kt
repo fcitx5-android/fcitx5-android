@@ -10,6 +10,7 @@ import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.core.CapabilityFlags
 import org.fcitx.fcitx5.android.core.FcitxEvent.CandidateListEvent
 import org.fcitx.fcitx5.android.core.FcitxEvent.InputPanelEvent
+import org.fcitx.fcitx5.android.core.FcitxEvent.PagedCandidateEvent
 import org.fcitx.fcitx5.android.core.FormattedText
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.input.wm.InputWindow
@@ -28,6 +29,8 @@ interface InputBroadcastReceiver {
     fun onImeUpdate(ime: InputMethodEntry) {}
 
     fun onCandidateUpdate(data: CandidateListEvent.Data) {}
+
+    fun onPagedCandidateUpdate(data: PagedCandidateEvent.Data) {}
 
     fun onStatusAreaUpdate(actions: Array<Action>) {}
 

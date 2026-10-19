@@ -9,6 +9,7 @@ import org.fcitx.fcitx5.android.core.Action
 import org.fcitx.fcitx5.android.core.CapabilityFlags
 import org.fcitx.fcitx5.android.core.FcitxEvent.CandidateListEvent
 import org.fcitx.fcitx5.android.core.FcitxEvent.InputPanelEvent
+import org.fcitx.fcitx5.android.core.FcitxEvent.PagedCandidateEvent
 import org.fcitx.fcitx5.android.core.FormattedText
 import org.fcitx.fcitx5.android.core.InputMethodEntry
 import org.fcitx.fcitx5.android.input.wm.InputWindow
@@ -56,6 +57,10 @@ class InputBroadcaster : UniqueComponent<InputBroadcaster>(), Dependent, InputBr
 
     override fun onCandidateUpdate(data: CandidateListEvent.Data) {
         receivers.forEach { it.onCandidateUpdate(data) }
+    }
+
+    override fun onPagedCandidateUpdate(data: PagedCandidateEvent.Data) {
+        receivers.forEach { it.onPagedCandidateUpdate(data) }
     }
 
     override fun onStatusAreaUpdate(actions: Array<Action>) {
