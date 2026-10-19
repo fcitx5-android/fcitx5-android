@@ -21,6 +21,8 @@ jobs:
         with:
           name: fcitx5-android
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+      - name: Run unit tests
+        run: nix develop .#noAS --command ./gradlew :app:testDebugUnitTest
       - name: Build Release APK
         run: |
           nix develop .#noAS --command ./gradlew :app:assembleRelease

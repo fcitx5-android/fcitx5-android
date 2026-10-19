@@ -66,7 +66,7 @@ class ThemeSerializationTest {
 
     @Test
     fun version2() {
-        // Version 2.0
+        // Version 2.0, outdated
         val raw = """
             {
                "name":"",
@@ -95,6 +95,47 @@ class ThemeSerializationTest {
                "genericActiveForegroundColor":-1,
                "isDark":true,
                "version":"2.0"
+            }
+        """.trimIndent()
+        val (decoded, migrated) = raw.toCustomTheme()
+        Assert.assertEquals("Migration should happen", true, migrated)
+        Assert.assertEquals("Round trip", decoded, decoded.toJson().toCustomTheme().first)
+    }
+
+    @Test
+    fun version2_1() {
+        // Version 2.1, current
+        val raw = """
+            {
+               "name":"",
+               "backgroundImage":{
+                  "croppedFilePath":"",
+                  "srcFilePath":"",
+                  "cropRect": null
+               },
+               "backgroundColor":-13816531,
+               "barColor":1275068416,
+               "keyboardColor":0,
+               "keyBackgroundColor":1275068415,
+               "keyTextColor":-1,
+               "candidateTextColor":-1,
+               "candidateLabelColor":-1,
+               "candidateCommentColor":-905969665,
+               "altKeyBackgroundColor":218103807,
+               "altKeyTextColor":-905969665,
+               "accentKeyBackgroundColor":-10577930,
+               "accentKeyTextColor":-1,
+               "keyPressHighlightColor":520093696,
+               "keyShadowColor":0,
+               "popupBackgroundColor":-13158601,
+               "popupTextColor":-1,
+               "spaceBarColor":1275068415,
+               "dividerColor":536870911,
+               "clipboardEntryColor":855638015,
+               "genericActiveBackgroundColor":-10577930,
+               "genericActiveForegroundColor":-1,
+               "isDark":true,
+               "version":"2.1"
             }
         """.trimIndent()
         val (decoded, migrated) = raw.toCustomTheme()
