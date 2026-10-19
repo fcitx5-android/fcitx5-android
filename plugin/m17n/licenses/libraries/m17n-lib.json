@@ -1,0 +1,11 @@
+{
+    "uniqueId": "NonGNU/m17n-lib",
+    "artifactVersion": "1.8.6",
+    "description": "Multilingual text processing library (runtimes)",
+    "name": "NonGNU/m17n-lib",
+    "website": "https://www.nongnu.org/m17n/",
+    "tag": "native",
+    "licenses": [
+        "LGPL-2.1-or-later"
+    ]
+}
