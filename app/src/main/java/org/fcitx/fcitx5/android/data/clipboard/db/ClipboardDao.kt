@@ -35,9 +35,6 @@ interface ClipboardDao {
     @Query("SELECT EXISTS(SELECT 1 FROM ${ClipboardEntry.TABLE_NAME} WHERE pinned=0 AND deleted=0)")
     suspend fun haveUnpinned(): Boolean
 
-    @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME} WHERE pinned=0 AND deleted=0")
-    suspend fun getAllUnpinned(): List<ClipboardEntry>
-
     @Query("SELECT * FROM ${ClipboardEntry.TABLE_NAME} WHERE deleted=0 ORDER BY pinned DESC, timestamp DESC")
     fun allEntries(): PagingSource<Int, ClipboardEntry>
 
@@ -53,8 +50,15 @@ interface ClipboardDao {
     @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET deleted=1 WHERE id in (:ids)")
     suspend fun markAsDeleted(vararg ids: Int)
 
-    @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET DELETED=1 WHERE timestamp<:timestamp AND pinned=0 AND deleted=0")
-    suspend fun markUnpinnedAsDeletedEarlierThan(timestamp: Long)
+    // Recopying changes timestamps without changing IDs. Select exact overflow IDs,
+    // with an ID tie-breaker so equal timestamps still obey the configured limit.
+    @Query("""
+        UPDATE ${ClipboardEntry.TABLE_NAME} SET deleted=1 WHERE id IN (
+            SELECT id FROM ${ClipboardEntry.TABLE_NAME} WHERE pinned=0 AND deleted=0
+            ORDER BY timestamp DESC, id DESC LIMIT -1 OFFSET :limit
+        )
+    """)
+    suspend fun pruneUnpinned(limit: Int)
 
     @Query("UPDATE ${ClipboardEntry.TABLE_NAME} SET deleted=0 WHERE id in (:ids) AND deleted=1")
     suspend fun undoDelete(vararg ids: Int)
