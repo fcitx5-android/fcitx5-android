@@ -57,6 +57,7 @@ class EditTextIntPreference(context: Context) : EditTextPreference(context) {
                 @Suppress("DEPRECATION")
                 DigitsKeyListener.getInstance(min < 0, false)
             }
+            it.selectAll()
         }
     }
 
