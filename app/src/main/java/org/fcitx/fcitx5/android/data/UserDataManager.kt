@@ -70,7 +70,7 @@ object UserDataManager {
             zipStream.putNextEntry(ZipEntry("metadata.json"))
             val pkgInfo = appContext.packageManager.getPackageInfo(appContext.packageName, 0)
             val metadata = Metadata(
-                pkgInfo.packageName,
+                pkgInfo.packageName.removeSuffix(".debug"),
                 pkgInfo.versionCodeCompat,
                 Const.versionName,
                 timestamp
@@ -97,7 +97,7 @@ object UserDataManager {
                 val metadataFile = extracted.find { it.name == "metadata.json" }
                     ?: errorRuntime(R.string.exception_user_data_metadata)
                 val metadata = json.decodeFromString<Metadata>(metadataFile.readText())
-                if (metadata.packageName != BuildConfig.APPLICATION_ID)
+                if (metadata.packageName != BuildConfig.APPLICATION_ID.removeSuffix(".debug"))
                     errorRuntime(R.string.exception_user_data_package_name_mismatch)
                 copyDir(File(tempDir, "shared_prefs"), sharedPrefsDir)
                 copyDir(File(tempDir, "databases"), dataBasesDir)
