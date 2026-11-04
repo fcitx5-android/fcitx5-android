@@ -15,9 +15,12 @@ import android.os.Process
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
+import java.io.File
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import kotlinx.coroutines.withTimeout
 import org.fcitx.fcitx5.android.core.deployRime
 import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
@@ -77,16 +80,33 @@ class FcitxApplication : Application() {
             val connection = FcitxDaemon.getFirstConnectionOrNull()
             if (connection == null) {
                 Timber.i("Received broadcast '${intent.action}', but there's no fcitx instance")
+                setResultCode(RESULT_DEPLOY_NO_INSTANCE)
+                writeDeployStatus(context, DEPLOY_STATUS_NO_INSTANCE)
                 return
             }
             Timber.i("Received broadcast '${intent.action}', try to deploy rime ...")
-            connection.runIfReady {
+            setResultCode(RESULT_DEPLOY_ACCEPTED)
+            writeDeployStatus(context, DEPLOY_STATUS_ACCEPTED)
+            coroutineScope.launch {
                 try {
-                    deployRime()
+                    withTimeout(DEPLOY_DISPATCH_TIMEOUT_MS) {
+                        connection.runOnReady { deployRime() }
+                    }
+                    writeDeployStatus(context, DEPLOY_STATUS_DISPATCHED)
                 } catch (e: Exception) {
                     Timber.w(e, "Failed to deploy rime")
+                    writeDeployStatus(context, DEPLOY_STATUS_FAILED)
                 }
             }
+        }
+    }
+
+    private fun writeDeployStatus(context: Context, status: String) {
+        try {
+            val dir = context.getExternalFilesDir(null) ?: context.filesDir
+            File(dir, DEPLOY_STATUS_FILE).writeText("${System.currentTimeMillis()}\t$status\n")
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to write rime deploy status")
         }
     }
 
@@ -214,6 +234,12 @@ class FcitxApplication : Application() {
          * Triggers a full Rime re-deployment (the "Deploy" action of fcitx5-rime), by calling
          * `setAddonSubConfig("rime", "deploy")` on the running fcitx instance.
          *
+         * Progress is reported for scripts:
+         * - result code [RESULT_DEPLOY_ACCEPTED] (1) or [RESULT_DEPLOY_NO_INSTANCE] (2);
+         * - status file `<external files dir>/rime_deploy_status.txt`, containing one line
+         *   `<unix millis>\t<accepted|no-instance|dispatched|failed>`. `dispatched` means the
+         *   full maintenance has been started (it completes asynchronously).
+         *
          * It is a no-op when there's no [FcitxDaemon] connection, i.e. the input method service
          * or the main UI is not alive.
          *
@@ -223,5 +249,18 @@ class FcitxApplication : Application() {
          */
         const val ACTION_DEPLOY_RIME =
             "${BuildConfig.APPLICATION_ID}.action.DEPLOY_RIME"
+
+        /** [ACTION_DEPLOY_RIME] result: the deploy request has been accepted. */
+        const val RESULT_DEPLOY_ACCEPTED = 1
+
+        /** [ACTION_DEPLOY_RIME] result: there is no running fcitx instance. */
+        const val RESULT_DEPLOY_NO_INSTANCE = 2
+
+        private const val DEPLOY_STATUS_FILE = "rime_deploy_status.txt"
+        private const val DEPLOY_STATUS_ACCEPTED = "accepted"
+        private const val DEPLOY_STATUS_NO_INSTANCE = "no-instance"
+        private const val DEPLOY_STATUS_DISPATCHED = "dispatched"
+        private const val DEPLOY_STATUS_FAILED = "failed"
+        private const val DEPLOY_DISPATCH_TIMEOUT_MS = 15_000L
     }
 }
