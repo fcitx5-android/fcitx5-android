@@ -15,3 +15,5 @@ suspend fun FcitxAPI.savePunctuationConfig(lang: String = "zh_CN", config: RawCo
 suspend fun FcitxAPI.reloadQuickPhrase() = setAddonSubConfig("quickphrase", "editor")
 
 suspend fun FcitxAPI.reloadPinyinCustomPhrase() = setAddonSubConfig("pinyin", "customphrase")
+
+suspend fun FcitxAPI.deployRime() = setAddonSubConfig("rime", "deploy")

@@ -18,6 +18,7 @@ import androidx.preference.PreferenceManager
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.plus
+import org.fcitx.fcitx5.android.core.deployRime
 import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.data.clipboard.ClipboardManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
@@ -66,6 +67,25 @@ class FcitxApplication : Application() {
                 FcitxDaemon.restartFcitx()
             } else {
                 Timber.i("Received broadcast '${intent.action}', but there's no fcitx instance")
+            }
+        }
+    }
+
+    private val deployRimeReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action != ACTION_DEPLOY_RIME) return
+            val connection = FcitxDaemon.getFirstConnectionOrNull()
+            if (connection == null) {
+                Timber.i("Received broadcast '${intent.action}', but there's no fcitx instance")
+                return
+            }
+            Timber.i("Received broadcast '${intent.action}', try to deploy rime ...")
+            connection.runIfReady {
+                try {
+                    deployRime()
+                } catch (e: Exception) {
+                    Timber.w(e, "Failed to deploy rime")
+                }
             }
         }
     }
@@ -149,6 +169,14 @@ class FcitxApplication : Application() {
             null,
             ContextCompat.RECEIVER_EXPORTED
         )
+        ContextCompat.registerReceiver(
+            this,
+            deployRimeReceiver,
+            IntentFilter(ACTION_DEPLOY_RIME),
+            PERMISSION_TEST_INPUT_METHOD,
+            null,
+            ContextCompat.RECEIVER_EXPORTED
+        )
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -181,5 +209,19 @@ class FcitxApplication : Application() {
          * https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-14.0.0_r1/packages/Shell/AndroidManifest.xml#628
          */
         const val PERMISSION_TEST_INPUT_METHOD = "android.permission.READ_INPUT_STATE"
+
+        /**
+         * Triggers a full Rime re-deployment (the "Deploy" action of fcitx5-rime), by calling
+         * `setAddonSubConfig("rime", "deploy")` on the running fcitx instance.
+         *
+         * It is a no-op when there's no [FcitxDaemon] connection, i.e. the input method service
+         * or the main UI is not alive.
+         *
+         * ```sh
+         * adb shell am broadcast -a org.fcitx.fcitx5.android.action.DEPLOY_RIME
+         * ```
+         */
+        const val ACTION_DEPLOY_RIME =
+            "${BuildConfig.APPLICATION_ID}.action.DEPLOY_RIME"
     }
 }
