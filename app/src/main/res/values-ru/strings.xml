@@ -225,6 +225,7 @@
     <string name="main_program">основная программа</string>
     <string name="edit_theme">Изменить тему</string>
     <string name="show_voice_input_button">Показывать кнопку голосового ввода</string>
+    <string name="preferred_voice_input">Предпочтительный голосовой ввод</string>
     <string name="fcitx_daemon">Демон Fcitx</string>
     <string name="restarting_fcitx">Перезапуск Fcitx</string>
     <string name="plugin_needs_reload">Обнаружены изменения плагина, нажмите здесь, чтобы перезагрузить</string>
@@ -316,6 +317,5 @@
     <string name="emoji_skin_tone_type_6">🏿 Type-6</string>
     <string name="hide_unsupported_emojis">Скрыть неподдерживаемые эмодзи</string>
     <string name="key_border_stroke">Включить обводку для границы клавиши</string>
-    <string name="preferred_voice_input">Предпочтительный голосовой ввод</string>
     <string name="edit_text_playground">Тестовое поле EditText</string>
     </resources>

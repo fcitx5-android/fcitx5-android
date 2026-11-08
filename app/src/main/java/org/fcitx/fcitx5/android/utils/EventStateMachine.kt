@@ -9,7 +9,8 @@ import timber.log.Timber
 
 class EventStateMachine<State : Any, Event : EventStateMachine.TransitionEvent<State, B>, B : EventStateMachine.BooleanStateKey>(
     private val initialState: State,
-    private val externalBooleanStates: MutableMap<B, Boolean>
+    private val externalBooleanStates: MutableMap<B, Boolean>,
+    verboseLog: Boolean? = null
 ) {
 
     interface BooleanStateKey {
@@ -30,7 +31,9 @@ class EventStateMachine<State : Any, Event : EventStateMachine.TransitionEvent<S
     var currentState = initialState
         private set
 
-    private val enableDebugLog: Boolean by AppPrefs.getInstance().internal.verboseLog
+    // `null` keeps the existing app-wide setting; tests can inject `false` to stay JVM-only.
+    private val enableDebugLog: Boolean =
+        verboseLog ?: AppPrefs.getInstance().internal.verboseLog.getValue()
 
     /**
      * Push an event that may trigger a transition of state
@@ -74,7 +77,9 @@ class EventStateMachine<State : Any, Event : EventStateMachine.TransitionEvent<S
 // DSL
 class TransitionEventBuilder<State : Any, B : EventStateMachine.BooleanStateKey> {
 
-    private val enableDebugLog: Boolean by AppPrefs.getInstance().internal.verboseLog
+    // Only read when transitions are ambiguous, so JVM tests can build deterministic machines
+    // without initializing Android preferences.
+    private val enableDebugLog: Boolean by lazy { AppPrefs.getInstance().internal.verboseLog.getValue() }
 
     private var raw: ((State, State, (B) -> Boolean?) -> State)? = null
 
