@@ -33,6 +33,10 @@ android {
         }
     }
 
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
+
     buildFeatures {
         viewBinding = true
         resValues = true
@@ -125,6 +129,7 @@ dependencies {
     implementation(libs.splitties.views.recyclerview)
     implementation(libs.aboutlibraries.core)
     testImplementation(libs.junit)
+    testImplementation("org.robolectric:robolectric:4.16.1")
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.rules)
     androidTestImplementation(libs.androidx.lifecycle.testing)

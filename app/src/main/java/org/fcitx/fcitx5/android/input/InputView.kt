@@ -197,7 +197,7 @@ class InputView(
     @Keep
     private val onKeyboardSizeChangeListener = ManagedPreferenceProvider.OnChangeListener { key ->
         if (keyboardSizePrefs.any { it.key == key }) {
-            updateKeyboardSize()
+            refreshKeyboardSize()
         }
     }
 
@@ -251,7 +251,7 @@ class InputView(
                 below(kawaiiBar.view)
                 above(bottomPaddingSpace)
                 /**
-                 * set start and end constrain in [updateKeyboardSize]
+                 * set start and end constrain in [refreshKeyboardSize]
                  */
             })
             add(bottomPaddingSpace, lParams {
@@ -261,7 +261,7 @@ class InputView(
             })
         }
 
-        updateKeyboardSize()
+        refreshKeyboardSize()
 
         add(preedit.ui.root, lParams(matchParent, wrapContent) {
             above(keyboardView)
@@ -280,10 +280,27 @@ class InputView(
         advancedPrefs.registerOnChangeListener(onKeyboardSizeChangeListener)
     }
 
-    private fun updateKeyboardSize() {
-        windowManager.view.updateLayoutParams {
-            height = keyboardHeightPx
+    private fun updateKeyboardHeight() {
+        val desiredHeight = keyboardHeightPx
+        if (windowManager.view.layoutParams.height != desiredHeight) {
+            windowManager.view.updateLayoutParams { height = desiredHeight }
         }
+    }
+
+    // Display metrics can settle after this view is constructed, especially on
+    // the first IME show. Resolve the saved percentage before child measurement.
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        updateKeyboardHeight()
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        refreshKeyboardSize()
+    }
+
+    fun refreshKeyboardSize() {
+        updateKeyboardHeight()
         bottomPaddingSpace.updateLayoutParams {
             height = keyboardBottomPaddingPx
         }
@@ -329,6 +346,7 @@ class InputView(
      * called when [InputView] is about to show, or restart
      */
     fun startInput(info: EditorInfo, capFlags: CapabilityFlags, restarting: Boolean = false) {
+        refreshKeyboardSize()
         broadcaster.onStartInput(info, capFlags)
         returnKeyDrawable.updateDrawableOnEditorInfo(info)
         if (focusChangeResetKeyboard || !restarting) {
