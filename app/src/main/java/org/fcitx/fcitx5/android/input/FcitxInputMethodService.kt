@@ -1098,18 +1098,25 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
 
     fun showDialog(dialog: Dialog) {
         showingDialog?.dismiss()
+        // AlertDialog installs ALT_FOCUSABLE_IM during onCreate when it has no
+        // editor. Apply our focus policy after creation and before attachment.
+        dialog.create()
         dialog.window?.also {
             it.attributes.apply {
                 token = decorView.windowToken
                 type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
             }
+            // This picker has no text input. Keep the editor as the IME target:
+            // taking focus can hide the IME and dismiss this attached dialog.
+            // With NOT_FOCUSABLE, ALT_FOCUSABLE_IM would put it behind the IME.
+            it.clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
             it.addFlags(
-                WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM or WindowManager.LayoutParams.FLAG_DIM_BEHIND
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_DIM_BEHIND
             )
             it.setDimAmount(styledFloat(android.R.attr.backgroundDimAmount))
         }
         dialog.setOnDismissListener {
-            showingDialog = null
+            if (showingDialog === dialog) showingDialog = null
         }
         dialog.show()
         showingDialog = dialog
