@@ -321,4 +321,11 @@
     <string name="keyboard_height_percent_base">键盘高度百分比</string>
     <string name="display_metrics">显示指标 (Resources.getDisplayMetrics)</string>
     <string name="real_size">真实尺寸 (Display.getRealSize)</string>
+    <string name="show_shuangpin_hints">显示双拼提示</string>
+    <string name="shuangpin_hint_layout">双拼提示布局</string>
+    <string name="shuangpin_hint_layout_split">声母在上韵母在下</string>
+    <string name="shuangpin_hint_layout_above">提示全部在上</string>
+    <string name="shuangpin_hint_layout_below">提示全部在下</string>
+    <string name="shuangpin_hint_layout_above_symbols_below">提示在上符号在下</string>
+    <string name="shuangpin_hint_layout_symbols_above_below">符号在上提示在下</string>
 </resources>

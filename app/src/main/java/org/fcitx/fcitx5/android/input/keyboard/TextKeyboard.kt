@@ -91,10 +91,23 @@ class TextKeyboard(
     }
 
     private val keepLettersUppercase by AppPrefs.getInstance().keyboard.keepLettersUppercase
+    private val showShuangpinHints = AppPrefs.getInstance().keyboard.showShuangpinHints
+    private val shuangpinHintLayout = AppPrefs.getInstance().keyboard.shuangpinHintLayout
+
+    @Keep
+    private val hintsEnabledListener = ManagedPreference.OnChangeListener<Boolean> { _, _ ->
+        post { updatePunctuationKeys() }
+    }
+    @Keep
+    private val hintsLayoutListener = ManagedPreference.OnChangeListener<ShuangpinHintLayout> { _, _ ->
+        post { updatePunctuationKeys() }
+    }
 
     init {
         updateLangSwitchKey(showLangSwitchKey.getValue())
         showLangSwitchKey.registerOnChangeListener(showLangSwitchKeyListener)
+        showShuangpinHints.registerOnChangeListener(hintsEnabledListener)
+        shuangpinHintLayout.registerOnChangeListener(hintsLayoutListener)
     }
 
     private val textKeys: List<TextKeyView> by lazy {
@@ -108,6 +121,14 @@ class TextKeyboard(
             CapsState.None -> c.lowercase()
             else -> c.uppercase()
         }
+    }
+
+    private var shuangpinHints: Map<String, Pair<String, String>> = emptyMap()
+
+    fun setShuangpinHints(hints: Array<String>) {
+        shuangpinHints = hints.asList().chunked(3).filter { it.size == 3 }
+            .associate { it[0] to (it[1] to it[2]) }
+        updatePunctuationKeys()
     }
 
     private var punctuationMapping: Map<String, String> = mapOf()
@@ -153,6 +174,7 @@ class TextKeyboard(
         capsState = CapsState.None
         updateCapsButtonIcon()
         updateAlphabetKeys()
+        updatePunctuationKeys()
     }
 
     override fun onReturnDrawableUpdate(returnDrawable: Int) {
@@ -165,6 +187,7 @@ class TextKeyboard(
     }
 
     override fun onInputMethodUpdate(ime: InputMethodEntry) {
+        if (ime.uniqueName != "shuangpin") setShuangpinHints(emptyArray())
         space.mainText.text = buildString {
             append(ime.displayName)
             ime.subMode.run { label.ifEmpty { name.ifEmpty { null } } }?.let { append(" ($it)") }
@@ -248,6 +271,12 @@ class TextKeyboard(
             if (it is AltTextKeyView) {
                 it.def as KeyDef.Appearance.AltText
                 it.altText.text = transformPunctuation(it.def.altText)
+                val key = it.def.displayText.lowercase()
+                val hint = shuangpinHints[key]
+                val active = showShuangpinHints.getValue() && shuangpinHints.isNotEmpty() &&
+                    key.length == 1 && key[0].isLetter()
+                it.setShuangpinHint(active, hint?.first.orEmpty(), hint?.second.orEmpty(),
+                    shuangpinHintLayout.getValue())
             } else {
                 it.def as KeyDef.Appearance.Text
                 it.mainText.text = it.def.displayText.let { str ->

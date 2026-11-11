@@ -64,6 +64,16 @@ class AutoScaleTextView @JvmOverloads constructor(
         }
     }
 
+    override fun setTextSize(unit: Int, size: Float) {
+        super.setTextSize(unit, size)
+        // This view measures/draws directly, so TextView's internal Layout can
+        // stay null and its setTextSize() does not always request remeasurement.
+        needsMeasureText = true
+        needsCalculateTransform = true
+        requestLayout()
+        invalidate()
+    }
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val widthMode = MeasureSpec.getMode(widthMeasureSpec)
         val widthSize = MeasureSpec.getSize(widthMeasureSpec)

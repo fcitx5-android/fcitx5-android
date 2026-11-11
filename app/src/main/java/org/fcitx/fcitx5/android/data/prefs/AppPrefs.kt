@@ -18,6 +18,7 @@ import org.fcitx.fcitx5.android.input.candidates.floating.FloatingCandidatesOrie
 import org.fcitx.fcitx5.android.input.candidates.horizontal.HorizontalCandidateMode
 import org.fcitx.fcitx5.android.input.keyboard.KeyboardHeightPercentBase
 import org.fcitx.fcitx5.android.input.keyboard.LangSwitchBehavior
+import org.fcitx.fcitx5.android.input.keyboard.ShuangpinHintLayout
 import org.fcitx.fcitx5.android.input.keyboard.SpaceLongPressBehavior
 import org.fcitx.fcitx5.android.input.keyboard.SwipeSymbolDirection
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
@@ -147,6 +148,17 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             "keep_keyboard_letters_uppercase",
             false
         )
+
+        val showShuangpinHints = switch(
+            R.string.show_shuangpin_hints,
+            "show_shuangpin_hints",
+            true
+        )
+        val shuangpinHintLayout = enumList(
+            R.string.shuangpin_hint_layout,
+            "shuangpin_hint_layout",
+            ShuangpinHintLayout.Split
+        ) { showShuangpinHints.getValue() }
 
         val showVoiceInputButton =
             switch(R.string.show_voice_input_button, "show_voice_input_button", false)

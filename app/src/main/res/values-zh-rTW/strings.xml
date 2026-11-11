@@ -316,4 +316,11 @@
     <string name="emoji_skin_tone_type_6">🏿 深膚色 (Type-6)</string>
     <string name="hide_unsupported_emojis">隱藏不支援的表情</string>
     <string name="preferred_voice_input">首選語音輸入</string>
+    <string name="show_shuangpin_hints">顯示雙拼提示</string>
+    <string name="shuangpin_hint_layout">雙拼提示配置</string>
+    <string name="shuangpin_hint_layout_split">聲母在上韻母在下</string>
+    <string name="shuangpin_hint_layout_above">提示全部在上</string>
+    <string name="shuangpin_hint_layout_below">提示全部在下</string>
+    <string name="shuangpin_hint_layout_above_symbols_below">提示在上符號在下</string>
+    <string name="shuangpin_hint_layout_symbols_above_below">符號在上提示在下</string>
 </resources>

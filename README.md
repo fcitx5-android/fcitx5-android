@@ -160,3 +160,10 @@ The current recommended versions are recorded in [Versions.kt](build-logic/conve
 ## Nix
 
 Appropriate Android SDK with NDK is available in the development shell.  The `gradlew` should work out-of-the-box, so you can install the app to your phone with `./gradlew installDebug` after applying the patch mentioned above. For development, you may want to install the unstable version of Android Studio, and point the project SDK path to `$ANDROID_SDK_ROOT` defined in the shell. Notice that Android Studio may generate wrong `local.properties` which sets the SDK location to `~/Android/SDK` (installed by SDK Manager). In such case, you need specify `sdk.dir` as the project SDK in that file manually, in case Android Studio sticks to the wrong global SDK.
+
+For the built-in Shuangpin engine, **Show Shuangpin hints** displays compound
+initial/final hints supplied by the engine's active profile, including custom
+profiles. **Shuangpin hint layout** supports initials above/finals below, hints
+all above or below, and combined hints on one edge with the keyboard's original
+punctuation on the other. Labels use `/` between multiple values. Disabling
+hints or switching away from Shuangpin restores the original keyboard.

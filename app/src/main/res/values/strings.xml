@@ -321,4 +321,11 @@
     <string name="keyboard_height_percent_base">Keyboard height percent base</string>
     <string name="display_metrics">Display metrics (Resources.getDisplayMetrics)</string>
     <string name="real_size">Real size (Display.getRealSize)</string>
+    <string name="show_shuangpin_hints">Show Shuangpin hints</string>
+    <string name="shuangpin_hint_layout">Shuangpin hint layout</string>
+    <string name="shuangpin_hint_layout_split">Initials above, finals below</string>
+    <string name="shuangpin_hint_layout_above">Hints all above</string>
+    <string name="shuangpin_hint_layout_below">Hints all below</string>
+    <string name="shuangpin_hint_layout_above_symbols_below">Hints above, symbols below</string>
+    <string name="shuangpin_hint_layout_symbols_above_below">Symbols above, hints below</string>
 </resources>

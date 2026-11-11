@@ -120,6 +120,10 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
     override suspend fun enumerateIme(forward: Boolean) =
         withFcitxContext { nextInputMethod(forward) }
 
+    override suspend fun shuangpinKeyHints() = withFcitxContext {
+        getFcitxShuangpinKeyHints() ?: emptyArray()
+    }
+
     override suspend fun currentIme() =
         withFcitxContext { inputMethodStatus() ?: inputMethodEntryCached }
 
@@ -295,6 +299,9 @@ class Fcitx(private val context: Context) : FcitxAPI, FcitxLifecycleOwner {
 
         @JvmStatic
         external fun inputMethodStatus(): InputMethodEntry?
+
+        @JvmStatic
+        external fun getFcitxShuangpinKeyHints(): Array<String>?
 
         @JvmStatic
         external fun setInputMethod(ime: String)

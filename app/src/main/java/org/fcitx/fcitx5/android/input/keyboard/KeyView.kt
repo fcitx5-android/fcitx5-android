@@ -304,6 +304,62 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
         applyLayout(resources.configuration.orientation)
     }
 
+    private var shuangpinActive = false
+    private var shuangpinLayout = ShuangpinHintLayout.Split
+    private fun hintLabel() = view(::AutoScaleTextView) {
+        isClickable = false
+        isFocusable = false
+        includeFontPadding = false
+        gravity = android.view.Gravity.CENTER
+        scaleMode = AutoScaleTextView.Mode.Proportional
+        setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10f)
+        setTextColor(theme.altKeyTextColor)
+        visibility = View.GONE
+    }
+    private val initialHint by lazy {
+        hintLabel().also {
+            appearanceView.add(it, appearanceView.lParams(0, wrapContent) {
+                leftToLeft = parentId; rightToRight = parentId
+                topToTop = parentId; topMargin = vMargin + dp(2)
+                leftMargin = hMargin + dp(2); rightMargin = hMargin + dp(2)
+            })
+        }
+    }
+    private val finalHint by lazy {
+        hintLabel().also {
+            appearanceView.add(it, appearanceView.lParams(0, wrapContent) {
+                leftToLeft = parentId; rightToRight = parentId
+                bottomToBottom = parentId; bottomMargin = vMargin + dp(2)
+                leftMargin = hMargin + dp(2); rightMargin = hMargin + dp(2)
+            })
+        }
+    }
+
+    fun setShuangpinHint(
+        active: Boolean, initial: String = "", final: String = "",
+        layout: ShuangpinHintLayout = ShuangpinHintLayout.Split
+    ) {
+        if (!active && !shuangpinActive) return
+        shuangpinActive = active
+        shuangpinLayout = layout
+        val combined = listOf(initial, final).filter(String::isNotEmpty).joinToString("/")
+        val centered = active && layout in setOf(ShuangpinHintLayout.Split,
+            ShuangpinHintLayout.AboveWithSymbols, ShuangpinHintLayout.BelowWithSymbols)
+        val centerTextSize = if (centered) 20f else (def as KeyDef.Appearance.Text).textSize
+        if (mainText.textSize != dp(centerTextSize)) {
+            mainText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, centerTextSize)
+        }
+        val hintsAbove = layout == ShuangpinHintLayout.Above || layout == ShuangpinHintLayout.AboveWithSymbols
+        val hintsBelow = layout == ShuangpinHintLayout.Below || layout == ShuangpinHintLayout.BelowWithSymbols
+        val top = if (hintsAbove) combined else initial
+        val bottom = if (hintsBelow) combined else final
+        initialHint.text = top
+        finalHint.text = bottom
+        initialHint.visibility = if (active && !hintsBelow && top.isNotEmpty()) View.VISIBLE else View.GONE
+        finalHint.visibility = if (active && !hintsAbove && bottom.isNotEmpty()) View.VISIBLE else View.GONE
+        applyLayout(resources.configuration.orientation)
+    }
+
     private fun applyTopRightAltTextPosition() {
         mainText.updateLayoutParams<ConstraintLayout.LayoutParams> {
             // reset
@@ -344,6 +400,20 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
         }
     }
 
+    private fun applyTopAltTextPosition() {
+        mainText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            topToTop = unset
+            topToBottom = altText.existingOrNewId
+            // A 4dp larger lower inset shifts the centered label upward by 2dp.
+            bottomToBottom = parentId; bottomMargin = vMargin + dp(4)
+        }
+        altText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            bottomToBottom = unset; bottomMargin = 0
+            topToTop = parentId; topMargin = vMargin + dp(2)
+            leftToLeft = parentId; rightToRight = parentId
+        }
+    }
+
     private fun applyNoAltTextPosition() {
         mainText.updateLayoutParams<ConstraintLayout.LayoutParams> {
             // reset
@@ -357,6 +427,48 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
     }
 
     private fun applyLayout(orientation: Int) {
+        mainText.scaleMode = AutoScaleTextView.Mode.None
+        mainText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            width = wrapContent; height = wrapContent
+            topToBottom = unset; bottomToTop = unset
+            leftMargin = 0; rightMargin = 0
+            topMargin = 0; bottomMargin = 0
+            horizontalBias = 0.5f; verticalBias = 0.5f
+            centerInParent()
+        }
+        altText.scaleMode = AutoScaleTextView.Mode.None
+        altText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            width = wrapContent; leftMargin = 0; rightMargin = 0
+        }
+        if (shuangpinActive) {
+            when (shuangpinLayout) {
+                ShuangpinHintLayout.Split -> applyNoAltTextPosition()
+                ShuangpinHintLayout.Above, ShuangpinHintLayout.Below -> {
+                    // Use the native symbol only as an invisible layout spacer.
+                    // Actual hints retain their own font and absolute edge anchors.
+                    if (shuangpinLayout == ShuangpinHintLayout.Below) applyBottomAltTextPosition()
+                    else applyTopAltTextPosition()
+                    altText.visibility = View.INVISIBLE
+                }
+                ShuangpinHintLayout.AboveWithSymbols, ShuangpinHintLayout.BelowWithSymbols -> {
+                    applyNoAltTextPosition()
+                    val symbolsAbove = shuangpinLayout == ShuangpinHintLayout.BelowWithSymbols
+                    altText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                        leftToLeft = parentId; rightToRight = parentId
+                        topToTop = if (symbolsAbove) parentId else unset
+                        bottomToBottom = if (symbolsAbove) unset else parentId
+                        topMargin = if (symbolsAbove) vMargin + dp(2) else 0
+                        bottomMargin = if (symbolsAbove) 0 else vMargin + dp(2)
+                    }
+                    altText.visibility = if (altText.text.isEmpty()) View.GONE else View.VISIBLE
+                }
+            }
+            return
+        }
+        if ((def as KeyDef.Appearance.AltText).altText.isEmpty()) {
+            applyNoAltTextPosition()
+            return
+        }
         when (ThemeManager.prefs.punctuationPosition.getValue()) {
             PunctuationPosition.Bottom -> when (orientation) {
                 Configuration.ORIENTATION_LANDSCAPE -> applyTopRightAltTextPosition()
@@ -368,7 +480,7 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
-        if (ThemeManager.prefs.punctuationPosition.getValue() == PunctuationPosition.TopRight) {
+        if (!shuangpinActive && ThemeManager.prefs.punctuationPosition.getValue() == PunctuationPosition.TopRight) {
             return
         }
         applyLayout(newConfig.orientation)
