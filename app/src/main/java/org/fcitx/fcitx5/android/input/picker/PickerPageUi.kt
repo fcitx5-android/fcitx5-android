@@ -220,7 +220,7 @@ class PickerPageUi(
                         view as KeyView
                         when (event.type) {
                             CustomGestureView.GestureType.Down -> {
-                                onPopupShow(view, item)
+                                onPopupShow(view, transformed)
                                 // never "consume" the gesture on touch down
                                 false
                             }

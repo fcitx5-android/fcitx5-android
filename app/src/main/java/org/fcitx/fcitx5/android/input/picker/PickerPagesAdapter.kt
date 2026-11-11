@@ -103,8 +103,8 @@ class PickerPagesAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         if (position == 0) {
-            // RecentlyUsed content should be displayed as-is, without popups
-            holder.ui.setItems(recentlyUsed.items)
+            // Keep stored history unchanged; only Symbol policy changes its presentation.
+            holder.ui.setItems(recentlyUsed.items.map(policy::transformRecent))
         } else {
             holder.ui.setItems(pages[position], policy)
         }

@@ -321,4 +321,5 @@
     <string name="keyboard_height_percent_base">Keyboard height percent base</string>
     <string name="display_metrics">Display metrics (Resources.getDisplayMetrics)</string>
     <string name="real_size">Real size (Display.getRealSize)</string>
+    <string name="full_width_symbol_punctuation">Default to full-width punctuation on symbol page</string>
 </resources>

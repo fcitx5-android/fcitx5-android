@@ -321,4 +321,5 @@
     <string name="keyboard_height_percent_base">键盘高度百分比</string>
     <string name="display_metrics">显示指标 (Resources.getDisplayMetrics)</string>
     <string name="real_size">真实尺寸 (Display.getRealSize)</string>
+    <string name="full_width_symbol_punctuation">符号页默认全角标点</string>
 </resources>

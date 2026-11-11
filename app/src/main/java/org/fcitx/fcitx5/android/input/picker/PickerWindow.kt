@@ -4,9 +4,12 @@
  */
 package org.fcitx.fcitx5.android.input.picker
 
+import androidx.annotation.Keep
 import androidx.core.content.ContextCompat
 import androidx.transition.Transition
 import androidx.viewpager2.widget.ViewPager2
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.input.broadcast.ReturnKeyDrawableComponent
 import org.fcitx.fcitx5.android.input.dependency.theme
@@ -49,6 +52,22 @@ class PickerWindow(
 
     private lateinit var pickerLayout: PickerLayout
     private lateinit var pickerPagesAdapter: PickerPagesAdapter
+
+    private val fullWidthPunctuationPref by lazy {
+        AppPrefs.getInstance().symbols.fullWidthSymbolPunctuation
+    }
+
+    @Keep
+    private val punctuationPreferenceListener = ManagedPreference.OnChangeListener<Boolean> { _, _ ->
+        if (::pickerLayout.isInitialized) pickerLayout.post {
+            popup.dismissAll()
+            pickerLayout.embeddedKeyboard.apply {
+                updatePunctuationLabels(policy)
+                onReturnDrawableUpdate(returnKeyDrawable.resourceId)
+            }
+            pickerPagesAdapter.refreshIfNeeded()
+        }
+    }
 
     override fun enterAnimation(lastWindow: InputWindow): Transition? = null
 
@@ -104,6 +123,10 @@ class PickerWindow(
 
     override fun onCreateView() = PickerLayout(context, theme, switchKey).apply {
         pickerLayout = this
+        embeddedKeyboard.updatePunctuationLabels(policy)
+        if (key == Key.Symbol) {
+            fullWidthPunctuationPref.registerOnChangeListener(punctuationPreferenceListener)
+        }
         val bordered = followKeyBorder && keyBorder
         pickerPagesAdapter = PickerPagesAdapter(
             theme, keyActionListener, popupActionListener, data,
@@ -148,6 +171,7 @@ class PickerWindow(
     override fun onAttached() {
         pickerLayout.embeddedKeyboard.also {
             pickerPagesAdapter.refreshIfNeeded()
+            it.updatePunctuationLabels(policy)
             it.onReturnDrawableUpdate(returnKeyDrawable.resourceId)
             it.keyActionListener = keyActionListener
         }

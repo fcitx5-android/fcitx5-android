@@ -8,6 +8,7 @@ package org.fcitx.fcitx5.android.input.picker
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef
 import org.fcitx.fcitx5.android.input.popup.EmojiModifier
+import org.fcitx.fcitx5.android.input.popup.PopupPreset
 
 interface PickerPolicy {
     /**
@@ -19,6 +20,9 @@ interface PickerPolicy {
      * Actual string to commit when this symbol was selected
      */
     fun transform(raw: String): String
+
+    /** Recently used items keep their original text unless this policy opts in. */
+    fun transformRecent(raw: String): String = raw
 
     /**
      * Long press options for this symbol
@@ -41,6 +45,42 @@ class DefaultPickerPolicy : PickerPolicy {
         KeyDef.Popup.Keyboard.Preset(label = raw, transformPunctuation = false)
 
     override fun invalidateKey() = Unit
+}
+
+/** Symbol-page punctuation defaults, independent of the active input engine. */
+class SymbolPickerPolicy : PickerPolicy {
+    private val enabled by AppPrefs.getInstance().symbols.fullWidthSymbolPunctuation
+
+    override fun filter(raw: String) = true
+
+    private fun transformPunctuation(raw: String): String =
+        if (enabled) FullWidthPunctuation[raw] ?: raw else raw
+
+    override fun transform(raw: String): String =
+        transformPunctuation(raw)
+
+    override fun transformRecent(raw: String) = transform(raw)
+
+    override fun popup(raw: String): KeyDef.Popup.Keyboard? {
+        if (!enabled) {
+            return KeyDef.Popup.Keyboard.Preset(label = raw, transformPunctuation = false)
+        }
+        val halfWidth = FullWidthPunctuation.entries.firstOrNull { it.value == raw }?.key ?: raw
+        val variants = PopupPreset[halfWidth]?.map(::transformPunctuation).orEmpty()
+        val items = if (halfWidth in FullWidthPunctuation) listOf(halfWidth) + variants else variants
+        return items.takeIf { it.isNotEmpty() }?.let {
+            KeyDef.Popup.Keyboard.Explicit(it.distinct().toTypedArray())
+        }
+    }
+
+    override fun invalidateKey() = enabled
+
+    companion object {
+        private val FullWidthPunctuation = mapOf(
+            "," to "，", "." to "。", "?" to "？", "!" to "！", ":" to "：",
+            ";" to "；", "(" to "（", ")" to "）", "'" to "“", "\"" to "”"
+        )
+    }
 }
 
 /**

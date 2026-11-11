@@ -160,3 +160,10 @@ The current recommended versions are recorded in [Versions.kt](build-logic/conve
 ## Nix
 
 Appropriate Android SDK with NDK is available in the development shell.  The `gradlew` should work out-of-the-box, so you can install the app to your phone with `./gradlew installDebug` after applying the patch mentioned above. For development, you may want to install the unstable version of Android Studio, and point the project SDK path to `$ANDROID_SDK_ROOT` defined in the shell. Notice that Android Studio may generate wrong `local.properties` which sets the SDK location to `~/Android/SDK` (installed by SDK Manager). In such case, you need specify `sdk.dir` as the project SDK in that file manually, in case Android Studio sticks to the wrong global SDK.
+
+The Emoji & Symbols settings include an optional **Default to full-width
+punctuation on symbol page** switch (disabled by default). It replaces the
+ASCII `, . ? ! : ; ( )` keys with `， 。 ？ ！ ： ； （ ）`, and the single/double
+quote keys with `“`/`”`. Each converted key offers its original ASCII character
+first on long press. This applies to the bottom comma/period keys too and does
+not change other keyboards, emoji, or emoticon strings.

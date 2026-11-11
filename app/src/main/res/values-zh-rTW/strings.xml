@@ -316,4 +316,5 @@
     <string name="emoji_skin_tone_type_6">🏿 深膚色 (Type-6)</string>
     <string name="hide_unsupported_emojis">隱藏不支援的表情</string>
     <string name="preferred_voice_input">首選語音輸入</string>
+    <string name="full_width_symbol_punctuation">符號頁預設全形標點</string>
 </resources>

@@ -7,6 +7,8 @@ package org.fcitx.fcitx5.android.input.picker
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.allViews
+import org.fcitx.fcitx5.android.input.popup.PopupAction
 import androidx.viewpager2.widget.ViewPager2
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
@@ -51,6 +53,39 @@ class PickerLayout(context: Context, theme: Theme, switchKey: KeyDef) :
                 Behavior.Press(KeyAction.FcitxKeyAction(symbol))
             )
         )
+
+        private var punctuationPolicy: PickerPolicy = DefaultPickerPolicy()
+
+        fun updatePunctuationLabels(policy: PickerPolicy) {
+            punctuationPolicy = policy
+            allViews.filterIsInstance<TextKeyView>().forEach { key ->
+                val label = (key.def as KeyDef.Appearance.Text).displayText
+                if (label != "," && label != ".") return@forEach
+                val transformed = policy.transform(label)
+                key.mainText.text = transformed
+                val popup = if (transformed != label) policy.popup(label) else null
+                key.setOnLongClickListener(if (popup == null) null else android.view.View.OnLongClickListener {
+                    key.updateBounds()
+                    onPopupAction(PopupAction.ShowKeyboardAction(key.id, popup, key.bounds))
+                    false
+                })
+                key.swipeEnabled = popup != null
+                key.onGestureListener = if (popup == null) null else CustomGestureView.OnGestureListener { _, event ->
+                    when (event.type) {
+                        CustomGestureView.GestureType.Move -> onPopupChangeFocus(key.id, event.x, event.y)
+                        CustomGestureView.GestureType.Up -> onPopupTrigger(key.id)
+                        else -> false
+                    }
+                }
+            }
+        }
+
+        override fun onAction(action: KeyAction, source: KeyActionListener.Source) {
+            val transformed = if (action is KeyAction.FcitxKeyAction) {
+                action.copy(act = punctuationPolicy.transform(action.act))
+            } else action
+            super.onAction(transformed, source)
+        }
 
         val `return`: ImageKeyView by lazy { findViewById(R.id.button_return) }
 

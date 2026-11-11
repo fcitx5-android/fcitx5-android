@@ -468,13 +468,13 @@ abstract class BaseKeyboard(
         popupActionListener?.onPopupAction(action)
     }
 
-    private fun onPopupChangeFocus(viewId: Int, x: Float, y: Float): Boolean {
+    protected fun onPopupChangeFocus(viewId: Int, x: Float, y: Float): Boolean {
         val changeFocusAction = PopupAction.ChangeFocusAction(viewId, x, y)
         popupActionListener?.onPopupAction(changeFocusAction)
         return changeFocusAction.outResult
     }
 
-    private fun onPopupTrigger(viewId: Int): Boolean {
+    protected fun onPopupTrigger(viewId: Int): Boolean {
         val triggerAction = PopupAction.TriggerAction(viewId)
         // ask popup keyboard whether there's a pending KeyAction
         onPopupAction(triggerAction)

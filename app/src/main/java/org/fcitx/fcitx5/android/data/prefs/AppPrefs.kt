@@ -358,6 +358,12 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
     }
 
     inner class Symbols : ManagedPreferenceCategory(R.string.emoji_and_symbols, sharedPreferences) {
+        val fullWidthSymbolPunctuation = switch(
+            R.string.full_width_symbol_punctuation,
+            "full_width_symbol_punctuation",
+            false
+        )
+
         val hideUnsupportedEmojis = switch(
             R.string.hide_unsupported_emojis,
             "hide_unsupported_emojis",
