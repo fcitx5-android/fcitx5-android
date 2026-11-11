@@ -1,0 +1,69 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag for the release (e.g. v1.0.0)'
+        required: true
+        type: string
+      abi:
+        description: 'Target ABI for the build'
+        required: true
+        type: choice
+        options:
+          - arm64-v8a
+          - armeabi-v7a
+          - x86
+          - x86_64
+        default: 'arm64-v8a'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: wrapper
+
+      - name: Build Release APK
+        run: ./gradlew :app:assembleRelease -PbuildABI=${{ inputs.abi }}
+        env:
+          SIGN_KEY_BASE64: ${{ secrets.SIGNING_KEY }}
+          SIGN_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGN_KEY_PWD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGN_STORE_PWD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+
+      - name: Find and Rename APK
+        run: |
+          APK_FILE=$(find app/build/outputs/apk/release/ -name "*.apk" | head -n 1)
+          if [ -n "$APK_FILE" ]; then
+            mv "$APK_FILE" app-release.apk
+          else
+            echo "No APK found"
+            false
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.version }}
+          name: ${{ inputs.version }}
+          files: app-release.apk
+          draft: false
+          prerelease: false
