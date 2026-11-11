@@ -46,11 +46,10 @@ class ShuangpinSemicolonTest {
 
     @Test fun requiredKeyAlignsBothRowsAndUnusedProfilesRestoreOriginalRow() {
         val keyboard = keyboard()
-        for (metadata in listOf(arrayOf("v", "zh", "ui"), arrayOf(";", "", "ing"),
-            arrayOf(";", "", ""), emptyArray(), arrayOf(";"))) {
+        for (metadata in listOf("abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyz;", ";", "", "abc")) {
             keyboard.setShuangpinInputKeys(metadata)
             layout(keyboard)
-            val required = metadata.size == 3 && metadata[0] == ";"
+            val required = ';' in metadata
             val second = keys(keyboard, 1)
             assertEquals(if (required) 10 else 9, second.size)
             val semicolon = keyboard.findViewById<TextKeyView>(R.id.button_semicolon)
@@ -69,7 +68,7 @@ class ShuangpinSemicolonTest {
     @Test fun semicolonSendsNativeVirtualCodeWithoutShiftAndPreservesPeriod() {
         for (caps in 0..2) {
             val keyboard = keyboard()
-            keyboard.setShuangpinInputKeys(arrayOf(";", "", "ing"))
+            keyboard.setShuangpinInputKeys("abcdefghijklmnopqrstuvwxyz;")
             layout(keyboard)
             if (caps == 1) keyboard.caps.performClick()
             if (caps == 2) keyboard.caps.performLongClick()
@@ -92,16 +91,16 @@ class ShuangpinSemicolonTest {
     @Test fun rebuiltRowRetainsCapsUpdatesAndLanguageSwitchRemovesExtraKey() {
         val keyboard = keyboard()
         keyboard.caps.performClick()
-        keyboard.setShuangpinInputKeys(arrayOf(";", "", "ing"))
+        keyboard.setShuangpinInputKeys("abcdefghijklmnopqrstuvwxyz;")
         assertEquals("A", (keys(keyboard, 1).first() as TextKeyView).mainText.text.toString())
         val currentA = keys(keyboard, 1).first()
-        keyboard.setShuangpinInputKeys(arrayOf(";", "", ""))
+        keyboard.setShuangpinInputKeys(";")
         assertSame(currentA, keys(keyboard, 1).first())
-        keyboard.setShuangpinInputKeys(arrayOf("v", "zh", "ui"))
+        keyboard.setShuangpinInputKeys("abcdefghijklmnopqrstuvwxyz")
         assertEquals("A", (keys(keyboard, 1).first() as TextKeyView).mainText.text.toString())
         keyboard.caps.performClick()
         assertEquals("a", (keys(keyboard, 1).first() as TextKeyView).mainText.text.toString())
-        keyboard.setShuangpinInputKeys(arrayOf(";", "", "ing"))
+        keyboard.setShuangpinInputKeys("abcdefghijklmnopqrstuvwxyz;")
         keyboard.onInputMethodUpdate(InputMethodEntry("keyboard-us", "English", "", "English", "", "en", "keyboard", false))
         layout(keyboard)
         assertEquals(9, keys(keyboard, 1).size)

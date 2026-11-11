@@ -66,7 +66,7 @@ interface FcitxAPI {
     suspend fun activateIme(ime: String)
     suspend fun enumerateIme(forward: Boolean = true)
 
-    suspend fun shuangpinKeyHints(): Array<String>
+    suspend fun shuangpinInputKeys(): String
 
     suspend fun currentIme(): InputMethodEntry
 

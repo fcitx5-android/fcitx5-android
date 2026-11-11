@@ -49,7 +49,7 @@
 #include "object-conversion.h"
 
 
-FCITX_ADDON_DECLARE_FUNCTION(PinyinEngine, shuangpinKeyHints, std::vector<std::string>());
+FCITX_ADDON_DECLARE_FUNCTION(PinyinEngine, shuangpinInputKeys, std::string());
 
 class Fcitx {
 public:
@@ -1295,26 +1295,16 @@ Java_org_fcitx_fcitx5_android_utils_Ini_writeAsIni(JNIEnv *env, jclass clazz, js
 #pragma GCC diagnostic pop
 
 extern "C"
-JNIEXPORT jobjectArray JNICALL
-Java_org_fcitx_fcitx5_android_core_Fcitx_getFcitxShuangpinKeyHints(JNIEnv *env, jclass) {
+JNIEXPORT jstring JNICALL
+Java_org_fcitx_fcitx5_android_core_Fcitx_getFcitxShuangpinInputKeys(JNIEnv *env, jclass) {
     RETURN_VALUE_IF_NOT_RUNNING(nullptr)
     const auto addon = Fcitx::Instance().getAddonInstance("pinyin");
     if (!addon) return nullptr;
-    std::vector<std::string> hints;
     try {
-        hints = addon->call<fcitx::IPinyinEngine::shuangpinKeyHints>();
+        const auto keys = addon->call<fcitx::IPinyinEngine::shuangpinInputKeys>();
+        return env->NewStringUTF(keys.c_str());
     } catch (const std::runtime_error &) {
         // Older pinyin addons do not export this optional frontend API.
         return nullptr;
     }
-    const auto stringClass = env->FindClass("java/lang/String");
-    auto result = env->NewObjectArray(static_cast<jsize>(hints.size()), stringClass, nullptr);
-    env->DeleteLocalRef(stringClass);
-    if (!result) return nullptr;
-    for (size_t i = 0; i < hints.size(); ++i) {
-        auto value = env->NewStringUTF(hints[i].c_str());
-        env->SetObjectArrayElement(result, static_cast<jsize>(i), value);
-        env->DeleteLocalRef(value);
-    }
-    return result;
 }

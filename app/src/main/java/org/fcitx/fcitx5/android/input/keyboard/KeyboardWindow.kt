@@ -78,11 +78,11 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
     private fun refreshShuangpinInputKeys() {
         inputKeysJob?.cancel()
         inputKeysJob = service.lifecycleScope.launch {
-            val hints = fcitx.runOnReady {
-                if (inputMethodEntryCached.uniqueName == "shuangpin") shuangpinKeyHints()
-                else emptyArray()
+            val keys = fcitx.runOnReady {
+                if (inputMethodEntryCached.uniqueName == "shuangpin") shuangpinInputKeys()
+                else ""
             }
-            (keyboards[TextKeyboard.Name] as TextKeyboard).setShuangpinInputKeys(hints)
+            (keyboards[TextKeyboard.Name] as TextKeyboard).setShuangpinInputKeys(keys)
         }
     }
 

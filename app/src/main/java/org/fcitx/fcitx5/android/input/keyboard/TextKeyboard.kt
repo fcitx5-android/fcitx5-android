@@ -111,8 +111,8 @@ class TextKeyboard(
 
     private var hasSemicolonKey = false
 
-    fun setShuangpinInputKeys(hints: Array<String>) {
-        val needsSemicolon = hints.asList().chunked(3).any { it.size == 3 && it[0] == ";" }
+    fun setShuangpinInputKeys(keys: String) {
+        val needsSemicolon = ';' in keys
         if (needsSemicolon != hasSemicolonKey) {
             hasSemicolonKey = needsSemicolon
             replaceKeyRow(1, if (needsSemicolon) Layout[1] + SemicolonKey() else Layout[1])
@@ -176,7 +176,7 @@ class TextKeyboard(
     }
 
     override fun onInputMethodUpdate(ime: InputMethodEntry) {
-        if (ime.uniqueName != "shuangpin") setShuangpinInputKeys(emptyArray())
+        if (ime.uniqueName != "shuangpin") setShuangpinInputKeys("")
         space.mainText.text = buildString {
             append(ime.displayName)
             ime.subMode.run { label.ifEmpty { name.ifEmpty { null } } }?.let { append(" ($it)") }
