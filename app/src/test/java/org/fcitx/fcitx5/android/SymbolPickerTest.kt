@@ -33,8 +33,8 @@ import org.robolectric.util.ReflectionHelpers
 @GraphicsMode(GraphicsMode.Mode.LEGACY)
 class SymbolPickerTest {
     private lateinit var context: Context
-    private val raw = ",.?!:;()'\"".map(Char::toString)
-    private val full = "，。？！：；（）“”".map(Char::toString)
+    private val raw = ",.?!:;()'\"`".map(Char::toString)
+    private val full = "，。？！：；（）“”、".map(Char::toString)
     private val preference get() = AppPrefs.getInstance().symbols.fullWidthSymbolPunctuation
 
     @Before fun setup() {

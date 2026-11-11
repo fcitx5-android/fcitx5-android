@@ -78,7 +78,7 @@ class SymbolPickerPolicy : PickerPolicy {
     companion object {
         private val FullWidthPunctuation = mapOf(
             "," to "，", "." to "。", "?" to "？", "!" to "！", ":" to "：",
-            ";" to "；", "(" to "（", ")" to "）", "'" to "“", "\"" to "”"
+            ";" to "；", "(" to "（", ")" to "）", "'" to "“", "\"" to "”", "`" to "、"
         )
     }
 }
