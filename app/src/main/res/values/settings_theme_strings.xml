@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_interface_theme">Settings interface theme</string>
+    <string name="settings_theme_material" translatable="false">Material Design</string>
+    <string name="settings_theme_material3" translatable="false">Material 3</string>
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.FcitxSettings.Material3" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/settings_primary</item>
+        <item name="colorSurface">@color/settings_surface</item>
+        <item name="colorOnSurface">@color/settings_on_surface</item>
+        <item name="android:colorBackground">@color/settings_surface</item>
+        <item name="android:windowLightStatusBar">@bool/settings_light_system_bars</item>
+        <item name="colorLogFatal">@color/red_A700</item>
+        <item name="colorLogError">@color/red_400</item>
+        <item name="colorLogWarning">@color/yellow_800</item>
+        <item name="colorLogInfo">@color/blue_500</item>
+        <item name="colorLogDebug">@color/settings_log_secondary</item>
+        <item name="colorLogVerbose">@color/settings_log_secondary</item>
+    </style>
+    <style name="TextAppearance.FcitxSettings.Title" parent="TextAppearance.Material3.TitleLarge" />
+    <color name="settings_log_secondary">#666666</color>
+    <color name="settings_primary">#315DA8</color>
+    <color name="settings_surface">#F9F9FF</color>
+    <color name="settings_on_surface">#191C20</color>
+    <bool name="settings_light_system_bars">true</bool>
+</resources>

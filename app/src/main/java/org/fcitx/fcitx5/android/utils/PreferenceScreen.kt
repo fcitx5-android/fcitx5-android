@@ -13,7 +13,6 @@ import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceScreen
 import androidx.preference.PreferenceViewHolder
 import splitties.resources.drawable
-import splitties.resources.styledColor
 
 fun PreferenceScreen.addCategory(title: String, block: PreferenceCategory.() -> Unit) {
     val category = PreferenceCategory(context).apply {
@@ -40,7 +39,7 @@ fun Preference.setup(
         isIconSpaceReserved = false
     } else {
         setIcon(context.drawable(icon)?.apply {
-            setTint(context.styledColor(android.R.attr.colorControlNormal))
+            setTint(context.resolveThemeColor(android.R.attr.colorControlNormal))
         })
     }
     onClick?.also {
@@ -85,11 +84,15 @@ class LongClickPreference(context: Context) : Preference(context) {
         onLongClick = callback
     }
 
+    fun performLongClick(): Boolean {
+        onLongClick?.invoke()
+        return onLongClick != null
+    }
+
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
         holder.itemView.setOnLongClickListener {
-            onLongClick?.invoke()
-            true
+            performLongClick()
         }
     }
 }

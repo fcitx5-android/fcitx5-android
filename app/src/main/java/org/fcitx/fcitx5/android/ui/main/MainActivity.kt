@@ -13,7 +13,6 @@ import android.view.ViewGroup
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -21,6 +20,9 @@ import androidx.core.view.updateLayoutParams
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.fragment.NavHostFragment
+import com.google.android.material.color.MaterialColors
+import org.fcitx.fcitx5.android.ui.main.theme.SettingsActivity
+import org.fcitx.fcitx5.android.ui.main.theme.SettingsTheme
 import org.fcitx.fcitx5.android.BuildConfig
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
@@ -33,7 +35,7 @@ import org.fcitx.fcitx5.android.utils.startActivity
 import splitties.dimensions.dp
 import splitties.views.topPadding
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : SettingsActivity() {
 
     private val viewModel: MainViewModel by viewModels()
 
@@ -55,6 +57,13 @@ class MainActivity : AppCompatActivity() {
         }
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
+        if (SettingsTheme.current() == SettingsTheme.Material3) {
+            binding.toolbar.setBackgroundColor(MaterialColors.getColor(
+                binding.toolbar, com.google.android.material.R.attr.colorSurface))
+            binding.toolbar.setTitleTextColor(MaterialColors.getColor(
+                binding.toolbar, com.google.android.material.R.attr.colorOnSurface))
+            binding.toolbar.setTitleTextAppearance(this, R.style.TextAppearance_FcitxSettings_Title)
+        }
         // always show toolbar back arrow icon
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         navController = binding.navHostFragment.getFragment<NavHostFragment>().navController
@@ -63,7 +72,9 @@ class MainActivity : AppCompatActivity() {
             supportActionBar!!.title = it
         }
         viewModel.toolbarShadow.observe(this) {
-            binding.toolbar.elevation = dp(if (it) 4f else 0f)
+            binding.toolbar.elevation = dp(
+                if (it && SettingsTheme.current() == SettingsTheme.MaterialDesign) 4f else 0f
+            )
         }
         navController.addOnDestinationChangedListener { _, dest, _ ->
             dest.label?.let { viewModel.setToolbarTitle(it.toString()) }
@@ -73,7 +84,7 @@ class MainActivity : AppCompatActivity() {
                 viewModel.enableToolbarShadow()
             }
         }
-        processIntent(intent)
+        if (savedInstanceState == null) processIntent(intent)
         checkNotificationPermission()
     }
 

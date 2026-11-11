@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.utils.Logcat
-import splitties.resources.styledColor
+import org.fcitx.fcitx5.android.utils.resolveThemeColor
 import splitties.views.bottomPadding
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
@@ -47,7 +47,7 @@ class LogView @JvmOverloads constructor(context: Context, attributeSet: Attribut
 
     fun append(content: String) {
         logAdapter.append(buildSpannedString {
-            color(styledColor(android.R.attr.colorForeground)) { append(content) }
+            color(resolveThemeColor(android.R.attr.colorForeground)) { append(content) }
         })
     }
 
@@ -55,7 +55,7 @@ class LogView @JvmOverloads constructor(context: Context, attributeSet: Attribut
         this.logcat = logcat
         logcat.initLogFlow()
         logcat.logFlow.onEach {
-            val color = styledColor(
+            val color = resolveThemeColor(
                 when (it.first()) {
                     'V' -> R.attr.colorLogVerbose
                     'D' -> R.attr.colorLogDebug

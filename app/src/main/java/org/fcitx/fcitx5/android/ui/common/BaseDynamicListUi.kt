@@ -30,7 +30,7 @@ import org.fcitx.fcitx5.android.utils.onPositiveButtonClick
 import org.fcitx.fcitx5.android.utils.str
 import splitties.dimensions.dp
 import splitties.resources.drawable
-import splitties.resources.styledColor
+import org.fcitx.fcitx5.android.utils.resolveThemeColor
 import splitties.views.backgroundColor
 import splitties.views.bottomPadding
 import splitties.views.dsl.constraintlayout.bottomOfParent
@@ -75,7 +75,7 @@ abstract class BaseDynamicListUi<T>(
 
     protected val fab = view(::FloatingActionButton) {
         imageDrawable = drawable(R.drawable.ic_baseline_plus_24)!!.apply {
-            setTint(styledColor(android.R.attr.colorForegroundInverse))
+            setTint(resolveThemeColor(android.R.attr.colorForegroundInverse))
         }
     }
 
@@ -295,7 +295,7 @@ abstract class BaseDynamicListUi<T>(
     }
 
     override val root = coordinatorLayout {
-        backgroundColor = styledColor(android.R.attr.colorBackground)
+        backgroundColor = resolveThemeColor(android.R.attr.colorBackground)
         add(recyclerView, defaultLParams {
             height = matchParent
             width = matchParent

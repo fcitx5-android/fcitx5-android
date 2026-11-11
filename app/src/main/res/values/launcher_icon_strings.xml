@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hide_launcher_icon">Hide launcher icon</string>
+    <string name="hide_launcher_icon_summary">Requires support from a third-party system</string>
+</resources>

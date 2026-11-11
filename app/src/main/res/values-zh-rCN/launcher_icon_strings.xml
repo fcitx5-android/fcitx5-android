@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hide_launcher_icon">隐藏启动器图标</string>
+    <string name="hide_launcher_icon_summary">需要第三方系统支持</string>
+</resources>

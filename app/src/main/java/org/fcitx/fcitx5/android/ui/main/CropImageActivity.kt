@@ -19,7 +19,7 @@ import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
+import org.fcitx.fcitx5.android.ui.main.theme.SettingsActivity
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -36,7 +36,7 @@ import org.fcitx.fcitx5.android.utils.parcelable
 import org.fcitx.fcitx5.android.utils.subMenu
 import org.fcitx.fcitx5.android.utils.toast
 import splitties.dimensions.dp
-import splitties.resources.styledColor
+import org.fcitx.fcitx5.android.utils.resolveThemeColor
 import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.below
 import splitties.views.dsl.constraintlayout.bottomOfParent
@@ -52,7 +52,7 @@ import splitties.views.topPadding
 import timber.log.Timber
 import java.io.File
 
-class CropImageActivity : AppCompatActivity() {
+class CropImageActivity : SettingsActivity() {
 
     companion object {
         const val CROP_OPTIONS = "crop_options"
@@ -151,7 +151,7 @@ class CropImageActivity : AppCompatActivity() {
 
     private fun setupRootView() {
         toolbar = view(::Toolbar) {
-            backgroundColor = styledColor(android.R.attr.colorPrimary)
+            backgroundColor = resolveThemeColor(android.R.attr.colorPrimary)
             elevation = dp(4f)
             navigationIcon = DrawerArrowDrawable(context).apply { progress = 1f }
             setupToolbarMenu(menu)
@@ -182,7 +182,7 @@ class CropImageActivity : AppCompatActivity() {
     }
 
     private fun setupToolbarMenu(menu: Menu) {
-        val iconTint = styledColor(android.R.attr.colorControlNormal)
+        val iconTint = resolveThemeColor(android.R.attr.colorControlNormal)
         menu.item(R.string.rotate, R.drawable.ic_baseline_rotate_right_24, iconTint, true) {
             cropView.rotateImage(90)
         }
@@ -206,7 +206,7 @@ class CropImageActivity : AppCompatActivity() {
                 snapRadius = 0f,
                 guidelines = CropImageView.Guidelines.ON_TOUCH,
                 showProgressBar = true,
-                progressBarColor = styledColor(android.R.attr.colorAccent),
+                progressBarColor = resolveThemeColor(android.R.attr.colorAccent),
                 // CropOverlayView
                 borderLineThickness = dp(1f),
                 borderCornerOffset = 0f,

@@ -16,7 +16,7 @@ import org.fcitx.fcitx5.android.R
 import splitties.dimensions.dp
 import splitties.resources.color
 import splitties.resources.drawable
-import splitties.resources.styledColor
+import org.fcitx.fcitx5.android.utils.resolveThemeColor
 import kotlin.math.absoluteValue
 
 open class DynamicListTouchCallback<T>(
@@ -38,7 +38,7 @@ open class DynamicListTouchCallback<T>(
 
     private val deleteIcon: Bitmap by lazy {
         ctx.drawable(R.drawable.ic_baseline_delete_24)!!.apply {
-            setTint(ctx.styledColor(android.R.attr.colorBackground))
+            setTint(ctx.resolveThemeColor(android.R.attr.colorBackground))
         }.toBitmap()
     }
 

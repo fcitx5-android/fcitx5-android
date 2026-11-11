@@ -10,7 +10,7 @@ import androidx.annotation.StringRes
 import org.fcitx.fcitx5.android.R
 import splitties.dimensions.dp
 import splitties.resources.resolveThemeAttribute
-import splitties.resources.styledColor
+import org.fcitx.fcitx5.android.utils.resolveThemeColor
 import splitties.resources.styledDimenPxSize
 import splitties.resources.styledDrawable
 import splitties.views.dsl.constraintlayout.above
@@ -37,13 +37,13 @@ class TableFilesSelectionUi(override val ctx: Context) : Ui {
 
         val title = textView {
             textAppearance = ctx.resolveThemeAttribute(android.R.attr.textAppearanceListItem)
-            setTextColor(styledColor(android.R.attr.textColorPrimary))
+            setTextColor(resolveThemeColor(android.R.attr.textColorPrimary))
             setText(titleRes)
         }
 
         val summary = textView {
             textAppearance = ctx.resolveThemeAttribute(android.R.attr.textAppearanceSmall)
-            setTextColor(styledColor(android.R.attr.textColorSecondary))
+            setTextColor(resolveThemeColor(android.R.attr.textColorSecondary))
             setText(R.string.table_file_placeholder)
         }
 

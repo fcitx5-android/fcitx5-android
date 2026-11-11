@@ -11,7 +11,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
+import org.fcitx.fcitx5.android.ui.main.theme.SettingsActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
@@ -28,10 +28,10 @@ import org.fcitx.fcitx5.android.utils.Logcat
 import org.fcitx.fcitx5.android.utils.iso8601UTCDateTime
 import org.fcitx.fcitx5.android.utils.item
 import org.fcitx.fcitx5.android.utils.toast
-import splitties.resources.styledColor
+import org.fcitx.fcitx5.android.utils.resolveThemeColor
 import splitties.views.topPadding
 
-class LogActivity : AppCompatActivity() {
+class LogActivity : SettingsActivity() {
 
     private var fromCrash = false
 
@@ -94,7 +94,7 @@ class LogActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val iconTint = styledColor(android.R.attr.colorControlNormal)
+        val iconTint = resolveThemeColor(android.R.attr.colorControlNormal)
         if (!fromCrash) {
             menu.item(R.string.clear, R.drawable.ic_baseline_delete_24, iconTint, true) {
                 logView.clear()

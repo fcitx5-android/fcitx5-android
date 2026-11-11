@@ -20,9 +20,11 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.daemon.FcitxDaemon
 import org.fcitx.fcitx5.android.data.UserDataManager
 import org.fcitx.fcitx5.android.data.prefs.AppPrefs
+import org.fcitx.fcitx5.android.data.prefs.ManagedPreference
 import org.fcitx.fcitx5.android.data.prefs.ManagedPreferenceFragment
 import org.fcitx.fcitx5.android.ui.common.withLoadingDialog
 import org.fcitx.fcitx5.android.ui.main.MainViewModel
+import org.fcitx.fcitx5.android.utils.LauncherIcon
 import org.fcitx.fcitx5.android.utils.AppUtil
 import org.fcitx.fcitx5.android.utils.addPreference
 import org.fcitx.fcitx5.android.utils.buildDocumentsProviderIntent
@@ -37,6 +39,11 @@ class AdvancedSettingsFragment : ManagedPreferenceFragment(AppPrefs.getInstance(
 
     private val viewModel: MainViewModel by activityViewModels()
 
+    private val hideLauncherIcon = AppPrefs.getInstance().advanced.hideLauncherIcon
+    private val launcherIconListener = ManagedPreference.OnChangeListener<Boolean> { _, hidden ->
+        LauncherIcon.setHidden(requireContext(), hidden)
+    }
+
     private var exportTimestamp = System.currentTimeMillis()
 
     private lateinit var exportLauncher: ActivityResultLauncher<String>
@@ -45,6 +52,8 @@ class AdvancedSettingsFragment : ManagedPreferenceFragment(AppPrefs.getInstance(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        LauncherIcon.setHidden(requireContext(), hideLauncherIcon.getValue())
+        hideLauncherIcon.registerOnChangeListener(launcherIconListener)
         importLauncher =
             registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
                 if (uri == null) return@registerForActivityResult
@@ -94,6 +103,11 @@ class AdvancedSettingsFragment : ManagedPreferenceFragment(AppPrefs.getInstance(
                     }
                 }
             }
+    }
+
+    override fun onDestroy() {
+        hideLauncherIcon.unregisterOnChangeListener(launcherIconListener)
+        super.onDestroy()
     }
 
     override fun onPreferenceUiCreated(screen: PreferenceScreen) {

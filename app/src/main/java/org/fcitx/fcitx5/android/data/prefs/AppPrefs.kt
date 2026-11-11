@@ -10,6 +10,7 @@ import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
+import org.fcitx.fcitx5.android.ui.main.theme.SettingsTheme
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.InputFeedbacks.InputFeedbackMode
 import org.fcitx.fcitx5.android.input.candidates.expanded.ExpandedCandidateStyle
@@ -39,6 +40,19 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
     }
 
     inner class Advanced : ManagedPreferenceCategory(R.string.advanced, sharedPreferences) {
+        val settingsTheme = enumList(
+            R.string.settings_interface_theme,
+            "settings_interface_theme",
+            SettingsTheme.MaterialDesign
+        )
+
+        val hideLauncherIcon = switch(
+            R.string.hide_launcher_icon,
+            "hide_launcher_icon",
+            false,
+            R.string.hide_launcher_icon_summary
+        )
+
         val ignoreSystemCursor = switch(R.string.ignore_sys_cursor, "ignore_system_cursor", false)
         val hideKeyConfig = switch(R.string.hide_key_config, "hide_key_config", true)
         val disableAnimation = switch(R.string.disable_animation, "disable_animation", false)

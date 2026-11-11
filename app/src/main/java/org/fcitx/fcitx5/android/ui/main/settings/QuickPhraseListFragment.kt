@@ -46,7 +46,7 @@ import org.fcitx.fcitx5.android.utils.parcelable
 import org.fcitx.fcitx5.android.utils.queryFileName
 import org.fcitx.fcitx5.android.utils.str
 import splitties.resources.drawable
-import splitties.resources.styledColor
+import org.fcitx.fcitx5.android.utils.resolveThemeColor
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
@@ -127,7 +127,7 @@ class QuickPhraseListFragment : Fragment(), OnItemChangedListener<QuickPhrase> {
                     }
                 }
                 imageDrawable = drawable(icon)!!.apply {
-                    setTint(styledColor(android.R.attr.colorControlNormal))
+                    setTint(resolveThemeColor(android.R.attr.colorControlNormal))
                 }
             }
         ) {

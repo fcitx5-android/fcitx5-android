@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="settings_log_secondary">#AAAAAA</color>
+    <color name="settings_primary">#AAC7FF</color>
+    <color name="settings_surface">#111318</color>
+    <color name="settings_on_surface">#E1E2E9</color>
+    <bool name="settings_light_system_bars">false</bool>
+</resources>

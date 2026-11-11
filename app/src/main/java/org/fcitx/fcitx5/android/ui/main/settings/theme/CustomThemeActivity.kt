@@ -26,7 +26,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AppCompatActivity
+import org.fcitx.fcitx5.android.ui.main.theme.SettingsActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -49,7 +49,7 @@ import org.fcitx.fcitx5.android.utils.parcelable
 import splitties.dimensions.dp
 import splitties.resources.color
 import splitties.resources.resolveThemeAttribute
-import splitties.resources.styledColor
+import org.fcitx.fcitx5.android.utils.resolveThemeColor
 import splitties.resources.styledDrawable
 import splitties.views.backgroundColor
 import splitties.views.bottomPadding
@@ -80,7 +80,7 @@ import splitties.views.textAppearance
 import splitties.views.topPadding
 import java.io.File
 
-class CustomThemeActivity : AppCompatActivity() {
+class CustomThemeActivity : SettingsActivity() {
 
     sealed interface BackgroundResult : Parcelable {
         @Parcelize
@@ -105,7 +105,7 @@ class CustomThemeActivity : AppCompatActivity() {
 
     private val toolbar by lazy {
         view(::Toolbar) {
-            backgroundColor = styledColor(android.R.attr.colorPrimary)
+            backgroundColor = resolveThemeColor(android.R.attr.colorPrimary)
             elevation = dp(4f)
         }
     }
@@ -472,7 +472,7 @@ class CustomThemeActivity : AppCompatActivity() {
                 promptDelete()
             }
         }
-        val iconTint = styledColor(android.R.attr.colorControlNormal)
+        val iconTint = resolveThemeColor(android.R.attr.colorControlNormal)
         menu.item(R.string.save, R.drawable.ic_baseline_check_24, iconTint, true) {
             done()
         }

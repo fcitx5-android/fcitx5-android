@@ -35,6 +35,24 @@ inline val ConstraintLayout.LayoutParams.unset
     get() = ConstraintLayout.LayoutParams.UNSET
 
 @ColorInt
+fun Context.resolveThemeColor(@AttrRes attrRes: Int): Int {
+    val attributes = obtainStyledAttributes(intArrayOf(attrRes))
+    return try {
+        requireNotNull(attributes.getColorStateList(0)) {
+            "Color theme attribute expected: $attrRes"
+        }.defaultColor
+    } finally {
+        attributes.recycle()
+    }
+}
+
+@ColorInt
+fun View.resolveThemeColor(@AttrRes attrRes: Int) = context.resolveThemeColor(attrRes)
+
+@ColorInt
+fun Ui.resolveThemeColor(@AttrRes attrRes: Int) = ctx.resolveThemeColor(attrRes)
+
+@ColorInt
 fun Context.styledColorOrDefault(@AttrRes attrRes: Int, @ColorInt defaultValue: Int) =
     runCatching { styledColor(attrRes) }.getOrDefault(defaultValue)
 
