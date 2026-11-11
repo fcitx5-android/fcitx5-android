@@ -274,7 +274,7 @@ class TextKeyboard(
                 val key = it.def.displayText.lowercase()
                 val hint = shuangpinHints[key]
                 val active = showShuangpinHints.getValue() && shuangpinHints.isNotEmpty() &&
-                    key.length == 1 && key[0].isLetter()
+                    (key == ";" || key.length == 1 && key[0].isLetter())
                 it.setShuangpinHint(active, hint?.first.orEmpty(), hint?.second.orEmpty(),
                     shuangpinHintLayout.getValue())
             } else {
