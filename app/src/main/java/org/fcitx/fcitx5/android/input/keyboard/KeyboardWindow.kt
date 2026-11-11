@@ -10,6 +10,9 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import androidx.transition.Slide
 import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.core.CapabilityFlags
@@ -71,6 +74,18 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
             NumberKeyboard.Name to NumberKeyboard(context, theme)
         )
     }
+    private var inputKeysJob: Job? = null
+    private fun refreshShuangpinInputKeys() {
+        inputKeysJob?.cancel()
+        inputKeysJob = service.lifecycleScope.launch {
+            val hints = fcitx.runOnReady {
+                if (inputMethodEntryCached.uniqueName == "shuangpin") shuangpinKeyHints()
+                else emptyArray()
+            }
+            (keyboards[TextKeyboard.Name] as TextKeyboard).setShuangpinInputKeys(hints)
+        }
+    }
+
     private var currentKeyboardName = ""
     private var lastSymbolType: String by AppPrefs.getInstance().internal.lastSymbolLayout
 
@@ -113,6 +128,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
             it.onAttach()
             it.onReturnDrawableUpdate(returnKeyDrawable.resourceId)
             it.onInputMethodUpdate(fcitx.runImmediately { inputMethodEntryCached })
+            refreshShuangpinInputKeys()
         }
     }
 
@@ -139,6 +155,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
     }
 
     override fun onStartInput(info: EditorInfo, capFlags: CapabilityFlags) {
+        refreshShuangpinInputKeys()
         val targetLayout = when (info.inputType and InputType.TYPE_MASK_CLASS) {
             InputType.TYPE_CLASS_NUMBER -> NumberKeyboard.Name
             InputType.TYPE_CLASS_PHONE -> NumberKeyboard.Name
@@ -149,6 +166,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
 
     override fun onImeUpdate(ime: InputMethodEntry) {
         currentKeyboard?.onInputMethodUpdate(ime)
+        refreshShuangpinInputKeys()
     }
 
     override fun onPunctuationUpdate(mapping: Map<String, String>) {
@@ -160,6 +178,7 @@ class KeyboardWindow : InputWindow.SimpleInputWindow<KeyboardWindow>(), Essentia
     }
 
     override fun onAttached() {
+        refreshShuangpinInputKeys()
         currentKeyboard?.let {
             it.keyActionListener = keyActionListener
             it.popupActionListener = popupActionListener

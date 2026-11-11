@@ -97,9 +97,8 @@ class TextKeyboard(
         showLangSwitchKey.registerOnChangeListener(showLangSwitchKeyListener)
     }
 
-    private val textKeys: List<TextKeyView> by lazy {
-        allViews.filterIsInstance(TextKeyView::class.java).toList()
-    }
+    private val textKeys: List<TextKeyView>
+        get() = allViews.filterIsInstance(TextKeyView::class.java).toList()
 
     private var capsState: CapsState = CapsState.None
 
@@ -107,6 +106,18 @@ class TextKeyboard(
         return when (capsState) {
             CapsState.None -> c.lowercase()
             else -> c.uppercase()
+        }
+    }
+
+    private var hasSemicolonKey = false
+
+    fun setShuangpinInputKeys(hints: Array<String>) {
+        val needsSemicolon = hints.asList().chunked(3).any { it.size == 3 && it[0] == ";" }
+        if (needsSemicolon != hasSemicolonKey) {
+            hasSemicolonKey = needsSemicolon
+            replaceKeyRow(1, if (needsSemicolon) Layout[1] + SemicolonKey() else Layout[1])
+            updateAlphabetKeys()
+            updatePunctuationKeys()
         }
     }
 
@@ -165,6 +176,7 @@ class TextKeyboard(
     }
 
     override fun onInputMethodUpdate(ime: InputMethodEntry) {
+        if (ime.uniqueName != "shuangpin") setShuangpinInputKeys(emptyArray())
         space.mainText.text = buildString {
             append(ime.displayName)
             ime.subMode.run { label.ifEmpty { name.ifEmpty { null } } }?.let { append(" ($it)") }

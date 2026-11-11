@@ -160,3 +160,10 @@ The current recommended versions are recorded in [Versions.kt](build-logic/conve
 ## Nix
 
 Appropriate Android SDK with NDK is available in the development shell.  The `gradlew` should work out-of-the-box, so you can install the app to your phone with `./gradlew installDebug` after applying the patch mentioned above. For development, you may want to install the unstable version of Android Studio, and point the project SDK path to `$ANDROID_SDK_ROOT` defined in the shell. Notice that Android Studio may generate wrong `local.properties` which sets the SDK location to `~/Android/SDK` (installed by SDK Manager). In such case, you need specify `sdk.dir` as the project SDK in that file manually, in case Android Studio sticks to the wrong global SDK.
+
+When the built-in Shuangpin engine's active profile uses `;`, the keyboard adds
+a dedicated semicolon key after L. Both top letter rows then contain ten keys
+and align. The period key remains unchanged. The semicolon sends a native
+virtual key without Shift, so it is an input code while composing and punctuation
+otherwise. Profiles that do not require it and other input methods retain the
+original nine-key second row. This behavior does not depend on hint display.

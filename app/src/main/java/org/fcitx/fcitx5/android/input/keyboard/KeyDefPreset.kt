@@ -39,6 +39,12 @@ class SymbolKey(
     )
 )
 
+class SemicolonKey : KeyDef(
+    Appearance.AltText(";", "", textSize = 23f, viewId = R.id.button_semicolon),
+    setOf(Behavior.Press(KeyAction.SymAction(KeySym(FcitxKeyMapping.FcitxKey_semicolon)))),
+    arrayOf(Popup.Preview(";"), Popup.Keyboard.Preset(";"))
+)
+
 class AlphabetKey(
     val character: String,
     val punctuation: String,

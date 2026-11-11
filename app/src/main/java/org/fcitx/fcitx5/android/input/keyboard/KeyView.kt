@@ -357,6 +357,10 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
     }
 
     private fun applyLayout(orientation: Int) {
+        if ((def as KeyDef.Appearance.AltText).altText.isEmpty()) {
+            applyNoAltTextPosition()
+            return
+        }
         when (ThemeManager.prefs.punctuationPosition.getValue()) {
             PunctuationPosition.Bottom -> when (orientation) {
                 Configuration.ORIENTATION_LANDSCAPE -> applyTopRightAltTextPosition()
