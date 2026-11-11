@@ -1,0 +1,121 @@
+<resources>
+    <string name="app_display_name">ClipboardSync</string>
+    <string name="plugin_description">Zwischenablage mit OneClip / ClipCascade / SyncClipboard synchronisieren</string>
+    <string name="settings_title">Zwischenablage-Synchronisierung</string>
+    <string name="quick_sync_tile_label">Zwischenablage-Sync</string>
+    <string name="clipboard_category_all">Alle</string>
+    <string name="clipboard_category_favorites">Favoriten</string>
+    <string name="clipboard_category_local">Lokal</string>
+    <string name="clipboard_category_media">Medien</string>
+    <string name="clipboard_category_remote">Andere Geräte</string>
+    <string name="clipboard_limit_local">Lokales Zwischenablage-Verlaufslimit</string>
+    <string name="clipboard_limit_remote">Remote-Zwischenablage-Verlaufslimit</string>
+    <string name="clipboard_limit_media">Medien-Verlaufslimit</string>
+    <string name="clipboard_sync_settings">Einstellungen für Remote-Zwischenablage-Sync</string>
+    <string name="clipboard_sync_settings_summary">Integriertes Sync-Konto, Serverprofil und Verhalten konfigurieren</string>
+
+    <string name="local_quick_sync">Synchronisierung aktivieren</string>
+    <string name="local_quick_sync_summary">Beim Deaktivieren werden alle Synchronisierungsdienste gestoppt</string>
+    <string name="local_quick_sync_summary_unreachable">Alle konfigurierten Endpunkte sind derzeit nicht erreichbar; bleibt aktiviert und versucht automatisch erneut</string>
+    <string name="server_profile_title">Server</string>
+    <string name="server_profile_summary">Servertyp auswählen und Adresse konfigurieren</string>
+    <string name="server_alias_title">Typ</string>
+    <string name="server_custom_alias_hint">Benutzerdefinierten Alias eingeben</string>
+    <string name="server_address_field_title">Serveradresse</string>
+    <string name="server_address_field_hint">Zum Beispiel http://192.168.10.45:5033</string>
+    <string name="server_profile_syncclipboard">SyncClipboard</string>
+    <string name="server_profile_oneclip">OneClip</string>
+    <string name="server_profile_clipcascade">ClipCascade</string>
+    <string name="server_profile_custom">Benutzerdefiniert</string>
+    <string name="sync_account_title">Synchronisierungskonto</string>
+    <string name="sync_account_dialog_title">Synchronisierungskonto bearbeiten</string>
+    <string name="sync_account_summary">Benutzer: %1$s\nPasswort: %2$s</string>
+    <string name="local_username">Benutzername</string>
+    <string name="local_password">Passwort</string>
+    <string name="credential_not_set">Nicht festgelegt</string>
+    <string name="password_show">Anzeigen</string>
+    <string name="password_hide">Ausblenden</string>
+    <string name="local_sync_interval">Synchronisierungsintervall (Sekunden)</string>
+    <string name="sync_filter_title">Synchronisierungsfilter</string>
+    <string name="sync_filter_summary_empty">Keine eingehenden Inhalte werden gefiltert</string>
+    <string name="sync_filter_category_text">Text</string>
+    <string name="sync_filter_category_binary">Bilder und Dateien</string>
+    <string name="sync_filter_category_preview">Aktuelle Regeln</string>
+    <string name="sync_filter_preview_title">Regelvorschau</string>
+    <string name="sync_filter_preview_empty">Derzeit sind keine Filterregeln aktiv</string>
+    <string name="sync_filter_segment_text_range">Text %1$d-%2$d Zeichen</string>
+    <string name="sync_filter_segment_text_min">Text ≥ %1$d Zeichen</string>
+    <string name="sync_filter_segment_text_max">Text ≤ %1$d Zeichen</string>
+    <string name="sync_filter_segment_extensions">%1$s ignorieren</string>
+    <string name="sync_filter_segment_file_max">Datei/Bild ≤ %1$d %2$s</string>
+    <string name="filter_hint_title">Hinweis</string>
+    <string name="filter_hint_summary">Sobald Mindest-/Maximalzeichen, Dateiendungen oder maximale Dateigröße gesetzt sind, wird der entsprechende Filter aktiviert. Leere Felder bedeuten keine Begrenzung. Mehrere Endungen mit Komma oder Leerzeichen trennen.</string>
+    <string name="filter_blocked_extensions_title">Dateiendungen ignorieren</string>
+    <string name="filter_blocked_extensions_summary">Mehrere Endungen werden unterstützt; mit Komma oder Leerzeichen trennen, z. B. apk, zip, mp4</string>
+    <string name="filter_max_file_size_title">Maximale Dateigröße</string>
+    <string name="filter_max_file_size_summary">Bilder oder Dateien, die größer sind, werden nicht empfangen</string>
+    <string name="filter_max_file_size_value">Aktuell: %1$s %2$s</string>
+    <string name="filter_max_file_size_unit_title">Größeneinheit</string>
+    <string-array name="filter_file_size_unit_entries">
+        <item>KB</item>
+        <item>MB</item>
+        <item>GB</item>
+    </string-array>
+    <string-array name="filter_file_size_unit_values">
+        <item>KB</item>
+        <item>MB</item>
+        <item>GB</item>
+    </string-array>
+    <string name="filter_min_text_chars_title">Mindestanzahl Zeichen</string>
+    <string name="filter_min_text_chars_summary">Text unter diesem Wert wird nicht empfangen, leer = unbegrenzt</string>
+    <string name="filter_max_text_chars_title">Maximale Zeichenanzahl</string>
+    <string name="filter_max_text_chars_summary">Text über diesem Wert wird nicht empfangen, leer = unbegrenzt</string>
+    <string name="storage_location_title">Speicherort</string>
+    <string name="storage_location_not_set">Nicht festgelegt</string>
+    <string name="storage_location_hint">Zum Beispiel /Download/SyncClipboard oder content://…</string>
+    <string name="storage_location_pick">Ordner auswählen</string>
+    <string name="local_test_connection">Verbindung testen</string>
+    <string name="local_click_test">Tippen, um die Serververfügbarkeit zu prüfen</string>
+    <string name="local_test_push">Push testen</string>
+    <string name="local_test_push_summary">Text oder Datei manuell an den aktuellen Server senden</string>
+    <string name="local_test_push_hint">Testtext eingeben oder Datei auswählen. Wenn eine Datei ausgewählt ist, wird sie bevorzugt gesendet.</string>
+    <string name="local_test_push_text_hint">Text eingeben, der an den Server gesendet wird</string>
+    <string name="local_test_push_no_file">Keine Datei ausgewählt</string>
+    <string name="local_test_push_pick_file">Datei auswählen</string>
+    <string name="local_test_push_clear_file">Datei entfernen</string>
+    <string name="local_test_push_send">Senden</string>
+    <string name="local_test_push_empty">Bitte zuerst Text eingeben oder Datei auswählen</string>
+    <string name="local_test_push_file_selected">Ausgewählte Datei: %s</string>
+    <string name="local_test_push_running">Push-Test läuft …</string>
+    <string name="local_test_push_success">Push-Test erfolgreich</string>
+    <string name="local_test_push_failed">Push-Test fehlgeschlagen</string>
+    <string name="please_set_server_address">Bitte zuerst Serveradresse festlegen</string>
+    <string name="quick_sync_required_title">Bitte zuerst Synchronisierung aktivieren</string>
+    <string name="quick_sync_required_message">Vor dem Verbindungstest muss „Synchronisierung aktivieren“ eingeschaltet sein.</string>
+    <string name="testing_connection">Verbindung wird getestet …</string>
+    <string name="connecting_to">Verbinde mit %s …</string>
+    <string name="connection_success">Verbindung erfolgreich</string>
+    <string name="connection_failed">Verbindung fehlgeschlagen</string>
+    <string name="unknown_error">Unbekannter Fehler</string>
+    <string name="keep_alive_notification_channel_name">ClipboardSync-Hintergrundsynchronisierung</string>
+    <string name="keep_alive_notification_channel_description">ClipboardSync im Hintergrund aktiv halten</string>
+    <string name="keep_alive_notification_title">ClipboardSync synchronisiert im Hintergrund</string>
+    <string name="keep_alive_notification_text">Aktueller Server: %1$s</string>
+    <string name="keep_alive_notification_text_battery">Aktueller Server: %1$s, Akku-Optimierung ausnehmen empfohlen</string>
+    <string name="keep_alive_notification_reconnect">Neu verbinden</string>
+    <string name="keep_alive_notification_pause">Pausieren</string>
+    <string name="keep_alive_notification_capture">Erfassen und synchronisieren</string>
+    <string name="manual_capture_empty">Systemzwischenablage ist leer oder nicht lesbar</string>
+    <string name="manual_capture_success">Systemzwischenablage gelesen und zur Synchronisierungswarteschlange hinzugefügt</string>
+    <string name="search">Suchen</string>
+    <string name="split_words">Wörter teilen</string>
+    <string name="tokenized_clipboard">Wörter aufteilen</string>
+    <string name="tokenized_clipboard_send">Senden</string>
+    <string name="tokenized_clipboard_select_all">Alle auswählen</string>
+    <string name="tokenized_clipboard_invert_selection">Auswahl umkehren</string>
+    <string name="tokenized_clipboard_clear_selection">Auswahl löschen</string>
+    <string name="tokenized_clipboard_unselect_all">Alles abwählen</string>
+    <string name="tokenized_clipboard_copied">Ausgewählte Tokens kopiert</string>
+    <string name="tokenized_clipboard_empty_selection">Wähle zuerst ein oder mehrere Tokens aus</string>
+    <string name="tokenized_clipboard_empty_state">Keine Tokens verfügbar</string>
+</resources>

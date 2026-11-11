@@ -1,0 +1,121 @@
+<resources>
+    <string name="app_display_name">ClipboardSync</string>
+    <string name="plugin_description">OneClip / ClipCascade / SyncClipboard とクリップボードを同期</string>
+    <string name="settings_title">クリップボード同期設定</string>
+    <string name="quick_sync_tile_label">クリップボード同期</string>
+    <string name="clipboard_category_all">すべて</string>
+    <string name="clipboard_category_favorites">お気に入り</string>
+    <string name="clipboard_category_local">ローカル</string>
+    <string name="clipboard_category_media">メディア</string>
+    <string name="clipboard_category_remote">他のデバイス</string>
+    <string name="clipboard_limit_local">ローカルクリップボード履歴上限</string>
+    <string name="clipboard_limit_remote">リモートクリップボード履歴上限</string>
+    <string name="clipboard_limit_media">メディア履歴上限</string>
+    <string name="clipboard_sync_settings">リモートクリップボード同期設定</string>
+    <string name="clipboard_sync_settings_summary">内蔵同期アカウント、サーバープロファイル、動作を設定</string>
+
+    <string name="local_quick_sync">同期を有効化</string>
+    <string name="local_quick_sync_summary">オフにすると同期サービスをすべて停止します</string>
+    <string name="local_quick_sync_summary_unreachable">設定済みエンドポイントは現在すべて到達不可です。オンのまま自動再試行します</string>
+    <string name="server_profile_title">サーバー</string>
+    <string name="server_profile_summary">サーバー種別を選び、アドレスを設定します</string>
+    <string name="server_alias_title">種類</string>
+    <string name="server_custom_alias_hint">カスタム別名を入力</string>
+    <string name="server_address_field_title">サーバーアドレス</string>
+    <string name="server_address_field_hint">例: http://192.168.10.45:5033</string>
+    <string name="server_profile_syncclipboard">SyncClipboard</string>
+    <string name="server_profile_oneclip">OneClip</string>
+    <string name="server_profile_clipcascade">ClipCascade</string>
+    <string name="server_profile_custom">カスタム</string>
+    <string name="sync_account_title">同期アカウント</string>
+    <string name="sync_account_dialog_title">同期アカウントを編集</string>
+    <string name="sync_account_summary">アカウント: %1$s\nパスワード: %2$s</string>
+    <string name="local_username">アカウント</string>
+    <string name="local_password">パスワード</string>
+    <string name="credential_not_set">未設定</string>
+    <string name="password_show">表示</string>
+    <string name="password_hide">非表示</string>
+    <string name="local_sync_interval">同期間隔（秒）</string>
+    <string name="sync_filter_title">同期フィルター</string>
+    <string name="sync_filter_summary_empty">受信内容をフィルターしません</string>
+    <string name="sync_filter_category_text">テキスト</string>
+    <string name="sync_filter_category_binary">画像とファイル</string>
+    <string name="sync_filter_category_preview">現在のルール</string>
+    <string name="sync_filter_preview_title">ルールプレビュー</string>
+    <string name="sync_filter_preview_empty">有効なフィルタールールはありません</string>
+    <string name="sync_filter_segment_text_range">テキスト %1$d-%2$d 文字</string>
+    <string name="sync_filter_segment_text_min">テキスト ≥ %1$d 文字</string>
+    <string name="sync_filter_segment_text_max">テキスト ≤ %1$d 文字</string>
+    <string name="sync_filter_segment_extensions">%1$s を無視</string>
+    <string name="sync_filter_segment_file_max">ファイル/画像 ≤ %1$d %2$s</string>
+    <string name="filter_hint_title">適用条件</string>
+    <string name="filter_hint_summary">文字数、拡張子、最大サイズを設定すると対応するフィルターが有効になります。空欄は無制限です。拡張子はカンマまたは空白で区切ってください。</string>
+    <string name="filter_blocked_extensions_title">無視する拡張子</string>
+    <string name="filter_blocked_extensions_summary">複数指定可。カンマまたは空白で区切る（例: apk, zip, mp4）</string>
+    <string name="filter_max_file_size_title">最大ファイルサイズ</string>
+    <string name="filter_max_file_size_summary">このサイズを超える画像/ファイルは受信しません</string>
+    <string name="filter_max_file_size_value">現在: %1$s %2$s</string>
+    <string name="filter_max_file_size_unit_title">サイズ単位</string>
+    <string-array name="filter_file_size_unit_entries">
+        <item>KB</item>
+        <item>MB</item>
+        <item>GB</item>
+    </string-array>
+    <string-array name="filter_file_size_unit_values">
+        <item>KB</item>
+        <item>MB</item>
+        <item>GB</item>
+    </string-array>
+    <string name="filter_min_text_chars_title">最小テキスト文字数</string>
+    <string name="filter_min_text_chars_summary">この文字数未満のテキストは受信しません。空欄で無制限</string>
+    <string name="filter_max_text_chars_title">最大テキスト文字数</string>
+    <string name="filter_max_text_chars_summary">この文字数を超えるテキストは受信しません。空欄で無制限</string>
+    <string name="storage_location_title">保存先</string>
+    <string name="storage_location_not_set">未設定</string>
+    <string name="storage_location_hint">例: /Download/SyncClipboard または content://…</string>
+    <string name="storage_location_pick">フォルダーを選択</string>
+    <string name="local_test_connection">接続テスト</string>
+    <string name="local_click_test">サーバー接続可否をテスト</string>
+    <string name="local_test_push">送信テスト</string>
+    <string name="local_test_push_summary">現在のサーバーへテキストまたはファイルを手動送信</string>
+    <string name="local_test_push_hint">テスト用テキストを入力するか、ファイルを選択してください。ファイル選択時はファイル送信を優先します。</string>
+    <string name="local_test_push_text_hint">サーバーへ送信するテキストを入力</string>
+    <string name="local_test_push_no_file">ファイル未選択</string>
+    <string name="local_test_push_pick_file">ファイルを選択</string>
+    <string name="local_test_push_clear_file">ファイルをクリア</string>
+    <string name="local_test_push_send">送信</string>
+    <string name="local_test_push_empty">先にテキスト入力またはファイル選択をしてください</string>
+    <string name="local_test_push_file_selected">選択中のファイル: %s</string>
+    <string name="local_test_push_running">送信テスト中…</string>
+    <string name="local_test_push_success">送信テスト成功</string>
+    <string name="local_test_push_failed">送信テスト失敗</string>
+    <string name="please_set_server_address">先にサーバーアドレスを設定してください</string>
+    <string name="quick_sync_required_title">先に同期を有効化してください</string>
+    <string name="quick_sync_required_message">接続テスト前に「同期を有効化」をオンにしてください。</string>
+    <string name="testing_connection">接続テスト中…</string>
+    <string name="connecting_to">%s に接続中…</string>
+    <string name="connection_success">接続成功</string>
+    <string name="connection_failed">接続失敗</string>
+    <string name="unknown_error">不明なエラー</string>
+    <string name="keep_alive_notification_channel_name">ClipboardSync バックグラウンド同期</string>
+    <string name="keep_alive_notification_channel_description">ClipboardSync をバックグラウンドで動作させ続けます</string>
+    <string name="keep_alive_notification_title">ClipboardSync がバックグラウンドで同期中</string>
+    <string name="keep_alive_notification_text">現在のサーバー: %1$s</string>
+    <string name="keep_alive_notification_text_battery">現在のサーバー: %1$s、バッテリー最適化の除外を推奨</string>
+    <string name="keep_alive_notification_reconnect">再接続</string>
+    <string name="keep_alive_notification_pause">一時停止</string>
+    <string name="keep_alive_notification_capture">取得して同期</string>
+    <string name="manual_capture_empty">システムクリップボードが空か、読み取れません</string>
+    <string name="manual_capture_success">システムクリップボードを読み取り、同期キューに追加しました</string>
+    <string name="search">検索</string>
+    <string name="split_words">分詞</string>
+    <string name="tokenized_clipboard">分詞</string>
+    <string name="tokenized_clipboard_send">送信</string>
+    <string name="tokenized_clipboard_select_all">すべて選択</string>
+    <string name="tokenized_clipboard_invert_selection">選択を反転</string>
+    <string name="tokenized_clipboard_clear_selection">選択をクリア</string>
+    <string name="tokenized_clipboard_unselect_all">すべて解除</string>
+    <string name="tokenized_clipboard_copied">選択したトークンをコピーしました</string>
+    <string name="tokenized_clipboard_empty_selection">先に1つ以上のトークンを選択してください</string>
+    <string name="tokenized_clipboard_empty_state">利用可能なトークンがありません</string>
+</resources>

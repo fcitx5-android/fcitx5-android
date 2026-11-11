@@ -16,6 +16,7 @@ abstract class FcitxPluginService : Service() {
     private lateinit var messenger: Messenger
 
     open val handler: Handler = Handler(Looper.getMainLooper())
+    protected open val stopOnUnbind: Boolean = true
 
     override fun onBind(intent: Intent): IBinder {
         messenger = Messenger(handler)
@@ -24,7 +25,9 @@ abstract class FcitxPluginService : Service() {
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
-        stop()
+        if (stopOnUnbind) {
+            stop()
+        }
         return false
     }
 

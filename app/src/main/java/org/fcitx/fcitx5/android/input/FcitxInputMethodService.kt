@@ -420,6 +420,10 @@ class FcitxInputMethodService : LifecycleInputMethodService() {
         currentInputConnection.setSelection(target, target)
     }
 
+    fun commitClipboardEntry(text: String): Boolean {
+        commitText(text)
+        return true
+    }
     fun commitText(text: String, cursor: Int = -1) {
         val ic = currentInputConnection ?: return
         // when composing text equals commit content, finish composing text as-is

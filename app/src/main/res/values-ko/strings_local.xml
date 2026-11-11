@@ -1,0 +1,121 @@
+<resources>
+    <string name="app_display_name">ClipboardSync</string>
+    <string name="plugin_description">OneClip / ClipCascade / SyncClipboard와 클립보드 동기화</string>
+    <string name="settings_title">클립보드 동기화 설정</string>
+    <string name="quick_sync_tile_label">클립보드 동기화</string>
+    <string name="clipboard_category_all">전체</string>
+    <string name="clipboard_category_favorites">즐겨찾기</string>
+    <string name="clipboard_category_local">로컬</string>
+    <string name="clipboard_category_media">미디어</string>
+    <string name="clipboard_category_remote">다른 기기</string>
+    <string name="clipboard_limit_local">로컬 클립보드 기록 한도</string>
+    <string name="clipboard_limit_remote">원격 클립보드 기록 한도</string>
+    <string name="clipboard_limit_media">미디어 기록 한도</string>
+    <string name="clipboard_sync_settings">원격 클립보드 동기화 설정</string>
+    <string name="clipboard_sync_settings_summary">내장 동기화 계정, 서버 프로필 및 동작 설정</string>
+
+    <string name="local_quick_sync">동기화 켜기</string>
+    <string name="local_quick_sync_summary">끄면 모든 동기화 서비스가 중지됩니다</string>
+    <string name="local_quick_sync_summary_unreachable">구성된 모든 엔드포인트에 현재 연결할 수 없습니다. 켠 상태로 유지하고 자동 재시도합니다</string>
+    <string name="server_profile_title">서버</string>
+    <string name="server_profile_summary">서버 유형을 선택하고 주소를 설정하세요</string>
+    <string name="server_alias_title">유형</string>
+    <string name="server_custom_alias_hint">사용자 지정 별칭 입력</string>
+    <string name="server_address_field_title">서버 주소</string>
+    <string name="server_address_field_hint">예: http://192.168.10.45:5033</string>
+    <string name="server_profile_syncclipboard">SyncClipboard</string>
+    <string name="server_profile_oneclip">OneClip</string>
+    <string name="server_profile_clipcascade">ClipCascade</string>
+    <string name="server_profile_custom">사용자 지정</string>
+    <string name="sync_account_title">동기화 계정</string>
+    <string name="sync_account_dialog_title">동기화 계정 편집</string>
+    <string name="sync_account_summary">계정: %1$s\n비밀번호: %2$s</string>
+    <string name="local_username">계정</string>
+    <string name="local_password">비밀번호</string>
+    <string name="credential_not_set">설정되지 않음</string>
+    <string name="password_show">표시</string>
+    <string name="password_hide">숨기기</string>
+    <string name="local_sync_interval">동기화 간격(초)</string>
+    <string name="sync_filter_title">동기화 필터</string>
+    <string name="sync_filter_summary_empty">수신 콘텐츠를 필터링하지 않습니다</string>
+    <string name="sync_filter_category_text">텍스트</string>
+    <string name="sync_filter_category_binary">이미지 및 파일</string>
+    <string name="sync_filter_category_preview">현재 규칙</string>
+    <string name="sync_filter_preview_title">규칙 미리보기</string>
+    <string name="sync_filter_preview_empty">활성화된 필터 규칙이 없습니다</string>
+    <string name="sync_filter_segment_text_range">텍스트 %1$d-%2$d자</string>
+    <string name="sync_filter_segment_text_min">텍스트 ≥ %1$d자</string>
+    <string name="sync_filter_segment_text_max">텍스트 ≤ %1$d자</string>
+    <string name="sync_filter_segment_extensions">%1$s 무시</string>
+    <string name="sync_filter_segment_file_max">파일/이미지 ≤ %1$d %2$s</string>
+    <string name="filter_hint_title">적용 안내</string>
+    <string name="filter_hint_summary">텍스트 길이, 파일 확장자, 최대 파일 크기를 입력하면 해당 필터가 적용됩니다. 비워두면 제한이 없습니다. 여러 확장자는 쉼표 또는 공백으로 구분하세요.</string>
+    <string name="filter_blocked_extensions_title">무시할 파일 확장자</string>
+    <string name="filter_blocked_extensions_summary">여러 확장자를 지원합니다. 쉼표 또는 공백으로 구분하세요(예: apk, zip, mp4)</string>
+    <string name="filter_max_file_size_title">최대 파일 크기</string>
+    <string name="filter_max_file_size_summary">이 크기를 초과하는 이미지/파일은 수신하지 않습니다</string>
+    <string name="filter_max_file_size_value">현재: %1$s %2$s</string>
+    <string name="filter_max_file_size_unit_title">크기 단위</string>
+    <string-array name="filter_file_size_unit_entries">
+        <item>KB</item>
+        <item>MB</item>
+        <item>GB</item>
+    </string-array>
+    <string-array name="filter_file_size_unit_values">
+        <item>KB</item>
+        <item>MB</item>
+        <item>GB</item>
+    </string-array>
+    <string name="filter_min_text_chars_title">최소 텍스트 글자 수</string>
+    <string name="filter_min_text_chars_summary">이보다 짧은 텍스트는 수신하지 않습니다. 비워두면 제한 없음</string>
+    <string name="filter_max_text_chars_title">최대 텍스트 글자 수</string>
+    <string name="filter_max_text_chars_summary">이보다 긴 텍스트는 수신하지 않습니다. 비워두면 제한 없음</string>
+    <string name="storage_location_title">저장 위치</string>
+    <string name="storage_location_not_set">설정되지 않음</string>
+    <string name="storage_location_hint">예: /Download/SyncClipboard 또는 content://…</string>
+    <string name="storage_location_pick">폴더 선택</string>
+    <string name="local_test_connection">연결 테스트</string>
+    <string name="local_click_test">탭하여 서버 연결 가능 여부를 테스트</string>
+    <string name="local_test_push">전송 테스트</string>
+    <string name="local_test_push_summary">현재 서버로 텍스트 또는 파일을 수동 전송</string>
+    <string name="local_test_push_hint">테스트 텍스트를 입력하거나 파일을 선택하세요. 파일이 선택되면 파일 전송을 우선합니다.</string>
+    <string name="local_test_push_text_hint">서버로 보낼 텍스트를 입력하세요</string>
+    <string name="local_test_push_no_file">선택된 파일 없음</string>
+    <string name="local_test_push_pick_file">파일 선택</string>
+    <string name="local_test_push_clear_file">파일 제거</string>
+    <string name="local_test_push_send">보내기</string>
+    <string name="local_test_push_empty">먼저 텍스트를 입력하거나 파일을 선택하세요</string>
+    <string name="local_test_push_file_selected">선택된 파일: %s</string>
+    <string name="local_test_push_running">전송 테스트 중…</string>
+    <string name="local_test_push_success">전송 테스트 성공</string>
+    <string name="local_test_push_failed">전송 테스트 실패</string>
+    <string name="please_set_server_address">먼저 서버 주소를 설정하세요</string>
+    <string name="quick_sync_required_title">먼저 동기화를 켜세요</string>
+    <string name="quick_sync_required_message">연결 테스트 전에 “동기화 켜기”를 먼저 활성화해야 합니다.</string>
+    <string name="testing_connection">연결 테스트 중…</string>
+    <string name="connecting_to">%s에 연결 중…</string>
+    <string name="connection_success">연결 성공</string>
+    <string name="connection_failed">연결 실패</string>
+    <string name="unknown_error">알 수 없는 오류</string>
+    <string name="keep_alive_notification_channel_name">ClipboardSync 백그라운드 동기화</string>
+    <string name="keep_alive_notification_channel_description">ClipboardSync를 백그라운드에서 계속 실행합니다</string>
+    <string name="keep_alive_notification_title">ClipboardSync가 백그라운드에서 동기화 중</string>
+    <string name="keep_alive_notification_text">현재 서버: %1$s</string>
+    <string name="keep_alive_notification_text_battery">현재 서버: %1$s, 배터리 최적화 예외 권장</string>
+    <string name="keep_alive_notification_reconnect">재연결</string>
+    <string name="keep_alive_notification_pause">일시중지</string>
+    <string name="keep_alive_notification_capture">가져와서 동기화</string>
+    <string name="manual_capture_empty">시스템 클립보드가 비어 있거나 읽을 수 없습니다</string>
+    <string name="manual_capture_success">시스템 클립보드를 읽어 동기화 대기열에 추가했습니다</string>
+    <string name="search">검색</string>
+    <string name="split_words">단어 분리</string>
+    <string name="tokenized_clipboard">토큰화</string>
+    <string name="tokenized_clipboard_send">보내기</string>
+    <string name="tokenized_clipboard_select_all">모두 선택</string>
+    <string name="tokenized_clipboard_invert_selection">선택 반전</string>
+    <string name="tokenized_clipboard_clear_selection">선택 지우기</string>
+    <string name="tokenized_clipboard_unselect_all">모두 선택 해제</string>
+    <string name="tokenized_clipboard_copied">선택한 토큰을 복사했습니다</string>
+    <string name="tokenized_clipboard_empty_selection">먼저 하나 이상의 토큰을 선택하세요</string>
+    <string name="tokenized_clipboard_empty_state">사용할 수 있는 토큰이 없습니다</string>
+</resources>

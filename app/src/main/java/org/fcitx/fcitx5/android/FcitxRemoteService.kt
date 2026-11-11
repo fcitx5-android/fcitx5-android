@@ -70,6 +70,32 @@ class FcitxRemoteService : Service() {
             FcitxDaemon.restartFcitx()
         }
 
+        override fun importRemoteClipboardEntry(
+            text: String,
+            originalText: String,
+            originalRootUri: String,
+            type: String,
+            timestamp: Long,
+            sensitive: Boolean
+        ) {
+            val filteredText = org.fcitx.fcitx5.android.data.clipboard.HostClipboardFilter.transform(text)
+            runBlocking {
+                ClipboardManager.importRemoteEntry(
+                    text = filteredText,
+                    originalText = when {
+                        originalText.isNotEmpty() -> originalText
+                        filteredText != text -> text
+                        else -> ""
+                    },
+                    originalRootUri = originalRootUri,
+                    type = type,
+                    timestamp = timestamp,
+                    sensitive = sensitive,
+                    notifyListeners = false
+                )
+            }
+        }
+
         override fun registerClipboardEntryTransformer(transformer: IClipboardEntryTransformer) {
             Timber.d("registerClipboardEntryTransformer: ${transformer.desc}")
             if (transformer.description.isNullOrBlank()) {

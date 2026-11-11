@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <SwitchPreferenceCompat
+        app:key="quick_sync"
+        app:title="@string/local_quick_sync"
+        app:summary="@string/local_quick_sync_summary"
+        app:defaultValue="false" />
+
+    <Preference
+        app:key="server_profile"
+        app:title="@string/server_profile_title"
+        app:summary="@string/server_profile_summary" />
+
+    <Preference
+        app:key="sync_account"
+        app:title="@string/sync_account_title"
+        app:summary="@string/credential_not_set" />
+
+    <org.fcitx.fcitx5.android.ui.main.settings.DialogSeekBarPreference
+        app:key="sync_interval"
+        app:title="@string/local_sync_interval"
+        app:defaultValue="3"
+        app:min="1"
+        app:max="60"
+        app:step="1"
+        app:unit="s"
+        app:useSimpleSummaryProvider="true" />
+
+    <Preference
+        app:key="sync_filter"
+        app:title="@string/sync_filter_title"
+        app:summary="@string/sync_filter_summary_empty" />
+
+    <Preference
+        app:key="download_path"
+        app:title="@string/storage_location_title"
+        app:summary="@string/storage_location_not_set" />
+
+    <Preference
+        app:key="test_connection"
+        app:title="@string/local_test_connection"
+        app:summary="@string/local_click_test" />
+
+    <Preference
+        app:key="test_push"
+        app:title="@string/local_test_push"
+        app:summary="@string/local_test_push_summary" />
+
+</PreferenceScreen>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <Preference
+        app:key="sync_filter_hint"
+        app:title="@string/filter_hint_title"
+        app:summary="@string/filter_hint_summary"
+        app:selectable="false" />
+
+    <PreferenceCategory
+        app:title="@string/sync_filter_category_text">
+
+        <EditTextPreference
+            app:key="filter_min_text_chars"
+            app:title="@string/filter_min_text_chars_title"
+            app:summary="@string/filter_min_text_chars_summary"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="filter_max_text_chars"
+            app:title="@string/filter_max_text_chars_title"
+            app:summary="@string/filter_max_text_chars_summary"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/sync_filter_category_binary">
+
+        <EditTextPreference
+            app:key="filter_blocked_extensions"
+            app:title="@string/filter_blocked_extensions_title"
+            app:summary="@string/filter_blocked_extensions_summary"
+            app:useSimpleSummaryProvider="true" />
+
+        <Preference
+            app:key="filter_max_file_size_entry"
+            app:title="@string/filter_max_file_size_title"
+            app:summary="@string/filter_max_file_size_summary" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/sync_filter_category_preview">
+
+        <Preference
+            app:key="sync_filter_preview"
+            app:title="@string/sync_filter_preview_title"
+            app:summary="@string/sync_filter_preview_empty" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
