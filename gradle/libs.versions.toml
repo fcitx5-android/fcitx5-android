@@ -63,6 +63,7 @@ androidx-lifecycle-testing = { module = "androidx.lifecycle:lifecycle-runtime-te
 kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version = "2.3.0" }
 ksp = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 
+jieba = { module = "com.huaban:jieba-analysis", version = "1.0.2" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }

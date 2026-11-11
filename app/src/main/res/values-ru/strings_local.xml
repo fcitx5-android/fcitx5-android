@@ -1,0 +1,121 @@
+<resources>
+    <string name="app_display_name">ClipboardSync</string>
+    <string name="plugin_description">Синхронизация буфера обмена с OneClip / ClipCascade / SyncClipboard</string>
+    <string name="settings_title">Настройки синхронизации буфера обмена</string>
+    <string name="quick_sync_tile_label">Синхр. буфера</string>
+    <string name="clipboard_category_all">Все</string>
+    <string name="clipboard_category_favorites">Избранное</string>
+    <string name="clipboard_category_local">Локальные</string>
+    <string name="clipboard_category_media">Медиа</string>
+    <string name="clipboard_category_remote">Другие устройства</string>
+    <string name="clipboard_limit_local">Лимит истории локального буфера обмена</string>
+    <string name="clipboard_limit_remote">Лимит истории удалённого буфера обмена</string>
+    <string name="clipboard_limit_media">Лимит истории медиа</string>
+    <string name="clipboard_sync_settings">Настройки удалённой синхронизации буфера обмена</string>
+    <string name="clipboard_sync_settings_summary">Настройка встроенной учётной записи синхронизации, профиля сервера и поведения</string>
+
+    <string name="local_quick_sync">Включить синхронизацию</string>
+    <string name="local_quick_sync_summary">При отключении будут остановлены все службы синхронизации</string>
+    <string name="local_quick_sync_summary_unreachable">Все настроенные конечные точки сейчас недоступны; синхронизация остаётся включённой и будет автоматически повторять попытки</string>
+    <string name="server_profile_title">Сервер</string>
+    <string name="server_profile_summary">Выберите тип сервера и настройте адрес</string>
+    <string name="server_alias_title">Тип</string>
+    <string name="server_custom_alias_hint">Введите пользовательский псевдоним</string>
+    <string name="server_address_field_title">Адрес сервера</string>
+    <string name="server_address_field_hint">Например: http://192.168.10.45:5033</string>
+    <string name="server_profile_syncclipboard">SyncClipboard</string>
+    <string name="server_profile_oneclip">OneClip</string>
+    <string name="server_profile_clipcascade">ClipCascade</string>
+    <string name="server_profile_custom">Пользовательский</string>
+    <string name="sync_account_title">Учётная запись синхронизации</string>
+    <string name="sync_account_dialog_title">Редактировать учётную запись синхронизации</string>
+    <string name="sync_account_summary">Учётная запись: %1$s\nПароль: %2$s</string>
+    <string name="local_username">Учётная запись</string>
+    <string name="local_password">Пароль</string>
+    <string name="credential_not_set">Не задано</string>
+    <string name="password_show">Показать</string>
+    <string name="password_hide">Скрыть</string>
+    <string name="local_sync_interval">Интервал синхронизации (сек.)</string>
+    <string name="sync_filter_title">Фильтр синхронизации</string>
+    <string name="sync_filter_summary_empty">Получаемое содержимое не фильтруется</string>
+    <string name="sync_filter_category_text">Текст</string>
+    <string name="sync_filter_category_binary">Изображения и файлы</string>
+    <string name="sync_filter_category_preview">Текущие правила</string>
+    <string name="sync_filter_preview_title">Предпросмотр правил</string>
+    <string name="sync_filter_preview_empty">Фильтры сейчас не включены</string>
+    <string name="sync_filter_segment_text_range">Текст %1$d-%2$d символов</string>
+    <string name="sync_filter_segment_text_min">Текст ≥ %1$d символов</string>
+    <string name="sync_filter_segment_text_max">Текст ≤ %1$d символов</string>
+    <string name="sync_filter_segment_extensions">Игнорировать %1$s</string>
+    <string name="sync_filter_segment_file_max">Файл/изображение ≤ %1$d %2$s</string>
+    <string name="filter_hint_title">Как это работает</string>
+    <string name="filter_hint_summary">После задания длины текста, расширений или максимального размера файла соответствующий фильтр включается. Пустое значение — без ограничений. Несколько расширений разделяйте запятой или пробелом.</string>
+    <string name="filter_blocked_extensions_title">Игнорируемые расширения</string>
+    <string name="filter_blocked_extensions_summary">Поддерживаются несколько расширений; разделяйте запятой или пробелом, например: apk, zip, mp4</string>
+    <string name="filter_max_file_size_title">Максимальный размер файла</string>
+    <string name="filter_max_file_size_summary">Изображения или файлы больше этого размера не принимаются</string>
+    <string name="filter_max_file_size_value">Текущее: %1$s %2$s</string>
+    <string name="filter_max_file_size_unit_title">Единица размера</string>
+    <string-array name="filter_file_size_unit_entries">
+        <item>KB</item>
+        <item>MB</item>
+        <item>GB</item>
+    </string-array>
+    <string-array name="filter_file_size_unit_values">
+        <item>KB</item>
+        <item>MB</item>
+        <item>GB</item>
+    </string-array>
+    <string name="filter_min_text_chars_title">Минимум символов текста</string>
+    <string name="filter_min_text_chars_summary">Текст короче этого значения не принимается; пусто = без ограничений</string>
+    <string name="filter_max_text_chars_title">Максимум символов текста</string>
+    <string name="filter_max_text_chars_summary">Текст длиннее этого значения не принимается; пусто = без ограничений</string>
+    <string name="storage_location_title">Место хранения</string>
+    <string name="storage_location_not_set">Не задано</string>
+    <string name="storage_location_hint">Например: /Download/SyncClipboard или content://…</string>
+    <string name="storage_location_pick">Выбрать папку</string>
+    <string name="local_test_connection">Проверить подключение</string>
+    <string name="local_click_test">Нажмите, чтобы проверить доступность сервера</string>
+    <string name="local_test_push">Тест отправки</string>
+    <string name="local_test_push_summary">Вручную отправить текст или файл на текущий сервер</string>
+    <string name="local_test_push_hint">Введите тестовый текст или выберите файл. Если выбран файл, сначала отправляется файл.</string>
+    <string name="local_test_push_text_hint">Введите текст для отправки на сервер</string>
+    <string name="local_test_push_no_file">Файл не выбран</string>
+    <string name="local_test_push_pick_file">Выбрать файл</string>
+    <string name="local_test_push_clear_file">Очистить файл</string>
+    <string name="local_test_push_send">Отправить</string>
+    <string name="local_test_push_empty">Сначала введите текст или выберите файл</string>
+    <string name="local_test_push_file_selected">Выбранный файл: %s</string>
+    <string name="local_test_push_running">Выполняется тест отправки…</string>
+    <string name="local_test_push_success">Тест отправки успешен</string>
+    <string name="local_test_push_failed">Тест отправки не удался</string>
+    <string name="please_set_server_address">Сначала задайте адрес сервера</string>
+    <string name="quick_sync_required_title">Сначала включите синхронизацию</string>
+    <string name="quick_sync_required_message">Перед проверкой подключения нужно включить «Включить синхронизацию».</string>
+    <string name="testing_connection">Проверка подключения…</string>
+    <string name="connecting_to">Подключение к %s…</string>
+    <string name="connection_success">Подключение успешно</string>
+    <string name="connection_failed">Ошибка подключения</string>
+    <string name="unknown_error">Неизвестная ошибка</string>
+    <string name="keep_alive_notification_channel_name">Фоновая синхронизация ClipboardSync</string>
+    <string name="keep_alive_notification_channel_description">Поддерживает работу ClipboardSync в фоне</string>
+    <string name="keep_alive_notification_title">ClipboardSync синхронизируется в фоне</string>
+    <string name="keep_alive_notification_text">Текущий сервер: %1$s</string>
+    <string name="keep_alive_notification_text_battery">Текущий сервер: %1$s, рекомендуется отключить оптимизацию батареи</string>
+    <string name="keep_alive_notification_reconnect">Переподключить</string>
+    <string name="keep_alive_notification_pause">Пауза</string>
+    <string name="keep_alive_notification_capture">Считать и синхронизировать</string>
+    <string name="manual_capture_empty">Системный буфер обмена пуст или недоступен для чтения</string>
+    <string name="manual_capture_success">Системный буфер обмена прочитан и добавлен в очередь синхронизации</string>
+    <string name="search">Поиск</string>
+    <string name="split_words">Разбить на слова</string>
+    <string name="tokenized_clipboard">Разбивка на слова</string>
+    <string name="tokenized_clipboard_send">Отправить</string>
+    <string name="tokenized_clipboard_select_all">Выбрать все</string>
+    <string name="tokenized_clipboard_invert_selection">Инвертировать</string>
+    <string name="tokenized_clipboard_clear_selection">Очистить выбор</string>
+    <string name="tokenized_clipboard_unselect_all">Снять выбор со всех</string>
+    <string name="tokenized_clipboard_copied">Выбранные токены скопированы</string>
+    <string name="tokenized_clipboard_empty_selection">Сначала выберите один или несколько токенов</string>
+    <string name="tokenized_clipboard_empty_state">Нет доступных токенов</string>
+</resources>

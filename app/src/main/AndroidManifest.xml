@@ -1,18 +1,28 @@
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ SPDX-License-Identifier: LGPL-2.1-or-later
+  ~ SPDX-FileCopyrightText: Copyright 2020-2024 Fcitx5 for Android Contributors
+  -->
 
-    <!-- remove unused permission from AppCompat -->
-    <permission
-        android:name="${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
-        tools:node="remove" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:installLocation="auto">
 
     <uses-permission
-        android:name="${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32"
         tools:node="remove" />
 
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
 
     <!-- remove intent queries merged from library manifest (namely Android-Image-Cropper) -->
     <queries tools:node="removeAll" />
@@ -43,9 +53,12 @@
         android:fullBackupContent="@xml/full_backup_content"
         android:icon="@mipmap/app_icon"
         android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/app_icon_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FcitxAppTheme"
+        android:usesCleartextTraffic="true"
+        tools:replace="android:supportsRtl,android:networkSecurityConfig,android:usesCleartextTraffic"
         tools:targetApi="33">
         <activity
             android:name=".ui.setup.SetupActivity"
@@ -146,6 +159,38 @@
             </intent-filter>
         </service>
 
+        <service
+            android:name=".clipboardsync.MainService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="remoteMessaging" />
+
+        <activity
+            android:name=".clipboardsync.ui.ClipboardSyncSettingsActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.ClipboardSync.Settings" />
+
+        <activity
+            android:name=".clipboardsync.ui.ClipboardCaptureActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:finishOnTaskLaunch="true"
+            android:theme="@style/Theme.ClipboardSync.Capture" />
+
+        <service
+            android:name=".clipboardsync.service.QuickSyncTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_tile_clipboard_sync"
+            android:label="@string/quick_sync_tile_label"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            tools:targetApi="n">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
         <provider
             android:name=".provider.FcitxDataProvider"
             android:authorities="${applicationId}.provider"
@@ -157,8 +202,18 @@
             </intent-filter>
         </provider>
 
-        <!-- remove unneeded components from com.canhub.cropper -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/clipboard_file_paths" />
+        </provider>
+
         <!--suppress DeprecatedClassUsageInspection -->
+        <!-- remove unneeded components from com.canhub.cropper -->
         <activity
             android:name="com.canhub.cropper.CropImageActivity"
             tools:node="remove" />

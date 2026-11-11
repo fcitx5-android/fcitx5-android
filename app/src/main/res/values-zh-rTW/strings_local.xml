@@ -1,0 +1,121 @@
+<resources>
+    <string name="app_display_name">ClipboardSync</string>
+    <string name="plugin_description">與 OneClip / ClipCascade / SyncClipboard 服務同步剪貼簿</string>
+    <string name="settings_title">剪貼簿同步設定</string>
+    <string name="quick_sync_tile_label">剪貼簿同步</string>
+    <string name="clipboard_category_all">全部</string>
+    <string name="clipboard_category_favorites">收藏</string>
+    <string name="clipboard_category_local">本機</string>
+    <string name="clipboard_category_media">媒體</string>
+    <string name="clipboard_category_remote">其他裝置</string>
+    <string name="clipboard_limit_local">本機剪貼簿歷史上限</string>
+    <string name="clipboard_limit_remote">遠端剪貼簿歷史上限</string>
+    <string name="clipboard_limit_media">媒體歷史上限</string>
+    <string name="clipboard_sync_settings">遠端剪貼簿同步設定</string>
+    <string name="clipboard_sync_settings_summary">設定內建同步帳號、伺服器設定與行為</string>
+
+    <string name="local_quick_sync">開啟同步</string>
+    <string name="local_quick_sync_summary">關閉後將停止所有同步服務</string>
+    <string name="local_quick_sync_summary_unreachable">所有已設定端點目前不可達，已保持開啟並等待自動重試</string>
+    <string name="server_profile_title">伺服器</string>
+    <string name="server_profile_summary">選擇伺服器類型並設定位址</string>
+    <string name="server_alias_title">類型</string>
+    <string name="server_custom_alias_hint">輸入自訂別名</string>
+    <string name="server_address_field_title">伺服器位址</string>
+    <string name="server_address_field_hint">例如 http://192.168.10.45:5033</string>
+    <string name="server_profile_syncclipboard">SyncClipboard</string>
+    <string name="server_profile_oneclip">OneClip</string>
+    <string name="server_profile_clipcascade">ClipCascade</string>
+    <string name="server_profile_custom">自訂</string>
+    <string name="sync_account_title">同步帳號</string>
+    <string name="sync_account_dialog_title">編輯同步帳號</string>
+    <string name="sync_account_summary">帳號：%1$s\n密碼：%2$s</string>
+    <string name="local_username">帳號</string>
+    <string name="local_password">密碼</string>
+    <string name="credential_not_set">未設定</string>
+    <string name="password_show">顯示</string>
+    <string name="password_hide">隱藏</string>
+    <string name="local_sync_interval">同步間隔（秒）</string>
+    <string name="sync_filter_title">同步過濾</string>
+    <string name="sync_filter_summary_empty">不過濾任何接收內容</string>
+    <string name="sync_filter_category_text">文字</string>
+    <string name="sync_filter_category_binary">圖片與檔案</string>
+    <string name="sync_filter_category_preview">目前規則</string>
+    <string name="sync_filter_preview_title">規則預覽</string>
+    <string name="sync_filter_preview_empty">目前未啟用任何過濾規則</string>
+    <string name="sync_filter_segment_text_range">文字 %1$d-%2$d 字</string>
+    <string name="sync_filter_segment_text_min">文字 ≥ %1$d 字</string>
+    <string name="sync_filter_segment_text_max">文字 ≤ %1$d 字</string>
+    <string name="sync_filter_segment_extensions">忽略 %1$s</string>
+    <string name="sync_filter_segment_file_max">檔案/圖片 ≤ %1$d %2$s</string>
+    <string name="filter_hint_title">生效說明</string>
+    <string name="filter_hint_summary">填寫文字字數、檔案副檔名或最大檔案大小後即啟用對應過濾；留空則不限制。多個副檔名可用逗號或空格分隔。</string>
+    <string name="filter_blocked_extensions_title">忽略檔案副檔名</string>
+    <string name="filter_blocked_extensions_summary">支援多個副檔名；用逗號或空格分隔，例如 apk, zip, mp4</string>
+    <string name="filter_max_file_size_title">最大檔案大小</string>
+    <string name="filter_max_file_size_summary">填寫後大於該大小的圖片或檔案不接收</string>
+    <string name="filter_max_file_size_value">目前：%1$s %2$s</string>
+    <string name="filter_max_file_size_unit_title">大小單位</string>
+    <string-array name="filter_file_size_unit_entries">
+        <item>KB</item>
+        <item>MB</item>
+        <item>GB</item>
+    </string-array>
+    <string-array name="filter_file_size_unit_values">
+        <item>KB</item>
+        <item>MB</item>
+        <item>GB</item>
+    </string-array>
+    <string name="filter_min_text_chars_title">最少文字字數</string>
+    <string name="filter_min_text_chars_summary">少於該字數的文字不接收，留空表示不限</string>
+    <string name="filter_max_text_chars_title">最多文字字數</string>
+    <string name="filter_max_text_chars_summary">多於該字數的文字不接收，留空表示不限</string>
+    <string name="storage_location_title">儲存位置</string>
+    <string name="storage_location_not_set">未設定</string>
+    <string name="storage_location_hint">例如 /Download/SyncClipboard 或 content://…</string>
+    <string name="storage_location_pick">選擇資料夾</string>
+    <string name="local_test_connection">測試連線</string>
+    <string name="local_click_test">點擊測試伺服器可用性</string>
+    <string name="local_test_push">測試推送</string>
+    <string name="local_test_push_summary">手動推送文字或檔案到目前伺服器</string>
+    <string name="local_test_push_hint">可直接輸入測試文字，或選擇一個檔案進行推送。已選擇檔案時會優先推送檔案。</string>
+    <string name="local_test_push_text_hint">輸入要推送到伺服器的文字</string>
+    <string name="local_test_push_no_file">未選擇檔案</string>
+    <string name="local_test_push_pick_file">選擇檔案</string>
+    <string name="local_test_push_clear_file">清除檔案</string>
+    <string name="local_test_push_send">送出</string>
+    <string name="local_test_push_empty">請先輸入文字或選擇檔案</string>
+    <string name="local_test_push_file_selected">已選擇檔案：%s</string>
+    <string name="local_test_push_running">正在測試推送…</string>
+    <string name="local_test_push_success">測試推送成功</string>
+    <string name="local_test_push_failed">測試推送失敗</string>
+    <string name="please_set_server_address">請先設定伺服器位址</string>
+    <string name="quick_sync_required_title">請先開啟同步</string>
+    <string name="quick_sync_required_message">測試連線前需要先開啟「開啟同步」。</string>
+    <string name="testing_connection">正在測試連線…</string>
+    <string name="connecting_to">正在連線到 %s…</string>
+    <string name="connection_success">連線成功</string>
+    <string name="connection_failed">連線失敗</string>
+    <string name="unknown_error">未知錯誤</string>
+    <string name="keep_alive_notification_channel_name">ClipboardSync 背景同步</string>
+    <string name="keep_alive_notification_channel_description">保持 ClipboardSync 在背景持續運作</string>
+    <string name="keep_alive_notification_title">ClipboardSync 正在背景同步</string>
+    <string name="keep_alive_notification_text">目前伺服器：%1$s</string>
+    <string name="keep_alive_notification_text_battery">目前伺服器：%1$s，建議放行電池最佳化</string>
+    <string name="keep_alive_notification_reconnect">重連</string>
+    <string name="keep_alive_notification_pause">暫停</string>
+    <string name="keep_alive_notification_capture">擷取並同步</string>
+    <string name="manual_capture_empty">目前系統剪貼簿為空或不可讀</string>
+    <string name="manual_capture_success">已讀取系統剪貼簿並加入同步佇列</string>
+    <string name="search">搜尋</string>
+    <string name="split_words">分詞</string>
+    <string name="tokenized_clipboard">分詞</string>
+    <string name="tokenized_clipboard_send">發送</string>
+    <string name="tokenized_clipboard_select_all">全選</string>
+    <string name="tokenized_clipboard_invert_selection">反選</string>
+    <string name="tokenized_clipboard_clear_selection">取消選擇</string>
+    <string name="tokenized_clipboard_unselect_all">取消全選</string>
+    <string name="tokenized_clipboard_copied">已複製所選詞元</string>
+    <string name="tokenized_clipboard_empty_selection">請先選擇一個或多個詞元</string>
+    <string name="tokenized_clipboard_empty_state">目前沒有可用詞元</string>
+</resources>

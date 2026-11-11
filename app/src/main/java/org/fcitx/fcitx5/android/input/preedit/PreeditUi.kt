@@ -3,6 +3,8 @@
  * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.input.preedit
+import android.text.style.ForegroundColorSpan
+import android.text.SpannableString
 
 import android.content.Context
 import android.graphics.Paint
@@ -76,7 +78,10 @@ open class PreeditUi(
             upCursor = inputPanel.preedit.cursor
         } else {
             upString = buildSpannedString {
-                append(inputPanel.auxUp.toSpannedString(activeBkg))
+                val auxUpStr = inputPanel.auxUp.toSpannedString(activeBkg)
+                val span = SpannableString(auxUpStr)
+                span.setSpan(ForegroundColorSpan(theme.altKeyTextColor), 0, span.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                append(span)
                 append(inputPanel.preedit.toSpannedString(activeBkg))
             }
             upCursor = inputPanel.preedit.cursor.let {
@@ -84,7 +89,11 @@ open class PreeditUi(
                 else inputPanel.auxUp.length + it
             }
         }
-        val downString = inputPanel.auxDown.toSpannedString(activeBkg)
+        val downString = inputPanel.auxDown.toSpannedString(activeBkg).let {
+            val span = SpannableString(it)
+            span.setSpan(ForegroundColorSpan(theme.altKeyTextColor), 0, span.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            span
+        }
         val hasUp = upString.isNotEmpty()
         val hasDown = downString.isNotEmpty()
         visible = hasUp || hasDown

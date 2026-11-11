@@ -41,6 +41,17 @@ open class FcitxRemoteConnection(
     }
 
     override fun onServiceDisconnected(name: ComponentName) {
+        remoteService = null
+        onDisconnected()
+    }
+
+    override fun onBindingDied(name: ComponentName) {
+        remoteService = null
+        onDisconnected()
+    }
+
+    override fun onNullBinding(name: ComponentName) {
+        remoteService = null
         onDisconnected()
     }
 

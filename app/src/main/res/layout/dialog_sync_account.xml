@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+    <EditText
+        android:id="@+id/username_edit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autofillHints="username"
+        android:hint="@string/local_username"
+        android:imeOptions="actionNext"
+        android:inputType="text"
+        android:maxLines="1" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp">
+
+        <EditText
+            android:id="@+id/password_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="password"
+            android:hint="@string/local_password"
+            android:imeOptions="actionDone"
+            android:inputType="textPassword"
+            android:maxLines="1"
+            android:paddingEnd="56dp" />
+
+        <ImageButton
+            android:id="@+id/password_toggle_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="end|center_vertical"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/password_show"
+            android:padding="8dp"
+            android:src="@drawable/ic_visibility"
+            app:tint="#FF5F6368" />
+    </FrameLayout>
+
+</LinearLayout>

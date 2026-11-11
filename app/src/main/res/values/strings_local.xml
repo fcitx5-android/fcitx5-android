@@ -1,0 +1,118 @@
+<resources>
+    <string name="app_display_name">ClipboardSync</string>
+    <string name="plugin_description">Sync clipboard with OneClip / ClipCascade / SyncClipboard</string>
+    <string name="settings_title">Clipboard Sync Settings</string>
+    <string name="quick_sync_tile_label">Clipboard Sync</string>
+
+    <string name="local_quick_sync">Enable sync</string>
+    <string name="local_quick_sync_summary">Turning this off will stop all sync services</string>
+    <string name="local_quick_sync_summary_unreachable">All configured endpoints are currently unreachable; kept enabled and waiting for automatic retry</string>
+    <string name="server_profile_title">Server</string>
+    <string name="server_profile_summary">Select server type and configure address</string>
+    <string name="server_alias_title">Type</string>
+    <string name="server_custom_alias_hint">Enter a custom alias</string>
+    <string name="server_address_field_title">Server address</string>
+    <string name="server_address_field_hint">For example: http://192.168.10.45:5033</string>
+    <string name="server_profile_syncclipboard">SyncClipboard</string>
+    <string name="server_profile_oneclip">OneClip</string>
+    <string name="server_profile_clipcascade">ClipCascade</string>
+    <string name="server_profile_custom">Custom</string>
+    <string name="background_keep_alive_title">Background persistent sync</string>
+    <string name="background_keep_alive_summary">Enable foreground service, reconnection, and self-recovery to reduce background disconnection</string>
+    <string name="battery_optimization_title">Battery optimization</string>
+    <string name="battery_optimization_summary">Recommended to add plugin to background whitelist to avoid restrictions when screen is off</string>
+    <string name="battery_optimization_summary_enabled">Battery optimization is currently ignored</string>
+    <string name="battery_optimization_summary_disabled">Still affected by battery optimization; allowing background run is recommended</string>
+    <string name="clipboard_permission_title">System clipboard permission</string>
+    <string name="clipboard_permission_summary">Please grant app permission to read/write system clipboard and related background permissions</string>
+    <string name="clipboard_permission_dialog_title">Grant system clipboard access</string>
+    <string name="clipboard_permission_dialog_message">Android does not provide a unified runtime permission dialog for clipboard access. You usually need to manually allow this plugin in system app permissions or privacy settings. If your system provides options like “Read clipboard”, “Clipboard access”, or “Read clipboard in background”, enable them for ClipboardSync. It is also recommended to keep background running permission. Note: Android 10+ restricts clipboard reads when the app is neither foreground nor the default IME. This is platform policy, not a plugin bug. In this case, you can use “Capture and sync” from the notification for a one-time foreground capture.</string>
+    <string name="clipboard_permission_open_app_info">Open app info</string>
+    <string name="clipboard_permission_open_permissions">Open permission settings</string>
+    <string name="sync_account_title">Sync account</string>
+    <string name="sync_account_dialog_title">Edit sync account</string>
+    <string name="sync_account_summary">Account: %1$s\nPassword: %2$s</string>
+    <string name="local_username">Account</string>
+    <string name="local_password">Password</string>
+    <string name="credential_not_set">Not set</string>
+    <string name="password_show">Show</string>
+    <string name="password_hide">Hide</string>
+    <string name="local_sync_interval">Sync interval (seconds)</string>
+    <string name="sync_filter_title">Sync filter</string>
+    <string name="sync_filter_summary_empty">Do not filter any received content</string>
+    <string name="sync_filter_category_text">Text</string>
+    <string name="sync_filter_category_binary">Images and files</string>
+    <string name="sync_filter_category_preview">Current rules</string>
+    <string name="sync_filter_preview_title">Rule preview</string>
+    <string name="sync_filter_preview_empty">No filter rules are currently enabled</string>
+    <string name="sync_filter_segment_text_range">Text %1$d-%2$d chars</string>
+    <string name="sync_filter_segment_text_min">Text ≥ %1$d chars</string>
+    <string name="sync_filter_segment_text_max">Text ≤ %1$d chars</string>
+    <string name="sync_filter_segment_extensions">Ignore %1$s</string>
+    <string name="sync_filter_segment_file_max">File/image ≤ %1$d %2$s</string>
+    <string name="filter_hint_title">How it works</string>
+    <string name="filter_hint_summary">Once you set text length, file extensions, or max file size, the corresponding filter becomes active. Leave empty for no limit. Separate multiple extensions with commas or spaces.</string>
+    <string name="filter_blocked_extensions_title">Ignored file extensions</string>
+    <string name="filter_blocked_extensions_summary">Supports multiple extensions; separate with commas or spaces, e.g. apk, zip, mp4</string>
+    <string name="filter_max_file_size_title">Maximum file size</string>
+    <string name="filter_max_file_size_summary">Images or files larger than this will not be received</string>
+    <string name="filter_max_file_size_value">Current: %1$s %2$s</string>
+    <string name="filter_max_file_size_unit_title">Size unit</string>
+    <string-array name="filter_file_size_unit_entries">
+        <item>KB</item>
+        <item>MB</item>
+        <item>GB</item>
+    </string-array>
+    <string-array name="filter_file_size_unit_values">
+        <item>KB</item>
+        <item>MB</item>
+        <item>GB</item>
+    </string-array>
+    <string name="filter_min_text_chars_title">Minimum text characters</string>
+    <string name="filter_min_text_chars_summary">Text shorter than this will not be received; empty means unlimited</string>
+    <string name="filter_max_text_chars_title">Maximum text characters</string>
+    <string name="filter_max_text_chars_summary">Text longer than this will not be received; empty means unlimited</string>
+    <string name="storage_location_title">Storage location</string>
+    <string name="storage_location_not_set">Not set</string>
+    <string name="storage_location_hint">For example: /Download/SyncClipboard or content://…</string>
+    <string name="storage_location_pick">Choose folder</string>
+    <string name="local_test_connection">Test connection</string>
+    <string name="local_click_test">Tap to test server availability</string>
+    <string name="local_test_push">Test push</string>
+    <string name="local_test_push_summary">Manually push text or file to the current server</string>
+    <string name="local_test_push_hint">Enter test text or choose a file. If a file is selected, file push is preferred.</string>
+    <string name="local_test_push_text_hint">Enter text to push to server</string>
+    <string name="local_test_push_no_file">No file selected</string>
+    <string name="local_test_push_pick_file">Choose file</string>
+    <string name="local_test_push_clear_file">Clear file</string>
+    <string name="local_test_push_send">Send</string>
+    <string name="local_test_push_empty">Please enter text or choose a file first</string>
+    <string name="local_test_push_file_selected">Selected file: %s</string>
+    <string name="local_test_push_running">Running test push…</string>
+    <string name="local_test_push_success">Test push successful</string>
+    <string name="local_test_push_failed">Test push failed</string>
+    <string name="please_set_server_address">Please set server address first</string>
+    <string name="quick_sync_required_title">Please enable sync first</string>
+    <string name="quick_sync_required_message">You need to turn on “Enable sync” before testing connection.</string>
+    <string name="testing_connection">Testing connection…</string>
+    <string name="connecting_to">Connecting to %s…</string>
+    <string name="connection_success">Connection successful</string>
+    <string name="connection_failed">Connection failed</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="about_build_version_title">Current build version</string>
+    <string name="about_build_version_unknown">Unknown</string>
+    <string name="about_supported_servers_title">Supported servers</string>
+    <string name="about_server_oneclip_summary">Tap to open OneClip homepage</string>
+    <string name="about_server_clipcascade_summary">Tap to open ClipCascade GitHub project</string>
+    <string name="about_server_syncclipboard_summary">Tap to open SyncClipboard GitHub project</string>
+    <string name="keep_alive_notification_channel_name">ClipboardSync background sync</string>
+    <string name="keep_alive_notification_channel_description">Keeps ClipboardSync running in the background</string>
+    <string name="keep_alive_notification_title">ClipboardSync is syncing in background</string>
+    <string name="keep_alive_notification_text">Current server: %1$s</string>
+    <string name="keep_alive_notification_text_battery">Current server: %1$s, battery optimization exemption is recommended</string>
+    <string name="keep_alive_notification_reconnect">Reconnect</string>
+    <string name="keep_alive_notification_pause">Pause</string>
+    <string name="keep_alive_notification_capture">Capture and sync</string>
+    <string name="manual_capture_empty">System clipboard is empty or unreadable</string>
+    <string name="manual_capture_success">Read system clipboard and added to sync queue</string>
+</resources>
