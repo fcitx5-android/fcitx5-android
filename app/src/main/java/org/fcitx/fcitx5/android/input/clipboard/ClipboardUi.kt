@@ -142,7 +142,9 @@ class ClipboardUi(override val ctx: Context, private val theme: Theme) : Ui {
         categoryButtons.forEach { (buttonCategory, button) ->
             val selected = buttonCategory == category
             button.background = categoryBackground(selected)
-            button.setTextColor(if (selected) theme.altKeyTextColor else theme.keyTextColor)
+            // Keep clipboard category labels at the regular text color; altKeyTextColor is
+            // also used for candidate auxiliary text and may intentionally be lighter.
+            button.setTextColor(theme.keyTextColor)
         }
     }
 
