@@ -41,6 +41,12 @@ jobs:
         with:
           gradle-version: wrapper
 
+      - name: Install Native Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y extra-cmake-modules
+          echo "CMAKE_PREFIX_PATH=/usr/share/ECM/cmake:$CMAKE_PREFIX_PATH" >> "$GITHUB_ENV"
+
       - name: Build Release APK
         run: ./gradlew :app:assembleRelease -PbuildABI=${{ inputs.abi }}
         env:
