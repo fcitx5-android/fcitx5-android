@@ -44,9 +44,30 @@ jobs:
       - name: Install Native Build Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y extra-cmake-modules
-          echo "CMAKE_PREFIX_PATH=/usr/share/ECM/cmake:$CMAKE_PREFIX_PATH" >> "$GITHUB_ENV"
+          sudo apt-get install -y \
+            extra-cmake-modules \
+            gettext
 
+          # Locate ECM
+          ECM_CONFIG="$(dpkg -L extra-cmake-modules | grep '/ECMConfig.cmake$' | head -n 1)"
+
+          if [ -z "$ECM_CONFIG" ]; then
+            echo "ECMConfig.cmake not found"
+            exit 1
+          fi
+
+          ECM_DIR="$(dirname "$ECM_CONFIG")"
+          echo "CMAKE_PREFIX_PATH=$ECM_DIR:$CMAKE_PREFIX_PATH" >> "$GITHUB_ENV"
+
+          # Verify native dependencies
+          command -v msgmerge
+          command -v msgfmt
+
+          msgmerge --version
+          msgfmt --version
+
+          echo "ECM_DIR=$ECM_DIR"
+          
       - name: Build Release APK
         run: ./gradlew :app:assembleRelease -PbuildABI=${{ inputs.abi }}
         env:
