@@ -160,6 +160,7 @@
     <string name="keyboard_bottom_padding">键盘底部边距</string>
     <string name="keyboard_side_padding">键盘两侧边距</string>
     <string name="clipboard_suggestion">显示剪贴板提示</string>
+    <string name="clipboard_extract_links">从剪贴板中提取网址、邮箱、电话和数字</string>
     <string name="disable_addon_warn_title">禁用附加组件</string>
     <string name="disable_addon_warn_name">禁用%1$s将同时：</string>
     <string name="disable_addon_warn_dep">禁用%1$s</string>
