@@ -1,0 +1,82 @@
+name: Personal Release
+
+on:
+  push:
+    branches:
+      - personal
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build_and_release:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check signing secrets
+        env:
+          SIGN_KEY_BASE64: ${{ secrets.SIGN_KEY_BASE64 }}
+          SIGN_KEY_ALIAS: ${{ secrets.SIGN_KEY_ALIAS }}
+          SIGN_KEY_PWD: ${{ secrets.SIGN_KEY_PWD }}
+        run: |
+          if [ -z "$SIGN_KEY_BASE64" ] || [ -z "$SIGN_KEY_ALIAS" ] || [ -z "$SIGN_KEY_PWD" ]; then
+            echo "::error::Missing signing secrets. Please configure SIGN_KEY_BASE64, SIGN_KEY_ALIAS, and SIGN_KEY_PWD in repository Actions secrets."
+            exit 1
+          fi
+
+      - name: Fetch source code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Setup Android environment
+        uses: android-actions/setup-android@v4
+
+      - name: Install Android NDK CMake
+        run: |
+          sdkmanager --install "cmake;3.31.6"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y extra-cmake-modules gettext
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build Personal Release APKs
+        env:
+          SIGN_KEY_BASE64: ${{ secrets.SIGN_KEY_BASE64 }}
+          SIGN_KEY_ALIAS: ${{ secrets.SIGN_KEY_ALIAS }}
+          SIGN_KEY_PWD: ${{ secrets.SIGN_KEY_PWD }}
+        run: |
+          ./gradlew :app:assembleRelease -PbuildABI=arm64-v8a
+          ./gradlew :plugin:clipboard-filter:assembleRelease
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          DATE=$(date -u +%Y%m%d)
+          TAG="personal-${DATE}-${SHORT_SHA}"
+          TITLE="Personal ${DATE} (${SHORT_SHA})"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" \
+              app/build/outputs/apk/release/*.apk \
+              plugin/clipboard-filter/build/outputs/apk/release/*.apk \
+              --clobber
+          else
+            gh release create "$TAG" \
+              app/build/outputs/apk/release/*.apk \
+              plugin/clipboard-filter/build/outputs/apk/release/*.apk \
+              --title "$TITLE" \
+              --notes "Personal build from commit ${GITHUB_SHA}."
+          fi

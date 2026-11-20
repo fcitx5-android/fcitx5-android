@@ -175,14 +175,7 @@ class PluginFragment : PaddingPreferenceFragment() {
     private fun startPluginAboutActivity(pkg: String): Boolean {
         val ctx = requireContext()
         val pm = ctx.packageManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            pm.queryIntentActivities(
-                Intent(DataManager.PLUGIN_INTENT),
-                PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_ALL.toLong())
-            )
-        } else {
-            pm.queryIntentActivities(Intent(DataManager.PLUGIN_INTENT), PackageManager.MATCH_ALL)
-        }.firstOrNull {
+        DataManager.queryPluginActivities(pm).firstOrNull {
             it.activityInfo.packageName == pkg
         }?.also {
             ctx.startActivity(Intent().apply {

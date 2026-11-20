@@ -7,11 +7,13 @@ package org.fcitx.fcitx5.android.core.data
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.content.res.AssetManager
 import android.os.Build
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.fcitx.fcitx5.android.BuildConfig
+import org.fcitx.fcitx5.android.core.FcitxPluginServices
 import org.fcitx.fcitx5.android.core.data.DataManager.dataDir
 import org.fcitx.fcitx5.android.utils.FileUtil
 import org.fcitx.fcitx5.android.utils.appContext
@@ -35,6 +37,20 @@ object DataManager {
     )
 
     const val PLUGIN_INTENT = "${BuildConfig.APPLICATION_ID}.plugin.MANIFEST"
+    private const val OFFICIAL_PLUGIN_INTENT = "org.fcitx.fcitx5.android.plugin.MANIFEST"
+    private val PLUGIN_INTENTS = listOf(PLUGIN_INTENT, OFFICIAL_PLUGIN_INTENT).distinct()
+
+    fun queryPluginActivities(pm: PackageManager): List<ResolveInfo> =
+        PLUGIN_INTENTS.flatMap { action ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                pm.queryIntentActivities(
+                    Intent(action),
+                    PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_ALL.toLong())
+                )
+            } else {
+                pm.queryIntentActivities(Intent(action), PackageManager.MATCH_ALL)
+            }
+        }.distinctBy { it.activityInfo.packageName }
 
     private val lock = ReentrantLock()
 
@@ -90,14 +106,7 @@ object DataManager {
 
         val pm = appContext.packageManager
 
-        val pluginPackages = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            pm.queryIntentActivities(
-                Intent(PLUGIN_INTENT),
-                PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_ALL.toLong())
-            )
-        } else {
-            pm.queryIntentActivities(Intent(PLUGIN_INTENT), PackageManager.MATCH_ALL)
-        }.map {
+        val pluginPackages = queryPluginActivities(pm).map {
             it.activityInfo.packageName
         }
 
@@ -142,6 +151,22 @@ object DataManager {
                     @SuppressLint("DiscouragedApi")
                     val id = res.getIdentifier(s, "string", packageName)
                     if (id != 0) description = res.getString(id)
+                }
+            }
+
+            if (hasService) {
+                val serviceIntent = Intent(FcitxPluginServices.PLUGIN_SERVICE_ACTION).apply {
+                    setPackage(packageName)
+                }
+                val hasMatchingService = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    pm.resolveService(serviceIntent, PackageManager.ResolveInfoFlags.of(0)) != null
+                } else {
+                    @Suppress("DEPRECATION")
+                    pm.resolveService(serviceIntent, 0) != null
+                }
+                if (!hasMatchingService) {
+                    Timber.d("Skipping service plugin $packageName targeting another host")
+                    continue
                 }
             }
 

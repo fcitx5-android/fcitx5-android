@@ -13,7 +13,7 @@ android {
     namespace = "org.fcitx.fcitx5.android"
 
     defaultConfig {
-        applicationId = "org.fcitx.fcitx5.android"
+        applicationId = "org.fcitx.fcitx5.android.custard.pi"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         @Suppress("UnstableApiUsage")
@@ -44,6 +44,9 @@ android {
             resValue("mipmap", "app_icon_round", "@mipmap/ic_launcher_round")
             resValue("string", "app_name", "@string/app_name_release")
             proguardFile("proguard-rules.pro")
+            if (signingConfig == null) {
+                signingConfig = signingConfigs.getByName("debug")
+            }
         }
         debug {
             resValue("mipmap", "app_icon", "@mipmap/ic_launcher_debug")

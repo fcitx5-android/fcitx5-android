@@ -13,7 +13,7 @@ android {
     namespace = "org.fcitx.fcitx5.android.plugin.clipboard_filter"
 
     defaultConfig {
-        applicationId = "org.fcitx.fcitx5.android.plugin.clipboard_filter"
+        applicationId = "org.fcitx.fcitx5.android.plugin.clipboard_filter.custard.pi"
     }
 
     buildFeatures {
@@ -22,10 +22,21 @@ android {
 
     buildTypes {
         release {
+            buildConfigField("String", "MAIN_APPLICATION_ID", "\"org.fcitx.fcitx5.android.custard.pi\"")
+            addManifestPlaceholders(
+                mapOf("mainApplicationId" to "org.fcitx.fcitx5.android.custard.pi")
+            )
             resValue("string", "app_name", "@string/app_name_release")
             proguardFile("proguard-rules.pro")
+            if (signingConfig == null) {
+                signingConfig = signingConfigs.getByName("debug")
+            }
         }
         debug {
+            buildConfigField("String", "MAIN_APPLICATION_ID", "\"org.fcitx.fcitx5.android.custard.pi.debug\"")
+            addManifestPlaceholders(
+                mapOf("mainApplicationId" to "org.fcitx.fcitx5.android.custard.pi.debug")
+            )
             resValue("string", "app_name", "@string/app_name_debug")
         }
     }
