@@ -23,12 +23,38 @@ import splitties.views.imageResource
 class TextKeyboard(
     context: Context,
     theme: Theme
-) : BaseKeyboard(context, theme, Layout) {
+) : BaseKeyboard(context, theme, Layout, SplitRows, SplitLayout) {
 
     enum class CapsState { None, Once, Lock }
 
     companion object {
         const val Name = "Text"
+
+        private const val SplitIndent = 0.4f
+
+        val SplitBottomRow = SplitRowSpec(
+            leftCount = 3,
+            bridge = true,
+            leftCols = 5,
+            rightCols = 5,
+            leftIndent = SplitIndent,
+            rightIndent = SplitIndent,
+            expandOuterLeft = true,
+            expandOuterRight = true
+        )
+
+        val SplitRows = listOf(
+            SplitRowSpec(5),
+            SplitRowSpec(5, leftIndent = SplitIndent, rightIndent = SplitIndent),
+            SplitRowSpec(
+                5,
+                leftIndent = SplitIndent,
+                rightIndent = SplitIndent,
+                expandOuterLeft = true,
+                expandOuterRight = true
+            ),
+            SplitBottomRow
+        )
 
         val Layout: List<List<KeyDef>> = listOf(
             listOf(
@@ -74,14 +100,46 @@ class TextKeyboard(
                 ReturnKey()
             )
         )
+
+        val SplitLayout: List<List<KeyDef>> = listOf(
+            Layout[0],
+            listOf(
+                AlphabetKey("A", "@"),
+                AlphabetKey("S", "*"),
+                AlphabetKey("D", "+"),
+                AlphabetKey("F", "-"),
+                AlphabetKey("G", "="),
+                AlphabetKey("G", "="),
+                AlphabetKey("H", "/"),
+                AlphabetKey("J", "#"),
+                AlphabetKey("K", "("),
+                AlphabetKey("L", ")")
+            ),
+            listOf(
+                CapsKey(),
+                AlphabetKey("Z", "'"),
+                AlphabetKey("X", ":"),
+                AlphabetKey("C", "\""),
+                AlphabetKey("V", "?"),
+                AlphabetKey("V", "?"),
+                AlphabetKey("B", "!"),
+                AlphabetKey("N", "~"),
+                AlphabetKey("M", "\\"),
+                BackspaceKey()
+            ),
+            Layout[3]
+        )
     }
 
-    val caps: ImageKeyView by lazy { findViewById(R.id.button_caps) }
-    val backspace: ImageKeyView by lazy { findViewById(R.id.button_backspace) }
-    val quickphrase: ImageKeyView by lazy { findViewById(R.id.button_quickphrase) }
-    val lang: ImageKeyView by lazy { findViewById(R.id.button_lang) }
-    val space: TextKeyView by lazy { findViewById(R.id.button_space) }
-    val `return`: ImageKeyView by lazy { findViewById(R.id.button_return) }
+    val caps: ImageKeyView get() = findViewById(R.id.button_caps)
+    val backspace: ImageKeyView get() = findViewById(R.id.button_backspace)
+    val quickphrase: ImageKeyView get() = findViewById(R.id.button_quickphrase)
+    val lang: ImageKeyView get() = findViewById(R.id.button_lang)
+    val space: TextKeyView get() = findViewById(R.id.button_space)
+    val `return`: ImageKeyView get() = findViewById(R.id.button_return)
+
+    private var returnDrawableId = R.drawable.ic_baseline_keyboard_return_24
+    private var spaceLabel: CharSequence = " "
 
     private val showLangSwitchKey = AppPrefs.getInstance().keyboard.showLangSwitchKey
 
@@ -97,9 +155,8 @@ class TextKeyboard(
         showLangSwitchKey.registerOnChangeListener(showLangSwitchKeyListener)
     }
 
-    private val textKeys: List<TextKeyView> by lazy {
-        allViews.filterIsInstance(TextKeyView::class.java).toList()
-    }
+    private val textKeys: Sequence<TextKeyView>
+        get() = allViews.filterIsInstance<TextKeyView>()
 
     private var capsState: CapsState = CapsState.None
 
@@ -156,6 +213,7 @@ class TextKeyboard(
     }
 
     override fun onReturnDrawableUpdate(returnDrawable: Int) {
+        returnDrawableId = returnDrawable
         `return`.img.imageResource = returnDrawable
     }
 
@@ -165,13 +223,23 @@ class TextKeyboard(
     }
 
     override fun onInputMethodUpdate(ime: InputMethodEntry) {
-        space.mainText.text = buildString {
+        spaceLabel = buildString {
             append(ime.displayName)
             ime.subMode.run { label.ifEmpty { name.ifEmpty { null } } }?.let { append(" ($it)") }
         }
+        space.mainText.text = spaceLabel
         if (capsState != CapsState.None) {
             switchCapsState()
         }
+    }
+
+    override fun onSplitLayoutChanged() {
+        updateCapsButtonIcon()
+        updateLangSwitchKey(showLangSwitchKey.getValue())
+        updateAlphabetKeys()
+        updatePunctuationKeys()
+        `return`.img.imageResource = returnDrawableId
+        space.mainText.text = spaceLabel
     }
 
     private fun transformPopupPreview(c: String): String {
@@ -235,7 +303,7 @@ class TextKeyboard(
 
     private fun updateAlphabetKeys() {
         textKeys.forEach {
-            if (it.def !is KeyDef.Appearance.AltText) return
+            if (it.def !is KeyDef.Appearance.AltText) return@forEach
             it.mainText.text = it.def.displayText.let { str ->
                 if (str.length != 1 || !str[0].isLetter()) return@forEach
                 if (keepLettersUppercase) str.uppercase() else transformAlphabet(str)

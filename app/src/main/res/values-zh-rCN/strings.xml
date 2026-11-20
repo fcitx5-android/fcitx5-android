@@ -62,6 +62,8 @@
     <string name="delete">删除</string>
     <string name="clipboard">剪贴板</string>
     <string name="keyboard_height">键盘高度</string>
+    <string name="split_keyboard">分屏键盘</string>
+    <string name="split_keyboard_gap">分屏键盘中间空白比例</string>
     <string name="virtual_keyboard">虚拟键盘</string>
     <string name="clipboard_suggestion_timeout">剪贴板提示超时</string>
     <string name="version">版本</string>

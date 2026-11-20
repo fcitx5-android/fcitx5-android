@@ -37,7 +37,7 @@ class PickerLayout(context: Context, theme: Theme, switchKey: KeyDef) :
                 PunctuationKey("."),
                 ReturnKey()
             )
-        )
+        ), listOf(TextKeyboard.SplitBottomRow)
     ) {
 
         class PunctuationKey(val symbol: String) : KeyDef(
