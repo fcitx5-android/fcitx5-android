@@ -84,7 +84,7 @@ class TextEditingUi(
 
     val pasteButton = textButton(android.R.string.paste, altStyle = true)
 
-    val backspaceButton = iconButton(R.drawable.ic_baseline_backspace_24, altStyle = true).apply {
+    val backspaceButton = iconButton(R.drawable.ic_outline_backspace_24, altStyle = true).apply {
         soundEffect = InputFeedbacks.SoundEffect.Delete
         contentDescription = ctx.getString(R.string.backspace)
     }
