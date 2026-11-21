@@ -5,8 +5,10 @@
 package org.fcitx.fcitx5.android.input.keyboard
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Rect
 import android.view.MotionEvent
+import android.view.View
 import androidx.annotation.CallSuper
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -44,8 +46,21 @@ import kotlin.math.roundToInt
 abstract class BaseKeyboard(
     context: Context,
     protected val theme: Theme,
-    private val keyLayout: List<List<KeyDef>>
+    private val keyLayout: List<List<KeyDef>>,
+    private val splitRows: List<SplitRowSpec> = emptyList(),
+    private val splitKeyLayout: List<List<KeyDef>>? = null
 ) : ConstraintLayout(context) {
+
+    data class SplitRowSpec(
+        val leftCount: Int,
+        val bridge: Boolean = false,
+        val leftCols: Int = 0,
+        val rightCols: Int = 0,
+        val leftIndent: Float = 0f,
+        val rightIndent: Float = 0f,
+        val expandOuterLeft: Boolean = false,
+        val expandOuterRight: Boolean = false
+    )
 
     var keyActionListener: KeyActionListener? = null
 
@@ -76,53 +91,25 @@ abstract class BaseKeyboard(
     private val disabledSwipeThreshold = dp(800f)
 
     private val keyRows: List<ConstraintLayout>
+    private val rowKeys: List<List<KeyView>>
+    private val splitRowKeys: List<List<KeyView>> by lazy {
+        splitKeyLayout?.map { row -> row.map(::createKeyView) } ?: rowKeys
+    }
+    private val splitKeyboard = prefs.internal.splitKeyboard
+    private val gapPortrait = prefs.keyboard.splitGapPercent
+    private val gapLandscape = prefs.keyboard.splitGapPercentLandscape
+    private val splitChangeListener = ManagedPreference.OnChangeListener<Any> { _, _ ->
+        post { updateSplitLayout() }
+    }
+    private var lastSplit = false
+    private var lastGap = -1f
 
     init {
         isMotionEventSplittingEnabled = true
-        keyRows = keyLayout.map { row ->
-            val keyViews = row.map(::createKeyView)
+        rowKeys = keyLayout.map { row -> row.map(::createKeyView) }
+        keyRows = rowKeys.map {
             constraintLayout Row@{
                 isMotionEventSplittingEnabled = true
-                var totalWidth = 0f
-                keyViews.forEachIndexed { index, view ->
-                    add(view, lParams {
-                        centerVertically()
-                        if (index == 0) {
-                            leftOfParent()
-                            horizontalChainStyle = LayoutParams.CHAIN_PACKED
-                        } else {
-                            leftToRightOf(keyViews[index - 1])
-                        }
-                        if (index == keyViews.size - 1) {
-                            rightOfParent()
-                            // for RTL
-                            horizontalChainStyle = LayoutParams.CHAIN_PACKED
-                        } else {
-                            rightToLeftOf(keyViews[index + 1])
-                        }
-                        val def = row[index]
-                        matchConstraintPercentWidth = def.appearance.percentWidth
-                    })
-                    row[index].appearance.percentWidth.let {
-                        // 0f means fill remaining space, thus does not need expanding
-                        totalWidth += if (it != 0f) it else 1f
-                    }
-                }
-                if (expandKeypressArea && totalWidth < 1f) {
-                    val free = (1f - totalWidth) / 2f
-                    keyViews.first().apply {
-                        updateLayoutParams<LayoutParams> {
-                            matchConstraintPercentWidth += free
-                        }
-                        layoutMarginLeft = free / (row.first().appearance.percentWidth + free)
-                    }
-                    keyViews.last().apply {
-                        updateLayoutParams<LayoutParams> {
-                            matchConstraintPercentWidth += free
-                        }
-                        layoutMarginRight = free / (row.last().appearance.percentWidth + free)
-                    }
-                }
             }
         }
         keyRows.forEachIndexed { index, row ->
@@ -134,7 +121,142 @@ abstract class BaseKeyboard(
                 centerHorizontally()
             })
         }
+        rowKeys.indices.forEach { layoutRow(it, false, 0f) }
         spaceSwipeMoveCursor.registerOnChangeListener(spaceSwipeChangeListener)
+    }
+
+    private fun splitSideWidths(
+        sideWidth: Float,
+        count: Int,
+        cols: Int,
+        indentCols: Float,
+        expandOuter: Boolean,
+        isLeft: Boolean
+    ): List<Float> {
+        if (count <= 0) return emptyList()
+        val effectiveCols = if (cols > 0) cols else count
+        val indent = sideWidth * indentCols / effectiveCols
+        val keyWidth = (sideWidth - indent) / effectiveCols
+        return List(count) { i ->
+            val isOuter = if (isLeft) i == 0 else i == count - 1
+            if (expandOuter && isOuter) keyWidth + indent else keyWidth
+        }
+    }
+
+    private fun layoutRow(index: Int, split: Boolean, gap: Float) {
+        val row = keyRows[index]
+        val keys = if (split) splitRowKeys[index] else rowKeys[index]
+        row.removeAllViews()
+        keys.forEach { it.layoutMarginLeft = 0f; it.layoutMarginRight = 0f }
+        val widths: List<Float>
+        val items: List<View>
+        if (split) {
+            val spec = splitRows[index]
+            val left = keys.take(spec.leftCount)
+            val center = if (spec.bridge) keys[spec.leftCount] else View(context).apply { id = View.generateViewId() }
+            val right = keys.drop(spec.leftCount + if (spec.bridge) 1 else 0)
+            val sideWidth = (1f - gap) / 2f
+            val leftWidths = splitSideWidths(
+                sideWidth, left.size, spec.leftCols, spec.leftIndent, spec.expandOuterLeft, isLeft = true
+            )
+            val rightWidths = splitSideWidths(
+                sideWidth, right.size, spec.rightCols, spec.rightIndent, spec.expandOuterRight, isLeft = false
+            )
+            val centerWidth = if (spec.bridge) 0f else gap
+            widths = leftWidths + centerWidth + rightWidths
+            items = left + center + right
+        } else {
+            items = keys
+            widths = keys.map { it.def.percentWidth }
+        }
+        items.forEachIndexed { i, view ->
+            row.add(view, row.lParams {
+                centerVertically()
+                if (i == 0) {
+                    leftOfParent()
+                    horizontalChainStyle = LayoutParams.CHAIN_PACKED
+                } else leftToRightOf(items[i - 1])
+                if (i == items.lastIndex) {
+                    rightOfParent()
+                    // for RTL
+                    horizontalChainStyle = LayoutParams.CHAIN_PACKED
+                } else rightToLeftOf(items[i + 1])
+                matchConstraintPercentWidth = widths[i]
+            })
+        }
+        if (expandKeypressArea) {
+            val total = widths.sumOf { if (it == 0f) 1.0 else it.toDouble() }.toFloat()
+            if (total < 1f - 1e-4f) {
+                val free = (1f - total) / 2f
+                keys.first().apply {
+                    updateLayoutParams<LayoutParams> { matchConstraintPercentWidth += free }
+                    layoutMarginLeft = free / (widths.first() + free)
+                }
+                keys.last().apply {
+                    updateLayoutParams<LayoutParams> { matchConstraintPercentWidth += free }
+                    layoutMarginRight = free / (widths.last() + free)
+                }
+            }
+        }
+    }
+
+    private fun updateSplitLayout(targetWidth: Int = width) {
+        if (targetWidth <= 0 || splitRows.isEmpty()) return
+        val enabled = splitKeyboard.getValue() &&
+            resources.configuration.screenWidthDp >= 600
+        val landscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        val gap = (if (landscape) gapLandscape else gapPortrait).getValue() / 100f
+        val split = if (enabled) {
+            val sideWidth = (1f - gap) / 2f
+            val minKeyWidth = dp(36f)
+            val layout = splitKeyLayout ?: keyLayout
+            layout.indices.all { index ->
+                val spec = splitRows[index]
+                val rightCount = layout[index].size - spec.leftCount - if (spec.bridge) 1 else 0
+                val leftWidths = splitSideWidths(
+                    sideWidth, spec.leftCount, spec.leftCols, spec.leftIndent, spec.expandOuterLeft, isLeft = true
+                )
+                val rightWidths = splitSideWidths(
+                    sideWidth, rightCount, spec.rightCols, spec.rightIndent, spec.expandOuterRight, isLeft = false
+                )
+                (leftWidths + rightWidths).all { it * targetWidth >= minKeyWidth }
+            }
+        } else false
+        if (split == lastSplit && (!split || gap == lastGap)) return
+        releaseAllTouchTargets()
+        rowKeys.indices.forEach { layoutRow(it, split, gap) }
+        lastSplit = split
+        lastGap = gap
+        onSplitLayoutChanged()
+    }
+
+    protected open fun onSplitLayoutChanged() = Unit
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        if (MeasureSpec.getMode(widthMeasureSpec) != MeasureSpec.UNSPECIFIED) {
+            updateSplitLayout(MeasureSpec.getSize(widthMeasureSpec))
+        }
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        post { updateSplitLayout() }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        splitKeyboard.registerOnChangeListener(splitChangeListener)
+        gapPortrait.registerOnChangeListener(splitChangeListener)
+        gapLandscape.registerOnChangeListener(splitChangeListener)
+        if (width > 0) updateSplitLayout(width) else post { updateSplitLayout() }
+    }
+
+    override fun onDetachedFromWindow() {
+        splitKeyboard.unregisterOnChangeListener(splitChangeListener)
+        gapPortrait.unregisterOnChangeListener(splitChangeListener)
+        gapLandscape.unregisterOnChangeListener(splitChangeListener)
+        super.onDetachedFromWindow()
     }
 
     private fun createKeyView(def: KeyDef): KeyView {

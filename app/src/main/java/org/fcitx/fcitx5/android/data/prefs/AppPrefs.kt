@@ -35,6 +35,7 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
         val verboseLog = bool("verbose_log", false)
         val pid = int("pid", 0)
         val editorInfoInspector = bool("editor_info_inspector", false)
+        val splitKeyboard = bool("split_keyboard", false)
         val needNotifications = bool("need_notifications", true)
     }
 
@@ -243,6 +244,26 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             )
             keyboardBottomPadding = primary
             keyboardBottomPaddingLandscape = secondary
+        }
+
+        val splitGapPercent: ManagedPreference.PInt
+        val splitGapPercentLandscape: ManagedPreference.PInt
+
+        init {
+            val (primary, secondary) = twinInt(
+                R.string.split_keyboard_gap,
+                R.string.portrait,
+                "split_keyboard_gap_percent",
+                30,
+                R.string.landscape,
+                "split_keyboard_gap_percent_landscape",
+                30,
+                10,
+                85,
+                "%"
+            )
+            splitGapPercent = primary
+            splitGapPercentLandscape = secondary
         }
 
         val horizontalCandidateStyle = enumList(

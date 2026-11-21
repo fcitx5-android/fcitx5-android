@@ -30,6 +30,7 @@ import org.fcitx.fcitx5.android.input.status.StatusAreaEntry.Android.Type.InputM
 import org.fcitx.fcitx5.android.input.status.StatusAreaEntry.Android.Type.Keyboard
 import org.fcitx.fcitx5.android.input.status.StatusAreaEntry.Android.Type.ReloadConfig
 import org.fcitx.fcitx5.android.input.status.StatusAreaEntry.Android.Type.ThemeList
+import org.fcitx.fcitx5.android.input.status.StatusAreaEntry.Android.Type.SplitKeyboard
 import org.fcitx.fcitx5.android.input.wm.InputWindow
 import org.fcitx.fcitx5.android.input.wm.InputWindowManager
 import org.fcitx.fcitx5.android.utils.AppUtil
@@ -54,6 +55,8 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
     private val windowManager: InputWindowManager by manager.must()
 
     private val editorInfoInspector by AppPrefs.getInstance().internal.editorInfoInspector
+    private val splitKeyboard = AppPrefs.getInstance().internal.splitKeyboard
+    private var currentActions: Array<Action> = emptyArray()
 
     private val staticEntries by lazy {
         arrayOf(
@@ -152,6 +155,10 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
                         }
                         Keyboard -> AppUtil.launchMainToKeyboard(context)
                         ThemeList -> AppUtil.launchMainToThemeList(context)
+                        SplitKeyboard -> {
+                            splitKeyboard.setValue(!splitKeyboard.getValue())
+                            onStatusAreaUpdate(currentActions)
+                        }
                     }
                 }
             }
@@ -173,8 +180,17 @@ class StatusAreaWindow : InputWindow.ExtendedInputWindow<StatusAreaWindow>(),
     }
 
     override fun onStatusAreaUpdate(actions: Array<Action>) {
+        currentActions = actions
         adapter.entries = arrayOf(
             *staticEntries,
+            *if (context.resources.configuration.screenWidthDp >= 600) arrayOf(
+                StatusAreaEntry.Android(
+                    context.getString(R.string.split_keyboard),
+                    R.drawable.ic_split_keyboard_24,
+                    SplitKeyboard,
+                    splitKeyboard.getValue()
+                )
+            ) else emptyArray(),
             *Array(actions.size) { StatusAreaEntry.fromAction(actions[it]) }
         )
     }
