@@ -95,7 +95,7 @@ class PickerPageUi(
     }
 
     private val backspaceAppearance = Appearance.Image(
-        src = R.drawable.ic_baseline_backspace_24,
+        src = R.drawable.ic_outline_backspace_24,
         variant = Variant.Alternative,
         border = if (bordered) Border.On else Border.Off,
         viewId = R.id.button_backspace

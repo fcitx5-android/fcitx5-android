@@ -130,7 +130,7 @@ class BackspaceKey(
     variant: Variant = Variant.Alternative
 ) : KeyDef(
     Appearance.Image(
-        src = R.drawable.ic_baseline_backspace_24,
+        src = R.drawable.ic_outline_backspace_24,
         percentWidth = percentWidth,
         variant = variant,
         viewId = R.id.button_backspace,
