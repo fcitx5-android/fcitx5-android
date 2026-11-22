@@ -321,4 +321,10 @@
     <string name="keyboard_height_percent_base">Keyboard height percent base</string>
     <string name="display_metrics">Display metrics (Resources.getDisplayMetrics)</string>
     <string name="real_size">Real size (Display.getRealSize)</string>
+    <string name="shuangpin_layout_hint">Shuangpin layout hint</string>
+    <string name="shuangpin_xiaohe">Xiaohe Shuangpin</string>
+    <string name="shuangpin_ziranma">Ziranma</string>
+    <string name="shuangpin_microsoft">Microsoft Shuangpin</string>
+    <string name="shuangpin_sogou">Sogou Shuangpin</string>
+    <string name="shuangpin_pinyin_jiajia">Pinyin JiaJia</string>
 </resources>

@@ -17,8 +17,10 @@ import android.graphics.drawable.InsetDrawable
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.StateListDrawable
 import android.util.TypedValue
+import android.view.Gravity
 import android.view.View
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.annotation.FloatRange
@@ -28,6 +30,7 @@ import org.fcitx.fcitx5.android.R
 import org.fcitx.fcitx5.android.data.theme.Theme
 import org.fcitx.fcitx5.android.data.theme.ThemeManager
 import org.fcitx.fcitx5.android.data.theme.ThemePrefs.PunctuationPosition
+import org.fcitx.fcitx5.android.data.prefs.AppPrefs
 import org.fcitx.fcitx5.android.input.AutoScaleTextView
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Border
 import org.fcitx.fcitx5.android.input.keyboard.KeyDef.Appearance.Variant
@@ -297,9 +300,37 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
         )
     }
 
+    val shuangpinText = view(::TextView) {
+        isClickable = false
+        isFocusable = false
+        maxLines = 2
+        gravity = Gravity.CENTER
+        setTextSize(TypedValue.COMPLEX_UNIT_DIP, 9.5f)
+        setTypeface(typeface, Typeface.NORMAL)
+        textDirection = View.TEXT_DIRECTION_FIRST_STRONG_LTR
+        setTextColor(
+            when (def.variant) {
+                Variant.Normal, Variant.AltForeground, Variant.Alternative -> theme.altKeyTextColor
+                Variant.Accent -> theme.accentKeyTextColor
+            }
+        )
+    }
+
     init {
+        val shuangpinLayout = AppPrefs.getInstance().keyboard.shuangpinLayoutHint.getValue()
+        val isLetterKey = def.displayText.length == 1 && def.displayText[0].uppercaseChar() in 'A'..'Z'
+        val shuangpinHint = if (isLetterKey) shuangpinLayout.getMapping(def.displayText[0]) else null
+
+        if (shuangpinHint != null) {
+            shuangpinText.text = shuangpinHint.replace('/', '\n')
+            shuangpinText.visibility = View.VISIBLE
+        } else {
+            shuangpinText.visibility = View.GONE
+        }
+
         appearanceView.apply {
             add(altText, lParams(wrapContent, wrapContent))
+            add(shuangpinText, lParams(wrapContent, wrapContent))
         }
         applyLayout(resources.configuration.orientation)
     }
@@ -356,7 +387,50 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
         altText.visibility = View.GONE
     }
 
+    private fun applyShuangpinLayout(orientation: Int) {
+        // Place shuangpinText at the bottom, centered horizontally
+        shuangpinText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            topToTop = unset
+            topMargin = 0
+            leftToLeft = parentId
+            rightToRight = parentId
+            bottomToBottom = parentId
+            bottomMargin = vMargin + dp(2)
+        }
+
+        // Place mainText above shuangpinText
+        mainText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            bottomToBottom = unset
+            topToTop = parentId
+            topMargin = vMargin
+            bottomToTop = shuangpinText.existingOrNewId
+        }
+
+        // Handle altText layout
+        when (ThemeManager.prefs.punctuationPosition.getValue()) {
+            PunctuationPosition.Bottom, PunctuationPosition.TopRight -> {
+                altText.visibility = View.VISIBLE
+                altText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                    bottomToBottom = unset
+                    bottomMargin = 0
+                    topToTop = parentId
+                    topMargin = vMargin
+                    leftToLeft = unset
+                    rightToRight = parentId
+                    rightMargin = hMargin + dp(4)
+                }
+            }
+            PunctuationPosition.None -> {
+                altText.visibility = View.GONE
+            }
+        }
+    }
+
     private fun applyLayout(orientation: Int) {
+        if (shuangpinText.visibility == View.VISIBLE) {
+            applyShuangpinLayout(orientation)
+            return
+        }
         when (ThemeManager.prefs.punctuationPosition.getValue()) {
             PunctuationPosition.Bottom -> when (orientation) {
                 Configuration.ORIENTATION_LANDSCAPE -> applyTopRightAltTextPosition()
@@ -368,6 +442,10 @@ class AltTextKeyView(ctx: Context, theme: Theme, def: KeyDef.Appearance.AltText)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
+        if (shuangpinText.visibility == View.VISIBLE) {
+            applyLayout(newConfig.orientation)
+            return
+        }
         if (ThemeManager.prefs.punctuationPosition.getValue() == PunctuationPosition.TopRight) {
             return
         }
