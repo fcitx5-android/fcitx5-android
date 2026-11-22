@@ -316,4 +316,10 @@
     <string name="emoji_skin_tone_type_6">🏿 深膚色 (Type-6)</string>
     <string name="hide_unsupported_emojis">隱藏不支援的表情</string>
     <string name="preferred_voice_input">首選語音輸入</string>
+    <string name="shuangpin_layout_hint">雙拼韵母提示</string>
+    <string name="shuangpin_xiaohe">小鶴雙拼</string>
+    <string name="shuangpin_ziranma">自然碼</string>
+    <string name="shuangpin_microsoft">微軟雙拼</string>
+    <string name="shuangpin_sogou">搜狗雙拼</string>
+    <string name="shuangpin_pinyin_jiajia">拼音加加</string>
 </resources>

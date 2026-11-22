@@ -18,6 +18,7 @@ import org.fcitx.fcitx5.android.input.candidates.floating.FloatingCandidatesOrie
 import org.fcitx.fcitx5.android.input.candidates.horizontal.HorizontalCandidateMode
 import org.fcitx.fcitx5.android.input.keyboard.KeyboardHeightPercentBase
 import org.fcitx.fcitx5.android.input.keyboard.LangSwitchBehavior
+import org.fcitx.fcitx5.android.input.keyboard.ShuangpinLayout
 import org.fcitx.fcitx5.android.input.keyboard.SpaceLongPressBehavior
 import org.fcitx.fcitx5.android.input.keyboard.SwipeSymbolDirection
 import org.fcitx.fcitx5.android.input.picker.PickerWindow
@@ -274,6 +275,12 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             expandedCandidateGridSpanCount = primary
             expandedCandidateGridSpanCountLandscape = secondary
         }
+
+        val shuangpinLayoutHint = enumList(
+            R.string.shuangpin_layout_hint,
+            "shuangpin_layout_hint",
+            ShuangpinLayout.None
+        )
 
     }
 
