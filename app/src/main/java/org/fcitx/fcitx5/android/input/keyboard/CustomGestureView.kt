@@ -66,6 +66,11 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
     private var repeatJob: Job? = null
 
     var swipeEnabled = false
+
+    /**
+     * Start handling swipe once long press triggered, even if [swipeEnabled] is false
+     */
+    var longPressStartsSwipe = false
     var swipeRepeatEnabled = false
     var swipeThresholdX = 24f
     var swipeThresholdY = 24f
@@ -123,7 +128,7 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
             repeatJob?.cancel()
             repeatJob = null
         }
-        if (swipeEnabled) {
+        if (swipeEnabled || longPressStartsSwipe) {
             if (swipeRepeatEnabled) {
                 swipeRepeatTriggered = false
             }
@@ -182,7 +187,7 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                         }
                     }
                 }
-                if (swipeEnabled) {
+                if (swipeEnabled || longPressStartsSwipe) {
                     swipeLastX = x
                     swipeLastY = y
                 }
@@ -227,11 +232,21 @@ open class CustomGestureView(ctx: Context) : FrameLayout(ctx) {
                         repeatJob?.cancel()
                         repeatJob = null
                     }
-                    if (repeatStarted || !swipeEnabled) {
+                    val swipeContinues =
+                        swipeEnabled || (longPressTriggered && longPressStartsSwipe)
+                    if (repeatStarted || !swipeContinues) {
                         isPressed = false
                     }
                 }
-                if (!swipeEnabled || longPressTriggered || repeatStarted) return true
+                val swipeActive = if (longPressTriggered) longPressStartsSwipe else swipeEnabled
+                if (!swipeActive || repeatStarted) {
+                    if (longPressStartsSwipe && !longPressTriggered) {
+                        // keep the starting point up to date, so cursor won't jump after long press
+                        swipeLastX = x
+                        swipeLastY = y
+                    }
+                    return true
+                }
                 val countX = consumeSwipe(x, SwipeAxis.X)
                 val countY = consumeSwipe(y, SwipeAxis.Y)
                 dispatchGestureEvent(GestureType.Move, x, y, countX, countY)

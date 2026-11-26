@@ -180,6 +180,8 @@ class CommonKeyActionListener :
                             toggleIme()
                         }
                         SpaceLongPressBehavior.ShowPicker -> showInputMethodPicker()
+                        // handled by space key gesture in BaseKeyboard
+                        SpaceLongPressBehavior.MoveCursor -> {}
                     }
                 }
                 else -> {}

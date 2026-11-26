@@ -62,6 +62,13 @@ abstract class BaseKeyboard(
             it.swipeEnabled = v
         }
     }
+    private val spaceLongPressBehavior = prefs.keyboard.spaceKeyLongPressBehavior
+    private val spaceLongPressChangeListener =
+        ManagedPreference.OnChangeListener<SpaceLongPressBehavior> { _, v ->
+            spaceKeys.forEach {
+                it.longPressStartsSwipe = v == SpaceLongPressBehavior.MoveCursor
+            }
+        }
 
     private val vivoKeypressWorkaround by prefs.advanced.vivoKeypressWorkaround
 
@@ -135,6 +142,7 @@ abstract class BaseKeyboard(
             })
         }
         spaceSwipeMoveCursor.registerOnChangeListener(spaceSwipeChangeListener)
+        spaceLongPressBehavior.registerOnChangeListener(spaceLongPressChangeListener)
     }
 
     private fun createKeyView(def: KeyDef): KeyView {
@@ -154,6 +162,8 @@ abstract class BaseKeyboard(
             if (def is SpaceKey) {
                 spaceKeys.add(this)
                 swipeEnabled = spaceSwipeMoveCursor.getValue()
+                longPressStartsSwipe =
+                    spaceLongPressBehavior.getValue() == SpaceLongPressBehavior.MoveCursor
                 swipeRepeatEnabled = true
                 swipeThresholdX = selectionSwipeThreshold
                 swipeThresholdY = disabledSwipeThreshold

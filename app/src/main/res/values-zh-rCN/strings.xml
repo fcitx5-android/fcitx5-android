@@ -202,6 +202,7 @@
     <string name="space_behavior_enumerate">轮换输入法</string>
     <string name="space_behavior_activate">在当前输入法和第一个输入法之间切换</string>
     <string name="space_behavior_picker">显示输入法选择对话框</string>
+    <string name="space_behavior_move_cursor">启动划动空格键移动光标</string>
     <string name="show_lang_switch_key">显示语言切换键</string>
     <string name="horizontal_candidate_style">横向候选词样式</string>
     <string name="horizontal_candidate_never_fill">从不填充宽度</string>
