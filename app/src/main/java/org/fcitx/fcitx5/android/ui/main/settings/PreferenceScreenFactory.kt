@@ -217,6 +217,7 @@ object PreferenceScreenFactory {
                 ConfigExternal.ETy.TableGlobal -> addonConfigPreference("table")
                 ConfigExternal.ETy.AndroidTable -> tableInputMethod()
                 ConfigExternal.ETy.PinyinCustomPhrase -> pinyinCustomPhrase()
+                ConfigExternal.ETy.CloudPinyin -> addonConfigPreference("cloudpinyin")
                 ConfigExternal.ETy.RimeUserDataDir -> rimeUserDataDir(
                     descriptor.description ?: descriptor.name
                 )

@@ -4,46 +4,42 @@
  */
 package org.fcitx.fcitx5.android.plugin.clipboard_filter
 
-import android.util.Log
-import org.fcitx.fcitx5.android.common.FcitxPluginService
-import org.fcitx.fcitx5.android.common.ipc.FcitxRemoteConnection
-import org.fcitx.fcitx5.android.common.ipc.IClipboardEntryTransformer
-import org.fcitx.fcitx5.android.common.ipc.bindFcitxRemoteService
+import android.app.Service
+import android.content.Intent
+import android.os.IBinder
+import org.fcitx.fcitx5.android.common.ipc.IFcitxPluginIpcCallback
+import org.fcitx.fcitx5.android.common.ipc.IFcitxPluginService
 
-class MainService : FcitxPluginService() {
-
-    private lateinit var connection: FcitxRemoteConnection
-
-    private val transformer = object : IClipboardEntryTransformer.Stub() {
-        override fun getPriority(): Int = 100
-
-        override fun transform(clipboardText: String): String =
-            ClearURLs.transform(clipboardText)
-
-        override fun getDescription(): String = "ClearURLs"
+class MainService : Service() {
+    companion object {
+        const val TAG = "clipboard_filter"
     }
+
+    private lateinit var pluginService: IFcitxPluginService
 
     override fun onCreate() {
         ClearURLs.initCatalog(assets.open("data.min.json").bufferedReader().readText())
-    }
+        pluginService = object : IFcitxPluginService.Stub() {
+            override fun getPluginId() = TAG
 
-    override fun start() {
-        connection = bindFcitxRemoteService(BuildConfig.MAIN_APPLICATION_ID) {
-            log("Bind to fcitx remote")
-            it.registerClipboardEntryTransformer(transformer)
+            override fun getClipboardEntryTransformerPriority() = 100
+            override fun transformClipboardEntry(clipboardText: String?): String {
+                if (clipboardText == null) return ""
+                return ClearURLs.transform(clipboardText)
+            }
+
+            override fun getCanHandleIpc() = false
+            override fun onIpcNotify(method: String?, params: ByteArray?) {}
+            override fun onIpcRequest(
+                method: String?,
+                params: ByteArray?,
+                cb: IFcitxPluginIpcCallback?
+            ) {
+            }
         }
     }
 
-    override fun stop() {
-        runCatching {
-            connection.remoteService?.unregisterClipboardEntryTransformer(transformer)
-        }
-        unbindService(connection)
-        log("Unbind from fcitx remote")
+    override fun onBind(intent: Intent): IBinder {
+        return pluginService.asBinder()
     }
-
-    private fun log(msg: String) {
-        Log.d("ClearURLsService", msg)
-    }
-
 }
