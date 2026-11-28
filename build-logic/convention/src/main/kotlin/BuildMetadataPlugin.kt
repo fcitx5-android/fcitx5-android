@@ -6,18 +6,11 @@ import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.gradle.tasks.PackageAndroidArtifact
 import kotlinx.serialization.Serializable
-import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.named
 
-/**
- * Add task `generateBuildMetadata${Variant}`
- */
 @Suppress("unused")
 class BuildMetadataPlugin : Plugin<Project> {
 
@@ -32,47 +25,38 @@ class BuildMetadataPlugin : Plugin<Project> {
                 buildConfigField("String", "DATA_DESCRIPTOR_NAME", "\"${DataDescriptorPlugin.FILE_NAME}\"")
             }
         }
+        val fileName = target.path.let {
+            // ":app" -> "" || ":plugin:anthy" -> ".plugin.anthy"
+            val suffix = if (it == ":app") "" else it.replace(':', '.')
+            "build-metadata${suffix}.json"
+        }
+        val buildMetadataJson = json.encodeToString(BuildMetadata.fromProject(target))
         target.extensions.configure<ApplicationAndroidComponentsExtension> {
             onVariants { variant ->
                 val variantName = variant.name.capitalized()
                 target.afterEvaluate {
-                    target.tasks.register<BuildMetadataTask>("generateBuildMetadata${variantName}") {
-                        val packageTask =
-                            target.tasks.getByName("package${variantName}") as PackageAndroidArtifact
-                        // create metadata file after package, because it's outputDirectory would
-                        // be cleared at some time before package
-                        mustRunAfter(packageTask)
-                        val fileName = target.path.let {
-                            // ":app" -> "" || ":plugin:anthy" -> ".plugin.anthy"
-                            val suffix = if (it == ":app") "" else it.replace(':', '.')
-                            "build-metadata${suffix}.json"
+                    target.tasks.named<PackageAndroidArtifact>("package$variantName") {
+                        val buildMetadataFile = this.outputDirectory.file(fileName)
+                        this.inputs.property("buildMetadataJson", buildMetadataJson)
+                        this.outputs.file(buildMetadataFile).withPropertyName("buildMetadataFile")
+                        doLast {
+                            buildMetadataFile.get().asFile.writeText(buildMetadataJson)
                         }
-                        outputFile.set(packageTask.outputDirectory.file(fileName))
-                    }.also {
-                        target.tasks.getByName("assemble${variantName}").dependsOn(it)
                     }
                 }
             }
         }
     }
 
-    abstract class BuildMetadataTask : DefaultTask() {
-        @Serializable
-        data class BuildMetadata(
-            val versionName: String,
-            val commitHash: String,
-            val timestamp: String
-        )
-
-        @get:OutputFile
-        abstract val outputFile: RegularFileProperty
-
-        @TaskAction
-        fun execute() {
-            with(project) {
-                val metadata = BuildMetadata(buildVersionName, buildCommitHash, buildTimestamp)
-                outputFile.get().asFile.writeText(json.encodeToString(metadata))
-            }
+    @Serializable
+    data class BuildMetadata(
+        val versionName: String,
+        val commitHash: String,
+        val timestamp: String
+    ) {
+        companion object {
+            fun fromProject(p: Project) =
+                BuildMetadata(p.buildVersionName, p.buildCommitHash, p.buildTimestamp)
         }
     }
 }
