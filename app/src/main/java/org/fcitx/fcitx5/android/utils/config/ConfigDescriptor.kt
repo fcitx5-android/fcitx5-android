@@ -183,6 +183,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
             Chttrans,
             TableGlobal,
             PinyinCustomPhrase,
+            CloudPinyin,
             RimeUserDataDir,
 
             // manually added on Android side for TableManager
@@ -310,7 +311,8 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                         ConfigType.TyString -> ConfigString(
                             raw.name,
                             raw.description,
-                            raw.defaultValue
+                            raw.defaultValue,
+                            raw.tooltip
                         )
                         ConfigType.TyExternal -> ConfigExternal(
                             raw.name,
@@ -324,6 +326,7 @@ sealed class ConfigDescriptor<T, U> : Parcelable {
                                 "Chttrans" -> ConfigExternal.ETy.Chttrans
                                 "TableGlobal" -> ConfigExternal.ETy.TableGlobal
                                 "CustomPhrase" -> ConfigExternal.ETy.PinyinCustomPhrase
+                                "CloudPinyin" -> ConfigExternal.ETy.CloudPinyin
                                 "UserDataDir" -> ConfigExternal.ETy.RimeUserDataDir
                                 "AndroidTable" -> ConfigExternal.ETy.AndroidTable
                                 else -> null
