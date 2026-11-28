@@ -73,7 +73,6 @@ val Project.signKey: File?
             val file = File(it)
             if (file.exists()) return file
         }
-        @OptIn(ExperimentalEncodingApi::class)
         signKeyBase64?.let {
             if (signKeyTempFile?.exists() == true) {
                 return signKeyTempFile
