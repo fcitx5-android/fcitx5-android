@@ -45,6 +45,9 @@ object FcitxPluginServices {
         var clipboardTransformerPriority = -1
             private set
 
+        var clipboardTransformer: ClipboardTransformer? = null
+            private set
+
         var canHandleIpc = false
             private set
 
@@ -54,6 +57,7 @@ object FcitxPluginServices {
             try {
                 this.pluginId = pluginService.pluginId
                 this.clipboardTransformerPriority = pluginService.clipboardEntryTransformerPriority
+                this.clipboardTransformer = buildClipboardTransformer()
                 this.canHandleIpc = pluginService.canHandleIpc
                 this.service = pluginService
             } catch (e: Exception) {
@@ -111,8 +115,8 @@ object FcitxPluginServices {
             }
         }
 
-        val clipboardTransformer: ClipboardTransformer? =
-            if (clipboardTransformerPriority < 0) null
+        private fun buildClipboardTransformer(): ClipboardTransformer? {
+            return if (clipboardTransformerPriority < 0) null
             else object : ClipboardTransformer {
                 override val priority = clipboardTransformerPriority
                 override fun transform(text: String): String {
@@ -125,6 +129,7 @@ object FcitxPluginServices {
                     }
                 }
             }
+        }
     }
 
     private val connections = mutableMapOf<String, PluginServiceConnection>()

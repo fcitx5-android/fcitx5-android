@@ -4,6 +4,7 @@
  */
 package org.fcitx.fcitx5.android.plugin.cloud_pinyin
 
+import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
@@ -15,11 +16,11 @@ import kotlinx.coroutines.plus
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.decodeFromByteArray
-import org.fcitx.fcitx5.android.common.FcitxPluginService
 import org.fcitx.fcitx5.android.common.ipc.IFcitxPluginIpcCallback
 import org.fcitx.fcitx5.android.common.ipc.IFcitxPluginService
+import org.fcitx.fcitx5.android.common.ipc.safeRespond
 
-class MainService : FcitxPluginService() {
+class MainService : Service() {
     companion object {
         const val TAG = "cloud_pinyin"
     }
@@ -61,12 +62,12 @@ class MainService : FcitxPluginService() {
                             // there will be no stack trace if it's an UnknownHostException because of network unavailable
                             // https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-17.0.0_r1/core/java/android/util/Log.java#486
                             Log.w(TAG, "Exception when requesting", e)
-                            cb.respond(1, "failed", null)
+                            cb.safeRespond(1, "failed", null)
                         }
-                    }.invokeOnCompletion {  }
+                    }
                     else -> {
                         Log.w(TAG, "Unsupported request: $method")
-                        cb.respond(2, "unsupported", null)
+                        cb.safeRespond(2, "unsupported", null)
                     }
                 }
             }
@@ -75,15 +76,5 @@ class MainService : FcitxPluginService() {
 
     override fun onBind(intent: Intent): IBinder {
         return pluginService.asBinder()
-    }
-
-    override fun onUnbind(intent: Intent?): Boolean {
-        return false
-    }
-
-    override fun start() {
-    }
-
-    override fun stop() {
     }
 }

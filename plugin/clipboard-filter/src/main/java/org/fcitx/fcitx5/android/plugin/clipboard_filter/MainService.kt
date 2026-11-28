@@ -4,19 +4,13 @@
  */
 package org.fcitx.fcitx5.android.plugin.clipboard_filter
 
+import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import android.util.Log
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.decodeFromByteArray
-import org.fcitx.fcitx5.android.common.FcitxPluginService
-import org.fcitx.fcitx5.android.common.ipc.FcitxRemoteConnection
-import org.fcitx.fcitx5.android.common.ipc.IClipboardEntryTransformer
 import org.fcitx.fcitx5.android.common.ipc.IFcitxPluginIpcCallback
 import org.fcitx.fcitx5.android.common.ipc.IFcitxPluginService
-import org.fcitx.fcitx5.android.common.ipc.bindFcitxRemoteService
 
-class MainService : FcitxPluginService() {
+class MainService : Service() {
     companion object {
         const val TAG = "clipboard_filter"
     }
@@ -47,15 +41,5 @@ class MainService : FcitxPluginService() {
 
     override fun onBind(intent: Intent): IBinder {
         return pluginService.asBinder()
-    }
-
-    override fun onUnbind(intent: Intent?): Boolean {
-        return false
-    }
-
-    override fun start() {
-    }
-
-    override fun stop() {
     }
 }
