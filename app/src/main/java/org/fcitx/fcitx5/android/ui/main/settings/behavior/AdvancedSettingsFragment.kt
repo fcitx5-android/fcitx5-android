@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2024 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.ui.main.settings.behavior
 
@@ -12,6 +12,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceScreen
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -88,6 +89,8 @@ class AdvancedSettingsFragment : ManagedPreferenceFragment(AppPrefs.getInstance(
                             val outputStream = ctx.contentResolver.openOutputStream(uri)!!
                             UserDataManager.export(outputStream, exportTimestamp).getOrThrow()
                         }
+                    } catch (_: CancellationException) {
+                        // noop: allow coroutine cancellation
                     } catch (e: Exception) {
                         e.printStackTrace()
                         ctx.toast(e)

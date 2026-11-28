@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Fcitx5 for Android Contributors
  */
 package org.fcitx.fcitx5.android.data
 
@@ -65,7 +65,7 @@ object UserDataManager {
             writeFileTree(dataBasesDir, "databases", zipStream)
             // external
             writeFileTree(externalDir, "external", zipStream)
-            // recently_used moved to SharedPreference and shoud not be exported
+            // recently_used moved to SharedPreference and should not be exported
             // metadata
             zipStream.putNextEntry(ZipEntry("metadata.json"))
             val pkgInfo = appContext.packageManager.getPackageInfo(appContext.packageName, 0)
@@ -90,21 +90,24 @@ object UserDataManager {
         }
     }
 
-    fun import(src: InputStream) = runCatching {
+    fun import(src: InputStream): Result<Metadata> = runCatching {
         ZipInputStream(src).use { zipStream ->
             withTempDir { tempDir ->
-                val extracted = zipStream.extract(tempDir)
-                val metadataFile = extracted.find { it.name == "metadata.json" }
-                    ?: errorRuntime(R.string.exception_user_data_metadata)
+                val topLevel = zipStream.extract(tempDir)
+                val importRoot =
+                    if (topLevel.size == 1 && topLevel[0].isDirectory) topLevel[0] else tempDir
+                val metadataFile = File(importRoot, "metadata.json")
+                if (!metadataFile.exists())
+                    errorRuntime(R.string.exception_user_data_metadata)
                 val metadata = json.decodeFromString<Metadata>(metadataFile.readText())
                 if (metadata.packageName != BuildConfig.APPLICATION_ID)
                     errorRuntime(R.string.exception_user_data_package_name_mismatch)
-                copyDir(File(tempDir, "shared_prefs"), sharedPrefsDir)
-                copyDir(File(tempDir, "databases"), dataBasesDir)
-                copyDir(File(tempDir, "external"), externalDir)
+                copyDir(File(importRoot, "shared_prefs"), sharedPrefsDir)
+                copyDir(File(importRoot, "databases"), dataBasesDir)
+                copyDir(File(importRoot, "external"), externalDir)
                 // keep importing recently_used for backwords compatibility
-                copyDir(File(tempDir, "recently_used"), recentlyUsedDir)
-                metadata
+                copyDir(File(importRoot, "recently_used"), recentlyUsedDir)
+                return@runCatching metadata
             }
         }
     }
