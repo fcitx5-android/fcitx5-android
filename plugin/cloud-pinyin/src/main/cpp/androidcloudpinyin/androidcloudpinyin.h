@@ -1,6 +1,8 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
+ * SPDX-FileCopyrightText: 2017-2017 CSSlayer <wengxt@gmail.com>
  * SPDX-FileCopyrightText: Copyright 2026 Fcitx5 for Android Contributors
+ * SPDX-FileComment: Modified from https://github.com/fcitx/fcitx5-chinese-addons/blob/5.1.15/modules/cloudpinyin/cloudpinyin.h
  */
 
 #ifndef FCITX5_ANDROID_ANDROIDCLOUDPINYIN_H

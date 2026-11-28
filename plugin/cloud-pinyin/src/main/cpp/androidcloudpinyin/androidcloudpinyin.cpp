@@ -1,6 +1,8 @@
 /*
  * SPDX-License-Identifier: LGPL-2.1-or-later
+ * SPDX-FileCopyrightText: 2017-2017 CSSlayer <wengxt@gmail.com>
  * SPDX-FileCopyrightText: Copyright 2026 Fcitx5 for Android Contributors
+ * SPDX-FileComment: Modified from https://github.com/fcitx/fcitx5-chinese-addons/blob/5.1.15/modules/cloudpinyin/cloudpinyin.cpp
  */
 
 #include <fcitx/addoninstance.h>
@@ -64,7 +66,7 @@ void CloudPinyin::request(const std::string &pinyin, CloudPinyinCallback callbac
             {"pinyin",  pinyin}
     };
     if (!config_.proxy->empty()) {
-        json["proxy"] = config_.proxy.value();
+        json.emplace("proxy", config_.proxy.value());
     }
     const auto &cbor = nlohmann::json::to_cbor(json);
     std::span<const std::byte> span{reinterpret_cast<const std::byte *>(cbor.data()), cbor.size()};
